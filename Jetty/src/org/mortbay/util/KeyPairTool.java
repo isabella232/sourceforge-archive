@@ -12,11 +12,13 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.IOException;
 import java.security.KeyFactory;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Security;
+import java.security.GeneralSecurityException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -118,7 +120,7 @@ public class KeyPairTool
      * @throws Exception on other exceptions, such as classloading failures.
      */
     private void importKeyPair()
-	throws Exception
+            throws IOException, GeneralSecurityException, Exception
     {
 	// Load the private key
         PrivateKey privateKey = loadPrivateKey(privateKeyFile);
@@ -175,7 +177,7 @@ public class KeyPairTool
      * form a valid chain starting with the cert corresponding to the
      * private key and ending with the cert just before the top level
      * cert.
-     * @param privateKeyFile String name of file to load the key from
+     * @param certFile String name of file to load the key from
      * @return PrivateKey loaded from the file
      * @throws Exception if there are problems with loading the key.
      */

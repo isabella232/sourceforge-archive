@@ -48,7 +48,7 @@ public class InetAddrPort implements Cloneable,
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
-     * @param addr 
+     * @param host
      * @param port 
      */
     public InetAddrPort(String host, int port)
@@ -85,7 +85,7 @@ public class InetAddrPort implements Cloneable,
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
-     * @param inetAddrPort String of the form "addr:port"
+     * @param address InetAddrPort top copy.
      */
     public InetAddrPort(InetAddrPort address)
     {

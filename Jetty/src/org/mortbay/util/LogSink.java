@@ -23,7 +23,7 @@ public interface LogSink extends LifeCycle, Serializable
     /*-------------------------------------------------------------------*/
     /** Set the log options.
      *
-     * @param logOptions A string of characters as defined for the
+     * @param options A string of characters as defined for the
      * LOG_OPTIONS system parameter.
      */
     public void setOptions(String options);

@@ -36,7 +36,6 @@ public class ThreadPool
     private Pool _pool;
     private Object _join="";
 
-    private transient int _threadId=0;
     private transient boolean _started;
     
     /* ------------------------------------------------------------------- */
@@ -149,7 +148,7 @@ public class ThreadPool
     /* ------------------------------------------------------------ */
     /** Get the number of threads in the pool.
      * Delegated to the named or anonymous Pool.
-     * @see setPoolName()
+     * @see #getIdleThreads
      * @return Number of threads
      */
     public int getThreads()
@@ -160,7 +159,7 @@ public class ThreadPool
     /* ------------------------------------------------------------ */
     /** Get the number of idle threads in the pool.
      * Delegated to the named or anonymous Pool.
-     * @see setPoolName()
+     * @see #getThreads
      * @return Number of threads
      */
     public int getIdleThreads()
@@ -171,7 +170,7 @@ public class ThreadPool
     /* ------------------------------------------------------------ */
     /** Get the minimum number of threads.
      * Delegated to the named or anonymous Pool.
-     * @see setPoolName()
+     * @see #setMinThreads
      * @return minimum number of threads.
      */
     public int getMinThreads()
@@ -182,7 +181,7 @@ public class ThreadPool
     /* ------------------------------------------------------------ */
     /** Set the minimum number of threads.
      * Delegated to the named or anonymous Pool.
-     * @see setPoolName()
+     * @see #getMinThreads
      * @param minThreads minimum number of threads
      */
     public void setMinThreads(int minThreads)
@@ -193,7 +192,7 @@ public class ThreadPool
     /* ------------------------------------------------------------ */
     /** Set the maximum number of threads.
      * Delegated to the named or anonymous Pool.
-     * @see setPoolName()
+     * @see #setMaxThreads
      * @return maximum number of threads.
      */
     public int getMaxThreads()
@@ -204,7 +203,7 @@ public class ThreadPool
     /* ------------------------------------------------------------ */
     /** Set the maximum number of threads.
      * Delegated to the named or anonymous Pool.
-     * @see setPoolName()
+     * @see #getMaxThreads
      * @param maxThreads maximum number of threads.
      */
     public void setMaxThreads(int maxThreads)
@@ -215,7 +214,7 @@ public class ThreadPool
     /* ------------------------------------------------------------ */
     /** Get the maximum thread idle time.
      * Delegated to the named or anonymous Pool.
-     * @see setPoolName()
+     * @see #setMaxIdleTimeMs
      * @return Max idle time in ms.
      */
     public int getMaxIdleTimeMs()
@@ -228,7 +227,7 @@ public class ThreadPool
      * Threads that are idle for longer than this period may be
      * stopped.
      * Delegated to the named or anonymous Pool.
-     * @see setPoolName()
+     * @see #getMaxIdleTimeMs
      * @param maxIdleTimeMs Max idle time in ms.
      */
     public void setMaxIdleTimeMs(int maxIdleTimeMs)
@@ -239,7 +238,7 @@ public class ThreadPool
     
     /* ------------------------------------------------------------ */
     /** Set Max Read Time.
-     * @deprecated. maxIdleTime is used instead.
+     * @deprecated maxIdleTime is used instead.
      */
     public void setMaxStopTimeMs(int ms)
     {
@@ -304,7 +303,7 @@ public class ThreadPool
     /* ------------------------------------------------------------ */
     /** Run job.
      * Give a job to the pool. 
-     * @param job.  If the job is derived from Runnable, the run method
+     * @param job  If the job is derived from Runnable, the run method
      * is called, otherwise it is passed as the argument to the handle
      * method.
      */

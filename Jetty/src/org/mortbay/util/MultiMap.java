@@ -145,7 +145,7 @@ public class MultiMap extends HashMap
     /* ------------------------------------------------------------ */
     /** Put multi valued entry.
      * @param name The entry key. 
-     * @param value The entry multiple values.
+     * @param values The List of multiple values.
      * @return The previous value or null.
      */
     public Object putValues(Object name, List values) 
@@ -156,7 +156,7 @@ public class MultiMap extends HashMap
     /* ------------------------------------------------------------ */
     /** Put multi valued entry.
      * @param name The entry key. 
-     * @param value The entry multiple values.
+     * @param values The String array of multiple values.
      * @return The previous value or null.
      */
     public Object putValues(Object name, String[] values) 
@@ -185,7 +185,7 @@ public class MultiMap extends HashMap
      * If the entry is single valued, it is converted to the first
      * value of a multi valued entry.
      * @param name The entry key. 
-     * @param value The entry multiple values.
+     * @param values The List of multiple values.
      */
     public void addValues(Object name, List values) 
     {
@@ -200,7 +200,7 @@ public class MultiMap extends HashMap
      * If the entry is single valued, it is converted to the first
      * value of a multi valued entry.
      * @param name The entry key. 
-     * @param value The entry multiple values.
+     * @param values The String array of multiple values.
      */
     public void addValues(Object name, String[] values) 
     {

@@ -249,15 +249,19 @@ public class Log
     }
     
     /* ------------------------------------------------------------ */
-    /** Log an warning.
+    /**
+     * Log a warning.
+     * @param message the Ovbject to use as a wrning message.
+     * @param stackDepth number of levels of stack to ignore.
      */
     public static void warning(Object message, int stackDepth)
     {
-        Log.message(Log.WARN,message,new Frame(1));
+        Log.message(Log.WARN,message,new Frame(stackDepth));
     }
     
     /* ------------------------------------------------------------ */
-    /** Log an warning.
+    /** Log a warning.
+     * @param message the Ovbject to use as a wrning message.
      */
     public static void warning(Object message)
     {

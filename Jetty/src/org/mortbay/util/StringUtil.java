@@ -19,7 +19,7 @@ package org.mortbay.util;
 public class StringUtil
 {
     public static final String __LINE_SEPARATOR=
-        (String)System.getProperty("line.separator","\n");
+        System.getProperty("line.separator","\n");
     
     public static String __ISO_8859_1;
     static

@@ -78,7 +78,6 @@ public class Code
     }
     
     /*-------------------------------------------------------------------*/
-    private static final String __lock="LOCK";
     private static final Class[] __noArgs=new Class[0];
     private static final String[] __nestedEx =
         {"getTargetException","getTargetError","getException","getRootCause"};
@@ -573,7 +572,7 @@ public class Code
     /*-------------------------------------------------------------------*/
     /** As debug(String)
      * <strong>Do not rely on side-effects</strong>
-     * @param ex The Throwable to print the full stack trace of
+     * @param o The Object to pass to the debug Log.
      */
     public static void debug(Object o)
     {
@@ -594,7 +593,8 @@ public class Code
     /*-------------------------------------------------------------------*/
     /** As debug(String)
      * <strong>Do not rely on side-effects</strong>
-     * @param ex The Throwable to print the full stack trace of
+     * @param o1 An Object to pass to the debug Log.
+     * @param o2 Another Object to pass to the debug Log.
      */
     public static void debug(Object o1,Object o2)
     {
@@ -615,9 +615,10 @@ public class Code
     /*-------------------------------------------------------------------*/
     /** As debug(String)
      * <strong>Do not rely on side-effects</strong>
-     * @param ex The Throwable to print the full stack trace of
+     * @param o1 An Object to pass to the debug Log.
+     * @param l a long to wrap as a Long and pass to Log.
      */
-    public static void debug(Object o1,long i)
+    public static void debug(Object o1,long l)
     {
         Code code = instance();
         if (code._debugOn)
@@ -627,7 +628,7 @@ public class Code
             {
                 frame.complete();
                 Log.message(Log.DEBUG,
-                            new LogMsg(new Object[]{o1,new Long(i)}),
+                            new LogMsg(new Object[]{o1,new Long(l)}),
                             frame);
             }
         }
@@ -636,7 +637,9 @@ public class Code
     /*-------------------------------------------------------------------*/
     /** As debug(String)
      * <strong>Do not rely on side-effects</strong>
-     * @param ex The Throwable to print the full stack trace of
+     * @param o1 An Object to pass to the debug Log.
+     * @param o2 Another Object to pass to the debug Log.
+     * @param o3 Another Object to pass to the debug Log.
      */
     public static void debug(Object o1,Object o2,Object o3)
     {
@@ -657,7 +660,10 @@ public class Code
     /*-------------------------------------------------------------------*/
     /** As debug(String)
      * <strong>Do not rely on side-effects</strong>
-     * @param ex The Throwable to print the full stack trace of
+     * @param o1 An Object to pass to the debug Log.
+     * @param o2 Another Object to pass to the debug Log.
+     * @param o3 Another Object to pass to the debug Log.
+     * @param o4 Another Object to pass to the debug Log.
      */
     public static void debug(Object o1,Object o2,Object o3, Object o4)
     {
@@ -678,7 +684,10 @@ public class Code
     /*-------------------------------------------------------------------*/
     /** As debug(String)
      * <strong>Do not rely on side-effects</strong>
-     * @param ex The Throwable to print the full stack trace of
+     * @param o1 An Object to pass to the debug Log.
+     * @param l1 a long to wrap as a Long and pass to Log.
+     * @param o2 Another Object to pass to the debug Log.
+     * @param l2 Another long to wrap as a Long and pass to Log.
      */
     public static void debug(Object o1,long l1,Object o2, long l2)
     {
@@ -699,7 +708,11 @@ public class Code
     /*-------------------------------------------------------------------*/
     /** As debug(String)
      * <strong>Do not rely on side-effects</strong>
-     * @param ex The Throwable to print the full stack trace of
+     * @param o1 An Object to pass to the debug Log.
+     * @param o2 Another Object to pass to the debug Log.
+     * @param o3 Another Object to pass to the debug Log.
+     * @param o4 Another Object to pass to the debug Log.
+     * @param o5 Another Object to pass to the debug Log.
      */
     public static void debug(Object o1,Object o2,Object o3, Object o4,
                              Object o5)
@@ -720,7 +733,12 @@ public class Code
     /*-------------------------------------------------------------------*/
     /** As debug(String)
      * <strong>Do not rely on side-effects</strong>
-     * @param ex The Throwable to print the full stack trace of
+     * @param o1 An Object to pass to the debug Log.
+     * @param o2 Another Object to pass to the debug Log.
+     * @param o3 Another Object to pass to the debug Log.
+     * @param o4 Another Object to pass to the debug Log.
+     * @param o5 Another Object to pass to the debug Log.
+     * @param o6 Another Object to pass to the debug Log.
      */
     public static void debug(Object o1,Object o2,Object o3, Object o4,
                              Object o5,Object o6)
@@ -741,7 +759,14 @@ public class Code
     /*-------------------------------------------------------------------*/
     /** As debug(String)
      * <strong>Do not rely on side-effects</strong>
-     * @param ex The Throwable to print the full stack trace of
+     * @param o1 An Object to pass to the debug Log.
+     * @param o2 Another Object to pass to the debug Log.
+     * @param o3 Another Object to pass to the debug Log.
+     * @param o4 Another Object to pass to the debug Log.
+     * @param o5 Another Object to pass to the debug Log.
+     * @param o6 Another Object to pass to the debug Log.
+     * @param o6 Another Object to pass to the debug Log.
+     * @param o7 Another Object to pass to the debug Log.
      */
     public static void debug(Object o1,Object o2,Object o3, Object o4,
                              Object o5,Object o6,Object o7)
@@ -762,7 +787,14 @@ public class Code
     /*-------------------------------------------------------------------*/
     /** As debug(String)
      * <strong>Do not rely on side-effects</strong>
-     * @param ex The Throwable to print the full stack trace of
+     * @param o1 An Object to pass to the debug Log.
+     * @param o2 Another Object to pass to the debug Log.
+     * @param o3 Another Object to pass to the debug Log.
+     * @param o4 Another Object to pass to the debug Log.
+     * @param o5 Another Object to pass to the debug Log.
+     * @param o6 Another Object to pass to the debug Log.
+     * @param o7 Another Object to pass to the debug Log.
+     * @param o8 Another Object to pass to the debug Log.
      */
     public static void debug(Object o1,Object o2,Object o3,Object o4,
                              Object o5,Object o6,Object o7,Object o8)

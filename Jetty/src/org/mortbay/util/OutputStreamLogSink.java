@@ -52,12 +52,7 @@ public class OutputStreamLogSink
     /* ------------------------------------------------------------ */
     private final static String __lineSeparator =
         System.getProperty("line.separator");
-    private final static String __indentBase ="";
-    private final static String __indentSeparator =
-        __lineSeparator+__indentBase;
-    private final static int __lineSeparatorLen =
-        __lineSeparator.length();    
-    
+
     /*-------------------------------------------------------------------*/
     private int _retainDays =Integer.getInteger("LOG_FILE_RETAIN_DAYS",31).intValue();
     
@@ -132,9 +127,6 @@ public class OutputStreamLogSink
     
     /*-------------------------------------------------------------------*/
     /** Set the log options.
-     *
-     * @param logOptions A string of characters as defined for the
-     * LOG_OPTIONS system parameter.
      */
     public void setOptions(boolean logTimeStamps,
                            boolean logLabels,

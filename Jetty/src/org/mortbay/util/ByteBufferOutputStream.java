@@ -55,8 +55,7 @@ public class ByteBufferOutputStream extends OutputStream
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param capacity Buffer capacity.
-     * @param fullAt The size of the buffer.
-     * @param reserve The reserve of byte for prepending
+     * @param preReserve The reserve of byte for prepending
      */
     public ByteBufferOutputStream(int capacity,int preReserve)
     {
@@ -65,8 +64,7 @@ public class ByteBufferOutputStream extends OutputStream
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
-     * @param BufferSize The size of the buffer == capacity+preReserve+postReserve
-     * @param fullAt The size of the buffer.
+     * @param bufferSize The size of the buffer == capacity+preReserve+postReserve
      * @param preReserve The reserve of byte for prepending
      * @param postReserve The reserve of byte for appending
      */

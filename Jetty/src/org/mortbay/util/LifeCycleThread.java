@@ -13,7 +13,6 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
     private boolean _running;
     private boolean _daemon ;
     private Thread _thread;
-    private Object _configuration;
     
     /* ------------------------------------------------------------ */
     public boolean isDaemon()

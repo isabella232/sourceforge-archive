@@ -130,7 +130,8 @@ public class DateCache
     
     /* ------------------------------------------------------------ */
     /** Set the timezone.
-     * @param tz TimeZoneId the ID of the zone as used by TimeZone.getTimeZone(id)
+     * @param timeZoneId TimeZoneId the ID of the zone as used by
+     * TimeZone.getTimeZone(id)
      */
     public void setTimeZoneID(String timeZoneId)
     {

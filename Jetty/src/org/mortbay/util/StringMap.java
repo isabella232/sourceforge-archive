@@ -104,7 +104,7 @@ public class StringMap extends AbstractMap implements Externalizable
     public Object put(Object key, Object value)
     {
         if (key==null)
-            return put((String)null,value);
+            return put(null,value);
         return put(key.toString(),value);
     }
         
@@ -414,7 +414,7 @@ public class StringMap extends AbstractMap implements Externalizable
     public Object remove(Object key)
     {
         if (key==null)
-            return remove((String)null);
+            return remove(null);
         return remove(key.toString());
     }
     
@@ -596,7 +596,7 @@ public class StringMap extends AbstractMap implements Externalizable
         
         public Object getKey(){return _key;}
         public Object getValue(){return _value;}
-        public Object setValue(Object o){Object old=_value;_value=(String)o;return old;}
+        public Object setValue(Object o){Object old=_value;_value=o;return old;}
         public String toString()
         {
             StringBuffer buf=new StringBuffer();
@@ -647,7 +647,7 @@ public class StringMap extends AbstractMap implements Externalizable
         public Object getKey(){return null;}
         public Object getValue(){return _nullValue;}
         public Object setValue(Object o)
-            {Object old=_nullValue;_nullValue=(String)o;return old;}
+            {Object old=_nullValue;_nullValue=o;return old;}
         public String toString(){return "[:null="+_nullValue+"]";}
     }
 

@@ -88,9 +88,9 @@ public class LazyList extends AbstractList
     }
     
     /* ------------------------------------------------------------ */
-    /** Add an item to a LazyList 
+    /** Add the contents of a Collection to a LazyList
      * @param list The list to add to or null if none yet created.
-     * @param item The item to add.
+     * @param collection The Collection whose contents should be added.
      * @return The lazylist created or added to.
      */
     public static LazyList add(LazyList list, Collection collection)
@@ -213,7 +213,7 @@ public class LazyList extends AbstractList
     /* ------------------------------------------------------------ */
     /** Get item from the list 
      * @param list  A LazyList returned from LazyList.add(Object) or null
-     * @param int i index
+     * @param i int index
      * @return the item from the list.
      */
     public static Object get(LazyList list, int i)

@@ -349,7 +349,6 @@ public class Pool
     
     /* ------------------------------------------------------------ */
     private void closePondLife(int id)
-        throws InterruptedException
     {
         if (_pondLife[id]!=null)
             _pondLife[id].poolClosing();
@@ -357,7 +356,6 @@ public class Pool
     
     /* ------------------------------------------------------------ */
     private void stopPondLife(int id)
-        throws InterruptedException
     {
         PondLife pl = null;
         synchronized(this)
