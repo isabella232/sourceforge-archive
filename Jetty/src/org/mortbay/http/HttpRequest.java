@@ -792,9 +792,7 @@ public class HttpRequest extends HttpMessage
                             String encoding=getCharacterEncoding();
                             if (encoding==null)
                                 encoding=StringUtil.__ISO_8859_1;
-                            String contentStr = new String(content,0,content_length,encoding);
-                            Code.debug("Form content='",contentStr,"'");
-                            UrlEncoded.decodeTo(contentStr,_parameters,encoding);
+                            UrlEncoded.decodeTo(content,_parameters,encoding);
                         }
                         catch (IOException e)
                         {

@@ -154,50 +154,75 @@ public class UrlEncoded extends MultiMap
         decodeTo(content,map,StringUtil.__ISO_8859_1);
     }
     
-    
+
+
     /* -------------------------------------------------------------- */
-    /* Decoded parameters to Map.
+    /** Decoded parameters to Map.
      * @param content the string containing the encoded parameters
-     * @param url The dictionary to add the parameters to
      */
-    public static void decodeTo(String content,MultiMap map,String charset)
+    public static void decodeTo(String content, MultiMap map, String charset)
     {
-        if (charset==null)
-            charset=StringUtil.__ISO_8859_1;
+        if ((content != null) && (content.length() > 0))
+            decodeTo(content.getBytes(), map, charset);
+    }
+
+    /* -------------------------------------------------------------- */
+    /** Decoded parameters to Map.
+     * @param data the byte[] containing the encoded parameters
+     */
+    public static void decodeTo(byte[] data, MultiMap map, String encoding)
+    {
+        if (data == null || data.length == 0)
+            return;
+
         synchronized(map)
         {
-            String token;
-            String name;
-            String value;
-
-            StringTokenizer tokenizer =
-                new StringTokenizer(content, "&", false);
-
-            while ((tokenizer.hasMoreTokens()))
+            try
             {
-                token = tokenizer.nextToken();
-                
-                // breaking it at the "=" sign
-                int i = token.indexOf('=');
-                if (i<0)
+                int    pos = 0;
+                int    ix = 0;
+                int    ox = 0;
+                String key = null;
+                String value = null;
+                while (ix < data.length)
                 {
-                    name=decodeString(token,charset);
-                    value="";
+                    byte c = data[ix++];
+                    switch ((char) c)
+                    {
+                      case '&':
+                          value = new String(data, 0, ox, encoding);
+                          if (key != null)
+                          {
+                              map.add(key,value);
+                              key = null;
+                          }
+                          ox = 0;
+                          break;
+                      case '=':
+                          key = new String(data, 0, ox, encoding);
+                          ox = 0;
+                          break;
+                      case '+':
+                          data[ox++] = (byte)' ';
+                          break;
+                      case '%':
+                          data[ox++] = (byte)
+                              ((TypeUtil.convertHexDigit(data[ix++]) << 4)+
+                               TypeUtil.convertHexDigit(data[ix++]));
+                          break;
+                      default:
+                          data[ox++] = c;
+                    }
                 }
-                else
+                if (key != null)
                 {
-                    name=decodeString(token.substring(0,i++),
-                                      charset);
-                    if (i>=token.length())
-                        value="";
-                    else
-                        value = decodeString(token.substring(i),
-                                             charset);
+                    value = new String(data, 0, ox, encoding);
+                    map.add(key,value);
                 }
-
-                // Add value to the map
-                if (name.length() > 0)
-                    map.add(name,value);
+            }
+            catch(UnsupportedEncodingException e)
+            {
+                Code.warning(e);
             }
         }
     }
