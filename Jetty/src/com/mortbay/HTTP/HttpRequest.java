@@ -700,18 +700,19 @@ public class HttpRequest extends HttpMessage
         if (_cookies!=null)
             return _cookies;
         
-        List cookies = _header.getValues(HttpFields.__Cookie);
-        if (cookies==null || cookies.size()==0)
+        String cookies = (String)_header.get(HttpFields.__Cookie);
+        if (cookies==null || cookies.length()==0)
         {
             _cookies=__emptyMap;
             return _cookies;
         }
         
-        _cookies=new HashMap((cookies.size()*3)/2);
+        _cookies=new HashMap(8);
+        QuotedStringTokenizer tok = new QuotedStringTokenizer(cookies,";");
         
-        for (int i=cookies.size();i-->0;)
+        while (tok.hasMoreTokens())
         {
-            String c = (String)cookies.get(i);
+            String c = tok.nextToken();
             int e = c.indexOf("=");
             String n;
             String v;

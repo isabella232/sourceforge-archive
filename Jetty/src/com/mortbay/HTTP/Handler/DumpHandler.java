@@ -92,11 +92,11 @@ public class DumpHandler extends NullHandler
                 expires=new Date(expires.getTime()+(60*60*1000));
                 response.addSetCookie(set_cookie,cv,null,"/",expires,false);
             }
-            catch(IllegalStateException e)
+            catch(IllegalArgumentException e)
             {
                 writer.write("</PRE>\n<H3>BAD Set-Cookie:</H3>\n<PRE>");
                 writer.write(e.toString());
-                Code.warning(e);
+                Code.ignore(e);
             }
         }
         

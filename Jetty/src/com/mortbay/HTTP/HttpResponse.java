@@ -373,7 +373,7 @@ public class HttpResponse extends HttpMessage
         for(int i = 0; i < name.length(); i++)
         {
 	    char c = name.charAt(i);
-            if (Character.isWhitespace(c) || c==',' || c==';')
+            if (Character.isWhitespace(c) || c==',' || c==';' || c=='=')
                 throw new IllegalArgumentException("Bad cookie name:'"+name+"'");
 	}
         if(name.equalsIgnoreCase ("Comment") ||
