@@ -39,7 +39,7 @@ public class NotFoundHandler extends AbstractHttpHandler
             method.equals(HttpRequest.__DELETE) ||
             method.equals(HttpRequest.__MOVE)   )
         {
-            response.sendError(response.__404_Not_Found,
+            response.sendError(HttpResponse.__404_Not_Found,
                                request.getPath()+" Not Found");
         }
         
@@ -55,7 +55,7 @@ public class NotFoundHandler extends AbstractHttpHandler
                 response.commit();
             }
             else
-                response.sendError(response.__404_Not_Found);
+                response.sendError(HttpResponse.__404_Not_Found);
         }
         else if (method.equals(HttpRequest.__TRACE))
         {
@@ -66,7 +66,7 @@ public class NotFoundHandler extends AbstractHttpHandler
             // Unknown METHOD
             response.setField(HttpFields.__Allow,
                               "GET, HEAD, POST, PUT, DELETE, MOVE, OPTIONS, TRACE");
-            response.sendError(response.__405_Method_Not_Allowed);
+            response.sendError(HttpResponse.__405_Method_Not_Allowed);
         }
     }
 }

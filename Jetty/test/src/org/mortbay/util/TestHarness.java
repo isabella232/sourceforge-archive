@@ -197,11 +197,11 @@ public class TestHarness
             test.checkEquals(tok.nextToken(","),"bbb","bbb");
             test.checkEquals(tok.nextToken(),"ccc;ddd","ccc;ddd");
             
-            test.checkEquals(tok.quote("aaa"," "),"aaa","no quote");
-            test.checkEquals(tok.quote("a a"," "),"\"a a\"","quote");
-            test.checkEquals(tok.quote("a'a"," "),"\"a'a\"","quote");
-            test.checkEquals(tok.quote("a,a",","),"\"a,a\"","quote");
-            test.checkEquals(tok.quote("a\\a",""),"\"a\\\\a\"","quote");
+            test.checkEquals(QuotedStringTokenizer.quote("aaa"," "),"aaa","no quote");
+            test.checkEquals(QuotedStringTokenizer.quote("a a"," "),"\"a a\"","quote");
+            test.checkEquals(QuotedStringTokenizer.quote("a'a"," "),"\"a'a\"","quote");
+            test.checkEquals(QuotedStringTokenizer.quote("a,a",","),"\"a,a\"","quote");
+            test.checkEquals(QuotedStringTokenizer.quote("a\\a",""),"\"a\\\\a\"","quote");
             
         }
         catch(Exception e)

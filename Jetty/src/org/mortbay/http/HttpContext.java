@@ -1621,7 +1621,7 @@ public class HttpContext implements LifeCycle,
         if (pathInContext==null)
         {
             // Must be a bad request.
-            throw new HttpException(response.__400_Bad_Request);
+            throw new HttpException(HttpResponse.__400_Bad_Request);
         }
 
         String contextPath=null;

@@ -896,7 +896,7 @@ public class HttpServer implements LifeCycle,
                 try{_notFoundContext.start();}catch(Exception e){Code.warning(e);}
             }
             if (!_notFoundContext.handle(request,response))
-                response.sendError(response.__404_Not_Found);
+                response.sendError(HttpResponse.__404_Not_Found);
             return _notFoundContext;
         }
     }

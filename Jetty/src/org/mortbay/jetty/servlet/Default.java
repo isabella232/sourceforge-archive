@@ -589,8 +589,7 @@ public class Default extends HttpServlet
         {
             Code.debug("no satisfiable ranges");
             writeHeaders(response, resource, resLength);
-            response.setStatus(HttpResponse.__416_Requested_Range_Not_Satisfiable,
-                               "Requested Range Not Satisfiable");
+            response.setStatus(HttpResponse.__416_Requested_Range_Not_Satisfiable);
             response.setHeader(HttpFields.__ContentRange, 
                                InclusiveByteRange.to416HeaderRangeString(resLength));
             
@@ -609,7 +608,7 @@ public class Default extends HttpServlet
             Code.debug("single satisfiable range: " + singleSatisfiableRange);
             long singleLength = singleSatisfiableRange.getSize(resLength);
             writeHeaders(response,resource,singleLength);
-            response.setStatus(HttpResponse.__206_Partial_Content,"Partial Content");
+            response.setStatus(HttpResponse.__206_Partial_Content);
             response.setHeader(HttpFields.__ContentRange, 
                                singleSatisfiableRange.toHeaderRangeString(resLength));
             OutputStream out = response.getOutputStream();
@@ -626,7 +625,7 @@ public class Default extends HttpServlet
             _httpContext.getResourceMetaData(resource);
         String encoding = metaData.getEncoding();
         MultiPartResponse multi = new MultiPartResponse(response.getOutputStream());
-        response.setStatus(HttpResponse.__206_Partial_Content,"Partial Content");
+        response.setStatus(HttpResponse.__206_Partial_Content);
 
 	// If the request has a "Request-Range" header then we need to
 	// send an old style multipart/x-byteranges Content-Type. This

@@ -930,7 +930,7 @@ public class TestRFC2616
             // these same headers will be required for corresponding 
             // sub range requests 
 
-            response=listener.getResponses("GET /" + listener.testFiles[0].name + " HTTP/1.1\n"+
+            response=listener.getResponses("GET /" + TestRFC2616.testFiles[0].name + " HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "Connection: close\n"+
                                            "\n");
@@ -941,7 +941,7 @@ public class TestRFC2616
 
             // now try again for the same resource but this time WITH range header
 
-            response=listener.getResponses("GET /" + listener.testFiles[0].name + " HTTP/1.1\n"+
+            response=listener.getResponses("GET /" + TestRFC2616.testFiles[0].name + " HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "Connection: close\n"+
                                            "Range: bytes=1-3\n"+
@@ -956,7 +956,7 @@ public class TestRFC2616
                                    "Content-Type: text/plain",
                                    "2. content type") + 2;
             offset=t.checkContains(response,offset,
-                                   "Last-Modified: " + listener.testFiles[0].modDate + "\r\n", 
+                                   "Last-Modified: " + TestRFC2616.testFiles[0].modDate + "\r\n", 
                                    "3. correct resource mod date");
 
             // if GET w/o range had Content-Location, then the corresponding 
@@ -977,7 +977,7 @@ public class TestRFC2616
                     // header for the get w/o range
             }
 
-            String expectedData = listener.testFiles[0].data.substring(1, 3+1);
+            String expectedData = TestRFC2616.testFiles[0].data.substring(1, 3+1);
             offset=t.checkContains(response,offset, 
                                    expectedData, 
                                    "6. subrange data: \"" + expectedData + "\"");
@@ -1186,11 +1186,11 @@ public class TestRFC2616
           //
           listener.checkContentRange( t, 
                      Integer.toString(id++),
-                     listener.testFiles[0].name,
+                     TestRFC2616.testFiles[0].name,
                      null,
                      200,
                      null,
-                     listener.testFiles[0].data 
+                     TestRFC2616.testFiles[0].data 
           );
 
 
@@ -1211,11 +1211,11 @@ public class TestRFC2616
           for (int i = 0; i < totallyBadRanges.length; i++) {
              listener.checkContentRange( t, 
                      "BadRange"+i,
-                     listener.testFiles[0].name,
+                     TestRFC2616.testFiles[0].name,
                      totallyBadRanges[i],
                      416,
                      null,
-                     listener.testFiles[0].data 
+                     TestRFC2616.testFiles[0].data 
              );
           }
 
@@ -1241,11 +1241,11 @@ public class TestRFC2616
 
           listener.checkContentRange( t, 
                      "bytes=5-8",
-                     listener.testFiles[0].name,
+                     TestRFC2616.testFiles[0].name,
                      "bytes=5-8",
                      206,
                      "5-8/26",
-                     listener.testFiles[0].data.substring(5,8+1) 
+                     TestRFC2616.testFiles[0].data.substring(5,8+1) 
                                       );
           
           // 
@@ -1254,25 +1254,25 @@ public class TestRFC2616
           //
           listener.checkContentRange( t, 
                                       "bytes=5-8,50-60",
-                                      listener.testFiles[0].name,
+                                      TestRFC2616.testFiles[0].name,
                                       "bytes=5-8,50-60",
                                       206,
                                       "5-8/26",
-                                      listener.testFiles[0].data.substring(5,8+1) 
+                                      TestRFC2616.testFiles[0].data.substring(5,8+1) 
           );
           listener.checkContentRange( t, 
                      "bytes=50-60,5-8",
-                     listener.testFiles[0].name,
+                     TestRFC2616.testFiles[0].name,
                      "bytes=50-60,5-8",
                      206,
                      "5-8/26",
-                     listener.testFiles[0].data.substring(5,8+1) 
+                     TestRFC2616.testFiles[0].data.substring(5,8+1) 
           );
 
           // 416 as none are satisfiable
           listener.checkContentRange( t, 
                      "bytes=50-60",
-                     listener.testFiles[0].name,
+                     TestRFC2616.testFiles[0].name,
                      "bytes=50-60",
                      416,
                      "*/26",
@@ -1358,56 +1358,56 @@ public class TestRFC2616
 
           listener.checkContentRange( t, 
                      "bytes=0-2",
-                     listener.testFiles[0].name,
+                     TestRFC2616.testFiles[0].name,
                      "bytes=0-2",
                      206,
                      "0-2/26",
-                     listener.testFiles[0].data.substring(0,2+1) 
+                     TestRFC2616.testFiles[0].data.substring(0,2+1) 
           );
 
           listener.checkContentRange( t, 
                      "bytes=23-",
-                     listener.testFiles[0].name,
+                     TestRFC2616.testFiles[0].name,
                      "bytes=23-",
                      206,
                      "23-25/26",
-                     listener.testFiles[0].data.substring(23,25+1) 
+                     TestRFC2616.testFiles[0].data.substring(23,25+1) 
           );
 
           listener.checkContentRange( t, 
                      "bytes=23-42",
-                     listener.testFiles[0].name,
+                     TestRFC2616.testFiles[0].name,
                      "bytes=23-42",
                      206,
                      "23-25/26",
-                     listener.testFiles[0].data.substring(23,25+1) 
+                     TestRFC2616.testFiles[0].data.substring(23,25+1) 
           );
 
           listener.checkContentRange( t, 
                      "bytes=-3",
-                     listener.testFiles[0].name,
+                     TestRFC2616.testFiles[0].name,
                      "bytes=-3",
                      206,
                      "23-25/26",
-                     listener.testFiles[0].data.substring(23,25+1) 
+                     TestRFC2616.testFiles[0].data.substring(23,25+1) 
           );
 
           listener.checkContentRange( t, 
                      "bytes=23-23,-2",
-                     listener.testFiles[0].name,
+                     TestRFC2616.testFiles[0].name,
                      "bytes=23-23,-2",
                      206,
                      "23-23/26",
-                     listener.testFiles[0].data.substring(23,23+1) 
+                     TestRFC2616.testFiles[0].data.substring(23,23+1) 
           );
 
           listener.checkContentRange( t, 
                      "bytes=-1,-2,-3",
-                     listener.testFiles[0].name,
+                     TestRFC2616.testFiles[0].name,
                      "bytes=-1,-2,-3",
                      206,
                      "25-25/26",
-                     listener.testFiles[0].data.substring(25,25+1) 
+                     TestRFC2616.testFiles[0].data.substring(25,25+1) 
           );
 
         }

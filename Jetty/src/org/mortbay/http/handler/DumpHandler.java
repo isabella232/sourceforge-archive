@@ -50,9 +50,9 @@ public class DumpHandler extends AbstractHttpHandler
             return;
         
         // Only handle GET, HEAD and POST
-        if (!request.__GET.equals(request.getMethod()) &&
-            !request.__HEAD.equals(request.getMethod()) &&
-            !request.__POST.equals(request.getMethod()))
+        if (!HttpRequest.__GET.equals(request.getMethod()) &&
+            !HttpRequest.__HEAD.equals(request.getMethod()) &&
+            !HttpRequest.__POST.equals(request.getMethod()))
             return;
 
         Code.debug("Dump");

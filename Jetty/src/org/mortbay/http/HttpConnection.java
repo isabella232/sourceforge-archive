@@ -391,7 +391,7 @@ public class HttpConnection
             // Can't have content without a content length
             // String content_type=_request.getField(HttpFields.__ContentType);
             // if (content_type!=null && content_type.length()>0)
-            //     throw new HttpException(_response.__411_Length_Required);
+            //     throw new HttpException(_HttpResponse.__411_Length_Required);
             _inputStream.setContentLength(0);
         }
 
@@ -410,7 +410,7 @@ public class HttpConnection
         // Check Host Field exists
         String host=_request.getField(HttpFields.__Host);
         if (host==null)
-            throw new HttpException(_response.__400_Bad_Request);
+            throw new HttpException(HttpResponse.__400_Bad_Request);
         
         // check and enable requests transfer encodings.
         String transfer_coding=
@@ -447,7 +447,7 @@ public class HttpConnection
             {
                 // XXX - can't do this check as IE stuff up on
                 // a redirect.
-                // throw new HttpException(_response.__411_Length_Required);
+                // throw new HttpException(HttpResponse.__411_Length_Required);
                 _inputStream.setContentLength(0);
             }
         }
@@ -463,7 +463,7 @@ public class HttpConnection
                 if (_inputStream.available()<=0)
                 {
                     OutputStream real_out=_outputStream.getOutputStream();
-                    real_out.write(_response.__Continue);
+                    real_out.write(HttpResponse.__Continue);
                     real_out.flush();
                 }
             }
@@ -471,12 +471,12 @@ public class HttpConnection
                 throw new HttpException(HttpResponse.__417_Expectation_Failed);
         }
         else if (_inputStream.available()<=0 &&
-                 (_request.__PUT.equals(_request.getMethod()) ||
-                  _request.__POST.equals(_request.getMethod())))
+                 (HttpRequest.__PUT.equals(_request.getMethod()) ||
+                  HttpRequest.__POST.equals(_request.getMethod())))
         {
             // Send continue for RFC 2068 exception
             OutputStream real_out=_outputStream.getOutputStream();
-            real_out.write(_response.__Continue);
+            real_out.write(HttpResponse.__Continue);
             real_out.flush();
         }            
              
@@ -597,7 +597,7 @@ public class HttpConnection
         {
             // Error for transfer encoding to be set in HTTP/1.0
             _response.removeField(HttpFields.__TransferEncoding);
-            throw new HttpException(_response.__501_Not_Implemented,
+            throw new HttpException(HttpResponse.__501_Not_Implemented,
                                     "Transfer-Encoding not supported in HTTP/1.0");
         }
         else
@@ -620,13 +620,13 @@ public class HttpConnection
                         HttpFields.__Chunked.equalsIgnoreCase(coding))
                         continue;
                     if (te==null || !te.contains(coding))
-                        throw new HttpException(_response.__501_Not_Implemented,coding);
+                        throw new HttpException(HttpResponse.__501_Not_Implemented,coding);
                 }
             }
         }
 
         // Nobble the OutputStream for HEAD requests
-        if (_request.__HEAD.equals(_request.getMethod()))
+        if (HttpRequest.__HEAD.equals(_request.getMethod()))
             _outputStream.nullOutput();
     }
 
@@ -769,7 +769,7 @@ public class HttpConnection
         throws HttpException, IOException
     {
         if (_httpServer==null)
-                throw new HttpException(response.__503_Service_Unavailable);
+                throw new HttpException(HttpResponse.__503_Service_Unavailable);
         return _httpServer.service(request,response);
     }
     
@@ -864,7 +864,7 @@ public class HttpConnection
             readRequest();
             _listener.customizeRequest(this,_request);
             if (_request.getState()!=HttpMessage.__MSG_RECEIVED)
-                throw new HttpException(_response.__400_Bad_Request);
+                throw new HttpException(HttpResponse.__400_Bad_Request);
             
             // We have a valid request!
             statsRequestStart();
@@ -923,7 +923,7 @@ public class HttpConnection
             else if (_dotVersion==0)
                 verifyHTTP_1_0();
             else if (_dotVersion!=-1)
-                throw new HttpException(_response.__505_HTTP_Version_Not_Supported);
+                throw new HttpException(HttpResponse.__505_HTTP_Version_Not_Supported);
             
             if (Code.verbose(99))
                 Code.debug("IN is "+
@@ -973,7 +973,7 @@ public class HttpConnection
                         _inputStream.setContentLength(0);
                     _persistent=false;
                     Code.ignore(e);
-                    exception(new HttpException(_response.__400_Bad_Request,
+                    exception(new HttpException(HttpResponse.__400_Bad_Request,
                                                 "Missing Content"));
                 }
                     
@@ -982,7 +982,7 @@ public class HttpConnection
                 {
                     _inputStream.setContentLength(0);
                     _persistent=false;
-                    exception (new HttpException(_response.__400_Bad_Request,
+                    exception (new HttpException(HttpResponse.__400_Bad_Request,
                                                  "Missing Content"));
                 }
                 

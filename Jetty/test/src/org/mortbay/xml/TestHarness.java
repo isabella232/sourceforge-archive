@@ -146,7 +146,7 @@ public class TestHarness
                           "Yes",
                           "Called");
 
-            t.check(tc.called,"Static called");
+            t.check(TestConfiguration.called,"Static called");
 
             t.checkEquals(tc.oa[0],"Blah","oa[0]");
             t.checkEquals(tc.oa[1],new InetAddrPort("1.2.3.4:5678"),"oa[1]");
