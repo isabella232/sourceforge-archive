@@ -11,9 +11,11 @@ import javax.management.MBeanException;
 import javax.management.MBeanOperationInfo;
 import javax.management.MBeanServer;
 import javax.management.ReflectionException;
+import javax.management.ObjectName;
 import javax.management.modelmbean.InvalidTargetObjectTypeException;
 import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
+import javax.management.modelmbean.ModelMBean;
 
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
@@ -135,17 +137,13 @@ public class LogMBean extends ModelMBeanImpl
         {
             LogSink sink=sinks[i];
 
-            LogSinkMBean bean=(LogSinkMBean)_sinks.get(sink);
+            ModelMBean bean=(LogSinkMBean)_sinks.get(sink);
             if (bean==null)
             {
                 try
                 {
-                    if (sink instanceof OutputStreamLogSink)
-                        bean=new OutputStreamLogSinkMBean(true);
-                    else
-                        bean=new LogSinkMBean();
-                    bean.setManagedResource(sink,"objectReference");
-                    getMBeanServer().registerMBean(bean,null);
+                    bean = mbeanFor(sink);
+                    getMBeanServer().registerMBean(bean,new ObjectName(getObjectName()+",sink="+i));
                     _sinks.put(sink,bean);
                 }
                 catch(Exception e)

@@ -92,6 +92,7 @@ public class OutputStreamLogSinkMBean extends LogSinkMBean
         defineAttribute("append");
         defineAttribute("outputStream");
         defineAttribute("filename");
+        defineAttribute("datedFilename");
         defineAttribute("retainDays");
         defineAttribute("flushOn");
     }
