@@ -511,7 +511,7 @@ public class HttpContext implements LifeCycle
         {
             try{
                 // that didn't work, so try something simpler (ish)
-                _tmpDir=File.createTempFile("JettyContext",null);
+                _tmpDir=File.createTempFile("JettyContext","");
                 if (_tmpDir.exists())
                     _tmpDir.delete();
                 _tmpDir.mkdir();

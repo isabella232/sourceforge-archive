@@ -1,8 +1,22 @@
 Jetty Versions
 --------------
 
+Jetty-4.0.RC1 - ???????
+ + Empty suffix for temp directory.
+ + Contributors list as an image to prevent SPAM!
  + Fixed recursive DEBUG loop in Logging.
  + Updated jetty.sh to always respect arguments.
+
+Jetty-3.1.6 - 28 Feb 2002
+ + Implemented 2.3 clarifications to security constraint semantics
+   PLEASE REVIEW YOUR SECURITY CONSTRAINTS (see README).
+ + Empty suffix for temp directory.
+ + Fixed HttpFields remove bug
+ + Set Listeners default scheme 
+ + LineInput can handle any sized marks
+ + HttpResponse.sendError makes a better attempt at finding an error page.
+ + Dispatcher.forward dispatches directly to ServletHolder to avoid
+   premature exception handling.
 
 Jetty-4.0.B2 - 25 Feb 2002
  + Minor Jasper updates

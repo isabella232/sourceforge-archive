@@ -847,7 +847,7 @@ public class ResourceHandler extends NullHandler
                     path=URI.addPaths(path,"/");
                 out.write(path);
                 out.write("\">");
-                out.write(ls[i]);
+                out.write(StringUtil.replace(StringUtil.replace(ls[i],"<","&lt;"),">","&gt;"));
                 out.write("&nbsp;");
                 out.write("</TD><TD ALIGN=right>");
                 out.write(""+item.length());
@@ -856,6 +856,7 @@ public class ResourceHandler extends NullHandler
                 out.write("</TD></TR>\n");
             }
             out.write("</TABLE>\n");
+            response.getHttpMessage().setContentLength(out.length());
             out.writeTo(response.getHttpMessage().getOutputStream());
             request.setHandled(true);
         }
