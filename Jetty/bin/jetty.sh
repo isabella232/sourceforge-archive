@@ -104,7 +104,7 @@ fi
 ##################################################
 # Jetty's hallmark
 ##################################################
-JETTY_JAR="lib/com.mortbay.jetty.jar"
+JETTY_JAR="lib/org.mortbay.jetty.jar"
 
 
 ##################################################
@@ -403,10 +403,10 @@ JAVA_OPTIONS="-Djetty.home=$JETTY_HOME -Djetty.log=$JETTY_LOG $JAVA_OPTIONS"
 
 case "$ACTION" in
   start)
-     RUN_CMD="$JAVA -DLOG_FILE=$JETTY_LOG/yyyy_mm_dd.jetty.log -cp $CLASSPATH $JAVA_OPTIONS com.mortbay.Jetty.Server $CONFIGS"
+     RUN_CMD="$JAVA -DLOG_FILE=$JETTY_LOG/yyyy_mm_dd.jetty.log -cp $CLASSPATH $JAVA_OPTIONS org.mortbay.jetty.Server $CONFIGS"
   ;;
   *)
-     RUN_CMD="$JAVA -cp $CLASSPATH $JAVA_OPTIONS com.mortbay.Jetty.Server $CONFIGS"
+     RUN_CMD="$JAVA -cp $CLASSPATH $JAVA_OPTIONS org.mortbay.jetty.Server $CONFIGS"
   ;;
 esac
 

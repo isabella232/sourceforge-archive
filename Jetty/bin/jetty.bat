@@ -82,7 +82,7 @@ if not exist %HOME%\.jettyrc  goto no_jettyrc
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Jetty's hallmark
 :::::::::::::::::::::::::::::::::::::::::::::::::::
-set JETTY_JAR=lib\com.mortbay.jetty.jar
+set JETTY_JAR=lib\org.mortbay.jetty.jar
 
 
 goto check_home_jetty
@@ -207,8 +207,8 @@ if x==x%JAVA% (
 :: Build the classpath with Jetty's bundled libraries.
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set CP=%JETTY_HOME%\lib\javax.servlet.jar
-set CP=%CP%;%JETTY_HOME%\lib\com.mortbay.jetty.jar
-set CP=%CP%;%JETTY_HOME%\lib\com.mortbay.http.jar
+set CP=%CP%;%JETTY_HOME%\lib\org.mortbay.jetty.jar
+set CP=%CP%;%JETTY_HOME%\lib\org.mortbay.http.jar
 set CP=%CP%;%JETTY_HOME%\lib\javax.xml.jaxp.jar
 set CP=%CP%;%JETTY_HOME%\lib\org.apache.crimson.jar
 if exist "%JETTY_HOME%\LIB\org.apache.jasper.jar"  set CP=%CP%;%JETTY_HOME%\lib\org.apache.jasper.jar
@@ -224,7 +224,7 @@ set JAVA_OPTIONS=-Djetty.home="%JETTY_HOME%" -Djetty.log="%JETTY_LOG%" %JAVA_OPT
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: This is how the Jetty server will be started
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set RUN_CMD=%JAVA% -classpath %CP%;%CLASSPATH% %JAVA_OPTIONS% com.mortbay.Jetty.Server %CONFIGS%
+set RUN_CMD=%JAVA% -classpath %CP%;%CLASSPATH% %JAVA_OPTIONS% org.mortbay.jetty.Server %CONFIGS%
 
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
