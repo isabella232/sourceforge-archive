@@ -208,8 +208,8 @@ if x==x%JAVA% (
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set CP=%JETTY_HOME%\lib\javax.servlet.jar
 set CP=%CP%;%JETTY_HOME%\lib\com.mortbay.jetty.jar
-set CP=%CP%;%JETTY_HOME%\lib\com.microstar.xml.jar
-set CP=%CP%;%JETTY_HOME%\lib\cryptix-sasl-jetty.jar;%JETTY_HOME%\lib\javax-sasl.jar
+set CP=%CP%;%JETTY_HOME%\lib\javax.xml.jaxp.jar
+set CP=%CP%;%JETTY_HOME%\lib\org.apache.cromson.jar
 if exist "%JETTY_HOME%\LIB\org.apache.jasper.jar"  set CP=%CP%;%JETTY_HOME%\lib\org.apache.jasper.jar
 if exist "%JETTY_HOME%\LIB\com.sun.net.ssl.jar"    set CP=%CP%;%JETTY_HOME%\lib\com.sun.net.ssl.jar
 if exist "%JAVA_HOME%\lib\tools.jar"               set CP=%CP%;%JAVA_HOME%\lib\tools.jar
@@ -218,13 +218,12 @@ set CLASSPATH=%CP%;%CLASSPATH%
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Add jetty properties to Java VM options.
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
-rem set JAVA_OPTIONS=-Djetty.home="%JETTY_HOME%" -Djetty.log="%JETTY_LOG%" %JAVA_OPTIONS%
-set JAVA_OPTIONS=-Djetty.home="%JETTY_HOME%" -Djetty.log="%JETTY_LOG%" -Djavax.security.sasl.server.pkgs=cryptix.sasl -Dcryptix.sasl.srp.passwordfile=etc/tpasswd %JAVA_OPTIONS%
+set JAVA_OPTIONS=-Djetty.home="%JETTY_HOME%" -Djetty.log="%JETTY_LOG%" %JAVA_OPTIONS%
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: This is how the Jetty server will be started
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set RUN_CMD=%JAVA% %JAVA_OPTIONS% com.mortbay.Jetty.Server %CONFIGS%
+set RUN_CMD=%JAVA% -classpath %CP%;%CLASSPATH% %JAVA_OPTIONS% com.mortbay.Jetty.Server %CONFIGS%
 
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -291,6 +290,11 @@ goto ERROR
 :ERROR
 
 :END
+set CP=
+set CONFIGS=
+set JAVA_OPTIONS=
+set JAVA=
+set RUN_CMD=
 rem endlocal
 
 
