@@ -9,7 +9,7 @@ Jetty-4.1.D2 - 24 June 2002
  + Fixed ChunkableOutputStream close propagation
  + Better recycling of HttpRequests.
  + Protect session.getAttributeNames from concurrent modifications.
- + Allow coma separated cookies and headers
+ + Allow comma separated cookies and headers
  + Back out Don't chunk 30x empty responses. 
  + Conditional header tested against welcome file not directory.
  + Improved ThreadedServer stopping on bad networks
@@ -27,7 +27,7 @@ Jetty-4.0.3 - 20 June 2002
  + Protect session.getAttributeNames from concurrent modifications.
  + Allow session manager to be initialized when set.
  + Fixed japanese locale
- + Allow coma separated cookies and headers
+ + Allow comma separated cookies and headers
 
 Jetty-4.1.D1 - 8 June 2002
  + Recycle servlet requests and responses

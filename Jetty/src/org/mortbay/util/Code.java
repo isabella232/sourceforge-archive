@@ -225,7 +225,7 @@ public class Code
     
     /* ------------------------------------------------------------ */
     /** Set debug patterns.
-     * @param patterns coma separated string of patterns 
+     * @param patterns comma separated string of patterns 
      */
     public static void setDebugPatterns(String patterns)
     {

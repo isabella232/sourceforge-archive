@@ -102,7 +102,7 @@ public class PathMap extends HashMap
     
     /* --------------------------------------------------------------- */
     /** Add a single path match to the PathMap.
-     * @param pathSpec The path specification, or coma separated list of
+     * @param pathSpec The path specification, or comma separated list of
      * path specifications.
      * @param object The object the path maps to
      */

@@ -86,7 +86,7 @@ public class MultiMap extends HashMap
     /* ------------------------------------------------------------ */
     /** Get value as String.
      * Single valued items are converted to a String with the toString()
-     * Object method. Multi valued entries are converted to a coma separated
+     * Object method. Multi valued entries are converted to a comma separated
      * List.  No quoting of commas within values is performed.
      * @param name The entry key. 
      * @return String value.

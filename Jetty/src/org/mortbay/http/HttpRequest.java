@@ -920,12 +920,12 @@ public class HttpRequest extends HttpMessage
                     {
                         if ("$version".equalsIgnoreCase(n))
                         {
-                            int coma=v.indexOf(',');
-                            if (coma>=0)
+                            int comma=v.indexOf(',');
+                            if (comma>=0)
                             {   
                                 version=Integer.parseInt
-                                    (StringUtil.unquote(v.substring(0,coma)));
-                                v=v.substring(coma+1);
+                                    (StringUtil.unquote(v.substring(0,comma)));
+                                v=v.substring(comma+1);
                                 e=v.indexOf('=');
                                 if (e>0)
                                 {

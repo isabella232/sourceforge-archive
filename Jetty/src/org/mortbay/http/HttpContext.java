@@ -816,7 +816,7 @@ public class HttpContext implements LifeCycle
      * context and does not include any paths from a parent or the
      * system classloader.
      * Note that this may not be a legal javac classpath. 
-     * @return a coma or ';' separated list of class
+     * @return a comma or ';' separated list of class
      * resources. These may be jar files, directories or URLs to jars
      * or directories.
      * @see #getFileClassPath()
@@ -868,7 +868,7 @@ public class HttpContext implements LifeCycle
     /** Sets the class path for the context.
      * A class path is only required for a context if it uses classes
      * that are not in the system class path.
-     * @param filePath a coma or ';' separated list of class
+     * @param filePath a comma or ';' separated list of class
      * resources. These may be jar files, directories or URLs to jars
      * or directories.
      */
