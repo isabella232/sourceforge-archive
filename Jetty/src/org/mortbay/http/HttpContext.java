@@ -1214,6 +1214,19 @@ public class HttpContext implements LifeCycle,
             }
         }
 
+        // No tempdir so look for a WEB-INF/work directory to use as tempDir base
+        File work=null;
+        try
+        {
+            work=new File(System.getProperty("jetty.home"),"work");
+            if (!work.exists() || !work.canWrite() || !work.isDirectory())
+                work=null;
+        }
+        catch(Exception e)
+        {
+            LogSupport.ignore(log,e);
+        }
+
         // No tempdir set so make one!
         try
         {
@@ -1720,6 +1733,12 @@ public class HttpContext implements LifeCycle,
             for (int k=0;k<handlers.length;k++)
             {
                 HttpHandler handler = handlers[k];
+		if (handler==null)
+		{
+		    handlers=getHandlers();
+		    k=-1;
+		    continue;
+		}
 
                 if (!handler.isStarted())
                 {
