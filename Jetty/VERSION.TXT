@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+Jetty-3.0.2 - 7 Jan 2001
+ + Improved jetty.sh finding of JVMs
  + Handle unknown status reasons in HttpResponse
  + Ignore included response updates rather than IllegalStateException
 

@@ -59,6 +59,8 @@
 #   first available of /var/run, /usr/var/run, and /tmp if not set.
 #   
 
+TMPJ=/tmp/j$$
+
 ##################################################
 # Get the action & configs
 ##################################################
@@ -338,11 +340,14 @@ then
     JVERSION=`cat $TMPJ | cut -d: -f1`
 
     JAVA_HOME=`dirname $JAVA`
-    while [ "$JAVA_HOME" != / -a ! -f $JAVA_HOME/lib/tools.jar ] ; do
+    while [ ! -z "$JAVA_HOME" -a "$JAVA_HOME" != "/" -a ! -f "$JAVA_HOME/lib/tools.jar" ] ; do
         JAVA_HOME=`dirname $JAVA_HOME`
     done
     [ "$JAVA_HOME" = "" ] && JAVA_HOME=
+
+    echo "Found JAVA=$JAVA in JAVA_HOME=$JAVA_HOME"
 fi
+
 
 ##################################################
 # Determine which JVM of version >1.2
@@ -359,6 +364,11 @@ then
   fi
 fi
 
+if [ "$JAVA" = "" ]
+then
+    echo "Cannot find a JRE or JDK. Please set $JAVA_HOME to a >1.2 JRE" 2>&2
+    exit 1
+fi
 
 #####################################################
 # Are we running on Windows? Could be, with Cygwin/NT.
