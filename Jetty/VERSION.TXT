@@ -1,13 +1,21 @@
 Jetty Versions
 --------------
 
-Jetty-5.0.beta1 - 20 November 2003
+Jetty-5.0.beta1 - 24 November 2003
  + SecurityConstraints not reset by stop() on custom context
  + Fixed UnixCrypt handling in HTAccessHandler
  + Added patch for JBoss realm single sign on
  + Reorganized FAQ
  + Env variables for CGI
+ + Removed support for old JBoss clustering
 
+Jetty-4.2.15 - 24 Dec 2003
+ + SecurityConstraints not reset by stop() on custom context
+ + Fixed UnixCrypt handling in HTAccessHandler
+ + Added patch for JBoss realm single sign on
+ + Environment variables for CGI
+ + Removed support for old JBoss clustering
+                                                                                                
 Jetty-5.0.beta0 - 22 November 2003
  + Removed support for HTTP trailers
  + PathMap uses own Map.Entry impl for IBM JVMs 
