@@ -33,6 +33,7 @@ Jetty-4.1.2 - 13 October 2002
  + FORM authentication sets 403 error page
  + Allow %3B encoded ; in URLs
  + Allow anonymous realm
+ + Update jasper to 4.1.12 tag
 
 Jetty-4.1.1 - 30 September 2002
  + Fixed client scripting vulnerability with jasper2.

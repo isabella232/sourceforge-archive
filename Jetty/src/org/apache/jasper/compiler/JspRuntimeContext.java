@@ -96,10 +96,6 @@ import org.apache.jasper.servlet.JspServletWrapper;
  * is dependent upon.  If a dpendent file changes the JSP page
  * which included it is recompiled.
  *
- * Saves information about JSP dependincies to the file
- * <code>JSP_DEPENDENCY.ser</code> in the web application context
- * work directory.
- *
  * Only used if a web application context is a directory.
  *
  * @author Glenn L. Nielsen
@@ -380,16 +376,27 @@ public final class JspRuntimeContext implements Runnable {
                 URL url = new URL("file:" + contextDir);
                 codeSource = new CodeSource(url,null);
                 permissionCollection = policy.getPermissions(codeSource);
+
                 // Create a file read permission for web app context directory
                 if (contextDir.endsWith(File.separator)) {
                     contextDir = contextDir + "-";
                 } else {
                     contextDir = contextDir + File.separator + "-";
                 }
-                permissionCollection.add(new FilePermission(contextDir,"read"));
+
+                // Create a file read permission for web app tempdir (work) directory
+                String workDir = options.getScratchDir().toString();
+                if (workDir.endsWith(File.separator)) {
+                    workDir = workDir + "-";
+                } else {
+                    workDir = workDir + File.separator + "-";
+                }
+                permissionCollection.add(new FilePermission(workDir,"read"));
+
                 // Allow the JSP to access org.apache.jasper.runtime.HttpJspBase
                 permissionCollection.add( new RuntimePermission(
                     "accessClassInPackage.org.apache.jasper.runtime") );
+
                 if (parentClassLoader instanceof URLClassLoader) {
                     URL [] urls = parentClassLoader.getURLs();
                     String jarUrl = null;

@@ -124,11 +124,17 @@ public class ScriptingVariabler {
 	    Vector vec = new Vector();
 
 	    Integer ownRange = null;
-	    Node.CustomTag parent = n.getCustomTagParent();
-	    if (parent == null)
-		ownRange = MAX_SCOPE;
-	    else
-		ownRange = parent.getNumCount();
+	    if (scope == VariableInfo.AT_BEGIN 
+		    || scope == VariableInfo.AT_END) {
+		Node.CustomTag parent = n.getCustomTagParent();
+		if (parent == null)
+		    ownRange = MAX_SCOPE;
+		else
+		    ownRange = parent.getNumCount();
+	    } else {
+		// NESTED
+		ownRange = n.getNumCount();
+	    }
 
 	    if (varInfos != null) {
 		for (int i=0; i<varInfos.length; i++) {
@@ -138,22 +144,11 @@ public class ScriptingVariabler {
 		    }
 		    String varName = varInfos[i].getVarName();
 		    
-		    if (scope == VariableInfo.AT_BEGIN 
-			    || scope == VariableInfo.AT_END
-			    || (scope == VariableInfo.NESTED
-				&& !n.implementsBodyTag())) {
-			Integer currentRange =
-			    (Integer) scriptVars.get(varName);
-			if (currentRange == null
-			        || ownRange.compareTo(currentRange) > 0) {
-			    scriptVars.put(varName, ownRange);
-			    vec.add(varInfos[i]);
-			}
-		    } else {
-			// scope equals NESTED AND node implements BodyTag
-			if (n.getCustomNestingLevel() == 0) {
-			    vec.add(varInfos[i]);
-			}
+		    Integer currentRange = (Integer) scriptVars.get(varName);
+		    if (currentRange == null
+			    || ownRange.compareTo(currentRange) > 0) {
+			scriptVars.put(varName, ownRange);
+			vec.add(varInfos[i]);
 		    }
 		}
 	    } else {
@@ -168,22 +163,11 @@ public class ScriptingVariabler {
 		                        tagVarInfos[i].getNameFromAttribute());
 		    }
 
-		    if (scope == VariableInfo.AT_BEGIN 
-			    || scope == VariableInfo.AT_END
-			    || (scope == VariableInfo.NESTED
-				&& !n.implementsBodyTag())) {
-			Integer currentRange =
-			    (Integer) scriptVars.get(varName);
-			if (currentRange == null
-			        || ownRange.compareTo(currentRange) > 0) {
-			    scriptVars.put(varName, ownRange);
-			    vec.add(tagVarInfos[i]);
-			}
-		    } else {
-			// scope equals NESTED AND node implements BodyTag
-			if (n.getCustomNestingLevel() == 0) {
-			    vec.add(tagVarInfos[i]);
-			}
+		    Integer currentRange = (Integer) scriptVars.get(varName);
+		    if (currentRange == null
+			    || ownRange.compareTo(currentRange) > 0) {
+			scriptVars.put(varName, ownRange);
+			vec.add(tagVarInfos[i]);
 		    }
 		}
 	    }

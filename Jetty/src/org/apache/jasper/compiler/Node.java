@@ -675,7 +675,9 @@ public abstract class Node {
 	private Class tagHandlerClass;
 	private VariableInfo[] varInfos;
 	private int customNestingLevel;
+	private boolean implementsIterationTag;
 	private boolean implementsBodyTag;
+	private boolean implementsTryCatchFinally;
 	private Vector atBeginScriptingVars;
 	private Vector atEndScriptingVars;
 	private Vector nestedScriptingVars;
@@ -693,8 +695,12 @@ public abstract class Node {
 	    this.customNestingLevel = makeCustomNestingLevel();
 
 	    this.tagHandlerClass = tagHandlerClass;
+	    this.implementsIterationTag = 
+		IterationTag.class.isAssignableFrom(tagHandlerClass);
 	    this.implementsBodyTag =
 		BodyTag.class.isAssignableFrom(tagHandlerClass);
+	    this.implementsTryCatchFinally = 
+		TryCatchFinally.class.isAssignableFrom(tagHandlerClass);
 	}
 
 	public void accept(Visitor v) throws JasperException {
@@ -795,8 +801,16 @@ public abstract class Node {
 	    return tagHandlerClass;
 	}
 
+	public boolean implementsIterationTag() {
+	    return implementsIterationTag;
+	}
+
 	public boolean implementsBodyTag() {
 	    return implementsBodyTag;
+	}
+
+	public boolean implementsTryCatchFinally() {
+	    return implementsTryCatchFinally;
 	}
 
 	public TagVariableInfo[] getTagVariableInfos() {
