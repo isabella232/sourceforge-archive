@@ -115,10 +115,11 @@ public class HandlerContext implements LifeCycle
         // check context path
         if (contextPathSpec==null ||
             contextPathSpec.indexOf(',')>=0 ||
-            contextPathSpec.startsWith("*") ||
-            !contextPathSpec.startsWith("/"))
+            contextPathSpec.startsWith("*"))
             new IllegalArgumentException
                 ("Illegal context spec:"+contextPathSpec);
+        if(!contextPathSpec.startsWith("/"))
+	    contextPathSpec='/'+contextPathSpec;
 
         if (contextPathSpec.endsWith("/*"))
             _contextPath=contextPathSpec
