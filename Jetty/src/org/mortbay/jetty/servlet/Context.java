@@ -46,7 +46,10 @@ public class Context implements ServletContext, HttpSessionContext
     /* ------------------------------------------------------------ */
     private static final String
         CONTEXT_LOG="org.mortbay.jetty.servlet.Context.LogSink";
-    
+
+    /* ------------------------------------------------------------ */
+    private static final boolean __Slosh2Slash=File.separatorChar=='\\';
+ 
     /* ------------------------------------------------------------ */
     private ServletHandler _handler;
     private HandlerContext _handlerContext;
@@ -284,6 +287,9 @@ public class Context implements ServletContext, HttpSessionContext
         if(Code.debug())
             Code.debug("getRealPath of ",path," in ",this);
 
+        if (__Slosh2Slash)
+            path=path.replace('\\','/');
+        
         Resource baseResource=_handlerContext.getBaseResource();
         if (baseResource==null )
             return null;
