@@ -29,6 +29,10 @@ public abstract class Resource implements Serializable
     Object _associate;
     
     /* ------------------------------------------------------------ */
+    /** Construct a resource from a url.
+     * @param resource A URL.
+     * @return A Resource object.
+     */
     public static Resource newResource(URL url)
         throws IOException
     {
@@ -41,8 +45,6 @@ public abstract class Resource implements Serializable
             try
             {
                 FileResource fileResource= new FileResource(url);
-                if (fileResource.getAlias()!=null)
-                    return fileResource.getAlias();
                 return fileResource;
             }
             catch(Exception e)
@@ -94,8 +96,6 @@ public abstract class Resource implements Serializable
                     
                     URLConnection connection=url.openConnection();
                     FileResource fileResource= new FileResource(url,connection,file);
-                    if (fileResource.getAlias()!=null)
-                        return fileResource.getAlias();
                     return fileResource;
                 }
                 catch(Exception e2)
@@ -304,6 +304,16 @@ public abstract class Resource implements Serializable
         _associate=o;
     }
     
+    /* ------------------------------------------------------------ */
+    /**
+     * @return The canonical Alias of this resource or null if none.
+     */
+    public URL getAlias()
+    {
+        return null;
+    }
+    
+
     /* ------------------------------------------------------------ */
     public CachedResource cache()
         throws IOException
