@@ -14,6 +14,7 @@ import org.mortbay.util.LifeCycle;
 import org.mortbay.util.Log;
 import org.mortbay.util.LogSink;
 import org.mortbay.util.MultiException;
+import org.mortbay.util.StringMap;
 import org.mortbay.util.URI;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -65,7 +66,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     
     // HttpServer[host->PathMap[contextPath->List[HanderContext]]]
     // HandlerContext[List[HttpHandler]]
-    private HashMap _hostMap = new HashMap(3);
+    private StringMap _hostMap = new StringMap();
     
     private HandlerContext _notFoundContext=null;
     private boolean _chunkingForced=false;
@@ -76,6 +77,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     public HttpServer()
     {
         __servers.add(this);
+        _hostMap.setIgnoreCase(true);
     }
     
     /* ------------------------------------------------------------ */

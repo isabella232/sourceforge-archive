@@ -11,6 +11,8 @@ dynamic HTTP requests from any Java application.
 Quick start on Unix
 ===================
 run:
+  export JETTY_HOME=<jetty install directory>
+  export JAVA_HOME=<JRE install directory>
   $JETTY_HOME/bin/jetty.sh run 
 
 Browse to:

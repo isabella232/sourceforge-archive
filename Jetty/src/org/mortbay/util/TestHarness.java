@@ -1736,17 +1736,36 @@ public class TestHarness
             t.checkEquals(map.getEntry("???".getBytes(),1,1),null,"7null");
             
             map.setIgnoreCase(false);
+            t.checkEquals(map.size(),4,"8size");
             t.checkEquals(map.get("0"),"V0","8V0");
             t.checkEquals(map.get("k1"),null,"8V1");
             t.checkEquals(map.get("k2"),null,"8V2");
             t.checkEquals(map.get("k03"),null,"8V3");
             t.checkEquals(map.get("???"),null,"8null");
             map.setIgnoreCase(true);
+            t.checkEquals(map.size(),4,"9size");
             t.checkEquals(map.get("0"),"V0","9V0");
             t.checkEquals(map.get("k1"),"V1","9V1");
             t.checkEquals(map.get("k2"),"V2","9V2");
             t.checkEquals(map.get("k03"),"V3","9V3");
             t.checkEquals(map.get("???"),null,"9null");
+
+            map.put(null,"Vn");
+            t.checkEquals(map.size(),5,"10size");
+            t.checkEquals(map.get("0"),"V0","10V0");
+            t.checkEquals(map.get("k1"),"V1","10V1");
+            t.checkEquals(map.get("k2"),"V2","10V2");
+            t.checkEquals(map.get("k03"),"V3","10V3");
+            t.checkEquals(map.get("???"),null,"10null");
+            t.checkEquals(map.get(null),"Vn","10Vn");
+
+            map.remove("XXX");
+            t.checkEquals(map.size(),5,"11size5");
+            map.remove("k2");
+            t.checkEquals(map.size(),4,"11size4");
+            map.remove(null);
+            t.checkEquals(map.size(),3,"11size3");
+            
             
         }
         catch(Exception e)

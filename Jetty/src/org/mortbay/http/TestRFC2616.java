@@ -644,6 +644,22 @@ public class TestRFC2616
                                    "pathInContext=/R1",
                                    "2. virtual host field")+1;
 
+            // Virtual Host case insensitive
+            offset=0;
+            response=listener.getResponses("GET /path/R1 HTTP/1.1\n"+
+                                           "Host: ViRtUalhOst\n"+
+                                           "\n");
+            Code.debug("RESPONSE: ",response);
+            offset=t.checkContains(response,offset,
+                                   "HTTP/1.1 200",
+                                   "2. virtual host field")+1;
+            offset=t.checkContains(response,offset,
+                                   "contextPath=/path",
+                                   "2. virtual host field")+1;
+            offset=t.checkContains(response,offset,
+                                   "pathInContext=/R1",
+                                   "2. virtual host field")+1;
+
             // Virtual Host
             offset=0;
             response=listener.getResponses("GET /path/R1 HTTP/1.1\n"+

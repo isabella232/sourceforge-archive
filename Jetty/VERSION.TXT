@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-3.1.3 - 21 Oct 2001
+Jetty-3.1.3 - 24 Oct 2001
  + Fix security problem with trailing special characters.
    Trailing %00 enabled JSP source to be viewed or other 
    servlets to be bypassed.
@@ -15,6 +15,7 @@ Jetty-3.1.3 - 21 Oct 2001
  + Improved Jasper debug output.
  + Improved ThreadedServer timeout defaults
  + Fixed binary files in CVS
+ + Fixed Virtual hosts to case insensitive.
  
 Jetty-3.1.2 - 13 Oct 2001
  + Fixed double entry on PathMap.getMatches
