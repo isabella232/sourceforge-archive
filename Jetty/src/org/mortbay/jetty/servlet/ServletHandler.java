@@ -206,7 +206,7 @@ public class ServletHandler extends AbstractHttpHandler
 
     /* ------------------------------------------------------------ */
     /** 
-     * @param sc If true, cookies are used for sessions
+     * @param uc If true, cookies are used for sessions
      */
     public void setUsingCookies(boolean uc)
     {
@@ -489,9 +489,9 @@ public class ServletHandler extends AbstractHttpHandler
 
     /* ----------------------------------------------------------------- */
     /** Handle request.
-     * @param contextPath 
-     * @param pathInContext 
-     * @param httpRequest 
+     * @param pathInContext
+     * @param pathParams
+     * @param httpRequest
      * @param httpResponse 
      * @exception IOException 
      */

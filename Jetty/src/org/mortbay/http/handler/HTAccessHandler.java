@@ -253,7 +253,7 @@ public class HTAccessHandler extends AbstractHttpHandler
         /* ------------------------------------------------------------ */
         public HTAccess(Resource resource)
         {
-            BufferedReader htin =null;
+            BufferedReader htin = null;
             try
             {
                 htin=new BufferedReader(new InputStreamReader(
@@ -464,7 +464,7 @@ public class HTAccessHandler extends AbstractHttpHandler
             {
                 Code.debug("LOAD ",_userResource);
                 _users=new HashMap();
-                BufferedReader ufin =null;
+                BufferedReader ufin = null;
                 try
                 {
                     ufin=new BufferedReader(new InputStreamReader(_userResource.getInputStream()));
@@ -504,7 +504,7 @@ public class HTAccessHandler extends AbstractHttpHandler
                 Code.debug("LOAD ",_groupResource);
                 
                 _groups=new HashMap();
-                BufferedReader ufin =null;
+                BufferedReader ufin = null;
                 try
                 {
                     ufin=new BufferedReader(new InputStreamReader(

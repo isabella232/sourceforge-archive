@@ -272,7 +272,7 @@ public class HttpRequest extends HttpMessage
     /* -------------------------------------------------------------- */
     /** Write the request header.
      * Places the message in __MSG_SENDING state.
-     * @param out Http output stream
+     * @param writer Http output stream
      * @exception IOException IO problem
      */
     public void writeHeader(Writer writer)
@@ -929,7 +929,6 @@ public class HttpRequest extends HttpMessage
 
     /* -------------------------------------------------------------- */
     /** Extract received cookies from a header.
-     * @param buffer Contains encoded cookies
      * @return Array of Cookies.
      */
     public Cookie[] getCookies()
