@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-4.0.0 - wait for it...
+Jetty-4.0.RC3 - 20 March 2002
  + Fixed ZZZ offset format to +/-HHMM
  + Updated history
  + JDBCUserRealm instantiates JDBC driver
