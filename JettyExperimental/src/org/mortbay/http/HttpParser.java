@@ -3,6 +3,8 @@ package org.mortbay.http;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.io.Buffer;
+import org.mortbay.io.BufferCache;
+import org.mortbay.io.BufferUtil;
 import org.mortbay.io.Portable;
 
 /* ------------------------------------------------------------------------------- */
@@ -43,6 +45,7 @@ public abstract class HttpParser
     public static final int STATE_CHUNK_PARAMS= 5;
     public static final int STATE_CHUNK= 6;
 
+	public static final int UNKNOWN_CONTENT= -3;
     public static final int CHUNKED_CONTENT= -2;
     public static final int EOF_CONTENT= -1;
     public static final int NO_CONTENT= 0;
@@ -55,6 +58,10 @@ public abstract class HttpParser
     protected int contentPosition;
     protected int chunkLength;
     protected int chunkPosition;
+    
+    private Buffer header;
+    private boolean close=false;
+    private boolean content=false;
 
     /* ------------------------------------------------------------------------------- */
     /** Constructor. 
@@ -106,6 +113,8 @@ public abstract class HttpParser
         if (source.remaining() == 0)
         {
             source.compact();
+            if (source.markValue()==0 && source.limit()==source.capacity())
+            	throw new IllegalStateException("Buffer too small");
             int filled= source.fill();
             if (filled < 0 && state == STATE_EOF_CONTENT)
             {
@@ -131,6 +140,7 @@ public abstract class HttpParser
             switch (state)
             {
                 case STATE_START :
+                	contentLength=UNKNOWN_CONTENT;
                     if (ch > SPACE)
                     {
                         source.mark();
@@ -208,8 +218,14 @@ public abstract class HttpParser
                 case STATE_HEADER :
                     if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                     {
+                    	if (contentLength==UNKNOWN_CONTENT)
+                    	{
+                    		if (content)
+								contentLength=EOF_CONTENT;
+							else
+								contentLength=NO_CONTENT;
+                    	}                		                       	
                         headerComplete();
-                        contentLength= getContentLength();
                         contentPosition= 0;
                         eol= ch;
                         switch (contentLength)
@@ -247,7 +263,10 @@ public abstract class HttpParser
                     if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                     {
                         if (length > 0)
-                            foundHttpHeader(source.sliceFromMark(length));
+                        {
+                        	header=HttpHeader.CACHE.normalize(source.sliceFromMark(length));
+                            foundHttpHeader(header);
+                        }
                         eol= ch;
                         state= STATE_HEADER;
                         return;
@@ -255,7 +274,10 @@ public abstract class HttpParser
                     else if (ch == COLON)
                     {
                         if (length > 0)
-                            foundHttpHeader(source.sliceFromMark(length));
+                        {
+							header=HttpHeader.CACHE.normalize(source.sliceFromMark(length));
+							foundHttpHeader(header);
+                        } 
                         length= -1;
                         state= STATE_HEADER_VALUE;
                         return;
@@ -271,9 +293,40 @@ public abstract class HttpParser
                 case STATE_HEADER_VALUE :
                     if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                     {
+                    	Buffer value = source.sliceFromMark(length);
                         if (length > 0)
-                            foundHttpValue(source.sliceFromMark(length));
+                        {
+                        	if (header instanceof BufferCache.CachedBuffer)
+                        	{
+                        		int ordinal=((BufferCache.CachedBuffer)header).getOrdinal();
 
+								switch(ordinal)
+								{
+									case HttpHeader.__CONTENT_LENGTH:
+										contentLength = BufferUtil.toInt(value);
+										if (contentLength<=0)
+											contentLength=HttpParser.NO_CONTENT;
+										break;
+									case HttpHeader.__CONNECTION:
+									    // TODO
+										close="close".equalsIgnoreCase(value.toString());
+										break;
+										
+									case HttpHeader.__TRANSFER_ENCODING:
+										// TODO
+										if ("chunked".equalsIgnoreCase(value.toString()))
+											contentLength=CHUNKED_CONTENT;
+										break; 
+										
+									case HttpHeader.__CONTENT_TYPE:
+										content=true;
+										break;
+								}
+                        	}
+                        	
+                            foundHttpValue(value);
+                        }
+                        
                         eol= ch;
                         state= STATE_HEADER;
                         return;
@@ -447,13 +500,7 @@ public abstract class HttpParser
     {
 		log.trace("headerComplete:");
     }
-
-    protected int getContentLength()
-    {
-		log.trace("getContentLength:");
-    	return 0;
-    }
-
+    
     protected void foundContent(int index, Buffer ref)
     {
         if(log.isTraceEnabled()) log.trace("foundContent:" + index+","+ref.toDetailString());

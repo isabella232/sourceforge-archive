@@ -4,11 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 
-import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.Buffer;
-import org.mortbay.io.stream.InputBuffer;
-
 import junit.framework.TestCase;
+
+import org.mortbay.io.Buffer;
+import org.mortbay.io.ByteArrayBuffer;
+import org.mortbay.io.stream.InputBuffer;
 
 /**
  * @author gregw
@@ -56,7 +56,6 @@ public class HttpParserTest extends TestCase
         String http= "POST /foo HTTP/1.0\015\012" + "\015\012";
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
 
-        contentLength= HttpParser.NO_CONTENT;
         HttpParser parser= new Parser();
         parser.parse(buffer);
         assertEquals("POST", f0);
@@ -71,7 +70,6 @@ public class HttpParserTest extends TestCase
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
 
         f2= null;
-        contentLength= HttpParser.NO_CONTENT;
         HttpParser parser= new Parser();
         parser.parse(buffer);
         assertEquals("GET", f0);
@@ -86,7 +84,6 @@ public class HttpParserTest extends TestCase
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
 
         f2= null;
-        contentLength= HttpParser.NO_CONTENT;
         HttpParser parser= new Parser();
         parser.parse(buffer);
         assertEquals("POST", f0);
@@ -108,7 +105,6 @@ public class HttpParserTest extends TestCase
                 + "\015\012";
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
 
-        contentLength= HttpParser.NO_CONTENT;
         HttpParser parser= new Parser();
         parser.parse(buffer);
         assertEquals("GET", f0);
@@ -130,6 +126,7 @@ public class HttpParserTest extends TestCase
         String http=
             "GET /chunk HTTP/1.0\015\012"
                 + "Header1: value1\015\012"
+				+ "Transfer-Encoding: chunked\015\012"
                 + "\015\012"
                 + "a;\015\012"
                 + "0123456789\015\012"
@@ -138,13 +135,12 @@ public class HttpParserTest extends TestCase
                 + "0\015\012";
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
 
-        contentLength= HttpParser.CHUNKED_CONTENT;
         HttpParser parser= new Parser();
         parser.parse(buffer);
         assertEquals("GET", f0);
         assertEquals("/chunk", f1);
         assertEquals("HTTP/1.0", f2);
-        assertEquals(0, h);
+        assertEquals(1, h);
         assertEquals("Header1", hdr[0]);
         assertEquals("value1", val[0]);
         assertEquals("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", content);
@@ -155,6 +151,7 @@ public class HttpParserTest extends TestCase
         String http=
             "GET /mp HTTP/1.0\015\012"
                 + "Header1: value1\015\012"
+				+ "Transfer-Encoding: chunked\015\012"
                 + "\015\012"
                 + "a;\015\012"
                 + "0123456789\015\012"
@@ -163,41 +160,40 @@ public class HttpParserTest extends TestCase
                 + "0\015\012"
                 + "POST /foo HTTP/1.0\015\012"
                 + "Header2: value2\015\012"
+				+ "Content-Length: 0\015\012"
                 + "\015\012"
                 + "PUT /doodle HTTP/1.0\015\012"
                 + "Header3: value3\015\012"
+				+ "Content-Length: 10\015\012"
                 + "\015\012"
                 + "0123456789\015\012";
 
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
 
-        contentLength= HttpParser.CHUNKED_CONTENT;
         HttpParser parser= new Parser();
         parser.parse(buffer);
         assertEquals("GET", f0);
         assertEquals("/mp", f1);
         assertEquals("HTTP/1.0", f2);
-        assertEquals(0, h);
+        assertEquals(1, h);
         assertEquals("Header1", hdr[0]);
         assertEquals("value1", val[0]);
         assertEquals("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", content);
 
-        contentLength= HttpParser.NO_CONTENT;
         parser.parse(buffer);
         assertEquals("POST", f0);
         assertEquals("/foo", f1);
         assertEquals("HTTP/1.0", f2);
-        assertEquals(0, h);
+        assertEquals(1, h);
         assertEquals("Header2", hdr[0]);
         assertEquals("value2", val[0]);
         assertEquals(null, content);
 
-        contentLength= 10;
         parser.parse(buffer);
         assertEquals("PUT", f0);
         assertEquals("/doodle", f1);
         assertEquals("HTTP/1.0", f2);
-        assertEquals(0, h);
+        assertEquals(1, h);
         assertEquals("Header3", hdr[0]);
         assertEquals("value3", val[0]);
         assertEquals("0123456789", content);
@@ -209,6 +205,7 @@ public class HttpParserTest extends TestCase
         String http=
             "GET / HTTP/1.0\015\012"
                 + "Header1: value1\015\012"
+				+ "Transfer-Encoding: chunked\015\012"
                 + "\015\012"
                 + "a;\015\012"
                 + "0123456789\015\012"
@@ -217,9 +214,11 @@ public class HttpParserTest extends TestCase
                 + "0\015\012"
                 + "POST /foo HTTP/1.0\015\012"
                 + "Header2: value2\015\012"
+                + "Content-Length: 0\015\012"
                 + "\015\012"
                 + "PUT /doodle HTTP/1.0\015\012"
                 + "Header3: value3\015\012"
+				+ "Content-Length: 10\015\012"
                 + "\015\012"
                 + "0123456789\015\012";
 
@@ -242,7 +241,7 @@ public class HttpParserTest extends TestCase
                 http.length() / 2,
                 http.length() / 3,
                 48,
-                16 
+                24
             };
 
         for (int t= 0; t < tests.length; t++)
@@ -250,33 +249,30 @@ public class HttpParserTest extends TestCase
             System.err.println("buffer size = " + tests[t]);
             InputBuffer buffer= new InputBuffer(new FileInputStream(file), tests[t]);
 
-            contentLength= HttpParser.CHUNKED_CONTENT;
             HttpParser parser= new Parser();
             parser.parse(buffer);
             assertEquals("GET", f0);
             assertEquals("/", f1);
             assertEquals("HTTP/1.0", f2);
-            assertEquals(0, h);
+            assertEquals(1, h);
             assertEquals("Header1", hdr[0]);
             assertEquals("value1", val[0]);
             assertEquals("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", content);
 
-            contentLength= HttpParser.NO_CONTENT;
             parser.parse(buffer);
             assertEquals("POST", f0);
             assertEquals("/foo", f1);
             assertEquals("HTTP/1.0", f2);
-            assertEquals(0, h);
+            assertEquals(1, h);
             assertEquals("Header2", hdr[0]);
             assertEquals("value2", val[0]);
             assertEquals(null, content);
 
-            contentLength= 10;
             parser.parse(buffer);
             assertEquals("PUT", f0);
             assertEquals("/doodle", f1);
             assertEquals("HTTP/1.0", f2);
-            assertEquals(0, h);
+            assertEquals(1, h);
             assertEquals("Header3", hdr[0]);
             assertEquals("value3", val[0]);
             assertEquals("0123456789", content);
@@ -290,8 +286,7 @@ public class HttpParserTest extends TestCase
     String[] hdr;
     String[] val;
     int h;
-    int contentLength;
-
+    
     class Parser extends HttpParser
     {
         public void foundContent(int index, Buffer ref)
@@ -336,11 +331,6 @@ public class HttpParserTest extends TestCase
             else
                 val[h] += ref.toString();
             System.out.println("Value='" + ref + "'");
-        }
-
-        public int getContentLength()
-        {
-            return HttpParserTest.this.contentLength;
         }
 
         public void headerComplete()
