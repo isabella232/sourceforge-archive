@@ -103,11 +103,11 @@ public class Dispatcher implements RequestDispatcher
 	    ServletHolder holder = (ServletHolder)entry.getValue();
 	    
 	    Code.debug("Try forward request to ",entry);
-	    servletRequest.setPaths(PathMap.pathMatch(servletPathSpec,
-						      _path),
-				    PathMap.pathInfo(servletPathSpec,
-						     _path),
-				    _query);
+	    servletRequest.setForwardPaths(PathMap.pathMatch(servletPathSpec,
+							     _path),
+					   PathMap.pathInfo(servletPathSpec,
+							    _path),
+					   _query);
 	    
 	    // try service request
 	    holder.handle(servletRequest,servletResponse);

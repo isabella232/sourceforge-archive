@@ -37,7 +37,8 @@ class ServletRequest
 
     private HttpRequest _httpRequest;
     private ServletResponse _servletResponse;
-    
+
+    private String _uri=null;
     private String _contextPath=null;
     private String _servletPath=null;
     private String _pathInfo=null;
@@ -74,11 +75,16 @@ class ServletRequest
     }
     
     /* ------------------------------------------------------------ */
-    void setPaths(String servletPath,String pathInfo,String query)
+    void setForwardPaths(String servletPath,String pathInfo,String query)
     {
         _servletPath=servletPath;
 	_pathInfo=pathInfo;
 	_query=query;
+
+	if (getContextPath()==null)
+	    _uri=_servletPath+_pathInfo;
+	else
+	    _uri=getContextPath()+_servletPath+_pathInfo;
     }
     
     /* ------------------------------------------------------------ */
@@ -364,6 +370,9 @@ class ServletRequest
     /* ------------------------------------------------------------ */
     public String getRequestURI()
     {
+	if (_uri!=null)
+	    return _uri;
+	
 	String path=_httpRequest.getPath();
 
 	// remove any session stuff
