@@ -531,7 +531,32 @@ public class WebApplicationContext
             removeHandler(_webAppHandler);
         _webAppHandler=null;
     }
-
+    
+    /* ------------------------------------------------------------ */
+    public boolean handle(String pathInContext,
+                          String pathParams,
+                          HttpRequest httpRequest,
+                          HttpResponse httpResponse)
+        throws HttpException, IOException
+    {
+        if (!isStarted())
+            return false;
+        try
+        {
+            super.handle(pathInContext,pathParams,httpRequest,httpResponse);
+        }
+        finally
+        {
+            if (!httpRequest.isHandled())
+                httpResponse.sendError(HttpResponse.__404_Not_Found);            
+            httpRequest.setHandled(true);
+            if (!httpResponse.isCommitted())
+                httpResponse.commit();
+        }
+        return true;
+    }
+    
+    
     /* ------------------------------------------------------------ */
     public synchronized void addEventListener(EventListener listener)
         throws IllegalArgumentException

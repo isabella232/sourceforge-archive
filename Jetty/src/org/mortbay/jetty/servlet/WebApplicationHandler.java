@@ -179,36 +179,6 @@ public class WebApplicationHandler extends ServletHandler
         }
     }
 
-    /* ----------------------------------------------------------------- */
-    /** Handle request.
-     * @param contextPath 
-     * @param pathInContext 
-     * @param httpRequest 
-     * @param httpResponse 
-     * @exception IOException 
-     */
-    public void handle(String pathInContext,
-                       String pathParams,
-                       HttpRequest httpRequest,
-                       HttpResponse httpResponse)
-         throws IOException
-    {
-        if (!_started)
-            return;
-        try
-        {
-            super.handle(pathInContext,pathParams,httpRequest,httpResponse);
-        }
-        finally
-        {
-            if (!httpRequest.isHandled())
-                httpResponse.sendError(HttpResponse.__404_Not_Found);            
-            httpRequest.setHandled(true);
-            if (!httpResponse.isCommitted())
-                httpResponse.commit();
-        }
-    }
-    
     /* ------------------------------------------------------------ */
     void dispatch(String pathInContext,
                   HttpServletRequest request,
