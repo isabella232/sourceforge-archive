@@ -79,6 +79,14 @@ public class URI
         try
         {    
             _uri=uri;
+            _scheme=null;
+            _host=null;
+            _port=0;
+            _path=null;
+            _encodedPath=null;
+            _query=null;
+            if (_parameters!=null)
+                _parameters.clear();
             
             // Scan _uri for host, port, path & query
             int maxi=uri.length()-1;
@@ -928,6 +936,29 @@ public class URI
             buf.append('/');
 
         return buf.toString();
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param uri URI
+     * @return True if the uri has a scheme
+     */
+    public static boolean hasScheme(String uri)
+    {
+        for (int i=0;i<uri.length();i++)
+        {
+            char c=uri.charAt(i);
+            if (c==':')
+                return true;
+            if (!(c>='a'&&c<='z' ||
+                  c>='A'&&c<='Z' ||
+                  c>='0'&&c<='9' ||
+                  c=='.' ||
+                  c=='+' ||
+                  c=='-'))
+                break;
+        }
+        return false;
     }
     
 }

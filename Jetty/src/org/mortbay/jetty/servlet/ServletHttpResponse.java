@@ -421,7 +421,7 @@ public class ServletHttpResponse implements HttpServletResponse
         if (url==null)
             throw new IllegalArgumentException();
         
-        if (!url.startsWith("http:/")&&!url.startsWith("https:/"))
+        if (!URI.hasScheme(url))
         {
             StringBuffer buf = _servletHttpRequest.getHttpRequest().getRootURL();
             

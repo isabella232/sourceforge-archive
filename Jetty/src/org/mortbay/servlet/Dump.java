@@ -370,9 +370,6 @@ public class Dump extends HttpServlet
             tf.addFileField("file","file");              
             tf.addButton("Upload","Upload");
             page.add(tf);
-
-
-            
         }
         catch (Exception e)
         {

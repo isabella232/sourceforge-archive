@@ -54,6 +54,11 @@
     <servlet-class>org.mortbay.servlet.SessionDump</servlet-class>
   </servlet>
 
+  <servlet>
+    <servlet-name>SendRedirect</servlet-name>
+    <servlet-class>org.mortbay.servlet.SendRedirect</servlet-class>
+  </servlet>
+
   <servlet-mapping>
     <servlet-name>Jetty Demo Page</servlet-name>
     <url-pattern>*.html</url-pattern>
@@ -87,6 +92,11 @@
   <servlet-mapping>
     <servlet-name>Session</servlet-name>
     <url-pattern>/session/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>SendRedirect</servlet-name>
+    <url-pattern>/sendredirect/*</url-pattern>
   </servlet-mapping>
 
   <welcome-file-list>
