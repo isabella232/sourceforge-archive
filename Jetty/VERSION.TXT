@@ -1,8 +1,10 @@
 Jetty Versions
 --------------
 
+ + Recycling of HttpFields class.
+ + Renamed Filter application methods.
  + Fixed firstWrite after commit.
- + Fixed ContextLoader parent delegation bug
+ + Fixed ContextLoader parent delegation bug.
  + Fixed problem setting the size of chunked buffers.
  + Removed unused Servlet and Servlet-Engine headers.
  + Fixed servletpath on invoker for named servlets.
