@@ -6,8 +6,16 @@
     <li>[07-Apr-2004] JettyPlus now updated to <a href="http://jotm.objectweb.org">JOTM 1.4.3 </a></li>
     <li>[07-Apr-2004] new <A href="#start.config">start configuration</a> for JettyPlus start.jar</li>
   </ol>
+
+<h2>About these instructions</h2>
+  The instructions in these pages served from <a href="http://jetty.mortbay.org">http://jetty.mortbay.org</a> refer to the most recent release (or the CVS <code>HEAD</code> version, whichever is most recent) of JettyPlus. The JettyPlus <a href="#download">downloads</a> contain instructions matching the downloaded version, and can be accessed on your local machine by running the Jetty demo webapp:
+  <p>
+  <code>java -jar start.jar etc/demo.xml</code>
+  <p>
+ and surfing to the <code>URL http://localhost:8080/jetty/plus</code>
+  
 <A name="start.config">
-<h2> What it is and how to run it</h2>
+<h2> What it is, where to get it and how to run it</h2>
 </a>
 
 The purpose of this project is to enrich Jetty by
@@ -27,6 +35,19 @@ The feature set currently contains:
   <li> <A HREF="http://java.sun.com/products/javamail/">Java Mail</A>&nbsp; 
 </ul> 
 
+<a name="download">
+<h3>Downloading</h3>
+</a>
+JettyPlus is part of the <a href="http://sourceforge.net/projects/jetty/">Jetty SourceForge</a> project. To obtain JettyPlus you can:
+<ul>
+  <li>check out Jetty from CVS (see <a href="http://sourceforge.net/cvs/?group_id=7322">CVS instructions</a>). The JettyPlus source is in <code>$JETTY_HOME/extra/plus</code>.
+  </li>
+  <li><a href="/jetty/download.html">download</a> a release of the <code>Jetty-X.X.X-extra.tar.gz</code> bundle which contains a number of extensions to Jetty, including JettyPlus. (Note: as this bundle does NOT include standard Jetty, you will need to install it separately before you can run JettyPlus).
+  </li>
+  <li><a href="/jetty/download.html">download</a> a release of the <code>Jetty-X.X.X-all.tar.gz</code> bundle which contains standard Jetty, along with all the extra extensions (including JettyPlus).
+  </li>
+</ul>
+
 <h3>Configuration</h3>
 To use JettyPlus, you must configure the <code>org.mortbay.jetty.plus.Server</code>
   class in your xml configuration file rather than the standard
@@ -41,9 +62,9 @@ You may also need to provide configuration for JettyPlus <a href="#feature-confi
 To start JettyPlus:
 <BR>
   <code><pre>   java -DSTART=extra/etc/start-plus.config -jar start.jar config.xml</code></pre>
-  </li>
+<BR>
 
-<h3>More Information ...</h3>
+<h3>More information ...</h3>
 If you use the convenient <code>start.jar</code> method of running Jetty as described above (<i>highly recommended!</i>), all necessary jar and property files will be <i>automatically</i> be placed on the JVM classpath for you.
 <p>
 <i>Otherwise</i>, you need to set up the the classpath yourself. JettyPlus consists of <code><b>org.mortbay.jetty.plus.jar</b></code>,  <code><b>org.mortbay.jaas.jar</b></code> as well
