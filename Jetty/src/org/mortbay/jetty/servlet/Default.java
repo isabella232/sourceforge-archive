@@ -192,7 +192,6 @@ public class Default extends HttpServlet
         String method=request.getMethod();      
         if (_AllowString.indexOf(method)<0)
         {
-            if(log.isDebugEnabled())log.debug("Method not allowed: "+method);
             if (resource!=null && resource.exists())
             {
                 response.setHeader(HttpFields.__Allow,_AllowString);    
@@ -206,8 +205,6 @@ public class Default extends HttpServlet
         // Handle the request
         try
         {
-            if (log.isDebugEnabled())log.debug(method+" PATH="+pathInContext+" RESOURCE="+resource);
-            
             // handle by method.
             if (method.equals(HttpRequest.__GET) ||
                 method.equals(HttpRequest.__POST) ||
@@ -225,7 +222,6 @@ public class Default extends HttpServlet
                 _servletHandler.handleTrace(request, response);
             else
             {
-                if(log.isDebugEnabled())log.debug("Unknown action:"+method);
                 // anything else...
                 try{
                     if (resource.exists())
@@ -256,8 +252,6 @@ public class Default extends HttpServlet
                           boolean endsWithSlash)
         throws ServletException,IOException
     {
-        if(log.isDebugEnabled())log.debug("handleGet "+resource);
-
         if (resource==null || !resource.exists())
             response.sendError(HttpResponse.__404_Not_Found);
         else
@@ -268,8 +262,6 @@ public class Default extends HttpServlet
             {
                 if (!endsWithSlash && !pathInContext.equals("/"))
                 {
-                    log.debug("Redirect to directory/");
-                    
                     String q=request.getQueryString();
                     StringBuffer buf=request.getRequestURL();
                     if (q!=null&&q.length()!=0)
@@ -328,8 +320,6 @@ public class Default extends HttpServlet
                           Resource resource)
         throws ServletException,IOException
     {
-        if(log.isDebugEnabled())log.debug("handlePut "+resource);
-
         boolean exists=resource!=null && resource.exists();
         if (exists && !passConditionalHeaders(request,response,resource))
             return;
@@ -387,7 +377,6 @@ public class Default extends HttpServlet
                              Resource resource)
         throws ServletException,IOException
     {
-        if(log.isDebugEnabled())log.debug("handleDelete "+resource);
         if (!resource.exists() ||
             !passConditionalHeaders(request,response,resource))
             return;
@@ -416,7 +405,6 @@ public class Default extends HttpServlet
                            Resource resource)
         throws ServletException,IOException
     {
-        if(log.isDebugEnabled())log.debug("handleMove "+resource);
         if (!resource.exists() || !passConditionalHeaders(request,response,resource))
             return;
         
@@ -441,7 +429,6 @@ public class Default extends HttpServlet
                 newInfo=newInfo.substring(contextPath.length());
             Resource newFile = _httpContext.getBaseResource().addPath(newInfo);
      
-            if(log.isDebugEnabled())log.debug("Moving "+resource+" to "+newFile);
             resource.renameTo(newFile);
             response.setStatus(HttpResponse.__204_No_Content);
             response.flushBuffer();
@@ -539,8 +526,6 @@ public class Default extends HttpServlet
             return;
         }
 
-        if(log.isDebugEnabled())log.debug("sendDirectory: "+resource);
-
         byte[] data=null;
         if (resource instanceof CachedResource)
             data=((CachedResource)resource).getCachedData();
@@ -596,9 +581,9 @@ public class Default extends HttpServlet
                         !pathInContext.endsWith(".gz"))
                     {
 			Resource gz = getResource(pathInContext+".gz");
-                        if (gz.exists() && accept.indexOf("gzip")>=0)
+                        if (gz.exists() && accept.indexOf("gzip")>=0 &&
+			    request.getAttribute(Dispatcher.__INCLUDE_REQUEST_URI)==null)
                         {
-                            if(log.isDebugEnabled())log.debug("gzip="+gz);
                             response.setHeader(HttpFields.__ContentEncoding,"gzip");
                             data=gz;
                             resLength=data.length();
@@ -615,12 +600,10 @@ public class Default extends HttpServlet
             
         // Parse the satisfiable ranges
         List ranges =InclusiveByteRange.satisfiableRanges(reqRanges,resLength);
-        if(log.isDebugEnabled())log.debug("ranges: " + reqRanges + " == " + ranges);
         
         //  if there are no satisfiable ranges, send 416 response
         if (ranges==null || ranges.size()==0)
         {
-            log.debug("no satisfiable ranges");
             writeHeaders(response, resource, resLength);
             response.setStatus(HttpResponse.__416_Requested_Range_Not_Satisfiable);
             response.setHeader(HttpFields.__ContentRange, 
@@ -638,7 +621,6 @@ public class Default extends HttpServlet
         {
             InclusiveByteRange singleSatisfiableRange =
                 (InclusiveByteRange)ranges.get(0);
-            if(log.isDebugEnabled())log.debug("single satisfiable range: " + singleSatisfiableRange);
             long singleLength = singleSatisfiableRange.getSize(resLength);
             writeHeaders(response,resource,singleLength);
             response.setStatus(HttpResponse.__206_Partial_Content);
@@ -679,7 +661,6 @@ public class Default extends HttpServlet
             InclusiveByteRange ibr = (InclusiveByteRange) ranges.get(i);
             String header=HttpFields.__ContentRange+": "+
                 ibr.toHeaderRangeString(resLength);
-            if(log.isDebugEnabled())log.debug("multi range: "+encoding+" "+header);
             multi.startPart(encoding,new String[]{header});
 
             long start=ibr.getFirst(resLength);
