@@ -14,16 +14,14 @@ import java.util.TimeZone;
 /**  DateCache.
  * Computes String representations of Dates and caches
  * the results
- * so that subsequent requests for the same Date will be fast. It compares
- * Dates to the second, so don't use DateCache with date formats that show
- * milliseconds.
+ * so that subsequent requests within the same minute will be fast.
  *
  * @see
  * @version 1.0 Wed Mar  3 1999
  * @author Kent Johnson <KJohnson@transparent.com>
  */
 
-public final class DateCache
+public final class DateCache 
 {
     private long lastSeconds = 0;
     private String lastResult = null;
@@ -42,7 +40,7 @@ public final class DateCache
      */
     public DateCache()
     {
-	this(new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US));
+	this(new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy"));
 	formatter.setTimeZone(TimeZone.getDefault());
     }
 
