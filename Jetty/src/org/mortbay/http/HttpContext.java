@@ -6,6 +6,7 @@
 package org.mortbay.http;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.Permissions;
@@ -357,6 +358,7 @@ public class HttpContext implements LifeCycle
      * result in a IllegalStateException
      */
     protected void initClassLoader()
+        throws MalformedURLException, IOException
     {
         if (_loader==null)
         {
@@ -383,7 +385,14 @@ public class HttpContext implements LifeCycle
         throws ClassNotFoundException
     {
         if (_loader==null)
-            initClassLoader();
+        {
+            try{initClassLoader();}
+            catch(Exception e)
+            {
+                Code.warning(e);
+                return null;
+            }
+        }
         
         if (className==null)
             return null;
