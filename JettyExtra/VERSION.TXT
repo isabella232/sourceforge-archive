@@ -1,6 +1,12 @@
 JettyExtra Versions
 --------------------
 
+JettyExtra-4.0.0
+  + Fixed tidy target
+  
+JettyExtra-4.0.RC2
+  + Added nio SocketChannelListenerMBean
+   
 JettyExtra-4.0.B2
   + New addWebApplication format
 

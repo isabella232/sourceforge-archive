@@ -48,10 +48,29 @@ clean       - Remove generated files
     <ant dir="sasl" target="clean"/>
   </target>
 
+
+  <target name="jmxtidy">
+    <ant dir="jmx" target="tidy"/>
+  </target>
+
+  <target name="ftptidy">
+    <ant dir="ftp" target="tidy"/>
+  </target>
+
+  <target name="toolstidy">
+    <ant dir="tools" target="tidy"/>
+  </target>
+
+  <target name="sasltidy">
+    <ant dir="sasl" target="tidy"/>
+  </target>
+
+
+
   <target name="all" depends="jmx,ftp,tools,sasl"/>
   <target name="clean" depends="jmxclean,ftpclean,toolsclean,saslclean"/>
 
-  <target name="tidy" depends="clean" />
+  <target name="tidy" depends="jmxtidy,ftptidy,toolstidy,sasltidy" />
 
 </project>
 
