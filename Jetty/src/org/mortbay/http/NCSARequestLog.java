@@ -360,6 +360,8 @@ public class NCSARequestLog implements RequestLog
                 if (_extended)
                     logExtended(request,response,_writer);
                 _writer.write(StringUtil.__LINE_SEPARATOR);
+                if (!_buffered)
+                     _writer.flush();
             }
         }
         catch(IOException e)
