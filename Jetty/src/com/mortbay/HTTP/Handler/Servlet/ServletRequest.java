@@ -74,13 +74,11 @@ class ServletRequest
     /** Constructor. 
      * @param request 
      */
-    ServletRequest(String contextPath,
-                   HttpRequest request,
-                   Context context)
+    ServletRequest(Context context,HttpRequest request)
     {
-        _contextPath=contextPath;
-        _httpRequest=request;
         _context=context;
+        _contextPath=context.getContextPath();
+        _httpRequest=request;
     }
 
     /* ------------------------------------------------------------ */
@@ -91,8 +89,15 @@ class ServletRequest
     }
     
     /* ------------------------------------------------------------ */
-    void setForwardPaths(String servletPath,String pathInfo,String query)
+    void setForwardPaths(Context context,
+                         String servletPath,
+                         String pathInfo,
+                         String query)
     {
+        _context=context;
+        _contextPath=context.getContextPath();
+        if (_contextPath.length()==1)
+            _contextPath=null;
         _servletPath=servletPath;
         _pathInfo=pathInfo;
         _query=query;

@@ -43,10 +43,11 @@ public class TestRFC2616
         setMaxThreads(10);
         setMaxIdleTimeMs(30000);
         _server=new HttpServer();
-        _server.addHandler(null,"/",new TestTEHandler());
-        _server.addHandler(null,"/",new RedirectHandler());
-        _server.addHandler(null,"/",new DumpHandler());
-        _server.addHandler(null,"/",new NotFoundHandler());
+        HandlerContext context = _server.getContext(null,"/");
+        context.addHandler(new TestTEHandler());
+        context.addHandler(new RedirectHandler());
+        context.addHandler(new DumpHandler());
+        context.addHandler(new NotFoundHandler());
         _server.addListener(this);
         _server.start();
         
@@ -427,9 +428,9 @@ public class TestRFC2616
         try
         {
             TestRFC2616 listener = new TestRFC2616();
-            listener.getHttpServer().addHandler("VirtualHost",
-                                                "/path/*",
-                                            new DumpHandler());
+            listener.getHttpServer().getContext("VirtualHost",
+                                                "/path")
+                .addHandler(new DumpHandler());
             listener.getHttpServer().start();
             String response;
             int offset=0;
@@ -1039,8 +1040,7 @@ public class TestRFC2616
     public class RedirectHandler extends NullHandler
     {
         /* ------------------------------------------------------------ */
-        public void handle(String contextPath,
-                           String pathInContext,
+        public void handle(String pathInContext,
                            HttpRequest request,
                            HttpResponse response)
             throws HttpException, IOException

@@ -6,6 +6,7 @@
 package com.mortbay.HTTP;
 
 import com.mortbay.HTTP.Handler.NotFoundHandler;
+import com.mortbay.HTTP.Handler.Servlet.ServletHandler;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.DateCache;
 import com.mortbay.Util.InetAddrPort;
@@ -298,47 +299,47 @@ public class HttpServer implements LifeCycle
     /* ------------------------------------------------------------ */
     /** Create and add a new context.
      * Note that multiple contexts can be created for the same
-     * host and contextPathSpec. Requests are offered to multiple
+     * host and contextPath. Requests are offered to multiple
      * contexts in the order they where added to the HttpServer.
-     * @param contextPathSpec
+     * @param contextPath
      * @return 
      */
-    public HandlerContext addContext(String contextPathSpec)
+    public HandlerContext addContext(String contextPath)
     {
-        return addContext(null,contextPathSpec);
+        return addContext(null,contextPath);
     }
     
     /* ------------------------------------------------------------ */
     /** Create and add a new context.
      * Note that multiple contexts can be created for the same
-     * host and contextPathSpec. Requests are offered to multiple
+     * host and contextPath. Requests are offered to multiple
      * contexts in the order they where added to the HttpServer.
      * @param host Virtual hostname or null for all hosts.
-     * @param contextPathSpec
+     * @param contextPath
      * @return 
      */
-    public HandlerContext addContext(String host, String contextPathSpec)
+    public HandlerContext addContext(String host, String contextPath)
     {
         HandlerContext hc = new HandlerContext(this);
-        addContext(host,contextPathSpec,hc);
+        addContext(host,contextPath,hc);
         return hc;
     }
 
     /* ------------------------------------------------------------ */
     /** 
      * @param host The virtual host or null for all hosts.
-     * @param contextPathSpec 
+     * @param contextPath
      * @param i Index among contexts of same host and pathSpec.
      * @return The HandlerContext or null.
      */
-    public HandlerContext getContext(String host, String contextPathSpec, int i)
+    public HandlerContext getContext(String host, String contextPath, int i)
     {
         HandlerContext hc=null;
 
         PathMap contextMap=(PathMap)_hostMap.get(host);
         if (contextMap!=null)
         {
-            List contextList = (List)contextMap.get(contextPathSpec);
+            List contextList = (List)contextMap.get(contextPath);
             if (contextList!=null)
             {
                 if (i>=contextList.size())
@@ -354,25 +355,25 @@ public class HttpServer implements LifeCycle
     /* ------------------------------------------------------------ */
     /** Get or create context. 
      * @param host The virtual host or null for all hosts.
-     * @param contextPathSpec 
+     * @param contextPath 
      * @return HandlerContext. If multiple contexts exist for the same
      * host and pathSpec, the most recently added context is returned.
      * If no context exists, a new context is defined.
      */
-    public HandlerContext getContext(String host, String contextPathSpec)
+    public HandlerContext getContext(String host, String contextPath)
     { 
         HandlerContext hc=null;
 
         PathMap contextMap=(PathMap)_hostMap.get(host);
         if (contextMap!=null)
         {
-            List contextList = (List)contextMap.get(contextPathSpec);
+            List contextList = (List)contextMap.get(contextPath);
             if (contextList!=null && contextList.size()>0)
                 hc=(HandlerContext)contextList.get(contextList.size()-1);
             
         }
         if (hc==null)
-            hc=addContext(host,contextPathSpec);
+            hc=addContext(host,contextPath);
 
         return hc;
     }
@@ -382,13 +383,24 @@ public class HttpServer implements LifeCycle
      * As contexts cannot be publicly created, this may be used to
      * alias an existing context.
      * @param host The virtual host or null for all hosts.
-     * @param contextPathSpec 
+     * @param contextPath
      * @return 
      */
     public void addContext(String host,
-                           String contextPathSpec,
+                           String contextPath,
                            HandlerContext context)
     {
+        // check context path
+        if (contextPath==null ||
+            contextPath.length()==0 ||
+            contextPath.indexOf("*")>=0 ||
+            contextPath.indexOf(",")>=0 ||
+            !contextPath.startsWith("/"))
+            throw new
+                IllegalArgumentException("ContextPath must be simple prefix:"+
+                                         contextPath);
+        
+        
         PathMap contextMap=(PathMap)_hostMap.get(host);
         if (contextMap==null)
         {
@@ -396,77 +408,53 @@ public class HttpServer implements LifeCycle
             _hostMap.put(host,contextMap);
         }
 
-        List contextList = (List)contextMap.get(contextPathSpec);
+        List contextList = (List)contextMap.get(contextPath);
         if (contextList==null)
         {
             contextList=new ArrayList(1);
-            contextMap.put(contextPathSpec,contextList);
+            contextMap.put(contextPath,contextList);
+            if (contextPath.length()>1)
+                contextMap.put(contextPath+"/*",contextList);
         }
 
         contextList.add(context);
-        String name=(host==null
-                     ?"":(host+":"))+contextPathSpec;
-        context.addName(name);    
+        context.setContextPath(host,contextPath);    
     }
 
     
     /* ------------------------------------------------------------ */
     /** 
-     * @param contextPathSpec 
+     * @param contextPath 
      * @param directory 
      * @exception IOException 
      */
-    public WebApplicationContext addWebApplication(String contextPathSpec,
+    public WebApplicationContext addWebApplication(String contextPath,
                                                    String directory)
         throws IOException
     {
-        return addWebApplication(null,contextPathSpec,directory);
+        return addWebApplication(null,contextPath,directory);
     }
     
     /* ------------------------------------------------------------ */
     /** 
      * @param host 
-     * @param contextPathSpec 
+     * @param contextPath 
      * @param directory 
      * @exception IOException 
      */
     public WebApplicationContext addWebApplication(String host,
-                                                   String contextPathSpec,
+                                                   String contextPath,
                                                    String directory)
         throws IOException
     {
         WebApplicationContext appContext =
             new WebApplicationContext(this,directory);
-        addContext(host,contextPathSpec,appContext);
-        Log.event("Web Application "+appContext+" added at "+
-                  (host!=null?(host+":"+contextPathSpec):contextPathSpec));
+        addContext(host,contextPath,appContext);
+        Log.event("Web Application "+appContext+" added");
         return appContext;
     }    
     
-    
-    /* ------------------------------------------------------------ */
-    /** Add a handler to a path specification.
-     * Requests with paths matching the path specification are passed
-     * to the handle method of the handler. All matching handlers
-     * are offered the request, starting with the best match, until
-     * the request is handled.
-     *
-     * Multiple handlers can be mapped to the same contextPath and
-     * requests are passed to the handlers in the order they
-     * were registered.
-     *
-     * @param host Virtual host name or null.
-     * @param contextPath 
-     * @param handler 
-     */
-    public void addHandler(String host,
-                           String contextPathSpec,
-                           HttpHandler handler)
-    {
-        HandlerContext hc = getContext(host,contextPathSpec);
-        hc.addHandler(handler);
-    }
-
+ 
     /* ------------------------------------------------------------ */
     /** 
      * @return Collection of all handler.
@@ -529,6 +517,7 @@ public class HttpServer implements LifeCycle
         _dateCache=new DateCache(format);
     }
 
+
         
     /* ------------------------------------------------------------ */
     /** Service a request.
@@ -567,7 +556,6 @@ public class HttpServer implements LifeCycle
                         Map.Entry entry=
                             (Map.Entry)
                             contextLists.get(i);
-                        String contextPathSpec=(String)entry.getKey();
                         List contextList = (List)entry.getValue();
                 
                         for (int j=0;j<contextList.size();j++)
@@ -579,8 +567,7 @@ public class HttpServer implements LifeCycle
                                 Code.debug("Try ",context,
                                            ",",new Integer(j));
 
-                            if (context.handle(contextPathSpec,
-                                               request,
+                            if (context.handle(request,
                                                response))
                                 return;
                         }
@@ -596,6 +583,64 @@ public class HttpServer implements LifeCycle
 
         response.sendError(response.__404_Not_Found);
         
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Find servlet handler.
+     * Find a servlet handler for a URI.  This method is provided for
+     * the servlet context getContext method to search for another
+     * context by URI.  A list of hosts may be passed to qualify the
+     * search.
+     * @param uri URI that must be satisfied by the servlet handler 
+     * @param hosts null or a list of virtual hosts names to search
+     * @return ServletHandler
+     */
+    public ServletHandler findServletHandler(String uri,
+                                             List hosts)
+    {
+        int nh=hosts==null?0:hosts.size();
+
+        for (int h=0; h<=nh ; h++)
+        {
+            String host = (String)
+                ((hosts!=null && h<nh)?hosts.get(h):null);
+            
+            PathMap contextMap=(PathMap)_hostMap.get(host);
+            if (contextMap!=null)
+            {
+                List contextLists =contextMap.getMatches(uri);
+                if(contextLists!=null)
+                {
+                    for (int i=0;i<contextLists.size();i++)
+                    {
+                        Map.Entry entry=
+                            (Map.Entry)
+                            contextLists.get(i);
+                        String contextPath=(String)entry.getKey();
+                        List contextList = (List)entry.getValue();
+                
+                        for (int j=0;j<contextList.size();j++)
+                        {
+                            HandlerContext context=
+                                (HandlerContext)contextList.get(j);
+                            
+                            ServletHandler handler =
+                                context.getServletHandler();
+
+                            String pathInContext=
+                                PathMap.pathInfo(contextPath,uri);
+                            
+                            Code.debug("Look for ",uri," in ",handler,
+                                       " via ",contextPath);
+                            
+                            if (handler.getHolderEntry(pathInContext)!=null)
+                                return handler;
+                        }
+                    }   
+                }
+            }
+        }	
+        return null;
     }
     
     /* ------------------------------------------------------------ */

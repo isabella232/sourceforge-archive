@@ -30,8 +30,8 @@ public class JettyServlet extends HttpServlet
                       HttpServletResponse response) 
         throws ServletException, IOException
     {	
-        String path=request.getServletPath();        
-
+        String path=request.getServletPath();
+        
         File file=(File)
             request.getAttribute("JettyFile");
         if (file==null)

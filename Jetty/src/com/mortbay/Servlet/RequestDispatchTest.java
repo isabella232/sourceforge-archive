@@ -19,8 +19,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
-/**
- * This is an example of a simple Servlet
+/* ------------------------------------------------------------ */
+/** 
+ * <p>
+ *
+ * @see
+ * @version $Id$
+ * @author Greg Wilkins (gregw)
  */
 public class RequestDispatchTest extends HttpServlet
 {

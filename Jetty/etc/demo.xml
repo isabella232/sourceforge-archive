@@ -80,12 +80,12 @@ $ID: $
 -->
 
   <Call name="addWebApplication">
-    <Arg>/jetty/*</Arg>
+    <Arg>/jetty</Arg>
     <Arg>file:<SystemProperty name="user.dir"/>/webapps/jetty/</Arg>
   </Call>
 
   <Call name="addContext">
-    <Arg>/demo/*</Arg>
+    <Arg>/demo</Arg>
     <Set name="ResourceBase">./docroot/</Set>
     <Call name="addServlet">
       <Arg>Dump</Arg>
@@ -114,21 +114,25 @@ $ID: $
   </Call>
 
   <Call name="addContext">
-    <Arg>/servlet/*</Arg>
+    <Arg>/servlet</Arg>
     <Set name="ClassPath">./servlets/</Set>
     <Set name="ServingDynamicServlets">TRUE</Set>
   </Call>
 
   <Call name="addContext">
-    <Arg>/javadoc/*</Arg>
+    <Arg>/javadoc</Arg>
     <Set name="ResourceBase">./javadoc/</Set>
     <Set name="ServingResources">TRUE</Set>
   </Call>
 
   <Call name="addContext">
     <Arg>/</Arg>
-    <Set name="ResourceBase">./docroot/</Set>
-    <Set name="ServingResources">TRUE</Set>
+    <Call name="addServlet">
+      <Arg>Forward</Arg>
+      <Arg>/</Arg>
+      <Arg>com.mortbay.Servlet.Forward</Arg>
+      <Put name="/">/jetty/index.html</Put>
+    </Call>
     <Call name="addHandler">
       <Arg><New class="com.mortbay.HTTP.Handler.NotFoundHandler"/></Arg>
     </Call>

@@ -91,8 +91,7 @@ public class SecurityHandler extends NullHandler
     }
     
     /* ------------------------------------------------------------ */
-    public void handle(String contextPath,
-                       String pathInContext,
+    public void handle(String pathInContext,
                        HttpRequest request,
                        HttpResponse response)
         throws HttpException, IOException

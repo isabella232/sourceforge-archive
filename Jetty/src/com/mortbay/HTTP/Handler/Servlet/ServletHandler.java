@@ -27,8 +27,6 @@ import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 
 
-
-
 /* --------------------------------------------------------------------- */
 /** ServletHandler<p>
  * This handler maps requests to servlets that implement the
@@ -185,8 +183,7 @@ public class ServletHandler extends NullHandler
      * @param httpResponse 
      * @exception IOException 
      */
-    public void handle(String contextPath,
-                       String pathInContext,
+    public void handle(String pathInContext,
                        HttpRequest httpRequest,
                        HttpResponse httpResponse)
          throws IOException
@@ -214,9 +211,7 @@ public class ServletHandler extends NullHandler
             
             // Build servlet request and response
             ServletRequest request =
-                new ServletRequest(contextPath,
-                                   httpRequest,
-                                   _context);
+                new ServletRequest(_context,httpRequest);
             ServletResponse response =
                 new ServletResponse(request,httpResponse);
 
@@ -238,7 +233,7 @@ public class ServletHandler extends NullHandler
      * @param pathInContext Path within context.
      * @return PathMap Entries pathspec to ServletHolder
      */
-    Map.Entry getHolderEntry(String pathInContext)
+    public Map.Entry getHolderEntry(String pathInContext)
     {
         return _servletMap.getMatch(pathInContext);
     }

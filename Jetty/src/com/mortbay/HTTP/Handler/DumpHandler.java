@@ -39,8 +39,7 @@ public class DumpHandler extends NullHandler
     }
     
     /* ------------------------------------------------------------ */
-    public void handle(String contextPath,
-                       String pathInContext,
+    public void handle(String pathInContext,
                        HttpRequest request,
                        HttpResponse response)
         throws HttpException, IOException
@@ -63,7 +62,7 @@ public class DumpHandler extends NullHandler
         Writer writer = new OutputStreamWriter(buf,"ISO-8859-1");
         writer.write("<HTML><H1>Dump HttpHandler</H1>");
         writer.write("<PRE>\npath="+request.getPath()+
-                    "\ncontextPath="+contextPath+
+                    "\ncontextPath="+getHandlerContext().getContextPath()+
                     "\npathInContext="+pathInContext+
                     "\n</PRE>\n");
         writer.write("<H3>Header:</H3><PRE>");

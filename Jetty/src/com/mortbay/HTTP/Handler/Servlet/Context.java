@@ -49,11 +49,17 @@ public class Context implements ServletContext, HttpSessionContext
     /** Constructor. 
      * @param handler 
      */
-    public Context(ServletHandler handler)
+    Context(ServletHandler handler)
     {
         _handler=handler;
     }
-
+    
+    /* ------------------------------------------------------------ */
+    public String getContextPath()
+    {
+        return _handler.getHandlerContext().getContextPath();
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * Implemented by delegation to getAttribute.
@@ -101,7 +107,14 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public ServletContext getContext(String uri)
     {
-        Code.warning("Not Implemented");
+        HandlerContext context=
+            _handler.getHandlerContext();
+
+        ServletHandler handler=context.getHttpServer()
+            .findServletHandler(uri,context.getHosts());
+
+        if (handler!=null)
+            return handler.getContext();
         return null;
     }
     
@@ -248,12 +261,12 @@ public class Context implements ServletContext, HttpSessionContext
     /* ------------------------------------------------------------ */
     public String getRealPath(String path)
     {
+        if(Code.debug())
+            Code.debug("getRealPath of ",path," in ",this);
+        
         Resource resourceBase=_handler.getHandlerContext().getResourceBase();
         if (resourceBase==null )
             return null;
-
-        // XXX - May need to strip some leading components off the the path
-        // but i can't tell from the comments. 
         
         try{
             Resource resource = resourceBase.addPath(path);
@@ -457,9 +470,18 @@ public class Context implements ServletContext, HttpSessionContext
         Thread.currentThread().setPriority(oldPriority);
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return 
+     */
+    public String toString()
+    {
+        return "Servlet"+_handler.getHandlerContext().toString();
+    }
+    
+    
     // how often to check - XXX - make this configurable
     final static int scavengeDelay = 30000;
-
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -691,9 +713,6 @@ public class Context implements ServletContext, HttpSessionContext
             if (value!=null && value instanceof HttpSessionBindingListener)
                 ((HttpSessionBindingListener)value)
                     .valueUnbound(new HttpSessionBindingEvent(this,name));
-        }
-        
-    }
-
-    
+        }        
+    }    
 }

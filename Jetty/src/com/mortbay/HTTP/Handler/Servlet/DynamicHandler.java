@@ -58,7 +58,7 @@ public class DynamicHandler extends ServletHandler
      * @param pathInContext Path including context
      * @return List of matching holders.
      */
-    synchronized Map.Entry getHolderEntry(String pathInContext)
+    public synchronized Map.Entry getHolderEntry(String pathInContext)
     {
         String path=pathInContext;
         

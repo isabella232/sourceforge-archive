@@ -149,7 +149,8 @@ public class Dispatcher implements RequestDispatcher
         // context must be the same, info is recalculate.
         Code.debug("Forward request to ",_holder,
                    " at ",_pathSpec);
-        servletRequest.setForwardPaths(PathMap.pathMatch(_pathSpec,_path),
+        servletRequest.setForwardPaths(_context,
+                                       PathMap.pathMatch(_pathSpec,_path),
                                        PathMap.pathInfo(_pathSpec,_path),
                                        _query);
             
@@ -175,7 +176,7 @@ public class Dispatcher implements RequestDispatcher
         // Request has all original path and info etc.
         // New path is in attributes - whose values are
         // saved to handle chains of includes.
-
+        
         // Need to ensure that there is no change to the
         // response other than write
         boolean old_locked = servletResponse.getLocked();

@@ -20,7 +20,7 @@ import java.io.IOException;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class NullHandler implements HttpHandler
+abstract public class NullHandler implements HttpHandler
 {
     /* ----------------------------------------------------------------- */
     private boolean _started=false;
@@ -93,17 +93,6 @@ public class NullHandler implements HttpHandler
     }
     
     
-    /* ------------------------------------------------------------ */
-    public void handle(String contextPath,
-                       String pathInContext,
-                       HttpRequest request,
-                       HttpResponse response)
-        throws HttpException, IOException
-    {
-        Code.warning("NullHandler called for "+contextPath+
-                     ": "+getClass());
-    }
-
     
     /* ------------------------------------------------------------ */
     public String toString()

@@ -49,6 +49,9 @@ public class HandlerContext
     private Resource _resourceBase;
     private Map _attributes = new HashMap(11);
     private Map _mimeMap;
+    
+    private List _hosts;
+    private String _contextPath;
     private String _name;
     private boolean _redirectNullPath=true;
 
@@ -63,16 +66,41 @@ public class HandlerContext
     }
     
     /* ------------------------------------------------------------ */
-    void addName(String name)
+    void setContextPath(String host,String contextPath)
     {
-      if (_name==null)
-        _name=name;
-      else if (_name.indexOf(":")>=0)
-          _name=_name+";"+name;
-      else
-          _name=_name+","+name;
+        if (_contextPath!=null && !_contextPath.equals(contextPath))
+            throw new IllegalArgumentException("HandlerContext cannot be registered at "+contextPath+" and "+_contextPath);
+
+        _contextPath=contextPath;
+        
+        if (host!=null)
+        {
+            if (_hosts==null)
+                _hosts=new ArrayList(3);
+            _hosts.add(host);
+        }
+
+        _name = ((_hosts!=null)?(_hosts.toString()+":"):"")+_contextPath;
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return List of virtual hosts that this context is registered in.
+     */
+    public List getHosts()
+    {
+        return _hosts;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return The context prefix
+     */
+    public String getContextPath()
+    {
+        return _contextPath;
+    }
+    
     /* ------------------------------------------------------------ */
     public HttpServer getHttpServer()
     {
@@ -638,28 +666,26 @@ public class HandlerContext
 
     /* ------------------------------------------------------------ */
     /** 
-     * @param contextPathSpec 
      * @param request 
      * @param response 
      * @exception HttpException 
      * @exception IOException 
      */
-    public boolean handle(String contextPathSpec,
-                          HttpRequest request,
+    public boolean handle(HttpRequest request,
                           HttpResponse response)
         throws HttpException, IOException
     {
         String pathInContext = request.getPath();
         String contextPath=null;
-        if (!"/".equals(contextPathSpec))
+        if (_contextPath.length()>1)
         {
-            contextPath=PathMap.pathMatch(contextPathSpec,pathInContext);
-            pathInContext=PathMap.pathInfo(contextPathSpec,pathInContext);
+            contextPath=_contextPath;
+            pathInContext=pathInContext.substring(_contextPath.length());
         }
         
-        if (_redirectNullPath && pathInContext==null)
+        if (_redirectNullPath && (pathInContext==null ||
+                                  pathInContext.length()==0))
         {
-            // XXX optional and avoid //////
             StringBuffer buf=request.getRequestURL();
             buf.append("/");
             String q=request.getQuery();
@@ -668,8 +694,7 @@ public class HandlerContext
             response.setField(HttpFields.__Location,
                               buf.toString());
             if (Code.debug())
-                Code.warning("Context "+contextPathSpec+
-                             " consumed all of path "+
+                Code.warning(this+" consumed all of path "+
                              request.getPath()+
                              ", redirect to "+buf.toString());
             response.sendError(302);
@@ -691,8 +716,7 @@ public class HandlerContext
             if (Code.debug())
                 Code.debug("Try handler ",handler);
                                 
-            handler.handle(contextPath,
-                           pathInContext,
+            handler.handle(pathInContext,
                            request,
                            response);
 

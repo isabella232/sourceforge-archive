@@ -38,9 +38,9 @@ public class Demo
             
             // Configure handlers
             HandlerContext context;
-            server.addWebApplication(null,"/jetty/*","./webapps/jetty");
+            server.addWebApplication(null,"/jetty","./webapps/jetty");
             
-            context=server.getContext(null,"/demo/*");
+            context=server.getContext(null,"/demo");
             context.setResourceBase("./docroot/");
             context.addServlet("Dump",
                                "/dump,/dump/*,*.DUMP",
@@ -56,17 +56,19 @@ public class Demo
             context.setServingResources(true);
             context.addHandler(new DumpHandler());
             
-            context=server.addContext(null,"/servlet/*");
+            context=server.addContext(null,"/servlet");
             context.setClassPath("./servlets/");
             context.setServingDynamicServlets(true);
             
-            context=server.addContext(null,"/javadoc/*");
+            context=server.addContext(null,"/javadoc");
             context.setResourceBase("./javadoc/");
             context.setServingResources(true);
             
             context=server.addContext(null,"/");
-            context.setResourceBase("./docroot/");
-            context.setServingResources(true);
+            context.addServlet("Forward",
+                               "/",
+                               "com.mortbay.Servlet.Forward")
+                .put("/","/jetty/index.html");
             context.addHandler(new NotFoundHandler());
 
             // Logger

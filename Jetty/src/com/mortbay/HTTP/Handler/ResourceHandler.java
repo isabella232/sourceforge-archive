@@ -198,8 +198,7 @@ public class ResourceHandler extends NullHandler
     }
  
     /* ------------------------------------------------------------ */
-    public void handle(String contextPath,
-                       String pathInContext,
+    public void handle(String pathInContext,
                        HttpRequest request,
                        HttpResponse response)
         throws HttpException, IOException
@@ -216,8 +215,7 @@ public class ResourceHandler extends NullHandler
         
         try
         {
-            Code.debug("CONTEXT=",contextPath,
-                       "\nPATH=",pathInContext,
+            Code.debug("\nPATH=",pathInContext,
                        "\nRESOURCE=",resource);
             
             // check filename
@@ -234,7 +232,7 @@ public class ResourceHandler extends NullHandler
             else if (method.equals(HttpRequest.__OPTIONS))
                 handleOptions(response);
             else if (method.equals(HttpRequest.__MOVE))
-                handleMove(request, response, contextPath, pathInContext, resource);
+                handleMove(request, response, pathInContext, resource);
             else
             {
                 Code.debug("Unknown action:"+method);
@@ -477,14 +475,12 @@ public class ResourceHandler extends NullHandler
     /* ------------------------------------------------------------ */
     void handleMove(HttpRequest request,
                     HttpResponse response,
-                    String contextPath,
                     String pathInContext,
                     Resource resource)
         throws IOException
     {
         if (!_delAllowed || !_putAllowed)
-            return;
-  
+            return;  
  
         if (!resource.exists())
         {
@@ -501,6 +497,7 @@ public class ResourceHandler extends NullHandler
         }
  
         String newPath = request.getField("New-uri");
+        String contextPath = getHandlerContext().getContextPath();
         if (newPath.indexOf("..")>=0)
         {
             response.sendError(response.__405_Method_Not_Allowed,

@@ -26,15 +26,11 @@ import java.io.Writer;
 public class NotFoundHandler extends NullHandler
 {
     /* ------------------------------------------------------------ */
-    public void handle(String contextPath,
-                       String pathInContext,
+    public void handle(String pathInContext,
                        HttpRequest request,
                        HttpResponse response)
         throws HttpException, IOException
     {
-        if (!isStarted())
-            return;
-
         Code.debug("Not Found");
 
         // Not found GET request

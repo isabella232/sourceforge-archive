@@ -243,7 +243,7 @@ public class ServletHolder
     {
         if (_initParams==null)
             return Collections.enumeration(Collections.EMPTY_LIST);
-        return Collections.enumeration(_initParams.values());
+        return Collections.enumeration(_initParams.keySet());
     }
     
     /* --------------------------------------------------------------- */
