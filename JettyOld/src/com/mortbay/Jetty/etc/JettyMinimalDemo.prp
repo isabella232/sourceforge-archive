@@ -128,7 +128,7 @@ main.root.Log.PROPERTY.DateFormat         : dd/MMM/yyyy:HH:mm:ss
 main.root.Auth.PROPERTIES		  : ./etc/JettyDemoRealms.prp
 main.root.Alias.PROPERTIES		  : ./etc/JettyDemoAlias.prp
 main.root.Filter.PROPERTY.Html.PATHS      : /
-main.root.Param.PROPERTY.Cookies          : True
+main.root.Param.PROPERTY.CookiesAsParameters : False
 # ------------------------------------------------------------------------
 main.root.Servlet.PROPERTY.SERVLET.Dump.PATHS		    : /Dump%;*.DUMP
 main.root.Servlet.PROPERTY.SERVLET.Dump.CHUNK		    : True

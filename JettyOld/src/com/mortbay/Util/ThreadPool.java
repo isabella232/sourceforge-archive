@@ -30,12 +30,15 @@ import com.mortbay.Base.Code;
  */
 public class ThreadPool
 {
+    private final String _jobLock="l1";
+    private final String _clearLock="l2";
     private String _name="PoolThread";
     private int _minThreads=0;
     private int _maxThreads=0;
     private int _threadID=0;
     private int _nThreads=0;
-    private BlockingQueue jobs;
+    private int _blockedThreads=0;
+    private Object _job=null;
     private int _maxIdleTimeMs=0;
     
     /* ------------------------------------------------------------ */
@@ -54,7 +57,6 @@ public class ThreadPool
     {
 	_minThreads=0;
 	_maxThreads=maxThreads;
-	jobs=new BlockingQueue(_maxThreads);
     }
     
     /* ------------------------------------------------------------ */
@@ -67,7 +69,6 @@ public class ThreadPool
 	_minThreads=0;
 	_maxThreads=maxThreads;
 	_name=name;
-	jobs=new BlockingQueue(_maxThreads);
     }
     
     /* ------------------------------------------------------------ */
@@ -83,7 +84,6 @@ public class ThreadPool
 	_maxIdleTimeMs=maxIdleTimeMs;
 	if (name!=null)
 	    _name=name;
-	jobs=new BlockingQueue(_maxThreads);
     }
     
     /* ------------------------------------------------------------ */
@@ -103,7 +103,6 @@ public class ThreadPool
 	_maxIdleTimeMs=maxIdleTimeMs;
 	if (name!=null)
 	    _name=name;
-	jobs=new BlockingQueue(_maxThreads);
 	for (int i=_minThreads;i-->0;)
 	{
 	    _nThreads++;
@@ -135,24 +134,37 @@ public class ThreadPool
      * is called, otherwise it is passed as the argument to the handle
      * method.
      */
-    public void run(Object job)
+    public synchronized void run(Object job)
 	throws InterruptedException
     {
-	// Place job on job queue
-	jobs.put(job);
-
-	// If there are jobs in the queue and we are not at our
-	// maximum number of threads, create a new thread
-	if (jobs.size()>0 && (_maxThreads==0 || _nThreads<_maxThreads))
+	if (job==null)
 	{
-	    synchronized(this)
+	    Code.warning("Null Job");
+	    return;
+	}
+
+	// Wait for last job to be consumed
+	if(_job!=null)
+	{
+	    synchronized(_clearLock)
 	    {
-		if (jobs.size()>0 && (_maxThreads==0 || _nThreads<_maxThreads))
+		while(_job!=null)
 		{
-		    _nThreads++;
-		    new PoolThread();
+		    _clearLock.wait();
 		}
 	    }
+	}
+	
+	// Setup job for collection
+	synchronized(_jobLock)
+	{
+	    _job=job;
+	    
+	    if (_blockedThreads==0 &&
+		(_maxThreads==0 || _nThreads<_maxThreads))
+		new PoolThread();
+	    else
+		_jobLock.notify();
 	}
     }
 
@@ -164,7 +176,10 @@ public class ThreadPool
      */
     protected void handle(Object job)
     {
-	((Runnable)job).run();
+	if (job!=null && job instanceof Runnable)
+	    ((Runnable)job).run();
+	else
+	    Code.warning("Invalid job: "+job);
     }
     
     
@@ -173,13 +188,17 @@ public class ThreadPool
      */
     class PoolThread extends Thread
     {
-	String _nameN;
+	String _nameN;	
 	
 	/* ------------------------------------------------------------ */
 	public PoolThread()
 	{
 	    super();
-	    _nameN=_name+"-"+(_threadID++);
+	    synchronized(ThreadPool.this)
+	    {
+		_nThreads++;
+		_nameN=_name+"-"+(_threadID++);
+	    }
 	    super.setName(_nameN);
 	    Code.debug("New ",this);
 	    setDaemon(true);
@@ -191,6 +210,7 @@ public class ThreadPool
 	 */
  	public void run()
 	{
+	    Object myJob=null;
 	    try
 	    {
 		Code.debug("Running PoolThread: ",this);
@@ -198,28 +218,54 @@ public class ThreadPool
 		int runs=0;
 		while(true)
 		{
-		    // get the next job (may block)
-		    Object job =(_maxIdleTimeMs>0)
-			?jobs.get(_maxIdleTimeMs)
-			:jobs.get();
-
-		    // If not jobs available in timeout, this thread dies.
-		    if (job == null)
+		    // Sync on the lock to get a job
+		    synchronized(_jobLock)
 		    {
-			if (_nThreads>_minThreads)
-			    break;
-			continue;
-		    }
+			// If no job ready...
+			while (_job==null)
+			{
+			    // Wait for one
+			    try{
+				_blockedThreads++;
+				if (Code.verbose())
+				    Code.debug("Thread: ",this,
+					       " waiting "+_maxIdleTimeMs);
 
-		    if (Code.debug())
-		    {
-			super.setName(_nameN+"/"+runs++);
-			if (Code.verbose())
-			    Code.debug("Thread: ",this," Handling ",job);
+				// Die if we are idle
+				if (_maxIdleTimeMs>0)
+				{
+				    _jobLock.wait(_maxIdleTimeMs);
+				    if (_job==null && _nThreads>_minThreads)
+					return;
+				}
+				else
+				    _jobLock.wait();
+			    }
+			    finally
+			    {
+				_blockedThreads--;
+			    }
+			}
+			myJob=_job;
+			synchronized(_clearLock)
+			{
+			    _job=null;
+			    _clearLock.notify();
+			}
+			
+			// name the thread
+			if (Code.debug())
+			{
+			    super.setName(_nameN+"/"+runs++);
+			    if (Code.verbose())
+				Code.debug("Thread: ",this,
+					   " Handling ",myJob);
+			}
 		    }
 
 		    // Handle the job
-		    ThreadPool.this.handle(job);
+		    ThreadPool.this.handle(myJob);
+		    myJob=null;
 		}
 	    }
 	    catch(InterruptedException e)

@@ -40,7 +40,7 @@ public class ParamHandler extends NullHandler
     /* ------------------------------------------------------------ */
     /** Configure from properties.
      * The configuration keys are:<PRE>
-     * Cookies - boolean, if true include cookies as request params.
+     * CookiesAsParameters - boolean, if true include cookies as request params.
      * </PRE>
      * @param properties configuration.
      */
@@ -52,7 +52,7 @@ public class ParamHandler extends NullHandler
 	else
 	    tree = new PropertyTree(properties);
 
-	includeCookiesAsParameters=tree.getBoolean("Cookies");
+	includeCookiesAsParameters=tree.getBoolean("CookiesAsParameters");
     }
     
     /* ----------------------------------------------------------------- */
@@ -69,7 +69,7 @@ public class ParamHandler extends NullHandler
 	Code.debug("ParamHandler");
 	request.decodeFormParameters();
 	if (includeCookiesAsParameters)
-	    request.decodeCookieParameters();
+	    request.cookiesAsParameters();
     }
 }
 

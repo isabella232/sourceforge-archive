@@ -93,7 +93,7 @@ public class Cookies
 	if (expires!=null)
 	{
 	    int maxAge = (int)
-		((System.currentTimeMillis()-expires.getTime())/100);
+		((System.currentTimeMillis()-expires.getTime())/1000);
 	    cookie.setMaxAge(maxAge);
 	}
 
@@ -154,9 +154,11 @@ public class Cookies
     }
     
     /* -------------------------------------------------------------- */
-    /** Decode received cookies into the given dictionary
+    /** Decode received cookies.
+     * @param buffer Contains encoded cookies
+     * @return Array of Cookies.
      */
-    public static Cookie[] decode(String buffer, Dictionary dict)
+    public static Cookie[] decode(String buffer)
     {
 	if (buffer!=null)
 	{
@@ -179,7 +181,6 @@ public class Cookies
 		    v=UrlEncoded.noValue;
 		}
 		v=UrlEncoded.decode(v);
-		dict.put(n,v);
 		cv.addElement(new Cookie(n,v));
 	    }
 	    Cookie[] cookies = new Cookie[cv.size()];

@@ -1,3 +1,20 @@
+release 2.2.6 - 
+  + New implementation of ThreadPool, avoids a thread leak problem.
+  + Fixed Cookie max age order of magnitude bug.
+  + Cookies always available from getCookies.
+  + Cookies parameter renamed to CookiesAsParameters
+  + HttpRequest.getSession() always returns a session as per
+    the latest API spec.
+  + Added destroy() method on all HttpHandlers. 
+  + ServletHandler.destroy destroys all servlets.
+  + FileHandler does not server files ending in '/'
+  + Ignore duplicate single valued headers, rather than
+    reply with bad request, as IE4 breaks the rules.
+  + Allow the handling of getPathTranslated to
+    be configured in ServletHandler.
+  + Removed JRUN options from ServletHandler configuration.
+  + Added ServletRunnerHandler to the contrib directories.
+
 Release 2.2.5 - 19 Aug 1999
   + Fixed bug with closing connections in ThreadedServer
   + Made start and stop non final in ThreadedServer

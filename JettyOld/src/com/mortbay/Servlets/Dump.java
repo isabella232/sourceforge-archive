@@ -179,8 +179,15 @@ public class Dump extends HttpServlet
     }
 
     /* ------------------------------------------------------------ */
-    public String getServletInfo() {
+    public String getServletInfo()
+    {
         return "Dump Servlet";
     }
 
+    /* ------------------------------------------------------------ */
+    public synchronized void destroy()
+    {
+	Code.debug("Destroyed");
+    }
+    
 }

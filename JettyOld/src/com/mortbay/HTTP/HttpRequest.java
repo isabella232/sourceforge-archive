@@ -403,20 +403,18 @@ public class HttpRequest extends HttpHeader
     }
     
     /* -------------------------------------------------------------- */
-    /** decode Form Parameters
-     * After this call, form parameters may be fetch via the
-     * getParameter() method.
+    /** Decode Cookies
+     * If includeAsParameters is true,  cookies may be fetch via the
+     * getParameter() method
      */
-    public void decodeCookieParameters()
+    public void cookiesAsParameters()
 	 throws IOException
     {
-	if (cookieParameters==null)
-	{
-	    cookieParameters=new Hashtable(11);
-	    String c = getHeader(HttpHeader.Cookie);
-	    if (c!=null)
-		cookies=Cookies.decode(c,cookieParameters);
-	}
+	getCookies();
+	cookieParameters=new Hashtable(11);
+	for (int i=0;cookies!=null && i<cookies.length; i++)
+	    cookieParameters.put(cookies[i].getName(),
+				 cookies[i].getValue());
     }
     
     
@@ -979,7 +977,11 @@ public class HttpRequest extends HttpHeader
     {
 	if (cookies==null)
 	{
-	    cookies=new javax.servlet.http.Cookie[0];
+	    String c = getHeader(HttpHeader.Cookie);
+	    if (c!=null)
+		cookies=Cookies.decode(c);
+	    else
+		cookies=new javax.servlet.http.Cookie[0];
 	}
 	return cookies;
     }
@@ -992,12 +994,15 @@ public class HttpRequest extends HttpHeader
 	    // Then try cookies
 	    if (sessionId == null)
 	    {
-		sessionId =
-		    (String)cookieParameters.get(SessionContext.SessionId);
-		if (sessionId != null)
+		getCookies();
+		for (int i=0; cookies!=null && i<cookies.length; i++)
 		{
-		    sessionIdState = SESSIONID_COOKIE;
-		    Code.debug("Got Session ",sessionId," from cookie");
+		    if (cookies[i].getName().equals(SessionContext.SessionId))
+		    {
+			sessionId=cookies[i].getValue();
+			sessionIdState = SESSIONID_COOKIE;
+			Code.debug("Got Session ",sessionId," from cookie");
+		    }
 		}
 	    }
 	    
@@ -1056,7 +1061,8 @@ public class HttpRequest extends HttpHeader
     /* ------------------------------------------------------------ */
     public HttpSession getSession()
     {
-	return getSession(false);
+  	HttpSession session = getSession(false);
+  	return (session == null) ? getSession(true) : session;
     }
     
     /* -------------------------------------------------------------- */
@@ -1079,7 +1085,8 @@ public class HttpRequest extends HttpHeader
 	if (session == null && create)
 	{
 	    session = sessions.newSession();
-	    Cookie cookie = new Cookie(SessionContext.SessionId,session.getId());
+	    Cookie cookie =
+		new Cookie(SessionContext.SessionId,session.getId());
 	    cookie.setPath("/");
 	    response.addCookie(cookie);	
 	}

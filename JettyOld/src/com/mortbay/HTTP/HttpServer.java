@@ -247,6 +247,20 @@ public class HttpServer implements ServletContext
 		listeners[c].stop();
 	    listeners=null;
 	}
+
+	// Destroy handlers
+	if (httpHandlersMap!=null)
+	{
+	    Enumeration e = httpHandlersMap.elements();
+	    while (e.hasMoreElements())
+	    {
+		HttpHandler[] stack = (HttpHandler[])e.nextElement();
+		for (int i=0;i<stack.length;i++)
+		    if (stack[i]!=null)
+			stack[i].destroy();
+	    }
+	}
+	    
 	httpHandlersMap=null;
 	exceptionHandlersMap=null;
 

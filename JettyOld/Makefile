@@ -23,7 +23,8 @@ ROOTNAME := .
 SUBDIRS := \
     src \
     contrib/org/gjt/jsp \
-    contrib/au/com/forge/Protekt/Jetty
+    contrib/au/com/forge/Protekt/Jetty \
+    contrib/com/mortbay/HTTP/Handler
 
 include $(JETTY_HOME)/etc/Global.mk
 

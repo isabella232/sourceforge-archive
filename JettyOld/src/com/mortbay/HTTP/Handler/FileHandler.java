@@ -359,12 +359,13 @@ public class FileHandler extends NullHandler
 	Code.debug("Looking for ",uri," in ",filename);
 	
 	// Try a cache lookup
-	if (cache!=null)
+	if (cache!=null && !endsWithSlash)
 	{
 	    byte[] bytes=null;
 	    synchronized(cacheMap)
 	    {
-		CachedFile cachedFile=(CachedFile)cacheMap.get(filename);
+		CachedFile cachedFile=
+		    (CachedFile)cacheMap.get(filename);
 		if (cachedFile!=null &&cachedFile.isValid())
 		{
 		    if (!checkGetHeader(request,response,cachedFile.file))
@@ -432,7 +433,8 @@ public class FileHandler extends NullHandler
 	    // check if it is a file
 	    else if (file.isFile())
 	    {
-		sendFile(request,response,filename,file);
+		if (!endsWithSlash)
+		    sendFile(request,response,filename,file);
 	    }
 	    else
 		// don't know what it is

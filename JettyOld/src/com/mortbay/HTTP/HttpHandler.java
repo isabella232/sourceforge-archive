@@ -68,7 +68,13 @@ public interface HttpHandler
      * instances.
      */
     public void setServer(HttpServer server)
-	 throws Exception; 
+	throws Exception;
+
+    /* ------------------------------------------------------------ */
+    /** Destroy Handler.
+     * Called by HttpServer.stop().
+     */
+    public void destroy();
 }
 	    
 

@@ -86,7 +86,12 @@ public class NullHandler implements HttpHandler
 	return properties;
     }
     
-    
+    /* ------------------------------------------------------------ */
+    /** Destroy Handler.
+     * Null implementation.
+     */
+    public void destroy()
+    {}
 }
 
 

@@ -215,18 +215,8 @@ public class ServletHolder implements ServletConfig
 		    catch(InterruptedException e){Code.ignore(e);}
 		}
 
-		// Destroy singleton servlet
-		if (servlet!=null)
-		    servlet.destroy();
-		servlet=null;
-		
-		// Destroy stack of servlets
-		while (servlets.size()>0)
-		{
-		    Servlet s = (Servlet)servlets.pop();
-		    s.destroy();
-		}
-		servlets=new Stack();
+		// Destroy servlet(s)
+		destroy();
 		
 		// Setup new class loader
 		String className=servletClass.getName();
@@ -275,6 +265,27 @@ public class ServletHolder implements ServletConfig
 	    getServlet();
     }
 
+    
+    /* ---------------------------------------------------------------- */
+    /** Destroy.
+     */
+    public synchronized void destroy()
+    {
+	// Destroy singleton servlet
+	if (servlet!=null)
+	    servlet.destroy();
+	servlet=null;
+		
+	// Destroy stack of servlets
+	while (servlets!=null && servlets.size()>0)
+	{
+	    Servlet s = (Servlet)servlets.pop();
+	    s.destroy();
+	}
+	servlets=new Stack();
+    }
+    
+    
     /* ------------------------------------------------------------ */
     /** Get the servlet.
      * The state of the servlet is unknown, specially if using

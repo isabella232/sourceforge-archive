@@ -569,7 +569,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	// get session;
 	if (session==null && !noSession)
 	{
-	    session=request.getSession();
+	    session=request.getSession(false);
 	    noSession=(session==null);
 	}
 

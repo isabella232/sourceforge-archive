@@ -255,14 +255,21 @@ public class HttpHeader
 	    String existing=(String)keyMap.get(lkey);
 	    if (existing!=null)
 	    {
-		Code.warning("Duplicate single value headers");
 		if (__singleValuedMap.containsKey(lkey))
-		    throw new IOException("Duplicate single value headers");
-		
-		StringBuffer sb = new StringBuffer(existing);
-		sb.append(',');
-		sb.append(buf,i1,i2-i1+1);
-		keyMap.put(lkey,sb.toString());
+		{
+		    Code.warning("Ignored duplicate single value header: "+
+				 key);
+		    
+		    // XXX Don't throw here as IE4 breaks the rules
+		    // throw new IOException("Duplicate single value headers");
+		}
+		else
+		{
+		    StringBuffer sb = new StringBuffer(existing);
+		    sb.append(',');
+		    sb.append(buf,i1,i2-i1+1);
+		    keyMap.put(lkey,sb.toString());
+		}
 	    }
 	    else
 	    {

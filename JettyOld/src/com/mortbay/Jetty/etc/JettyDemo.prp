@@ -86,7 +86,7 @@ main.root.Filter.PROPERTY.Html.CLASS      : com.mortbay.HTTP.Filter.HtmlFilter
 main.root.Filter.PROPERTY.Html.PATHS      : /
 
 main.root.Param.CLASS			  : com.mortbay.HTTP.Handler.ParamHandler
-main.root.Param.PROPERTY.Cookies          : True
+main.root.Param.PROPERTY.CookiesAsParameters : False
 
 main.root.Session.CLASS			  : com.mortbay.HTTP.Handler.SessionHandler
 

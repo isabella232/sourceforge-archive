@@ -10,6 +10,8 @@
 # Loader                  - The class name of the ClassLoader to use to load
 #                           dynamic servlets. Must be an implementation of
 #                           com.mortbay.HTTP.Handler.ServletLoader
+# PathTranslated          - Optional override of default prefix for 
+#                           getPathTranslated()
 # SERVLET.name.CLASS      - The class of servlet "name".
 # SERVLET.name.PATHS      - List of PathMap path specs to server the servlet 
 #                           "name" from.

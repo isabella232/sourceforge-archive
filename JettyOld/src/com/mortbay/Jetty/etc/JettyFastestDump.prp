@@ -31,7 +31,7 @@ main.root.File.PROPERTY.FILES.FileBase.PATHS	     : /File%
 main.root.File.PROPERTY.FILES.FileBase.DIRECTORY     : ./FileBase
 
 main.root.Param.CLASS				     : com.mortbay.HTTP.Handler.ParamHandler
-main.root.Param.PROPERTY.Cookies		     : False
+main.root.Param.PROPERTY.CookiesAsParameters	     : False
 
 main.root.Dynamic.CLASS			             : com.mortbay.HTTP.Handler.ServletHandler
 main.root.Dynamic.PROPERTY.PATHS		     : /servlet/
