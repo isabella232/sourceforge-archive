@@ -201,6 +201,17 @@ public class TestRFC2616
         return 0;
     }
 
+    /* ------------------------------------------------------------ */
+    public boolean isLowOnResources()
+    {
+        return false;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void  persistConnection(HttpConnection connection)
+    {
+    }
+    
     /* --------------------------------------------------------------- */
     public String getResponses(String request)
         throws IOException
@@ -342,7 +353,7 @@ public class TestRFC2616
             offset = t.checkContains(response,offset,"HTTP/1.1 200","3.6.1 Chunking")+10;
             offset = t.checkContains(response,offset,"123456","3.6.1 Chunking");
             offset = t.checkContains(response,offset,"/R2","3.6.1 Chunking")+10;
-
+            
             // Chunked and keep alive
             offset=0;
             response=listener.getResponses("GET /R1 HTTP/1.1\n"+

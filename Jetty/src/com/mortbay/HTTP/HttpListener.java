@@ -30,6 +30,9 @@ public interface HttpListener extends LifeCycle
                                           HttpRequest request);
     public abstract String getDefaultScheme();
     public abstract ServerSocket getServerSocket();
+    
+    public abstract boolean isLowOnResources();
+    public abstract void persistConnection(HttpConnection connection);
 }
 
 

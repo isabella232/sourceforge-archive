@@ -31,7 +31,9 @@ public class SocketListener
 {
     /* ------------------------------------------------------------------- */
     private HttpServer _server;
-
+    private int _lowResourcePersistTimeMs=2000;
+    private int _throttled=0;
+    
     /* ------------------------------------------------------------------- */
     public SocketListener()
         throws IOException
@@ -64,6 +66,26 @@ public class SocketListener
         return "http";
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return time in ms that connections will persist if listener is
+     * low on resources.
+     */
+    public int getLowResourcePersistTimeMs()
+    {
+        return _lowResourcePersistTimeMs;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param ms time in ms that connections will persist if listener is
+     * low on resources. 
+     */
+    public void setLowResourcePersistTimeMs(int ms)
+    {
+        _lowResourcePersistTimeMs=ms;
+    }
+    
     /* --------------------------------------------------------------- */
     public void start()
         throws Exception
@@ -108,17 +130,36 @@ public class SocketListener
     }
 
     /* ------------------------------------------------------------ */
-    /**
+    /** Customize the request from connection.
+     * This method extracts the socket from the connection and calls
+     * the customizeRequest(Socket,HttpRequest) method.
      * @param request
      */
     public final void customizeRequest(HttpConnection connection,
                                        HttpRequest request)
     {
-        customizeRequest((Socket)(connection.getConnection()),request);
+        Socket socket=(Socket)(connection.getConnection());
+
+        try
+        {
+            if (_throttled>0 && socket.getSoTimeout()!=getMaxReadTimeMs())
+            {
+                _throttled--;
+                socket.setSoTimeout(getMaxReadTimeMs());
+            }
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+        }
+        customizeRequest(socket,request);
     }
 
     /* ------------------------------------------------------------ */
-    /**
+    /** Customize request from socket.
+     * Derived versions of SocketListener may specialize this method
+     * to customize the request with attributes of the socket used (eg
+     * SSL session ids).
      * @param request
      */
     protected void customizeRequest(Socket socket,
@@ -126,6 +167,43 @@ public class SocketListener
     {
         // Do nothing
     }
+
+    /* ------------------------------------------------------------ */
+    /** Persist the connection
+     * If the listener is low on resources, the connection read
+     * timeout is set to lowResourcePersistTimeMs.  The
+     * customizeRequest method is used to reset this to the normal
+     * value after a request has been read.
+     * @param connection.
+     */
+    public final void persistConnection(HttpConnection connection)
+    {
+        if (isLowOnResources())
+        {
+            try
+            {
+                _throttled++;
+                Socket socket=(Socket)(connection.getConnection());
+                socket.setSoTimeout(_lowResourcePersistTimeMs);
+            }
+            catch(Exception e)
+            {
+                Code.warning(e);
+            }
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if low on idle threads. 
+     */
+    public boolean isLowOnResources()
+    {
+        return
+            getThreads()==getMaxThreads() &&
+            getIdleThreads()<getMinThreads();
+    }
+    
 
 }
 

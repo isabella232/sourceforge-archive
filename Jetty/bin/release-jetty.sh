@@ -27,7 +27,7 @@ read Y
 {
     cd $HOME
     unset JETTY_HOME
-    [ -d Jetty3 ] && mv Jetty3 Jetty3.$$
+    [ -d Jetty3 ] && mv Jetty3 Jetty3.cvs
     cvs $CVS_ARGS rtag -F Jetty_$TAG Jetty3
     cvs $CVS_ARGS export -r Jetty_$TAG Jetty3
     cd $HOME/Jetty3
