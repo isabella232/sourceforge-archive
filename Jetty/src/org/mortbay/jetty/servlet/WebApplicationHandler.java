@@ -191,7 +191,6 @@ public class WebApplicationHandler extends ServletHandler
     public synchronized void addEventListener(EventListener listener)
         throws IllegalArgumentException
     {
-        boolean known= false;
 
         if ((listener instanceof HttpSessionActivationListener)
             || (listener instanceof HttpSessionAttributeListener)
@@ -201,29 +200,25 @@ public class WebApplicationHandler extends ServletHandler
             if (_sessionManager != null)
                 _sessionManager.addEventListener(listener);
             _sessionListeners= LazyList.add(_sessionListeners, listener);
-            known= true;
         }
 
         if (listener instanceof ServletRequestListener)
         {
-            known= true;
             _requestListeners= LazyList.add(_requestListeners, listener);
         }
 
         if (listener instanceof ServletRequestAttributeListener)
         {
-            known= true;
-            _requestAttributeListeners= LazyList.add(_requestAttributeListeners, listener);
+             _requestAttributeListeners= LazyList.add(_requestAttributeListeners, listener);
         }
 
         if (listener instanceof ServletContextAttributeListener)
-        {
-            known= true;
+        {            
             _contextAttributeListeners= LazyList.add(_contextAttributeListeners, listener);
         }
 
-        if (!known)
-            super.addEventListener(listener);
+        
+        super.addEventListener(listener);
     }
 
     /* ------------------------------------------------------------ */
@@ -338,6 +333,7 @@ public class WebApplicationHandler extends ServletHandler
         
         if (LazyList.size(_requestAttributeListeners) > 0 || LazyList.size(_requestListeners) > 0)
         {
+            
             if (jsr154Filter==null)
                 log.warn("Filter jsr154 not defined for RequestAttributeListeners");
             else

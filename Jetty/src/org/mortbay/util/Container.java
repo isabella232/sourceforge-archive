@@ -233,15 +233,17 @@ public abstract class Container implements LifeCycle,EventProvider,Serializable
     public void addEventListener(EventListener listener)
     	throws IllegalArgumentException
     {
-        if(log.isDebugEnabled())log.debug("addEventListener: "+listener);
+       
         if (_eventListeners==null)
             _eventListeners=new ArrayList();
         
         if (listener instanceof ComponentListener ||
             listener instanceof LifeCycleListener )
+        {
+            if(log.isDebugEnabled())log.debug("addEventListener: "+listener);      
             _eventListeners=LazyList.add(_eventListeners,listener);
-        else
-            throw new IllegalArgumentException("Not handled "+listener);
+        }
+      
     }
     
     /* ------------------------------------------------------------ */

@@ -639,15 +639,12 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
     /* ------------------------------------------------------------ */
     public synchronized void addEventListener(EventListener listener) throws IllegalArgumentException
     {
-        boolean known= false;
         if (listener instanceof ServletContextListener)
         {
-            known= true;
             _contextListeners= LazyList.add(_contextListeners, listener);
         }
-
-        if (!known)
-            super.addEventListener(listener);
+ 
+        super.addEventListener(listener);
     }
 
     /* ------------------------------------------------------------ */
