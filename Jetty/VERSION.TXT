@@ -3,6 +3,7 @@ Jetty Versions
 
  + Don't process conditional headers and ranges for includes
  + Added Log4jSink in the contrib directory.
+ + Fixed pathParam bug for ;jsessionid
 
 Jetty-4.2.4 - 4 January 2003
  + Fixed stop/start handling of servlet context

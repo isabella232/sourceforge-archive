@@ -524,7 +524,7 @@ public class HttpRequest extends HttpMessage
         if (_uri==null)
             _uri=new URI(path);
         else
-            _uri.setPath(path);
+            _uri.setURI(path);
     }
     
     /* ------------------------------------------------------------ */
