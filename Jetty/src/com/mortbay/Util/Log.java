@@ -191,6 +191,7 @@ public class Log
             }
             _sinks=null;
         }
+        _initialized=true;
     }
     
     

@@ -1,8 +1,10 @@
 Jetty Versions
 --------------
 
- + Handle empty form content without exception.
+Jetty-3.0.3 - 3 Feb 2001
  + Fixed pipelined request buffer bug.
+ + Handle empty form content without exception.
+ + Allow Log to be disabled before initialization.
  + Included new Jetty Logo
  + Implemented web.xml servlet mapping to a JSP
  + Fixed handling of directories without trailing /
