@@ -7,6 +7,8 @@ package com.mortbay.Util;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.DataInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -22,6 +24,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Collection;
+import java.util.ArrayList;
 
 
 /* ------------------------------------------------------------ */
@@ -50,8 +53,8 @@ public class KeyPairTool
     private String alias = "mykey";
     private File privateKeyFile = null;
     private File certFile = null;
-    String providerClassName
-          = "org.bouncycastle.jce.provider.BouncyCastleProvider";
+    private String providerClassName
+	= "org.bouncycastle.jce.provider.BouncyCastleProvider";
 
 
     private final String usageString
@@ -115,59 +118,18 @@ public class KeyPairTool
      *     operation.
      * @throws IOException if there are problems with file IO
      * @throws GeneralSecurityException if there are cryptographic failures.
+     * @throws Exception on other exceptions, such as classloading failures.
      */
     private void importKeyPair()
-    throws IOException, java.security.GeneralSecurityException
+	throws Exception
     {
-        FileInputStream privateKeyInputStream
-          = new FileInputStream(privateKeyFile);
-        byte[] keyBytes = new byte[(int) privateKeyFile.length()];
-        privateKeyInputStream.read(keyBytes);
-
-        // Dynamically install the Bouncy Castle provider for RSA support.
-	Provider provider;
-        try
-        {
-            Class providerClass = Class.forName(providerClassName);
-	    provider = (Provider)providerClass.newInstance();
-            Security.insertProviderAt(provider, 1);
-	    //            Security.addProvider(provider);
-        }
-        catch (Exception e)
-        {
-            System.out.println("Exception: " + e.getMessage());
-            e.printStackTrace();
-
-            System.out.println("Unable to load provider: "
-                               + providerClassName);
-            
-            usage();
-	    return;
-        }
-
-        PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(keyBytes);
-        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-        PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
-
-        System.out.println("Loaded the private key...");
-
+	// Load the private key
+        PrivateKey privateKey = loadPrivateKey(privateKeyFile);
+	
         // Import the cert...
-        FileInputStream certInputStream
-          = new FileInputStream(certFile);
+	Certificate[] certChain = loadCertChain(certFile);
 
-        CertificateFactory certificateFactory
-          = CertificateFactory.getInstance("X509");
-        Collection collection
-          = certificateFactory.generateCertificates(certInputStream);
-        Certificate[] certChain = (Certificate[])collection.toArray();
-
-        System.out.println("Loaded the cert chain... " + certChain.length);
-
-        //--------------------------------------------------
-        // Dynamically deinstall the RSA provider
-	Security.removeProvider(provider.getName());
-
-        // Load the KeyStore
+        // Load any existing KeyStore
         if (keyPassword == null)
             keyPassword = keyStorePassword;
 
@@ -175,14 +137,14 @@ public class KeyPairTool
         InputStream keyStoreStream = null;
         try
         {
-             keyStoreStream = new FileInputStream(keyStoreFile);
-             System.out.println("Will load " + keyStoreType
-				+ " keystore: " + keyStoreFile);
+	    keyStoreStream = new FileInputStream(keyStoreFile);
+	    System.out.println("Will load " + keyStoreType
+			       + " keystore: " + keyStoreFile);
         }
         catch (FileNotFoundException e)
         {
             // That's OK, we'll just create a new one
-            System.out.println("Will create keystore: " + keyStoreFile);
+            System.out.println("Creating keystore: " + keyStoreFile);
         }
 
         // The load method can accept a null keyStoreStream.
@@ -200,7 +162,7 @@ public class KeyPairTool
                              keyPassword.getCharArray(),
                              certChain);
 
-        // To save the KeyStore to disk
+        // Save the KeyStore
         FileOutputStream keyStoreOut = new FileOutputStream(keyStoreFile);
         keyStore.store(keyStoreOut,
                        keyStorePassword.getCharArray());
@@ -208,11 +170,90 @@ public class KeyPairTool
 
         System.out.println("Keys have been written to keystore");
     }
- 
+	
+
+    /**
+     * Load the chain of certificates from the given File
+     * @param privateKeyFile String name of file to load the key from
+     * @return PrivateKey loaded from the file
+     * @throws Exception if there are problems with loading the key.
+     */
+    private Certificate[] loadCertChain(File certFile)
+	throws Exception
+    {
+        FileInputStream fis = new FileInputStream(certFile);
+	DataInputStream dis = new DataInputStream(fis);
+	byte[] bytes = new byte[dis.available()];
+	dis.readFully(bytes);
+	ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+	
+        CertificateFactory certificateFactory
+	    = CertificateFactory.getInstance("X509");
+
+	ArrayList chain = new ArrayList();
+	while (bais.available() > 0) {
+	    Certificate cert
+		= certificateFactory.generateCertificate(bais);
+	    // System.out.println(cert.toString());
+	    chain.add(cert);
+	}
+
+        Certificate[] certChain
+	    = (Certificate[])chain.toArray(new Certificate[0]);
+
+        System.out.println("Loaded the cert chain. Depth = "
+			   + certChain.length);
+	return certChain;
+    }
+    
+    /**
+     * Load an RSA private key from the given File
+     * @param privateKeyFile String name of file to load the key from
+     * @return PrivateKey loaded from the file
+     * @throws Exception if there are problems with loading the key.
+     */
+    private PrivateKey loadPrivateKey(File privateKeyFile)
+	throws Exception
+    {
+	// Load the key file.
+	System.out.println("Loading private key from "
+			   + privateKeyFile
+			   + ", using " + providerClassName
+			   + " as the private key loading provider");
+        FileInputStream privateKeyInputStream
+	    = new FileInputStream(privateKeyFile);
+        byte[] keyBytes = new byte[(int) privateKeyFile.length()];
+        privateKeyInputStream.read(keyBytes);
+	privateKeyInputStream.close();
+	
+        // Dynamically register the Bouncy Castle provider for RSA
+	// support.
+	Class providerClass = Class.forName(providerClassName);
+	Provider provider = (Provider)providerClass.newInstance();
+	Security.insertProviderAt(provider, 1);
+	try {
+	    // Load the private key
+	    PKCS8EncodedKeySpec privateKeySpec
+		= new PKCS8EncodedKeySpec(keyBytes);
+	    KeyFactory keyFactory
+		= KeyFactory.getInstance("RSA");
+	    PrivateKey privateKey
+		= keyFactory.generatePrivate(privateKeySpec);
+	    
+	    System.out.println("Loaded " + privateKey.getAlgorithm()
+			       + " " + privateKey.getFormat()
+			       + " private key.");
+	    return privateKey;
+	} finally {
+	    // Dynamically deinstall the RSA provider 
+	    Security.removeProvider(provider.getName());
+	}
+    }
+    
     /**
      * Show a usage message.
      */
-    void usage()
+    private void usage()
     {
         System.out.println(usageString);
         System.exit(23);
@@ -224,7 +265,7 @@ public class KeyPairTool
      * <p> Class variables are populated from the command line arguments
      * @param args Array of Strings from the command line.
      */
-    void loadParameters(String[] args)
+    private void loadParameters(String[] args)
     {
         for (int i = 0; (i < args.length) && args[i].startsWith("-"); i++)
         {
@@ -260,13 +301,3 @@ public class KeyPairTool
                                    keyStorePassword.toString());
     }
 }
-
-
-
-
-
-
-
-
-
-
