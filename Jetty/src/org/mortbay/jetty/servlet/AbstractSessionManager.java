@@ -73,14 +73,12 @@ public abstract class AbstractSessionManager implements SessionManager
     /* global Map of ID to session */
     protected static MultiMap __allSessions=new MultiMap();  
     
-    
     /* ------------------------------------------------------------ */
     // Setting of max inactive interval for new sessions
     // -1 means no timeout
     private int _dftMaxIdleSecs = -1;
     private int _scavengePeriodMs = 30000;
     private String _workerName ;
-    private boolean _useRequestedId=false;
     protected transient ArrayList _sessionListeners=new ArrayList();
     protected transient ArrayList _sessionAttributeListeners=new ArrayList();
     protected transient Map _sessions;
@@ -88,6 +86,7 @@ public abstract class AbstractSessionManager implements SessionManager
     protected transient ServletHandler _handler;
     protected int _minSessions = 0;
     protected int _maxSessions = 0;
+    protected boolean _crossContextSessionIDs=false;
     protected boolean _secureCookies=false;
     protected boolean _httpOnly=false;
     protected boolean _invalidateGlobal=true;
@@ -106,30 +105,52 @@ public abstract class AbstractSessionManager implements SessionManager
         _random=random;
     }
     
+    
+    
     /* ------------------------------------------------------------ */
     /** 
      * @return True if requested session ID are first considered for new
+     * @deprecated use getCrossContextSessionIDs
      * session IDs
      */
     public boolean getUseRequestedId()
     {
-        return _useRequestedId;
+        return _crossContextSessionIDs;
     }
     
     /* ------------------------------------------------------------ */
     /** Set Use Requested ID.
-     * This option activates a mode where a requested session ID can be used to create a 
-     * new session. This facilitates the sharing of session cookies when cross context
-     * dispatches use sessions.   Requested session IDs are only used if they have not
-     * been used before by this context. This requires a map of all known session IDs to
-     * be kept, which can consume memory.
-     * 
+     * @deprectated use setCrossContextSessionIDs
      * @param useRequestedId True if requested session ID are first considered for new
      * session IDs
      */
     public void setUseRequestedId(boolean useRequestedId)
     {   
-        _useRequestedId = useRequestedId;
+        _crossContextSessionIDs = useRequestedId;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if cross context session IDs are first considered for new
+     * session IDs
+     */
+    public boolean getCrossContextSessionIDs()
+    {
+        return _crossContextSessionIDs;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set Cross Context sessions IDs
+     * This option activates a mode where a requested session ID can be used to create a 
+     * new session. This facilitates the sharing of session cookies when cross context
+     * dispatches use sessions.   
+     * 
+     * @param useRequestedId True if cross context session ID are first considered for new
+     * session IDs
+     */
+    public void setCrossContextSessionIDs(boolean useRequestedId)
+    {   
+        _crossContextSessionIDs = useRequestedId;
     }
     
     /* ------------------------------------------------------------ */
@@ -187,7 +208,7 @@ public abstract class AbstractSessionManager implements SessionManager
             // A requested session ID can only be used if it is in the global map of
             // ID but not in this contexts map.  Ie it is an ID in use by another context
             // in this server and thus we are doing a cross context dispatch.
-            if (_useRequestedId)
+            if (_crossContextSessionIDs)
             {
                 String requested_id=(String)request.getAttribute(__NEW_SESSION_ID);
                 if (requested_id==null)
@@ -242,7 +263,7 @@ public abstract class AbstractSessionManager implements SessionManager
             ((HttpSessionListener)_sessionListeners.get(i))
             .sessionCreated(event);
         
-        if (getUseRequestedId())
+        if (getCrossContextSessionIDs())
             request.setAttribute(__NEW_SESSION_ID, session.getId());
         return session;
     }
@@ -259,7 +280,7 @@ public abstract class AbstractSessionManager implements SessionManager
             String maxAge=_handler.getServletContext().getInitParameter(SessionManager.__MaxAge);
             String path=_handler.getServletContext().getInitParameter(SessionManager.__SessionPath);
             if (path==null)
-                path=getUseRequestedId()?"/":_handler.getHttpContext().getContextPath();
+                path=getCrossContextSessionIDs()?"/":_handler.getHttpContext().getContextPath();
             if (path==null || path.length()==0)
                 path="/";
             

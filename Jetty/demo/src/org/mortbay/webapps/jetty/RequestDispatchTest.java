@@ -167,6 +167,33 @@ public class RequestDispatchTest extends HttpServlet
                 pout.flush();
             }
         }
+        else if (info.startsWith("/forwardSC/"))
+        {
+            sreq.getSession(true);
+            info= info.substring(10);
+            if (info.indexOf('?') < 0)
+                info += "?Dispatch=forward";
+            else
+                info += "&Dispatch=forward";
+            
+            String cpath= info.substring(0, info.indexOf('/', 1));
+            info= info.substring(cpath.length());
+            
+            ServletContext context= getServletContext().getContext(cpath);
+            RequestDispatcher dispatch= context.getRequestDispatcher(info);
+            
+            if (dispatch != null)
+            {
+                dispatch.forward(sreq, sres);
+            }
+            else
+            {
+                sres.setContentType("text/html");
+                PrintWriter pout= sres.getWriter();
+                pout.write("<H1>No dispatcher for: " + cpath + "/" + info + "</H1><HR>");
+                pout.flush();
+            }
+        }
         else if (info.startsWith("/includeN/"))
         {
             sres.setContentType("text/html");
@@ -225,9 +252,9 @@ public class RequestDispatchTest extends HttpServlet
                     + prefix
                     + "/includeN/name\n"
                     + prefix
-                    + "/forwardN/name\n"
+                    + "/forwardC/context/path\n"
                     + prefix
-                    + "/forwardC/context/path</PRE>");
+                    + "/forwardSC/context/path</PRE>");
             pout.flush();
         }
     }
