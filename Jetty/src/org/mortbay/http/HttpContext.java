@@ -267,18 +267,55 @@ public class HttpContext implements LifeCycle
      * This method only returns the paths that have been set for this
      * context and does not include any paths from a parent or the
      * system classloader.
-     * Note that this may not be a legal javac classpath.  A file only
-     * classpath can be obtained from ContextLoader.getFileClassPath().
+     * Note that this may not be a legal javac classpath. 
      * @return a coma or ';' separated list of class
      * resources. These may be jar files, directories or URLs to jars
      * or directories.
-     * @see org.mortbay.jetty.servlet.WebApplicationContext.getFileClassPath();
+     * @see getFileClassPath();
      */
     public String getClassPath()
     {
         return _classPath;
     }
-     
+
+    /* ------------------------------------------------------------ */
+    /** Get the file classpath of the context.
+     * This method makes a best effort to return a complete file
+     * classpath for the context.  The default implementation returns
+     * <PRE>
+     *  ((ContextLoader)getClassLoader()).getFileClassPath()+
+     *       System.getProperty("path.separator")+
+     *       System.getProperty("java.class.path");
+     * </PRE>
+     * The default implementation requires the classloader to be
+     * initialized before it is called. It will not include any
+     * classpaths used by a non-system parent classloader.
+     * <P>
+     * The main user of this method is the start() method.  If a JSP
+     * servlet is detected, the string returned from this method is
+     * used as the default value for the "classpath" init parameter.
+     * <P>
+     * Derivations may replace this method with a more accurate or
+     * specialized version.
+     * @return Path of files and directories for loading classes.
+     * @exception IllegalStateException HttpContext.initClassLoader
+     * has not been called.
+     */
+    public String getFileClassPath()
+        throws IllegalStateException
+    {
+        ClassLoader loader = getClassLoader();
+        if (loader==null)
+            throw new IllegalStateException("Context classloader not initialized");
+        String fileClassPath =
+            ((loader instanceof ContextLoader)
+             ? ((ContextLoader)loader).getFileClassPath()
+             : getClassPath())+
+            System.getProperty("path.separator")+
+            System.getProperty("java.class.path");
+        return fileClassPath;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Sets the class path for the context.
      * A class path is only required for a context if it uses classes
@@ -473,6 +510,33 @@ public class HttpContext implements LifeCycle
     {
         _tmpDir=file;
         setAttribute("javax.servlet.context.tempdir",_tmpDir);
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /** Set ClassLoader.
+     * @param loader The loader to be used by this context.
+     */
+    public synchronized void setClassLoader(ClassLoader loader)
+    {
+        if (isStarted())
+            throw new IllegalStateException("Started");
+        _loader=loader;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set Parent ClassLoader.
+     * By default the parent loader is the thread context classloader
+     * of the thread that calls initClassLoader.  If setClassLoader is
+     * called, then the parent is ignored.
+     * @param loader The class loader to use for the parent loader of
+     * the context classloader.
+     */
+    public synchronized void setParentClassLoader(ClassLoader loader)
+    {
+        if (isStarted())
+            throw new IllegalStateException("Started");
+        _parent=loader;
     }
     
     /* ------------------------------------------------------------ */

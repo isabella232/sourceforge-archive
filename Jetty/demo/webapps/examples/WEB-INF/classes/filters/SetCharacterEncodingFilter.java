@@ -76,14 +76,29 @@ import javax.servlet.UnavailableException;
 
 
 /**
- * Example filter that unconditionally sets the character encoding to be used
- * in parsing the incoming request to a value specified by the
- * <strong>encoding</string> filter initialization parameter in the web app
- * deployment descriptor (</code>/WEB-INF/web.xml</code>).  This filter could
- * easily be extended to be more intelligent about what character encoding to
- * set, based on characteristics of the incoming request (such as the values
- * of the <code>Accept-Language</code> and <code>User-Agent</code> headers,
- * or a value stashed in the current user's session).
+ * <p>Example filter that sets the character encoding to be used in parsing the
+ * incoming request, either unconditionally or only if the client did not
+ * specify a character encoding.  Configuration of this filter is based on
+ * the following initialization parameters:</p>
+ * <ul>
+ * <li><strong>encoding</strong> - The character encoding to be configured
+ *     for this request, either conditionally or unconditionally based on
+ *     the <code>ignore</code> initialization parameter.  This parameter
+ *     is required, so there is no default.</li>
+ * <li><strong>ignore</strong> - If set to "true", any character encoding
+ *     specified by the client is ignored, and the value returned by the
+ *     <code>selectEncoding()</code> method is set.  If set to "false,
+ *     <code>selectEncoding()</code> is called <strong>only</strong> if the
+ *     client has not already specified an encoding.  By default, this
+ *     parameter is set to "true".</li>
+ * </ul>
+ *
+ * <p>Although this filter can be used unchanged, it is also easy to
+ * subclass it and make the <code>selectEncoding()</code> method more
+ * intelligent about what encoding to choose, based on characteristics of
+ * the incoming request (such as the values of the <code>Accept-Language</code>
+ * and <code>User-Agent</code> headers, or a value stashed in the current
+ * user's session.</p>
  *
  * @author Craig McClanahan
  * @version $Revision$ $Date$
@@ -107,6 +122,12 @@ public class SetCharacterEncodingFilter implements Filter {
      * is null, this filter instance is not currently configured.
      */
     protected FilterConfig filterConfig = null;
+
+
+    /**
+     * Should a character encoding specified by the client be ignored?
+     */
+    protected boolean ignore = true;
 
 
     // --------------------------------------------------------- Public Methods
@@ -138,10 +159,12 @@ public class SetCharacterEncodingFilter implements Filter {
                          FilterChain chain)
 	throws IOException, ServletException {
 
-        // Select and set (if needed) the character encoding to be used
-        String encoding = selectEncoding(request);
-        if (encoding != null)
-            request.setCharacterEncoding(encoding);
+        // Conditionally select and set the character encoding to be used
+        if (ignore || (request.getCharacterEncoding() == null)) {
+            String encoding = selectEncoding(request);
+            if (encoding != null)
+                request.setCharacterEncoding(encoding);
+        }
 
 	// Pass control on to the next filter
         chain.doFilter(request, response);
@@ -158,6 +181,15 @@ public class SetCharacterEncodingFilter implements Filter {
 
 	this.filterConfig = filterConfig;
         this.encoding = filterConfig.getInitParameter("encoding");
+        String value = filterConfig.getInitParameter("ignore");
+        if (value == null)
+            this.ignore = true;
+        else if (value.equalsIgnoreCase("true"))
+            this.ignore = true;
+        else if (value.equalsIgnoreCase("yes"))
+            this.ignore = true;
+        else
+            this.ignore = false;
 
     }
 
@@ -185,4 +217,3 @@ public class SetCharacterEncodingFilter implements Filter {
 
 
 }
-

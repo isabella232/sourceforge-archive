@@ -339,7 +339,7 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     public String getPathInfo()
     {
-        if (_pathInfo==null)
+        if (_servletPath==null)
             return _pathInContext;
         return _pathInfo;
     }

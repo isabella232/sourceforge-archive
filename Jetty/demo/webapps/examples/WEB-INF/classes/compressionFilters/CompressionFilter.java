@@ -167,8 +167,7 @@ public class CompressionFilter implements Filter{
             Enumeration e =
                 ((HttpServletRequest)request).getHeaders("Accept-Encoding");
             while (e.hasMoreElements()) {
-                String name = (String)e.nextElement();
-                if (name.indexOf("gzip") != -1) {
+                String name = (String)e.nextElement();                if (name.indexOf("gzip") != -1) {
                     if (debug > 0) {
                         System.out.println("supports compression");
                     }

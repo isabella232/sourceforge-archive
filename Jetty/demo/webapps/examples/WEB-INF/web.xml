@@ -44,21 +44,18 @@
 
         <init-param>
           <param-name>compressionThreshold</param-name>
-          <param-value>10</param-value>
+          <param-value>1</param-value>
         </init-param>
         <init-param>
           <param-name>debug</param-name>
-          <param-value>0</param-value>
+          <param-value>1</param-value>
         </init-param>
     </filter>
 
     <!-- Define filter mappings for the defined filters -->
     <filter-mapping>
         <filter-name>Servlet Mapped Filter</filter-name>
-	<!-- not in Jetty, use snoop instead 
-             <servlet-name>invoker</servlet-name> 
-        -->
-	<servlet-name>snoop</servlet-name>
+	<servlet-name>invoker</servlet-name>
     </filter-mapping>
     <filter-mapping>
         <filter-name>Path Mapped Filter</filter-name>
@@ -75,12 +72,10 @@
     </filter-mapping>
 -->
 
-<!--
     <filter-mapping>
       <filter-name>Compression Filter</filter-name>
-      <url-pattern>/CompressionTest</url-pattern>
+      <url-pattern>/CompressionTest/*</url-pattern>
     </filter-mapping>
--->
 
 <!--
     <filter-mapping>
@@ -99,12 +94,10 @@
 
     <!-- Define servlets that are included in the example application -->
 
-    <!-- Not demonstrated in Jetty
-    <servlet>
+    <!--<servlet>
         <servlet-name>SendMailServlet</servlet-name>
         <servlet-class>SendMailServlet</servlet-class>
-    </servlet>
-    -->
+    </servlet>-->
 
     <servlet>
         <servlet-name>
@@ -152,19 +145,19 @@
         </url-pattern>
     </servlet-mapping>
 
-    <!-- Not demonstrated in Jetty
+<!--
     <servlet-mapping>
         <servlet-name>SendMailServlet</servlet-name>
         <url-pattern>/SendMailServlet</url-pattern>
     </servlet-mapping>
-    -->
+-->
 
     <servlet-mapping>
         <servlet-name>
             snoop
         </servlet-name>
         <url-pattern>
-            /snoop/*
+            /snoop
         </url-pattern>
     </servlet-mapping>
     <servlet-mapping>

@@ -34,7 +34,6 @@ public class HelloWorldExample extends HttpServlet {
 	    out.println("<title>" + title + "</title>");
         out.println("</head>");
         out.println("<body bgcolor=\"white\">");
-        out.println("<body>");
 
 	// note that all links are created to be relative. this
 	// ensures that we can move the web application that this

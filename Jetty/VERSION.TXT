@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Added setClassLoader and moved getFileClassPath to HttpContext
+ + Updated examples webapp from tomcat
  + getRequestURI returns encoded path
  + Servlet request destined for static content returns paths as default servlet
 

@@ -496,44 +496,6 @@ public class WebApplicationContext extends ServletHttpContext
     }
 
     /* ------------------------------------------------------------ */
-    /** Get the complete file classpath of webapplication.
-     * This method makes a best effort to return a complete file
-     * classpath for the context.  The default implementation returns
-     * <PRE>
-     *  ((ContextLoader)getClassLoader()).getFileClassPath()+
-     *       System.getProperty("path.separator")+
-     *       System.getProperty("java.class.path");
-     * </PRE>
-     * The default implementation requires the classloader to be
-     * initialized before it is called. It will not include any
-     * classpaths used by a non-system parent classloader.
-     * <P>
-     * The main user of this method is the start() method.  If a JSP
-     * servlet is detected, the string returned from this method is
-     * used as the default value for the "classpath" init parameter.
-     * <P>
-     * Derivations may replace this method with a more accurate or
-     * specialized version.
-     * @return Path of files and directories for loading classes.
-     * @exception IllegalStateException HttpContext.initClassLoader
-     * has not been called.
-     */
-    public String getFileClassPath()
-        throws IllegalStateException
-    {
-        ClassLoader loader = getClassLoader();
-        if (loader==null)
-            throw new IllegalStateException("Context classloader not initialized");
-        String fileClassPath =
-            ((loader instanceof ContextLoader)
-             ? ((ContextLoader)loader).getFileClassPath()
-             : getClassPath())+
-            System.getProperty("path.separator")+
-            System.getProperty("java.class.path");
-        return fileClassPath;
-    }
-    
-    /* ------------------------------------------------------------ */
     public synchronized void addEventListener(EventListener listener)
         throws IllegalArgumentException
     {

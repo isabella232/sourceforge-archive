@@ -48,6 +48,14 @@ public class JndiServlet
         }
         
         try {
+            Object value = ctx.lookup("java:/comp/env/linkToGlobalResource");
+            out.println("Resource link test : ");
+            out.println("Link value : " + value);
+        } catch (NamingException e) {
+            out.println("JNDI lookup failed : " + e);
+        }
+        
+        try {
             Context envCtx = (Context) ctx.lookup("java:/comp/env/");
             out.println("list() on /comp/env Context : ");
             NamingEnumeration enum = ctx.list("java:/comp/env/");

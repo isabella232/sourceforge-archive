@@ -30,7 +30,6 @@ public  class DemoFilter implements Filter
                          FilterChain chain)
 	throws IOException, ServletException
     {
-        System.err.println(request);
         Code.debug("doFilter:",request);
         chain.doFilter(request, response);
     }

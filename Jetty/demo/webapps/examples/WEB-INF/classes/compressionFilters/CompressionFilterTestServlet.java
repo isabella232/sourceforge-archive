@@ -86,8 +86,7 @@ public class CompressionFilterTestServlet extends HttpServlet {
 
         Enumeration e = ((HttpServletRequest)request).getHeaders("Accept-Encoding");
         while (e.hasMoreElements()) {
-            String name = (String)e.nextElement();
-            out.println(name);
+            String name = (String)e.nextElement();            out.println(name);
             if (name.indexOf("gzip") != -1) {
                 out.println("gzip supported -- able to compress");
             }
