@@ -172,7 +172,8 @@ public class Manager
       }
       boolean isDaemon=true;
       _scavenger=new Timer(isDaemon);
-      _scavenger.scheduleAtFixedRate(new Scavenger() ,0,_localScavengePeriod*1000);
+      long delay=_localScavengePeriod*1000;
+      _scavenger.scheduleAtFixedRate(new Scavenger() ,delay,delay);
       _started=true;
     }
 
