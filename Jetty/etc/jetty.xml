@@ -100,6 +100,7 @@
   <!-- + Use the webdefault.xml resource for the defaults descriptor   -->
   <!-- + Upack the war file                                            -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <Set name="rootWebApp">rXoot</Set>
   <Call name="addWebApplications">
     <Arg></Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/webapps/</Arg>
@@ -108,16 +109,15 @@
   </Call>
 
 
-
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Add and configure a specific web application                    -->
   <!-- + Set Unpack WAR files                                          -->
   <!-- + Set Default Descriptor.  Resource, file or URL                -->
   <!-- + Set Virtual Hosts. A Null host or empty array means all hosts -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- UNCOMMENT TO ACTIVATE 
+  <!-- UNCOMMENT TO ACTIVATE
   <Call name="addWebApplication">
-    <Arg>/</Arg>
+    <Arg>/context</Arg>
     <Arg>./webapps/root</Arg>
 
     <Set name="extractWAR">false</Set> 
@@ -134,7 +134,6 @@
     </Set>
   </Call>
   -->
-
 
   <!-- =============================================================== -->
   <!-- Configure the Request Log                                       -->
