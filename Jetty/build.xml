@@ -69,6 +69,7 @@ Other targets:
     <pathelement path="${jsse.jar}" />
     <pathelement path="${jaxp.jar}" />
     <pathelement path="${xml.jar}" />
+    <pathelement path="${junit.jar}" />
   </path>
 
   <!-- ==================================================================== -->
