@@ -154,8 +154,6 @@ public class HttpHeader
 
         if (value==null)
         {
-	    System.err.println("REMOVE "+key);
-	    new Throwable().printStackTrace();
             keyMap.remove(lkey);
             keys.removeElement(key);
             keys.removeElement(lkey);
@@ -262,8 +260,6 @@ public class HttpHeader
                 continue;
             }
             
-	    System.err.println(lkey);
-	    
             // Handle repeated headers
             String existing=(String)keyMap.get(lkey);
             if (existing!=null)
@@ -292,9 +288,9 @@ public class HttpHeader
             }
         }
 
-	dump();
     }
 
+    /* -------------------------------------------------------------- */
     public void dump()
     {
 	    System.err.println(keyMap);
