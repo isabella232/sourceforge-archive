@@ -782,7 +782,9 @@ public class HandlerContext implements LifeCycle
                                   String role)
     {
         SecurityHandler sh=getSecurityHandler();
-        sh.addSecurityConstraint(pathSpec,new SecurityConstraint(role,role));
+        SecurityConstraint sc = new SecurityConstraint(role,role);
+        sc.setAuthenticated(true);
+        sh.addSecurityConstraint(pathSpec,sc);
     }
 
     /* ------------------------------------------------------------ */
