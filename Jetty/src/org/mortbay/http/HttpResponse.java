@@ -16,6 +16,7 @@ import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.Code;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
+import org.mortbay.util.URI;
 
 
 /* ------------------------------------------------------------ */
@@ -339,6 +340,8 @@ public class HttpResponse extends HttpMessage
             // Handle error page
             if (error_page!=null)
             {
+                if (!error_page.startsWith("/"))
+                    error_page="/"+error_page;
                 if (request.getAttribute("javax.servlet.error.status_code")==null)
                 {
                     // Clear old wrappers
@@ -351,9 +354,11 @@ public class HttpResponse extends HttpMessage
                     request.setAttribute("javax.servlet.error.status_code",code_integer);
                     request.setAttribute("javax.servlet.error.message",message);
 
-                    // Change method to GET
+                    // Change URI and the method to GET
                     request.setState(HttpMessage.__MSG_EDITABLE);
                     request.setMethod(HttpRequest.__GET);
+                    request.getURI().setPath
+                        (URI.addPaths(_httpContext.getContextPath(),error_page));
                     request.setState(HttpMessage.__MSG_RECEIVED);
                     // Do a forward to the error page resource.
                     setContentType(HttpFields.__TextHtml);

@@ -40,7 +40,6 @@
   <property name="webapps"        value="${basedir}/webapps"/>
   <property name="demo.webapps"   value="${basedir}/demo/webapps"/>
   <property name="demo.src"       value="${basedir}/demo/src"/>
-  <property name="launcher"       value="${basedir}/launcher"/>
   <property name="test"           value="${basedir}/test"/>
   <property name="test.src"       value="${test}/src"/>
   <property name="test.classes"   value="${test}/classes" />
@@ -143,7 +142,6 @@
     <delete dir="${classes1.4}" quiet="true"/>
     <delete dir="${test.classes}" quiet="true"/>
     <delete file="${mini.http.jar}" quiet="true"/>
-    <ant antfile="${launcher}/build.xml" inheritAll="false" target="tidy"/>
     <ant antfile="${test}/build.xml" inheritAll="false" target="tidy"/>
   
   </target>
@@ -180,7 +178,6 @@
         <include name="*.dtd"/>
       </fileset>
     </delete>
-    <ant antfile="${launcher}/build.xml" inheritAll="false" target="clean"/>
     <ant antfile="${test}/build.xml" inheritAll="false" target="clean"/>
   </target>
 
@@ -429,11 +426,6 @@
     </javadoc>
   </target>
 
-  <!-- ==================================================================== -->
-  <target name="launcher" depends="jars"
-   description="Build the launcher">
-    <ant antfile="${launcher}/build.xml" inheritAll="false" target="jar"/>
-  </target>
 
   <!-- ==================================================================== -->
   <target name="test" depends="jars"
@@ -442,7 +434,7 @@
   </target>
 
   <!-- ==================================================================== -->
-  <target name="all" depends="prepare,jars,launcher,webapps,javadoc,test"
+  <target name="all" depends="prepare,jars,webapps,javadoc,test"
    description="Build everything"/>
 
   <!-- ==================================================================== -->

@@ -113,15 +113,15 @@
 
   <error-page>
     <error-code>401</error-code>
-    <location>error401.html</location>
+    <location>/error401.html</location>
   </error-page>
   <error-page>
     <error-code>403</error-code>
-    <location>error403.html</location>
+    <location>/error403.html</location>
   </error-page>
   <error-page>
     <error-code>404</error-code>
-    <location>error404.html</location>
+    <location>/error404.html</location>
   </error-page>
   <error-page>
     <exception-type>
