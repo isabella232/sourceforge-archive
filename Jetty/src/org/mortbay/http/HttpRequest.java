@@ -102,6 +102,7 @@ public class HttpRequest extends HttpMessage
     private boolean _handled;
     private Cookie[] _cookies;
     private long _timeStamp;
+    private String _timeStampStr;
     private UserPrincipal _userPrincipal;
     
     /* ------------------------------------------------------------ */
@@ -119,6 +120,17 @@ public class HttpRequest extends HttpMessage
         super(connection);
     }
 
+    /* ------------------------------------------------------------ */
+    /** Get Request TimeStamp
+     * @return The time that the request was received.
+     */
+    public String getTimeStampStr()
+    {
+        if (_timeStampStr==null && _timeStamp>0)
+            _timeStampStr=HttpFields.__dateCache.format(_timeStamp);
+        return _timeStampStr;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Get Request TimeStamp
      * @return The time that the request was received.
@@ -1005,6 +1017,7 @@ public class HttpRequest extends HttpMessage
         _handled=false;
         _cookies=null;
         _timeStamp=0;
+        _timeStampStr=null;
         _userPrincipal=null;
         super.recycle(connection);
     }
@@ -1017,7 +1030,12 @@ public class HttpRequest extends HttpMessage
     {
         _method=null;
         _uri=null;
-        _version=null;
+        _host=null;
+        _hostPort=null;
+        _te=null;
+        _cookies=null;
+        _timeStampStr=null;
+        _userPrincipal=null;
         if (_attributes!=null)
             _attributes.clear();
         super.destroy();

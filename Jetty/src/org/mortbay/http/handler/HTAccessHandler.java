@@ -80,29 +80,20 @@ public class HTAccessHandler extends NullHandler
         
         try
         {
-            // Do we have resources?
-            Resource baseResource=getHttpContext().getBaseResource();
-            if (baseResource==null)
-                return;
-            Resource reqResource = baseResource.addPath(pathInContext);
-            Resource resource = reqResource;
-
-            // Work out search start
-            String directory=pathInContext;
-            if (!resource.isDirectory())
-                directory=URI.parentPath(pathInContext);
-            else if (!pathInContext.endsWith("/"))
-                directory+="/";
+            Resource resource = null;
+            String directory=pathInContext.endsWith("/")
+                ?pathInContext:
+                URI.parentPath(pathInContext);
         
             // Look for htAccess resource
             while (directory!=null)
             {
-                resource=baseResource.addPath(directory+_accessFile);
+                String htPath=directory+_accessFile;
+                resource=getHttpContext().getResource(htPath);
                 Code.debug("directory=",directory," resource=",resource);
                 
-                if (resource.exists() && !resource.isDirectory())
+                if (resource!=null && resource.exists() && !resource.isDirectory())
                     break;
-
                 resource=null;
                 directory=URI.parentPath(directory);  
             }

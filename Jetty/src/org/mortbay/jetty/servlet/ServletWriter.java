@@ -95,11 +95,42 @@ class ServletWriter extends PrintWriter
     public void println(long p)   {written=true;super.println(p);}
     public void println(Object p) {written=true;super.println(p);}
     public void println(String p) {written=true;super.println(p);}
-    public void write(int c)      {written=true;super.write(c);}
-    public void write(char[] cbuf, int off, int len){written=true;super.write(cbuf,off,len);}
-    public void write(char[] cbuf){written=true;super.write(cbuf);}
-    public void write(String s, int off, int len){written=true;super.write(s,off,len);}
-    public void write(String s)   {written=true;super.write(s);}
+
+    
+    public void write(int c)
+    {
+        written=true;
+        try{out.write(c);}
+        catch (IOException e){Code.ignore(e);setError();}
+    }
+    
+    public void write(char[] cbuf, int off, int len)
+    {
+        written=true;
+        try{out.write(cbuf,off,len);}
+        catch (IOException e){Code.ignore(e);setError();}
+    }
+    
+    public void write(char[] cbuf)
+    {
+        written=true;
+        try{out.write(cbuf,0,cbuf.length);}
+        catch (IOException e){Code.ignore(e);setError();}
+    }
+
+    public void write(String s, int off, int len)
+    {
+        written=true;
+        try{out.write(s,off,len);}
+        catch (IOException e){Code.ignore(e);setError();}
+    }
+
+    public void write(String s)
+    {
+        written=true;
+        try{out.write(s,0,s.length());}
+        catch (IOException e){Code.ignore(e);setError();}
+    }
 }
 
 

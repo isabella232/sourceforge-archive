@@ -56,7 +56,9 @@ public class HttpConnection
     private int _dotVersion;
     private boolean _outputSetup;
     private Thread _handlingThread;
-    private InetAddress _remoteAddr;
+    
+    private InetAddress _remoteInetAddress;
+    private String _remoteAddr;
     private String _remoteHost;
     private HttpServer _httpServer;
     private Object _connection;
@@ -88,7 +90,7 @@ public class HttpConnection
     {
         Code.debug("new HttpConnection: ",connection);
         _listener=listener;
-        _remoteAddr=remoteAddr;
+        _remoteInetAddress=remoteAddr;
         int bufferSize=listener==null?4096:listener.getBufferSize();
         _inputStream=new ChunkableInputStream(in,bufferSize);
         _outputStream=new ChunkableOutputStream(out,bufferSize);
@@ -117,7 +119,7 @@ public class HttpConnection
      */
     public InetAddress getRemoteInetAddress()
     {
-        return _remoteAddr;
+        return _remoteInetAddress;
     }
 
     /* ------------------------------------------------------------ */
@@ -126,7 +128,13 @@ public class HttpConnection
      */
     public String getRemoteAddr()
     {
-        return _remoteAddr.getHostAddress();
+        if (_remoteAddr==null)
+        {
+            if (_remoteInetAddress==null)
+                return "127.0.0.1";
+            _remoteAddr=_remoteInetAddress.getHostAddress();
+        }
+        return _remoteAddr;
     }
     
     /* ------------------------------------------------------------ */
@@ -137,9 +145,9 @@ public class HttpConnection
     {
         if (_remoteHost==null)
         {
-            if (_remoteAddr==null)
+            if (_remoteInetAddress==null)
                 return "localhost";
-            _remoteHost=_remoteAddr.getHostName();
+            _remoteHost=_remoteInetAddress.getHostName();
         }
         return _remoteHost;
     }
@@ -879,7 +887,7 @@ public class HttpConnection
             // Common fields on the response
             // XXX could be done faster?
             _response.setVersion(HttpMessage.__HTTP_1_1);
-            _response.setDateField(HttpFields.__Date,_request.getTimeStamp());
+            _response.setField(HttpFields.__Date,_request.getTimeStampStr());
             _response.setField(HttpFields.__Server,Version.__VersionDetail);
             _response.setField(HttpFields.__ServletEngine,Version.__ServletEngine);
             

@@ -187,6 +187,7 @@ Other targets:
   <target name="classes1.4" depends="prepare" if="jdk1.4.available"
    description="Compile the java 1.4 classes" >
     <delete file="${classes}/org/mortbay/util/Frame.class" quiet="true"/>
+    <delete file="${classes}/org/mortbay/util/FileResource.class" quiet="true"/>
     <copy todir="${classes}">
       <fileset dir="${src1.4}">
         <include name="**/defaultManifest.mf" />
@@ -214,7 +215,7 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
-  <target name="jetty.jar" depends="classes,classes1.4,servlet.jar">
+  <target name="jetty.jar" depends="classes1.4,classes,servlet.jar">
     <delete file="${mini.http.jar}" quiet="true"/>
     <jar jarfile="${jetty.jar}" basedir="${classes}" manifest="${src}/org/mortbay/MANIFEST.MF" >
        <include name="org/mortbay/**"  />

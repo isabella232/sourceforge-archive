@@ -127,11 +127,13 @@ public class HttpFields
     /* ------------------------------------------------------------ */
     /** Other Fields.
      */
-    public final static String __Cookie = "Cookie";
-    public final static String __SetCookie = "Set-Cookie";
-    public final static String __SetCookie2 = "Set-Cookie2";
-    public final static String __MimeVersion ="MIME-Version";
-    public final static String __Identity ="identity";
+    public final static String
+        __Cookie = "Cookie",
+        __SetCookie = "Set-Cookie",
+        __SetCookie2 = "Set-Cookie2",
+        __MimeVersion ="MIME-Version",
+        __Identity ="identity";
+
     
     /* ------------------------------------------------------------ */
     /** Private class to hold Field name info
@@ -153,10 +155,17 @@ public class HttpFields
                 _lname=StringUtil.asciiToLowerCase(name);
                 _singleValued=single;
                 _inlineValues=inline;
-                __info.put(name,this);
-                if (!name.equals(_lname))
-                    __info.put(_lname,this);
-                _hashCode=__hashCode++;
+                
+                if (__info.size()<__maxCacheSize)
+                {
+                    __info.put(name,this);
+                    if (!name.equals(_lname))
+                        __info.put(_lname,this);
+                    
+                    _hashCode=__hashCode++;
+                }
+                else
+                    _hashCode=_name.hashCode();
             }
         }
 
@@ -180,6 +189,8 @@ public class HttpFields
 
     /* ------------------------------------------------------------ */
     private static final StringMap __info = new StringMap(true);
+    private static final StringMap __values = new StringMap(true);
+    private static final int __maxCacheSize=100;
     
     /* ------------------------------------------------------------ */
     static
@@ -237,6 +248,9 @@ public class HttpFields
         new FieldInfo(__Age,true,false);
         new FieldInfo(__ETag,true,false);
         new FieldInfo(__RetryAfter,true,false);
+
+        __values.put(__KeepAlive,__KeepAlive);
+        
     };
     
     /* ------------------------------------------------------------ */
@@ -969,7 +983,30 @@ public class HttpFields
 
                 // create the field.
                 FieldInfo info = getFieldInfo(buf,name_i,name_l);
-                Field field=new Field(info,new String(buf,i1,i2-i1+1));
+                Map.Entry valueEntry=__values.getEntry(buf,i1,i2-i1+1);
+                String value=null;
+                if (valueEntry!=null)
+                    value=(String)valueEntry.getKey();
+                else
+                {
+                    value=new String(buf,i1,i2-i1+1);
+
+                    if (__values.size()<__maxCacheSize &&
+                        (info._name==__UserAgent ||
+                         info._name==__Accept ||
+                         info._name==__AcceptEncoding ||
+                         info._name==__AcceptCharset))
+                    {
+                        synchronized(__values)
+                        {
+                            Code.debug("Learnt ",info._name,": ",value);
+                            __values.put(value,value);
+                        }
+                    }
+                }
+                
+                
+                Field field=new Field(info,value);
                 
                 if (_index[info.hashCode()]<0)
                     _index[info.hashCode()]=_fields.size();

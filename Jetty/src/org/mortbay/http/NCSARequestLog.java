@@ -29,7 +29,6 @@ public class NCSARequestLog implements RequestLog
     private int _retainDays;
     private RolloverFileOutputStream _fileOut;
     private ByteArrayISO8859Writer _buf=new ByteArrayISO8859Writer();
-    private PrintWriter _out=new PrintWriter(_buf);
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -168,50 +167,50 @@ public class NCSARequestLog implements RequestLog
             {
                 if (_fileOut==null)
                     return;
-        
-                _out.print(request.getRemoteAddr());
-                _out.print(" - ");
+                
+                _buf.write(request.getRemoteAddr());
+                _buf.write(" - ");
                 String user = (String)request.getAttribute(HttpRequest.__AuthUser);
-                _out.print((user==null)?"-":user);
-                _out.print(" [");
-                _out.print(_logDateCache.format(request.getTimeStamp()));
-                _out.print("] \"");
-                request.writeRequestLine(_out);
-                _out.print("\" ");
-                _out.print(response.getStatus());
+                _buf.write((user==null)?"-":user);
+                _buf.write(" [");
+                _buf.write(_logDateCache.format(request.getTimeStamp()));
+                _buf.write("] \"");
+                request.writeRequestLine(_buf);
+                _buf.write("\" ");
+                _buf.write(response.getStatus());
                 if (responseLength>=0)
                 {
-                    _out.print(' ');
-                    _out.print(responseLength);
-                    _out.print(' ');
+                    _buf.write(' ');
+                    _buf.write(responseLength);
+                    _buf.write(' ');
                 }
                 else
-                    _out.print(" - ");
+                    _buf.write(" - ");
                 
                 if (_extended)
                 {
                     String referer = request.getField(HttpFields.__Referer);
                     if(referer==null)
-                        _out.print("\"-\" ");
+                        _buf.write("\"-\" ");
                     else
                     {
-                        _out.print('"');
-                        _out.print(referer);
-                        _out.print("\" ");
+                        _buf.write('"');
+                        _buf.write(referer);
+                        _buf.write("\" ");
                     }
                     
                     String agent = request.getField(HttpFields.__UserAgent);
                     if(agent==null)
-                    _out.print("\"-\"");
+                    _buf.write("\"-\"");
                     else
                     {
-                        _out.print('"');
-                        _out.print(agent);
-                        _out.print('"');
+                        _buf.write('"');
+                        _buf.write(agent);
+                        _buf.write('"');
                     }
                 }
-                _out.println();
-                _out.flush();
+                _buf.write("\n");
+                _buf.flush();
                 _buf.writeTo(_fileOut);
                 _buf.reset();
             }
