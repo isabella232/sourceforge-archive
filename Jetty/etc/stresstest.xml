@@ -21,9 +21,9 @@
     <Arg>
       <New class="org.mortbay.http.SocketListener">
         <Set name="port"><SystemProperty name="jetty.port" default="8080"/></Set>
-        <Set name="minThreads">20</Set>
-        <Set name="maxThreads">200</Set>
-        <Set name="maxIdleTimeMs">30000</Set>
+        <Set name="minThreads">2</Set>
+        <Set name="maxThreads">6</Set>
+        <Set name="maxIdleTimeMs">5000</Set>
         <Set name="lowResourcePersistTimeMs">1000</Set>
         <Set name="poolName">StressTest</Set>
       </New>
@@ -93,6 +93,9 @@
     <Set name="extractWAR">true</Set> 
   </Call>
 
+  <!-- =============================================================== -->
+  <Set name="requestsPerGC">1000</Set>
+  
 </Configure>
 
 
