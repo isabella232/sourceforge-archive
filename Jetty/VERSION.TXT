@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-4.2.14 - 7 October 2003
+Jetty-4.2.14RC0 - 7 October 2003
  + Correctly setup context classloader in cross context dispatch.
  + Put a semi busy loop into proxy tunnels for IE problems
  + Fixed handling of error pages for IO and Servlet exceptions

@@ -585,6 +585,9 @@
         <exclude name="testdocs/**"/>
       </zipfileset>
     </zip>
+
+    <copy file="extra/j2ee/*.sar" todir="${dist}" />
+
   </target>
 
 
