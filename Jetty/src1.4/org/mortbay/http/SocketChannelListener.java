@@ -282,8 +282,20 @@ public class SocketChannelListener
             Connection connection =(Connection)job;
             try
             {
-                while (connection.handleNext())
+                connection.associateThread();
+                requestLoop:
+                while (isStarted())
                 {
+                    // Handle connection
+                    if (connection.handleNext())
+                        connection.recycle();
+                    else
+                    {
+                        connection.destroy();
+                        break requestLoop;
+                    }
+
+                    // If no more bytes available, goto idle connection
                     ChunkableInputStream cin=connection.getInputStream();
                     if (cin.available()<=0)
                     {
@@ -296,7 +308,7 @@ public class SocketChannelListener
                                 _idling.add(connection);
                             }
                             _selector.wakeup();
-                            break;
+                            break requestLoop;
                         }
                     }
                 }
@@ -304,6 +316,10 @@ public class SocketChannelListener
             catch(Exception e)
             {
                 Code.warning(e);
+            }
+            finally
+            {
+                connection.disassociateThread();
             }
         }
         else
@@ -329,7 +345,7 @@ public class SocketChannelListener
      * @param request
      */
     public void customizeRequest(HttpConnection connection,
-                                    HttpRequest request)
+                                 HttpRequest request)
     {
     }
 
@@ -460,6 +476,27 @@ public class SocketChannelListener
                   sc);
         }
 
+        protected void readRequest()
+            throws IOException
+        {
+            Thread handlingThread=Thread.currentThread();
+            if (handlingThread instanceof PoolThread)
+            {
+                PoolThread poolThread=(PoolThread)handlingThread;
+                try
+                {
+                    poolThread.setActive(false);
+                    super.readRequest();
+                }
+                finally
+                {
+                    poolThread.setActive(true);
+                }
+            }
+            else
+                super.readRequest();
+        }
+    
         public SocketChannel getSocketChannel()
         {
             return (SocketChannel)getConnection();

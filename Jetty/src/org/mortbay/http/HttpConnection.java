@@ -703,6 +703,7 @@ public class HttpConnection
     private void exception(Throwable e)
     {
 	try{
+	    _persistent=false;
 	    boolean gotIOException = false;
             int error_code=HttpResponse.__500_Internal_Server_Error;
             
@@ -739,7 +740,6 @@ public class HttpConnection
                 }
             }
             
-	    _persistent=false;
 	    if (_response != null && !_response.isCommitted())
 	    {
 		_response.reset();
@@ -796,9 +796,41 @@ public class HttpConnection
      */
     public final void handle()
     {
-        while(_listener.isStarted())
-            if (!handleNext())
-                break;
+        try
+        {
+            associateThread();
+            while(_listener.isStarted() && handleNext())
+                recycle();
+        }
+        finally
+        {
+            disassociateThread();
+            destroy();
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    protected void associateThread()
+    {
+        __threadConnection.set(this);
+        _handlingThread=Thread.currentThread();
+    }
+    
+    /* ------------------------------------------------------------ */
+    protected void disassociateThread()
+    {
+        _handlingThread=null;
+        __threadConnection.set(null);
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    protected void readRequest()
+        throws IOException
+    {
+        Code.debug("readRequest() ...");
+        _request.readHeader((LineInput)((ChunkableInputStream)_inputStream)
+                            .getRawStream());
     }
     
     /* ------------------------------------------------------------ */
@@ -815,11 +847,6 @@ public class HttpConnection
      */
     public boolean handleNext()
     {
-        _handlingThread=Thread.currentThread();
-        PoolThread poolThread=(_handlingThread instanceof PoolThread)
-            ? ((PoolThread)_handlingThread):null;
-        
-        __threadConnection.set(this);
         HttpContext context=null;
         try
         {   
@@ -828,44 +855,12 @@ public class HttpConnection
             _persistent=false;
             _close=false;
             _keepAlive=false;
+            _outputSetup=false;
             _dotVersion=0;
-            Code.debug("Wait for request...");
-            
-            try
-            {
-                _outputSetup=false;
-                if (poolThread!=null)
-                    poolThread.setActive(false);
-                _request.readHeader((LineInput)((ChunkableInputStream)_inputStream).getRawStream());
-                if (poolThread!=null)
-                    poolThread.setActive(true);
-                _listener.customizeRequest(this,_request);
-            }
-            catch(HttpException e){throw e;}
-            catch(IOException e)
-            {
-                if (_request.getState()!=HttpMessage.__MSG_RECEIVED)
-                {
-                    if (Code.debug())
-                    {
-                        if (Code.verbose())
-                            Code.debug(e);
-                        else
-                            Code.debug(e.toString());
-                    }
-                    _persistent=false;
-                    _response.destroy();
-                    _response=null;
-                    return false;
-                }
-                
-                exception(e);
-                _persistent=false;
-                _response.destroy();
-                _response=null;
-                return false;
-            }
-            
+
+            // Read requests
+            readRequest();
+            _listener.customizeRequest(this,_request);
             if (_request.getState()!=HttpMessage.__MSG_RECEIVED)
                 throw new HttpException(_response.__400_Bad_Request);
             
@@ -890,7 +885,6 @@ public class HttpConnection
             }
             
             // Common fields on the response
-            // XXX could be done faster?
             _response.setVersion(HttpMessage.__HTTP_1_1);
             _response.setField(HttpFields.__Date,_request.getTimeStampStr());
             _response.setField(HttpFields.__Server,Version.__VersionDetail);
@@ -940,125 +934,111 @@ public class HttpConnection
             // service the request
             if (!_request.isHandled())
                 context=service(_request,_response);
-        } 
-        catch (InterruptedIOException e)
+        }
+        catch(HttpException e) {exception(e);}
+        catch (IOException e)
         {
-            exception(e);
-            _persistent=false;
-            try
+            if (_request.getState()!=HttpMessage.__MSG_RECEIVED)
             {
-                _response.commit();
-                _outputStream.flush();
+                if (Code.debug())
+                {
+                    if (Code.verbose()) Code.debug(e);
+                    else Code.debug(e.toString());
+                }
+                _response.destroy();
+                _response=null;
             }
-            catch (IOException e2){exception(e2);}
+            else
+                exception(e);
         }
         catch (Exception e)     {exception(e);}
         catch (Error e)         {exception(e);}
         finally
         {
             int bytes_written=0;
-            try
-            {
-                int content_length = _response==null
-                    ?-1:_response.getIntField(HttpFields.__ContentLength);
+            int content_length = _response==null
+                ?-1:_response.getIntField(HttpFields.__ContentLength);
                 
-                // Complete the request
-                if (_persistent)
-                {                    
-                    try{
-                        // Read remaining input
-                        while(_inputStream.skip(4096)>0 || _inputStream.read()>=0);
-                    }
-                    catch(IOException e)
-                    {
-                        if (_inputStream.getContentLength()>0)
-                            _inputStream.setContentLength(0);
-                        _persistent=false;
-                        Code.ignore(e);
-                        exception(new HttpException(_response.__400_Bad_Request,
-                                                    "Missing Content"));
-                    }
-                    
-                    // Check for no more content
+            // Complete the request
+            if (_persistent)
+            {                    
+                try{
+                    // Read remaining input
+                    while(_inputStream.skip(4096)>0 || _inputStream.read()>=0);
+                }
+                catch(IOException e)
+                {
                     if (_inputStream.getContentLength()>0)
-                    {
                         _inputStream.setContentLength(0);
-                        _persistent=false;
-                        exception (new HttpException(_response.__400_Bad_Request,
-                                                     "Missing Content"));
-                    }
-
-                    // Commit the response
-                    try{
-                        _outputStream.flush(true);
-                        _response.commit();
-                        bytes_written=_outputStream.getBytesWritten();
-                        _outputStream.resetStream();
-                        _outputStream.addObserver(this);
-                        _inputStream.resetStream();
-                    }
-                    catch(IOException e) {exception(e);}
+                    _persistent=false;
+                    Code.ignore(e);
+                    exception(new HttpException(_response.__400_Bad_Request,
+                                                "Missing Content"));
                 }
-                else if (_response!=null) // There was a request
+                    
+                // Check for no more content
+                if (_inputStream.getContentLength()>0)
                 {
-                    // half hearted attempt to eat any remaining input
-                    try{
-                        if (_inputStream.getContentLength()>0)
+                    _inputStream.setContentLength(0);
+                    _persistent=false;
+                    exception (new HttpException(_response.__400_Bad_Request,
+                                                 "Missing Content"));
+                }
+                
+                // Commit the response
+                try{
+                    _outputStream.flush(true);
+                    _response.commit();
+                    bytes_written=_outputStream.getBytesWritten();
+                    _outputStream.resetStream();
+                    _outputStream.addObserver(this);
+                        _inputStream.resetStream();
+                }
+                catch(IOException e) {exception(e);}
+            }
+            else if (_response!=null) // There was a request
+            {
+                // half hearted attempt to eat any remaining input
+                try{
+                    if (_inputStream.getContentLength()>0)
                         while(_inputStream.skip(4096)>0 || _inputStream.read()>=0);
-                        _inputStream.resetStream();
-                    }
-                    catch(IOException e){Code.ignore(e);}
-                
-                    // commit non persistent
-                    try{
-                        _outputStream.flush();
-                        _response.commit();
-                        bytes_written=_outputStream.getBytesWritten();
-                        _outputStream.close();
-                        _outputStream.resetStream();
-                    }
-                    catch(IOException e) {exception(e);}
+                    _inputStream.resetStream();
                 }
+                catch(IOException e){Code.ignore(e);}
                 
-                // Check response length
-                if (_response!=null)
+                // commit non persistent
+                try{
+                    _outputStream.flush();
+                    _response.commit();
+                    bytes_written=_outputStream.getBytesWritten();
+                    _outputStream.close();
+                    _outputStream.resetStream();
+                }
+                catch(IOException e) {exception(e);}
+            }
+            
+            // Check response length
+            if (_response!=null)
+            {
+                Code.debug("RESPONSE:\n",_response);
+                if (_persistent &&
+                    content_length>=0 && bytes_written>0 && content_length!=bytes_written)
                 {
-                    Code.debug("RESPONSE:\n",_response);
-                    if (_persistent &&
-                        content_length>=0 && bytes_written>0 && content_length!=bytes_written)
-                    {
                     Code.warning("Invalid length: Content-Length="+content_length+
                                  " written="+bytes_written+
                                  " for "+_request.getRequestURL());
                     _persistent=false;
                     try{_outputStream.close();}
                     catch(IOException e) {Code.warning(e);}
-                    }    
-                }
+                }    
             }
-            finally
-            {
-                __threadConnection.set(null);
-                
-                // stats & logging
-                statsRequestEnd();
-                
-                if (context!=null)
-                    context.log(_request,_response,bytes_written);
-                
-                if (_persistent)
-                {
-                    _listener.persistConnection(this);
-                    if (_request!=null)
-                        _request.recycle(this);
-                    if (_response!=null)
-                        _response.recycle(this);
-                }
-                else
-                    destroy();
-            }
+            
+            // stats & logging
+            statsRequestEnd();       
+            if (context!=null)
+                context.log(_request,_response,bytes_written);
         }
-
+        
         return _persistent;
     }
 
@@ -1067,6 +1047,8 @@ public class HttpConnection
     {
         if (_statsOn)
         {
+            if (_reqTime>0)
+                statsRequestEnd();
             _requests++;
             _tmpTime=_request.getTimeStamp();
             _reqTime=_tmpTime;
@@ -1086,10 +1068,23 @@ public class HttpConnection
     }
     
     /* ------------------------------------------------------------ */
-    /** Destroy the connection.
-     * called by handleNext when handleNext returns false.
+    /** Recycle the connection.
+     * called by handle when handleNext returns true.
      */
-    private void destroy()
+    protected void recycle()
+    {
+        _listener.persistConnection(this);
+        if (_request!=null)
+            _request.recycle(this);
+        if (_response!=null)
+            _response.recycle(this);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Destroy the connection.
+     * called by handle when handleNext returns false.
+     */
+    protected void destroy()
     {
         try{close();}
         catch (IOException e){Code.ignore(e);}

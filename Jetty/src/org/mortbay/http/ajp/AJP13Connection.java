@@ -225,8 +225,7 @@ public class AJP13Connection extends HttpConnection
                   Code.warning("Not implemented: "+packet);
             }
 
-            persistent=true;
-            
+            persistent=true;   
         }
         catch (Exception e)
         {
@@ -246,16 +245,16 @@ public class AJP13Connection extends HttpConnection
             // Close the outout
             try{_ajpOut.close();} catch (IOException e){Code.warning(e);}
 
-
             try{getOutputStream().resetStream();} catch (Exception e){Code.warning(e);}
             getOutputStream().addObserver(this);
             try{getInputStream().resetStream();}catch (Exception e){Code.warning(e);}
             _ajpIn.recycle();
             _ajpOut.recycle();
             
+            statsRequestEnd();
             if (context!=null)
                 context.log(request,response,-1);
-            
+
         }
         return persistent;
     }

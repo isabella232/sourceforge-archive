@@ -667,6 +667,7 @@ public class ThreadPool
             if (Code.verbose(9))
                 Code.debug( "Start thread in ", _name );
             try{
+                jobloop:
                 while(_running) 
                 {
                     // clear interrupts
@@ -703,22 +704,28 @@ public class ThreadPool
                             // If we are still running
                             if (_running)
                             {
-                                // If not more threads accepting - start one
-                                if (_idleSet.size()==0 &&
-                                    _job!=null &&
-                                    _threadSet.size()<_maxThreads)   
+                                // If we have a job
+                                if (_job!=null)
                                 {
-                                    try{newThread();}
-                                    catch(Exception e){Code.warning(e);}
+                                     // If not more threads accepting - start one
+                                     if (_idleSet.size()==0 &&
+                                         _threadSet.size()<_maxThreads)   
+                                     {
+                                         try{newThread();}
+                                         catch(Exception e){Code.warning(e);}
+                                     }
                                 }
-                                // else if no job
-                                else if (_job==null &&
-                                         _threadSet.size()>_minThreads &&
-                                         _idleSet.size()>0)
+                                
+                                else
                                 {
-                                    if (Code.verbose(99))
-                                        Code.debug("Idle death: "+_thread);
-                                    break; // Break from the running loop
+                                    // No Job, are we still needed?
+                                    if (_threadSet.size()>_minThreads &&
+                                        _idleSet.size()>0)
+                                    {
+                                        if (Code.verbose(99))
+                                            Code.debug("Idle death: "+_thread);
+                                        break jobloop; // Break from the running loop
+                                    }
                                 }
                             }
                         }
