@@ -120,11 +120,11 @@ public class PlusWebAppContext extends WebApplicationContext
 
     
     /* ------------------------------------------------------------ */
-    public boolean handle(HttpRequest request,
+    public void handle(HttpRequest request,
                           HttpResponse response)
         throws HttpException, IOException
     {
-        return super.handle(request,response);
+        super.handle(request,response);
     }    
 
 

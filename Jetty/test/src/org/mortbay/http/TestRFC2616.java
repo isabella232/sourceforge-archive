@@ -1582,5 +1582,11 @@ public class TestRFC2616
     {
         return 0;    
     }
+
+    public HttpHandler getHttpHandler()
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
     
 }
