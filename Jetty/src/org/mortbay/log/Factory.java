@@ -21,9 +21,10 @@ import org.apache.commons.logging.LogFactory;
  * with '.*' it is assumed to be a name prefix match.
  * Attributes with string values are treated as references to other attributes.
  * 
- * If you do not want to use Jetty logging, you can revert to the commons logging log factory
- * by setting the system property:
- *   -Dorg.apache.commons.logging.LogFactory=org.apache.commons.logging.impl.LogFactoryImpl
+ * This class needs to be configured in the META-INF/services directory (see build.xml for example)
+ * for automatic discovery.  Or it can be configured with the system property:
+ *   -Dorg.apache.commons.logging.LogFactory=org.mortbay.log.Factory
+ * 
  */
 public class Factory extends LogFactory
 {

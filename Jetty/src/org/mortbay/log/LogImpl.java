@@ -21,6 +21,8 @@ import org.mortbay.util.Loader;
  *                   If set to zero, then info is enabled.
  *   LOG_SINKS - List of class names used to instantiate the log sinks.
  * 
+ * This logger can be configured with the org.mortbay.log.Factory
+ * 
  * @see org.mortbay.log.Factory
  */
 public class LogImpl implements org.apache.commons.logging.Log

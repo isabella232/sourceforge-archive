@@ -143,6 +143,18 @@ public class ServerMBean extends HttpServerMBean
     public void postDeregister()
     {
         _configuration=null;   
-        super.postDeregister();
+	try
+	{
+	    _jettyServer.stop();
+	}
+	catch(Exception e)
+	{
+	    log.warn(e);
+	}
+	finally
+	{
+	    super.postDeregister();
+	}
+
     }
 }

@@ -15,12 +15,14 @@
 
 package org.mortbay.util.jmx;
 
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.Iterator;
 import java.util.Set;
 
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
+import javax.management.MalformedObjectNameException;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.loading.MLet;
@@ -41,6 +43,7 @@ public class Main
     private static Log log = LogFactory.getLog(Main.class);
 
     static MLet mlet;
+    static MBeanServer server = null;
         
     /* ------------------------------------------------------------ */
     /** 
@@ -51,12 +54,13 @@ public class Main
         try
         {
             // Create a MBeanServer
-            final MBeanServer server =
+            server =
                 MBeanServerFactory.createMBeanServer(ModelMBeanImpl.getDefaultDomain());
             if(log.isDebugEnabled())log.debug("MBeanServer="+server);
             
             // Create and register the MLet
-            mlet = new MLet(new URL[0],Thread.currentThread().getContextClassLoader());
+            //mlet = new MLet(new URL[0],Thread.currentThread().getContextClassLoader());
+            mlet = new MLet();
             server.registerMBean(mlet,new ObjectName(server.getDefaultDomain(),"service","MLet"));
             if(log.isDebugEnabled())log.debug("MLet="+mlet);
             
@@ -89,6 +93,31 @@ public class Main
                             try{server.invoke(oi.getObjectName(),"start",null,null);}
                             catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
                         }
+			
+                        else if ("mx4j.adaptor.rmi.jrmp.JRMPAdaptor".equals(oi.getClassName()))
+                        {
+                            Object[] jndinameargs =  {"jrmp"};
+                            String[] jndinametype = {"java.lang.String"};
+                            Object[] jndiportargs =  {new Integer(1099)};
+                            String[] jndiporttype = {"int"};
+
+                            log.info("Starting mx4j.tools.naming.NamingService");
+			                ObjectName naming = new ObjectName("Naming:type=rmiregistry");
+                   			server.createMBean("mx4j.tools.naming.NamingService", naming, null);
+			                server.invoke(naming, "start", null, null);
+
+                            try{
+                            	server.invoke(oi.getObjectName(),"setJNDIName",jndinameargs,jndinametype);
+                            	server.invoke(oi.getObjectName(),"setPort",jndiportargs,jndiporttype);}
+                            	catch(Exception e){log.warn(e);}
+
+                            log.info("Starting mx4j.adaptor.rmi.jrmp.JRMPAdaptor");
+
+                            try{server.invoke(oi.getObjectName(),"start",null,null);}
+                            catch(Exception e){log.warn(e);} 
+                        }
+
+
                     }
                 }
                 
@@ -111,9 +140,83 @@ public class Main
             System.exit(1);
         }
         startMLet(arg);
-        synchronized(mlet)
+        
+        if ((!Boolean.getBoolean("JETTY_NO_SHUTDOWN_HOOK")))
         {
-            mlet.wait();
+            try
+            {
+                Method shutdownHook=
+                    java.lang.Runtime.class.getMethod("addShutdownHook",new Class[] {java.lang.Thread.class});
+                Thread hook = new Thread() 
+				{
+	                public void run()
+	                {
+	                    setName("Shutdown");
+	                    log.info("Shutdown hook executing");
+	                    Set registeredNames = null;
+						try 
+						{
+							//getting jetty server-mbeans
+							registeredNames = server.queryNames(new ObjectName("org.mortbay:Server=0"),null);
+						} 
+						catch (MalformedObjectNameException e) 
+						{
+							log.warn("Malformed JMX-Object-Name", e);
+						}
+						Iterator i = registeredNames.iterator();
+	                    while(i.hasNext())
+	                    {
+	                        ObjectName name = (ObjectName)i.next();
+	                        try
+	                        {
+	                        	if(server.isRegistered(name))
+	                        	{
+	                        		//do not de-register instances of javax.management.MBeanServerDelegate
+	                        		if(!(server.isInstanceOf(name, "javax.management.MBeanServerDelegate")))
+	                        		{
+	                        		   server.unregisterMBean(name);
+	                        		}
+	                        	}
+	                        }
+	                        catch (Exception e)
+	                        {
+	                        	if(name != null)
+	                        	{
+	                        		String bname = name.getCanonicalName();
+	                        		log.warn("could not unregister mbean: "+bname+" Exception: " +e);
+	                        	}
+	                        	else
+	                        	{
+	                        		log.warn("could not unregister mbean. Exception: "+e);
+	                        	}
+	                        	
+	                        }
+	
+	                    }
+	                    // Try to avoid JVM crash
+	                    try{Thread.sleep(1000);}
+	                    catch(Exception e){log.warn(e);}
+	                  }
+	                };
+                shutdownHook.invoke(Runtime.getRuntime(),
+                                    new Object[]{hook});
+            }
+            catch(Exception e)
+            {
+                log.debug("No shutdown hook in JVM ",e);
+            }
+        }
+        
+        try
+		{        
+	        synchronized(mlet)
+	        {            
+	            mlet.wait();
+	        }
+        }
+        catch(Exception e)
+        {
+          log.info("Exception:"+e);
         }
     }
 }

@@ -255,18 +255,22 @@ There are additional ext jars that may be included in the extra/ext
 directory.  These are docuented elsewhere.
 
 
-DEBUGGING
-=========
+LOGGING AND DEBUGGING
+=====================
 
 Since 5.0, Jetty has used jakarta commons logging.  This is a facade over
-other logging mechanism.  
+other logging mechanism.   By default, this is configured in start.config
+to use the Jetty logger. Debugging can be enabled with -DDEBUG or see the
+jetty.xml and demo.xml files for more examples.
 
-If the Jetty extra package is available, then log4j is used and is configured 
-in $JETTY_HOME/extra/resources/log4j.properties.
+To use the JDK logger:
+  java -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Jdk14Logger -jar start.jar
 
-If the extra package is not installed, then commons logging will probably
-use JDK1.4 logging or it's own simple log mechanism.
+To use log4j:
+  java -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger -jar start.jar
 
+Note that any jetty logging config should be removed from the configuration files before using
+another log mechanism
 
 
 Package contents

@@ -12,10 +12,11 @@
   <!-- Configure Logging                                               -->
   <!-- =============================================================== -->
 
+  
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- Assume Commons logging is using Jetty log.  If not this section -->
-  <!-- needs to be removed. See demo.xml for a larger example          -->
+  <!-- Configure Jetty Logging.                                        -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Uncomment if using jetty logging.
   <Call class="org.apache.commons.logging.LogFactory" name="getFactory">
     <Call name="getInstance">
       <Arg/>
@@ -37,6 +38,7 @@
       </Call>
     </Call>
   </Call>
+  -->
   
   <!-- =============================================================== -->
   <!-- Configure the Request Listeners                                 -->

@@ -251,6 +251,11 @@ public class Main
                                 e.printStackTrace();
                         }
                     }
+                    else if(condition.equals("property"))
+                    {
+                        String property = System.getProperty(st.nextToken());
+                        eval=property!=null && property.length()>0;
+                    }
                     else if(condition.equals("java"))
                     {
                         String operator=st.nextToken();
