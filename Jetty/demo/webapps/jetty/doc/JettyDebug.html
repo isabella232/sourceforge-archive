@@ -1,13 +1,10 @@
-<html>
-<head><title>Hints for Debugging Jetty With SSL</title>
-</head>
-<BIG><BIG><BIG><B>Hints for Debugging Jetty With SSL</B></BIG></BIG></BIG><HR><P>
+<H2>How do I debug with SSL?</H2>
 
 <p> While Jetty is normally well behaved, there are times when it is necessary to
 debug problems. For information on how to set up general debugging options go to the <a href="/jetty/tut/logging.html#debugging"> tutorial page </a>. The following are some hints for debugging when using SSL.
 
 
-<h1>JSSE</h1>
+<h3>JSSE</h3>
 <p> As described in the JSSE FAQ, there is a debug facility built into JSSE controlled by the javax.net.debug property.
 <p> Assuming that you've got JSSE configured properly you will be able to use it as follows, you will need to edit the etc/demo.xml as described in <a href="../JsseSSL.html">The JSSE SSL doco</a>.
 <p> To get help use:
@@ -37,9 +34,8 @@ The following can be used with ssl:
 JAVA_OPTIONS='-Djavax.net.debug=ssl,handshake,data' ./bin/jetty.sh run
 </pre>
 
-<hr>
-
-<h1>General SSL</h1>
+<P>
+<h3>General SSL</h3>
 <p> Assuming you've got the excellent (in a Bill&Ted way) openssl package installed, you can use it's s_client utility to help debug an SSL setup.
 
 <p> To get help use:
@@ -113,11 +109,12 @@ SSL-Session:
 </font>
 <BR><BR>
 <font size="-1">Author: Brett Sealey.<br>
-Last updated: 2002 January 22nd
+Last updated: 2003 April 4th
 </font>
+
+
+<P>
+
+<A HREF="index.html" TITLE="Back to JettyFAQ"><IMG SRC="/jetty/images/info_sm.gif" BORDER="0"><BR
+CLEAR="bottom"> JettyFaq</A>
 <BR><BR>
-<hr>
-Return to <A HREF="index.html">Jetty FAQ</A>.
-<hr>
-</body>
-</html>

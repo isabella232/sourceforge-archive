@@ -1,69 +1,72 @@
-<HR><B><FONT SIZE="+2">Using Jetty With Apache</FONT></B><HR>
-<BR><BR>
+<H2>Can Jetty be run with Apache?</H2>
+<P>
 Firstly remember that Jetty is a HTTP/1.1 server and there is no need to use another webserver
 just to serve static content.  However, if existing applications or special features require Apache 
 to be used, it is possible to use Jetty behind Apache.
 <P>
-<H2>AJP13 and mod_jk</H2>
+<H3>AJP13 and mod_jk</H3>
 The AJP13 protcol was developed to connect Apache with the Tomcat servlet container.  The apache side
 of the protocol is run by the mod_jk or mod_jk2 modules.    Jetty supports this connection protocol which
 gives access to the load balancing and other features of apache.   Other HTTP servers such as IIS also have
 mod_jk support.    Using Jetty and mod_jk is documented <A href=modjk.html>here</A>.
 
-<H2>Jetty and mod_proxy</H2>
+<H3>Jetty and mod_proxy</H3>
 Apache can be configured as a HTTP/1.1 proxy to pass selected request to the Jetty using the HTTP/1.1 protocol.
 This is simple to configure and use, but current versions of the apache mod_proxy do not support persistent connections.
 <P>
 The setup uses the Apache transparent proxy feature.  If you have an Apache server with DSO support or mod_proxy is already configured in, you may not have to rebuild Apache.  You may also wish to use Apache's mod_rewrite.  Some Apache installations in RedHat&nbsp;<!-- widget ref --> RPM format have everything you will need, right out of the box.  These instructions presume that you have an Apache with the appropriate modules compiled in or available as DSO's for dynamic loading.
-<BR><BR>
+<P>
 <B>Configuring Jetty</B>
-<BR><BR>
+<P>
 Jetty's configuration need not change for this setup.  Just use a different port than Apache.
-<BR><BR>
+<P>
 <B>Enabling Apache Dynamic Modules</B> 
-<BR><BR>
+<P>
 If the modules you need are compiled in, omit this step.  To enable the DSO versions of the modules, you will need to enable them with lines in your configuration file (httpd.conf) such as:
-<BR><BR>
+<P>
 <CODE><PRE>LoadModule rewrite_module     modules/mod_rewrite.so # Optional
 LoadModule proxy_module       modules/libproxy.so
-<BR><BR>
+<P>
 AddModule mod_rewrite.c # Optional
 AddModule mod_proxy.c</PRE></CODE>
 <B>Using Apache's Transparent Proxying</B>
-<BR><BR>
+<P>
 Apache's transparent proxy facility enables it to delegate HTTP requests to another web server such as Jetty.  The simplest configuration gives Jetty all requests for certain parts of your site, for example all URLs starting with /foo/ or /bar/.  If these parts of your site do not contain a lot of heavily-accessed static content such as images and other files, this is fine.  You will not require mod_rewrite for this configuration.  Just put one or more lines in your Apache config file such as:
-<BR><BR>
+<P>
 <CODE><PRE>ProxyPass /foo/ http://localhost:8080/foo/ </PRE></CODE>
 In this example, Apache will delegate responsibility for all pages in the
 /foo/ area of your site to Jetty on port 8080.  In case some of the pages served by Jetty do redirects, it is probably wise to add an additional line:
-<BR><BR>
+<P>
 <CODE><PRE>ProxyPassReverse / http://localhost:8080/ </PRE></CODE>
 Jetty could be running on a different machine, in which case substitute the name of that machine for "localhost" in both the lines above.  You can use as many ProxyPass directives as needed.  The one ProxyPassReverse line will fix up all redirect requests from Jetty to point to Apache, so your Jetty server won't become visible to visitors to your site.
-<BR><BR>
+<P>
 You will not need mod_rewrite for this type of setup.
-<BR><BR>
+<P>
 <B>Transparent Proxying with mod_rewrite</B>
-<BR><BR>
+<P>
 If pages to be served by Jetty and by Apache are heavily intermixed, you can use mod_rewrite for finer control over Apache's decision whether to delegate the request to Jetty.
-<BR><BR>
+<P>
 [[To be written.]]
-<BR><BR>
+<P>
 <B>Jetty with Apache with SSL</B>
-<BR><BR>
+<P>
 If your Apache server supports SSL, the transparent proxy feature will automatically handle SSL.  It converts SSL requests to ordinary HTTP requests and encrypts the responses for you.
-<BR><BR>
+<P>
 <B>Performance Pros and Cons</B>
-<BR><BR>
+<P>
 If you prefer to use Apache to serve some of your content, or if you are constrained for any reason to using Apache, you can run Jetty just for the content you prefer to serve with Jetty.  If you simply wish to optimize performance, you may need to experiment to find the best approach.  Apache is probably faster than Jetty for static content, but routing requests through Apache slows them down somewhat also.  Apache's transparent proxy feature claims only HTTP 1.0 compliance, so serving content directly with Jetty may reduce the number of TCP connections that must be established with the web browser.
-<BR><BR>
+<P>
 We would love to learn of your results with performance testing.
-<BR><BR>
+<P>
 <B>Limitations</B>
-<BR><BR>
+<P>
 The Servlet API calls ServletRequest.getRemoteHost() and ServletRequest.getRemoteAddr() will refer to the host running Apache instead of the IP address of the remote user (or their proxy server).  This limitation could be worked around in the future.
-<BR><BR>
+<P>
 You may also wish to turn off Jetty's HTTP request logging.  The limitation on access to remote addresses applies to Jetty logging also.
+<P>
+
+<P>
+
+<A HREF="index.html" TITLE="Back to JettyFAQ"><IMG SRC="/jetty/images/info_sm.gif" BORDER="0"><BR
+CLEAR="bottom"> JettyFaq</A>
 <BR><BR>
-<HR>
-Return to <A HREF="index.html">Jetty FAQ</A>.
-<HR>

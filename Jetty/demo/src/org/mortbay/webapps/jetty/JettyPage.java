@@ -70,7 +70,7 @@ public class JettyPage extends Page
                     do
                     {
                         Section section=new Section(context,value);
-                        Code.debug(key," = ",section);
+                        Log.event(key+" = "+section);
                         minor.add(section);
                         if (section._pathSpec!=null)
                         {
@@ -134,9 +134,9 @@ public class JettyPage extends Page
     private boolean _home;
     
     /* ------------------------------------------------------------ */
-    private Section _section ;
+    private Section _selectedSection ;
     private Links _links ;
-    public Section getSection() {return _section;}
+    public Section getSection() {return _selectedSection;}
     
     /* ------------------------------------------------------------ */
     public JettyPage(String context,String path)
@@ -158,11 +158,11 @@ public class JettyPage extends Page
         addLinkHeader("Copyright",context,"LICENSE.html");
         
         _links = (Links)__linkMap.match(_path);
-        _section = (Section)__pathMap.match(_path);
-        if (_section==null)
+        _selectedSection = (Section)__pathMap.match(_path);
+        if (_selectedSection==null)
         {
             if("/".equals(_path))
-                _section=__section[0][0];
+                _selectedSection=__section[0][0];
             else
                 return;
         }
@@ -206,9 +206,9 @@ public class JettyPage extends Page
 
         attribute("text","#000000");
         attribute(BGCOLOR,"#FFFFFF");
-        attribute("link","#606CC0");
-        attribute("vlink","#606CC0");
-        attribute("alink","#606CC0");
+        // attribute("link","#606CC0");
+        // attribute("vlink","#606CC0");
+        // attribute("alink","#606CC0");
         attribute("MARGINWIDTH","0");
         attribute("MARGINHEIGHT","0");
         attribute("LEFTMARGIN","0");
@@ -216,9 +216,9 @@ public class JettyPage extends Page
         attribute("TOPMARGIN","0");
         
         
-        title("Jetty: "+_section._key);
+        title("Jetty: "+_selectedSection._key);
         _home=false;
-        if (__section[0][0].equals(_section))
+        if (__section[0][0].equals(_selectedSection))
         {
             _home=true;
             title("Jetty Java HTTP Servlet Server");
@@ -229,71 +229,139 @@ public class JettyPage extends Page
         _table.width("90%");
         
         nest(_table);
-        _table.cellPadding(0);
-        _table.cellSpacing(0);
+        _table.cellPadding(5);
+        _table.cellSpacing(5);
         _table.newRow();
         _table.newCell();
-        _table.cell().bgColor("#E8ECF8");
         _table.cell().top();
         _table.cell().center();
-
+        _table.cell().width("15%");
+        
         _table.add("<A HREF=http://jetty.mortbay.org><IMG SRC=\""+context+"/images/powered.gif\" WIDTH=140 HEIGHT=58 BORDER=0 ALT=\"Powered by Jetty\"></A>\n");
 
-        boolean para=true;
-        // navigation
-        for (int section=0;section<__section.length;section++)
-        {
-            if (_section._section.equals(__section[section][0]._section)&&
-                __section[section].length>1 )
-                para=true;
-            _table.add(para?"<P>":"<BR><BR>");
-            para=false;
-            
-            if(_section.equals(__section[section][0]))
-            {
-                if (_links==null)
-                {    
-                    if (section>0)
-                        addLinkHeader("prev",context,__section[section-1][0]._uri);
-                    if ((section+1)<__section.length)
-                        addLinkHeader("next",context,__section[section+1][0]._uri);
-                }
-                
-                _table.add("<FONT SIZE=+1><B>"+
-                           __section[section][0]._section+
-                           "</B></FONT>");
-            }
-            else
-                _table.add(__section[section][0]._link);
-            
-            
-            if (__section[section].length>1 &&
-                _section._section.equals(__section[section][0]._section))
-            {
-                for (int sub=1;sub<__section[section].length;sub++)
-                {
-                    _table.add("<BR>");
-                    if(_section.equals(__section[section][sub]))
-                    {
-                        if (_links==null)
-                        {
-                            addLinkHeader("up",context,__section[section][0]._uri);
-                            if (sub>0)
-                                addLinkHeader("prev",context,__section[section][sub-1]._uri);
-                            if ((sub+1)<__section[section].length)
-                                addLinkHeader("next",context,__section[section][sub+1]._uri);
-                        }
-                        _table.add("<FONT SIZE=-1><B>"+
-                                   __section[section][sub]._subSection+
-                                   "</B></FONT>");
-                    }
-                    else
-                        _table.add(__section[section][sub]._link);
-                }
-                para=true;
-            }
-        }
+
+     
         
+        Table menu = new Table(0,"bgcolor=#FFFFFF");
+        menu.width("90%");
+        menu.cellPadding(2);
+        menu.cellSpacing(5);
+        
+        _table.add(menu);
+        
+
+        
+        boolean para=true;
+        // navigation - iterate over all sections
+        for (int i=0;i<__section.length;i++)
+        {
+             for (int j=0; j < __section[i].length; j++)
+             {
+                 // this is the section header,make a new row
+                 if (j==0)
+                 {
+                     menu.newRow();
+                     menu.newCell(" bgcolor=#3333ff");
+                     menu.cell().middle();
+                     menu.cell().right();
+
+                     if (__section[i][0]._link != null)
+                     {
+                         Log.event ("Section "+__section[i][0]._section+" has link "+__section[i][0]._link);
+                         
+                         if (_selectedSection._section.equals(__section[i][0]._section))
+                             menu.add ("<a class=selhdr href="+__section[i][0]._link+">"+__section[i][0]._section+"</a>");
+                         else
+                             menu.add ("<a class=hdr href="+__section[i][0]._link+">"+__section[i][0]._section+"</a>");
+                     }
+                     else
+                     {
+                         Log.event ("Section has no link: "+__section[i][0]._section);
+                         menu.add ("<font color=#ffffff><b>"+__section[i][0]._section+"</b></font>");
+                     }
+                 }
+                 else
+                 {
+                     //if this is first of the subsections, make
+                     //a new row
+                     if (j==1)
+                     {
+                         menu.newRow();
+                         menu.newCell();
+                         menu.cell().top();
+                         menu.cell().right();
+                     }
+
+                     if ((_selectedSection._subSection != null)
+                         &&
+                         _selectedSection._subSection.equals(__section[i][j]._subSection))
+                         menu.cell().add ("<a class=selmenu href="+__section[i][j]._link+">"+__section[i][j]._subSection+"</a>");
+                     else
+                         menu.cell().add ("<a class=menu href="+__section[i][j]._link+">"+__section[i][j]._subSection+"</a>");
+                 }
+                 
+                 menu.cell().add("<BR>");
+             }
+             
+            
+
+             
+             //if the selected section is a section header with subsections
+             //   if (_selectedSection._section.equals(__section[i][0]._section)
+//                 &&
+//                 __section[i].length>1 )
+//                 para=true;
+             
+//             _table.add(para?"<P>":"<BR><BR>");
+             
+//             para=false;
+             
+          
+            
+//             if(_selectedSection.equals(__section[i][0]))
+//             {
+//                 if (_links==null)
+//                 {    
+//                     if (section>0)
+//                         addLinkHeader("prev",context,__section[section-1][0]._uri);
+//                     if ((section+1)<__section.length)
+//                         addLinkHeader("next",context,__section[section+1][0]._uri);
+//                 }
+             
+//             }
+//             else
+//                 _table.add(__section[i][0]._link);
+            
+            
+//             if (__section[i].length>1 &&
+//                 _selectedSection._section.equals(__section[i][0]._section))
+//             {
+//                 for (int sub=1;sub<__section[i].length;sub++)
+//                 {
+//                     _table.add("<BR>");
+//                     if(_selectedSection.equals(__section[i][sub]))
+//                     {
+//                         if (_links==null)
+//                         {
+//                             addLinkHeader("up",context,__section[i][0]._uri);
+//                             if (sub>0)
+//                                 addLinkHeader("prev",context,__section[i][sub-1]._uri);
+//                             if ((sub+1)<__section[i].length)
+//                                 addLinkHeader("next",context,__section[i][sub+1]._uri);
+//                         }
+//                         _table.add("<FONT SIZE=-1><B>"+
+//                                    __section[i][sub]._subSection+
+//                                    "</B></FONT>");
+//                     }
+//                     else
+//                         _table.add(__section[i][sub]._link);
+//                 }
+//                 para=true;
+//             }
+        }
+
+       
+       
         _table.add("&nbsp;<P>");
         _table.add("&nbsp;<P>");
 
@@ -316,19 +384,14 @@ public class JettyPage extends Page
         _table.add("<A HREF=\""+context+"/freesoftware.html\"><IMG SRC=\""+context+"/images/effbr.gif\" WIDTH=88 HEIGHT=32 BORDER=0 ALT=\"EFF\"></A><P>\n");
         
         _table.add("&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P><font size=-4 color=\"#606CC0\">Copyright 2002<BR>Mort Bay Consulting.</FONT>");
+       
+
         
-        _table.newCell();
-        _table.cell().width(3);
-        _table.cell().bgColor("#606C90");
-        _table.add("<BR>");
-        _table.newCell();
-        _table.cell().width(10);
-        _table.add("&nbsp;&nbsp;");
         _table.newCell();
         _table.cell().top();
         _table.cell().left();
         
-        _table.add("<IMG SRC=\""+context+"/images/trans.gif\" WIDTH=4 HEIGHT=4 BORDER=0><br>");
+       
         
         if (path.endsWith(".txt"))
             _table.nest(new Block(Block.Pre));
@@ -368,8 +431,10 @@ public class JettyPage extends Page
             StringTokenizer tok = new StringTokenizer(value,"\t ");
             Code.assertTrue(tok.hasMoreTokens(),"No name");
             _key=tok.nextToken();
-            Code.assertTrue(tok.hasMoreTokens(),"No URI");
-            _uri=tok.nextToken();
+            //Code.assertTrue(tok.hasMoreTokens(),"No URI");
+            if (tok.hasMoreTokens())
+                _uri=tok.nextToken();
+            
             if (tok.hasMoreTokens())
                 _pathSpec=tok.nextToken();
             _key=_key.replace('+',' ');
@@ -378,33 +443,36 @@ public class JettyPage extends Page
             {
                 _section=_key.substring(0,c);
                 _subSection=_key.substring(c+1);
-                Font font=new Font(-1,true);
-                if (_uri.startsWith("///"))
-                    font.add(new Link(_uri.substring(2),_subSection));
-                else if (_uri.startsWith("/"))
-                    font.add(new Link(context+_uri,_subSection));
-                else
-                    font.add(new Link(_uri,_subSection));
-                _link=font.toString();
+                if (_uri != null)
+                {
+                    if (_uri.startsWith("///"))
+                        _link = _uri.substring(2);
+                    else if (_uri.startsWith("/"))
+                        _link = context+_uri;
+                    else
+                        _link = _uri;
+                }
             }
             else
             {
                 _section=_key;
                 _subSection=null;
-                Font font=new Font(1,true);
-                if (_uri.startsWith("///"))
-                    font.add(new Link(_uri.substring(2),_section));
-                else if (_uri.startsWith("/"))
-                    font.add(new Link(context+_uri,_section));
-                else
-                    font.add(new Link(_uri,_section));
-                _link=font.toString();
+                if (_uri != null)
+                {
+                    if (_uri.startsWith("///"))
+                        _link = _uri.substring(2);
+                    else if (_uri.startsWith("/"))
+                        _link = context+_uri;
+                    else
+                        _link = _uri;
+                }
             }
+            
         }
         
         public String toString()
         {
-            return _key+", "+_uri+", "+(_pathSpec==null?"":_pathSpec);
+            return _key+", "+(_uri==null?"":_uri)+", "+(_pathSpec==null?"":_pathSpec);
         }
     }
 

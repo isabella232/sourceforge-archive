@@ -1,5 +1,5 @@
-<BR><B><FONT SIZE="+2">Using Jetty and JSSE</FONT></B><HR>
-<BR>
+<h2>Using Jetty and JSSE</H2>
+
 <p>This is an overview of how to use Jetty with JSSE as an SSL 
 implementation.  The 1.0 release of JSSE contains both a framework
 for third party providers and a reference implementation.
@@ -25,7 +25,7 @@ It has not been documented here, however it is configured in a similar
 fashion to the SunJsseListener. IBM documentation should be consulting
 for management of their keystore.
 
-<P><HR><P>
+<P><P>
 
 <h2><a name="getkeys">Step 1: Get the private key and cert.</a></h2>
 
@@ -287,7 +287,7 @@ yLBF4K9469LZRhVSzfc=
 </pre>
 
 
-<P><HR><P>
+<P><P>
 <h2><a name="loadkeys">Step 2: Load the private key and cert into a Sun JKS keystore.</a></h2>
 
 If a sun provider key/certificate pair was generated, then they are already 
@@ -352,7 +352,6 @@ an as need be basis.
 
 
 <P>
-<hr>
 <B>Loading Private Key and Certificate into the keystore</B><BR>
 Next, load the key and the cert into a JKS keystore. The class 
 org.mortbay.util.KeyPairTool is used to load the keys into the
@@ -424,7 +423,7 @@ Certificate fingerprint (MD5): 1A:DA:C0:35:F0:A3:EC:AD:AB:D8:5F:48:78:A0:CB:90
 <b>$</b> 
 </pre>
 
-<P><HR><P>
+<P><P>
 <h2><a name="usekeys">Step 3: Configure Jetty to use JSSE and the keystore.</a></h2>
 <p>Assuming you already have a functioning Jetty Server:
 
@@ -486,7 +485,6 @@ If you get an javax.net.ssl.SSLException, check that you have
 remembered the s in https.
 
 <P>
-<hr>
 <B>Password Issues</B><BR>
 The passwords can also be set on the command line as system properties, but
 remember that putting your password on the command line is a security risk.
@@ -507,8 +505,7 @@ While these mechanism just exports the security problem from jetty,
 it does allow customized security arrangements to be configured.
 
 <p>
-<hr>
-<h1><a name="issues"> Outstanding Issues. </a></h1>
+<h3><a name="issues"> Outstanding Issues. </a></h3>
 <p> The following issues are outstanding:
 <ul>
  <li> Reading passwords from prompts should turn echo off.</li>
@@ -519,8 +516,7 @@ it does allow customized security arrangements to be configured.
 </ul>
 
 <p>
-<hr>
-<h1><a name="environment"> Environment and version information. </a></h1>
+<h3><a name="environment"> Environment and version information. </a></h3>
 <p> The environment this procedure was developed in was:
 <ul>
  <li> Red Hat Linux 6.2 x86 with openssl-0.9.5a-2.i386.rpm installed </li>
@@ -531,13 +527,18 @@ it does allow customized security arrangements to be configured.
  <li>Sun JDK - java version "1.2.2" Classic VM (build 1.2.2_006, green threads, nojit)
 </ul>
 <p>
-<hr>
+<FONT SIZE="-1">
 Written by Brett Sealey. 13th August 2000.<br>
 Updated by Greg Wilkins. 14th August 2000.<br>
 Last updated: 14th March 2001
-<hr>
+</FONT>
+<P>
+<FONT COLOR="red">
 I told you to clean up your clear-text private key - if you haven't then do it <b>NOW!</b>
+</FONT>
 
-<BR><BR><HR> Return to <A HREF="index.html">JettyFaq</A><HR>
-</body>
-</html>
+<P>
+
+<A HREF="index.html" TITLE="Back to JettyFAQ"><IMG SRC="/jetty/images/info_sm.gif" BORDER="0"><BR
+CLEAR="bottom"> JettyFaq</A>
+<BR><BR>

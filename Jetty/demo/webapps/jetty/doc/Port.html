@@ -1,0 +1,48 @@
+<H2>How do I run Jetty on a specific port?</H2>
+<P>
+
+Jetty will listen on a default port for incoming HTTP requests. The default is port 8080. To change this default, you set the
+system property <code>jetty.port</code> on the Jetty run line, eg:
+<PRE>
+  java -Djetty.port=8999 -jar start.jar config.xml
+</PRE>
+
+To add additional ports on which Jetty listens for HTTP traffic when using Jetty as a standalone HTTP server (ie not as a web
+application server), you add lines such as the following to your startup class:
+<P>
+<PRE>
+    HttpServer server;   /* Jetty HTTP server instance */
+    .
+    .
+    .
+    SocketListener listener = new SocketListener(); /* make a new listener */
+    listener.setPort(8080);   /* set up the port number */
+    server.addListener(listener); // get the server listening on that port
+</PRE>
+
+To add another HTTP listener port to Jetty as a web-app server,  you use your jetty xml configuration file, eg:
+<PRE>
+  &lt;Call name="addListener"&gt;
+    &lt;Arg&gt;
+      &lt;New class="org.mortbay.http.SocketListener"&gt;
+        &lt;Set name="Port"&gt;9999&lt;/Set&gt;
+        &lt;Set name="MinThreads"&gt;5&lt;/Set&gt;
+        &lt;Set name="MaxThreads"&gt;100&lt;/Set&gt;
+        &lt;Set name="MaxIdleTimeMs"&gt;30000&lt;/Set&gt;
+        &lt;Set name="LowResourcePersistTimeMs"&gt;5000&lt;/Set&gt;
+        &lt;Set name="PoolName"&gt;Listener&lt;/Set&gt;
+      &lt;/New&gt;
+    &lt;/Arg&gt;
+  &lt;/Call&gt;
+</PRE>
+
+<P>
+If you don't know the difference between using Jetty as a pure HTTP server and Jetty as a web-app server, or you want more
+information on configurable attributes of port listeners, you should read the <A HREF="/jetty/tut/index.html" TITLE="Read the
+tutorial">Jetty tutorial</A>.
+
+<P>
+
+<A HREF="index.html" TITLE="Back to JettyFAQ"><IMG SRC="/jetty/images/info_sm.gif" BORDER="0"><BR
+CLEAR="bottom"> JettyFaq</A>
+<BR><BR>
