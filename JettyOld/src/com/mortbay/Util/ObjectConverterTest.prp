@@ -1,7 +1,0 @@
-conversions.intTest2 = 999
-conversions.floatTest = 9.99
-conversions.stringTest = This is a field
-conversions.propTest = This is a property
-conversions.complexTest.OK = true
-fails.intTest2 = notAChanceInt
-fails.floatTest = notAChanceFloat
