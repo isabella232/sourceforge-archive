@@ -215,6 +215,12 @@ public class HashUserRealm extends HashMap
         }
         
         /* -------------------------------------------------------- */
+        public boolean isAuthenticated()
+        {
+            return true;
+        }
+    
+        /* -------------------------------------------------------- */
         public boolean isUserInRole(String role)
         {
             return HashUserRealm.this.isUserInRole(this,role);

@@ -752,11 +752,15 @@ public class ServletHandler
             String username=(String)session.getAttribute(__J_AUTHENTICATED);
             UserPrincipal user =
                 shandler.getUserRealm().getUser(username);
-            Code.debug("FORM Authenticated for ",username);
-            httpRequest.setAttribute(HttpRequest.__AuthType,"FORM");
-            httpRequest.setAttribute(HttpRequest.__AuthUser,username);
-            httpRequest.setAttribute(UserPrincipal.__ATTR,user);
-            return true;
+
+            if (user.isAuthenticated())
+            {
+                Code.debug("FORM Authenticated for ",username);
+                httpRequest.setAttribute(HttpRequest.__AuthType,"FORM");
+                httpRequest.setAttribute(HttpRequest.__AuthUser,username);
+                httpRequest.setAttribute(UserPrincipal.__ATTR,user);
+                return true;
+            }
         }
         
         // redirect to login page

@@ -38,9 +38,17 @@ public interface UserPrincipal extends Principal
     public boolean authenticate(String credentials, HttpRequest request);
 
     /* ------------------------------------------------------------ */
+    /** Check authentication status.
+     * @return True if this user is still authenticated.
+     */
+    public boolean isAuthenticated();
+    
+    /* ------------------------------------------------------------ */
     /** Check if the user is in a role. 
      * @param role A role name.
      * @return True if the user can act in that role.
      */
     public boolean isUserInRole(String role);
+
+    
 }
