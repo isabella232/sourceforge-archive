@@ -20,7 +20,6 @@ public interface OutputObserver
         __FIRST_WRITE=0,
         __RESET_BUFFER=1,
         __COMMITING=2,
-        __COMMITED=3,
         __CLOSING=4,
         __CLOSED=5;
     

@@ -461,9 +461,6 @@ public class HttpConnection
                   _response.commitHeader();
               break;
               
-          case OutputObserver.__COMMITED:
-              break;
-              
           case OutputObserver.__CLOSING:
               _response.complete();
               break;
@@ -971,7 +968,7 @@ public class HttpConnection
                     
                     // Commit the response
                     try{
-                        _outputStream.flush(_outputStream.isChunking());
+                        _outputStream.flush(true);
                         bytes_written=_outputStream.getBytesWritten();
                         _outputStream.resetStream();
                         _outputStream.addObserver(this);

@@ -296,7 +296,7 @@ public class ChunkableOutputStream extends FilterOutputStream
      * reset if chunking is enabled.
      */
     public void resetStream()
-        throws IllegalStateException
+        throws IOException, IllegalStateException
     {
         if (isChunking())
             throw new IllegalStateException("Chunking");
@@ -308,6 +308,7 @@ public class ChunkableOutputStream extends FilterOutputStream
         _committed=false;
         _written=false;
         _buffer.reset();
+        
         out=_buffer;    
         _nulled=false;
         _bytes=0;
@@ -387,25 +388,44 @@ public class ChunkableOutputStream extends FilterOutputStream
     {
         flush(false);
     }
+
+    /* ------------------------------------------------------------ */
+    public void commit()
+        throws IOException
+    {
+        _committed=true;
+        notify(OutputObserver.__COMMITING);
+    }
     
     /* ------------------------------------------------------------ */
-    public void flush(boolean endChunking) throws IOException
+    /** Flush.
+     * @param complete If true, filters are closed, chunking ended and
+     * trailers written. 
+     * @exception IOException 
+     */
+    public void flush(boolean complete)
+        throws IOException
     {
         // Flush filters
         if (out!=null)
+        {
             out.flush();
-
+            if (complete)
+            {
+                if (out!=_buffer)
+                    out.close();
+                out=null;
+            }
+        }
+        
+        
         // Save non-raw size
         int size=_buffer.size();
         
         // Do we need to commit?
-        boolean commiting=false;
         if (!_committed && (size>0 || (_rawWriter!=null && _rawWriter.length()>0)))
         {
-            // this may recurse to flush so set committed now
-            _committed=true;
-            commiting=true;
-            notify(OutputObserver.__COMMITING);
+            commit();            
             if (out!=null)
                 out.flush();
             size=_buffer.size();
@@ -433,7 +453,7 @@ public class ChunkableOutputStream extends FilterOutputStream
                         _buffer.write(__CRLF_B);
                     }
 
-                    if (endChunking)
+                    if (complete)
                     {
                         _buffer.write(__CHUNK_EOF_B);
                         if (_trailer==null)
@@ -446,7 +466,7 @@ public class ChunkableOutputStream extends FilterOutputStream
                     _buffer.prewrite(_rawWriter.getBuf(),0,_rawWriter.length());
                 
                 // Handle any trailers
-                if (_trailer!=null && endChunking)
+                if (_trailer!=null && complete)
                 {
                     Writer writer=getRawWriter();
                     _rawWriter.reset();
@@ -466,15 +486,11 @@ public class ChunkableOutputStream extends FilterOutputStream
             if (_rawWriter!=null)
                 _rawWriter.reset();
 
-            if (endChunking)
+            if (complete)
             {
-                if (!_chunking)
-                    throw new IllegalStateException("Not Chunking");
                 _chunking=false;
             }
             
-            if (commiting)
-                notify(OutputObserver.__COMMITED);
         }
     }
 
@@ -494,18 +510,10 @@ public class ChunkableOutputStream extends FilterOutputStream
         // Close
         try {
             notify(OutputObserver.__CLOSING);
-            
-            // close filters
-            out.close();
+            flush(true);
             out=null;
-
-            if (_chunking)
-                flush(true);
-            else
-            {
-                flush(false);
+            if (!_chunking)
                 _realOut.close();
-            }
             
             notify(OutputObserver.__CLOSED);
         }

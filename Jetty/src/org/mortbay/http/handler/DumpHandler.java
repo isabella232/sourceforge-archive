@@ -124,10 +124,10 @@ public class DumpHandler extends NullHandler
             }
         }
         
+        writer.write("</PRE>\n<H3>Cookies:</H3>\n<PRE>");
         Cookie[] cookies=request.getCookies();
         if (cookies!=null && cookies.length>0)
         {
-            writer.write("</PRE>\n<H3>Cookies:</H3>\n<PRE>");
             for(int c=0;c<cookies.length;c++)
             {
                 Cookie cookie=cookies[c];
@@ -138,11 +138,10 @@ public class DumpHandler extends NullHandler
             }
         }
         
-        
+        writer.write("</PRE>\n<H3>Attributes:</H3>\n<PRE>");
         Enumeration attributes=request.getAttributeNames();
         if (attributes!=null && attributes.hasMoreElements())
         {
-            writer.write("</PRE>\n<H3>Attributes:</H3>\n<PRE>");
             while(attributes.hasMoreElements())
             {
                 String attr=attributes.nextElement().toString();
@@ -167,20 +166,40 @@ public class DumpHandler extends NullHandler
             writer.write(e.toString());
         }
         
-        writer.write("</PRE>\n<H3>Response:</H3>\n<PRE>");
-        writer.write(response.toString());
-        writer.write("</PRE></HTML>");
-        writer.flush();
-        response.setIntField(HttpFields.__ContentLength,buf.size());
-        buf.writeTo(out);
-
         // You wouldn't normally set a trailer like this, but
         // we don't want to commit the output to force trailers as
         // it makes test harness messy
         request.getAcceptableTransferCodings();
+        HttpFields trailer=null;
         if (response.acceptTrailer())
-            response.getTrailer().put("TestTrailer","Value");
-
+        {
+            trailer=response.getTrailer();
+            trailer.put("TestTrailer","Value");
+        }
+        
+        // commit now
+        writer.flush();
+        response.setIntField(HttpFields.__ContentLength,buf.size()+1000);
+        buf.writeTo(out);
+        out.flush();
+        
+        // Now add the response
+        buf.reset();
+        writer.write("</PRE>\n<H3>Response:</H3>\n<PRE>");
+        writer.write(response.toString());
+        if (trailer!=null)
+        {
+            writer.write("</PRE>\n<H3>Trailer:</H3>\n<PRE>");
+            writer.write(trailer.toString());
+        }
+        writer.write("</PRE></HTML>");
+        writer.flush();
+        for (int pad=998-buf.size();pad-->0;)
+            writer.write(" ");
+        writer.write("\015\012");
+        writer.flush();
+        buf.writeTo(out);
+            
         request.setHandled(true);
     }
 }

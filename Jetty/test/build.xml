@@ -132,6 +132,7 @@ Test results in ${test.results}
     </junit>
   </target>
 
+  <!-- ==================================================================== -->
   <target name="check.junit.task" unless="junit.task.available" >
     <fail message="
  The &lt;junit&gt; task is not available.

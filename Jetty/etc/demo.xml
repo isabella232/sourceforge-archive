@@ -93,6 +93,10 @@
     </Call>
 
     <Call name="addHandler">
+      <Arg><New class="org.mortbay.http.handler.ContentEncodingHandler"></New></Arg>
+    </Call>
+
+    <Call name="addHandler">
       <Arg><New class="org.mortbay.http.handler.HTAccessHandler">
 	    <Set name="AccessFile">.htaccess</Set>
       </New></Arg>

@@ -37,6 +37,7 @@ import org.mortbay.util.SingletonList;
 import org.mortbay.util.StringMap;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.UrlEncoded;
+import org.mortbay.util.LazyList;
 
 /* ------------------------------------------------------------ */
 /** HTTP Fields.
@@ -411,6 +412,28 @@ public class HttpFields
     
     /* ------------------------------------------------------------ */
     private static Float __one = new Float("1.0");
+    private static Float __zero = new Float("0.0");
+    private static StringMap __qualities=new StringMap();
+    static
+    {
+        __qualities.put(null,__one);
+        __qualities.put("1.0",__one);
+        __qualities.put("1",__one);
+        __qualities.put("0.9",new Float("0.9"));
+        __qualities.put("0.8",new Float("0.8"));
+        __qualities.put("0.7",new Float("0.7"));
+        __qualities.put("0.66",new Float("0.66"));
+        __qualities.put("0.6",new Float("0.6"));
+        __qualities.put("0.5",new Float("0.5"));
+        __qualities.put("0.4",new Float("0.4"));
+        __qualities.put("0.33",new Float("0.33"));
+        __qualities.put("0.3",new Float("0.3"));
+        __qualities.put("0.2",new Float("0.2"));
+        __qualities.put("0.1",new Float("0.1"));
+        __qualities.put("0",__zero);
+        __qualities.put("0.0",__zero);
+    }
+    
     
     /* -------------------------------------------------------------- */
     private ArrayList _fields=new ArrayList(15);
@@ -1074,12 +1097,26 @@ public class HttpFields
     /* ------------------------------------------------------------ */
     public static Float getQuality(String value)
     {
-        HashMap params = new HashMap(7);
+        if (value==null)
+            return __zero;
+        
+        int qe=value.indexOf(";");
+        if (qe++<0 || qe==value.length())
+            return __one;
+        
+        if (value.charAt(qe++)=='q');
+        {
+            qe++;
+            Map.Entry entry=__qualities.getEntry(value,qe,value.length()-qe);
+            if (entry!=null)
+                return (Float)entry.getValue();
+        }
+        
+        HashMap params = new HashMap(3);
         valueParameters(value,params);
         String qs=(String)params.get("q");
-        Float q=__one;
-        
-        if (qs!=null)
+        Float q=(Float)__qualities.get(qs);
+        if (q==null)
         {
             try{q=new Float(qs);}
             catch(Exception e){q=__one;}
@@ -1097,87 +1134,50 @@ public class HttpFields
         if(enum==null || !enum.hasMoreElements())
             return Collections.EMPTY_LIST;
 
-        String value=null;
-        Float quality=null;
-        LinkedList list=null;
-        LinkedList qual=null;
-        
-        // Assume that we will only have zero or 1 elements1
+        LazyList list=null;
+        LazyList qual=null;
+
+        // Assume list will be well ordered and just add nonzero
         while(enum.hasMoreElements())
         {
             String v=enum.nextElement().toString();
             Float q=getQuality(v);
-            
+
             if (q.floatValue()>=0.001)
             {
-                // Is this the first OK value?
-                if (value==null)
-                {
-                    value=v;
-                    quality=q;
-                }
-                else
-                {
-                    // we have more than 1 OK value, so build list
-                    list = new LinkedList();
-                    qual = new LinkedList();
-                    if (quality.floatValue()>q.floatValue())
-                    {
-                        list.add(value);
-                        list.add(v);
-                        qual.add(quality);
-                        qual.add(q);
-                    }
-                    else
-                    {
-                        list.add(v);
-                        list.add(value);
-                        qual.add(q);
-                        qual.add(quality);
-                    }
-                    break;
-                }
+                list=LazyList.add(list,v);
+                qual=LazyList.add(qual,q);
             }
         }
-        
-        // Do we have any values?
-        if (value==null)
-            return Collections.EMPTY_LIST;
 
-        // Do we have only 1 value?
-        if (list==null)
-            return SingletonList.newSingletonList(value);
+        List vl=LazyList.getList(list,false);
+        if (vl.size()<2)
+            return vl;
 
-        // Add remaining values
-        while(enum.hasMoreElements())
+        List ql=LazyList.getList(qual,false);
+
+        // sort list with swaps
+        Float last=__zero;
+        for (int i=vl.size();i-->0;)
         {
-            String v=enum.nextElement().toString();
-            Float q=getQuality(v);
-            if (q.floatValue()<0.001)
-                continue;
-
-            ListIterator vi = list.listIterator();
-            ListIterator qi = qual.listIterator();
-        
-            // Insert sort
-            while(vi.hasNext())
+            Float q = (Float)ql.get(i);
+            if (last.compareTo(q)>0)
             {
-                String cv=(String)vi.next();
-                Float cq=(Float)qi.next();
-                if(cq.floatValue()<q.floatValue())
-                {
-                    qi.previous();
-                    vi.previous();
-                    break;
-                }
+                Object tmp=vl.get(i);
+                vl.set(i,vl.get(i+1));
+                vl.set(i+1,tmp);
+                ql.set(i,ql.get(i+1));
+                ql.set(i+1,q);
+                last=__zero;
+                i=vl.size();
+                continue;
             }
-            vi.add(v);
-            qi.add(q);
+            last=q;
         }
-
-        qual.clear();
-        return list;
+        ql.clear();
+        return vl;
     }
+    
 
 
     /* ------------------------------------------------------------ */

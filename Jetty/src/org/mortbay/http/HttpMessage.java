@@ -785,14 +785,14 @@ public interface HttpMessage
         abstract void writeHeader(Writer writer)
             throws IOException;
 
-    /* ------------------------------------------------------------ */
+        /* ------------------------------------------------------------ */
         public synchronized void commitHeader()
             throws IOException
         {
             ChunkableOutputStream out = (ChunkableOutputStream)getOutputStream();
             if (out==null)
                 throw new IllegalStateException("No output stream");
-        
+
             _connection.setupOutputStream();
             Writer writer = out.getRawWriter();
             writeHeader(writer);
@@ -802,7 +802,7 @@ public interface HttpMessage
         /* ------------------------------------------------------------ */
         /** Commit the message.
          * Take whatever actions possible to move the message to the SENDING state.
-     */
+         */
         public synchronized void commit()
             throws IOException, IllegalStateException
         {
@@ -812,13 +812,13 @@ public interface HttpMessage
             if (Code.verbose(99))
                 Code.debug("commit from "+__state[_state]);
         
-            OutputStream out = getOutputStream();
+            ChunkableOutputStream out = (ChunkableOutputStream)getOutputStream();
         
             switch(_state)
             {
               case __MSG_EDITABLE:
-                  commitHeader();
-                  out.flush();
+                  out.commit();
+                  out.flush(false);
                   break;
               case __MSG_BAD:
                   throw new IllegalStateException("BAD");
