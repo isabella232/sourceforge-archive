@@ -15,6 +15,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.JarURLConnection;
 import java.net.Socket;
@@ -178,6 +179,7 @@ public class Tests extends junit.framework.TestCase
 
 
             // Test string is cached
+            dc = new DateCache();
             String s1=dc.format(System.currentTimeMillis());
             dc.format(1);
             String s2=dc.format(System.currentTimeMillis());
@@ -262,6 +264,7 @@ public class Tests extends junit.framework.TestCase
 
     /* ------------------------------------------------------------ */
     public static void testB64()
+        throws UnsupportedEncodingException
     {
 	    // Perform basic reversibility tests
        assertEquals("decode(encode())",       B64Code.decode(B64Code.encode("")),"");
@@ -286,7 +289,7 @@ public class Tests extends junit.framework.TestCase
 	    byte[] allValues= new byte[256];
 	    for (int i=0; i<256; i++)
          allValues[i] = (byte) i;
-	    String input = new String(allValues);
+	    String input = new String(allValues, StringUtil.__ISO_8859_1);
             String output=B64Code.decode(B64Code.encode(input));
 
             for (int i=0;i<256;i++)

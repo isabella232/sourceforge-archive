@@ -52,8 +52,7 @@ public class B64Code
     {
         try
         {
-            char[] encoded = encode(s.getBytes(StringUtil.__ISO_8859_1));
-            return new String(encoded);
+            return encode(s, null);
         }
         catch(UnsupportedEncodingException e)
         {
