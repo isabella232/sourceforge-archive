@@ -18,7 +18,7 @@ import java.util.Set;
  * communications ability, but it does assist with query string
  * formatting.
  * <P>ISO_8859_1 encoding is used by default for % encoded characters. This
- * may be overridden with the org.mortbay.util.URI.encoding system property.
+ * may be overridden with the org.mortbay.util.URI.charset system property.
  * @see UrlEncoded
  * @version $Id$
  * @author Greg Wilkins (gregw)
