@@ -11,9 +11,10 @@ import java.net.*;
 import java.util.*;
 
 /* ------------------------------------------------------------ */
-/** 
+/** Socket HTTP Listener.
  *
- * @see
+ * Temparary implementation, just to get the ball rolling.
+ * 
  * @version 1.0 Fri Oct  8 1999
  * @author Greg Wilkins (gregw)
  */
@@ -55,8 +56,14 @@ public class SocketListener
     {
         return super.getPort();
     }
-    
 
+    /* --------------------------------------------------------------- */
+    public void start()
+    {
+        super.start();
+        Log.event("Started SocketListener on "+getInetAddrPort());
+    }
+    
     /* ------------------------------------------------------------ */
     /** Handle Job.
      * Implementation of ThreadPool.handle(), calls handleConnection.
@@ -66,7 +73,7 @@ public class SocketListener
     {
         try
         {
-            System.err.println("Accepted "+socket);
+            Log.event("Accepted "+socket);
             ChunkableInputStream in  =
                 new ChunkableInputStream(socket.getInputStream());
             ChunkableOutputStream out =

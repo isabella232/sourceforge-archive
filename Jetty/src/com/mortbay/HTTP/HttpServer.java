@@ -222,7 +222,7 @@ public class HttpServer
             InetAddrPort address = new InetAddrPort(8080);
             SocketListener listener = new SocketListener(address);
             listener.getServer()._fileHandler =
-                new com.mortbay.HTTP.Handler.FileHandler("FileBase",
+                new com.mortbay.HTTP.Handler.FileHandler(".",
                                                          "index.html",
                                                          true,
                                                          true,

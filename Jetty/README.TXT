@@ -1,11 +1,11 @@
 
 Jetty 3
 =======
-
 This is an alpha release of the Jetty 3 project.  It is currently not
-usable as a WWW server, but is released now to keep the development open.
+usable as a servlet server, but is released now to keep the development
+open.
 
-Jetty 3 has started from a clean slate.  Classes are moved from Jetty 2
+Jetty 3 was started from a clean slate.  Classes are moved from Jetty 2
 on an as needed basis.  
 
 Currently the release contains the Utils package (with about half a 
@@ -15,7 +15,6 @@ See the VERSION.TXT file for more detail.
 
 Environment
 ===========
-
 Development has been done in JDK1.1 with the 1.2 Collection classes.
 The compiled classes are currently kept in the src directory, so
 the following CLASSPATH is required (or the non unix equivalent):
@@ -35,25 +34,28 @@ harnesses can be run with
 
 WWW Server
 ==========
-A trivial WWW server can be run with
+A HTTP server can be run with
  
   java com.mortbay.HTTP.HttpServer
 
-It always runs at port 8080 and just does a simple dump of the request.
+It always runs at port 8080 and serves files or does a simple request dump 
+if a file is not found.  If run from the install directory, a set of
+simple demo pages are served.
 
 
 Distribution
 ============
 Currently the jetty.mortbay.com host has a dead hard disk, so no public
-CVS repository is available yet (hopefully next week).
+CVS repository is available yet.
 
 For now, the package and collections jar will be made available on the
-document vault of the jetty3-discuss egroups page:
+Mort Bay FTP site or the document vault of the jetty3-discuss egroups page:
 
+   ftp://ftp.mortbay.com/pub
    http://www.egroups.com/docvault/jetty3-discuss/
 
 
-Contributions
-=============
+How to Contribute
+=================
 Comments, contributions, feedback, bugs, testing, etc. please....
 

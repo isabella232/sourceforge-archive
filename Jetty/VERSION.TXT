@@ -2,7 +2,9 @@
 Jetty-3.0.A0 -
    + LineInput uses own buffering and uses character encodings.
    + Added MultiMap for common handling of multiple valued parameters.
-   + Added parameter reading to HttpRequest
+   + Added parameters to HttpRequest
+   + Quick port of FileHandler
+   + Setup demo pages.
 
 Jetty-3.0.A0 - 9 Oct 1999
    + Started fresh repository in CVS
