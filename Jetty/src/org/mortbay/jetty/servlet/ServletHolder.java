@@ -206,7 +206,7 @@ public class ServletHolder extends Holder
             throw ex;
         }        
 
-	_config=new Config();
+        _config=new Config();
 
         if (javax.servlet.SingleThreadModel.class
             .isAssignableFrom(_class))
@@ -278,6 +278,8 @@ public class ServletHolder extends Holder
                 if (_servlets.size()==0)
                 {
                     servlet= (Servlet)newInstance();
+                    if(_config==null)
+                        _config=new Config();
                     servlet.init(_config);
                 }
                 else
@@ -287,8 +289,10 @@ public class ServletHolder extends Holder
             }
             
             if (_servlet==null)
-	    {
+            {
                 _servlet=(Servlet)newInstance();
+                if(_config==null)
+                    _config=new Config();
                 _servlet.init(_config);
             }
 
@@ -310,7 +314,7 @@ public class ServletHolder extends Holder
             _servlet=null;
             _config=null;
             Code.warning(e);
-            throw new UnavailableException(_servlet,e.toString());
+            throw new UnavailableException(e.toString());
         }    
     }
     
