@@ -1,7 +1,10 @@
+Jetty3Extra Versions
+--------------------
 
+Jetty3Extra-0.0. - 30 Mar 2001
   + Improved JMX HttpListenerMBean with ThreadPool and ThreadedServer support.
 
-Jetty3Extra-0.0.1 - 18 Mar 2001
 
+Jetty3Extra-0.0.1 - 18 Mar 2001
   + Extraced from Jetty3 release.
 
