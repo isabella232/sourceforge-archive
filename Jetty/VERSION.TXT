@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
  + DIGEST auth handles qop, stale and maxNonceAge.
+ + Less verbose warning for non validating xml parser.
 
 Jetty-5.0.RC2 - 2 July 2004
  + Fixed DIGEST challenge delimiters
