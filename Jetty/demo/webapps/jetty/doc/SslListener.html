@@ -293,6 +293,13 @@ yLBF4K9469LZRhVSzfc=
 If a sun provider key/certificate pair was generated, then they are already 
 loaded into the JKS keystore and this step can be 
 <a href="#usekeys">skipped</A>.
+<P>
+<font color=red><I>Jason Gilbert has contributed <A HREF="/javadoc/org/mortbay/util/PKCS12Import.html">PKCS12Import</A> which can 
+load a PKCS12 key directly and avoid the bouncy castle proceedure described
+below.  As we have not fully tested this yet we will continue to describe
+both methods.
+</I></font>
+
 
 <p>
 During this step you will be doing a few exposed things from a security 
