@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
 Jetty-4.0.1 -
+ + 3DES Keylength was being reported as 0. Now reports 168 bits.
  + Implemented the run-as servlet tag.
  + Added confidential and integral redirections to HttpListener
  + Fixed ServletResponse.reset() to resetBuffer.
