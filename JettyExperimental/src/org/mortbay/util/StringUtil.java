@@ -250,6 +250,17 @@ public class StringUtil
             c= 'a'+(c-'0'-10);
         buf.append((char)c);
     }
+
+    
+    /* ------------------------------------------------------------ */
+    public static void append2digits(StringBuffer buf,int i)
+    {
+        if (i<100)
+        {
+            buf.append((char)(i/10+'0'));
+            buf.append((char)(i%10+'0'));
+        }
+    }
     
     /* ------------------------------------------------------------ */
     /** Return a non null string.

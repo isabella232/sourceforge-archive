@@ -55,6 +55,17 @@
 
   <currentVersion>EXP0</currentVersion>
 
+  <!-- ============ -->
+  <!-- Dependencies -->
+  <!-- ============ -->
+  <dependencies>
+     <dependency>
+        <groupId>commons-logging</groupId>
+        <artifactId>commons-logging</artifactId>
+        <version>1.0.3</version>
+        <url>http://jakarta.apache.org/commons/logging/</url>
+     </dependency>
+  </dependencies>
 
   <!-- ========== -->
   <!-- Developers -->

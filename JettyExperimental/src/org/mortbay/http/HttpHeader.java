@@ -6,12 +6,16 @@
 package org.mortbay.http;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -47,15 +51,107 @@ public class HttpHeader
     /* ------------------------------------------------------------ */
     public final static String __separators = ", \t";    
 
+    /* ------------------------------------------------------------ */
+    private static String[] DAYS= { "Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat" };
+    private static String[] MONTHS= { "Jan","Feb","Mar","Apr","May","Jun",
+                                      "Jul","Aug","Sep","Oct","Nov","Dec","Jan" };
+
+    /* ------------------------------------------------------------ */
+    /** Format HTTP date
+     * "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or 
+     * "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for cookies
+     */
+    public static String formatDate(long date, boolean cookie)
+    {
+        StringBuffer buf = new StringBuffer(32);
+        GregorianCalendar gc = new GregorianCalendar(__GMT);
+        gc.setTimeInMillis(date);
+        formatDate(buf,gc,cookie);
+        return buf.toString();
+    } 
+
+    /* ------------------------------------------------------------ */
+    /** Format HTTP date
+     * "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or 
+     * "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for cookies
+     */
+    public static String formatDate(Calendar calendar, boolean cookie)
+    {
+        StringBuffer buf = new StringBuffer(32);
+        formatDate(buf,calendar,cookie);
+        return buf.toString();
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Format HTTP date
+     * "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or 
+     * "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for cookies
+     */
+    public static String formatDate(StringBuffer buf, long date, boolean cookie)
+    {
+        GregorianCalendar gc = new GregorianCalendar(__GMT);
+        gc.setTimeInMillis(date);
+        formatDate(buf,gc,cookie);
+        return buf.toString();
+    } 
+
+    /* ------------------------------------------------------------ */
+    /** Format HTTP date
+     * "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or 
+     * "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for cookies
+     */
+    public static void formatDate(StringBuffer buf,Calendar calendar, boolean cookie)
+    {
+        // "EEE, dd MMM yyyy HH:mm:ss 'GMT'"
+        // "EEE, dd-MMM-yy HH:mm:ss 'GMT'",     cookie
+        
+        int day_of_week  = calendar.get(Calendar.DAY_OF_WEEK);
+        int day_of_month = calendar.get(Calendar.DAY_OF_MONTH);
+        int month = calendar.get(Calendar.MONTH);
+        int year = calendar.get(Calendar.YEAR);
+        int century = year/100;
+        year=year%100;
+        
+        int epoch=(int)((calendar.getTimeInMillis()/1000) % (60*60*24));
+        int seconds=epoch%60;
+        epoch=epoch/60;
+        int minutes=epoch%60;
+        int hours=epoch/60;
+        
+        buf.append(DAYS[day_of_week]);
+        buf.append(',');
+        buf.append(' ');
+        StringUtil.append2digits(buf,day_of_month);
+        
+        if (cookie)
+        {
+            buf.append('-');
+            buf.append(MONTHS[month]);
+            buf.append('-');
+            StringUtil.append2digits(buf,year);
+        }
+        else
+        {
+            buf.append(' ');
+            buf.append(MONTHS[month]);
+            buf.append(' ');
+            StringUtil.append2digits(buf,century);
+            StringUtil.append2digits(buf,year);
+        }
+        buf.append(' ');
+        StringUtil.append2digits(buf,hours);
+        buf.append(':');
+        StringUtil.append2digits(buf,minutes);
+        buf.append(':');
+        StringUtil.append2digits(buf,seconds);
+        buf.append(" GMT");
+    }    
+
     /* -------------------------------------------------------------- */
+    private static TimeZone __GMT = TimeZone.getTimeZone("GMT");
     public final static DateCache __dateCache = 
-        new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'",Locale.US);
-    public final static SimpleDateFormat __dateSend = 
-        new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'",Locale.US);
-    public final static SimpleDateFormat __dateCookie = 
-        new SimpleDateFormat("EEE, dd-MMM-yyyy HH:mm:ss 'GMT'",Locale.US);
-    public final static String __01Jan1970=
-        '"'+HttpHeader.__dateSend.format(new Date(0))+'"';
+        new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'",
+                      Locale.US);     
     
     /* ------------------------------------------------------------ */
     private final static String __dateReceiveFmt[] =
@@ -86,21 +182,18 @@ public class HttpHeader
     public static SimpleDateFormat __dateReceive[];
     static
     {
-        TimeZone tz = TimeZone.getTimeZone("GMT");
-        tz.setID("GMT");
-        __dateSend.setTimeZone(tz);
-        __dateCache.setTimeZone(tz); 
-        __dateCookie.setTimeZone(tz);
-       
+        __GMT.setID("GMT");
+        __dateCache.setTimeZone(__GMT); 
         __dateReceive = new SimpleDateFormat[__dateReceiveFmt.length];
         for(int i=0;i<__dateReceive.length;i++)
         {
             __dateReceive[i] =
                 new SimpleDateFormat(__dateReceiveFmt[i],Locale.US);
-            __dateReceive[i].setTimeZone(tz);
+            __dateReceive[i].setTimeZone(__GMT);
         }
-    }
-
+    }                 
+    public final static String __01Jan1970=formatDate(0,false);
+    public final static Buffer __01Jan1970_BUFFER=new ByteArrayBuffer(__01Jan1970);
     
     /* -------------------------------------------------------------- */
     protected Buffer _method;
@@ -111,6 +204,9 @@ public class HttpHeader
     protected ArrayList _fields=new ArrayList(20);
     protected int _revision;
     protected HashMap _bufferMap=new HashMap(32);
+    protected SimpleDateFormat _dateReceive[]=new SimpleDateFormat[__dateReceive.length];
+    private StringBuffer _dateBuffer;
+    private Calendar _calendar;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -330,13 +426,13 @@ public class HttpHeader
         };
     }
     /* ------------------------------------------------------------ */
-    protected Field getField(String name)
+    public Field getField(String name)
     {       
         return (Field)_bufferMap.get(HttpHeaders.CACHE.lookup(name));
     }
     
     /* ------------------------------------------------------------ */
-    protected Field getField(Buffer name)
+    public Field getField(Buffer name)
     {       
         return (Field)_bufferMap.get(name);
     }
@@ -700,10 +796,13 @@ public class HttpHeader
         if (val==null)
             return -1;
 
-        for (int i=0;i<__dateReceive.length;i++)
+        for (int i=0;i<_dateReceive.length;i++)
         {
+            if (_dateReceive[i]==null)
+                _dateReceive[i]=(SimpleDateFormat)__dateReceive[i].clone();
+                
             try{
-                Date date=(Date)__dateReceive[i].parseObject(val);
+                Date date=(Date)_dateReceive[i].parseObject(val);
                 return date.getTime();
             }
             catch(java.lang.Exception e)
@@ -712,10 +811,10 @@ public class HttpHeader
         if (val.endsWith(" GMT"))
         {
             val=val.substring(0,val.length()-4);
-            for (int i=0;i<__dateReceive.length;i++)
+            for (int i=0;i<_dateReceive.length;i++)
             {
                 try{
-                    Date date=(Date)__dateReceive[i].parseObject(val);
+                    Date date=(Date)_dateReceive[i].parseObject(val);
                     return date.getTime();
                 }
                 catch(java.lang.Exception e)
@@ -737,27 +836,6 @@ public class HttpHeader
         put(name, Integer.toString(value));
     }
 
-    /* -------------------------------------------------------------- */
-    /**
-     * Sets the value of a date field.
-     * @param name the field name
-     * @param date the field date value
-     */
-    public void putDateField(String name, Date date)
-    {
-        put(name, __dateSend.format(date));
-    }
-    
-    /* -------------------------------------------------------------- */
-    /**
-     * Adds the value of a date field.
-     * @param name the field name
-     * @param date the field date value
-     */
-    public void addDateField(String name, Date date)
-    {
-        add(name, __dateSend.format(date));
-    }
     
     /* -------------------------------------------------------------- */
     /**
@@ -767,7 +845,15 @@ public class HttpHeader
      */
     public void addDateField(String name, long date)
     {
-        add(name, __dateSend.format(new Date(date)));
+        if (_dateBuffer==null)
+        {
+            _dateBuffer=new StringBuffer(32);
+            _calendar=new GregorianCalendar(__GMT);
+        }
+        _dateBuffer.setLength(0);
+        _calendar.setTimeInMillis(date);
+        formatDate(_dateBuffer, _calendar, false);
+        add(name, _dateBuffer.toString());
     }
     
     /* -------------------------------------------------------------- */
@@ -778,7 +864,101 @@ public class HttpHeader
      */
     public void putDateField(String name, long date)
     {
-        put(name, __dateSend.format(new Date(date)));
+        if (_dateBuffer==null)
+        {
+            _dateBuffer=new StringBuffer(32);
+            _calendar=new GregorianCalendar(__GMT);
+        }
+        _dateBuffer.setLength(0);
+        _calendar.setTimeInMillis(date);
+        formatDate(_dateBuffer, _calendar, false);
+        put(name, _dateBuffer.toString());
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Format a set cookie value
+     * @param cookie The cookie.
+     * @param cookie2 If true, use the alternate cookie 2 header
+     */
+    public void addSetCookie(
+        String name,
+        String value,
+        String path,
+        String domain, 
+        long maxAge,
+        int version,
+        String extraParams)
+    {
+        
+        // Check arguments
+        if (name==null || name.length()==0)
+            throw new IllegalArgumentException("Bad cookie name");
+
+        // Format value and params
+        StringBuffer buf = new StringBuffer(128);
+        String name_value_params=null;
+        synchronized(buf)
+        {
+            buf.append(name);
+            buf.append('=');
+            if (value!=null && value.length()>0)
+            {
+                if (version==0)
+                {
+                    // TODO - better than this
+                    try{buf.append(URLEncoder.encode(value,StringUtil.__ISO_8859_1));}
+                    catch(UnsupportedEncodingException e){e.printStackTrace();}
+                }
+                else
+                    QuotedStringTokenizer.quote(buf,value);
+            }
+
+            if (version>0)
+            {
+                buf.append(";version=");
+                buf.append(version);
+            }
+            if (path!=null && path.length()>0)
+            {
+                buf.append(";path=");
+                buf.append(path);
+            }
+            if (domain!=null && domain.length()>0)
+            {
+                buf.append(";domain=");
+                buf.append(domain.toLowerCase());// lowercase for IE
+            }
+            
+            if (maxAge>=0)
+            {
+                if (version==0)
+                {
+                    buf.append(";expires=");
+                    if (maxAge==0)
+                        buf.append(__01Jan1970);
+                    else
+                        formatDate(buf,System.currentTimeMillis()+1000L*maxAge,true);
+                }
+                else
+                {
+                    buf.append (";max-age=");
+                    buf.append (maxAge);
+                }
+            }
+            else if (version>0)
+            {
+                buf.append (";discard");
+            }
+            if (extraParams!=null)
+            {
+                buf.append(extraParams);
+            }
+            
+            // TODO - straight to Buffer?
+            name_value_params = buf.toString();
+        }
+        put(HttpHeaders.EXPIRES_BUFFER,__01Jan1970_BUFFER);
+        add(HttpHeaders.SET_COOKIE_BUFFER,new ByteArrayBuffer(name_value_params)); 
     }
 
     
@@ -922,13 +1102,19 @@ public class HttpHeader
      */
     public void destroy()
     {   
-        for (int i=_fields.size();i-->0;)
+        if (_fields!=null)
         {
-            Field field=(Field)_fields.get(i);
-            if (field!=null)
-                field.destroy();
+            for (int i=_fields.size();i-->0;)
+            {
+                Field field=(Field)_fields.get(i);
+                if (field!=null)
+                    field.destroy();
+            }
         }
         _fields=null;
+        _dateBuffer=null;
+        _calendar=null;
+        _dateReceive=null;
     }
     
     
@@ -1173,7 +1359,7 @@ public class HttpHeader
         }
 
         /* ------------------------------------------------------------ */
-        String getDisplayName()
+        public String getDisplayName()
         {
             return _name.toString();
         }

@@ -9,59 +9,60 @@ package org.mortbay.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
-
 import org.mortbay.io.Buffer;
 
 /* ------------------------------------------------------------------------------- */
-/** HTTP OutputStream.
- * Based on HttpOutput and assumes a blocking buffer implementation. 
- * 
+/**
+ * HTTP OutputStream. Based on HttpOutput and assumes a blocking buffer implementation.
  */
 public class HttpOutputStream extends OutputStream
 {
+    private byte[] _b1=new byte[0];
+    private HttpOutput _out;
+
     /**
      * 
      */
-    public HttpOutputStream(Buffer buffer, int headerReserve)
+    public HttpOutputStream(Buffer buffer,HttpHeader header,int headerReserve)
     {
-        _out=new HttpOutput(buffer,headerReserve);
-    }
-    
-    public Buffer getBuffer()
-    {
-        return _out.getBuffer();
+        _out=new HttpOutput(buffer,header,headerReserve);
     }
 
-    /**
-     * Set the output version.
-     * For responses, the version may differ from that indicated by the header.
-     * @param ordinal HttpVersions ordinal
-     */
-    public void setVersionOrdinal(int ordinal)
-    {
-        _out.setVersionOrdinal(ordinal);
-    }
-
-    /* 
+    /*
      * @see java.io.OutputStream#close()
      */
     public void close() throws IOException
     {
-        if (_out.isClosed())
+        if(_out.isClosed())
             return;
-            
         _out.close();
-        
         while(_out.isFlushing())
             _out.flush();
     }
-    
-    /* 
+
+    /* ------------------------------------------------------------------------------- */
+    /**
+     * destroy.
+     */
+    public void destroy()
+    {
+        if(_out!=null)
+            _out.destroy();
+        _out=null;
+        _b1=null;
+    }
+
+    /*
      * @see java.io.OutputStream#flush()
      */
     public void flush() throws IOException
     {
         while(!_out.flush());
+    }
+
+    public Buffer getBuffer()
+    {
+        return _out.getBuffer();
     }
 
     public HttpHeader getHttpHeader()
@@ -76,40 +77,55 @@ public class HttpOutputStream extends OutputStream
     {
         return _out.isCommitted();
     }
-    
+
     public boolean isPersistent()
     {
         return _out.isPersitent();
     }
-    
+
     public void resetBuffer()
     {
         _out.resetBuffer();
     }
-    
+
+    public void resetStream()
+    {
+        _out.reset();
+    }
+
+    public void sendContinue()
+    throws IOException
+    {
+        _out.sendContinue();
+    }
+
     public void setHeadResponse(boolean h)
     {
         _out.setHeadResponse(h);
     }
-    
-    public void sendContinue()
-        throws IOException
+
+    /**
+     * Set the output version. For responses, the version may differ from that indicated by the
+     * header.
+     * 
+     * @param ordinal HttpVersions ordinal
+     */
+    public void setVersionOrdinal(int ordinal)
     {
-        _out.sendContinue();
+        _out.setVersionOrdinal(ordinal);
     }
-    
-    /* 
+
+    /*
      * @see java.io.OutputStream#write(byte[], int, int)
      */
-    public void write(byte[] b, int offset, int length) throws IOException
+    public void write(byte[] b,int offset,int length) throws IOException
     {
         if(_out.isFlushing())
             while(!_out.flush());
-            
-        while (length >0)
-        {    
+        while(length>0)
+        {
             int len=_out.write(b,offset,length);
-            if (len<length)
+            if(len<length)
             {
                 length-=len;
                 offset+=len;
@@ -123,7 +139,7 @@ public class HttpOutputStream extends OutputStream
         }
     }
 
-    /* 
+    /*
      * @see java.io.OutputStream#write(int)
      */
     public void write(int b) throws IOException
@@ -132,11 +148,4 @@ public class HttpOutputStream extends OutputStream
         write(_b1,0,1);
     }
     
-    public void resetStream()
-    {
-        _out.reset();
-    }
-    
-    private HttpOutput _out;
-    private byte[] _b1 = new byte[0];
 }

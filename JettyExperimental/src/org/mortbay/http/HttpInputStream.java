@@ -13,14 +13,24 @@ import org.mortbay.io.Portable;
 public class HttpInputStream extends InputStream
 {
 
-    public HttpInputStream(Buffer buffer)
+    public HttpInputStream(Buffer buffer, HttpHeader header)
     {
-        _in = new HttpInput(buffer);
+        _in = new HttpInput(buffer,header);
+    }
+
+    public HttpInput getHttpInput()
+    {
+        return _in;
     }
 
     public Buffer getBuffer()
     {
         return _in.getBuffer();
+    }
+    
+    public HttpHeader getHttpHeader()
+    {
+        return _in.getHttpHeader();
     }
     
     /* 
@@ -90,7 +100,7 @@ public class HttpInputStream extends InputStream
     public HttpHeader readHeader()
         throws IOException
     {   
-        while (_in.getHeader()==null)
+        while (_in.getParsedHeader()==null)
         {
             switch(_in.parseNext())
             {
@@ -106,7 +116,7 @@ public class HttpInputStream extends InputStream
             break;
         }
             
-        return _in.getHeader();
+        return _in.getParsedHeader();
     }
     
     public void resetStream()
@@ -131,7 +141,7 @@ public class HttpInputStream extends InputStream
                 case HttpInput.EOF:
                     return false;
                 case HttpInput.CONTENT:
-                    _content=_in.getContent();
+                    _content=_in.getParsedContent();
                     if (_content!=null && _content.length()==0)
                         continue;
             }
@@ -143,6 +153,18 @@ public class HttpInputStream extends InputStream
     
     Buffer _content;
     private HttpInput _in;
+    
+    /* ------------------------------------------------------------------------------- */
+    /** destroy.
+     * 
+     */
+    public void destroy()
+    {
+        _content=null;
+        if (_in!=null)
+            _in.destroy();
+        _in=null;
+    }
     
 
 }

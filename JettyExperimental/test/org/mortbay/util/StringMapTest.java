@@ -13,10 +13,10 @@ import java.io.ObjectOutputStream;
 import java.util.Map;
 import java.util.Set;
 
+import junit.framework.TestCase;
+
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
-
-import junit.framework.TestCase;
 
 /**
  * @author gregw
