@@ -173,7 +173,7 @@ $Id$
 
   <Call name="addContext">
     <Arg>/cgi-bin/*</Arg>
-    <Set name="ResourceBase">cgi-bin</Set>
+    <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/cgi-bin</Set>
     <Call name="addServlet">
       <Arg>Common Gateway Interface</Arg>
       <Arg>/</Arg>
