@@ -102,7 +102,10 @@ public class TestHarness
             byte[] eleven = "0123456789\n".getBytes();
             for (int i=0;i<400;i++)
                 cout.write(eleven);
-            cout.close();
+            HttpFields footer=new HttpFields();
+            footer.put("footer1","value1");
+            footer.put("footer2","value2");
+            cout.close(footer);
             
             FileInputStream ftmp= new FileInputStream("TestData/tmp.chunkOut");
             ChunkableInputStream cin = new ChunkableInputStream(ftmp);
@@ -149,6 +152,9 @@ public class TestHarness
             "D5: Tue Feb 29 2000 12:00:00" + CRLF +
             "C1: Continuation  " + CRLF +
             "    Value  " + CRLF +
+            "L1: V1  " + CRLF +
+            "L1: V2  " + CRLF +
+            "L1: 'V,3'  " + CRLF +
             CRLF +
             "Other Stuff"+ CRLF;
         
@@ -161,6 +167,7 @@ public class TestHarness
             "D4: Mon Jan 1 2000 00:00:01" + CRLF +
             "D5: Tue Feb 29 2000 12:00:00" + CRLF +
             "C1: Continuation Value" + CRLF +
+            "L1: V1, V2, 'V,3'" + CRLF +
             CRLF;
         
 
@@ -169,7 +176,6 @@ public class TestHarness
 
 
         Test t = new Test("com.mortbay.HTTP.HttpFields");
-
         try
         {    
             HttpFields f = new HttpFields();
@@ -204,9 +210,16 @@ public class TestHarness
             t.checkEquals(f.get("D1"),f.get("D2"),
                           "setDateHeader12");
 
+            List l = f.getValues("L1");
+            t.checkEquals(l.get(0),"V1","getValues");
+            t.checkEquals(l.get(1),"V2","getValues");
+            t.checkEquals(l.get(2),"V,3","getValues");
+            f.put("L1","V1");
+            f.add("L1","V2");
+            f.add("L1","V,3"); 
+            
             String h3 = f.toString();
             t.checkEquals(h2,h3,"toString");
-
 
             HashMap params = new HashMap();
             String value = HttpFields.valueParameters(" v ; p1=v1 ; p2 = \" v 2 \";p3 ; p4='v4=;' ;",params);

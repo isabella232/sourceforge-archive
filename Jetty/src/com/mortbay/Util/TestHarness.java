@@ -470,6 +470,11 @@ public class TestHarness
             test.check(tok.hasMoreTokens(),"hasMoreTokens");
             test.checkEquals(tok.nextToken(","),"bbb","bbb");
             test.checkEquals(tok.nextToken(),"ccc;ddd","ccc;ddd");
+            
+            test.checkEquals(tok.quote("a\"aa"," ,"),"a\"aa","no quote");
+            test.checkEquals(tok.quote("aa  a"," ,"),"'aa  a'","quote");
+            test.checkEquals(tok.quote("a'a"," ,"),"'a\\'a'","quote");
+            
         }
         catch(Exception e)
         {

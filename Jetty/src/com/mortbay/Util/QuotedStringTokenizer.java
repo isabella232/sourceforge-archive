@@ -241,6 +241,57 @@ public class QuotedStringTokenizer
     {
         return -1;
     }
+
+    
+    /* ------------------------------------------------------------ */
+    /** Quote a string.
+     * The string is quoted only if quoting is required due to
+     * embeded delimiters, quote characters or the
+     * empty string.
+     * @param s The string to quote.
+     * @return quoted string
+     */
+    public static String quote(String s, String delim)
+    {
+        if (s==null)
+            return null;
+        if (s.length()==0)
+            return "\"\"";
+        StringBuffer b=new StringBuffer(s.length()+8);
+        boolean quote=false;
+        synchronized(b)
+        {
+            b.append("'");
+            for (int i=0;i<s.length();i++)
+            {
+                char c = s.charAt(i);
+                if (c=='\'')
+                {
+                    
+                      b.append("\\'");
+                      quote=true;
+                      continue;
+                }
+                else if (delim.indexOf(c)>=0)
+                {
+                    quote=true;
+                    b.append(c);
+                    continue;
+                }
+                else
+                {
+                    b.append(c);
+                    continue;
+                }
+            }
+            if (quote)
+            {
+                b.append("'");
+                return b.toString();
+            }
+        }
+        return s;
+    }
 }
 
 

@@ -23,8 +23,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     /* ------------------------------------------------------------ */
     final static byte[]
         __CRLF_B      ={(byte)'\015',(byte)'\012'},
-        __CHUNK_EOF_B ={(byte)'0',(byte)';',(byte)'\015',
-                        (byte)'\012',(byte)'\015',(byte)'\012'};
+        __CHUNK_EOF_B ={(byte)'0',(byte)';',(byte)'\015',(byte)'\012'};
 
     
     /* ------------------------------------------------------------ */
@@ -179,6 +178,7 @@ public class ChunkableOutputStream extends FilterOutputStream
             {
                 // send last chunk and revert to normal output
                 _realOut.write(__CHUNK_EOF_B);
+                _realOut.write(__CRLF_B);
                 _realOut.flush();
                 _chunkSize=null;
                 out=_buffer=new ByteArrayOutputStream(4096);
@@ -191,4 +191,29 @@ public class ChunkableOutputStream extends FilterOutputStream
             Code.ignore(e);
         }
     }
+
+    
+    /* ------------------------------------------------------------ */
+    /** Close the stream.
+     * In chunking mode, the underlying stream is not closed.
+     * All filters are closed and discarded.
+     * @param footers Chunked footers
+     * @exception IOException 
+     */
+    public synchronized void close(HttpFields footers)
+        throws IOException
+    {
+        if (_chunkSize==null)
+            throw new IllegalStateException("Footers only in Chunked mode");
+        
+        flush();
+        out.close();
+        _realOut.write(__CHUNK_EOF_B);
+        footers.write(_realOut);
+        _realOut.flush();
+        _chunkSize=null;
+        out=_buffer=new ByteArrayOutputStream(4096);
+    }
 }
+
+

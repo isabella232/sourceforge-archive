@@ -18,7 +18,7 @@ public class HttpMessage
     
     /* ------------------------------------------------------------ */
     /** Destroy the header.
-     * Help the garbage collector by null everything that we can.
+     * Help the garbage collector by nulling everything that we can.
      */
     public void destroy()
     {

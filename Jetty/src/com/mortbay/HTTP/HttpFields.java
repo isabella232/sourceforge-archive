@@ -212,6 +212,56 @@ public class HttpFields extends HashMap
     }
     
     /* -------------------------------------------------------------- */
+    /**
+     * Returns multiple values of a field, or null if not found.
+     * The case of the field name is ignored.
+     * @param name the case-insensitive field name
+     */
+    public List getValues(String name)
+    {
+        String v=get(name);
+        if (v==null)
+            return null;
+
+        List list = new ArrayList();
+
+        QuotedStringTokenizer tok =
+            new QuotedStringTokenizer(v,", ",true,false);
+        String value=null;
+        boolean space=false;
+        while (tok.hasMoreTokens())
+        {
+            String token=tok.nextToken();
+            if (",".equals(token))
+            {
+                if (value!=null)
+                    list.add(value);
+                value=null;
+            }
+            else if (" ".equals(token))
+            {
+                space=(value!=null);
+            }
+            else if (value==null)
+            {
+                value=token;
+                space=false;
+            }
+            else if (space)
+            {
+                value+=" "+token;
+                space=false;
+            }
+            else
+                value+=token;
+        }
+        if(value!=null)
+            list.add(value);
+            
+        return list;
+    }
+    
+    /* -------------------------------------------------------------- */
     /** Set a field.
      * @param name the name of the field
      * @param value the value of the field. If null the field is cleared.
@@ -245,11 +295,15 @@ public class HttpFields extends HashMap
     /** Add to or set a field.
      * If the field is allowed to have multiple values, add will build
      * a coma separated list for the value.
+     * The values are quoted if they contain comas or quote characters.
      * @param name the name of the field
      * @param value the value of the field. 
      */
     public void add(String name,String value)
     {
+        if (value==null)
+            return;
+        value=QuotedStringTokenizer.quote(value,", ");
         String existing=get(name);
         if(existing!=null)
             put(name,existing+", "+value);
@@ -589,5 +643,6 @@ public class HttpFields extends HashMap
         
         return value.substring(0,i).trim();
     }
+
 }
 
