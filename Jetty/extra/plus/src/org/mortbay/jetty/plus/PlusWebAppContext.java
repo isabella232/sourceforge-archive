@@ -21,9 +21,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import javax.naming.Binding;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.LinkRef;
+import javax.naming.NameNotFoundException;
+import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
@@ -45,6 +48,7 @@ public class PlusWebAppContext extends WebApplicationContext
     private InitialContext _initialCtx = null;
     private HashMap _envMap = null;
     private ClassLoader _removeClassLoader=null;
+    private boolean _webXmlEnvEntryOverride = true;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -69,6 +73,15 @@ public class PlusWebAppContext extends WebApplicationContext
         setConfiguration(new Configuration(this));
     }
 
+    public void setWebXmlEnvEntryOverride (boolean value)
+    {
+        _webXmlEnvEntryOverride = value;
+    }
+    
+    public boolean getWebXmlEnvEntryOverride()
+    {
+        return _webXmlEnvEntryOverride;
+    }
 
     /* ------------------------------------------------------------ */
     /** Add a java:comp/env entry.
@@ -87,6 +100,46 @@ public class PlusWebAppContext extends WebApplicationContext
         _envMap.put (name, value);
     }
 
+    public Object getEnvEntry (String name)
+    {
+        if (_envMap == null)
+            return null;
+        
+        return _envMap.get(name);
+    }
+    
+    
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Get a mapping of java:comp/env bindings for this webapp context.
+     * @return flattened map of java:comp/env names to bound objects
+     * @throws NamingException
+     */
+    public Map getENC()
+    throws NamingException
+    {
+        // save context classloader
+        Thread thread= Thread.currentThread();
+        ClassLoader lastContextLoader= thread.getContextClassLoader();
+        
+        //set the classloader up as this webapp's loader
+        thread.setContextClassLoader(getClassLoader());
+        Map map = null;
+        try
+        {
+            map = Util.flattenBindings ((Context)_initialCtx.lookup("java:comp"), "env");
+        }
+        finally
+        {
+            //replace the classloader
+            thread.setContextClassLoader(lastContextLoader);
+        }
+        
+        return map;
+    }
+    
+    
     /* ------------------------------------------------------------ */
     public void start()
         throws Exception
@@ -118,7 +171,7 @@ public class PlusWebAppContext extends WebApplicationContext
         compCtx.rebind ("UserTransaction", new LinkRef ("javax.transaction.UserTransaction"));
         if(log.isDebugEnabled())log.debug("Bound ref to javax.transaction.UserTransaction to java:comp/UserTransaction");   
 
-	//set up any env entries defined in config file
+        //set up any env entries defined in config file
         if (_envMap != null)
         {
             Iterator it = _envMap.entrySet().iterator();
@@ -192,7 +245,22 @@ public class PlusWebAppContext extends WebApplicationContext
                 String name=node.getString("env-entry-name",false,true);
                 Object value= TypeUtil.valueOf(node.getString("env-entry-type",false,true),
                                                node.getString("env-entry-value",false,true));
-                Util.bind (envCtx, name, value);
+                
+                try
+                {
+                    Object o = envCtx.lookup (name);
+                    //an object must already exist, check if we should override with web xml env-entry
+                    if (((PlusWebAppContext)getWebApplicationContext()).getWebXmlEnvEntryOverride())
+                    {
+                        Util.bind (envCtx, name, value);
+                    }                       
+                }
+                catch (NameNotFoundException e)
+                {
+                    //bind it anyway
+                    Util.bind (envCtx, name, value);
+                }
+
             }
             else if ("resource-ref".equals(element))
             {

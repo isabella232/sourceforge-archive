@@ -146,6 +146,11 @@
   <Call name="addWebApplication">
     <Arg>/jettyplus</Arg>
     <Arg><SystemProperty name="jetty.home"/>/extra/plus/demo/webapps/jettyplus</Arg>
+    <!-- uncomment to allow env entries specified in this config file  -->
+    <!-- to override env-entrys in web.xml                             -->
+    <!--
+    <Set name="WebXmlEnvEntryOverride">false</Set>
+    -->
     <Call name="addEnvEntry">
       <Arg>my/trivial/name</Arg>
       <Arg type="Integer">99</Arg>
