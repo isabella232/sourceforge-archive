@@ -39,9 +39,13 @@ all         - everything
 
   <property name="build.compiler.emacs"	value="true"/>
 
-  <property name="jetty"          value="${env.JETTY_HOME}"/>
-  <property name="jetty.lib"      value="${jetty}/lib"/>
+  <property name="jboss.home"     value="${env.JBOSS_HOME}"/>
+  <property name="jetty.home"     value="${env.JETTY_HOME}"/>
+  <property name="jetty.lib"      value="${jetty.home}/lib"/>
+  <property name="jetty.jar"      value="${jetty.lib}/org.mortbay.jetty-jdk1.2.jar"/>
+<!--
   <property name="jetty.jar"      value="${jetty.lib}/org.mortbay.jetty.jar"/>
+-->
   <property name="servlet.jar"    value="${jetty.lib}/javax.servlet.jar"/>
   <property name="classpath"      value="${jetty.jar};${servlet.jar}"/>
   <property name="jaxp.jar"       value="${jetty.lib}/javax.xml.jaxp.jar"/>
@@ -66,6 +70,7 @@ all         - everything
   <path id="jboss.classpath">
     <pathelement location="${jboss.home}/client/jboss-j2ee.jar"/>
     <pathelement location="${jboss.home}/client/log4j.jar"/>
+    <pathelement location="${jboss.home}/server/all/lib/javagroups-2.0.jar"/> <!-- jboss 3.2 -->
     <pathelement location="${jboss.home}/thirdparty/javagroups/javagroups/lib/javagroups-2.0.jar"/>
   </path>
 
@@ -161,6 +166,9 @@ all         - everything
       <fileset dir="${src}">
        <exclude name="org/mortbay/j2ee/**/test/*" />
        <exclude name="org/mortbay/j2ee/session/**/CMP*.java"/>
+       <exclude name="org/mortbay/j2ee/session/**/CMR*.java"/>
+       <exclude name="org/mortbay/j2ee/session/MigrationInterceptor.java"/>
+       <exclude name="**/MANIFEST.MF"/>
       </fileset>
     </javadoc>
   </target>

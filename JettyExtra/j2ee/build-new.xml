@@ -1,0 +1,521 @@
+<?xml version="1.0"?>
+
+<!--
+========================================================================
+ Copyright (c) 1999 Mort Bay Consulting (Australia) Pty. Ltd.
+ $Id$
+========================================================================
+
+targets:
+
+-->
+
+
+<project name="session" default="jetty" basedir=".">
+
+<!--=========================================================================-->
+
+  <property name="debug"            value="on"/>
+
+<!--=========================================================================-->
+
+  <property name="jboss.home" value="${jboss}/build/output/jboss-3.0.4RC1"/>
+  <property name="jboss.src" value="${jboss.home}/../../.."/>
+<!--
+-->
+
+<!--
+  <property name="jboss.src" value="/home/jules/cvs/JBoss/jboss-3.2"/>
+  <property name="jboss.home" value="${jboss.src}/build/output/jboss-3.2.0beta2"/>
+-->
+
+<!--
+  <property name="jboss" value="/home/jules/cvs/JBoss/jboss-head"/>
+  <property name="jboss.home" value="${jboss.src}/build/output/jboss-4.0.0alpha"/>
+-->
+
+<!--
+  <property name="javagroups.jar" value="/home/jules/cvs/JavaGroups-2.0/dist/javagroups-all.jar"/>
+-->
+  <property name="javagroups.jar" value="${jboss.home}/server/all/lib/javagroups-2.0.jar"/>
+
+  <path id="common.classpath">
+    <pathelement location="${jboss.src}/tools/lib/xdoclet.jar"/>
+    <pathelement location="${jboss.src}/tools/lib/xjavadoc.jar"/>
+    <pathelement location="${jboss.src}/lib/jboss-j2ee.jar"/>
+    <pathelement location="${jboss.src}/lib/jboss-jmx.jar"/>
+    <pathelement location="${jboss.src}/client/gnu-regexp.jar"/>
+    <pathelement location="${jboss.src}/client/jnp-client.jar"/>
+    <pathelement location="${jboss.src}/client/jbossjmx-ant.jar"/>
+    <pathelement location="${jboss.src}/client/jboss-common-client.jar"/>
+    <pathelement location="${jboss.src}/client/jboss-system-client.jar"/>
+    <pathelement location="${jboss.src}/thirdparty/xdoclet/xdoclet/lib/xdoclet.jar"/>
+    <pathelement location="${jboss.src}/thirdparty/xdoclet/xdoclet/lib/xjavadoc.jar"/>
+    <pathelement location="${jboss.src}/tools/lib/ant.jar"/>
+    <pathelement location="${jboss.src}/tools/lib/junit.jar"/>
+    <pathelement location="${jboss.src}/thirdparty/apache/log4j/lib/log4j.jar"/>
+    <pathelement location="${jboss.home}/client/jboss-j2ee.jar"/>
+<!--
+    <pathelement location="${jboss.home}/server/all/lib/javagroups-2.0.jar"/>
+-->
+    <pathelement location="${javagroups.jar}"/>
+
+    <pathelement location="${jetty.home}/lib/javax.servlet.jar"/>
+    <pathelement location="${jetty.home}/lib/org.mortbay.jetty.jar"/>
+<!--
+    <pathelement location="${jboss.src}/jetty/output/lib/org.mortbay.j2ee.jar"/>
+-->
+
+  </path>
+
+  <path id="server.classpath">
+    <pathelement location="."/>
+    <pathelement location="${basedir}/webtest.ear/web.war/WEB-INF/classes"/>
+<!--
+    <pathelement location="${jboss.src}/jetty/output/lib/org.jboss.jetty.jar"/>
+    <pathelement location="${jboss.src}/jetty/output/lib/org.mortbay.j2ee.session.ejb.jar"/>
+-->
+    <pathelement location="${jboss.src}/cluster/output/classes"/>
+    <path refid="common.classpath"/>
+  </path>
+
+  <path id="ejb.classpath">
+    <pathelement location="."/>
+    <pathelement location="${basedir}/webtest.ear/ejb.jar"/>
+    <path refid="common.classpath"/>
+  </path>
+
+  <path id="jmx.classpath">
+    <pathelement location="."/>
+<!--
+
+    <path refid="common.classpath"/>
+-->
+  </path>
+
+  <path id="client.classpath">
+    <pathelement location="."/>
+    <pathelement location="${basedir}/output/client"/>
+    <pathelement location="${basedir}/lib/jcookie.jar"/>
+    <path refid="common.classpath"/>
+  </path>
+
+<!--=========================================================================-->
+
+  <taskdef name="webdoclet"
+    classpathref="server.classpath"
+    classname="xdoclet.web.WebDocletTask"
+  />
+
+  <taskdef name="ejbdoclet"
+    classpathref="server.classpath"
+    classname="xdoclet.ejb.EjbDocletTask"
+  />
+
+  <taskdef name="jmx"
+    classpathref="jmx.classpath"
+    classname="org.jboss.ant.JMX"
+  />
+
+<!--=========================================================================-->
+
+<!-- look in jndi view for what org.jboss.jmx.adaptor.rmi.RMIAdaptorImpl is bound under-->
+   <property name="node.1" value="zeuglodon"/>
+   <property name="node.2" value="pteranodon"/>
+   <property name="jmx.adapter.node.1" value="jmx:${node.1}:rmi"/>
+   <property name="jmx.adapter.node.2" value="jmx:${node.2}:rmi"/>
+
+<!--=========================================================================-->
+
+  <target name="init">
+    <tstamp/>
+    <echo message="building ${ant.project.name}-${DSTAMP} on Java ${ant.java.version}"/>
+    <echo message="JBOSS_SRC=${jboss.src}"/>
+    <echo message="JBOSS_HOME=${jboss.home}"/>
+    <echo message="JETTY_HOME=${jetty.home}"/>
+
+    <!-- build dir hier -->
+    <mkdir dir="${basedir}/output"/>
+    <mkdir dir="${basedir}/output/META-INF"/>
+    <copy file="${basedir}/etc/application.xml" todir="${basedir}/webtest.ear/META-INF"/>
+    <mkdir dir="${basedir}/webtest.ear/ejb.jar"/>
+    <mkdir dir="${basedir}/webtest.ear/ejb.jar/src"/>
+    <mkdir dir="${basedir}/webtest.ear/ejb.jar/META-INF"/>
+    <mkdir dir="${basedir}/webtest.ear/web.war"/>
+    <mkdir dir="${basedir}/webtest.ear/web.war/WEB-INF"/>
+    <mkdir dir="${basedir}/webtest.ear/web.war/WEB-INF/classes"/>
+    <mkdir dir="${basedir}/webtest.ear/web.war/WEB-INF/lib"/>
+    <copy file="${jboss.src}/tools/lib/junit.jar" todir="${basedir}/webtest.ear/web.war/WEB-INF/lib"/>
+    <copy file="${javagroups.jar}" todir="${basedir}/webtest.ear/web.war/WEB-INF/lib"/>
+    <mkdir dir="${basedir}/output/client"/>
+
+  </target>
+
+<!--=========================================================================-->
+
+  <target name="clean">
+    <delete failonerror="false" file="webtest.ear"/>
+    <delete failonerror="false" dir="webtest.ear"/>
+    <delete failonerror="false">
+      <fileset dir="${basedir}/hs_err_pid*.log"/>
+      <fileset dir="${basedir}/TEST-*.txt"/>
+    </delete>
+    <delete failonerror="false" file="test/Test.class"/>
+    <delete failonerror="false" file="TEST-Test.txt"/>
+  </target>
+
+<!--=========================================================================-->
+
+  <target name="compile" depends="init">
+
+    <echo message="generating Servlet DDs"/>
+    <webdoclet
+      sourcepath="${basedir}/src"
+      excludedtags="@version,@author"
+      classpathref="server.classpath"
+      destdir="${basedir}/webtest.ear/web.war/WEB-INF"
+    >
+      <fileset dir="${basedir}/test">
+        <include name="server/**/*Servlet.java"/>
+        <include name="server/**/*Listener.java"/>
+      </fileset>
+      <deploymentdescriptor
+        xmlencoding ="UTF-8"
+        servletspec="2.3"
+        sessiontimeout="10"
+	destdir="${basedir}/webtest.ear/web.war/WEB-INF"
+	distributable="true"
+      />
+    </webdoclet>
+
+    <!-- copy in proprietary Jetty dd -->
+    <delete file="${basedir}/webtest.ear/web.war/WEB-INF/jetty-web.xml"/>
+    <copy file="${basedir}/etc/jetty-web.xml" todir="${basedir}/webtest.ear/web.war/WEB-INF"/>
+
+    <echo message="generating EJB DDs and APIs"/>
+    <ejbdoclet
+      sourcepath="${basedir}/src"
+      destdir="${basedir}/webtest.ear/ejb.jar/src"
+      ejbspec="2.0"
+      excludedtags="@version,@author"
+      classpathref="server.classpath"
+    >
+      <fileset dir="${basedir}/src">
+        <include name="**/ejb/*Bean.java" />
+      </fileset>
+      <packageSubstitution packages="ejb" substituteWith="interfaces"/>
+<!--
+      <dataobject/>
+ -->
+      <remoteinterface/>
+      <localinterface/>
+      <homeinterface/>
+      <localhomeinterface/>
+      <entitypk/>
+      <entitycmp/>
+      <session/>
+      <deploymentdescriptor
+        xmlencoding ="UTF-8"
+	destdir="${basedir}/webtest.ear/ejb.jar/META-INF"
+      />
+      <jboss version="3.0"
+             xmlencoding="UTF-8"
+             typemapping="Hypersonic SQL"
+             datasource="java:/DefaultDS"
+             destdir="${basedir}/webtest.ear/ejb.jar/META-INF"
+      />
+<!--
+             mergedir="${basedir}/etc"
+-->
+    </ejbdoclet>
+
+    <!-- hack- I can't get xdoclet to generate this yet... -->
+<!--
+    <delete file="${basedir}/webtest.ear/ejb.jar/META-INF/jbosscmp-jdbc.xml"/>
+    <copy file="${basedir}/etc/jbosscmp-jdbc.xml" todir="${basedir}/webtest.ear/ejb.jar/META-INF"/>
+-->
+
+    <echo message="compiling EJB impls and APIs for ejb.jar"/>
+    <javac
+      srcdir="${basedir}/src;${basedir}/webtest.ear/ejb.jar/src"
+      destdir="${basedir}/webtest.ear/ejb.jar"
+      debug="${debug}"
+    >
+      <classpath refid="ejb.classpath"/>
+      <include name="**/ejb/*.java" />
+      <include name="**/interfaces/*.java" />
+    </javac>
+
+    <echo message="compiling EJB APIs for web.war"/>
+    <javac
+      srcdir="${basedir}/webtest.ear/ejb.jar/src"
+      destdir="${basedir}/webtest.ear/web.war/WEB-INF/classes"
+      debug="${debug}"
+    >
+      <classpath refid="ejb.classpath"/>
+      <include name="**/interfaces/*.java"/>
+    </javac>
+
+    <echo message="compiling Server classes"/>
+    <javac
+      srcdir="${basedir}/src"
+      destdir="${basedir}/webtest.ear/web.war/WEB-INF/classes"
+      debug="${debug}"
+    >
+      <classpath refid="ejb.classpath"/>
+      <include name="**/*.java"/>
+      <exclude name="**/MigrationInterceptor.java"/>
+      <exclude name="**/ThrottleInterceptor.java"/>
+    </javac>
+
+    <echo message="compiling Test Server classes"/>
+    <javac
+      srcdir="${basedir}/test/server"
+      destdir="${basedir}/webtest.ear/web.war/WEB-INF/classes"
+      debug="${debug}"
+    >
+      <classpath refid="server.classpath"/>
+      <exclude name="**/Test.java"/>
+    </javac>
+
+    <echo message="compiling Test Client classes"/>
+    <javac
+      srcdir="${basedir}/test/client"
+      destdir="${basedir}/output/client"
+      debug="${debug}"
+    >
+      <classpath refid="client.classpath"/>
+      <include name="**/*.java"/>
+      <exclude name="**/Test.java"/>
+    </javac>
+
+<!-- turn dir hier into jar hier -->
+<!--
+    <move todir="${basedir}/webtest.ear/ejb"><fileset dir="${basedir}/webtest.ear/ejb.jar"/></move>
+    <delete dir="${basedir}/webtest.ear/ejb.jar"/>
+    <jar destfile="${basedir}/webtest.ear/ejb.jar" basedir="${basedir}/webtest.ear/ejb"/>
+    <delete dir="${basedir}/webtest.ear/ejb"/>
+    <move todir="${basedir}/webtest.ear/web"><fileset dir="${basedir}/webtest.ear/web.war"/></move>
+    <delete dir="${basedir}/webtest.ear/web.war"/>
+    <jar destfile="${basedir}/webtest.ear/web.war" basedir="${basedir}/webtest.ear/web"/>
+    <delete dir="${basedir}/webtest.ear/web"/>
+    <move todir="${basedir}/webtest"><fileset dir="${basedir}/webtest.ear"/></move>
+    <delete dir="${basedir}/webtest.ear"/>
+    <jar destfile="${basedir}/webtest.ear" basedir="${basedir}/webtest"/>
+    <delete dir="${basedir}/webtest"/>
+-->
+
+  </target>
+
+<!--=========================================================================-->
+
+  <target name="redeploy">
+
+    <jmx adapterName="${jmx.adapter.node.1}" serverUrl="${node.1}">
+     <propertyEditor type="java.net.URL" editor="org.jboss.util.propertyeditor.URLEditor"/>
+     <invoke target="jboss.system:service=MainDeployer" operation="redeploy">
+      <parameter type="java.net.URL" arg="file://${basedir}/webtest.ear/web.war"/>
+     </invoke>
+    </jmx>
+
+    <jmx adapterName="${jmx.adapter.node.2}" serverUrl="${node.2}">
+     <propertyEditor type="java.net.URL" editor="org.jboss.util.propertyeditor.URLEditor"/>
+     <invoke target="jboss.system:service=MainDeployer" operation="redeploy">
+      <parameter type="java.net.URL" arg="file:///mnt/${node.1}${basedir}/webtest.ear/web.war"/>
+     </invoke>
+    </jmx>
+<!--
+-->
+
+   <parallel>
+   </parallel>
+  </target>
+
+  <target name="run.server" depends="compile,redeploy"/>
+
+  <target name="client">
+
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+
+  </target>
+  <target name="run.client" depends="compile,client"/>
+
+  <target name="clients">
+   <parallel>
+
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+   </parallel>
+  </target>
+
+<!--=========================================================================-->
+
+  <path id="jetty.classpath">
+          <pathelement path="${jetty.home}/lib/javax.servlet.jar" />
+          <pathelement path="${jetty.home}/lib/org.mortbay.jetty.jar" />
+          <pathelement path="${jetty.home}/lib/org.mortbay.jmx.jar" />
+          <pathelement path="${jetty.home}/ext/jasper-runtime.jar" />
+          <pathelement path="${jetty.home}/ext/jasper-compiler.jar" />
+          <pathelement path="${jetty.home}/ext/ant.jar" />
+          <pathelement path="${jetty.home}/ext/jmxri.jar" />
+          <pathelement path="${jetty.home}/ext/jmxtools.jar" />
+          <pathelement path="${jetty.home}/ext/javax.xml.jaxp.jar" />
+          <pathelement path="${jetty.home}/ext/crimson.jar" />
+          <pathelement path="${jboss.home}/server/all/deploy/jbossweb.sar/org.jboss.jetty.jar" />
+          <pathelement location="${jboss.src}/thirdparty/apache/log4j/lib/log4j.jar"/>
+          <pathelement location="${javagroups.jar}"/>
+          <pathelement location="${jboss.home}/client/jboss-j2ee.jar"/>
+  </path>
+
+  <target name="jetty" if="jetty.home" description="test in standalone Jetty" depends="compile">
+   <parallel>
+    <java classname="org.mortbay.jetty.Server"
+           dir="${jetty.home}"
+           fork="yes"
+           failonerror="yes"
+           >
+        <classpath>
+         <path refid="jetty.classpath"/>
+        </classpath>
+        <jvmarg line="-Dbase.dir=${basedir}" />
+        <jvmarg line="-Djetty.port=8080" />
+        <jvmarg line="-Dlog4j.configuration=file://${basedir}/etc/jetty0-log4j.properties" />
+        <arg line="${basedir}/etc/jetty.xml" />
+     </java>
+    <sequential>
+     <waitfor>
+       <socket server="localhost" port="8080"/>
+     </waitfor>
+    <java classname="org.mortbay.jetty.Server"
+           dir="${jetty.home}"
+           fork="yes"
+           failonerror="yes"
+           >
+        <classpath>
+         <path refid="jetty.classpath"/>
+        </classpath>
+        <jvmarg line="-Dbase.dir=${basedir}" />
+        <jvmarg line="-Djetty.port=8081" />
+        <jvmarg line="-Dlog4j.configuration=file://${basedir}/etc/jetty1-log4j.properties" />
+        <arg line="${basedir}/etc/jetty.xml" />
+     </java>
+    </sequential>
+    <sequential>
+     <waitfor>
+      <and>
+       <socket server="localhost" port="8080"/>
+       <socket server="localhost" port="8081"/>
+      </and>
+     </waitfor>
+    <java fork="yes" classname="junit.textui.TestRunner" taskname="junit" failonerror="true">
+     <arg value="client.Client"/>
+     <classpath refid="client.classpath"/>
+    </java>
+<!--
+     <junit>
+      <classpath>
+       <path refid="client.classpath"/>
+      </classpath>
+      <test name="client.Client" fork="true" todir="/tmp" />
+     </junit>
+-->
+     <!-- after running the tests how can we shut down the two Jetty's -->
+    </sequential>
+    </parallel>
+  </target>
+
+<!--=========================================================================-->
+
+<!-- Test target -->
+
+  <target name="test" depends="run.server, run.client"/>
+
+<!--=========================================================================-->
+<!-- Main target -->
+
+  <target name="tests" depends="test"/>
+  <target name="main" depends="test"/>
+
+<!--=========================================================================-->
+</project>
