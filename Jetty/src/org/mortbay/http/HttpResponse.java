@@ -309,76 +309,80 @@ public class HttpResponse extends HttpMessage
         String reason = (String)__statusMsg.get(code_integer);
         HttpRequest request=getRequest();
 
-        // Handle error page.
-        // XXX some servlet dependancies in attribute names here.
-        String error_page = _handlerContext==null?null:_handlerContext.getErrorPage(error);
-        if (error_page!=null)
-        {
-            if (request.getAttribute("javax.servlet.error.status_code")==null)
-            {
-                // Set attributes to describe error
-                request.setAttribute("javax.servlet.error.status_code",code_integer);
-                request.setAttribute("javax.servlet.error.message",
-                                     message==null?reason:message);
-                // Do a forward to the error page resource.
-                getHandlerContext().handle(error_page,null,request,this);
-                return;
-            }
-            Code.warning("Error "+code+" while serving error page for "+
-                         request.getAttribute("javax.servlet.error.status_code"));
-        }
-
         // Generate normal error page.
         setStatus(code);
         setReason(reason);
 
+        // If we are allowed to have a body 
         if (code!=__204_No_Content &&
             code!=__304_Not_Modified &&
             code!=__206_Partial_Content &&
             code>=200)
         {
-            _header.put(HttpFields.__ContentType,HttpFields.__TextHtml);
-            _mimeType=HttpFields.__TextHtml;
-            _characterEncoding=null;
-            ChunkableOutputStream out=getOutputStream();
-            
-            if (message!=null)
+            // Handle error page.
+            // XXX some servlet dependancies in attribute names here.
+            String error_page = _handlerContext==null?null:_handlerContext.getErrorPage(error);
+            if (error_page!=null)
             {
-                message=StringUtil.replace(message,"<","&lt;");
-                message=StringUtil.replace(message,">","&gt;");
+                if (request.getAttribute("javax.servlet.error.status_code")==null)
+                {
+                    // Set attributes to describe error
+                    request.setAttribute("javax.servlet.error.status_code",code_integer);
+                    request.setAttribute("javax.servlet.error.message",
+                                         message==null?reason:message);
+                    // Do a forward to the error page resource.
+                    getHandlerContext().handle(error_page,null,request,this);
+                }
+                else
+                    Code.warning("Error "+code+" while serving error page for "+
+                                 request.getAttribute("javax.servlet.error.status_code"));
             }
-            String uri=getRequest().getPath();
-            uri=StringUtil.replace(uri,"<","&lt;");
-            uri=StringUtil.replace(uri,">","&gt;");
-            
-            StringBuffer body= new StringBuffer(1500);
-            body.append("<HTML>\n<HEAD>\n<TITLE>Error ");
-            body.append(code);
-            body.append(' ');
-            body.append(reason);
-            body.append("</TITLE>\n<BODY>\n<H2>HTTP ERROR: ");
-            body.append(code);
-            body.append(' ');
-            body.append(reason);
-            body.append("</H2>\n");
-            if (message!=null) body.append(message);
-            body.append("<P>RequestURI=");
-            body.append(uri);
-            for (int i=0;i<20;i++)
-                body.append("\n                                                ");
-            body.append("\n</BODY>\n</HTML>\n");
-            byte[] buf=body.toString().getBytes(StringUtil.__ISO_8859_1);
-            _header.putIntField(HttpFields.__ContentLength,buf.length);
-            out.write(buf);
+            else
+            {
+                _header.put(HttpFields.__ContentType,HttpFields.__TextHtml);
+                _mimeType=HttpFields.__TextHtml;
+                _characterEncoding=null;
+                ChunkableOutputStream out=getOutputStream();
+                
+                if (message!=null)
+                {
+                    message=StringUtil.replace(message,"<","&lt;");
+                    message=StringUtil.replace(message,">","&gt;");
+                }
+                String uri=getRequest().getPath();
+                uri=StringUtil.replace(uri,"<","&lt;");
+                uri=StringUtil.replace(uri,">","&gt;");
+                
+                StringBuffer body= new StringBuffer(1500);
+                body.append("<HTML>\n<HEAD>\n<TITLE>Error ");
+                body.append(code);
+                body.append(' ');
+                body.append(reason);
+                body.append("</TITLE>\n<BODY>\n<H2>HTTP ERROR: ");
+                body.append(code);
+                body.append(' ');
+                body.append(reason);
+                body.append("</H2>\n");
+                if (message!=null) body.append(message);
+                body.append("<P>RequestURI=");
+                body.append(uri);
+                for (int i=0;i<20;i++)
+                    body.append("\n                                                ");
+                body.append("\n</BODY>\n</HTML>\n");
+                byte[] buf=body.toString().getBytes(StringUtil.__ISO_8859_1);
+                _header.putIntField(HttpFields.__ContentLength,buf.length);
+                out.write(buf);
+            }
         }
-        else if (code!=206) 
+        else if (code!=__206_Partial_Content) 
         {
             _header.remove(HttpFields.__ContentType);
             _header.remove(HttpFields.__ContentLength);
             _characterEncoding=null;
             _mimeType=null;
         }
-        commitHeader();
+        if (!isCommitted())
+            commitHeader();
     }
     
     /* ------------------------------------------------------------- */
