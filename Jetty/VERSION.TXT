@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+ + Added missing S to some OPTIONS strings
+ + Added open method to threaded server.
+
 Jetty-4.2.11 - 12 July 2003
  + Fixed race in servlet initialization code.
  + Cookie params all in lower case.
