@@ -101,7 +101,7 @@ JETTY_JAR="lib/com.mortbay.jetty.jar"
 ##################################################
 # Try to determine JETTY_HOME if not set
 ##################################################
-if [ -z $JETTY_HOME ] 
+if [ -z "$JETTY_HOME" ] 
 then
   JETTY_HOME_1=`dirname "$0"`
   JETTY_HOME_1=`dirname "$JETTY_HOME_1"`
