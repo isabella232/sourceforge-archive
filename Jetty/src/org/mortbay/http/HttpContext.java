@@ -12,16 +12,22 @@ import java.net.MalformedURLException;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.Permissions;
+import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.http.handler.ResourceHandler;
 import org.mortbay.http.handler.SecurityHandler;
+import org.mortbay.util.ByteArrayISO8859Writer;
+import org.mortbay.util.CachedResource;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.InetAddrPort;
@@ -31,14 +37,8 @@ import org.mortbay.util.LogSink;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
 import org.mortbay.util.StringUtil;
-import org.mortbay.util.URI;
-import org.mortbay.util.ByteArrayISO8859Writer;
-import java.util.Arrays;
-import org.mortbay.util.CachedResource;
 import org.mortbay.util.TypeUtil;
-import java.text.DateFormat;
-import java.util.Date;
-import org.mortbay.http.SecurityConstraint.Authenticator;
+import org.mortbay.util.URI;
 
 
 /* ------------------------------------------------------------ */
@@ -783,7 +783,8 @@ public class HttpContext implements LifeCycle,
         String[] ls = resource.list();
         if (ls==null)
             return null;
-                
+        Arrays.sort(ls);
+        
         String title = "Directory: "+base;
         
         ByteArrayISO8859Writer out = new ByteArrayISO8859Writer();
