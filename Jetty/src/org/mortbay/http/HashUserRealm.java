@@ -117,21 +117,24 @@ public class HashUserRealm
     }
     
     /* ------------------------------------------------------------ */
-    public UserPrincipal getAnonymous()
+    public void deAuthenticate(UserPrincipal user)
     {
-        return new User();
     }
     
     /* ------------------------------------------------------------ */
-    public void pushRole(UserPrincipal user, String role)
+    public UserPrincipal pushRole(UserPrincipal user, String role)
     {
-        ((User)user).pushRole(role);
+        if (user==null)
+            user=new User();
+        
+        return new WrappedUser(user,role);
     }
 
     /* ------------------------------------------------------------ */
-    public void popRole(UserPrincipal user, String role)
+    public UserPrincipal popRole(UserPrincipal user)
     {
-        ((User)user).popRole(role);
+        WrappedUser wu = (WrappedUser)user;
+        return wu.getUserPrincipal();
     }
     
     /* ------------------------------------------------------------ */
@@ -205,6 +208,47 @@ public class HashUserRealm
         out.println(super.toString());
         out.println(_roles);
     }
+
+
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class User implements UserPrincipal
+    {
+        List roles=null;
+
+        /* ------------------------------------------------------------ */
+        private UserRealm getUserRealm()
+        {
+            return HashUserRealm.this;
+        }
+        
+        public String getName()
+        {
+            return "Anonymous";
+        }
+        
+        public boolean authenticate(String credentials, HttpRequest request)
+        {
+            return false;
+        }
+                
+        public boolean isAuthenticated()
+        {
+            return false;
+        }
+        
+        public boolean isUserInRole(String role)
+        {
+            return false;
+        }
+        
+        public String toString()
+        {
+            return getName();
+        }        
+    }
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -253,54 +297,40 @@ public class HashUserRealm
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private class User implements UserPrincipal
-    {
-        List roles=null;
+    private class WrappedUser extends User
+    {   
+        private UserPrincipal user;
+        private String role;
 
-        /* ------------------------------------------------------------ */
-        private UserRealm getUserRealm()
+        private WrappedUser(UserPrincipal user, String role)
         {
-            return HashUserRealm.this;
+            this.user=user;
+            this.role=role;
         }
-        
+
+        private UserPrincipal getUserPrincipal()
+        {
+            return user;    
+        }
+
         public String getName()
         {
-            return "Anonymous";
+            return user.getName();
         }
         
         public boolean authenticate(String credentials, HttpRequest request)
         {
-            return false;
+            return user.authenticate(credentials,request);
         }
                 
         public boolean isAuthenticated()
         {
-            return false;
+            return user.isAuthenticated();
         }
         
         public boolean isUserInRole(String role)
         {
-            if (roles==null)
-                return false;
-            return roles.contains(role);
-        }
-        
-        public String toString()
-        {
-            return getName();
-        }
-        
-        private synchronized void pushRole(String role)
-        {
-            if (roles==null)
-                roles=new ArrayList();
-            roles.add(role);
-        }
-        
-        public synchronized void popRole(String role)
-        {
-            if (roles!=null)
-                roles.remove(role);
+            return this.role.equals(role) || user.isUserInRole(role);
         }
     }
 }

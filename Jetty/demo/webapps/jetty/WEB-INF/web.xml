@@ -143,17 +143,6 @@
     </user-data-constraint>
   </security-constraint>
 
-  <security-constraint>
-    <web-resource-collection>
-      <web-resource-name>Dispatch</web-resource-name>
-      <url-pattern>/auth/dispatch/*</url-pattern>
-    </web-resource-collection>
-    <auth-constraint>
-      <role-name>dispatch</role-name>
-    </auth-constraint>
-  </security-constraint>
-
-
   <login-config>
     <auth-method>BASIC</auth-method>
     <realm-name>Jetty Demo Realm</realm-name>

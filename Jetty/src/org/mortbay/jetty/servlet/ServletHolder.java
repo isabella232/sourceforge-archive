@@ -346,6 +346,7 @@ public class ServletHolder extends Holder
         // Service the request
         boolean servlet_error=true;
         UserPrincipal user=null;
+        HttpRequest http_request=null;
         try
         {
             // Handle aliased path
@@ -361,15 +362,13 @@ public class ServletHolder extends Holder
             {
                 ServletHttpRequest servletHttpRequest=
                     ServletHttpRequest.unwrap(request);
-                HttpRequest http_request=servletHttpRequest.getHttpRequest();
-                user=http_request.getUserPrincipal();
-                if (user==null)
-                    http_request.setUserPrincipal(user=_realm.getAnonymous());
-                _realm.pushRole(user,_run_as);
+                http_request=servletHttpRequest.getHttpRequest();
+
+                user=_realm.pushRole(http_request.getUserPrincipal(),_run_as);
+                http_request.setUserPrincipal(user);
             }
 
             servlet.service(request,response);
-            //response.flushBuffer();
             servlet_error=false;
         }
         catch(UnavailableException e)
@@ -381,9 +380,14 @@ public class ServletHolder extends Holder
         }
         finally
         {
+            // pop run-as role
             if (_run_as!=null && _realm!=null && user!=null)
-                _realm.popRole(user,_run_as);
-            
+            {
+                user=_realm.popRole(user);
+                http_request.setUserPrincipal(user);
+            }
+
+            // Handle error params.
             if (servlet_error)
                 request.setAttribute("javax.servlet.error.servlet_name",getName());
 

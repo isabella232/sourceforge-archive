@@ -105,8 +105,7 @@ public class HttpContext implements LifeCycle
     private Map _encodingMap;
     private Map _resourceAliases;
     private Map _errorPages;
-    
-
+    private UserRealm _userRealm;
     private PermissionCollection _permissions;    
     
     /* ------------------------------------------------------------ */
@@ -772,10 +771,6 @@ public class HttpContext implements LifeCycle
        return (String) _errorPages.remove(error);
     }
     
-    
-
-
-    
     /* ------------------------------------------------------------ */
     /** Get all handlers.
      * @return List of all HttpHandlers
@@ -1035,7 +1030,17 @@ public class HttpContext implements LifeCycle
         SecurityHandler sh=getSecurityHandler();
         sh.setRealmName(realmName);
     }
-
+    
+    /* ------------------------------------------------------------ */
+    public String getRealm()
+    {
+        SecurityHandler handler = (SecurityHandler)
+            getHandler(org.mortbay.http.handler.SecurityHandler.class);
+        if (handler!=null)
+            return handler.getRealmName();
+        return null;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Set the SecurityHandler realm.
      * Conveniance method.
@@ -1045,20 +1050,19 @@ public class HttpContext implements LifeCycle
      * @param realm The realm instance to use, instead of one
      * retrieved from the HttpServer.
      */
-    public void setRealm(String realmName, UserRealm realm)
+    public void setUserRealm(String realmName, UserRealm realm)
     {
         SecurityHandler sh=getSecurityHandler();
         sh.setRealm(realmName,realm);
     }
 
-    
     /* ------------------------------------------------------------ */
-    public String getRealm()
+    public UserRealm getUserRealm()
     {
         SecurityHandler handler = (SecurityHandler)
             getHandler(org.mortbay.http.handler.SecurityHandler.class);
         if (handler!=null)
-            return handler.getRealmName();
+            return handler.getUserRealm();
         return null;
     }
     
@@ -1306,7 +1310,16 @@ public class HttpContext implements LifeCycle
             pathInContext=pathInContext.substring(0,semi);
         }
 
-        return handle(0,pathInContext,pathParams,request,response);
+        try
+        {
+            return handle(0,pathInContext,pathParams,request,response);
+        }
+        finally
+        {
+            UserPrincipal user = request.getUserPrincipal();
+            if (_userRealm!=null && user!=null)
+                _userRealm.deAuthenticate(user);
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -1408,7 +1421,6 @@ public class HttpContext implements LifeCycle
         _started=true;
         getMimeMap();
         getEncodingMap();
-
         
         // setup the context loader
         initClassLoader(false);
@@ -1421,11 +1433,11 @@ public class HttpContext implements LifeCycle
             if (_loader!=null)
                 thread.setContextClassLoader(_loader);
 
-            startHandlers();
-            
+            startHandlers();            
         }
         finally
         {
+            _userRealm=getUserRealm();
             thread.setContextClassLoader(lastContextLoader);
         }
 

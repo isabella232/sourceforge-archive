@@ -40,7 +40,5 @@ public interface UserPrincipal extends Principal
      * @param role A role name.
      * @return True if the user can act in that role.
      */
-    public boolean isUserInRole(String role);
-
-    
+    public boolean isUserInRole(String role);   
 }
