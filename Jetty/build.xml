@@ -172,7 +172,6 @@ release     - Cleanup for release
     </javac>
     <copyfile src="LICENSE.html" dest="${jetty.webapp}/LICENSE.html" />
     <copyfile src="VERSION.TXT" dest="${jetty.webapp}/versions.txt" />
-    <copyfile src="doc/JsseSSL.html" dest="${jetty.webapp}/JsseSSL.html" />
     <jar jarfile="${jetty.war}"
          basedir="${jetty.webapp}" 
          >

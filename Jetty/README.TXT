@@ -6,8 +6,8 @@ It is designed to be light weight, high performance, embeddable,
 extensible and flexible, thus making it an ideal platform for serving  
 dynamic HTTP requests from any Java application.
 
-This is a BETA release of Jetty 3, which is a significant revision of
-the Jetty 2 code base. The aims of the Jetty 3 developement include:
+This  release of Jetty 3 is a significant revision of the Jetty 2 code 
+base. The aims of the Jetty 3 developement include:
 
   + Fully RFC2616 compliant implementation of HTTP/1.1.
   + Decouple HTTP server from specific Servlet container.
@@ -76,7 +76,6 @@ can be run with
 
 The com.mortbay.Jetty.Server class is simply an xml configuration
 frontend to com.mortbay.HTTP.HttpServer.
-
 
 Jetty comes with the tiny aelfred SAX parser from microstar.com.  This
 is only a partially validating parser, so care must be taken when 
@@ -156,16 +155,9 @@ The mailing lists are the best place to start:
   http://sourceforge.net/mail/?group_id=7322
 
 
-NOTES
-=====
-
-SSL:
-----
-A document in the doc directory describes the configuration for SSL in Jetty.
 
 
-CGI:
-----
-A CGI servlet is included in src/com/mortbay/Servlet/CGI.java  ,  but
-it is not yet configured into the release demo, nor is it documented.
+
+
+
 
