@@ -16,5 +16,7 @@ AuthGroupFile ./etc/htgroup
 <Limit>
 order deny,allow
 satisfy all
+deny from 127.0.0
+allow from 127.0.0.1
 require group TestGroup
 </Limit>

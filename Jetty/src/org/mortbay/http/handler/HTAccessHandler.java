@@ -22,6 +22,7 @@ import org.mortbay.util.*;
 import org.mortbay.util.URI;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Iterator;
@@ -67,7 +68,8 @@ public class HTAccessHandler extends NullHandler
             user = credentials.substring(0,i);
             password = credentials.substring(i+1);
  
-            Code.debug("User="+user+", password="+password);
+            Code.debug("User="+user+", password="+
+                       "******************************".substring(0,password.length()));
         }
 
         HTAccess ht=null;
@@ -82,22 +84,23 @@ public class HTAccessHandler extends NullHandler
             Resource resource = reqResource;
 
             // Work out search start
+            String directory=pathInContext;
             if (!resource.isDirectory())
-                pathInContext=URI.parentPath(pathInContext);
+                directory=URI.parentPath(pathInContext);
             else if (!pathInContext.endsWith("/"))
-                pathInContext+="/";
+                directory+="/";
         
             // Look for htAccess resource
-            while (pathInContext!=null)
+            while (directory!=null)
             {
-                resource=baseResource.addPath(pathInContext+_accessFile);
-                Code.debug("pathInContext=",pathInContext," resource=",resource);
+                resource=baseResource.addPath(directory+_accessFile);
+                Code.debug("directory=",directory," resource=",resource);
                 
                 if (resource.exists() && !resource.isDirectory())
                     break;
 
                 resource=null;
-                pathInContext=URI.parentPath(pathInContext);  
+                directory=URI.parentPath(directory);  
             }
             
             // Try default directory
@@ -113,15 +116,32 @@ public class HTAccessHandler extends NullHandler
             ht = (HTAccess) _htCache.get(resource);
             if (ht==null || ht.getLastModified()!=resource.lastModified())
             {
-                Code.debug("HTCache Miss");
                 ht=new HTAccess(resource);
                 _htCache.put(resource,ht);
+                Code.debug("HTCache loaded ",ht);
             }
-
+            
+            // prevent access to htaccess files
+            if (pathInContext.endsWith(_accessFile))
+            {
+                response.sendError(HttpResponse.__403_Forbidden);
+                request.setHandled(true);
+                return; 
+            }
+            
+            // See if there is a config problem
+            if (ht.isForbidden())
+            {
+                Code.warning("Mis-configured htaccess: "+ht);
+                response.sendError(HttpResponse.__403_Forbidden);
+                request.setHandled(true);
+                return;
+            }
+            
             //first see if we need to handle based on method type
-            if( !ht.getMethods().containsKey(request.getMethod()) ) {
+            Map methods=ht.getMethods();
+            if( methods.size()>0 && !methods.containsKey(request.getMethod()) ) 
                 return; //Nothing to check
-            }
 
             // Check the accesss
             int satisfy = ht.getSatisfy();
@@ -161,15 +181,6 @@ public class HTAccessHandler extends NullHandler
                 request.setAttribute(HttpRequest.__AuthUser,user);
             }
 
-            // prevent access to htaccess files
-            if (reqResource.equals(resource) ||
-                reqResource.equals(ht.getUserResource()) ||
-                reqResource.equals(ht.getGroupResource()))
-            {
-                response.sendError(HttpResponse.__403_Forbidden);
-                request.setHandled(true);
-                return; 
-            }
         }
         catch (Exception ex)
         {
@@ -237,12 +248,13 @@ public class HTAccessHandler extends NullHandler
         String _type;
         String _name;
         HashMap _methods = new HashMap();
-        HashMap _requireEntities = new HashMap();
+        HashSet _requireEntities = new HashSet();
         String _requireName;
         int _order;
         ArrayList _allowList = new ArrayList();
         ArrayList _denyList = new ArrayList();
         long _lastModified;
+        boolean _forbidden=false;
         
         /* ------------------------------------------------------------ */
         public HTAccess(Resource resource)
@@ -254,31 +266,40 @@ public class HTAccessHandler extends NullHandler
                 parse(htin);
                 _lastModified=resource.lastModified();
 
-                Resource
-                    base=Resource.newResource(URI.parentPath(resource.toString()));
-                
                 if (_userFile!=null)
                 {
-                    if(_userFile.charAt(0)==File.separatorChar)
-                        _userResource=Resource.newResource(_userFile);
+                    _userResource=Resource.newResource(_userFile);
+                    if (!_userResource.exists())
+                    {
+                        _forbidden=true;
+                        Code.warning("Could not find ht user file: "+_userFile);
+                    }
                     else
-                        _userResource=base.addPath(_userFile);
+                        Code.debug("user file: ",_userResource);
                 }
                 
                 if (_groupFile!=null)
                 {
-                    if(_groupFile.charAt(0)==File.separatorChar)
-                        _groupResource=Resource.newResource(_groupFile);
+                    _groupResource=Resource.newResource(_groupFile);
+                    if (!_groupResource.exists())
+                    {
+                        _forbidden=true;
+                        Code.warning("Could not find ht group file: "+_groupResource);
+                    }
                     else
-                        _groupResource=base.addPath(_groupFile);
+                        Code.debug("group file: ",_groupResource);
                 }
             }
             catch (IOException e)
             {
+                _forbidden=true;
                 Code.warning(e);
             }
         }
 
+        /* ------------------------------------------------------------ */
+        public boolean isForbidden() {return _forbidden;}
+        
         /* ------------------------------------------------------------ */
         public HashMap getMethods() {return _methods;}
 
@@ -306,7 +327,7 @@ public class HTAccessHandler extends NullHandler
             String elm;
             boolean alp = false;
             boolean dep = false;
- 
+
             // if no allows and no deny defined, then return true
             if(_allowList.size()==0 && _denyList.size()==0)
                 return(true);
@@ -375,13 +396,10 @@ public class HTAccessHandler extends NullHandler
                 }
             }
  
-            if (_order != 0) {
-                if (_order > 0) return (alp && !dep);
-                else return (!dep || alp);
-            }
-            else {
-                return (alp && !dep);
-            }
+            if (_order<0) //deny,allow
+                return !dep || alp;
+            //mutual failure == allow,deny
+            return alp && !dep;
         }
 
         /* ------------------------------------------------------------ */
@@ -389,60 +407,30 @@ public class HTAccessHandler extends NullHandler
         {
             if(_requireName == null)
                 return true;
-            String code;
+
+            // Have to authenticate the user
+            String code=getUserCode(user);
+            if (code==null ||
+                (code.equals("") && !pass.equals("")) ||
+                (!code.equals(UnixCrypt.crypt(pass, code))))
+                return false;
+                    
+            
             if (_requireName.equals(USER)) 
             {
-                for (Iterator i = _requireEntities.keySet().iterator(); i.hasNext();) 
-                {
-                    if (user.equals((String)i.next())) 
-                    {
-                        if ((code = getUserCode(user)) != null) 
-                        {
-                            if(code.equals("") && pass.equals(""))
-                                return true;
-                            if (code.equals(UnixCrypt.crypt(pass, code))) 
-                            {
-                                return true;
-                            }
-                        }
-                        break;
-                    }
-                }
+                if (_requireEntities.contains(user))
+                    return true;
             }
             else if (_requireName.equals(GROUP)) 
             {
                 ArrayList gps = getUserGroups(user);
-                if (gps != null) 
-                {
-                    for (Iterator i = _requireEntities.keySet().iterator(); i.hasNext();) 
-                    {
-                        if (gps.contains(i.next())) 
-                        {
-                            if ((code = getUserCode(user)) != null) 
-                            {
-                                if(code.equals("") && pass.equals(""))
-                                    return true;
-                                if (code.equals(UnixCrypt.crypt(pass, code))) 
-                                {
-                                    return true;
-                                }
-                            }
-                            break;
-                        }
-                    }
-                }
+                for (int g=gps.size();g-->0;)
+                    if (_requireEntities.contains(gps.get(g)))
+                        return true;
             }
             else if (_requireName.equals(VALID_USER)) 
             {
-                if ((code = getUserCode(user)) != null) 
-                {
-                    if(code.equals("") && pass.equals(""))
-                        return true;
-                    if (code.equals(UnixCrypt.crypt(pass, code))) 
-                    {
-                        return true;
-                    }
-                }
+                return true;
             }
             return false;
         }
@@ -562,29 +550,33 @@ public class HTAccessHandler extends NullHandler
         {
             StringBuffer buf = new StringBuffer();
             
-            buf.append("AuthUserFile = ");
+            buf.append("AuthUserFile=");
             buf.append(_userFile);
-            buf.append("AuthGroupFile = ");
+            buf.append(", AuthGroupFile=");
             buf.append(_groupFile);
-            buf.append("AuthName = ");
+            buf.append(", AuthName=");
             buf.append(_name);
-            buf.append("AuthType = ");
+            buf.append(", AuthType=");
             buf.append(_type);
-            buf.append("satisfy=");
+            buf.append(", Methods=");
+            buf.append(_methods);
+            buf.append(", satisfy=");
             buf.append(_satisfy);
             if(_order <0)
-                buf.append("order = deny,allow");
+                buf.append(", order=deny,allow");
             else if(_order > 0)
-                buf.append("order = allow,deny");
+                buf.append(", order=allow,deny");
             else
-                buf.append("order = mutual-failure");
+                buf.append(", order=mutual-failure");
  
-            buf.append("Allow from = ");
+            buf.append(", Allow from=");
             buf.append(_allowList);
-            buf.append("deny from = ");
+            buf.append(", deny from=");
             buf.append(_denyList);
-            buf.append("requireName = ");
+            buf.append(", requireName=");
             buf.append(_requireName);
+            buf.append(" ");
+            buf.append(_requireEntities);
 
             return buf.toString();
         }
@@ -659,7 +651,7 @@ public class HTAccessHandler extends NullHandler
  
                                 tkns = new StringTokenizer(line.substring(pos1));
                                 while (tkns.hasMoreTokens()) {
-                                    _requireEntities.put(tkns.nextToken(), Boolean.TRUE);
+                                    _requireEntities.add(tkns.nextToken());
                                 }
                             }
  

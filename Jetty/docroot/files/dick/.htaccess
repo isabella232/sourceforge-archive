@@ -16,5 +16,5 @@ AuthGroupFile ./etc/htgroup
 <Limit>
 order deny,allow
 satisfy all
-require group TestGroup
+require user dick
 </Limit>
