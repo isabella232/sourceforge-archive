@@ -151,15 +151,4 @@ public class SocketConnector extends AbstractConnector
             }
         }
     }
-    
-    public static void main(String[] arg)
-    	throws Exception
-    {
-        Server server = new Server();
-        SocketConnector scl = new SocketConnector();
-        server.setConnectors(new Connector[]{scl});
-        server.setHandlers(new Handler[]{new FileHandler()});
-        server.start();
-        scl.join();
-    }
 }

@@ -82,7 +82,8 @@ public class XmlParser
             }
             catch (Exception e)
             {
-                log.warn("Schema validation may not be supported: ", e);
+                if (log.isDebugEnabled())
+                    log.warn("Schema validation may not be supported: ", e);
             }
 
          

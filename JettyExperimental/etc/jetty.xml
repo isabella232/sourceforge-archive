@@ -1,0 +1,41 @@
+<?xml version="1.0"?> 
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure//EN" "http://jetty.mortbay.org/configure.dtd">
+
+
+<!-- =============================================================== -->
+<!-- Configure the Jetty Server                                      -->
+<!-- =============================================================== -->
+<Configure class="org.mortbay.jetty.Server">
+
+
+    <Set name="connectors">
+      <Array type="org.mortbay.jetty.Connector"> 
+        <Item>
+	    <New class="org.mortbay.jetty.bio.SocketConnector">
+	      <Set name="port">8080</Set>
+	    </New>
+	</Item>
+      </Array>
+    </Set>
+
+
+    <Set name="handlers">
+      <Array type="org.mortbay.jetty.Handler"> 
+        <Item>
+	  <New class="org.mortbay.jetty.handler.FileHandler"/>
+	</Item>
+      </Array>
+    </Set>
+
+    <Call name="start"/>
+
+</Configure>
+
+
+
+
+
+
+
+
+

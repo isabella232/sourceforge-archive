@@ -15,6 +15,7 @@
 
 package org.mortbay.xml;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -871,7 +872,19 @@ public class XmlConfiguration
         try
         {
             for (int i=0;i<arg.length;i++)
-                new XmlConfiguration(new URL(arg[i])).newInstance();
+            {
+                URL url=null;
+                try{
+                    url=new URL(arg[i]);
+                }
+                catch(Exception e)
+                {
+                    LogSupport.ignore(log,e);
+                }
+                if (url==null)
+                    url=(new File(arg[i])).toURL();
+                new XmlConfiguration(url).newInstance();
+            }
         }
         catch (Exception e)
         {
