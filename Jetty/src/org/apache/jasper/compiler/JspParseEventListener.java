@@ -478,7 +478,7 @@ public class JspParseEventListener extends BaseJspListener {
                 else {
                     Integer i = null;
                     try {
-                        int ind = buffer.indexOf("k");
+                        int ind = buffer.indexOf('k');
                         String num;
                         if (ind == -1)
                             num = buffer;
@@ -662,7 +662,7 @@ public class JspParseEventListener extends BaseJspListener {
                  * will assume the extended class is in the same pkg as
                  * the generated servlet.
                  */
-                if (extendsClzz.indexOf(".") == -1)  {
+                if (extendsClzz.indexOf('.') == -1)  {
                     listener.imports.addElement(extendsClzz);
                 }
             }

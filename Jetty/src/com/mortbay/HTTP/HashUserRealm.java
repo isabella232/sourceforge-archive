@@ -74,7 +74,7 @@ public class HashUserRealm extends HashMap
             String username=entry.getKey().toString().trim();
             String credentials=entry.getValue().toString().trim();
             String roles=null;
-            int c=credentials.indexOf(",");
+            int c=credentials.indexOf(',');
             if (c>0)
             {
                 roles=credentials.substring(c+1).trim();

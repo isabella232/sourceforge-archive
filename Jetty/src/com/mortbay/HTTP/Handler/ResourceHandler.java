@@ -237,8 +237,8 @@ public class ResourceHandler extends NullHandler
         throws HttpException, IOException
     {
         // Strip any path params
-        if (pathInContext!=null && pathInContext.indexOf(";")>0)
-            pathInContext=pathInContext.substring(0,pathInContext.indexOf(";"));
+        if (pathInContext!=null && pathInContext.indexOf(';')>0)
+            pathInContext=pathInContext.substring(0,pathInContext.indexOf(';'));
         
         // Extract and check filename
         pathInContext=Resource.canonicalPath(pathInContext);

@@ -378,7 +378,7 @@ public class ServletHandler extends NullHandler
                 servletClass=servletClass.substring(1);
                 
                 // remove suffix
-                int slash=servletClass.indexOf("/");
+                int slash=servletClass.indexOf('/');
                 if (slash>=0)
                     servletClass=servletClass.substring(0,slash);            
                 if (servletClass.endsWith(".class"))
@@ -386,9 +386,9 @@ public class ServletHandler extends NullHandler
                 
                 // work out the actual servlet path
                 if ("/".equals(_dynamicServletPathSpec))
-                    path="/"+servletClass;
+                    path='/'+servletClass;
                 else
-                    path=PathMap.pathMatch(_dynamicServletPathSpec,path)+"/"+servletClass;
+                    path=PathMap.pathMatch(_dynamicServletPathSpec,path)+'/'+servletClass;
                 
                 Code.debug("Dynamic path=",path);
                 

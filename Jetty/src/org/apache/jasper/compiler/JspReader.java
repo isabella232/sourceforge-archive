@@ -136,7 +136,7 @@ public class JspReader {
         throws ParseException, FileNotFoundException
     {
         String parent = master == null ?
-            null : master.substring(0, master.lastIndexOf("/") + 1);
+            null : master.substring(0, master.lastIndexOf('/') + 1);
         boolean isAbsolute = name.startsWith("/");
 
         if (parent == null || isAbsolute) {

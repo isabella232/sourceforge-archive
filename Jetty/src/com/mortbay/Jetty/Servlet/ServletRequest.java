@@ -184,7 +184,7 @@ public class ServletRequest
             String language = (String)acceptLanguage.get(i);
             language=HttpFields.valueParameters(language,null);
             String country = "";
-            int dash = language.indexOf("-");
+            int dash = language.indexOf('-');
             if (dash > -1)
             {
                 country = language.substring(dash + 1).trim();
@@ -354,8 +354,14 @@ public class ServletRequest
         }
             
         // check if there is a url encoded session param.
-        int prefix=pathInContext.indexOf(Context.__SessionUrlPrefix);
-        if (prefix!=-1)
+        int semi=pathInContext.indexOf(';');
+        int prefix=pathInContext.indexOf(Context.__SessionUrlPrefix,semi);
+        if (prefix<0)
+        {
+            if (semi>=0)
+                pathInContext=pathInContext.substring(0,semi);
+        }
+        else
         {
             String id =
                 pathInContext.substring(prefix+Context.__SessionUrlPrefix.length());
@@ -702,7 +708,7 @@ public class ServletRequest
         {
             String relTo=URI.addPaths(_servletPath,_pathInfo);
             
-            int slash=relTo.lastIndexOf("/");
+            int slash=relTo.lastIndexOf('/');
             relTo=relTo.substring(0,slash);
             
             while(url.startsWith("../"))
@@ -710,7 +716,7 @@ public class ServletRequest
                 if (relTo.length()==0)
                     return null;
                 url=url.substring(3);
-                slash=relTo.lastIndexOf("/");
+                slash=relTo.lastIndexOf('/');
                 relTo=relTo.substring(0,slash);
             }
 

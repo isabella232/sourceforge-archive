@@ -73,17 +73,17 @@ public class Debug extends HttpServlet
             String logOptions=sinks[s].getOptions();
             if (sinks[s] instanceof WriterLogSink)
             {
-                tf.addCheckbox("Lt"+s,"Timestamp",logOptions.indexOf("t")>=0);
+                tf.addCheckbox("Lt"+s,"Timestamp",logOptions.indexOf('t')>=0);
                 logOptions=StringUtil.replace(logOptions,"t","");
-                tf.addCheckbox("LT"+s,"Tag",logOptions.indexOf("T")>=0);
+                tf.addCheckbox("LT"+s,"Tag",logOptions.indexOf('T')>=0);
                 logOptions=StringUtil.replace(logOptions,"T","");
-                tf.addCheckbox("LL"+s,"Label",logOptions.indexOf("L")>=0);
+                tf.addCheckbox("LL"+s,"Label",logOptions.indexOf('L')>=0);
                 logOptions=StringUtil.replace(logOptions,"L","");
-                tf.addCheckbox("Ls"+s,"Stack Size",logOptions.indexOf("s")>=0);
+                tf.addCheckbox("Ls"+s,"Stack Size",logOptions.indexOf('s')>=0);
                 logOptions=StringUtil.replace(logOptions,"s","");
-                tf.addCheckbox("LS"+s,"Stack Trace",logOptions.indexOf("S")>=0);
+                tf.addCheckbox("LS"+s,"Stack Trace",logOptions.indexOf('S')>=0);
                 logOptions=StringUtil.replace(logOptions,"S","");
-                tf.addCheckbox("SL"+s,"Single Line",logOptions.indexOf("O")>=0);
+                tf.addCheckbox("SL"+s,"Single Line",logOptions.indexOf('O')>=0);
                 logOptions=StringUtil.replace(logOptions,"O","");
                 tf.addTextField("LO"+s,"Other Options",10,logOptions);
                 

@@ -42,7 +42,7 @@ abstract public class NullHandler implements HttpHandler
         {
             _name=this.getClass().getName();
             if (!Code.debug())
-                _name=_name.substring(_name.lastIndexOf(".")+1);
+                _name=_name.substring(_name.lastIndexOf('.')+1);
         }
         return _name;
     }

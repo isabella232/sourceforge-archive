@@ -46,8 +46,8 @@ public class QuotedStringTokenizer
         _returnTokens=returnTokens;
         _returnQuotes=returnQuotes;
         
-        if (_delim.indexOf("'")>=0 ||
-            _delim.indexOf("\"")>=0)
+        if (_delim.indexOf('\'')>=0 ||
+            _delim.indexOf('"')>=0)
             throw new Error("Can't use quotes as delimiters: "+_delim);
         
         _token=new StringBuffer(_string.length()>1024?512:_string.length()/2);

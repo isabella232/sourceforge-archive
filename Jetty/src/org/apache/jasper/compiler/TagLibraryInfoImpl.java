@@ -139,7 +139,7 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
     private InputStream getResourceAsStream(String uri) 
         throws FileNotFoundException 
     {
-        if (uri.indexOf(":") > 0) {
+        if (uri.indexOf(':') > 0) {
             // may be fully qualified (Windows) or may be a URL.  Let
             // getResourceAsStream deal with it.
             return ctxt.getResourceAsStream(uri);

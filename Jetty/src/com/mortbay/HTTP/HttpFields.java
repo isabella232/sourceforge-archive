@@ -799,7 +799,7 @@ public class HttpFields
         if (value==null)
             return null;
         
-        int i = value.indexOf(";");
+        int i = value.indexOf(';');
         if (i<0)
             return value;
         if (parameters==null)

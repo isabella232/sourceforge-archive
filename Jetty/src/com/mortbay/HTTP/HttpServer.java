@@ -14,6 +14,7 @@ import com.mortbay.Util.LifeCycle;
 import com.mortbay.Util.Log;
 import com.mortbay.Util.LogSink;
 import com.mortbay.Util.MultiException;
+import com.mortbay.Util.URI;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -744,6 +745,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
                                    String uri,
                                    List hosts)
     {
+        uri = URI.stripPath(uri);
         for (int h=0; h<hosts.size() ; h++)
         {
             String host = (String)hosts.get(h);

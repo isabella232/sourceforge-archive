@@ -157,7 +157,7 @@ public class ThreadPool
         if (_name==null)
         {
             _name=getClass().getName();
-            _name=_name.substring(_name.lastIndexOf(".")+1);
+            _name=_name.substring(_name.lastIndexOf('.')+1);
         }
     }
 

@@ -572,9 +572,9 @@ public class URI
 
         String p3=null;
         
-        int split=p1.indexOf(";");
+        int split=p1.indexOf(';');
         if (split<0)
-            split=p1.indexOf("?");
+            split=p1.indexOf('?');
         if (split==0)
             return p2+p1;
         else if (split>=0)
@@ -600,6 +600,11 @@ public class URI
     }
     
     /* ------------------------------------------------------------ */
+    /** Return the parent Path.
+     * Treat a URI like a directory path and return the parent directory.
+     * @param p 
+     * @return 
+     */
     public static String parentPath(String p)
     {
         if (p==null || "/".equals(p))
@@ -608,6 +613,22 @@ public class URI
         if (slash>=0)
             return p.substring(0,slash+1);
         return null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Strip parameters from a path.
+     * Return path upto any semicolon parameters.
+     * @param path 
+     * @return 
+     */
+    public static String stripPath(String path)
+    {
+        if (path==null)
+            return null;
+        int semi=path.indexOf(';');
+        if (semi<0)
+            return path;
+        return path.substring(0,semi);
     }
     
     /* ------------------------------------------------------------ */

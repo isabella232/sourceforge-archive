@@ -180,8 +180,8 @@ public class JasperLoader extends org.apache.jasper.runtime.JspLoader {
     
     protected Class findClass(String className) throws ClassNotFoundException {
         try {
-            int beg = className.lastIndexOf(".") == -1 ? 0 :
-                className.lastIndexOf(".")+1;
+            int beg = className.lastIndexOf('.') == -1 ? 0 :
+                className.lastIndexOf('.')+1;
             int end = className.lastIndexOf("_jsp_");
 
             if (end <= 0) {     

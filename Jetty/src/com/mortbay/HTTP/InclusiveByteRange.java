@@ -71,7 +71,7 @@ public class InclusiveByteRange {
                     
                     long first = -1;
                     long last  = -1;
-                    int d=t.indexOf("-");
+                    int d=t.indexOf('-');
                     if (d<0 || t.indexOf("-",d+1)>=0)
                     {           
                         if ("bytes".equals(t))

@@ -304,19 +304,19 @@ public class MultiPartRequest
     private String value(String nameEqualsValue)
     {   
         String value =
-            nameEqualsValue.substring(nameEqualsValue.indexOf("=")+1).trim();
+            nameEqualsValue.substring(nameEqualsValue.indexOf('=')+1).trim();
         
-        int i=value.indexOf(";");
+        int i=value.indexOf(';');
         if (i>0)
             value=value.substring(0,i);
         if (value.startsWith("\""))
         {
-            value=value.substring(1,value.indexOf("\"",1));
+            value=value.substring(1,value.indexOf('"',1));
         }
         
         else
         {
-            i=value.indexOf(" ");
+            i=value.indexOf(' ');
             if (i>0)
                 value=value.substring(0,i);
         }

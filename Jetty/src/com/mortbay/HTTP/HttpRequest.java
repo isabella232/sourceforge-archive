@@ -838,7 +838,7 @@ public class HttpRequest extends HttpMessage
                 try
                 {
                     String c = iter.next().toString().trim();
-                    int e = c.indexOf("=");
+                    int e = c.indexOf('=');
                     String n;
                     String v;
                     if (e>0)
@@ -861,13 +861,13 @@ public class HttpRequest extends HttpMessage
                     {
                         if ("$version".equalsIgnoreCase(n))
                         {
-                            int coma=v.indexOf(",");
+                            int coma=v.indexOf(',');
                             if (coma>=0)
                             {   
                                 version=Integer.parseInt
                                     (StringUtil.unquote(v.substring(0,coma)));
                                 v=v.substring(coma+1);
-                                e=v.indexOf("=");
+                                e=v.indexOf('=');
                                 if (e>0)
                                 {
                                     n=v.substring(0,e).trim();

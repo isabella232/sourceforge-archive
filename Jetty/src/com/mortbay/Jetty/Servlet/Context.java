@@ -186,7 +186,7 @@ public class Context implements ServletContext, HttpSessionContext
             String pathInContext=uriInContext;
             String query=null;
             int q=0;
-            if ((q=pathInContext.indexOf("?"))>0)
+            if ((q=pathInContext.indexOf('?'))>0)
             {
                 pathInContext=uriInContext.substring(0,q);
                 query=uriInContext.substring(q+1);

@@ -159,7 +159,7 @@ public abstract class Element
      */
     public Element attributes(String attributes)
     {
-        if (Code.debug() && attributes!=null && attributes.indexOf("=")>=0)
+        if (Code.debug() && attributes!=null && attributes.indexOf('=')>=0)
             Code.warning("Set attribute with old method: "+attributes+
                          " on " + getClass().getName());
 
@@ -203,7 +203,7 @@ public abstract class Element
      */
     public Element attribute(String attributes)
     {
-        if (Code.debug() && attributes!=null && attributes.indexOf("=")>=0)
+        if (Code.debug() && attributes!=null && attributes.indexOf('=')>=0)
             Code.warning("Set attribute with old method: "+attributes+
                          " on " + getClass().getName());
         

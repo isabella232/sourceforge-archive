@@ -100,8 +100,8 @@ public class Code
         String o = appl.getParameter("DEBUG_OPTIONS");
         if (o!=null)
         {
-            setSuppressStack(o.indexOf("S")>=0);
-            setSuppressWarnings(o.indexOf("W")>=0);
+            setSuppressStack(o.indexOf('S')>=0);
+            setSuppressWarnings(o.indexOf('W')>=0);
         }
         else
         {
@@ -144,8 +144,8 @@ public class Code
             String o = System.getProperty("DEBUG_OPTIONS");
             if (o!=null)
             {
-                setSuppressStack(!(o.indexOf("S")>=0));
-                setSuppressWarnings(!(o.indexOf("W")>=0));
+                setSuppressStack(!(o.indexOf('S')>=0));
+                setSuppressWarnings(!(o.indexOf('W')>=0));
             }
             else
             {

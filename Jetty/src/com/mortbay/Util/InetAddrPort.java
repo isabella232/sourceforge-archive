@@ -61,12 +61,12 @@ public class InetAddrPort
     public InetAddrPort(String inetAddrPort)
         throws java.net.UnknownHostException
     {
-        int c = inetAddrPort.indexOf(":");
+        int c = inetAddrPort.indexOf(':');
         if (c>=0)
         {
             String addr=inetAddrPort.substring(0,c);
-            if (addr.indexOf("/")>0)
-                addr=addr.substring(addr.indexOf("/")+1);
+            if (addr.indexOf('/')>0)
+                addr=addr.substring(addr.indexOf('/')+1);
             inetAddrPort=inetAddrPort.substring(c+1);
         
             if (addr.length()>0 && ! "0.0.0.0".equals(addr))
@@ -115,8 +115,8 @@ public class InetAddrPort
         _addr=null;
         if (host!=null)
         {
-            if (host.indexOf("/")>0)
-                host=host.substring(0,host.indexOf("/"));
+            if (host.indexOf('/')>0)
+                host=host.substring(0,host.indexOf('/'));
             _addrIsHost=!Character.isDigit((host.charAt(0)));
             _addr=InetAddress.getByName(host);
         }

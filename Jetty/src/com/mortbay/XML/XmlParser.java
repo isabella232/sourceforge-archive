@@ -275,8 +275,8 @@ public class XmlParser
             if (resource==null)
             {
                 String dtd = sid;
-                if (dtd.lastIndexOf("/")>=0)
-                    dtd=dtd.substring(dtd.lastIndexOf("/")+1);
+                if (dtd.lastIndexOf('/')>=0)
+                    dtd=dtd.substring(dtd.lastIndexOf('/')+1);
                 resource = (Resource)_redirectMap.get(dtd);
             }
 

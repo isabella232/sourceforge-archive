@@ -255,7 +255,7 @@ public class ServletResponse implements HttpServletResponse
             String charset = (String)__charSetMap.get(lang);
             if (charset != null)
             {
-                type = ((type.indexOf(";")==-1)?"; charset=":" charset=")+
+                type = ((type.indexOf(';')==-1)?"; charset=":" charset=")+
                     charset;
             }
         }        
