@@ -6,21 +6,21 @@ QUESTION: How do I control JSP scratch files?
 Dynamically compiled JSP files result in java source files being generated to
 a scratch directory.  By default, this is called org/apache/jsp and is within
 the temporary directory allocated to each web application. See 
-<a href="faq?s=250-Configuration&t=tempdir">this faq</a> for more info about how temporary directories are allocated.
+<a href="faq?s=250-Configuration&t=210tempdir">this faq</a> for more info about how temporary directories are allocated.
 </p>
 <p>
 The location of the scratch directory can be controlled via the scratch init parameter of the JSP Servlet, 
 which is defined in the webdefaults.xml.  However, if the scratch dir is set in the 
-<a href="faq?s=250-Configuration&t=xmlwebdefault">webdefault.xml</a>
+<a href="faq?s=250-Configuration&t=140xmlwebdefault">webdefault.xml</a>
 file, it
 is used for <i>all</i> web applications, which is typically not what is required for JSP compilation.
-It can also be set in a <a href="faq?s=250-Configuration&t=xmljettyweb">jetty-web.xml</a> file, but it is
+It can also be set in a <a href="faq?s=250-Configuration&t=150xmljettyweb">jetty-web.xml</a> file, but it is
 probably simpler to use a work temp directory.
 </p>
 <p>
 If you wish to keep generated JSP source between runs of the web application, then the keepgenerated init parameter
-can be set on the JSPServlet.  This can be done in the <a href="faq?s=250-Configuration&t=xmlwebdefault">webdefault.xml</a> 
-file for all web applications or in a <a href="faq?s=250-Configuration&t=xmljettyweb">jetty-web.xml</a>  file for
+can be set on the JSPServlet.  This can be done in the <a href="faq?s=250-Configuration&t=140xmlwebdefault">webdefault.xml</a> 
+file for all web applications or in a <a href="faq?s=250-Configuration&t=150xmljettyweb">jetty-web.xml</a>  file for
 a particular web application.
 </p>
 
