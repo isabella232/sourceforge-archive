@@ -353,7 +353,7 @@ public class SecurityConstraint implements Cloneable, Serializable
         // Does this forbid everything?
         if (forbidden)
         {
-            response.sendError(HttpResponse.__403_Forbidden);
+            HttpContext.sendContextError(response,HttpResponse.__403_Forbidden,null);
             return false;
         }
 
@@ -384,7 +384,7 @@ public class SecurityConstraint implements Cloneable, Serializable
                         response.sendRedirect(url);
                     }
                     else
-                        response.sendError(HttpResponse.__403_Forbidden);
+                        HttpContext.sendContextError(response,HttpResponse.__403_Forbidden,null);
                     return false;
 
                 case SecurityConstraint.DC_CONFIDENTIAL :
@@ -407,11 +407,11 @@ public class SecurityConstraint implements Cloneable, Serializable
                         response.sendRedirect(url);
                     }
                     else
-                        response.sendError(HttpResponse.__403_Forbidden);
+                        HttpContext.sendContextError(response,HttpResponse.__403_Forbidden,null);
                     return false;
 
                 default :
-                    response.sendError(HttpResponse.__403_Forbidden);
+                    HttpContext.sendContextError(response,HttpResponse.__403_Forbidden,null);
                     return false;
             }
         }
@@ -421,9 +421,7 @@ public class SecurityConstraint implements Cloneable, Serializable
         {
             if (realm == null)
             {
-                response.sendError(
-                    HttpResponse.__500_Internal_Server_Error,
-                    "Realm Not Configured");
+                HttpContext.sendContextError(response,HttpResponse.__500_Internal_Server_Error,"Configuration error");
                 return false;
             }
 
@@ -448,7 +446,7 @@ public class SecurityConstraint implements Cloneable, Serializable
             {
                 // don't know how authenticate
                 log.warn("Mis-configured Authenticator for " + request.getPath());
-                response.sendError(HttpResponse.__500_Internal_Server_Error);
+                HttpContext.sendContextError(response,HttpResponse.__500_Internal_Server_Error,"Configuration error");
             }
 
             // If we still did not get a user
@@ -475,9 +473,7 @@ public class SecurityConstraint implements Cloneable, Serializable
                     if ("BASIC".equalsIgnoreCase(authenticator.getAuthMethod()))
                          ((BasicAuthenticator)authenticator).sendChallenge(realm, response);
                     else
-                        response.sendError(
-                            HttpResponse.__403_Forbidden,
-                            "User not in required role");
+                        HttpContext.sendContextError(response,HttpResponse.__403_Forbidden,"User not in required role");
                     return false; // role failed.
                 }
             }
@@ -489,4 +485,5 @@ public class SecurityConstraint implements Cloneable, Serializable
 
         return true;
     }
+    
 }

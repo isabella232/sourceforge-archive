@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Locale;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
@@ -181,4 +182,18 @@ public class ServletHttpContext extends HttpContext
         return "Servlet"+super.toString(); 
     }
     
+
+    /* ------------------------------------------------------------ */
+    /* send servlet response error
+     * 
+     */
+    public void sendError(HttpResponse response,int code,String msg)
+    	throws IOException
+    {
+        Object wrapper = response.getWrapper();
+        if (wrapper!=null && wrapper instanceof HttpServletResponse)
+            ((HttpServletResponse)wrapper).sendError(code,msg);
+        else
+            super.sendError(response,code,msg);
+    }
 }
