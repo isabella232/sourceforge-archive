@@ -30,6 +30,7 @@ import org.mortbay.util.LogSink;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.URI;
 
 /* ------------------------------------------------------------ */
 /** Context for a collection of HttpHandlers.
@@ -1327,6 +1328,8 @@ public class HttpContext implements LifeCycle
                           HttpResponse response)
         throws HttpException, IOException
     {
+        pathInContext=URI.canonicalPath(pathInContext);
+        
         // Save the thread context loader
         Thread thread = Thread.currentThread();
         ClassLoader lastContextLoader=thread.getContextClassLoader();

@@ -403,6 +403,21 @@ public class TestHarness
                 {"/suffix/path.gz","7"},
                 {"/animal/path.gz","5"},
                 {"/Other/path","8"},
+                {"//abs/path","1"},
+                {"/abs//path/xxx","8"},
+                {"//abs//pith","8"},
+                {"//abs/../abs/path/longer","2"},
+                {"//abs/path/","8"},
+                {"/abs/path/xxx","8"},
+                {"/animal/fish/../bird/eagle/bald","3"},
+                {"//animal/fish/shark/grey","4"},
+                {"//animal/insect/bug","5"},
+                {"/animal","5"},
+                {"/animal//","5"},
+                {"/suffix//path.tar.gz","6"},
+                {"/suffix//path.gz","7"},
+                {"/animal//path.gz","5"},
+                {"/Other/path","8"},
             };    
 
             for (int i=0;i<tests.length;i++)

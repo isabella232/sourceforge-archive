@@ -14,6 +14,7 @@ import java.util.StringTokenizer;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.SingletonList;
 import org.mortbay.util.StringMap;
+import org.mortbay.util.URI;
 
 /* ------------------------------------------------------------ */
 /** URI path map to Object.
@@ -172,6 +173,7 @@ public class PathMap extends HashMap
      */
     public synchronized Map.Entry getMatch(String path)
     {
+        path=URI.canonicalPath(path);
         Map.Entry entry;
 
         int l=path.indexOf(';');

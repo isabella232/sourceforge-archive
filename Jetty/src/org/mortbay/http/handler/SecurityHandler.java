@@ -249,12 +249,15 @@ public class SecurityHandler extends NullHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
+        System.err.println("SECURITY HANDLER: "+pathInContext);
+        
         // Get all path matches
         List scss =_constraintMap.getMatches(pathInContext);
         if (scss!=null)
         {          
             Code.debug("Security Constraint on ",pathInContext," against ",scss);
-  
+
+            
             // for each path match
         matches:
             for (int m=0;m<scss.size();m++)
