@@ -673,6 +673,9 @@ public class ModelMBeanImpl
                MBeanException,
                ReflectionException
     {
+        if (attr==null)
+            return null;
+
         if(log.isDebugEnabled())log.debug("setAttribute "+attr.getName()+"="+attr.getValue());
         Method setter = (Method)_setter.get(attr.getName());
         if (setter==null)

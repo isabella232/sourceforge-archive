@@ -176,27 +176,12 @@
            debug="${javac.debug}"
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}"
-           target="1.2"
-           >
-       <classpath>
-         <path refid="extpath"/>
-         <pathelement path="${classes}"/>
-       </classpath>
-       <include name="javax/**/*.java"/>
-    </javac>
-
-    <javac srcdir="${src}"
-           destdir="${classes}"
-           debug="${javac.debug}"
-           optimize="${javac.optimize}"
-           deprecation="${javac.deprecation}"
            >
        <classpath>
          <path refid="extpath"/>
          <pathelement path="${classes}"/>
        </classpath>
        <include name="**/*.java"/>
-       <exclude name="javax/**/*.java"/>
        <exclude name="**/jmx/**" unless="jmx.available"/>
     </javac>
 
