@@ -29,12 +29,10 @@ import java.io.InputStreamReader;
  */
  
  /* TODO:
- 
    - finish possible jetty.home locations
    - use File.toURI.toURL() on JDK 1.4+
    - better handling of errors (i.e. when jetty.home cannot be autodetected...)
    - include entries from lib _when needed_
-
  */
  
 public class Launcher {
@@ -81,9 +79,18 @@ public class Launcher {
             return true;
         }
         catch (ClassNotFoundException e)
+        {}
+        
+        ClassLoader loader=_classpath.getClassLoader();
+        try
         {
-            return false;
+            Class check = loader.loadClass(classname);
+            return true;
         }
+        catch (ClassNotFoundException e)
+        {}
+
+        return false;
     }
 
     public static void invokeMain(ClassLoader classloader, String classname, String[] args)

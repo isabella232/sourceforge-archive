@@ -102,13 +102,13 @@ public class Classpath {
             } catch (MalformedURLException e) {}
         }
         
-        ClassLoader old_classloader = Thread.currentThread().getContextClassLoader();
-        if (old_classloader == null) {
-            old_classloader = Classpath.class.getClassLoader();
+        ClassLoader parent = Thread.currentThread().getContextClassLoader();
+        if (parent == null) {
+            parent = Classpath.class.getClassLoader();
         }
-        if (old_classloader == null) {
-            old_classloader = ClassLoader.getSystemClassLoader();
+        if (parent == null) {
+            parent = ClassLoader.getSystemClassLoader();
         }
-        return new URLClassLoader(urls, old_classloader);
+        return new URLClassLoader(urls, parent);
     }
 }
