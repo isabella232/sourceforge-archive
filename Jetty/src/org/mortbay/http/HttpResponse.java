@@ -308,14 +308,15 @@ public class HttpResponse extends HttpMessage
      */
     private void sendError(int code,String error,String message) 
         throws IOException
-    {
+    {        
         Integer code_integer=new Integer(code);
-        String reason = (String)__statusMsg.get(code_integer);
+        if (message == null)
+            message = (String)__statusMsg.get(code_integer);
         HttpRequest request=getRequest();
 
         // Generate normal error page.
         setStatus(code);
-        setReason(reason);
+        setReason(message);
 
         // If we are allowed to have a body 
         if (code!=__204_No_Content &&
@@ -338,8 +339,8 @@ public class HttpResponse extends HttpMessage
                     request.setAttribute("javax.servlet.error.request_uri",
                                          getHttpRequest().getPath());
                     request.setAttribute("javax.servlet.error.status_code",code_integer);
-                    request.setAttribute("javax.servlet.error.message",
-                                         message==null?reason:message);
+                    request.setAttribute("javax.servlet.error.message",message);
+                    
                     // Do a forward to the error page resource.
                     getHttpContext().handle(0,error_page,null,request,this);
                 }
@@ -367,14 +368,13 @@ public class HttpResponse extends HttpMessage
                 body.append("<HTML>\n<HEAD>\n<TITLE>Error ");
                 body.append(code);
                 body.append(' ');
-                body.append(reason);
+                body.append(message);
                 body.append("</TITLE>\n<BODY>\n<H2>HTTP ERROR: ");
                 body.append(code);
                 body.append(' ');
-                body.append(reason);
+                body.append(message);
                 body.append("</H2>\n");
-                if (message!=null) body.append(message);
-                body.append("<P>RequestURI=");
+                body.append("RequestURI=");
                 body.append(uri);
                 for (int i=0;i<20;i++)
                     body.append("\n                                                ");
