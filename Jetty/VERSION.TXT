@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-4.0.1RC1 - 
+Jetty-4.0.1RC1 - 26 April 2002
  + Fixed double filtering of welcome files.
  + Fixed FORM authentication auth of login page bug.
  + Fixed setTempDirectory creation bug

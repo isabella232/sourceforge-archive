@@ -539,7 +539,7 @@ public class Dispatcher implements RequestDispatcher
                 try {_out=super.getOutputStream();}
                 catch(IllegalStateException e)
                 {
-                    if (Code.debug()) Code.warning(e);
+                    Code.ignore(e);
                     _flushNeeded=true;
                     _out=new ServletOut(new WriterOutputStream(super.getWriter()));
                 }
