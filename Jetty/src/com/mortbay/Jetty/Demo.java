@@ -35,7 +35,7 @@ public class Demo
             // Realm
             HashUserRealm realm=
                 new HashUserRealm("Jetty Demo Realm",
-                                  "./etc/demoRealm.properties");
+                                  "etc/demoRealm.properties");
             
             // Make server
             HttpServer server = new HttpServer();

@@ -79,9 +79,9 @@ $Id$
 
   <Call name="addContext">
     <Arg>/</Arg>
-    <Set name="ClassPath">servlets/</Set>
+    <Set name="ClassPath"><SystemProperty name="jetty.home" default="."/>/servlets/</Set>
     <Set name="DynamicServletPathSpec">/servlet/*</Set>
-    <Set name="ResourceBase">docroot/</Set>
+    <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/docroot/</Set>
     <Set name="ServingResources">TRUE</Set>
     <Call name="addServlet">
       <Arg>Dump</Arg>

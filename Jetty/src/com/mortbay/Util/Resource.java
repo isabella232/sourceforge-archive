@@ -95,7 +95,7 @@ public class Resource
         }
         catch(MalformedURLException e)
         {
-            if(resource.startsWith("."+File.separator))
+            if(resource.startsWith("."))
             {
                 // It's a local file.
                 File file=new File(resource);

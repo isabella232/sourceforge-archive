@@ -89,7 +89,7 @@ $Id$
 
   <Call name="addContext">
     <Arg>/demo/*</Arg>
-    <Set name="ResourceBase">docroot/</Set>
+    <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/docroot/</Set>
     <Call name="addServlet">
       <Arg>Dump</Arg>
       <Arg>/dump/*,*.DUMP</Arg>
@@ -129,7 +129,7 @@ $Id$
 
   <Call name="addContext">
     <Arg>/javadoc/*</Arg>
-    <Set name="ResourceBase">javadoc/</Set>
+    <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/javadoc/</Set>
     <Set name="ServingResources">TRUE</Set>
   </Call>
 
@@ -146,7 +146,7 @@ $Id$
 
   <Call name="addContext">
     <Arg>/</Arg>
-    <Set name="ClassPath">servlets/</Set>
+    <Set name="ClassPath"><SystemProperty name="jetty.home" default="."/>/servlets/</Set>
     <Set name="DynamicServletPathSpec">/servlet/*</Set>
     <Call name="addHandler">
       <Arg type="int">0</Arg>

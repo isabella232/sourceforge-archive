@@ -1,7 +1,10 @@
 Jetty Versions
 --------------
 
-Jetty-3.0.0.rc8
+ + Fixed rel path handling in default configurations.
+
+
+Jetty-3.0.0.rc8 - 13 Dec 2000
  + Optional alias checking added to FileResource.  Turned on by default
    on all platforms without the "/" file separator.
  + Mapped *.jsp,*.jsP,*.jSp,*.jSP,*.Jsp,*.JsP,*.JSp,*.JSP
