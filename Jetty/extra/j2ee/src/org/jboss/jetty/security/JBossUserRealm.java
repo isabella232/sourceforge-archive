@@ -16,11 +16,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 
+import javax.management.MBeanServer;
+import javax.management.MBeanServerFactory;
+import javax.management.ObjectName;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.security.auth.Subject;
 
+import org.jboss.jetty.JBossWebApplicationContext;
 import org.jboss.logging.Logger;
 import org.jboss.security.AuthenticationManager;
 import org.jboss.security.RealmMapping;
@@ -53,6 +57,7 @@ public class JBossUserRealm
     private       AuthenticationManager  _authMgr      =null;
     private       RealmMapping           _realmMapping =null;
     private       SubjectSecurityManager _subjSecMgr   =null;
+    private       JBossWebApplicationContext _jbossWebAppContext = null;
 
 
     /* Since there is a seperate instance of JBossUserRealm per web-app regardless of whether the realm-name is the same,
@@ -442,7 +447,36 @@ public class JBossUserRealm
     
     public void logout(Principal user)
     {
-        // TODO
+    	// yukky hack to try and force JBoss to actually
+    	// flush the user from the jaas security manager's cache therefore
+    	// forcing logincontext.logout() to be called
+    	
+    	_log.info ("logout for "+user.getName());
+    	
+    	try
+		{  	
+    		Principal pUser = user;
+    		if (user instanceof JBossUserPrincipal)
+    			pUser = ((JBossUserPrincipal)user)._principal;
+    		  		
+    		java.util.ArrayList servers = MBeanServerFactory.findMBeanServer(null);
+    		if (servers.size() != 1) 
+    			_log.warn ("More than one MBeanServer found, choosing first");
+    		MBeanServer server = (MBeanServer) servers.get(0);   	 
+    		
+    		server.invoke(new ObjectName("jboss.security:service=JaasSecurityManager"), 
+    				"flushAuthenticationCache", 
+    				new Object[]{getName(), pUser}, 
+					new String[]{"java.lang.String", "java.security.Principal"});
+		}
+    	catch (Exception e)
+		{
+    		_log.error (e);
+		}
+    	catch (Error err)
+		{
+    		_log.error(err);
+    	}
     }
 
     /**
