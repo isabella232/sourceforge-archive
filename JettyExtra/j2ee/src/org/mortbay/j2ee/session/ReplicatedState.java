@@ -7,8 +7,11 @@ package org.mortbay.j2ee.session;
 
 //----------------------------------------
 
+import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import javax.servlet.http.HttpSessionBindingListener;
 import org.apache.log4j.Category;
@@ -129,55 +132,111 @@ public class
       return _state.isValid();
     }
 
+  // hacky...
+  public boolean
+    isValid(int extraTime)
+    {
+      return _state.isValid(extraTime);
+    }
+
   //----------------------------------------
-  // writers - wrap-n-publish
+  // writers - wrap-publish-n-delegate - these should be moved into a
+  // ReplicatingInterceptor...
 
   public void
     setLastAccessedTime(long time)
     {
-      Class[] argClasses={String.class, String.class, Long.class};
-      Object[] argInstances={_context, _id, new Long(time)};
-      _store.publish("setLastAccessedTime", argClasses, argInstances);
+      if (!AbstractReplicatedStore.getReplicating())
+      {
+	Class[] argClasses={Long.TYPE};
+	Object[] argInstances={new Long(time)};
+	_store.publish(_id, "setLastAccessedTime", argClasses, argInstances);
+      }
+
+      _state.setLastAccessedTime(time);
     }
 
   public void
     setMaxInactiveInterval(int interval)
     {
-      Class[] argClasses={String.class, String.class, Integer.class};
-      Object[] argInstances={_context, _id, new Integer(interval)};
-      _store.publish("setMaxInactiveInterval", argClasses, argInstances);
+      if (!AbstractReplicatedStore.getReplicating())
+      {
+	Class[] argClasses={Integer.TYPE};
+	Object[] argInstances={new Integer(interval)};
+	_store.publish(_id, "setMaxInactiveInterval", argClasses, argInstances);
+      }
+
+      _state.setMaxInactiveInterval(interval);
     }
 
   public Object
     setAttribute(String name, Object value, boolean returnValue)
     {
-      Class[] argClasses={String.class, String.class, String.class, Object.class, Boolean.class};
-      Object[] argInstances={_context, _id, name, value, new Boolean(returnValue)}; // optimise - TODO
+      if (!AbstractReplicatedStore.getReplicating())
+      {
+	// special case to allow double marshalling - works around current limitation in RpcDispatcher...
+	Class[] argClasses={String.class, Object.class, Boolean.TYPE, Boolean.TYPE};
 
-      Object oldValue=_state.getAttribute(name);
-      _store.publish("setAttribute", argClasses, argInstances);
+	byte[] tmp=null;
+	try
+	{
+	  tmp=MarshallingInterceptor.marshal(value);
+	}
+	catch(IOException e)
+	{
+	  _log.error("could not marshal arg for publication", e);
+	}
 
-      return returnValue?oldValue:null;
+	Object[] argInstances={name, tmp, returnValue?Boolean.TRUE:Boolean.FALSE, Boolean.TRUE};
+	_store.publish(_id, "setAttribute", argClasses, argInstances);
+      }
+
+      return _state.setAttribute(name, value, returnValue);
     }
 
   public void
     setAttributes(Map attributes)
     {
-      Class[] argClasses={String.class, String.class, Map.class};
-      Object[] argInstances={_context, _id, attributes};
-      _store.publish("setAttributes", argClasses, argInstances);
+      if (!AbstractReplicatedStore.getReplicating())
+      {
+	// special case to allow double marshalling - works around current limitation in RpcDispatcher...
+	Class[] argClasses={Map.class, Boolean.TYPE};
+
+	// marshall all attribute values (into new Map)
+	Map tmp=new HashMap(attributes.size());
+	for (Iterator i=attributes.entrySet().iterator(); i.hasNext();)
+	{
+	  Map.Entry entry=(Map.Entry)i.next();
+	  String key=(String)entry.getKey();
+	  Object val=entry.getValue();
+	  try
+	  {
+	    tmp.put(key,MarshallingInterceptor.marshal(val));
+	  }
+	  catch(IOException e)
+	  {
+	    _log.error("could not marshal arg ("+key+") for publication", e);
+	  }
+	}
+
+	Object[] argInstances={tmp, Boolean.TRUE};
+	_store.publish(_id, "setAttributes", argClasses, argInstances);
+      }
+
+      _state.setAttributes(attributes);
     }
 
   public Object
     removeAttribute(String name, boolean returnValue)
     {
-      Class[] argClasses={String.class, String.class, String.class, Boolean.class};
-      Object[] argInstances={_context, _id, name, new Boolean(returnValue)};	// optimise - TODO
+      if (!AbstractReplicatedStore.getReplicating())
+      {
+	Class[] argClasses={String.class, Boolean.TYPE};
+	Object[] argInstances={name, returnValue?Boolean.TRUE:Boolean.FALSE};
+	_store.publish(_id, "removeAttribute", argClasses, argInstances);
+      }
 
-      Object oldValue=_state.getAttribute(name);
-      _store.publish("removeAttribute", argClasses, argInstances);
-
-      return returnValue?oldValue:null;
+      return _state.removeAttribute(name, returnValue);
     }
 
   //----------------------------------------
@@ -196,44 +255,42 @@ public class
       }
     }
 
-  // yeughhhhh! - but cheaper than reformatting args
-
-  // writers - receive-n-delegate
-
-  public void
-    setLastAccessedTime(String context, String id, Long time)
-    {
-      _state.setLastAccessedTime(time.longValue());
-    }
-
-  public void
-    setMaxInactiveInterval(String context, String id, Integer interval)
-    {
-      _state.setMaxInactiveInterval(interval.intValue());
-    }
-
   public Object
-    setAttribute(String context, String id, String name, Object value, Boolean returnValue)
+    setAttribute(String name, Object value, boolean returnValue, boolean dummy)
     {
-      return _state.setAttribute(name, value, returnValue.booleanValue());
+      // deserialise attribute here...
+      Object tmp=null;
+      try
+      {
+	tmp=MarshallingInterceptor.demarshal((byte[])value);
+      }
+      catch(Exception e)
+      {
+	_log.error("could not demarshal arg for dispatch", e);
+      }
+
+      return _state.setAttribute(name, tmp, returnValue);
     }
 
   public void
-    setAttributes(String context, String id, Map attributes)
+    setAttributes(Map attributes, boolean dummy)
     {
+      // demarshall all attribute values (back into given Map)
+      for (Iterator i=attributes.entrySet().iterator(); i.hasNext();)
+      {
+	Map.Entry entry=(Map.Entry)i.next();
+	String key=(String)entry.getKey();
+	Object val=entry.getValue();
+	try
+	{
+	  attributes.put(key, MarshallingInterceptor.demarshal((byte[])val));
+	}
+	catch(Exception e)
+	{
+	  _log.error("could not demarshal arg ("+key+") for publication", e);
+	}
+      }
+
       _state.setAttributes(attributes);
-    }
-
-  public Object
-    removeAttribute(String context, String id, String name, Boolean returnValue)
-    {
-      return _state.removeAttribute(name, returnValue.booleanValue());
-    }
-
-  // hacky...
-  public boolean
-    isValid(int extraTime)
-    {
-      return _state.isValid(extraTime);
     }
 }

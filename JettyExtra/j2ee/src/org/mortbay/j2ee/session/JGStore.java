@@ -23,6 +23,7 @@ import org.javagroups.MergeView;
 import org.javagroups.Message;
 import org.javagroups.MessageListener; // we are notified of changes to other state
 import org.javagroups.View;
+import org.javagroups.View;
 import org.javagroups.blocks.GroupRequest;
 import org.javagroups.blocks.MessageDispatcher;
 import org.javagroups.blocks.MethodCall;
@@ -87,7 +88,7 @@ public class
   public int getRetrievalTimeOut() {return _retrievalTimeOut;}
   public void setRetrievalTimeOut(int retrievalTimeOut) {_retrievalTimeOut=retrievalTimeOut;}
 
-  protected int _distributionModeInternal=GroupRequest.GET_ALL; // synchronous
+  protected int _distributionModeInternal=GroupRequest.GET_ALL; // synchronous/non-sticky
   protected int getDistributionModeInternal() {return _distributionModeInternal;}
   protected void
     setDistributionModeInternal(String distributionMode)
@@ -103,7 +104,7 @@ public class
       _log.debug("GroupRequest:"+distributionMode+"="+_distributionModeInternal);
     }
 
-  protected String _distributionMode="GET_ALL";
+  protected String _distributionMode="GET_ALL"; // synchronous/non-sticky
   public String getDistributionMode() {return _distributionMode;}
   public void
     setDistributionMode(String distributionMode)
@@ -112,7 +113,7 @@ public class
       setDistributionModeInternal(_distributionMode);
     }
 
-  protected int _distributionTimeOut=0;
+  protected int _distributionTimeOut=0;	// never timeout - risky...
   public int getDistributionTimeOut() {return _distributionTimeOut;}
   public void setDistributionTimeOut(int distributionTimeOut) {_distributionTimeOut=distributionTimeOut;}
 
@@ -131,6 +132,7 @@ public class
 
   //----------------------------------------
 
+  protected ClassLoader   _loader;
   protected Channel       _channel;
   protected RpcDispatcher _dispatcher;
   protected Vector        _members;
@@ -143,23 +145,37 @@ public class
     {
       super();
 
+      _loader=Thread.currentThread().getContextClassLoader();
+
       try
       {
 	// start up our channel...
 	_channel=new JChannel(_protocolStack); // channel should be JBoss or new Jetty channel
 
 	MessageListener messageListener=this;
-	MembershipListener membershipListener=null; //this - later
+	MembershipListener membershipListener=this;
 	Object serverObject=this;
 	_dispatcher=new RpcDispatcher(_channel, messageListener, membershipListener, serverObject);
 
-	_channel.setOpt(Channel.GET_STATE_EVENTS, new Boolean(true));
-	_members=(Vector)_channel.getView().getMembers().clone();
-	_members.remove(_channel.getLocalAddress());
+	_channel.setOpt(Channel.GET_STATE_EVENTS, Boolean.TRUE);
+
+	View view=_channel.getView();
+	if (view!=null)
+	  _members=(Vector)view.getMembers().clone();
+
+	if (_members!=null)
+	{
+	    _members=(Vector)_members.clone(); // we don't own it
+	    _members.remove(_channel.getLocalAddress());
+	  }
+	else
+	  _members=new Vector(0);
+
+	_log.info("current view members: "+_members);
       }
       catch (Exception e)
       {
-	_log.error("could not initialise JavaGroups Channel and Dispatcher");
+	_log.error("could not initialise JavaGroups Channel and Dispatcher", e);
       }
     }
 
@@ -182,7 +198,7 @@ public class
       _dispatcher.start();
 
       if (!_channel.getState(null, getRetrievalTimeOut()))
-	_log.info("could not retrieve current sessions from JavaGroups - I must be first up");
+	_log.info("could not retrieve current sessions from JavaGroups - assuming this to be initial node");
 
       _log.debug("started ("+channelName+")....");
     }
@@ -209,39 +225,20 @@ public class
   // AbstractReplicatedStore API
 
   protected void
-    publish(String methodName, Class[] argClasses, Object[] argInstances)
+    publish(String id, String methodName, Class[] argClasses, Object[] argInstances)
     {
-      //      _log.info("publishing: "+methodName);
-      // we also need to dispatch this on ourselves synchronously,
-      // since we are excluded from members list...
-      super.dispatch(methodName, argClasses, argInstances);
-
-      // hack... - awkward - we can't use the current
-      // MarshallingInterceptor because we need the original reference
-      // of the object given us preserved all the way to the cache, so
-      // that subsequent requests from this cache yield the same
-      // reference, rather than value...
-
-	for (int i=0; i<argInstances.length; i++)
-	{
-	  try
-	  {
-	    argInstances[i]=MarshallingInterceptor.marshal(argInstances[i]);
-	  }
-	  catch(IOException e)
-	  {
-	    _log.error("could not marshal arg for publication", e);
-	  }
-	}
+      _log.info("publishing: "+id+" - "+methodName);
 
       try
       {
-	Class[] tmp={String.class, Class[].class, Object[].class};
+	Class[] tmp={String.class, String.class, Class[].class, Object[].class};
 	MethodCall method = new MethodCall(getClass().getMethod("dispatch",tmp));
+	method.addArg(id);
 	method.addArg(methodName);
 	method.addArg(argClasses);
 	method.addArg(argInstances);
 
+	// we need some way of synchronising _member read/write-ing...
 	_dispatcher.callRemoteMethods(_members,
 				      method,
 				      getDistributionModeInternal(),
@@ -256,24 +253,22 @@ public class
 
   // JG doesn't find this method in our superclass ...
   public void
-    dispatch(String methodName, Class[] argClasses, Object[] argInstances)
+    dispatch(String id, String methodName, Class[] argClasses, Object[] argInstances)
     {
-      //      _log.info("dispatching: "+methodName);
+      _log.info("dispatching: "+id+" - "+methodName);
 
-      // unhack...
-      for (int i=0; i<argInstances.length; i++)
-	{
-	  try
-	  {
-	    argInstances[i]=MarshallingInterceptor.demarshal((byte[])argInstances[i]);
-	  }
-	  catch(Exception e)
-	  {
-	    _log.error("could not demarshal arg from publication", e);
-	  }
-	}
+      // we should check the context name here, or not bother sending it...
 
-      super.dispatch(methodName, argClasses, argInstances);
+      ClassLoader oldLoader=Thread.currentThread().getContextClassLoader();
+      try
+      {
+	//	Thread.currentThread().setContextClassLoader(_loader);
+	super.dispatch(id, methodName, argClasses, argInstances);
+      }
+      finally
+      {
+	Thread.currentThread().setContextClassLoader(oldLoader);
+      }
     }
 
   //----------------------------------------
@@ -296,33 +291,45 @@ public class
    *
    * @return an <code>Object</code> value
    */
-  public byte[]
+
+  // should we cache the state, in case two new nodes come up together ?
+
+  public synchronized byte[]
     getState()
     {
-      _log.info("initialising another store from our current state");
-
-      // this is a bit problematic - since we really need to freeze
-      // every session before we can dump them... - TODO
-      LocalState[] state;
-      synchronized (_sessions)
-      {
-	_log.info("sending "+_sessions.size()+" sessions");
-
-	state=new LocalState[_sessions.size()];
-	int j=0;
-	for (Iterator i=_sessions.values().iterator(); i.hasNext();)
-	  state[j++]=((ReplicatedState)i.next()).getLocalState();
-      }
-
-      Object[] data={new Long(System.currentTimeMillis()), state};
+      ClassLoader oldLoader=Thread.currentThread().getContextClassLoader();
       try
       {
-	return MarshallingInterceptor.marshal(data);
+	//	Thread.currentThread().setContextClassLoader(_loader);
+	_log.info("initialising another store from our current state");
+
+	// this is a bit problematic - since we really need to freeze
+	// every session before we can dump them... - TODO
+	LocalState[] state;
+	synchronized (_sessions)
+	{
+	  _log.info("sending "+_sessions.size()+" sessions");
+
+	  state=new LocalState[_sessions.size()];
+	  int j=0;
+	  for (Iterator i=_sessions.values().iterator(); i.hasNext();)
+	    state[j++]=((ReplicatedState)i.next()).getLocalState();
+	}
+
+	Object[] data={new Long(System.currentTimeMillis()), state};
+	try
+	{
+	  return MarshallingInterceptor.marshal(data);
+	}
+	catch (Exception e)
+	{
+	  _log.error ("Unable to getState from JavaGroups: ", e);
+	  return null;
+	}
       }
-      catch (Exception e)
+      finally
       {
-	_log.error ("Unable to getState from JavaGroups: ", e);
-	return null;
+	Thread.currentThread().setContextClassLoader(oldLoader);
       }
     }
 
@@ -331,7 +338,7 @@ public class
    *
    * @param new_state an <code>Object</code> value
    */
-  public void
+  public synchronized void
     setState (byte[] tmp)
     {
       if (tmp!=null)
@@ -377,14 +384,14 @@ public class
     }
 
   // Called when a member is suspected
-  public void
+  public synchronized void
     suspect(Address suspected_mbr)
     {
       _log.info("suspect("+suspected_mbr+")");
     }
 
   // Called when channel membership changes
-  public void
+  public synchronized void
     viewAccepted(View newView)
     {
       _log.info("viewAccepted("+newView+")");
@@ -399,6 +406,7 @@ public class
  	_members.clear();
  	_members.addAll(newMembers);
 	_members.remove(_channel.getLocalAddress());
+	_log.info("current view members: "+_members);
       }
     }
 }

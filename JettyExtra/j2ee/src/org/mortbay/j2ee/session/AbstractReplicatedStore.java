@@ -40,6 +40,13 @@ abstract public class
   AbstractReplicatedStore
   extends AbstractStore
 {
+  //----------------------------------------
+  // tmp hack to prevent infinite loop
+  private final static ThreadLocal _replicating=new ThreadLocal();
+  public static boolean     getReplicating()                    {return _replicating.get()==Boolean.TRUE;}
+  public static void        setReplicating(boolean replicating) {_replicating.set(replicating?Boolean.TRUE:Boolean.FALSE);}
+  //----------------------------------------
+
   public Object
     clone()
     {
@@ -68,13 +75,16 @@ abstract public class
     throws Exception
     {
       long creationTime=System.currentTimeMillis();
-      Class[]  argClasses   = {String.class, String.class, Long.class, Integer.class, Integer.class};
-      Object[] argInstances = {getContextPath(), id, new Long(creationTime), new Integer(maxInactiveInterval), new Integer(_actualMaxInactiveInterval)};
-      publish("create", argClasses, argInstances);
+      Class[]  argClasses   = {Long.class, Integer.class, Integer.class};
+      Object[] argInstances = {new Long(creationTime), new Integer(maxInactiveInterval), new Integer(_actualMaxInactiveInterval)};
+
+      if (!AbstractReplicatedStore.getReplicating())
+	publish(id, "create", argClasses, argInstances);
 
       // if we get one - all we have to do is loadState - because we
       // will have just created it...
 
+      dispatch(id, "create", argClasses, argInstances);
       return loadState(id);
     }
 
@@ -107,11 +117,15 @@ abstract public class
     removeState(State state)
     throws Exception
     {
-      Class[]  argClasses   = {String.class, String.class};
-      Object[] argInstances = {getContextPath(), state.getId()};
-      publish("destroy", argClasses, argInstances);
-
       String id=state.getId();
+
+      Class[]  argClasses   = {};
+      Object[] argInstances = {};
+
+      if (!AbstractReplicatedStore.getReplicating())
+	publish(id, "destroy", argClasses, argInstances);
+
+      dispatch(id, "destroy", argClasses, argInstances);
       synchronized (_sessions){_sessions.remove(id);}
     }
 
@@ -152,42 +166,48 @@ abstract public class
   //----------------------------------------
   // change notification API
 
-  abstract protected void publish(String methodName, Class[] argClasses, Object[] argInstances);
+  abstract protected void publish(String id, String methodName, Class[] argClasses, Object[] argInstances);
 
   protected void
-    dispatch(String methodName, Class[] argClasses, Object[] argInstances)
+    dispatch(String id, String methodName, Class[] argClasses, Object[] argInstances)
     {
-      // only stuff meant for our context will be dispatched to us
-
-      //      String tmp="(";
-      //      for (int i=2; i<argInstances.length; i++)
-      //	tmp=tmp+argInstances[i]+((i<argInstances.length-1)?", ":"");
-      //      tmp=tmp+")";
-
-      //      _log.info("dispatching call: "+argInstances[1]+"."+methodName+tmp);
-
-      String id=(String)argInstances[1];
-
-      // either this is a class method
-      if (methodName.equals("create"))
+      try
       {
-	_log.debug("creating replicated session: "+id);
-	long creationTime=((Long)argInstances[2]).longValue();
-	int maxInactiveInterval=((Integer)argInstances[3]).intValue();
-	int actualMaxInactiveInterval=((Integer)argInstances[4]).intValue();
-	State state=new ReplicatedState(this, id, creationTime, maxInactiveInterval, actualMaxInactiveInterval);
+	AbstractReplicatedStore.setReplicating(true);
+	// only stuff meant for our context will be dispatched to us
 
-	synchronized(_sessions) {_sessions.put(id, state);}
+	//      String tmp="(";
+	//      for (int i=2; i<argInstances.length; i++)
+	//	tmp=tmp+argInstances[i]+((i<argInstances.length-1)?", ":"");
+	//      tmp=tmp+")";
+
+	//      _log.info("dispatching call: "+argInstances[1]+"."+methodName+tmp);
+
+	// either this is a class method
+	if (methodName.equals("create"))
+	{
+	  _log.debug("creating replicated session: "+id);
+	  long creationTime=((Long)argInstances[0]).longValue();
+	  int maxInactiveInterval=((Integer)argInstances[1]).intValue();
+	  int actualMaxInactiveInterval=((Integer)argInstances[2]).intValue();
+	  State state=new ReplicatedState(this, id, creationTime, maxInactiveInterval, actualMaxInactiveInterval);
+
+	  synchronized(_sessions) {_sessions.put(id, state);}
+	}
+	else if (methodName.equals("destroy"))
+	{
+	  _log.debug("destroying replicated session: "+id);
+	  synchronized(_sessions) {_sessions.remove(id);}
+	}
+	else
+	{
+	  // or an instance method..
+	  ((ReplicatedState)_sessions.get(id)).dispatch(methodName, argClasses, argInstances);
+	}
       }
-      else if (methodName.equals("destroy"))
+      finally
       {
-	_log.debug("destroying replicated session: "+id);
-	synchronized(_sessions) {_sessions.remove(id);}
-      }
-      else
-      {
-	// or an instance method..
-	((ReplicatedState)_sessions.get(id)).dispatch(methodName, argClasses, argInstances);
+	AbstractReplicatedStore.setReplicating(false);
       }
     }
 }
