@@ -61,7 +61,11 @@ public class Resource
                 }
                 if (file.isDirectory() && !url.getFile().endsWith("/"))
                     url=new URL(url.toString()+"/");
-                return new FileResource(url,connection,file);
+
+                FileResource fileResource= new FileResource(url,connection,file);
+                if (fileResource.getAlias()!=null)
+                    return fileResource.getAlias();
+                return fileResource;
             }
             Code.warning("File resource without FilePermission:"+url);
         }
@@ -113,6 +117,20 @@ public class Resource
                 Code.warning(e);
         }
 
+        String nurl=url.toString();
+        if (nurl.length()>0 &&
+            nurl.charAt(nurl.length()-1)!=
+            resource.charAt(resource.length()-1))
+        {
+            if (nurl.charAt(nurl.length()-1)!='/' ||
+                nurl.charAt(nurl.length()-2)!=resource.charAt(resource.length()-1))
+            {
+                System.err.println("resource="+resource);
+                System.err.println("nurl="+nurl);
+
+                return new BadResource(url,"Trailing special characters stripped by URL in "+resource);
+            }
+        }
         return newResource(url);
     }
 

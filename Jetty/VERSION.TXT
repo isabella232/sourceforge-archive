@@ -1,6 +1,12 @@
 Jetty Versions
 --------------
 
+ + Fix security problem with trailing special characters.
+   Trailing %00 enabled JSP source to be viewed or other 
+   servlets to be bypassed.
+ + Improved Jasper debug output.
+ + Improved ThreadedServer timeout defaults
+ 
 Jetty-3.1.2 - 13 Oct 2001
  + Fixed double entry on PathMap.getMatches
  + Fixed servlet handling of non session url params.

@@ -47,8 +47,8 @@ class FileResource extends Resource
     
     /* ------------------------------------------------------------ */
     private File _file;
-    private String _alias=null;
-        
+    private BadResource _alias=null;
+    
     /* -------------------------------------------------------- */
     FileResource(URL url, URLConnection connection, File file)
     {
@@ -62,7 +62,7 @@ class FileResource extends Resource
                 String can=_file.getCanonicalPath();
 
                 if (!abs.equals(can))
-                    _alias=abs+" is alias of "+can;
+                    _alias=new BadResource(url,abs+" is alias of "+can);
                 
                 if (_alias!=null && Code.debug())
                 {
@@ -78,13 +78,22 @@ class FileResource extends Resource
     }
     
 
+    /* ------------------------------------------------------------ */
+    /** Get an Alias BadResource if one was created.
+     * @return BadResource for alias or null.
+     */
+    BadResource getAlias()
+    {
+        return _alias;
+    }
+    
     /* -------------------------------------------------------- */
     /**
      * Returns true if the respresenetd resource exists.
      */
     public boolean exists()
     {
-        return _file.exists() && _alias==null;
+        return _file.exists();
     }
         
     /* -------------------------------------------------------- */
@@ -102,7 +111,7 @@ class FileResource extends Resource
      */
     public boolean isDirectory()
     {
-        return _file.isDirectory() && _alias==null;
+        return _file.isDirectory();
     }
 
     /* --------------------------------------------------------- */
@@ -131,8 +140,6 @@ class FileResource extends Resource
      */
     public File getFile()
     {
-        if (_alias!=null)
-            return null;
         return _file;
     }
         
@@ -142,8 +149,6 @@ class FileResource extends Resource
      */
     public InputStream getInputStream() throws IOException
     {
-        if (_alias!=null)
-            throw new FileNotFoundException(_alias);
         return new FileInputStream(_file);
     }
         
@@ -154,8 +159,6 @@ class FileResource extends Resource
     public OutputStream getOutputStream()
         throws java.io.IOException, SecurityException
     {
-        if (_alias!=null)
-            throw new FileNotFoundException(_alias);
         return new FileOutputStream(_file);
     }
         
@@ -166,8 +169,6 @@ class FileResource extends Resource
     public boolean delete()
         throws SecurityException
     {
-        if (_alias!=null)
-            throw new SecurityException(_alias);
         return _file.delete();
     }
 
@@ -178,8 +179,6 @@ class FileResource extends Resource
     public boolean renameTo( Resource dest)
         throws SecurityException
     {
-        if (_alias!=null)
-            throw new SecurityException(_alias);
         if( dest instanceof FileResource)
             return _file.renameTo( ((FileResource)dest)._file);
         else
