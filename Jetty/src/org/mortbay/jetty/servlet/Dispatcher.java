@@ -2,7 +2,6 @@
 // Copyright (c) 1996 Mort Bay Consulting Pty. Ltd. All rights reserved.
 // $Id$
 // ---------------------------------------------------------------------------
-
 package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
@@ -77,6 +76,7 @@ public class Dispatcher implements RequestDispatcher
     String _query;
     Resource _resource;
     ResourceHandler _resourceHandler;
+    DispatcherRequest _request;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -204,6 +204,7 @@ public class Dispatcher implements RequestDispatcher
             DispatcherResponse response = new DispatcherResponse(httpServletResponse);
             servletHttpRequest.setWrapper(request);
             servletHttpResponse.setWrapper(response);
+            _request=request;
 
             if (forward)
             {
@@ -334,14 +335,35 @@ public class Dispatcher implements RequestDispatcher
         {
             if (!_forwarded)
                 return super.getRequestURI();
-
             return URI.addPaths(_contextPath,_path);
         }
         
         /* ------------------------------------------------------------ */
         public StringBuffer getRequestURL()
         {
-            return HttpUtils.getRequestURL(this);
+            if (!_forwarded)
+                return super.getRequestURL();
+            StringBuffer buf = getRootURL();
+            if (_contextPath.length()>0)
+                buf.append(_contextPath);
+            buf.append(_path);
+            return buf;
+        }
+        
+        /* ------------------------------------------------------------ */
+        StringBuffer getRootURL()
+        {
+            StringBuffer buf = super.getRequestURL();
+            int d=3;
+            for (int i=0;i<buf.length();i++)
+            {
+                if (buf.charAt(i)=='/' && --d==0)
+                {
+                    buf.setLength(i);
+                    break;
+                }
+            }
+            return buf;
         }
         
         /* ------------------------------------------------------------ */
@@ -641,7 +663,21 @@ public class Dispatcher implements RequestDispatcher
         public void sendRedirect(String url)
             throws IOException
         {
-            if (!_locked) super.sendRedirect(url);
+            if (!_locked)
+            {
+                if (!url.startsWith("http:/")&&!url.startsWith("https:/"))
+                {
+                    StringBuffer buf = _request.getRootURL();
+                    
+                    if (url.startsWith("/"))
+                        buf.append(URI.canonicalPath(url));
+                    else
+                        buf.append(URI.canonicalPath(URI.addPaths(URI.parentPath(_request.getRequestURI()),url)));
+                    url=buf.toString();
+                }
+                
+                super.sendRedirect(url);
+            }
         }
         
         /* ------------------------------------------------------------ */

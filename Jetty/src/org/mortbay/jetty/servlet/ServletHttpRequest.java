@@ -3,7 +3,6 @@
 // $Id$
 // ========================================================================
 
-
 package org.mortbay.jetty.servlet;
 
 import java.io.BufferedReader;
@@ -604,10 +603,9 @@ public class ServletHttpRequest
     public void setCharacterEncoding(String encoding)
         throws UnsupportedEncodingException
     {
-        _httpRequest.setCharacterEncoding(encoding);
         if (_inputState!=0)
             throw new IllegalStateException("getReader() or getInputStream() called");
-        _reader=new BufferedReader(new InputStreamReader(getInputStream(),encoding));
+        _httpRequest.setCharacterEncoding(encoding);
     }
     
     /* -------------------------------------------------------------- */

@@ -1,7 +1,11 @@
 Jetty Versions
 --------------
 
+
  + fixed forward attribute handling for jsp-file servlets
+ + Fixed setCharacterEncoding to work with getReader
+ + Fixed handling of relative sendRedirect after forward.
+ + Fixed virtual hosts temp directories.
 
 Jetty-4.0.5 - 31 July 2002
  + Fixed getRealPath for packed war files.
