@@ -143,6 +143,8 @@
     </copy>
     <copy file="LICENSE.html" tofile="${classes}/org/mortbay/LICENSE.html" />
     <copy file="${src}/org/mortbay/jetty/servlet/webdefault.xml" tofile="${etc}/webdefault.xml" />
+    <available property="demo.available" type="dir" file="${demo.src}" />
+    <echo message="Demo available=${demo.available}" level="info"/>
   </target>
   
 
@@ -384,11 +386,10 @@
   <target name="webapps" depends="webapp.jetty,webapp.examples"
    description="Build the demonstration webapplications"
    >
-    <copy file="${demo.webapps}/jetty/images/jetty_banner.gif" tofile="${webapps}/root/jetty_banner.gif" />
   </target>
 
   <!-- ==================================================================== -->
-  <target name="webapp.jetty" depends="jars">
+  <target name="webapp.jetty" depends="jars" if="demo.available">
     <copy todir="${jetty.webapp.classes}">
       <fileset dir="${demo.src}">
         <include name="**/defaultManifest.mf" />
@@ -412,11 +413,11 @@
 
     <copy file="LICENSE.html" tofile="${jetty.webapp}/LICENSE.html" />
     <copy file="VERSION.TXT" tofile="${jetty.webapp}/versions.txt" />
-    <!-- jar jarfile="${jetty.war}" basedir="${jetty.webapp}"/ -->
+    <copy file="${demo.webapps}/jetty/images/jetty_banner.gif" tofile="${webapps}/root/jetty_banner.gif" />
   </target>
 
   <!-- ==================================================================== -->
-  <target name="webapp.examples" depends="jars">
+  <target name="webapp.examples" depends="jars" if="demo.available">
     <javac srcdir="${demo.webapps}/examples/WEB-INF/classes"
            destdir="${demo.webapps}/examples/WEB-INF/classes"
            debug="${javac.debug}"
@@ -475,7 +476,7 @@
    description="Build everything"/>
 
   <!-- ==================================================================== -->
-  <target name="demo" depends="webapps" 
+  <target name="demo" depends="webapps" if="demo.available"
    description="Build and run the demo">
     <java classname="org.mortbay.jetty.Server"
           dir="${jetty.home}"
@@ -492,7 +493,7 @@
   </target>
 
   <!-- ==================================================================== -->
-  <target name="demo.jmx" depends="mortbay.jmx.jar,webapps" 
+  <target name="demo.jmx" depends="mortbay.jmx.jar,webapps" if="demo.available"
    description="Build and run the demo with JMX">   
     <java classname="org.mortbay.util.jmx.Main"
           fork="yes"

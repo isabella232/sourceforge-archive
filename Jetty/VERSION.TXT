@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+
+ + Fixed build.xml for source release
+
 Jetty-4.2.9rc1 - 6 March 2003
  + Work around URLClassloader not handling leading /
  + Dump servlet can load resources for testing now.
