@@ -80,6 +80,10 @@ public class WebApplicationContext extends HandlerContext
             _webApp = Resource.newResource(webApp);
         }
         _webAppName=_webApp.toString();
+        if (!_webApp.exists()) {
+            Code.warning("Web application not found "+_webAppName);
+            throw new java.io.FileNotFoundException(_webAppName);
+        }
 
         // add security handler first
         _securityHandler=new SecurityHandler();
