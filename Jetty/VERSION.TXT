@@ -11,6 +11,7 @@ Jetty3 Versions
    * Buffer allocation
    * URI pathAdd
    * StringMap
+   * URI canonicalPath
  + Separation of URL params in HttpHandler API.
  + Fixed handling of default mime types
  + Allow contextpaths without leading /

@@ -65,11 +65,11 @@ public class Resource
             }
             Code.warning("File resource without FilePermission:"+url);
         }
-        else if( url.toExternalForm().startsWith( "jar:file:"))
+        else if( urls.startsWith( "jar:file:"))
         {
             return new JarFileResource(url);
         }
-        else if( url.toExternalForm().startsWith( "jar:"))
+        else if( urls.startsWith( "jar:"))
         {
             return new JarResource(url);
         }
@@ -359,9 +359,7 @@ public class Resource
 
         path = canonicalPath(path);
 
-        String resourceBase = _url.toExternalForm();
-        path=URI.addPaths(resourceBase,path);
-        return newResource(new URL(path));
+        return newResource(URI.addPaths(_url.toExternalForm(),path));
     }
 
     /* ------------------------------------------------------------ */

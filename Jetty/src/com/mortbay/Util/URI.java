@@ -651,6 +651,104 @@ public class URI
         return path.substring(0,semi);
     }
     
+
+    /* ------------------------------------------------------------ */
+    /** Convert a path to a cananonical form.
+     * All instances of "//", "." and ".." are factored out.  Null is returned
+     * if the path tries to .. above it's root.
+     * @param path 
+     * @return path or null.
+     */
+    public static String oldCanonicalPath(String path)
+    {
+        if (path==null || path.length()==0)
+            return path;
+
+        int last=-1;
+        int slash=path.indexOf('/');
+        if (slash<0)
+            slash=path.length();
+
+    search:
+        while (last<slash)
+        {
+            switch(slash-last)
+            {
+              case 1: // double slash
+                  if (last<0 || slash==path.length())
+                      break;
+                  break search;
+              case 2: // possible single dot
+                  if (path.charAt(last+1)!='.')
+                      break;
+                  break search;
+              case 3: // possible double dot
+                  if (path.charAt(last+1)!='.' || path.charAt(last+2)!='.')
+                      break;
+                  break search;
+            }
+            
+            last=slash;
+            slash=path.indexOf('/',last+1);
+            if (slash<0)
+                slash=path.length();
+        }
+
+        // If we have checked the entire string
+        if (last>=slash)
+            return path;
+        
+        StringBuffer buf = new StringBuffer(path);
+
+        while (last<slash)
+        {
+            switch(slash-last)
+            {
+              case 1: // double slash
+                  if (last<0 || slash==buf.length())
+                      break;
+                  buf.deleteCharAt(last);
+                  slash=last;
+                  
+                  break;
+              case 2: // possible single dot
+                  if (buf.charAt(last+1)!='.')
+                      break;
+                  while(slash<buf.length() && buf.charAt(slash)=='/')
+                      slash++;
+                  if (last<0)
+                      buf.delete(0,slash);
+                  else
+                      buf.delete(last+1,slash);
+                  slash=last;
+                  break;
+              case 3: // possible double dot
+                  if (buf.charAt(last+1)!='.' || buf.charAt(last+2)!='.')
+                      break;
+                  if (last<=0)
+                      return null;
+                  int i=last-1;
+                  while(i>0 && buf.charAt(i)!='/')
+                      i--;
+                  buf.delete(buf.charAt(i)=='/'?(i+1):i,
+                             (slash==buf.length()||buf.charAt(i)=='/')?slash:(slash+1));
+                  if (i<0 || buf.length()==0)
+                      slash=last=i;
+                  else 
+                      slash=last=buf.charAt(i)=='/'?i:(i-1);
+                  break;
+            }            
+            
+            last=slash;
+            if (slash<buf.length())
+                slash++;
+            while(slash<buf.length() && buf.charAt(slash)!='/')
+                slash++;
+        }
+
+        return buf.toString();
+    }
+    
     /* ------------------------------------------------------------ */
     /** Convert a path to a cananonical form.
      * All instances of "//", "." and ".." are factored out.  Null is returned
@@ -663,78 +761,136 @@ public class URI
         if (path==null || path.length()==0)
             return path;
 
-        StringBuffer buf = new StringBuffer(path.length());
-        int last=-1;
-        int slash=path.indexOf('/');
-        if (slash<0)
-            slash=path.length();
-        while (last<slash)
+        int end=path.length();
+        int start=path.lastIndexOf('/',end);
+
+    search:
+        while (end>=0)
         {
-            switch(slash-last)
+            switch(end-start)
             {
-              case 1:
-                  if (last<0)
-                      buf.append('/');
-                  break;
-              case 2:
-                  {
-                      char c= path.charAt(last+1);
-                      if (c!='.')
-                      {
-                          buf.append(c);
-                          if(slash<path.length())
-                              buf.append('/');
-                      }
-                  }
-                  break;
-              case 3:
-                  {
-                      char c1= path.charAt(last+1);
-                      char c2= path.charAt(last+2);
-                      if (c1=='.' && c2=='.')
-                      {
-                          int i=buf.length()-1;
-                          if (i<0 || i==0 && buf.charAt(0)=='/')
-                              return null;
-                              
-                          for (i=buf.length()-1;i-->0;)
-                          {
-                              char c3=buf.charAt(i);
-                              if (c3=='/')
-                              {
-                                  buf.setLength(i+1);
-                                  break;
-                              }
-                          }
-                          if (i<0)
-                              buf.setLength(0);
-                      }
-                      else
-                      {
-                          buf.append(c1);
-                          buf.append(c2);
-                          buf.append('/');
-                      }
-                  }
-                  break;
-              default:
-                  if (slash<0)
-                      StringUtil.append(buf,path,last+1,path.length()-last);
-                  else
-                      StringUtil.append(buf,path,last+1,slash-last);
-                  break;
+              case 1: // double slash
+                  if (start<0 || end==path.length())
+                      break;
+                  break search;
+              case 2: // possible single dot
+                  if (path.charAt(start+1)!='.')
+                      break;
+                  break search;
+              case 3: // possible double dot
+                  if (path.charAt(start+1)!='.' || path.charAt(start+2)!='.')
+                      break;
+                  break search;
             }
             
-            last=slash;
-            slash=path.indexOf('/',last+1);
-            if (slash<0)
-                slash=path.length();
+            end=start;
+            start=path.lastIndexOf('/',end-1);
         }
 
-        if (buf.length()==path.length())
+        // If we have checked the entire string
+        if (start>=end)
             return path;
+        
+        StringBuffer buf = new StringBuffer(path);
+        int delStart=-1;
+        int delEnd=-1;
+        int skip=0;
+        
+        while (end>=0)
+        {
+            switch(end-start)
+            {
+              case 1: // double slash
+                  if (start<0 || end==path.length())
+                      break;
+                  delStart=start;
+                  if (delEnd<0)
+                      delEnd=end;
+                  if(delStart==0 && delEnd==buf.length())
+                  {
+                      delStart++;
+                      break;
+                  }
+                          
+                  end=start--;
+                  while (start>=0 && buf.charAt(start)!='/')
+                      start--;
+                  continue;
+                  
+              case 2: // possible single dot
+                  if (buf.charAt(start+1)!='.')
+                  {
+                      if (--skip==0)
+                          delStart=start>=0?start:0;
+                      break;
+                  }
+                  
+                  if(delEnd<0)
+                      delEnd=end;
+                  delStart=start;
+                  if (delStart<0 || delStart==0&&buf.charAt(delStart)=='/')
+                  {
+                      delStart++;
+                      if (delEnd<buf.length() && buf.charAt(delEnd)=='/')
+                          delEnd++;
+                      break;
+                  }
+                  end=start--;
+                  while (start>=0 && buf.charAt(start)!='/')
+                      start--;
+                  continue;
+                  
+              case 3: // possible double dot
+                  if (buf.charAt(start+1)!='.' || buf.charAt(start+2)!='.')
+                  {
+                      if (--skip==0)
+                          delStart=start>=0?start:0;
+                      break;
+                  }
+                  
+                  delStart=start;
+                  if (delEnd<0)
+                      delEnd=end;
+
+                  skip++;
+                  
+                  end=start--;
+                  while (start>=0 && buf.charAt(start)!='/')
+                      start--;
+                  continue;
+
+              default:
+                  if (--skip==0)
+                      delStart=start>=0?start:0;
+            }            
+
+            // Do the delete
+            if (delStart>=0)
+            {
+                buf.delete(delStart,delEnd);
+                delStart=delEnd=-1;
+            }
+            
+            end=start--;
+            while (start>=0 && buf.charAt(start)!='/')
+                start--;
+        }      
+
+        // Too many ..
+        if (skip>0)
+            return null;
+        
+        // Do the delete
+        if (delEnd>=0)
+            buf.delete(delStart,delEnd);
+
+        // If it was a dir, keep it a dir
+        if (path.endsWith(".") && buf.length()>0 && buf.charAt(buf.length()-1)!='/')
+            buf.append('/');
+
         return buf.toString();
     }
+    
 }
 
 

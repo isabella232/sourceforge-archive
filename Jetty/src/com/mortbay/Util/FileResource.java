@@ -205,4 +205,8 @@ class FileResource extends Resource
         return o instanceof FileResource &&
             _file.equals(((FileResource)o)._file);
     }
+
+    
+
+    
 }

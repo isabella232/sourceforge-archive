@@ -749,12 +749,18 @@ public class TestHarness
             {
                 {"/aaa/bbb/","/aaa/bbb/"},
                 {"/aaa//bbb/","/aaa/bbb/"},
+                {"/aaa///bbb/","/aaa/bbb/"},
                 {"/aaa/./bbb/","/aaa/bbb/"},
                 {"/aaa/../bbb/","/bbb/"},
                 {"/aaa/./../bbb/","/bbb/"},
                 {"./bbb/","bbb/"},
                 {"./aaa/../bbb/","bbb/"},
+                {"./",""},
                 {".//",""},
+                {".///",""},
+                {"/.","/"},
+                {"//.","/"},
+                {"///.","/"},
                 {"/","/"},
                 {"aaa/bbb","aaa/bbb"},
                 {"aaa/","aaa/"},
@@ -788,6 +794,7 @@ public class TestHarness
                 test.checkEquals(URI.canonicalPath(canonical[t][0]),
                                  canonical[t][1],
                                  "canonical "+canonical[t][0]);
+            
         }
         catch(Exception e)
         {
@@ -1826,7 +1833,7 @@ public class TestHarness
     {
         try
         {
-     	    testTest();
+       	    testTest();
             testLog();
             testFrame();
             testCode();
@@ -1844,7 +1851,8 @@ public class TestHarness
             testThreadedServer();
             testB64();
             testResource();
-      	    //testJarURL();
+
+            //testJarURL();
         }
         catch(Throwable th)
         {
