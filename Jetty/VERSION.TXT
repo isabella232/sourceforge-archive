@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+Jetty-4.1.0RC1 - 11 August 2002
  + Fixed forward query string handling
  + Fixed setCharacterEncoding to work with getReader
  + Fixed getContext to use canonical contextPathSpec

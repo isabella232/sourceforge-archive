@@ -89,35 +89,6 @@ abstract public class ThreadedServer extends ThreadPool
     }
     
     
-    /* ------------------------------------------------------------ */
-    /** Set the server InetAddress and port.
-     * @param address The Address to listen on, or 0.0.0.0:port for
-     * all interfaces.
-     */
-    public void setAddress(String address) 
-        throws UnknownHostException
-    {
-        if (_address!=null && _address.toString().equals(address))
-            return;
-
-        if (isStarted())
-            Log.warning(this+" is started");
-        
-        _address=new InetAddrPort(address);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return String address as host:port 
-     */
-    public String getAddress() 
-    {
-        if (_address==null)
-            return null;
-        return _address.toString();
-    }
-    
-
     
     /* ------------------------------------------------------------ */
     /** Set the server InetAddress and port.

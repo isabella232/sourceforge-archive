@@ -324,7 +324,9 @@ public class ServletHolder extends Holder
         if (_class==null)
             throw new UnavailableException("Servlet Not Initialized");
         
-        Servlet servlet=getServlet();
+        Servlet servlet=_servlet;
+        if (servlet==null || _servlets!=null)
+            servlet=getServlet();
         
         // Check that we got one in the end
         if (servlet==null)

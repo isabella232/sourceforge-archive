@@ -101,14 +101,33 @@ public class HttpServer implements LifeCycle,
     private HttpEncoding _httpEncoding ;
     private HashMap _realmMap = new HashMap(3);    
     private StringMap _virtualHostMap = new StringMap();
-    
     private boolean _chunkingForced=false;
-    
     private RequestLog _requestLog;
+    private int _requestsPerGC ;
     
+    private transient int _gcRequests;
     private transient HttpContext _notFoundContext=null;
     private transient List _eventListeners;
     private transient List _components;
+    
+    /* ------------------------------------------------------------ */
+    private boolean _statsOn=false;
+    private transient long _statsStartedAt=0;
+    private transient int _connections;
+    private transient int _connectionsOpen;
+    private transient int _connectionsOpenMax;
+    private transient long _connectionsDurationAve;
+    private transient long _connectionsDurationMax;
+    private transient int _connectionsRequestsAve;
+    private transient int _connectionsRequestsMax;
+
+    private transient int _errors;
+    private transient int _requests;
+    private transient int _requestsActive;
+    private transient int _requestsActiveMax;
+    private transient long _requestsDurationAve;
+    private transient long _requestsDurationMax;
+
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -590,6 +609,36 @@ public class HttpServer implements LifeCycle,
     }
     
     /* ------------------------------------------------------------ */
+    /** Get the requests per GC.
+     * If this is set greater than zero, then the System garbage collector
+     * will be invoked after approximately this number of requests.  For
+     * predictable response, it is often best to have frequent small runs of
+     * the GC rather than infrequent large runs.  The request count is only
+     * approximate as it is not synchronized and multi CPU machines may miss
+     * counting some requests.
+     * @return Approx requests per garbage collection.
+     */
+    public int getRequestsPerGC()
+    {
+        return _requestsPerGC;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set the requests per GC.
+     * If this is set greater than zero, then the System garbage collector
+     * will be invoked after approximately this number of requests.  For
+     * predictable response, it is often best to have frequent small runs of
+     * the GC rather than infrequent large runs.  The request count is only
+     * approximate as it is not synchronized and multi CPU machines may miss
+     * counting some requests.
+     * @param requestsPerGC Approx requests per garbage collection.
+     */
+    public void setRequestsPerGC(int requestsPerGC)
+    {
+        _requestsPerGC = requestsPerGC;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Start all handlers then listeners.
      * If a subcomponent fails to start, it's exception is added to a
      * org.mortbay.util.MultiException and the start method continues.
@@ -787,6 +836,12 @@ public class HttpServer implements LifeCycle,
     {
         String host=request.getHost();
 
+        if (_requestsPerGC>0 && _gcRequests++>_requestsPerGC)
+        {
+            _gcRequests=0;
+            System.gc();
+        }
+        
         while (true)
         {
             PathMap contextMap=(PathMap)_virtualHostMap.get(host);
@@ -942,24 +997,6 @@ public class HttpServer implements LifeCycle,
     }
 
 
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    private boolean _statsOn=false;
-    private long _statsStartedAt=0;
-    private int _connections;
-    private int _connectionsOpen;
-    private int _connectionsOpenMax;
-    private long _connectionsDurationAve;
-    private long _connectionsDurationMax;
-    private int _connectionsRequestsAve;
-    private int _connectionsRequestsMax;
-
-    private int _errors;
-    private int _requests;
-    private int _requestsActive;
-    private int _requestsActiveMax;
-    private long _requestsDurationAve;
-    private long _requestsDurationMax;    
 
     /* ------------------------------------------------------------ */
     /** Reset statistics.

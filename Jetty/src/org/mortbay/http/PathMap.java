@@ -43,6 +43,8 @@ import org.mortbay.util.Code;
  * Note that this is a very different mapping to that provided by PathMap
  * in Jetty2.
  * <P>
+ * This class is not synchronized for get's.  If concurrent modifications are
+ * possible then it should be synchronized at a higher level.
  *
  * @version $Id$
  * @author Greg Wilkins (gregw)
@@ -193,7 +195,7 @@ public class PathMap extends HashMap implements Externalizable
      * @param path the path.
      * @return Map.Entry of the best matched  or null.
      */
-    public synchronized Map.Entry getMatch(String path)
+    public Map.Entry getMatch(String path)
     {
         Map.Entry entry;
 

@@ -44,9 +44,6 @@ public class ThreadedServerMBean extends ThreadPoolMBean
 
         defineAttribute("host");
         defineAttribute("port");
-        defineAttribute("address",false);
-        defineAttribute("inetAddress",false);
-        defineAttribute("inetAddrPort",false);
         defineAttribute("maxReadTimeMs");
         defineAttribute("lingerTimeSecs");
     }    

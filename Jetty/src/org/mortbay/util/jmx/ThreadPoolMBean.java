@@ -43,7 +43,6 @@ public class ThreadPoolMBean extends LifeCycleMBean
     {
         super.defineManagedResource();
         defineAttribute("name");
-        defineAttribute("threadClass");
         defineAttribute("threads");
         defineAttribute("idleThreads");
         defineAttribute("minThreads");

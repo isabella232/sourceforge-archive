@@ -35,8 +35,7 @@ public class NCSARequestLogMBean extends LifeCycleMBean
      */
     public NCSARequestLogMBean()
         throws MBeanException
-    {}
-    
+    {}    
 
     /* ------------------------------------------------------------ */
     protected void defineManagedResource()

@@ -89,15 +89,16 @@ public class OutputStreamLogSink
     protected boolean _logOneLine=false;
     
     /*-------------------------------------------------------------------*/
-    protected OutputStream _out;
-    protected ByteArrayISO8859Writer _buffer = new ByteArrayISO8859Writer(4096);
-    protected boolean _started;
     private String _filename;
     private boolean _append=true;
     protected boolean _flushOn=true;
     protected int _bufferSize=4096;
     protected boolean _reopen=false;
-    
+
+    protected transient boolean _started;
+    protected transient OutputStream _out;
+    protected transient ByteArrayISO8859Writer _buffer;
+
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
@@ -265,7 +266,8 @@ public class OutputStreamLogSink
     {
         _reopen=isStarted() && out!=out;
         _filename=null;
-        _buffer.reset();
+        if (_buffer!=null)
+            _buffer.reset();
         _out=out;
     }
 
@@ -473,7 +475,8 @@ public class OutputStreamLogSink
      * The default implementation does nothing 
      */
     public synchronized void start()
-    {        
+    {
+        _buffer=new ByteArrayISO8859Writer(_bufferSize);
         _reopen=false;
         if (_started)
             return;
@@ -512,9 +515,9 @@ public class OutputStreamLogSink
                 if (_buffer.length()>0)
                 {
                     _buffer.writeTo(_out);
-                    _buffer.reset();
                 }
                 _out.flush();
+                _buffer=null;
             }
             catch(Exception e){if (Code.debug())e.printStackTrace();}
             Thread.yield();

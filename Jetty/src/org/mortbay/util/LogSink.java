@@ -5,7 +5,7 @@
 
 package org.mortbay.util;
 
-
+import java.io.Serializable;
 
 /* ------------------------------------------------------------ */
 /** A Log sink.
@@ -18,7 +18,7 @@ package org.mortbay.util;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public interface LogSink extends LifeCycle
+public interface LogSink extends LifeCycle, Serializable
 {
     /*-------------------------------------------------------------------*/
     /** Set the log options.
