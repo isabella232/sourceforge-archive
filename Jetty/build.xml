@@ -247,7 +247,7 @@
          <attribute name="Main-Class" value="org.mortbay.http.HttpServer"/>
 
          <section name="org/mortbay/jetty/">
-           <attribute name="Specification-Title" value="Servlet/2.3"/>
+           <attribute name="Specification-Title" value="Servlet/2.4"/>
            <attribute name="Implementation-Title" value="Jetty/${RELEASE.MAJOR}"/>
          </section>
 
