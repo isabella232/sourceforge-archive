@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+Jetty-4.1.0RC2 - 15 August 2002
  + Conveninace setClassLoaderJava2Compliant method.
  + Clear interrupted status in ThreadPool
  + Fixed HttpFields cache overflow
