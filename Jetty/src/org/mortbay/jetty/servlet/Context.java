@@ -355,7 +355,7 @@ public class Context implements ServletContext, HttpSessionContext
             if (tempDir==null)
             {
                 try{
-                    tempDir=File.createTempFile("JettyContext",null);
+                    tempDir=File.createTempFile("JettyContext","");
                     if (tempDir.exists())
                         tempDir.delete();
                     tempDir.mkdir();

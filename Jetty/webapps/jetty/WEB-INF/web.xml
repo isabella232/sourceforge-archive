@@ -104,12 +104,13 @@
     </auth-constraint>
   </security-constraint>
 
+<!-- Replace login clause above with this section for FORM auth
   <login-config>
     <auth-method>BASIC</auth-method>
     <realm-name>Jetty Demo Realm</realm-name>
   </login-config>
+-->
 
-<!-- Replace login clause above with this section for FORM auth
   <login-config>
     <auth-method>FORM</auth-method>
     <realm-name>Jetty Demo Realm</realm-name>
@@ -118,7 +119,6 @@
        <form-error-page>/logonError.html</form-error-page>
     </form-login-config>
   </login-config>
--->
 
   <security-role>
       <role-name>roleName</role-name>
