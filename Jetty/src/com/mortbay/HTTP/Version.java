@@ -34,12 +34,8 @@ public class Version
                 System.getProperty("os.version")+" "+
                 System.getProperty("os.arch")+")";
 
-            __ServletEngine=__Version+" (JSP 1.1; Servlet 2.2; "+
-                System.getProperty("os.name")+" "+
-                System.getProperty("os.version")+" "+
-                System.getProperty("os.arch")+"; java "+
-                System.getProperty("java.version")+"; java.vendor="+
-                System.getProperty("java.vendor")+")";
+            __ServletEngine=__Version+" (JSP 1.1; Servlet 2.2; java "+
+                System.getProperty("java.version")+")";
         }
     }
 }

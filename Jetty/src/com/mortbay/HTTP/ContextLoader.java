@@ -6,7 +6,6 @@
 package com.mortbay.HTTP;
 
 import com.mortbay.Util.Code;
-import com.mortbay.Util.UrlPolicy;
 import com.mortbay.Util.IO;
 import com.mortbay.Util.Resource;
 import java.io.File;

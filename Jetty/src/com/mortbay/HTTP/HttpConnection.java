@@ -271,7 +271,7 @@ public class HttpConnection
                 _response.setVersion(_version);
                 _response.setCurrentTime(HttpFields.__Date);
                 _response.setField(HttpFields.__Server,Version.__VersionDetail);
-                //_response.setField(HttpFields.__ServletEngine,Version.__ServletEngine);
+                _response.setField(HttpFields.__ServletEngine,Version.__ServletEngine);
             
                 // Handle Connection header field
                 List connectionValues =
