@@ -343,9 +343,11 @@ public class SecurityConstraint
                         user=realm.authenticate(request.getAuthUser(),
                                                 null,
                                                 request);
-                    if (user==null)
-                        response.sendError(HttpResponse.__403_Forbidden,
-                                           "Preauthenticated user not trusted");
+                    if (user==null && authenticator!=null)
+                        user=authenticator.authenticated(realm,
+                                                         pathInContext,
+                                                         request,
+                                                         response);
                 }
                 else if (authenticator!=null)
                 {
