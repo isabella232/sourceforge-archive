@@ -71,7 +71,7 @@ public class HttpParser
             if (filled < 0 && ctx.state == STATE_EOF_CONTENT)
             {
                 ctx.state= STATE_END;
-                handler.messageComplete(ctx.contentOffset);
+                handler.gotCompleteMessage(ctx.contentOffset);
             }
 
             if (filled <= 0)
@@ -129,8 +129,7 @@ public class HttpParser
                     }
                     else if (ch < SPACE)
                     {
-                        handler.headerComplete();
-                        handler.messageComplete(ctx.contentOffset);
+                    	Portable.throwNotSupported();
                         ctx.state= STATE_END;
                     }
                     break;
@@ -142,7 +141,7 @@ public class HttpParser
                         ctx.state= STATE_FIELD1;
                     }
                     else if (ch < SPACE)
-                        throw new RuntimeException(ctx.toString(source));
+                    	Portable.throwRuntime(ctx.toString(source));
                     break;
 
                 case STATE_FIELD1 :
@@ -152,7 +151,7 @@ public class HttpParser
                         ctx.state= STATE_SPACE2;
                     }
                     else if (ch < SPACE)
-                        throw new RuntimeException(ctx.toString(source));
+						Portable.throwRuntime(ctx.toString(source));
                     break;
 
                 case STATE_SPACE2 :
@@ -162,7 +161,7 @@ public class HttpParser
                         ctx.state= STATE_FIELD2;
                     }
                     else if (ch < SPACE)
-                        throw new RuntimeException(ctx.toString(source));
+						Portable.throwRuntime(ctx.toString(source));
                     break;
 
                 case STATE_FIELD2 :
@@ -185,8 +184,7 @@ public class HttpParser
                     		ctx.length=-1;
                     	}
                     	
-                        handler.headerComplete();
-                        ctx.contentLength= handler.getContentLength();
+                        ctx.contentLength= handler.gotCompleteHeader();
                         ctx.contentOffset= 0;
                         ctx.eol= ch;
                         switch (ctx.contentLength)
@@ -198,7 +196,7 @@ public class HttpParser
                                 ctx.state= STATE_CHUNKED_CONTENT;
                                 break;
                             case HttpParser.NO_CONTENT :
-                                handler.messageComplete(ctx.contentOffset);
+                                handler.gotCompleteMessage(ctx.contentOffset);
                                 ctx.state= STATE_END;
                                 break;
                             default :
@@ -294,7 +292,7 @@ public class HttpParser
                         if (remaining == 0)
                         {
                             ctx.state= STATE_END;
-                            handler.messageComplete(ctx.contentOffset);
+                            handler.gotCompleteMessage(ctx.contentOffset);
                             break;
                         }
                         else if (length > remaining)
@@ -327,7 +325,7 @@ public class HttpParser
 						if (ctx.chunkLength==0)
 						{
 							ctx.state=STATE_END;
-							handler.messageComplete(ctx.contentOffset);
+							handler.gotCompleteMessage(ctx.contentOffset);
 						}
 						else
 							ctx.state= STATE_CHUNK;
@@ -353,7 +351,7 @@ public class HttpParser
                         if (ctx.chunkLength==0)
                         {
                         	ctx.state=STATE_END;
-                        	handler.messageComplete(ctx.contentOffset);
+                        	handler.gotCompleteMessage(ctx.contentOffset);
                         }
                         else
 	                        ctx.state= STATE_CHUNK;
@@ -426,13 +424,11 @@ public class HttpParser
          */
         public abstract void gotHeader(Buffer name, Buffer value);
 
-        public abstract void headerComplete();
-
-        public abstract int getContentLength();
+        public abstract int gotCompleteHeader();
 
         public abstract void gotContent(int offset, Buffer ref);
 
-        public abstract void messageComplete(int contextLength);
+        public abstract void gotCompleteMessage(int contextLength);
 
     }
 }

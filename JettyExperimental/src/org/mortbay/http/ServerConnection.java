@@ -88,19 +88,9 @@ public class ServerConnection
 
         /* ------------------------------------------------------------------------------- */
         /**
-         * @see org.mortbay.http.HttpParser.Handler#headerComplete()
-         */
-        public void headerComplete()
-        {
-            // TODO Auto-generated method stub
-            
-        }
-
-        /* ------------------------------------------------------------------------------- */
-        /**
          * @see org.mortbay.http.HttpParser.Handler#getContentLength()
          */
-        public int getContentLength()
+        public int gotCompleteHeader()
         {
             // TODO Auto-generated method stub
             return 0;
@@ -120,7 +110,7 @@ public class ServerConnection
         /**
          * @see org.mortbay.http.HttpParser.Handler#messageComplete(int)
          */
-        public void messageComplete(int contextLength)
+        public void gotCompleteMessage(int contextLength)
         {
             // TODO Auto-generated method stub
             

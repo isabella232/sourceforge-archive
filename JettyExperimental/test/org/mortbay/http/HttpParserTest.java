@@ -214,18 +214,13 @@ public class HttpParserTest extends TestCase implements HttpParser.Handler
 	    	val[h]=value.toString();
     }
 
-    public int getContentLength()
+    public int gotCompleteHeader()
     {
+		content=null;
         return contentLength;
     }
 
-    public void headerComplete()
-    {
-    	content=null;
-		System.out.println("\n");
-    }
-
-    public void messageComplete(int contentLength)
+    public void gotCompleteMessage(int contentLength)
     {
 		System.out.println("Message Complete: "+contentLength);
     }
