@@ -422,8 +422,7 @@ public class JBossUserRealm
 
     public void disassociate(Principal user)
     {
-        SecurityAssociation.setPrincipal(null);
-        SecurityAssociation.setCredential(null);
+        SecurityAssociation.clear();
     }
 
     public Principal pushRole(Principal user, String role)
