@@ -17,6 +17,7 @@ import org.mortbay.util.Code;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
 import org.mortbay.util.URI;
+import org.mortbay.util.UrlEncoded;
 
 
 /* ------------------------------------------------------------ */
@@ -318,7 +319,7 @@ public class HttpResponse extends HttpMessage
              
         // Generate normal error page.
         setStatus(code);
-        setReason(message);
+        setReason(UrlEncoded.encodeString(message));
 
         // If we are allowed to have a body 
         if (code!=__204_No_Content &&
