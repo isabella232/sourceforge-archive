@@ -245,7 +245,6 @@
          <attribute name="Implementation-Vendor" value="Mort Bay Consulting, Pty. Ltd."/>
          <attribute name="Implementation-URL" value="http://jetty.mortbay.org"/>
          <attribute name="Main-Class" value="org.mortbay.http.HttpServer"/>
-         <attribute name="Class-Path" value="javax.servlet.jar"/>
 
          <section name="org/mortbay/jetty/">
            <attribute name="Specification-Title" value="Servlet/2.3"/>
