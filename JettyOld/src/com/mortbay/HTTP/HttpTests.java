@@ -41,7 +41,7 @@ public class HttpTests
             "D2: Friday, 31-Dec-99 23:59:59 GMT" + CRLF +
             "D3: Fri Dec 31 23:59:59 1999" + CRLF +
             "D4: Mon Jan 1 2000 00:00:01" + CRLF +
-            "D5: Tue Feb 29 2000 12:00:00" + CRLF +
+            "D-5: Tue Feb 29 2000 12:00:00" + CRLF +
             "C1: Continuation  " + CRLF +
             "    Value  " + CRLF +
             CRLF +
@@ -54,7 +54,7 @@ public class HttpTests
             "D2: Fri, 31 Dec 1999 23:59:59 GMT" + CRLF +
             "D3: Fri Dec 31 23:59:59 1999" + CRLF +
             "D4: Mon Jan 1 2000 00:00:01" + CRLF +
-            "D5: Tue Feb 29 2000 12:00:00" + CRLF +
+            "D-5: Tue Feb 29 2000 12:00:00" + CRLF +
             "C1: Continuation Value" + CRLF +
             CRLF;
         
@@ -84,7 +84,6 @@ public class HttpTests
         long d2 = h.getDateHeader("D2");
         long d3 = h.getDateHeader("D3");
         long d4 = h.getDateHeader("D4");
-        long d5 = h.getDateHeader("D5");
         t.check(d1>0,"getDateHeader1");
         t.check(d2>0,"getDateHeader2");
         t.checkEquals(d1,d2,"getDateHeader12");
@@ -97,6 +96,8 @@ public class HttpTests
 
         String h3 = h.toString();
         t.checkEquals(h2,h3,"toString");
+
+	t.checkEquals(h.getHeader("D-5"),"Tue Feb 29 2000 12:00:00","hyphen");
         
     }
     

@@ -96,7 +96,7 @@ public class BasicAuthHandler extends NullHandler
                        HttpResponse response)
          throws Exception
     {
-        String address = request.getPathInfo();
+        String address = request.getResourcePath();
         
         String path=realms.longestMatch(address);
         

@@ -308,6 +308,7 @@ public class FileHandler extends NullHandler
             Code.warning("Path with .. not handled");
             return;
         }
+
         
         // Find path
         String path=dirMap.longestMatch(uri);
@@ -419,9 +420,11 @@ public class FileHandler extends NullHandler
                 {
                     File index = new File(filename+
                                           File.separator +
-                                          indexFiles.elementAt(i));
+                                          indexFiles.elementAt(i));		    
                     if (index.isFile())
                     {
+			if (!checkGetHeader(request,response,index))
+			    return;
                         sendFile(request,response,filename,index);
                         indexSent=true;
                         break;
@@ -453,14 +456,21 @@ public class FileHandler extends NullHandler
                                    HttpResponse response,
                                    File file)
         throws IOException
-    {
+    {	
         if (!request.getMethod().equals(HttpRequest.HEAD))
         {
+	    request.dump();
+	    System.err.println(file.lastModified()+" <= "+request.getHeader(HttpHeader.IfModifiedSince));
+	    
+	    
+	    
             // check any modified headers.
             long date=0;
             if ((date=request.
                  getDateHeader(HttpHeader.IfModifiedSince))>0)
             {
+		System.err.println(file.lastModified()+" <= "+date);
+		
                 if (file.lastModified() <= date)
                 {
                     response.sendError(response.SC_NOT_MODIFIED);
@@ -785,15 +795,4 @@ public class FileHandler extends NullHandler
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
 

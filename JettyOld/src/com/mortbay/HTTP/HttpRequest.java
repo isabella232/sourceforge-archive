@@ -240,7 +240,8 @@ public class HttpRequest extends HttpHeader
         if (uri!=null && path!=null)
             uri.setPath(path);
         servletPath=null;
-        pathInfo=path;
+	
+        pathInfo=(path!=null)?path:(uri!=null?uri.getPath():null);
     }
     
     /* -------------------------------------------------------------- */

@@ -32,7 +32,7 @@ public class Composite extends Element
     protected Vector elements= new Vector(8,0);
 
     /* ----------------------------------------------------------------- */
-    private Composite nest=null;
+    protected Composite nest=null;
 
     /* ----------------------------------------------------------------- */
     /** Default constructor
@@ -219,4 +219,33 @@ public class Composite extends Element
     {
         flush(new OutputStreamWriter(out,encoding));
     }
+
+    /* ------------------------------------------------------------ */
+    /** Replace an object within the composite
+     * @param oldObj 
+     * @param newObj 
+     * @return 
+     */
+    public boolean replace(Object oldObj, Object newObj)
+    {  
+	if (nest != null)
+	{
+	    return nest.replace(oldObj, newObj);
+	}
+	else
+	{
+	    int sz = elements.size();
+	    for (int i = 0; i < sz; i++)
+	    {
+		if (elements.elementAt(i) == oldObj)
+		{
+		    elements.setElementAt(newObj, i);
+		    return true;
+		}     
+	    }
+	}
+	
+	return false;
+    }           
+
 }

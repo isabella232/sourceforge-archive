@@ -1,3 +1,11 @@
+
+
+  + HttpRequest.setRequestPath does not null pathInfo.
+  + BasicAuthHandler uses getResourcePath so it can be used 
+    behind request dispatching
+  + Added HTML.Composite.replace
+  + FileHandler implements IfModifiedSince on index files.
+
 Release 2.4.3 - 4th May 2000 LATEST STABLE
   + Pass Cookies with 0 max age to browser.
   + Allow CRLF in UrlEncoded
