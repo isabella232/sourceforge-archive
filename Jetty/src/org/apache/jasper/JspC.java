@@ -340,8 +340,8 @@ public class JspC implements Options { //, JspCompilationContext {
     {
         try {
             CommandLineContext clctxt = new CommandLineContext(
-                    getClassPath(), file, uriBase, uriRoot, false,
-                    this);
+                    getClassPath(), file.replace('\\','/'), uriBase, uriRoot,
+		    false, this);
             if ((targetClassName != null) && (targetClassName.length() > 0)) {
                 clctxt.setServletClassName(targetClassName);
             }

@@ -336,8 +336,9 @@ public class PluginGenerator
 	writer.indent ();
 	writer.print ("out.println (");
 	writer.print (" _jspxNSString [i][0] + ");
-	writer.print ("\"=\"");
-	writer.print (" + _jspxNSString[i][1]");
+	writer.print ("\"=\\\"\"");
+	writer.print (" + _jspxNSString[i][1] + ");
+	writer.print ("\"\\\"\"");
 	writer.print (");");
 	writer.println ();
 	writer.popIndent ();
