@@ -457,9 +457,15 @@ public class WebApplicationContext extends ServletHttpContext
      *       System.getProperty("java.class.path");
      * </PRE>
      * The default implementation requires the classloader to be
-     * initialized before it is called.
+     * initialized before it is called. It will not include any
+     * classpaths used by a non-system parent classloader.
      * <P>
-     * Derivations may replace this method with a more accurate version.
+     * The main user of this method is the start() method.  If a JSP
+     * servlet is detected, the string returned from this method is
+     * used as the default value for the "classpath" init parameter.
+     * <P>
+     * Derivations may replace this method with a more accurate or
+     * specialized version.
      * @return Path of files and directories for loading classes.
      * @exception IllegalStateException HttpContext.initClassLoader
      * has not been called.
