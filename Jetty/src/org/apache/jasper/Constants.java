@@ -192,66 +192,71 @@ public class Constants {
      * Get hold of a "message" or any string from our resources
      * database. 
      */
-    public static final String getString(String key) {
+    public static final String getString(String key)
+    {
         return getString(key, null);
     }
 
     /**
      * Format the string that is looked up using "key" using "args". 
      */
-    public static final String getString(String key, Object[] args) {
+    public static final String getString(String key, Object[] args)
+    {
         if (resources == null) 
             initResources();
         
         try {
             String msg = resources.getString(key);
             if (args == null)
-                return msg;
+                return "JASPER: "+msg;
             MessageFormat form = new MessageFormat(msg);
-            return form.format(args);
-        } catch (MissingResourceException ignore) {
-            throw new Error("Fatal Error: missing resource: "+ignore.getClassName());
+            return "JASPER: "+form.format(args);
+        }
+        catch (MissingResourceException ignore)
+        {
+            throw new Error("Fatal Error: missing resource: "+
+                            ignore.getClassName());
         }
     }
 
     public static final void debug(String key)
     {
-        Code.debug(key);
+        Code.debug(getString(key));
     }
 
     public static final void debug(String key, Object[] args)
     {
-        Code.debug(key,args);
+        Code.debug(getString(key,args));
     }
     
     public static final void message(String key)
     {
-        Log.event(key);
+        Log.event(getString(key));
     }
 
     public static final void message(String key, Object[] args)
     {
-        Log.event(key+DataClass.toString(args));
+        Log.event(getString(key,args));
     }
         
     public static final void warning(String key)
     {
-        warning(key, null);
+        warning(getString(key));
     }
 
     public static final void warning(String key, Object[] args)
     {
-        Code.warning(key+DataClass.toString(args));
+        Code.warning(getString(key,args));
     }
         
     public static final void fatal(String key)
     {
-        fatal(key, null);
+        Code.fail(getString(key));
     }
 
     public static final void fatal(String key, Object[] args)
     {
-        Code.fail(key+DataClass.toString(args));
+        Code.fail(getString(key,args));
     }
 }
 

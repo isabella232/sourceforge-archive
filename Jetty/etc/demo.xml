@@ -85,12 +85,11 @@ $ID: $
   </Call>
 
   <Call name="addContext">
-    <Arg>/handler/*</Arg>
+    <Arg>/demo/*</Arg>
     <Set name="ResourceBase">./docroot/</Set>
-    <Set name="ServingResources">TRUE</Set>
     <Call name="addServlet">
       <Arg>Dump</Arg>
-      <Arg>/dump,/dump/*</Arg>
+      <Arg>/dump,/dump/*,*.DUMP</Arg>
       <Arg>com.mortbay.Servlet.Dump</Arg>
     </Call>
     <Call name="addServlet">
@@ -103,9 +102,15 @@ $ID: $
       <Arg>/Dispatch,/Dispatch/*</Arg>
       <Arg>com.mortbay.Servlet.RequestDispatchTest</Arg>
     </Call>
+    <Call name="addServlet">
+      <Arg>JSP</Arg>
+      <Arg>*.jsp</Arg>
+      <Arg>org.apache.jasper.servlet.JspServlet</Arg>
+    </Call>
     <Call name="addHandler">
       <Arg><New class="com.mortbay.HTTP.Handler.DumpHandler"/></Arg>
     </Call>
+    <Set name="ServingResources">TRUE</Set>
   </Call>
 
   <Call name="addContext">
@@ -122,12 +127,6 @@ $ID: $
 
   <Call name="addContext">
     <Arg>/</Arg>
-    <Set name="ResourceBase">./docroot/</Set>
-    <Call name="addServlet">
-      <Arg>JSP</Arg>
-      <Arg>*.jsp</Arg>
-      <Arg>org.apache.jasper.servlet.JspServlet</Arg>
-    </Call>
     <Call name="addHandler">
       <Arg><New class="com.mortbay.HTTP.Handler.NotFoundHandler"/></Arg>
     </Call>
@@ -141,9 +140,6 @@ $ID: $
       <Set name="Append">true</Set>
     </New>
   </Set>
-
-  <Set name="TempDir">./tmp</Set>
-  
 
 </Configure>
 

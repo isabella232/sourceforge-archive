@@ -42,7 +42,14 @@ public class Demo
             
             context=server.getContext(null,"/demo/*");
             context.setResourceBase("./docroot/");
-            context.addServlet("/Dispatch,/Dispatch/*",
+            context.addServlet("Dump",
+                               "/dump,/dump/*,*.DUMP",
+                               "com.mortbay.Servlet.Dump");
+            context.addServlet("Session",
+                               "/session",
+                               "com.mortbay.Servlet.SessionDump");
+            context.addServlet("Dispatch",
+                               "/Dispatch,/Dispatch/*",
                                "com.mortbay.Servlet.RequestDispatchTest");
             context.addServlet("JSP","*.jsp",
                                "org.apache.jasper.servlet.JspServlet");
