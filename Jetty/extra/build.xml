@@ -18,7 +18,8 @@ Other targets:
   <property environment="env"/>
   <property name="plus"           value="${basedir}/plus"/>
   <property name="jboss"          value="${basedir}/jboss"/>
-  <property name="loadbalancer"  value="${basedir}/loadbalancer"/>
+  <property name="loadbalancer"   value="${basedir}/loadbalancer"/>
+  <property name="ftp"            value="${basedir}/ftp"/>
 
 
   <!-- ==================================================================== -->
@@ -27,7 +28,7 @@ Other targets:
   <target name="clean" depends="check.available, clean.available">
   </target>
 
-  <target name="clean.available" depends="clean.plus, clean.jboss, clean.loadbalancer">
+  <target name="clean.available" depends="clean.plus,clean.jboss,clean.loadbalancer,clean.ftp">
   </target>
 
   <target name="clean.plus" if="plus.available"
@@ -41,6 +42,10 @@ Other targets:
 
   <target name="clean.loadbalancer" if="loadbalancer.available">
     <ant antfile="${loadbalancer.available}" inheritAll="false" target="clean"/>
+  </target>
+
+  <target name="clean.ftp" if="ftp.available">
+    <ant antfile="${ftp.available}" inheritAll="false" target="clean"/>
   </target>
 
 
@@ -57,10 +62,11 @@ Other targets:
     <available property="plus.available" value="${plus}/build.xml" file="${plus}/build.xml"/>
     <available property="jboss.available" value="${jboss}/build.xml" file="${jboss}/build.xml"/>
     <available property="loadbalancer.available" value="${loadbalancer}/build.xml" file="${loadbalancer}/build.xml"/>
+    <available property="ftp.available" value="${ftp}/build.xml" file="${ftp}/build.xml"/>
     <!-- add other subdir checks here                       -->
   </target>
 
-  <target name="build.available" depends="do.plus, do.jboss, do.loadbalancer">
+  <target name="build.available" depends="do.plus,do.jboss,do.loadbalancer,do.ftp">
   </target>
 
   <target name="do.plus" if="plus.available">
@@ -73,6 +79,10 @@ Other targets:
 
   <target name="do.loadbalancer" if="loadbalancer.available">
     <ant antfile="${loadbalancer.available}" inheritAll="false"/>
+  </target>
+
+  <target name="do.ftp" if="ftp.available">
+    <ant antfile="${ftp.available}" inheritAll="false"/>
   </target>
 
  </project>

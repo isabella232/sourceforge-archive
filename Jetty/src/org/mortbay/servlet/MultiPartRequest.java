@@ -276,6 +276,9 @@ public class MultiPartRequest
             if ((b>0 && b<_byteBoundary.length-2) ||
                 (b==_byteBoundary.length-1))
             {
+                if (cr) baos.write(13);
+                if (lf) baos.write(10);
+                cr=lf=false;
                 baos.write(_byteBoundary,0,b);
                 b=-1;
             }

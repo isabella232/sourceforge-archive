@@ -81,11 +81,12 @@ Other targets:
   <!-- Clean                                                                -->
   <!-- ==================================================================== -->
   <target name="clean" depends="tidy" description="Remove generated files">
-    <delete quiet="true">
+    <delete quiet="false">
       <fileset dir="${logs}">
         <include name="**/*.log"/>
       </fileset>
     </delete>
+    <delete file="${package.jar}"/>
   </target>
 
 

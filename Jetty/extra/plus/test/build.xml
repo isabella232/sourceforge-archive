@@ -19,7 +19,7 @@ the Ant optional tasks from:
    http://jakarta.apache.org/ant
 -->
 
-<project name="JettyPlus Tests" default="test" basedir="..">
+<project name="JettyPlus Tests" default="test" basedir=".">
 
 
   <!-- ==================================================================== -->
@@ -33,8 +33,8 @@ the Ant optional tasks from:
 
   <!-- ==================================================================== -->
   <property environment="env"/>
-  <property name="extra"          value="${basedir}/.."/>
-  <property name="plus"           value="${basedir}"/>
+  <property name="extra"          value="${basedir}/../.."/>
+  <property name="plus"           value="${basedir}/.."/>
   <property name="src"            value="${plus}/src" />
   <property name="etc"            value="${extra}/etc" />
   <property name="lib"            value="${extra}/lib"/>
@@ -45,7 +45,7 @@ the Ant optional tasks from:
   <property name="test.src"       value="${test}/src"/>
   <property name="test.classes"   value="${test}/classes"/>
   <property name="test.results"   value="${test}/results"/>
-  <property name="jetty.home"     value="${basedir}/../.." />
+  <property name="jetty.home"     value="${basedir}/../../.." />
   <property name="jetty.lib"      value="${jetty.home}/lib" />
   <property name="jetty.ext"      value="${jetty.home}/ext" />
   <property name="jetty.jar"      value="${jetty.lib}/org.mortbay.jetty.jar"/>
@@ -172,7 +172,7 @@ Test results in ${test.results}
   <!-- ==================================================================== -->
   <!-- testJAAS                                                             -->
   <!-- ==================================================================== -->
-  <target name="testJAAS" depends="prepare, check.junit.task, check.junit, check.jdbc, check.security, check.jaas, classes, secure" />
+  <target name="testJAAS" depends="prepare, check.junit.task, check.junit, check.jdbc, classes, secure" />
 
   <target name="check.jdbc">
     <condition property="jdbc.override">
@@ -192,21 +192,9 @@ Test results in ${test.results}
     <property name="dbDriver" value="org.hsqldb.jdbcDriver"/>
   </target>
 
-  <target name="check.security">
-    <available property="policy.file.available" file="${test.src}/org/mortbay/jaas/test.policy"/>
-    <echo message="policy file available: ${policy.file.available}"/>
- </target>
 
-
-  <target name="check.jaas">
-    <available property="jaas.available" file="${extra}/lib/jaas.jar"/>
-    <echo message="jaas.jar available: ${jaas.available}"/>
-  </target>
-
-
-  <target name="secure" depends="jdbc-prep" if="policy.file.available">
+  <target name="secure" depends="jdbc-prep">
     <echo message="Doing JAAS test with policy file"/>
-    <fail message="jaas.jar is not available in ${extra}/lib" unless="jaas.available"/>
     <echo>
 	Test results in ${test.results}
     </echo>
