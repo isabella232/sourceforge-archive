@@ -609,9 +609,21 @@ public class ServletHttpResponse implements HttpServletResponse
     {
         if (isCommitted())
             return;
-        _httpResponse.setContentType(contentType);
-        if (contentType.indexOf(';')>0)
-            _explicitEncoding=true;
+        
+        int semi=contentType.indexOf(';');
+        if (semi>0)
+        {
+            if (_outputState==0)
+            {
+                _explicitEncoding=true;
+                _httpResponse.setContentType(contentType);
+            }
+            else
+                _httpResponse.setContentType(contentType.substring(0,semi));
+        }
+        else
+            _httpResponse.setContentType(contentType);
+        
         if (_locale!=null)
             setLocale(_locale);
     }
