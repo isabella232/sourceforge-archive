@@ -121,3 +121,26 @@ pre.programlisting {
     font-size: 10pt;
     white-space: pre;
 }
+
+table.faq
+{
+  border: 1px solid #eeeeee;
+}
+
+table.faq td
+{
+  text-align: left;
+  vertical-align: top;
+  border: 1px solid #eeeeee;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  padding-left: 0px;
+  padding-right: 3px;
+}
+table.faq th
+{
+        font-weight: bold;
+        text-decoration: none;
+	color: #3333cc;
+	text-align:left;
+}
