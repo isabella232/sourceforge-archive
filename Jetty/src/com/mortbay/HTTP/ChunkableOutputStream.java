@@ -89,7 +89,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     /* ------------------------------------------------------------ */
     /** Get Writer for the raw stream.
      * A writer without filters or chunking is returned, which uses
-     * the UTF8 encoding. The converted bytes from this writer will be
+     * the 8859-1 encoding. The converted bytes from this writer will be
      * writen to the rawStream when writeRawWriter() is called.
      * These methods allow Character encoded data to be mixed with
      * raw data on the same stream without excessive buffering or flushes.
@@ -102,7 +102,7 @@ public class ChunkableOutputStream extends FilterOutputStream
             try
             {
                 _rawWriterBuffer=new ByteArrayOutputStream(1024);
-                _rawWriter=new OutputStreamWriter(_rawWriterBuffer,"UTF8");
+                _rawWriter=new OutputStreamWriter(_rawWriterBuffer,"ISO8859_1");
             }
             catch(IOException e)
             {
@@ -115,7 +115,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     
     /* ------------------------------------------------------------ */
     /** Write the raw writer to the raw stream.
-     * When called any UTF8 converted bytes written to the raw writer,
+     * When called any bytes written to the raw writer,
      * are writen to the rawStream, but the rawStream is not flushed.
      *
      * These methods allow Character encoded data to be mixed with

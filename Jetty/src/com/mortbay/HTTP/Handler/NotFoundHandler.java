@@ -76,7 +76,7 @@ public class NotFoundHandler extends NullHandler
                               HttpFields.__MessageHttp);
             ChunkableOutputStream out = response.getOutputStream();
             ByteArrayOutputStream buf = new ByteArrayOutputStream(2048);
-            Writer writer = new OutputStreamWriter(buf,"UTF8");
+            Writer writer = new OutputStreamWriter(buf,"ISO8859_1");
             writer.write(request.toString());
             writer.flush();
             response.setIntField(HttpFields.__ContentLength,buf.size());

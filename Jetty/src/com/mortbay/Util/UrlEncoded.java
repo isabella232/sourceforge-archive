@@ -172,12 +172,13 @@ public class UrlEncoded extends MultiMap
     {
         int len=encoded.length();
         byte[] bytes=new byte[len];
+        char[] characters = encoded.toCharArray();
         int n=0;
         boolean noDecode=true;
         
         for (int i=0;i<len;i++)
         {
-            char c = encoded.charAt(i);
+            char c = characters[i];
             if (c<0||c>0x7f)
                 throw new IllegalArgumentException("Not encoded");
             
@@ -203,7 +204,7 @@ public class UrlEncoded extends MultiMap
 
         try
         {    
-            return new String(bytes,0,n,"UTF8");
+            return new String(bytes,0,n,"ISO8859_1");
         }
         catch(Exception e)
         {

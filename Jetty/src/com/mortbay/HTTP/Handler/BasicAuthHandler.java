@@ -72,7 +72,7 @@ public class BasicAuthHandler extends NullHandler
             Code.debug("Credentials: "+credentials);
             credentials =
                 credentials.substring(credentials.indexOf(' ')+1);
-            credentials = B64Code.decode(credentials,"UTF8");
+            credentials = B64Code.decode(credentials,"ISO8859_1");
             int i = credentials.indexOf(':');
             String user = credentials.substring(0,i);
             String password = credentials.substring(i+1);

@@ -16,7 +16,7 @@ import java.lang.reflect.*;
  * setChunking(true) is called.  Once chunking is
  * enabled, the raw stream is chunk decoded as per RFC2616.
  *
- * The "UTF8" encoding is used on underlying LineInput instance for
+ * The "8859-1" encoding is used on underlying LineInput instance for
  * line based reads from the raw stream.
  *
  * @see com.mortbay.Util.LineInput.
@@ -44,7 +44,7 @@ public class ChunkableInputStream extends FilterInputStream
     {
         super(null);
         try {
-            _realIn= new LineInput(in,0,"UTF8");
+            _realIn= new LineInput(in,0,"ISO8859_1");
         }
         catch(UnsupportedEncodingException e)
         {

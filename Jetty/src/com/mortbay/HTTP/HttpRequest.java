@@ -644,7 +644,7 @@ public class HttpRequest extends HttpMessage
                             UrlEncoded.decodeTo(new String(content,
                                                            0,
                                                            content_length,
-                                                           "UTF8"),
+                                                           "ISO8859_1"),
                                                 _parameters);
                         }
                         catch (IOException e)

@@ -247,7 +247,7 @@ public class HttpResponse extends HttpMessage
         {
             _header.put(HttpFields.__ContentType,"text/html");
             ChunkableOutputStream out=getOutputStream();
-            Writer writer= new OutputStreamWriter(out,"UTF8");
+            Writer writer= new OutputStreamWriter(out,"ISO8859_1");
             synchronized(writer)
             {
                 writer.write("<HTML>\n<HEAD>\n<TITLE>Error ");
@@ -287,7 +287,7 @@ public class HttpResponse extends HttpMessage
         {
             _header.put(HttpFields.__ContentType,"text/html");
             ChunkableOutputStream out=getOutputStream();
-            Writer writer=new OutputStreamWriter(out,"UTF8");
+            Writer writer=new OutputStreamWriter(out,"ISO8859_1");
             synchronized(writer)
             {
                 writer.write("<HTML>\n<HEAD>\n<TITLE>Error ");
