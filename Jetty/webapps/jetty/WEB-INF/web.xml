@@ -53,12 +53,16 @@
     <location>error404.html</location>
   </error-page>
   <error-page>
-    <exception-type>
-       java.lang.NullPointerException
-    </exception-type>
-    <location>
-       errorNullPointer.html
-    </location>
+    <error-code>503</error-code>
+    <location>error503.html</location>
+  </error-page>
+  <error-page>
+    <exception-type>java.lang.NullPointerException</exception-type>
+    <location>errorNullPointer.html</location>
+  </error-page>
+  <error-page>
+    <exception-type>java.lang.RuntimeException</exception-type>
+    <location>errorRuntime.html</location>
   </error-page>
 
   <security-constraint>

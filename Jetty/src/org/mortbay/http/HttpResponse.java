@@ -302,7 +302,7 @@ public class HttpResponse extends HttpMessage
     /* ------------------------------------------------------------- */
     /** Send Error Response.
      */
-    private void sendError(int code,String error,String message) 
+    private void sendError(int code,Class exClass,String message) 
         throws IOException
     {
         Integer code_integer=new Integer(code);
@@ -320,8 +320,16 @@ public class HttpResponse extends HttpMessage
             code>=200)
         {
             // Handle error page.
-            // XXX some servlet dependancies in attribute names here.
-            String error_page = _handlerContext==null?null:_handlerContext.getErrorPage(error);
+            String error_page = null;
+            while (error_page==null && exClass!=null)
+            {
+                error_page = _handlerContext.getErrorPage(exClass.getName());
+                exClass=exClass.getSuperclass();
+            }
+            
+            if (error_page==null)
+                error_page = _handlerContext.getErrorPage(""+code);
+
             if (error_page!=null)
             {
                 if (request.getAttribute("javax.servlet.error.status_code")==null)
@@ -395,7 +403,7 @@ public class HttpResponse extends HttpMessage
      */public void sendError(int code,String message) 
         throws IOException
     {
-        sendError(code,""+code,message);
+        sendError(code,null,message);
     }
     
     /* ------------------------------------------------------------- */
@@ -408,7 +416,7 @@ public class HttpResponse extends HttpMessage
     public void sendError(int code) 
         throws IOException
     {
-        sendError(code,""+code,null);
+        sendError(code,null,null);
     }
     
     /* ------------------------------------------------------------- */
@@ -425,13 +433,13 @@ public class HttpResponse extends HttpMessage
         {
             HttpException he = (HttpException)exception;
             code=he.getCode();
-            sendError(code,""+code,he.getMessage());
+            sendError(code,null,he.getMessage());
         }
         else
         {
-            getRequest().setAttribute("javax.servlet.error.exception_type",
-                                      exception.getClass());
-            sendError(code,exception.getClass().getName(),exception.toString());
+            Class exClass=exception.getClass();
+            getRequest().setAttribute("javax.servlet.error.exception_type",exClass);
+            sendError(code,exClass,exception.toString());
         }
     }
     

@@ -28,7 +28,7 @@ read Y
     cd $HOME
     unset JETTY_HOME
     [ -d Jetty ] && mv Jetty Jetty.cvs
-    cvs $CVS_ARGS rtag -F Jetty_$TAG Jetty
+    cvs $CVS_ARGS rtag -r Jetty_3_1 -F Jetty_$TAG Jetty
     cvs $CVS_ARGS export -r Jetty_$TAG Jetty
     cd $HOME/Jetty
     rm -fr src/com webappsrc/com

@@ -215,12 +215,13 @@ public class Dispatcher implements RequestDispatcher
                                                PathMap.pathInfo(_pathSpec,_path),
                                                _query);
             }
-            
-            // Forward request
-            //httpRequest.setAttribute(ServletHandler.__SERVLET_REQUEST,request);
-            //httpRequest.setAttribute(ServletHandler.__SERVLET_RESPONSE,response);
-            httpRequest.setAttribute(ServletHandler.__SERVLET_HOLDER,_holder);
-            _context.getHandlerContext().handle(_path,null,httpRequest,httpResponse);
+
+            // Forward to servlet
+            if (_holder!=null)
+                _holder.handle(servletRequest,servletResponse);
+            else
+                // Forward to handlers
+                _context.getHandlerContext().handle(_path,null,httpRequest,httpResponse);
         }
     }
         

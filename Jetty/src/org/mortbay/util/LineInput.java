@@ -354,7 +354,12 @@ public class LineInput extends FilterInputStream
         throws IllegalArgumentException
     {
         if (limit>_buf.length)
-            throw new IllegalArgumentException("limit larger than buffer");
+        {
+            byte[] new_buf=new byte[limit];
+            System.arraycopy(_buf,_pos,new_buf,_pos,_avail-_pos);
+            _buf=new_buf;
+        }
+        
         _mark=_pos;
     }
 
