@@ -95,9 +95,9 @@ public class CGI extends HttpServlet
   public void service(HttpServletRequest req, HttpServletResponse res) 
     throws ServletException, IOException
   {
-    Code.debug("CGI: req.getContextPath() : " + req.getContextPath());
-    Code.debug("CGI: req.getServletPath() : " + req.getServletPath());
-    Code.debug("CGI: req.getPathInfo()    : " + req.getPathInfo());
+    Code.debug("CGI: req.getContextPath() : ",req.getContextPath());
+    Code.debug("CGI: req.getServletPath() : ",req.getServletPath());
+    Code.debug("CGI: req.getPathInfo()    : ",req.getPathInfo());
 
     Code.debug("CGI: System.Properties : " + System.getProperties().toString());
 
