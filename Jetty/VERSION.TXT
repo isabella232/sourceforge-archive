@@ -1,5 +1,9 @@
 Jetty Versions
 --------------
+
+ + Added Get element to the XmlConfiguration class.
+ + Added Static calls to the XmlConfiguration class.
+ + Added debug and logging config example to demo.xml
  + Moved mime types and encodings to property bundles.
  + RequestDispatch.forward() uses normal HandlerContext.handle() path if possible.
  + Cleaned up destroy handling of listeners and contexts.

@@ -738,8 +738,8 @@ public class HttpFields
     }
 
     /* ------------------------------------------------------------ */
-    /** Destroy the header.
-     * Help the garbage collector by null everything that we can.
+    /** Clear the header.
+     * Remove all entries.
      */
     public void clear()
     {

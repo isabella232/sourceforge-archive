@@ -53,6 +53,30 @@ $Id$
 -->
 
 <Configure class="com.mortbay.HTTP.HttpServer">
+
+
+  <!-- The following section can be uncommented to control the
+       debugging and logging mechanism.  
+  <Set name="Debug" class="com.mortbay.Util.Code" type="boolean">false</Set>
+  <Set name="Verbose" class="com.mortbay.Util.Code" type="int">0</Set>
+  <Set name="DebugPatterns" class="com.mortbay.Util.Code" type="String"></Set>
+
+  <Call name="instance" class="com.mortbay.Util.Log">
+    <Call name="disableLog"/>
+    <Call name="add"> 
+      <Arg>
+        <New class="com.mortbay.Util.WriterLogSink">
+          <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.log</Arg>
+          <Set name="RetainDays">90</Set>
+          <Set name="Append">true</Set>
+          <Call name="start"/> 
+        </New>
+      </Arg>
+    </Call>
+  </Call>
+  -->
+
+  <!-- Configure the listeners -->
   <Call name="addListener">
     <Arg>
       <New class="com.mortbay.HTTP.SocketListener">
@@ -162,9 +186,9 @@ $Id$
     <Arg>/</Arg>
     <Set name="ClassPath"><SystemProperty name="jetty.home" default="."/>/servlets/</Set>
     <Set name="DynamicServletPathSpec">/servlet/*</Set>
-    <Call name="getServletHandler">
+    <Get name="ServletHandler">
       <Set name="ServeDynamicSystemServlets" type="boolean">FALSE</Set>
-    </Call>
+    </Get>
     <Call name="addHandler">
       <Arg type="int">0</Arg>
       <Arg>

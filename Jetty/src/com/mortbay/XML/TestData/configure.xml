@@ -75,6 +75,8 @@
   </New></Put>
 
   <Put name="Property" ><SystemProperty name="user.dir"/>/stuff</Put>
+  <Put name="Boolean" type="Boolean">True</Put>
+  <Put name="Float" type="Float">2.3</Put>
 
   <Call name="call">
   </Call>
@@ -93,6 +95,13 @@
       <Arg type="boolean">false</Arg>
     </Call>
   </Call>
+
+  <Get name="String">
+     <Call name="toString"/>
+  </Get>
+
+  <Call name="callStatic" class="com.mortbay.XML.TestConfiguration"/>
+
 </Configure>
 
 

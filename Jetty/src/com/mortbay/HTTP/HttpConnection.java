@@ -236,15 +236,18 @@ public class HttpConnection
             {
                 // Create or recycle connection
                 if (_request!=null)
+                {
                     _request.recycle(this);
+                    if (_response!=null)
+                        _response.recycle(this);
+                    else
+                        _response = new HttpResponse(this);
+                }
                 else
+                {
                     _request = new HttpRequest(this);
-
-                if (_response!=null)
-                    _response.recycle(this);
-                else
                     _response = new HttpResponse(this);
-                
+                }
                 
                 // Assume the connection is not persistent,
                 // unless told otherwise.

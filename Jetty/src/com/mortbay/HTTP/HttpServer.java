@@ -55,11 +55,6 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     /* ------------------------------------------------------------ */
     private static ArrayList __servers = new ArrayList(3);
     private static List __roServers = Collections.unmodifiableList(__servers);
-
-    static
-    {
-        Log.event("HttpServer version "+Version.__VersionImpl);
-    }
     
     /* ------------------------------------------------------------ */
     private HashMap _listeners = new HashMap(3);
@@ -83,7 +78,6 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     {
         __servers.add(this);
     }
-
     
     /* ------------------------------------------------------------ */
     /** 
@@ -111,6 +105,8 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     public synchronized void start()
         throws Exception
     {
+        Log.event("start HttpServer version "+Version.__VersionImpl);
+
         MultiException mex = new MultiException();
         
         if (Code.verbose(99))

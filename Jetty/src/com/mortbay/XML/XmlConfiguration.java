@@ -14,6 +14,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -109,7 +110,8 @@ public class XmlConfiguration
     public void configure(Object obj)
         throws ClassNotFoundException,
                NoSuchMethodException,
-               InvocationTargetException
+               InvocationTargetException,
+               IllegalAccessException
     {
         //Check the class of the object
         Class oClass = nodeClass(_config);
@@ -166,7 +168,8 @@ public class XmlConfiguration
     private void configure(Object obj,XmlParser.Node cfg,int i)
         throws ClassNotFoundException,
                NoSuchMethodException,
-               InvocationTargetException
+               InvocationTargetException,
+               IllegalAccessException
     {
         for(;i<cfg.size();i++)
         {  
@@ -182,6 +185,8 @@ public class XmlConfiguration
                 put(obj,node);
             else if("Call".equals(tag))
                 call(obj,node);
+            else if("Get".equals(tag))
+                get(obj,node);
             else
                 throw new IllegalStateException("Unknown tag: "+tag);
         }
@@ -201,14 +206,21 @@ public class XmlConfiguration
     private void set(Object obj,XmlParser.Node node)
         throws ClassNotFoundException,
                NoSuchMethodException,
-               InvocationTargetException
+               InvocationTargetException,
+               IllegalAccessException
     {
         String attr=node.getAttribute("name");
         attr=attr.substring(0,1).toUpperCase()+attr.substring(1);
         String name = "set"+attr;
         Object value= value(obj,node);
         Object[] arg={value};
-        Class oClass = obj.getClass();
+        
+        Class oClass = nodeClass(node);
+        if (oClass!=null)
+            obj=null;
+        else
+            oClass = obj.getClass();
+        
         Class[] vClass = {Object.class};
         if (value!=null)
             vClass[0]=value.getClass();
@@ -309,7 +321,8 @@ public class XmlConfiguration
     private void put(Object obj,XmlParser.Node node)
         throws NoSuchMethodException,
                ClassNotFoundException,
-               InvocationTargetException
+               InvocationTargetException,
+               IllegalAccessException
     {
         if (!(obj instanceof Map))
             throw new IllegalArgumentException("Object for put is not a Map: "+
@@ -323,6 +336,41 @@ public class XmlConfiguration
     }
     
     
+    
+    /* ------------------------------------------------------------ */
+    /* Call a get method.
+     * Any object returned from the call is passed to the configure
+     * method to consume the remaining elements.
+     * @param obj 
+     * @param node 
+     * @return 
+     * @exception NoSuchMethodException 
+     * @exception ClassNotFoundException 
+     * @exception InvocationTargetException 
+     */
+    private Object get(Object obj,XmlParser.Node node)
+        throws NoSuchMethodException,
+               ClassNotFoundException,
+               InvocationTargetException,
+               IllegalAccessException
+    {
+        Class oClass = nodeClass(node);
+        if (oClass!=null)
+            obj=null;
+        else
+            oClass = obj.getClass();        
+        
+        String name=node.getAttribute("name");
+        name="get"+name.substring(0,1).toUpperCase()+name.substring(1);
+        Code.debug("call ",name);
+        
+        Method method = oClass.getMethod(name,null);
+
+        Object n=null;
+        n=method.invoke(obj,null);
+        configure(n,node,0);
+        return n;
+    }
     
     /* ------------------------------------------------------------ */
     /* Call a method.
@@ -340,9 +388,15 @@ public class XmlConfiguration
     private Object call(Object obj,XmlParser.Node node)
         throws NoSuchMethodException,
                ClassNotFoundException,
-               InvocationTargetException
+               InvocationTargetException,
+               IllegalAccessException
     {
-        Class oClass = obj.getClass();
+        Class oClass = nodeClass(node);
+        if (oClass!=null)
+            obj=null;
+        else
+            oClass = obj.getClass();
+        
         int size=0;
         int argi=node.size();
         for (int i=0;i<node.size();i++)
@@ -373,10 +427,12 @@ public class XmlConfiguration
         // Lets just try all methods for now
         Method[] methods = oClass.getMethods();
         for (int c=0;methods!=null && c<methods.length;c++)
-        {
+        {            
             if (!methods[c].getName().equals(method))
                 continue;
             if (methods[c].getParameterTypes().length!=size)
+                continue;
+            if (Modifier.isStatic(methods[c].getModifiers())!=(obj==null))
                 continue;
             
             Object n=null;
@@ -393,7 +449,7 @@ public class XmlConfiguration
             }
         }
 
-        throw new IllegalStateException("No Method: "+node+" on "+obj);
+        throw new IllegalStateException("No Method: "+node+" on "+oClass);
     }
     
     /* ------------------------------------------------------------ */
@@ -409,7 +465,8 @@ public class XmlConfiguration
     private Object newObj(Object obj,XmlParser.Node node)
         throws NoSuchMethodException,
                ClassNotFoundException,
-               InvocationTargetException
+               InvocationTargetException,
+               IllegalAccessException
     {
         Class oClass = nodeClass(node);
         int size=0;
@@ -478,7 +535,8 @@ public class XmlConfiguration
     private Object value(Object obj,XmlParser.Node node)
         throws NoSuchMethodException,
                ClassNotFoundException,
-               InvocationTargetException
+               InvocationTargetException,
+               IllegalAccessException
     {
         // Get the type
         String type = node.getAttribute("type");
@@ -612,7 +670,8 @@ public class XmlConfiguration
     private Object itemValue(Object obj, Object item)
         throws NoSuchMethodException,
                ClassNotFoundException,
-               InvocationTargetException
+               InvocationTargetException,
+               IllegalAccessException
     {
         // String value
         if (item instanceof String)
@@ -622,7 +681,8 @@ public class XmlConfiguration
         String tag=node.getTag();
         if ("Call".equals(tag))
             return call(obj,node);
-        
+        if ("Get".equals(tag))
+            return get(obj,node);
         if ("New".equals(tag))
             return newObj(obj,node);
         

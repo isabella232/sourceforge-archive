@@ -19,6 +19,7 @@ public class TestConfiguration extends HashMap
     public Object testObject;
     public int testInt;
     public URL url;
+    public static boolean called=false;
     
     public void setTest(Object value)
     {
@@ -46,7 +47,18 @@ public class TestConfiguration extends HashMap
     {
         put("URL",b?"1":"0");
         url=u;
-    }    
+    }
+
+    public String getString()
+    {
+        return "String";
+    }
+
+    public static void callStatic()
+    {
+        called=true;
+    }
+    
 }
 
 

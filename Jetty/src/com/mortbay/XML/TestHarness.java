@@ -168,12 +168,14 @@ public class TestHarness
             t.checkEquals(tc.get("Property"),
                           System.getProperty("user.dir")+"/stuff",
                           "Property");
-
             
             t.checkEquals(tc.get("Called"),
                           "Yes",
                           "Called");
 
+            t.check(tc.called,"Static called");
+
+            
             TestConfiguration tc2=tc.nested;
             t.check(tc2!=null,"Called(bool)");
             t.checkEquals(tc2.get("Arg"),

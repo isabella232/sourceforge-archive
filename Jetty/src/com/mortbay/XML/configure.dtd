@@ -20,10 +20,11 @@ $Id$
 -->
 
 
-<!ENTITY % CONFIG "Set|Put|Call">
-<!ENTITY % TYPE "String|char|short|byte|int|long|boolean|float|double|URL|InetAddress|InetAddrPort">
-<!ENTITY % VALUE "#PCDATA|Call|New|SystemProperty">
+<!ENTITY % CONFIG "Set|Put|Call|Get">
+<!ENTITY % TYPE "String|Character|Short|Byte|Integer|Long|Boolean|Float|Double|char|short|byte|int|long|boolean|float|double|URL|InetAddress|InetAddrPort">
+<!ENTITY % VALUE "#PCDATA|Call|Get|New|SystemProperty">
 <!ENTITY % TYPEATTR "type (%TYPE;) #IMPLIED " >
+<!ENTITY % OCLASSATTR "class NMTOKEN #IMPLIED" >
 <!ENTITY % CLASSATTR "class NMTOKEN #REQUIRED" >
 <!ENTITY % NAMEATTR "name NMTOKEN #REQUIRED" >
 
@@ -44,7 +45,9 @@ A Configure element can contain Set, Put or Call elements.
 Set Element.
 This element maps to a call to a set method on the current object.
 The name and optional type attributes are used to select the set 
-method.
+method. If the class attribute is provided, a static call on that 
+class is made.
+
 A Set element can contain value text and/or the value elements Call,
 New and SystemProperty. If no value type is specified, then white
 space is trimmed out of the value. If it contains multiple value
@@ -52,7 +55,7 @@ elements they are added as strings before being converted to any
 specified type.
 -->
 <!ELEMENT Set ( %VALUE; )* >
-<!ATTLIST Set %NAMEATTR; %TYPEATTR; >
+<!ATTLIST Set %NAMEATTR; %TYPEATTR; %OCLASSATTR;>
 
 
 <!--
@@ -75,7 +78,8 @@ specified type.
 <!--
 Call Element.
 This element maps to an arbitrary call to amethod on the current object,
-The name attribute and Arg elements are used to select the method.
+The name attribute and Arg elements are used to select the method. If the
+class attribute is provided, a static call on that class is made.
 
 A Call element can contain a sequence of Arg elements followed by
 a sequence of Set, Put and/or Call elements which act on any object
@@ -90,7 +94,23 @@ This is equivalent to:
 
 -->
 <!ELEMENT Call (Arg*,(%CONFIG;)*)>
-<!ATTLIST Call %NAMEATTR;>
+<!ATTLIST Call %NAMEATTR; %OCLASSATTR;>
+
+<!--
+Get Element.
+The Get element is short hand for a Call to a getter method.
+
+ <Call name="test"><Set name="Test">Value2</Set></Call>
+
+This is equivalent to:
+
+ Object o2 = o1.getTest();
+ o2.setTest("value2");
+
+-->
+<!ELEMENT Get ((%CONFIG;)*)>
+<!ATTLIST Get %NAMEATTR; %OCLASSATTR;>
+
 
 
 <!--

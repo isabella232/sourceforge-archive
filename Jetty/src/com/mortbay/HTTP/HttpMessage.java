@@ -55,10 +55,10 @@ abstract public class HttpMessage
 
 
     /* ------------------------------------------------------------ */
-    protected int _state;
+    protected int _state=__MSG_EDITABLE;
     protected String _version;
     protected int _dotVersion;
-    protected HttpFields _header;
+    protected HttpFields _header=new HttpFields();
     protected HttpFields _trailer;
     protected boolean _acceptTrailer;
     protected HttpConnection _connection;
@@ -70,7 +70,6 @@ abstract public class HttpMessage
      */
     protected HttpMessage()
     {
-        _header=new HttpFields();
     }
     
     /* ------------------------------------------------------------ */
@@ -78,7 +77,6 @@ abstract public class HttpMessage
      */
     protected HttpMessage(HttpConnection connection)
     {
-        _header=new HttpFields();
         _connection=connection;
     }
 
@@ -582,8 +580,8 @@ abstract public class HttpMessage
         _trailer=null;
         _acceptTrailer=false;
         _connection=connection;
-        _mimeType=null;
         _characterEncoding=null;
+        _mimeType=null;
     }
     
     /* ------------------------------------------------------------ */
