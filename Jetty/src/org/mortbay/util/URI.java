@@ -727,6 +727,7 @@ public class URI
      * @return cloned URI
      */
     public Object clone()
+	throws CloneNotSupportedException
     {
          URI u = (URI)super.clone();
          if (_parameters!=null)
