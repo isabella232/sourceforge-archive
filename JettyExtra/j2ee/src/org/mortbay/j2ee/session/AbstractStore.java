@@ -75,6 +75,8 @@ public abstract class
 	  _log.debug("stopped local scavenger");
 	}
       }
+
+      new Scavenger().run();;
     }
 
   public void

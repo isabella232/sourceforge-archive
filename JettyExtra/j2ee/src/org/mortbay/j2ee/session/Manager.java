@@ -205,6 +205,7 @@ public class Manager
 
       _scavenger.cancel();
       _scavenger=null;
+      scavenge();
       _store.stop();
       _store.destroy();
       _store=null;
