@@ -3,7 +3,7 @@
 
 <!-- 
 This is the jetty specific web application configuration file.  When starting
-a Web Application, the WEB-INF/jetty.xml is looked for and if found, treated
+a Web Application, the WEB-INF/web-jetty.xml file is looked for and if found, treated
 as a org.mortbay.xml.XmlConfiguration file and is applied to the 
 org.mortbay.jetty.servlet.WebApplicationContext objet
 -->
@@ -14,15 +14,9 @@ org.mortbay.jetty.servlet.WebApplicationContext objet
     <Set name="statsOn" type="boolean">false</Set>
 -->
 
-<!-- example context log file  
-   <Set name="LogSink">
-      <New class="org.mortbay.util.OutputStreamLogSink">
-      <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.jetty.request.log</Arg>
-      <Set name="retainDays">90</Set>
-      <Set name="append">true</Set>
-      <Set name="flushOn">false</Set>
-    </New>
-  </Set>
--->
+   <Call name="getResourceHandler">
+      <Set name="putAllowed">false</Set>
+      <Set name="delAllowed">false</Set>
+   </Call>
 
 </Configure>

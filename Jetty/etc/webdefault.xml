@@ -22,6 +22,7 @@
     <session-timeout>60</session-timeout>
   </session-config>
 
+<!-- Constrain PUT and DELETE if enabled
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>Read Only</web-resource-name>
@@ -30,11 +31,6 @@
       <http-method>PUT</http-method>
     </web-resource-collection>
   </security-constraint>
-
-  <!--
-  <security-role>
-      <role-name>roleName</role-name>
-  </security-role>
-  -->
+-->
 
 </web-app>

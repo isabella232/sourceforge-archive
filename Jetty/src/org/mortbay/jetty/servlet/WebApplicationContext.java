@@ -42,6 +42,18 @@ import javax.servlet.UnavailableException;
  * This specialization of HandlerContext uses the standardized web.xml
  * to describe a web application and configure the handlers for the
  * HandlerContext.
+ * <P>
+ * It creates and/or configures the following Handlers:<UL>
+ * <LI>SecurityHandler - Implements BASIC and FORM
+ * authentication. This handler is forced to be the first handler in
+ * the context.
+ * <LI>ServletHandler - Servlet handler for dynamic and configured
+ * servlets
+ * <LI>WebInfProtect - A handler to ensure the WEB-INF is protected
+ * from all requests. This is always installed before the ResourceHandler
+ * <LI>ResourceHandler - Serves static content and if forced to be
+ * after the servlet handler within the context.
+ * </UL>
  *
  * @version $Id$
  * @author Greg Wilkins (gregw)
@@ -214,12 +226,16 @@ public class WebApplicationContext extends ServletHandlerContext
         resolveWebApp();
 
         // add security handler first
-        _securityHandler=new SecurityHandler();
-        addHandler(_securityHandler);
-            
+        _securityHandler=(SecurityHandler)getHandler(SecurityHandler.class);
+        if (_securityHandler==null)
+            _securityHandler=new SecurityHandler();
+        else
+            removeHandler(_securityHandler);
+        addHandler(0,_securityHandler);
+
+        
         // Add servlet Handler
-        _servletHandler = (ServletHandler)
-            getHandler(org.mortbay.jetty.servlet.ServletHandler.class);
+        _servletHandler = (ServletHandler)getHandler(ServletHandler.class);
         if (_servletHandler==null)
         {
             _servletHandler=new ServletHandler();
@@ -227,16 +243,27 @@ public class WebApplicationContext extends ServletHandlerContext
         }
         _servletHandler.setDynamicServletPathSpec("/servlet/*");
         _context=_servletHandler.getContext();
-
-        // Protect WEB-INF
-        addHandler(new WebInfProtect());
         
         // Resource Handler
-        setServingResources(true);
-        ResourceHandler rh = getResourceHandler();
-        rh.setPutAllowed(false);
-        rh.setDelAllowed(false);
+        ResourceHandler rh = (ResourceHandler)getHandler(ResourceHandler.class);
+        if (rh==null)
+        {
+            rh=new ResourceHandler();
+            rh.setPutAllowed(false);
+            rh.setDelAllowed(false);
+            addHandler(rh);
+        }
 
+        // Check order
+        if (getHandlerIndex(rh)<getHandlerIndex(_servletHandler))
+        {
+            removeHandler(rh);
+            addHandler(rh);
+        }
+        
+        // Protect WEB-INF
+        addHandler(getHandlerIndex(rh),new WebInfProtect());
+        
         // Do the default configuration
         try
         {
@@ -292,11 +319,6 @@ public class WebApplicationContext extends ServletHandlerContext
                     _deploymentDescriptor=web.toString();
                     XmlParser.Node config = xmlParser.parse(web.getURL().toString());
                     initialize(config);
-                    if (_defaultsDescriptor!=null && _defaultsDescriptor.length()>0)
-                    {
-                        rh.setPutAllowed(true);
-                        rh.setDelAllowed(true);
-                    }
                 }
                 catch(IOException e)
                 {
@@ -336,6 +358,11 @@ public class WebApplicationContext extends ServletHandlerContext
             }
         }
         super.start();
+
+        if (rh.isPutAllowed())
+            Log.event("PUT allowed in "+this);
+        if (rh.isDelAllowed())
+            Log.event("DEL allowed in "+this);
     }
 
     /* ------------------------------------------------------------ */

@@ -595,6 +595,21 @@ public class HandlerContext implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
+    /** Get handler index.
+     * @param Handler instance 
+     * @return Index of handler in context or -1 if not found.
+     */
+    public int getHandlerIndex(HttpHandler handler)
+    {
+        for (int h=0;h<_handlers.size();h++)
+        {
+            if ( handler == _handlers.get(h))
+                return h;
+        }
+        return -1;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Get a handler by class.
      * @param handlerClass 
      * @return The first handler that is an instance of the handlerClass
