@@ -808,15 +808,23 @@ public class ServletHandler extends AbstractHttpHandler
                 query=uriInContext.substring(q+1);
                 uriInContext=uriInContext.substring(0,q);
             }
+            if ((q=uriInContext.indexOf(';'))>0)
+                uriInContext=uriInContext.substring(0,q);
 
-            return new Dispatcher(ServletHandler.this,
-                                  uriInContext,query);
+            String pathInContext=URI.canonicalPath(URI.decodePath(uriInContext));
+            Map.Entry entry=getHolderEntry(pathInContext);
+            if (entry!=null)
+                return new Dispatcher(ServletHandler.this,
+                                      uriInContext,
+                                      pathInContext,
+                                      query,
+                                      entry);
         }
         catch(Exception e)
         {
             Code.ignore(e);
-            return null;
         }
+        return null;
     }
 
     /* ------------------------------------------------------------ */

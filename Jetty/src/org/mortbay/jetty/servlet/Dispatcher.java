@@ -91,27 +91,19 @@ public class Dispatcher implements RequestDispatcher
      */
     Dispatcher(ServletHandler servletHandler,
                String uriInContext,
-               String query)
+               String pathInContext,
+               String query,
+               Map.Entry entry)
         throws IllegalStateException
     {
         Code.debug("Dispatcher for ",servletHandler,",",uriInContext,",",query);
-
-        _uriInContext=uriInContext;
         
         _servletHandler=servletHandler;
-        _pathInContext=URI.canonicalPath(URI.decodePath(_uriInContext));
+        _uriInContext=uriInContext;
+        _pathInContext=pathInContext;        
         _query=query;
-
-        Map.Entry entry=_servletHandler.getHolderEntry(_pathInContext);
-        if(entry!=null)
-        {
-            _pathSpec=(String)entry.getKey();
-            _holder = (ServletHolder)entry.getValue();
-        }
-
-        // if no servlet
-        if (_holder==null)
-            throw new IllegalStateException("No servlet handlers in context");
+        _pathSpec=(String)entry.getKey();
+        _holder = (ServletHolder)entry.getValue();
     }
     
     /* ------------------------------------------------------------ */
