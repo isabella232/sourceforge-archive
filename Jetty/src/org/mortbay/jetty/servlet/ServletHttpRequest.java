@@ -41,6 +41,7 @@ import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpInputStream;
+import org.mortbay.http.HttpOnlyCookie;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.SecurityConstraint;
 import org.mortbay.util.LazyList;
@@ -534,7 +535,10 @@ public class ServletHttpRequest
         if (_servletHandler.isUsingCookies())
         {
             Cookie cookie =
-                new Cookie(SessionManager.__SessionCookie,session.getId());
+                _servletHandler.getSessionManager().getHttpOnly()
+                ?new HttpOnlyCookie(SessionManager.__SessionCookie,session.getId())
+                :new Cookie(SessionManager.__SessionCookie,session.getId());
+                
             String path=
                 _servletHandler.getServletContext()
                 .getInitParameter(SessionManager.__SessionPath);
@@ -556,6 +560,8 @@ public class ServletHttpRequest
                 cookie.setMaxAge(Integer.parseInt(maxAge));
             else
                 cookie.setMaxAge(-1);
+            
+            cookie.setSecure(isSecure() && _servletHandler.getSessionManager().getSecureCookies());
             
             cookie.setPath(path);
             _servletHttpResponse.getHttpResponse().addSetCookie(cookie);

@@ -299,17 +299,17 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
     </user-data-constraint>
   </security-constraint>
 
-<!--
   <login-config>
     <auth-method>BASIC</auth-method>
     <realm-name>Jetty Demo Realm</realm-name>
   </login-config>
--->
 
+<!--
   <login-config>
     <auth-method>DIGEST</auth-method>
     <realm-name>Jetty Demo Realm</realm-name>
   </login-config>
+-->
 
 <!--
   <login-config>
