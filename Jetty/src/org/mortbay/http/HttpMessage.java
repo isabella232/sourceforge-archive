@@ -741,10 +741,7 @@ public abstract class HttpMessage
     public boolean isDirty()
     {
         HttpOutputStream out=(HttpOutputStream)getOutputStream();
-        
-        return _state!=__MSG_EDITABLE
-            || ( out!=null &&
-                 (out.isWritten() || out.isCommitted()));
+        return _state!=__MSG_EDITABLE || ( out!=null && out.isWritten());
     }
     
     /* ------------------------------------------------------------ */

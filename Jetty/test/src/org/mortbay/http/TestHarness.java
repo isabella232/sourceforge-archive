@@ -150,6 +150,7 @@ public class TestHarness
             
             cout.write("Reset Output".getBytes());
             cout.resetBuffer();
+            cout.setChunking();
             
             cout.flush();
             cout.write('a');
@@ -219,10 +220,10 @@ public class TestHarness
                 Code.debug("Chunk out tmp = ",tmpFile);
             
             FileOutputStream fout = new FileOutputStream(tmpFile);
-            ChunkingOutputStream cout = new ChunkingOutputStream(fout,4020);
+            ChunkingOutputStream cout = new ChunkingOutputStream(fout,4020,512);
             
             cout.write("Reset Output".getBytes());
-            cout.reset();
+            cout.resetStream();
             
             cout.flush();
             cout.write('a');
@@ -268,7 +269,7 @@ public class TestHarness
                 new FileInputStream(__userDir+File.separator+
                                     "TestData"+File.separator+
                                     "chunkOut.bin");
-            test.checkEquals(ftmp,ftest,"chunked out");
+            test.checkEquals(ftmp,ftest,"chunked out "+tmpFile);
         }
         catch(Exception e)
         {

@@ -40,7 +40,7 @@ public class TestRequest
         HttpConnection connection = new HttpConnection(null,null,in,out,null);
         
         HttpRequest request = new HttpRequest(connection);
-        request.readHeader((LineInput)((HttpInputStream)connection.getInputStream()).getRawStream());
+        request.readHeader((LineInput)((HttpInputStream)connection.getInputStream()).getInputStream());
         return request;
     }
     

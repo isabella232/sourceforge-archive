@@ -62,7 +62,6 @@ public class HttpOutputStream
     private BufferedOutputStream _bufferedOut;
     private ChunkingOutputStream _chunkingOut;
     
-    private boolean _committed;
     private boolean _written;
     
     private ArrayList _observers;
@@ -99,7 +98,6 @@ public class HttpOutputStream
                             int headerReserve)
     {
         super(outputStream);
-        _committed=false;
         _written=false;
         _bufferSize=bufferSize;
         _headerReserve=headerReserve;
@@ -157,15 +155,6 @@ public class HttpOutputStream
     {
         return _written;
     }
-    
-    /* ------------------------------------------------------------ */
-    /** Has any data been sent from this stream.
-     * @return True if buffer has been flushed to destination.
-     */
-    public boolean isCommitted()
-    {
-        return _committed;
-    }
         
     /* ------------------------------------------------------------ */
     /** Get the output buffer capacity.
@@ -194,8 +183,6 @@ public class HttpOutputStream
         
         if (_bufferedOut!=null && _bufferedOut.size()>0)
             throw new IllegalStateException("Buffer is not empty");
-        if (_committed)
-            throw new IllegalStateException("Output committed");
 
         try
         {
@@ -224,9 +211,6 @@ public class HttpOutputStream
     public void resetBuffer()
         throws IllegalStateException
     {
-        if (_committed)
-            throw new IllegalStateException("Output committed");
-
         // Shutdown filters without observation
         if (out!=null && out!=_headerOut)
         {
@@ -258,7 +242,6 @@ public class HttpOutputStream
         out=(OutputStream)_headerOut;
 	_bytes=0;
         _written=false;
-        _committed=false;
         try
         {
             notify(OutputObserver.__RESET_BUFFER);
@@ -358,7 +341,6 @@ public class HttpOutputStream
         if (isChunking())
             close();
         
-        _committed=false;
         _written=false;
         if (_bufferedOut!=null)
             _bufferedOut.resetStream();
@@ -401,7 +383,9 @@ public class HttpOutputStream
     public void writeHeader(HttpMessage httpMessage)
         throws IOException
     {
-        if (_bufferHeaders)
+        if (isNullOutput())
+            _nullableOut.writeHeader(httpMessage);
+        else if (_bufferHeaders)
             _bufferedOut.writeHeader(httpMessage);
         else
             _headerOut.writeHeader(httpMessage);
@@ -481,13 +465,16 @@ public class HttpOutputStream
      */
     public void close()
         throws IOException
-    {
+    {        
         // Are we already closed?
         if (out==null)
             return;
-
+        
         // Close
         try {
+            if (out==_nullableOut)
+                notify(OutputObserver.__COMMITING);
+            
             notify(OutputObserver.__CLOSING);
             if (_bufferHeaders)
                 _bufferedOut.close();

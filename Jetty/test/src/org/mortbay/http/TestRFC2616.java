@@ -454,7 +454,7 @@ public class TestRFC2616
             ByteArrayInputStream bin = new ByteArrayInputStream(rbytes);
             HttpInputStream cin = new HttpInputStream(bin);
             HttpFields header = new HttpFields();
-            header.read((LineInput)cin.getRawStream());
+            header.read((LineInput)cin.getInputStream());
             Code.debug("HEADER:\n",header);
             cin.setChunking();
             GZIPInputStream gin = new GZIPInputStream(cin);
@@ -901,26 +901,24 @@ public class TestRFC2616
         try
         {
             TestRFC2616 listener = new TestRFC2616();
-            String get;
-            String head;
-
-            // Default Host
-            get=listener.getResponses("GET /R1 HTTP/1.0\n"+
+            String get=listener.getResponses("GET /R1 HTTP/1.0\n"+
                                       "Host: localhost\n"+
                                       "\n");
-            head=listener.getResponses("HEAD /R1 HTTP/1.0\n"+
-                                       "Host: localhost\n"+
-                                       "\n");
             
             Code.debug("GET: ",get);
-            Code.debug("HEAD: ",head);
             t.checkContains(get,0,"HTTP/1.1 200","GET");
             t.checkContains(get,0,"Content-Type: text/html","GET content");
             t.checkContains(get,0,"Content-Length: ","GET length");
+            t.checkContains(get,0,"<HTML>","GET body");
+
+            
+            String head=listener.getResponses("HEAD /R1 HTTP/1.0\n"+
+                                              "Host: localhost\n"+
+                                              "\n");
+            Code.debug("HEAD: ",head);
             t.checkContains(head,0,"HTTP/1.1 200","HEAD");
             t.checkContains(head,0,"Content-Type: text/html","HEAD content");
             t.checkContains(head,0,"Content-Length: ","HEAD length");
-            t.checkContains(get,0,"<HTML>","GET body");
             t.checkEquals(head.indexOf("<HTML>"),-1,"HEAD no body");
         }
         catch(Exception e)
