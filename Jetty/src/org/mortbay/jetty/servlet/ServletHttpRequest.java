@@ -444,7 +444,7 @@ public class ServletHttpRequest
                 _sessionIdState = __SESSIONID_URL;
             }
             else if (!id.equals(_sessionId))
-                Code.warning("Mismatched session IDs");
+                Code.debug("Mismatched session IDs");
         }
         
         if (_sessionId == null)
