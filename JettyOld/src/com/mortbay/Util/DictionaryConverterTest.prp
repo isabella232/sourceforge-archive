@@ -1,0 +1,5 @@
+intTest2 = 999
+floatTest = 9.99
+stringTest = This is a field
+propTest = This is a property
+complexTest.OK = true
