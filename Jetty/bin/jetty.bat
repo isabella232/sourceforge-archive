@@ -210,7 +210,6 @@ set CP=%JETTY_HOME%\lib\javax.servlet.jar
 set CP=%CP%;%JETTY_HOME%\lib\com.mortbay.jetty.jar
 set CP=%CP%;%JETTY_HOME%\lib\com.microstar.xml.jar
 set CP=%CP%;%JETTY_HOME%\lib\cryptix-sasl-jetty.jar;%JETTY_HOME%\lib\javax-sasl.jar
-set CP=%CP%;%JETTY_HOME%\lib\log4j.jar
 if exist "%JETTY_HOME%\LIB\org.apache.jasper.jar"  set CP=%CP%;%JETTY_HOME%\lib\org.apache.jasper.jar
 if exist "%JETTY_HOME%\LIB\com.sun.net.ssl.jar"    set CP=%CP%;%JETTY_HOME%\lib\com.sun.net.ssl.jar
 if exist "%JAVA_HOME%\lib\tools.jar"               set CP=%CP%;%JAVA_HOME%\lib\tools.jar
