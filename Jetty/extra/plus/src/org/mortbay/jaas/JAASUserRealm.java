@@ -172,7 +172,10 @@ public class JAASUserRealm implements UserRealm
 
     public Principal getPrincipal(String username)
     {
-        return (Principal)userMap.get(username);
+        synchronized (this)
+        {
+            return (Principal)userMap.get(username);
+        }
     }
 
 
@@ -190,7 +193,10 @@ public class JAASUserRealm implements UserRealm
     {
         // TODO This is not correct if auth can expire! We need to
         // get the user out of the cache
-        return (userMap.get(user.getName()) != null);
+        synchronized (this)
+        {
+            return (userMap.get(user.getName()) != null);
+        }
     }
 
     
@@ -210,7 +216,11 @@ public class JAASUserRealm implements UserRealm
     {
         try
         {
-            UserInfo info = (UserInfo)userMap.get(username);
+            UserInfo info = null;
+            synchronized (this)
+            {
+                info = (UserInfo)userMap.get(username);
+            }
             
             //user has been previously authenticated, but
             //re-authentication has been requested, so flow that 
@@ -219,7 +229,10 @@ public class JAASUserRealm implements UserRealm
             //TODO: ensure cache state and "logged in status" are synchronized
             if (info != null)
             {
-                userMap.remove (username);
+                synchronized (this)
+                {
+                    userMap.remove (username);
+                }
             }
             
             
@@ -251,7 +264,10 @@ public class JAASUserRealm implements UserRealm
             userPrincipal.setSubject(loginContext.getSubject());
             userPrincipal.setRoleCheckPolicy (roleCheckPolicy);
             
-            userMap.put (username, new UserInfo (username, userPrincipal, loginContext));
+            synchronized (this)
+            {
+                userMap.put (username, new UserInfo (username, userPrincipal, loginContext));
+            }
             
             return userPrincipal;       
         }
@@ -322,14 +338,22 @@ public class JAASUserRealm implements UserRealm
                 throw new IllegalArgumentException (user + " is not a JAASUserPrincipal");
             
             String key = ((JAASUserPrincipal)user).getName();
-            UserInfo info = (UserInfo)userMap.get(key);
+            
+            UserInfo info = null;
+            synchronized (this)
+            {
+                info = (UserInfo)userMap.get(key);
+            }
             
             if (info == null)
                 log.warn ("Logout called for user="+user+" who is NOT in the authentication cache");
             else 
                 info.getLoginContext().logout();
             
-            userMap.remove (key);
+            synchronized (this)
+            {
+                userMap.remove (key);
+            }
             log.debug (user+" has been LOGGED OUT");
         }
         catch (LoginException e)
