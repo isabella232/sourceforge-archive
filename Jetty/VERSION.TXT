@@ -5,6 +5,7 @@ Jetty Versions
  + Fixed SessionManager initialization
  + Added authenticator to admin.xml
  + Fixed Session timeout NPE.
+ + Removed duplicate classes from jar
 
 Jetty-4.2.0beta0 - 13 October 2002
  + New ThreadPool implementation.
