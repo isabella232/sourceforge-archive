@@ -1,18 +1,63 @@
 <?xml version="1.0"  encoding="ISO-8859-1"?>
-<!DOCTYPE Configure SYSTEM "configure.dtd">
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure 1.0//EN" "http://jetty.mortbay.org/configure_1_1.dtd">
 
-<!-- This is a Jetty Config file to run the server with the 
-     jakarta watchdog tests, which must be downloaded separately.
-  -->
+<!--
 
-<Configure class="org.mortbay.http.HttpServer">
+Configuration file for Watchdog tests.
+
+Instructions for running Watchdog on Windows
+============================================
+
+  1. Check out latest version of Jetty (see http://sourceforge.net/cvs/?group_id=7322)
+  2. Build Jetty
+  3. Download latest binary build of Watchdog (from http://jakarta.apache.org/builds/jakarta-watchdog-4.0/nightly/)
+  4. Unzip the Watchdog into a directory, from now on referred to as %WATCHDOG_HOME%
+  5. Copy the test servlet and jsp web applications (servlet-tests.war and jsp-tests.war respectively) from
+     %WATCHDOG_HOME%/webapps to %JETTY_HOME%/webapps
+  6. Start Jetty with the watchdog configuration
+  7. Run the watchdog tests, there are three different targets in the %WATCHDOG_HOME%/build.xml file:
+       - servlet
+       - jsp
+       - jsp-xml
+     To run the tests you will need to have ant 1.3 or later.  There are also convenience targets that run
+     combinations of the above tests.  See the %WATCHDOG_HOME%/build.xml file for more details on available targets.
+     Run the tests with the following command line (assumes ant is in your path):
+       > cd %WATCHDOG_HOME%
+       > ant servlet
+
+
+Instructions for running Watchdog on Linux
+==========================================
+
+  1. Check out latest version of Jetty (see http://sourceforge.net/cvs/?group_id=7322)
+  2. Build Jetty
+  3. Download latest binary build of Watchdog (from http://jakarta.apache.org/builds/jakarta-watchdog-4.0/nightly/)
+  4. Untar the Watchdog into a directory, from now on referred to as $WATCHDOG_HOME
+  5. Copy the test servlet and jsp web applications (servlet-tests.war and jsp-tests.war respectively) from
+     $WATCHDOG_HOME/webapps to $JETTY_HOME/webapps
+  6. Start Jetty with the watchdog configuration
+  7. Run the watchdog tests, there are three different targets in the $WATCHDOG_HOME/build.xml file:
+       - servlet
+       - jsp
+       - jsp-xml
+     To run the tests you will need to have ant 1.3 or later.  There are also convenience targets that run
+     combinations of the above tests.  See the $WATCHDOG_HOME/build.xml file for more details on available targets.
+     Run the tests with the following command line (assumes ant is in your path):
+       $ cd $WATCHDOG_HOME
+       $ ant servlet
+
+-->
+
+<Configure class="org.mortbay.jetty.Server">
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.SocketListener">
-        <Set name="Port">8080</Set>
+        <Set name="Port"><SystemProperty name="jetty.port" default="8080"/></Set>
         <Set name="MinThreads">5</Set>
         <Set name="MaxThreads">255</Set>
-        <Set name="MaxIdleTimeMs">50000</Set>
+        <Set name="MaxIdleTimeMs">60000</Set>
+        <Set name="MaxReadTimeMs">60000</Set>
+        <Set name="LowResourcePersistTimeMs">5000</Set>
       </New>
     </Arg>
   </Call>
@@ -23,16 +68,20 @@
     <Arg>etc/webdefault.xml/</Arg>
   </Call>
 
-  <Set name="LogSink">
+  <Call name="addWebApplication">
+    <Arg>/jsp-tests/*</Arg>
+    <Arg>webapps/jsp-tests.war</Arg>
+    <Arg>etc/webdefault.xml/</Arg>
+  </Call>
+
+  <Set name="RequestLogSink">
     <New class="org.mortbay.util.OutputStreamLogSink">
-      <Set name="LogDir">./logs</Set>
+      <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.request.log</Arg>
       <Set name="RetainDays">90</Set>
-      <Set name="MultiDay">false</Set>
       <Set name="Append">true</Set>
+      <Set name="flushOn">false</Set>
+      <Set name="logDateFormat">dd/MMM/yyyy:HH:mm:ss ZZZ</Set>
     </New>
   </Set>
 
 </Configure>
-
-
-

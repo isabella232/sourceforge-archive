@@ -1,13 +1,13 @@
 
 Jetty 4
-=======  
+=======
 
 THIS IS A DEVELOPMENT RELEASE OF JETTY4.
 This is a work in progress to move to the 2.3 Servlet API
 
-Jetty is an Open Source HTTP Servlet Server written in 100% Java. 
-It is designed to be light weight, high performance, embeddable, 
-extensible and flexible, thus making it an ideal platform for serving  
+Jetty is an Open Source HTTP Servlet Server written in 100% Java.
+It is designed to be light weight, high performance, embeddable,
+extensible and flexible, thus making it an ideal platform for serving
 dynamic HTTP requests from any Java application.
 
 
@@ -17,13 +17,13 @@ Quick start on Unix
 run:
   export JETTY_HOME=<jetty install directory>
   export JAVA_HOME=<JRE install directory>
-  $JETTY_HOME/bin/jetty.sh run 
+  $JETTY_HOME/bin/jetty.sh run
 
 Browse to:
   http://localhost:8080
 
 
-If this doesn't work - you can try the ant quick start below or you will need to 
+If this doesn't work - you can try the ant quick start below or you will need to
 read some more and setup the environment.
 
 
@@ -31,7 +31,7 @@ read some more and setup the environment.
 Quick start on Windows
 ======================
 Due to problems with the servlet security model (see below). It is vital
-that windows users use the exact case for drive letters, URLs and filenames. 
+that windows users use the exact case for drive letters, URLs and filenames.
 
 run:
   set JETTY_HOME=<jetty install directory>
@@ -42,12 +42,12 @@ Browse to:
   http://localhost:8080
 
 If you still have problems:
-  - try installing in a path with no spaces in the directory name. 
+  - try installing in a path with no spaces in the directory name.
   - Check that the case of JETTY_HOME is exactly the same as reported by
     your system. Also read the section on alias checking in the web application
     security section below.
 
-If this doesn't work - you can try the ant quick start below or you will need to 
+If this doesn't work - you can try the ant quick start below or you will need to
 read some more and setup the environment.
 
 
@@ -71,7 +71,7 @@ The default jetty.xml configuration can be started with:
 
 Environment
 ===========
-Development has been done in JDK1.2 and the following CLASSPATH is required 
+Development has been done in JDK1.2 and the following CLASSPATH is required
 (or the non unix equivalent):
 
   CLASSPATH=\
@@ -118,8 +118,8 @@ the demo with:
 
   bin/jetty.sh run demo
 
-This script finds the JVM and sets the CLASSPATH, so it can be used as 
-an /etc/init.d script and also looks for xml config files in 
+This script finds the JVM and sets the CLASSPATH, so it can be used as
+an /etc/init.d script and also looks for xml config files in
 /etc/jetty (among other places).
 
 
@@ -147,7 +147,7 @@ Jetty comes with the JAXP 1.1 reference XML parser, which is cromson from
 apache. Use the org.xml.sax.parser property to specify an alternative SAX parser.
 
 The DTDs used by jetty are resolved as resources from the system classpath,
-thus they are stored in org.mortbay.http/web.dtd and org.mortbay.util.configure.dtd 
+thus they are stored in org.mortbay.http/web.dtd and org.mortbay.util.configure.dtd
 within the source tree and jar file.  Copies are also placed in etc for reference.
 
 There is also a Jetty extension configuration mechanism for web applications.
@@ -162,7 +162,7 @@ An Ant build file is included in build.xml.  This file is configured to
 use the jikes compiler from IBM. To use the normal JDK compiler comment
 out the jikes line in build.xml.  Ant is available from
 
-    http://jakarta.apache.org/ant/index.html  
+    http://jakarta.apache.org/ant/index.html
 
 You can run ant for the following targets:
 
@@ -175,7 +175,7 @@ You can run ant for the following targets:
 
 Test Harnesses
 ==============
-The class org.mortbay.http.TestRFC2616 is a test harness linked 
+The class org.mortbay.http.TestRFC2616 is a test harness linked
 to the RFC document.  This and the other test harnesses can be run with
 
   java org.mortbay.util.TestHarness
@@ -185,6 +185,12 @@ Note that the test harnesses are not in the jar file, so you will need
 to build all the source and run with the source hierarchy in the CLASSPATH.
 
 
+Running Watchdog Tests
+======================
+See the etc/watchdog.xml configuration file comments for instructions on how
+to run the Jakarta Watchdog 4.0 tests.
+
+
 Distribution
 ============
 Jetty distributions and information is available from:
@@ -192,7 +198,7 @@ Jetty distributions and information is available from:
    http://jetty.mortbay.org
    http://sourceforge.net/project/jetty
    ftp://jetty.mortbay.org/pub
-   
+
 
 
 How to Contribute
@@ -224,7 +230,7 @@ If a context has it's own classpath set, then a ContextLoader
 is created with tha classpath set.  A ContextLoader is a specialized
 URLClassLoader so any Resource/URL/File combination may be used to
 specify a path.   This classloader has the ServletHandlers classloader
-set as its parent, so normal Java2 loader hierarchy semantics are 
+set as its parent, so normal Java2 loader hierarchy semantics are
 followed.
 
 Note that if the context is a packed WAR file, then the elements
@@ -236,10 +242,10 @@ JSP Classpaths
 The context classloader is passed to the Jasper JspServlet and
 is used as the parent loader of the JspLoader.
 A file classpath is also passed for used by the JSP compiler. Note
-that if the context is a packed WAR file, then there is no 
+that if the context is a packed WAR file, then there is no
 reasonable file based classpath that can be passed to the compiler.
 
-If this proves to be a problem for you, then unpack your WAR files 
+If this proves to be a problem for you, then unpack your WAR files
 (which is what most other containers do by default anyway).
 
 
@@ -247,7 +253,7 @@ If this proves to be a problem for you, then unpack your WAR files
 Unimplemented WebApplication features
 -------------------------------------
 The following WebApplication tags are not implemented:
- 
+
   <distributable>
   <resource-ref>
   <env-entry>
@@ -261,11 +267,11 @@ The unix start/stop script bin/jetty.sh which can run with:
    bin/jetty.sh start [ jetty.xml ... ]
 
 This script is controlled by the following environment variables:
- 
+
  JAVA       - executable JVM
  JAVA_HOME  - Home of java, specifically $JAVA_HOME/lib/tools.jar
  JETTY_HOME - Home of jetty
- JETTY_CONF - Location of the script's configuration file, set to 
+ JETTY_CONF - Location of the script's configuration file, set to
               /etc/jetty.conf, or $JETTY_HOME/etc/jetty.conf by
               default.
  JETTY_RUN  - Directory for jetty pid file
@@ -286,38 +292,38 @@ not use /etc/jetty.conf. This is useful for running single servers while
 testing.
 
 Note: if you don't setup the /etc/jetty.conf file, then running
-"jetty.sh start" without a config specified may start multiple 
+"jetty.sh start" without a config specified may start multiple
 servers (demo, jetty, watchdog) on the same port - causing errors.
 
 Other jetty.sh actions are:
    start -- To start the server.
-   stop  -- Stops a server started with "start". 
+   stop  -- Stops a server started with "start".
    run   -- Runs Jetty in foreground mode.
    check -- Does nothing. Useful checking the configuration.
 
 
-    
+
 Unix SystemV Init
 -----------------
-Jetty includes a SystemV Init script that has been tested under 
-RedHat Linux 6.2. This script allows Jetty to be automatically started 
+Jetty includes a SystemV Init script that has been tested under
+RedHat Linux 6.2. This script allows Jetty to be automatically started
 and stoped when the operating system is booted or shutdown.
 
 To use the script, follow these steps:
 
   - Login as root.
-  
+
   - Make the script executable:
 
        chmod u+x $JETTY_HOME/bin/jetty.sysvinit
-        
+
   - Place a  symbolic link to the script in the /etc/rc.d/init.d directory:
 
        ln -s $JETTY_HOME/bin/jetty.sysvinit /etc/rc.d/init.d/jetty
 
     you can also copy the script there. Just remember to make it executable.
 
-  - Edit the script and make sure that the JETTY_HOME and JAVA_HOME 
+  - Edit the script and make sure that the JETTY_HOME and JAVA_HOME
     variables are set properly.
 
   - Enable the script:
@@ -335,9 +341,9 @@ execute:
 Check /var/log/messages to see if everything worked fine.
 
 The Jetty SystemV Init script uses the $JETTY_HOME/bin/jetty.sh shell script
-to launch Jetty. Read the shell script's documentation above, or the one in 
+to launch Jetty. Read the shell script's documentation above, or the one in
 the script's initial comments to learn about available configuration options.
-        
+
 
 Win32 Service
 -------------
@@ -348,7 +354,7 @@ a win32 service.
 Web Application Security
 ------------------------
 Jetty has made a few extensions to the security mechanism "described" in the servlet
-specifiction.  The default security model is that all access is allowed unless a 
+specifiction.  The default security model is that all access is allowed unless a
 particular security constraint prevents access. This is vulnerable to alias attacks
 where alternate case or names can be used to get to a resource.
 
@@ -364,8 +370,8 @@ Jetty makes the following interpretations:
 
  + A security constraint with an auth constraint of NONE grants access.
 
- + On platforms without the / file separator or when the system parameter 
-   org.mortbay.util.FileResource.checkAliases is true, then the FileResouce class 
+ + On platforms without the / file separator or when the system parameter
+   org.mortbay.util.FileResource.checkAliases is true, then the FileResouce class
    compares the absolutePath and canonicalPath and treats the resource as not found
    if they do not match.  THIS means that win32 platforms need to exactly match
    the case of drive letters and filenames.
@@ -373,8 +379,8 @@ Jetty makes the following interpretations:
  + Dynamic servlets by default, can only be loaded from the context classpath.
    Use ServletHandler.setServeDynamicSystemServlets to control this behaivour.
 
-It is strongly recommended that secure WebApplications take following 
-approach.  All access should be denied by default with 
+It is strongly recommended that secure WebApplications take following
+approach.  All access should be denied by default with
 
   <security-constraint>
     <web-resource-collection>
@@ -415,7 +421,7 @@ JMX Management
 --------------
 Jetty is instrumented with an optional JMX managment layer.
 This is contained in the Jetty3Extra release
-  
+
 
 SASL Authentication
 -------------------
@@ -433,7 +439,7 @@ not force chunking and the ResourceHandler to not accept ranges:
   ...
   <Set name="ChunkingForced" type="boolean">false</Set>
   ...
-   
+
   <Call name="addWebApplication">
       ...
       <Call name="getResourceHandler">
@@ -455,7 +461,7 @@ but then there has been specification bloat as well.  This jar could be
 trimmed significantly if all HTTP/1.1 features are not used (eg Ranges or
 security).
 
-The minimal server can be run from the command line with 
+The minimal server can be run from the command line with
 
  java -cp org.mortbay.http.jar org.mortbay.http.HttpServer
 
