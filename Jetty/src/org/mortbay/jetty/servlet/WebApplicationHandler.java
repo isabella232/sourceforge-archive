@@ -112,9 +112,15 @@ public class WebApplicationHandler extends ServletHandler
     /* ------------------------------------------------------------ */
     public FilterHolder defineFilter(String name, String className)
     {
-        FilterHolder holder= new FilterHolder(this, name, className);
+        FilterHolder holder= newFilterHolder(name,className);
         addFilterHolder(holder);
         return holder;
+    }
+    
+    /* ------------------------------------------------------------ */
+    protected FilterHolder newFilterHolder(String name, String className)
+    {
+        return new FilterHolder(this, name, className);
     }
 
     /* ------------------------------------------------------------ */
