@@ -773,7 +773,7 @@ public class HttpFields
         
         if (list.size()>1)
         {    
-            Iterator iter = list.iterator();
+            java.util.Iterator iter = list.iterator();
             iter.next();
             while(iter.hasNext())
             {
@@ -1403,5 +1403,31 @@ public class HttpFields
             }
         }
     }
-}
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * return an iterator for field name:value pairs
+     * @return an HttpFields.Iterator
+     */
+
+  public Iterator iterator() {return new Iterator();}
+
+  public class
+    Entry
+  {
+    protected int _i;
+    
+    Entry(int i) {_i=i;}
+    public String getKey() {return ((Field)_fields.get(_i)).getDisplayName();}
+    public String getValue() {return ((Field)_fields.get(_i))._value;}
+  }
+
+  public class
+    Iterator
+  {
+    protected int _i=0;
+
+    public boolean hasNext() {return (_i<_fields.size());}
+    public Entry next() {return new Entry(_i++);}
+  }
+}

@@ -26,6 +26,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.mortbay.http.HttpFields.Entry;
+import org.mortbay.http.HttpFields.Iterator;
 import org.mortbay.http.HttpFields;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
@@ -92,7 +94,7 @@ public class CGI extends HttpServlet
             Code.warning("CGI: CGI bin is not a directory - "+dir);
             throw new ServletException();
         }
-    
+
         try
         {
             _docRoot=dir.getCanonicalFile();
@@ -111,7 +113,7 @@ public class CGI extends HttpServlet
     }
 
     /* ------------------------------------------------------------ */
-    public void service(HttpServletRequest req, HttpServletResponse res) 
+    public void service(HttpServletRequest req, HttpServletResponse res)
         throws ServletException, IOException
     {
 	String pathInContext =
@@ -123,7 +125,7 @@ public class CGI extends HttpServlet
         Code.debug("CGI: req.getPathInfo()    : "+req.getPathInfo());
         Code.debug("CGI: _docRoot             : "+_docRoot);
 
-	
+
         // pathInContext may actually comprises scriptName/pathInfo...We will
         // walk backwards up it until we find the script - the rest must
         // be the pathInfo;
@@ -131,18 +133,18 @@ public class CGI extends HttpServlet
         String both=pathInContext;
         String first=both;
         String last="";
-        
+
         File exe=new File(_docRoot, first);
 
         while ((first.endsWith("/") || !exe.exists()) && first.length()>=0)
         {
-            int index=first.lastIndexOf('/'); 
-      
+            int index=first.lastIndexOf('/');
+
             first=first.substring(0, index);
             last=both.substring(index, both.length());
             exe=new File(_docRoot, first);
         }
-        
+
         if (first.length()==0 ||
             !exe.exists() ||
             !exe.getCanonicalPath().equals(exe.getAbsolutePath()) ||
@@ -152,18 +154,18 @@ public class CGI extends HttpServlet
         {
             Code.debug("CGI: script is "+exe);
             Code.debug("CGI: pathInfo is "+last);
-            
+
             exec(exe, last, req, res);
         }
     }
 
     /* ------------------------------------------------------------ */
-    /* 
-     * @param root 
-     * @param path 
-     * @param req 
-     * @param res 
-     * @exception IOException 
+    /*
+     * @param root
+     * @param path
+     * @param req
+     * @param res
+     * @exception IOException
      */
     private void exec(File command,
                       String pathInfo,
@@ -176,7 +178,7 @@ public class CGI extends HttpServlet
         Code.debug("CGI: execing: "+path);
 
 	EnvList env = new EnvList();
-	
+
 	// these ones are from "The WWW Common Gateway Interface Version 1.1"
 	// look at : http://Web.Golux.Com/coar/cgi/draft-coar-cgi-v11-03-clean.html#6.1.1
 	env.set("AUTH_TYPE", req.getAuthType());
@@ -230,7 +232,7 @@ public class CGI extends HttpServlet
             execCmd="\""+execCmd+"\"";
         if (_cmdPrefix!=null)
             execCmd=_cmdPrefix+" "+execCmd;
-        
+
         Process p=dir==null
             ?Runtime.getRuntime().exec(execCmd, env.getEnvArray())
             :Runtime.getRuntime().exec(execCmd, env.getEnvArray(),dir);
@@ -239,7 +241,7 @@ public class CGI extends HttpServlet
         final InputStream inFromReq=req.getInputStream();
         final OutputStream outToCgi=p.getOutputStream();
         final int inputLength = req.getContentLength();
-        
+
         new Thread(new Runnable()
             {
                 public void run()
@@ -251,8 +253,8 @@ public class CGI extends HttpServlet
                     }
                     catch(IOException e){Code.ignore(e);}
                 }
-            }).start();       
-    
+            }).start();
+
 
         // hook processes output to browser's input (sync)
         // if browser closes stream, we should detect it and kill process...
@@ -277,17 +279,15 @@ public class CGI extends HttpServlet
                 int i = status.indexOf(' ');
                 if (i>0)
                     status = status.substring(0,i);
-	  
+
                 res.setStatus(Integer.parseInt(status));
             }
-      
+
             // copy remaining headers into response...
-            Enumeration headers = fields.getFieldNames();
-            while (headers.hasMoreElements())
+	    for (HttpFields.Iterator i=fields.iterator(); i.hasNext();)
             {
-                String key = headers.nextElement().toString();
-                String val = fields.get(key).toString();
-                res.setHeader(key,val);
+	      HttpFields.Entry e=i.next();
+	      res.addHeader(e.getKey(),e.getValue());
             }
 
             if (status==null && redirect != null)
@@ -299,7 +299,7 @@ public class CGI extends HttpServlet
                 else
                     res.setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
             }
-                
+
             // copy remains of input onto output...
             IO.copy(li, res.getOutputStream());
 
