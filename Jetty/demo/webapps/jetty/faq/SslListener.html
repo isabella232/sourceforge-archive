@@ -9,11 +9,13 @@ Configuring SSL can be a confusing experience of keys, certificates,
 protocols and formats, thus it helps to have a reasonable understanding
 of the basics.  The following links provide some good starting points:
 <UL>
-<LI>SSL Certificates (<A href="http://en.tldp.org/HOWTO/SSL-Certificates-HOWTO/">HOWTO</A>).
-<LI>Keytool (<A href="http://java.sun.com/j2se/1.4.1/docs/tooldocs/solaris/keytool.html">unix</A>)
-            (<A href="http://java.sun.com/j2se/1.4.1/docs/tooldocs/windows/keytool.html">windows</A>).
-<LI>Open SSL (<A href="http://www.openssl.org/docs/HOWTO/">HOWTO</A>)
-             (<A href="http://www.openssl.org/support/faq.html">FAQ</A>).
+<LI>Certificates: <a href="http://en.tldp.org/HOWTO/SSL-Certificates-HOWTO/">HOWTO</a>),
+<a href="http://mindprod.com/jgloss/certificate.html">Mindprod Java Glossary</a>.
+<LI>Keytool: <a href="http://java.sun.com/j2se/1.4.1/docs/tooldocs/solaris/keytool.html">unix</a>,
+             <a href="http://java.sun.com/j2se/1.4.1/docs/tooldocs/windows/keytool.html">windows</a>.
+<LI>Other tools: <a href="http://www.alphaworks.ibm.com/tech/keyman">IBM keyman</a>.
+<LI>Open SSL: <a href="http://www.openssl.org/docs/HOWTO/">HOWTO</a>,
+             <a href="http://www.openssl.org/support/faq.html">FAQ</a>.
 </UL>
 
 
@@ -30,7 +32,8 @@ The following steps are required to configure Jetty for SSL:<UL>
 <h3>OpenSSL Versus Keytool</h3>
 <P>
 For testing, keytool is probably the simplest way to generate the key and
-certificate you will need.
+certificate you will need. However, IBMs <a href="http://www.alphaworks.ibm.com/tech/keyman">keyman</a> is 
+also pretty good and provides a GUI rather than a command line.
 <P>
 The OpenSSL tools can also be used to generate keys and certificates or to
 convert ones that have been used with Apache or other servers.
