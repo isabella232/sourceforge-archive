@@ -53,8 +53,9 @@ public class SessionDump extends HttpServlet
 	else if (action.equals("Remove"))
 	    session.removeValue(name);
 
-	response.sendRedirect(request.getRequestURI()+
-			      "?R="+redirectCount++);
+	response.sendRedirect
+	    (response.encodeURL
+	     (request.getRequestURI()+"?R="+redirectCount++));
     }
     
 	

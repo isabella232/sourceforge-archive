@@ -7,7 +7,7 @@ SERVERS                                   : main;proxy
 
 # ------------------------------------------------------------------------
 main.CLASS				  : com.mortbay.HTTP.HttpServer
-main.STACKS				  : root;javadoc
+main.STACKS				  : root;files
 main.PROPERTY.SessionMaxInactiveInterval  : 3600
 main.PROPERTY.MinListenerThreads	  : 3
 main.PROPERTY.MaxListenerThreads	  : 20
@@ -63,18 +63,20 @@ main.root.NotFound.CLASS		  : com.mortbay.HTTP.Handler.NotFoundHandler
 main.root.Default.CLASS			  : com.mortbay.HTTP.Handler.DefaultExceptionHandler
 
 # ------------------------------------------------------------------------
-main.javadoc.HOSTS			           :
-main.javadoc.PATHS                                 : /javadoc%
-main.javadoc.HANDLERS                              : File;NotFound
-main.javadoc.File.CLASS			           : com.mortbay.HTTP.Handler.FileHandler
-main.javadoc.File.PROPERTY.AllowPut		   : False
-main.javadoc.File.PROPERTY.AllowDelete		   : False
-main.javadoc.File.PROPERTY.Indexes		   : index.html
-main.javadoc.File.PROPERTY.FILES.Javadoc.PATHS     : /javadoc
-main.javadoc.File.PROPERTY.FILES.Javadoc.DIRECTORY : ./javadoc
-main.javadoc.File.PROPERTY.FILES.Servlet.PATHS     : /javadoc/javax/servlet
-main.javadoc.File.PROPERTY.FILES.Servlet.DIRECTORY : ./src/javax/servlet/javadoc
-main.javadoc.NotFound.CLASS		  : com.mortbay.HTTP.Handler.NotFoundHandler
+main.files.HOSTS			         :
+main.files.PATHS                                 : /javadoc%;/laf%
+main.files.HANDLERS                              : File;NotFound
+main.files.File.CLASS			         : com.mortbay.HTTP.Handler.FileHandler
+main.files.File.PROPERTY.AllowPut		 : False
+main.files.File.PROPERTY.AllowDelete		 : False
+main.files.File.PROPERTY.Indexes		 : index.html
+main.files.File.PROPERTY.FILES.Laf.PATHS         : /laf
+main.files.File.PROPERTY.FILES.Laf.DIRECTORY     : ./FileBase
+main.files.File.PROPERTY.FILES.Javadoc.PATHS     : /javadoc
+main.files.File.PROPERTY.FILES.Javadoc.DIRECTORY : ./javadoc
+main.files.File.PROPERTY.FILES.Servlet.PATHS     : /javadoc/javax/servlet
+main.files.File.PROPERTY.FILES.Servlet.DIRECTORY : ./src/javax/servlet/javadoc
+main.files.NotFound.CLASS		         : com.mortbay.HTTP.Handler.NotFoundHandler
 
 # ------------------------------------------------------------------------
 proxy.CLASS				  : com.mortbay.HTTP.HttpServer

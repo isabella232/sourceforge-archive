@@ -90,6 +90,8 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     private boolean doNotClose=false;
     private int outputState=0;
     private boolean handled=false;
+    private HttpSession session=null;
+    private boolean noSession=false;
     
     /* -------------------------------------------------------------- */
     /** Construct a response
@@ -558,13 +560,16 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public java.lang.String encodeURL(java.lang.String url)
     {
-	
 	// should not encode if cookies in evidence
 	if (request.isRequestedSessionIdFromCookie())
 	    return url;
 	
 	// get session;
-	HttpSession session = request.getSession();
+	if (session==null && !noSession)
+	{
+	    session=request.getSession();
+	    noSession=(session==null);
+	}
 
 	// no session or no url
 	if (session == null || url==null)
@@ -579,8 +584,8 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	int from= url.length()-1;
 	if (from<0)
 	    return SessionContext.SessionUrlPrefix + id +
-		SessionContext.SessionUrlSuffix;
-	    
+		SessionContext.SessionUrlSuffix;	    
+	
 	int hook = url.indexOf('?');
 	if (hook>=0 && hook<from)
 	    from=hook;
@@ -602,7 +607,8 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 		SessionContext.SessionUrlPrefix + id +
 		SessionContext.SessionUrlSuffix + 
 		url.substring(slash+1); 
-	} 
+	}
+	
 	
 	// Must be a partial url...
 	return url;
@@ -660,6 +666,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	out=null;
 	writer=null;
 	cookies=null;
+	session=null;
 	if (filters!=null)
 	{
 	    filters.removeAllElements();

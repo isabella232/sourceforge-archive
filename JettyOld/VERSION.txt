@@ -1,12 +1,14 @@
 Release 2.3.Beta3 - 22 June 1999
-  + Reimplemented ThreadedServer to improve and balance performance.
+  + Re-implemented ThreadedServer to improve and balance performance.
   + Added file cache to FileHandler
-  + Implemented effecient version of 
+  + Implemented efficient version of 
     ServletContext.getResourceAsStream() that does not open a 
     new socket connection (as does getResource()).
   + LookAndFeelServlet uses getResourceAsStream to get the file
     to wrap. This allows it to benefit from any caching done and
     to wrap arbitrary content (not just files).
+  + Restructure demo so that LookAndFeel content comes from simple
+    handler stack.
   + Fixed file and socket leaks in Include and Embed tags.
   + Ran dos2unix on all text files
   + Applied contributed patch of spelling and typo corrections

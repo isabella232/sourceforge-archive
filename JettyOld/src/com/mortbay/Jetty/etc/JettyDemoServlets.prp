@@ -42,7 +42,7 @@ SERVLET.Upload.CLASS		    : com.mortbay.Jetty.UploadServlet
 
 SERVLET.Laf.CLASS		    : com.mortbay.Servlets.LookAndFeelServlet
 SERVLET.Laf.PATHS		    : /Jetty/Demo/;/Jetty/Info/;/Jetty/Config/;/Jetty/Program/
-SERVLET.Laf.PROPERTY.ResourceBase   : /FileBase
+SERVLET.Laf.PROPERTY.ResourceBase   : /laf
 
 SERVLET.Index.PATHS		    : /Jetty|;/Jetty/Info|;/Jetty/Demo|;/Jetty/Program|;/Jetty/Config|
 SERVLET.Index.CLASS		    : com.mortbay.Jetty.DemoIndex

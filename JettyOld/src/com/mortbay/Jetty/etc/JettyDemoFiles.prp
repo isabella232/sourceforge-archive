@@ -1,8 +1,8 @@
 AllowPut		 : False
 AllowDelete		 : False
 Indexes			 : index.html;index.htm
-MaxCachedFiles       : 100
-MaxCachedFileSize    : 8192
+MaxCachedFiles           : 100
+MaxCachedFileSize        : 8192
 FILES.FileBase.PATHS     : /;/FileBase%
 FILES.FileBase.DIRECTORY : ./FileBase
 FILES.jsp.PATHS          : /JSP/

@@ -271,13 +271,17 @@ abstract public class ThreadedServer
 	_running=true;
 	_threadSet=new Hashtable(_maxThreads+_maxThreads/2+13);
 	for (int i=0;i<_minThreads;i++)
-	{
-	    Thread thread=new Thread( this, _name+"-"+(_threadId++));
-	    _threadSet.put(thread,thread);
-	    thread.start();
-	}
+	    newThread();
     }
-  
+
+    /* ------------------------------------------------------------------- */
+    private synchronized void newThread()
+    {
+	Thread thread=new Thread( this, _name+"-"+(_threadId++));
+	_threadSet.put(thread,thread);
+	thread.start();
+    }
+    
     /* ------------------------------------------------------------------- */
     final synchronized public void stop() 
     {
@@ -380,6 +384,8 @@ abstract public class ThreadedServer
 		catch ( IOException e )
 		{
 		    Code.warning(e);
+		    newThread();
+		    break;
 		}
 		finally
 		{
@@ -390,10 +396,7 @@ abstract public class ThreadedServer
 			    _threadSet.size()<_maxThreads &&
 			    _running)
 			{
-			    Thread newThread=
-				new Thread( this, _name+"-"+(_threadId++));
-			    _threadSet.put(newThread,newThread);
-			    newThread.start();
+			    newThread();
 			}
 		    }
 		}

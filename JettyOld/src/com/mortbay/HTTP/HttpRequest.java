@@ -1058,7 +1058,7 @@ public class HttpRequest extends HttpHeader
     /* ------------------------------------------------------------ */
     public HttpSession getSession()
     {
-	return getSession(true);
+	return getSession(false);
     }
     
     /* -------------------------------------------------------------- */
