@@ -6,7 +6,7 @@ BODY
 
 P, BODY, TD, OL, UL, MENU, BLOCKQUOTE, DIV
 {
-        font-size: normal;
+        font-size: small;
         color: #000000;
 }
 
