@@ -12,6 +12,7 @@ import com.mortbay.HTTP.HttpMessage;
 import com.mortbay.HTTP.HttpRequest;
 import com.mortbay.HTTP.HttpResponse;
 import com.mortbay.HTTP.PathMap;
+import com.mortbay.Util.UrlEncoded;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.Log;
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class ForwardHandler extends NullHandler
 {
     PathMap _forward = new PathMap();
     String _root;
-
+    boolean _handleQueries = false;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -66,6 +67,16 @@ public class ForwardHandler extends NullHandler
     }
     
     /* ------------------------------------------------------------ */
+    /** Set the Handler up to cope with forwards to paths that contain query
+     * elements (e.g. "/blah"->"/foo?a=b").
+     * @param b 
+     */
+    public void setHandleQueries(boolean b)
+    {
+        _handleQueries = b;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** 
      * @param pathInContext 
      * @param request 
@@ -79,6 +90,7 @@ public class ForwardHandler extends NullHandler
         throws HttpException, IOException
     {
         String newPath=null;
+        String query=null;
         if (_root!=null && "/".equals(pathInContext))
             newPath=_root;
         else
@@ -86,8 +98,19 @@ public class ForwardHandler extends NullHandler
             Map.Entry entry = _forward.getMatch(pathInContext);
             if (entry!=null)
             {
+                String match = (String)entry.getValue();
+                if (_handleQueries)
+                {
+                    int hook = match.indexOf('?');
+                    if (hook != -1){
+                        query = match.substring(hook+1);
+                        match = match.substring(0, hook);
+                    }
+                }
                 String info=PathMap.pathInfo((String)entry.getKey(),pathInContext);
-                newPath=(String)entry.getValue()+(info==null?"":info);
+                Code.debug("Forward: match:\"", match, "\" info:",
+                           info, "\" query:", query);
+                newPath=match+(info==null?"":info);
             }
         }
         
@@ -101,6 +124,10 @@ public class ForwardHandler extends NullHandler
                 request.setPath(newPath);
             else
                 request.setPath(getHandlerContext().getContextPath()+newPath);
+            if (_handleQueries && query != null){
+                // add forwarded to query string to parameters
+                UrlEncoded.decodeTo(query, request.getParameters());
+            }
             request.setState(last);
             getHandlerContext().getHttpServer().service(request,response);
             return;
