@@ -25,26 +25,25 @@
   <!-- =============================================================== -->
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- UNCOMMENT TO CONFIGURE OutputStreamLogSink                    
+  <!-- UNCOMMENT TO CONFIGURE OutputStreamLogSink   -->                  
   <Call name="instance" class="org.mortbay.util.Log">
     <Call name="disableLog"/>
     <Call name="add">
       <Arg>
         <New class="org.mortbay.util.OutputStreamLogSink">  
-          <Arg><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.jetty.log</Arg>
+          <Set name="filename"><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.jetty.log</Set>
           <Set name="retainDays">90</Set>
           <Set name="append">true</Set>
-          <Set name="logLabels">false</Set>
-          <Set name="logStackSize">false</Set>
+          <Set name="logLabels">true</Set>
+          <Set name="logStackSize">true</Set>
           <Set name="logStackTrace">false</Set>
-          <Set name="logOneLine">true</Set>
+          <Set name="logOneLine">false</Set>
           <Set name="logTimeZone">GMT</Set>
           <Call name="start"/>
         </New>
       </Arg>
     </Call>
   </Call>
-  -->
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- UNCOMMENT TO CONFIGURE Log4jSink (in contrib directory)

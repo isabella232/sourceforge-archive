@@ -302,6 +302,9 @@ public class OutputStreamLogSink
             ((_filename==null && filename!=null)||
              (_filename!=null && !_filename.equals(filename)));
         _filename=filename;
+
+        if (!isStarted() && _filename!=null)
+            _out=null;
     }
 
     /* ------------------------------------------------------------ */
