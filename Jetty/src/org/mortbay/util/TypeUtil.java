@@ -112,5 +112,4 @@ public class TypeUtil
         }
         return buf.toString();
     }
-    
 }

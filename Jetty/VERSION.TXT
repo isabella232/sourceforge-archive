@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-4.1.0 - 21 September 2002
+Jetty-4.1.0 - 22 September 2002
  + Fixed CGI+windows security hole.
  + Fixed AJP13 POST handling.
  + NCSARequest log buffered default
@@ -13,6 +13,7 @@ Jetty-4.1.0 - 21 September 2002
  + ClientCertAuthenticator protected from null subjectDN
  + Added LimitedNCSARequestLog
  + Use javac -target 1.2 for normal classes
+ + AJP13 fixed for mod_jk sesson affinity
 
 Jetty-4.1.0RC6 - 14 September 2002
  + Don't URL encode FileURLS.

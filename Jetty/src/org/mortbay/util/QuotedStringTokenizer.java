@@ -256,53 +256,54 @@ public class QuotedStringTokenizer
             return null;
         if (s.length()==0)
             return "\"\"";
-        StringBuffer b=new StringBuffer(s.length()+8);
-        boolean quote=false;
-        synchronized(b)
+
+        
+        for (int i=0;i<s.length();i++)
         {
-            b.append("\"");
+            char c = s.charAt(i);
+            if (c=='"' ||
+                c=='\\' ||
+                c=='\'' ||
+                delim.indexOf(c)>=0)
+            {
+                StringBuffer b=new StringBuffer(s.length()+8);
+                quote(b,s);
+                return b.toString();
+            }
+        }
+        
+        return s;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Quote a string into a StringBuffer.
+     * @param buf The StringBuffer
+     * @param s The String to quote.
+     */
+    public static void quote(StringBuffer buf, String s)
+    {
+        synchronized(buf)
+        {
+            buf.append('"');
             for (int i=0;i<s.length();i++)
             {
                 char c = s.charAt(i);
                 if (c=='"')
                 {   
-                      b.append("\\\"");
-                      quote=true;
-                      continue;
+                    buf.append("\\\"");
+                    continue;
                 }
                 if (c=='\\')
                 {   
-                      b.append("\\\\");
-                      quote=true;
-                      continue;
-                }
-                if (c=='\'')
-                {   
-                      b.append('\'');
-                      quote=true;
-                      continue;
-                }
-                else if (delim.indexOf(c)>=0)
-                {
-                    quote=true;
-                    b.append(c);
+                    buf.append("\\\\");
                     continue;
                 }
-                else
-                {
-                    b.append(c);
-                    continue;
-                }
+                buf.append(c);
+                continue;
             }
-            if (quote)
-            {
-                b.append("\"");
-                return b.toString();
-            }
+            buf.append('"');
         }
-        return s;
     }
-
 
     /* ------------------------------------------------------------ */
     /** Unquote a string.

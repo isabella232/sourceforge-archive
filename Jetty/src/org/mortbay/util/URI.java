@@ -462,7 +462,7 @@ public class URI
     }
 
     /* ------------------------------------------------------------ */
-    /* Encode a URI path.
+    /** Encode a URI path.
      * This is the same encoding offered by URLEncoder, except that
      * the '/' character is not encoded.
      * @param path The path the encode
@@ -478,7 +478,7 @@ public class URI
     }
         
     /* ------------------------------------------------------------ */
-    /* Encode a URI path.
+    /** Encode a URI path.
      * @param path The path the encode
      * @param buf StringBuffer to encode path into (or null)
      * @return The StringBuffer or null if no substitutions required.
@@ -532,6 +532,51 @@ public class URI
                       buf.append(c);
                       continue;
                 }
+            }
+        }
+
+        return buf;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Encode a URI path.
+     * @param path The path the encode
+     * @param buf StringBuffer to encode path into (or null)
+     * @param encode String of characters to encode.
+     * @return The StringBuffer or null if no substitutions required.
+     */
+    public static StringBuffer encodeString(StringBuffer buf,
+                                            String path,
+                                            String encode)
+    {
+        if (buf==null)
+        {
+        loop:
+            for (int i=0;i<path.length();i++)
+            {
+                char c=path.charAt(i);
+                if (encode.indexOf(c)>=0)
+                {    
+                    buf=new StringBuffer(path.length()<<1);
+                    break loop;
+                }
+            }
+            if (buf==null)
+                return null;
+        }
+        
+        synchronized(buf)
+        {
+            for (int i=0;i<path.length();i++)
+            {
+                char c=path.charAt(i);
+                if (encode.indexOf(c)>=0)
+                {
+                    buf.append('%');
+                    StringUtil.append(buf,(byte)(0xff&c),16);
+                }
+                else
+                    buf.append(c);
             }
         }
 

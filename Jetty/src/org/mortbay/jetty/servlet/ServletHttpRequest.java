@@ -532,6 +532,8 @@ public class ServletHttpRequest
                     .getInitParameter(SessionManager.__MaxAge);
                 if (maxAge!=null)
                     cookie.setMaxAge(Integer.parseInt(maxAge));
+                else
+                    cookie.setMaxAge(-1);
                 
                 cookie.setPath(path);
                 _servletHttpResponse.getHttpResponse().addSetCookie(cookie,false);

@@ -21,7 +21,7 @@ import org.mortbay.util.LifeCycle;
 public interface SessionManager extends LifeCycle, Serializable
 {
     /* ------------------------------------------------------------ */
-    public final static String __SessionId  = "jsessionid";
+    public final static String __SessionId  = "JSESSIONID";
     public final static String __SessionUrlPrefix = ";"+__SessionId+"=";
 
     /* ------------------------------------------------------------ */
@@ -46,7 +46,7 @@ public interface SessionManager extends LifeCycle, Serializable
     /** Session Max Age.
      * If this property is set as a ServletContext InitParam, then it is
      * used as the max age for the session cookie.  If it is not set, then
-     * no max age is set.
+     * a max age of -1 is used.
      */
     public final static String __MaxAge=
         "org.mortbay.jetty.servlet.MaxAge";

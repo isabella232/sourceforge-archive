@@ -36,6 +36,7 @@ import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.SingletonList;
 import org.mortbay.util.StringMap;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.URI;
 import org.mortbay.util.UrlEncoded;
 import org.mortbay.util.LazyList;
 
@@ -299,7 +300,7 @@ public class HttpFields
                              Locale.US);
 
     public final static String __01Jan1970=
-        HttpFields.__dateSend.format(new Date(0));
+        '"'+HttpFields.__dateSend.format(new Date(0))+'"';
     
     /* ------------------------------------------------------------ */
     private final static String __dateReceiveFmt[] =
@@ -1295,7 +1296,7 @@ public class HttpFields
             buf.append(name);
             buf.append('=');
             if (value!=null && value.length()>0)
-                buf.append(UrlEncoded.encodeString(value));
+                URI.encodeString(buf,value,"\"; ");
             
             if (version>0)
             {
@@ -1304,9 +1305,8 @@ public class HttpFields
                 String comment=cookie.getComment();
                 if (comment!=null && comment.length()>0)
                 {
-                    buf.append(";Comment=\"");
-                    buf.append(comment);
-                    buf.append('"');
+                    buf.append(";Comment=");
+                    QuotedStringTokenizer.quote(buf,value);
                 }
             }
             String path=cookie.getPath();
@@ -1330,7 +1330,9 @@ public class HttpFields
                     if (maxAge==0)
                         buf.append(__01Jan1970);
                     else
-                        buf.append(HttpFields.__dateSend.format(new Date(System.currentTimeMillis()+1000L*maxAge)));
+                        QuotedStringTokenizer.quote
+                            (buf,HttpFields.__dateSend
+                             .format(new Date(System.currentTimeMillis()+1000L*maxAge)));
                 }
                 else
                 {
