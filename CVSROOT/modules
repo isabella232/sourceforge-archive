@@ -24,3 +24,7 @@
 # character to interpose another module into the current module.  This
 # can be useful for creating a module that consists of many directories
 # spread out over the entire source repository.
+
+Jetty-all -d Jetty-all Jetty JettyExtra
+Jetty3 -d Jetty Jetty
+Jetty3Extra -d JettyExtra JettyExtra
