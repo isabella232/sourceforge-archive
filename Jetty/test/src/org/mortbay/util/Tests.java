@@ -594,6 +594,7 @@ public class Tests extends junit.framework.TestCase
             {"a/.","a/"},
             {"a/..",""},
             {"a/../..",null},
+            {"/foo/../bar//","/bar/"}
         };
 
         for (int t=0;t<canonical.length;t++)

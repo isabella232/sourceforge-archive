@@ -340,6 +340,8 @@ public class Dispatcher implements RequestDispatcher
         /* ------------------------------------------------------------ */
         void setContextPath(String s)
         {
+            if (s.length()==1 && s.charAt(0)=='/')
+                s="";
             _contextPath=s;
         }
         

@@ -1,7 +1,28 @@
 Jetty Versions
 --------------
 
-Jetty-4.1.D0
+Jetty-4.1.D1 - 6 June 2002
+ + Don't chunk 30x empty responses.
+ + Fixed "" contextPaths in Dispatcher.
+ + Removed race for the starting of session scavaging
+ + Fixed /foo/../bar// bug in canonical path.
+
+Jetty-4.0.2 - 6 June 2002
+ + Fixed web.dtd references.
+ + Fixed handler/context start order.
+ + Added OptimizeIt plug
+ + Fixed /foo/../bar// bug in canonical path.
+ + Don't chunk 30x empty responses.
+ + Fixed "" contextPaths in Dispatcher.
+ + Removed race for the starting of session scavaging
+
+Jetty-3.1.8 - 6 June 2002
+ + Made SecurityConstraint.addRole() require authentication.
+ + Fixed singled threaded dynamic servlets
+ + Fixed no slash context redirection.
+ + Fixed /foo/../bar// bug in canonical path.
+
+Jetty-4.1.D0 - 5 June 2002
  + The 4.1 Series started looking for even more performance
    within the 2.3 specification.
  + Removed the HttpMessage facade mechanism
@@ -13,7 +34,6 @@ Jetty-4.1.D0
  + Fixed web.dtd references.
  + Fixed handler/context start order.
  + Added OptimizeIt plug.
-
 
 Jetty-4.0.1 - 22 May 2002
  + Fixed contextclassloader on ServletContextEvents.
