@@ -32,6 +32,8 @@ import javax.servlet.UnavailableException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.http.HttpConnection;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.UserRealm;
 import org.mortbay.util.LogSupport;
@@ -58,7 +60,7 @@ public class ServletHolder extends Holder
     private boolean _initOnStartup=false;
     private Map _roleMap;
     private String _forcedPath;
-    private String _run_as;
+    private String _runAs;
     private UserRealm _realm;
 
     
@@ -197,13 +199,13 @@ public class ServletHolder extends Holder
      */
     public void setRunAs(String role)
     {
-        _run_as=role;
+        _runAs=role;
     }
     
     /* ------------------------------------------------------------ */
     public String getRunAs()
     {
-        return _run_as;
+        return _runAs;
     }
     
     /* ------------------------------------------------------------ */
@@ -223,6 +225,8 @@ public class ServletHolder extends Holder
         }        
 
         _config=new Config();
+        if (_runAs!=null)
+            _realm=_httpHandler.getHttpContext().getRealm();
 
         if (javax.servlet.SingleThreadModel.class
             .isAssignableFrom(_class))
@@ -233,7 +237,7 @@ public class ServletHolder extends Holder
             _servlet=(Servlet)newInstance();
             try
             {
-                _servlet.init(_config);
+                initServlet(_servlet,_config);
             }
             catch(Throwable e)
             {
@@ -246,27 +250,37 @@ public class ServletHolder extends Holder
                 else
                     throw new ServletException(e);
             }            
-        }
-
-        if (_run_as!=null)
-            _realm=_httpHandler.getHttpContext().getRealm();
-        
+        }  
     }
 
     /* ------------------------------------------------------------ */
     public void stop()
     {
-        if (_servlet!=null)
-            _servlet.destroy();
-        _servlet=null;
-        
-        while (_servlets!=null && _servlets.size()>0)
+        Principal user=null;
+        try
         {
-            Servlet s = (Servlet)_servlets.pop();
-            s.destroy();
+            // Handle run as
+            if (_runAs!=null && _realm!=null)
+                user=_realm.pushRole(null,_runAs);
+                
+            if (_servlet!=null)
+                _servlet.destroy();
+            _servlet=null;
+            
+            while (_servlets!=null && _servlets.size()>0)
+            {
+                Servlet s = (Servlet)_servlets.pop();
+                s.destroy();
+            }
+            _config=null;
         }
-        _config=null;
-        super.stop();
+        finally
+        {
+            super.stop();
+            // pop run-as role
+            if (_runAs!=null && _realm!=null && user!=null)
+                _realm.popRole(user);
+        }
     }
     
 
@@ -296,7 +310,7 @@ public class ServletHolder extends Holder
                     servlet= (Servlet)newInstance();
                     if (_config==null)
                     	_config=new Config();
-                    servlet.init(_config);
+                    initServlet(servlet,_config);
                 }
                 else
                     servlet = (Servlet)_servlets.pop();
@@ -309,7 +323,7 @@ public class ServletHolder extends Holder
                 _servlet=(Servlet)newInstance();
                 if (_config==null)
                 	_config=new Config();
-                _servlet.init(_config);
+                initServlet(_servlet,_config);
             }
         
             return _servlet;
@@ -332,6 +346,26 @@ public class ServletHolder extends Holder
             log.warn(LogSupport.EXCEPTION,e);
             throw new UnavailableException(_servlet,e.toString());
         }    
+    }
+
+    /* ------------------------------------------------------------ */
+    private void initServlet(Servlet servlet, ServletConfig config) 
+    	throws ServletException
+    {
+        Principal user=null;
+        try
+        {
+            // Handle run as
+            if (_runAs!=null && _realm!=null)
+                user=_realm.pushRole(null,_runAs);
+            servlet.init(config);
+        }
+        finally
+        {
+            // pop run-as role
+            if (_runAs!=null && _realm!=null && user!=null)
+                _realm.popRole(user);
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -361,13 +395,10 @@ public class ServletHolder extends Holder
                 request.setAttribute("javax.servlet.include.servlet_path",_forcedPath);
 
             // Handle run as
-            if (_run_as!=null && _realm!=null)
+            if (_runAs!=null && _realm!=null)
             {
-                ServletHttpRequest servletHttpRequest=
-                    ServletHttpRequest.unwrap(request);
-                http_request=servletHttpRequest.getHttpRequest();
-
-                user=_realm.pushRole(http_request.getUserPrincipal(),_run_as);
+                http_request=getHttpContext().getHttpConnection().getRequest();
+                user=_realm.pushRole(http_request.getUserPrincipal(),_runAs);
                 http_request.setUserPrincipal(user);
             }
             
@@ -377,14 +408,13 @@ public class ServletHolder extends Holder
         catch(UnavailableException e)
         {
             if (_servlets!=null && servlet!=null)
-                servlet.destroy();
-            servlet=null;
+                stop();
             throw e;
         }
         finally
         {
             // pop run-as role
-            if (_run_as!=null && _realm!=null && user!=null)
+            if (_runAs!=null && _realm!=null && user!=null)
             {
                 user=_realm.popRole(user);
                 http_request.setUserPrincipal(user);

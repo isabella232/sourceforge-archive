@@ -25,6 +25,7 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpHandler;
 import org.mortbay.util.LifeCycle;
 
@@ -102,6 +103,14 @@ public class Holder
     public HttpHandler getHttpHandler()
     {
         return _httpHandler;
+    }
+
+    /* ------------------------------------------------------------ */
+    public HttpContext getHttpContext()
+    {
+        if (_httpHandler!=null)
+            return _httpHandler.getHttpContext();
+        return null;
     }
     
     /* ------------------------------------------------------------ */

@@ -14,6 +14,7 @@ Jetty-5.0.RC2
  + Default servlet may use only pathInfo for resource
  + Fixed session leak in j2ee
  + Fixed no-role security constraint combination.
+ + Fix to use runas roles during servlet init and destroy
 
 Jetty-4.2
  + integrated jetty-jboss with jboss-3.2.4
