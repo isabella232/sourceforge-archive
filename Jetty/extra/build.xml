@@ -22,6 +22,7 @@ Other targets:
   <property name="ftp"            value="${basedir}/ftp"/>
   <property name="jdk1.2"         value="${basedir}/jdk1.2"/>
   <property name="ibmjsse"        value="${basedir}/ibmjsse"/>
+  <property name="j2ee"           value="${basedir}/j2ee"/>
 
 
 
@@ -29,7 +30,7 @@ Other targets:
   <!-- all                                                                  -->
   <!-- ==================================================================== -->
   <target name="all" 
-	  depends="do.plus,do.loadbalancer,do.ftp,do.jdk1.2"
+	  depends="do.plus,do.loadbalancer,do.ftp,do.jdk1.2,do.j2ee"
 	  description="Build all extras">
   </target>
 
@@ -52,6 +53,11 @@ Other targets:
   <target name="do.ibmjsse">
     <ant antfile="${ibmjsse}/build.xml" inheritAll="false"/>
   </target>
+
+  <target name="do.j2ee">
+    <ant antfile="${j2ee}/build.xml" inheritAll="false"/>
+  </target>
+
 
 
   <!-- ==================================================================== -->
@@ -84,7 +90,7 @@ Other targets:
   <!-- ==================================================================== -->
   <!-- Tidy                                                                -->
   <!-- ==================================================================== -->
-  <target name="tidy" depends="tidy.plus,tidy.loadbalancer,tidy.ftp,tidy.jdk1.2">
+  <target name="tidy" depends="tidy.plus,tidy.loadbalancer,tidy.ftp,tidy.jdk1.2,clean.j2ee">
   </target>
 
   <target name="tidy.plus">
@@ -107,10 +113,14 @@ Other targets:
     <ant antfile="${ibmjsse}/build.xml" inheritAll="false" target="tidy"/>
   </target>
 
+  <target name="tidy.j2ee">
+    <ant antfile="${j2ee}/build.xml" inheritAll="false" target="tidy"/>
+  </target>
+
   <!-- ==================================================================== -->
   <!-- Clean                                                                -->
   <!-- ==================================================================== -->
-  <target name="clean" depends="clean.plus,clean.loadbalancer,clean.ftp,clean.jdk1.2">
+  <target name="clean" depends="clean.plus,clean.loadbalancer,clean.ftp,clean.jdk1.2,clean.j2ee">
   </target>
 
   <target name="clean.plus">
@@ -131,6 +141,10 @@ Other targets:
 
   <target name="clean.ibmjsse">
     <ant antfile="${ibmjsse}/build.xml" inheritAll="false" target="clean"/>
+  </target>
+
+  <target name="clean.j2ee">
+    <ant antfile="${j2ee}/build.xml" inheritAll="false" target="clean"/>
   </target>
 
 </project>
