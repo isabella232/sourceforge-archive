@@ -33,7 +33,7 @@ public class HashUserRealm extends HashMap
     implements UserRealm
 {
     private String _name;
-    private HashMap _roles=new HashMap(7);
+    protected HashMap _roles=new HashMap(7);
 
     /* ------------------------------------------------------------ */
     /** Constructor. 

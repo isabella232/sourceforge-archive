@@ -342,7 +342,6 @@ a win32 service.
 
 Web Application Security
 ------------------------
-
 Jetty makes the following interpretations for the configuration of security
 constraints within a web.xml file:
 
@@ -454,6 +453,14 @@ The XML to do this to a webapplication is:
 Note: initialising the SecureRandom object is a one-off time consuming
 operation which may cause the initial request to take much longer.
 
+Authentication Realms
+=====================
+The authentication mechanisms use and abstract org.mortbay.http.UserRealm 
+interface for authentication. The default implementation is a hashtable that
+is initialized from a properties file. Jetty also includes org.mortbay.http.JDBCUserRealm 
+for SQL based authentication data.  Users may simply implement their own Realms and 
+platforms such as JBoss use this mechanism to link the Jetty authentication mechanism
+to their own.
 
 XML Parsing
 -----------
