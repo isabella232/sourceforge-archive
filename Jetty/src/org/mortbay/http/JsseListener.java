@@ -76,7 +76,7 @@ public abstract class JsseListener extends SocketListener
     /** String name of key password property. */
     public static final String KEYPASSWORD_PROPERTY = "jetty.ssl.keypassword";
     
-    /** The name of the SSLSession attribute that wil contain any
+    /** The name of the SSLSession attribute that will contain any
      * cached information.
      */
     static final String CACHED_INFO_ATTR

@@ -1142,10 +1142,9 @@ public class HttpContext implements LifeCycle,
             if (_tmpDir.exists())
             {
                 Code.debug("Delete existing temp dir ",_tmpDir," for ",this);
-                try {IO.delete(_tmpDir);} catch (Exception e)
-                {
-                    Code.debug(e);
-                }
+                if (!IO.delete(_tmpDir))
+                    Code.debug("Failed to delete temp dir "+_tmpDir);
+
                 if (_tmpDir.exists())
                 {
                     String old=_tmpDir.toString();
