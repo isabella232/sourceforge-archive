@@ -272,7 +272,7 @@ public class TestRequest extends junit.framework.TestCase
         request=getRequest("GET /R1 HTTP/1.0\n"+
                 "Cookie: Client=Winston Churchill\n"+
                 "Cookie: $Version=\"1\"; Customer=\"WILE_E_COYOTE\"; $Path=\"/acme\"\n"+
-                "Cookie: $Version=1; Rodent=Howard; \n"+
+                "Cookie: $version=1; Rodent=Howard; \n"+
                 "\n");
         
         Cookie[] cookies = request.getCookies();

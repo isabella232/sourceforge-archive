@@ -1467,25 +1467,25 @@ public class HttpFields
 
             if (version>0)
             {
-                buf.append(";version=");
+                buf.append(";Version=");
                 buf.append(version);
                 String comment=cookie.getComment();
                 if (comment!=null && comment.length()>0)
                 {
-                    buf.append(";comment=");
+                    buf.append(";Comment=");
                     QuotedStringTokenizer.quote(buf,comment);
                 }
             }
             String path=cookie.getPath();
             if (path!=null && path.length()>0)
             {
-                buf.append(";path=");
+                buf.append(";Path=");
                 buf.append(path);
             }
             String domain=cookie.getDomain();
             if (domain!=null && domain.length()>0)
             {
-                buf.append(";domain=");
+                buf.append(";Domain=");
                 buf.append(domain.toLowerCase());// lowercase for IE
             }
             long maxAge = cookie.getMaxAge();
@@ -1493,7 +1493,7 @@ public class HttpFields
             {
                 if (version==0)
                 {
-                    buf.append(";expires=");
+                    buf.append(";Expires=");
                     if (maxAge==0)
                         buf.append(__01Jan1970);
                     else
@@ -1501,17 +1501,17 @@ public class HttpFields
                 }
                 else
                 {
-                    buf.append (";max-age=");
+                    buf.append (";Max-Age=");
                     buf.append (cookie.getMaxAge());
                 }
             }
             else if (version>0)
             {
-                buf.append (";discard");
+                buf.append (";Discard");
             }
             if (cookie.getSecure())
             {
-                buf.append(";secure");
+                buf.append(";Secure");
             }
             name_value_params = buf.toString();
         }
