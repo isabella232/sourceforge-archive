@@ -1,7 +1,7 @@
 // Permissions specific to Jetty
 // This is an example policy file that can be used to restrict Jetty.
 // It should be used with a command like:
-//  java -Djetty.home=/home/gregw/Jetty3 -Dwebapp=jetty -Djava.security.manager -Djava.security.policy=file:$JETTY_HOME/etc/jetty.policy com.mortbay.Jetty.Demo
+//  java -Djetty.home=$JETTY_HOME -Dwebapp=jetty -Djava.security.manager -Djava.security.policy=file:$JETTY_HOME/etc/jetty.policy com.mortbay.Jetty.Demo
 //
 grant codeBase "file:${jetty.home}/lib/-" 
 {
