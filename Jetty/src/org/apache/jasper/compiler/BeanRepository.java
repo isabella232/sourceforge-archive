@@ -84,6 +84,7 @@ public class BeanRepository {
     Vector appBeans;
     Vector requestBeans;
     Hashtable beanTypes;
+    ClassLoader loader;
     
     public BeanRepository (ClassLoader loader) {
 	sessionBeans = new Vector(11);
@@ -91,6 +92,7 @@ public class BeanRepository {
 	appBeans = new Vector(11);
 	requestBeans    = new Vector(11);
 	beanTypes    = new Hashtable ();
+        this.loader = loader;
     }
     
     public boolean checkSessionBean (String s) {
@@ -166,8 +168,7 @@ public class BeanRepository {
     throws ClassNotFoundException {
 	Class cls = null;
 	//try {
-	    cls = Thread.currentThread().getContextClassLoader().loadClass
-                (clsname) ;
+	    cls = loader.loadClass (clsname);
 	    //} catch (ClassNotFoundException ex) {
 	    //return false;
 	    //}
@@ -177,8 +178,7 @@ public class BeanRepository {
     public Class getBeanType (String bean) throws JasperException {
 	Class cls = null;
 	try {
-	    cls = Thread.currentThread().getContextClassLoader().loadClass
-                ((String)beanTypes.get(bean)) ;
+	    cls = loader.loadClass ((String)beanTypes.get(bean));
 	} catch (ClassNotFoundException ex) {
 	    throw new JasperException (ex);
 	}
@@ -213,7 +213,7 @@ public class BeanRepository {
 	throws ClassNotFoundException {
 	    Class cls = null;
 	    if (clsname != null) {
-		cls = Thread.currentThread().getContextClassLoader().loadClass (clsname);
+		cls = loader.loadClass (clsname);
 	    }
 	    return cls;
     }

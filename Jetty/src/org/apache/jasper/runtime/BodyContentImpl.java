@@ -82,7 +82,7 @@ public class BodyContentImpl extends BodyContent {
     protected int bufferSize = Constants.DEFAULT_BUFFER_SIZE;
     private int nextChar;
     static String lineSeparator = System.getProperty("line.separator");
-
+    private boolean closed = false;
 
     public BodyContentImpl (JspWriter writer) {
         super(writer);
@@ -90,11 +90,17 @@ public class BodyContentImpl extends BodyContent {
 	nextChar = 0;
     }
 
+    private void ensureOpen() throws IOException {
+	if (closed)
+	    throw new IOException("Stream closed");
+    }
+
     /**
      * Write a single character.
      *
      */
     public void write(int c) throws IOException {
+	ensureOpen();
         synchronized (lock) {
             if (nextChar >= bufferSize) {
 	        reAllocBuff (0);
@@ -141,6 +147,7 @@ public class BodyContentImpl extends BodyContent {
     public void write(char cbuf[], int off, int len) 
         throws IOException 
     {
+	ensureOpen();
         synchronized (lock) {
 
             if ((off < 0) || (off > cbuf.length) || (len < 0) ||
@@ -175,6 +182,7 @@ public class BodyContentImpl extends BodyContent {
      *
      */
     public void write(String s, int off, int len) throws IOException {
+	ensureOpen();
         synchronized (lock) {
 	    if (len >= bufferSize - nextChar)
 	        reAllocBuff(len);
@@ -202,9 +210,7 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void newLine() throws IOException {
-	synchronized (lock) {
-	    write(lineSeparator);
-	}
+	write(lineSeparator);
     }
 
     /**
@@ -244,7 +250,6 @@ public class BodyContentImpl extends BodyContent {
      * method.
      *
      * @param      i   The <code>int</code> to be printed
-     * @see        java.lang.Integer#toString(int)
      * @throws	   java.io.IOException
      */
 
@@ -260,7 +265,6 @@ public class BodyContentImpl extends BodyContent {
      * method.
      *
      * @param      l   The <code>long</code> to be printed
-     * @see        java.lang.Long#toString(long)
      * @throws	   java.io.IOException
      */
 
@@ -276,7 +280,6 @@ public class BodyContentImpl extends BodyContent {
      * method.
      *
      * @param      f   The <code>float</code> to be printed
-     * @see        java.lang.Float#toString(float)
      * @throws	   java.io.IOException
      */
 
@@ -292,7 +295,6 @@ public class BodyContentImpl extends BodyContent {
      * #write(int)}</code> method.
      *
      * @param      d   The <code>double</code> to be printed
-     * @see        java.lang.Double#toString(double)
      * @throws	   java.io.IOException
      */
 
@@ -342,7 +344,6 @@ public class BodyContentImpl extends BodyContent {
      * method.
      *
      * @param      obj   The <code>Object</code> to be printed
-     * @see        java.lang.Object#toString()
      * @throws	   java.io.IOException
      */
 
@@ -525,9 +526,8 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void close() throws IOException {
-        synchronized (lock) {
-	    cb = null;	
-	}
+	cb = null;	
+	closed = true;
     }
 
     /**

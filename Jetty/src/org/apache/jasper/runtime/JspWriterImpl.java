@@ -88,7 +88,6 @@ import org.apache.jasper.Constants;
  */
 public class JspWriterImpl extends JspWriter {
 
-    
     protected Writer out;
 
     protected ServletResponse response;
@@ -99,7 +98,8 @@ public class JspWriterImpl extends JspWriter {
     protected static int defaultCharBufferSize = Constants.DEFAULT_BUFFER_SIZE;
 
     protected boolean flushed = false;
-
+    protected boolean closed = false;
+    
     public JspWriterImpl() {
 	super( defaultCharBufferSize, true );
     }
@@ -155,7 +155,7 @@ public class JspWriterImpl extends JspWriter {
 	    ensureOpen();
 	    if (nextChar == 0)
 		return;
-            initOut();
+	    initOut();
             out.write(cb, 0, nextChar);
 	    nextChar = 0;
 	}
@@ -217,12 +217,14 @@ public class JspWriterImpl extends JspWriter {
      */
     public void close() throws IOException {
         synchronized (lock) {
-            if (response == null)
+            if (response == null || closed)
+		// multiple calls to close is OK
                 return;
             flush();
             if (out != null)
                 out.close();
             out = null;
+	    closed = true;
 	    //            cb = null;
         }
     }
@@ -236,7 +238,7 @@ public class JspWriterImpl extends JspWriter {
 
     /** check to make sure that the stream has not been closed */
     protected void ensureOpen() throws IOException {
-	if (response == null)
+	if (response == null || closed)
 	    throw new IOException("Stream closed");
     }
 
@@ -434,7 +436,6 @@ public class JspWriterImpl extends JspWriter {
      * method.
      *
      * @param      i   The <code>int</code> to be printed
-     * @see        java.lang.Integer#toString(int)
      */
     public void print(int i) throws IOException {
 	write(String.valueOf(i));
@@ -448,7 +449,6 @@ public class JspWriterImpl extends JspWriter {
      * method.
      *
      * @param      l   The <code>long</code> to be printed
-     * @see        java.lang.Long#toString(long)
      */
     public void print(long l) throws IOException {
 	write(String.valueOf(l));
@@ -462,7 +462,6 @@ public class JspWriterImpl extends JspWriter {
      * method.
      *
      * @param      f   The <code>float</code> to be printed
-     * @see        java.lang.Float#toString(float)
      */
     public void print(float f) throws IOException {
 	write(String.valueOf(f));
@@ -476,7 +475,6 @@ public class JspWriterImpl extends JspWriter {
      * #write(int)}</code> method.
      *
      * @param      d   The <code>double</code> to be printed
-     * @see        java.lang.Double#toString(double)
      */
     public void print(double d) throws IOException {
 	write(String.valueOf(d));
@@ -520,7 +518,6 @@ public class JspWriterImpl extends JspWriter {
      * method.
      *
      * @param      obj   The <code>Object</code> to be printed
-     * @see        java.lang.Object#toString()
      */
     public void print(Object obj) throws IOException {
 	write(String.valueOf(obj));

@@ -202,8 +202,11 @@ public class JspFactoryImpl extends JspFactory {
     }
 
     static class SunJspEngineInfo extends JspEngineInfo {
+
+	final static String SpecificationVersion = "1.2";
+
         public String getSpecificationVersion() {
-            return "1.1";
+            return SpecificationVersion;
         }
     }
     

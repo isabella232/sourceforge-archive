@@ -80,6 +80,7 @@ public class SunJavaCompiler implements JavaCompiler {
     String compilerPath;
     String outdir;
     OutputStream out;
+    boolean classDebugInfo=false;
 
     /**
      * Specify where the compiler can be found
@@ -124,11 +125,18 @@ public class SunJavaCompiler implements JavaCompiler {
         this.out = out;
     }
     
+    /**
+     * Set if you want debugging information in the class file 
+     */ 
+    public void setClassDebugInfo(boolean classDebugInfo) {
+        this.classDebugInfo = classDebugInfo;
+    }
+
     public boolean compile(String source) {
         Main compiler = new Main(out, "jsp->javac");
-	String[] args = null;
+        String[] args = null;
 
-	if( outdir != null ) {
+        if( outdir != null ) {
             args = new String[]
             {
                 "-encoding", encoding,
@@ -136,14 +144,20 @@ public class SunJavaCompiler implements JavaCompiler {
                 "-d", outdir,
                 source
             };
-	} else {
+        } else {
             args = new String[]
             {
                 "-encoding", encoding,
                 "-classpath", classpath,
                 source       
             };
-	}
+        }
+        if( classDebugInfo ) {
+            String[] args2 = new String[args.length + 1];
+            args2[0] = "-g";
+            System.arraycopy(args,0,args2,1,args.length);
+            args=args2;
+        }
 
         return compiler.compile(args);
     }

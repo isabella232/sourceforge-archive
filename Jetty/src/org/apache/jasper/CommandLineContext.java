@@ -164,7 +164,7 @@ public class CommandLineContext implements JspCompilationContext {
     
     /**
      * What class loader to use for loading classes while compiling
-     * this JSP? I don't think this is used right now -- akv. 
+     * this JSP?
      */
     public ClassLoader getClassLoader() {
         return loader;

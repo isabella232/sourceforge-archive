@@ -106,6 +106,11 @@ public final class EmbededServletOptions implements Options {
     public boolean sendErrorToClient = false;
 
     /**
+     * Do we want to include debugging information in the class file?
+     */
+    public boolean classDebugInfo = false;
+
+    /**
      * I want to see my generated servlets. Which directory are they
      * in?
      */
@@ -172,6 +177,13 @@ public final class EmbededServletOptions implements Options {
         return sendErrorToClient;
     }
  
+    /**
+     * Should class files be compiled with debug information?
+     */
+    public boolean getClassDebugInfo() {
+        return classDebugInfo;
+    }
+
     /**
      * Class ID for use in the plugin tag when the browser is IE. 
      */
@@ -257,6 +269,15 @@ public final class EmbededServletOptions implements Options {
             else if (senderr.equalsIgnoreCase("false"))
                 this.sendErrorToClient = false;
             else Constants.message ("jsp.warning.sendErrToClient", Logger.WARNING);
+        }
+
+        String debugInfo = config.getInitParameter("classdebuginfo");
+        if (debugInfo != null) {
+            if (debugInfo.equalsIgnoreCase("true"))
+                this.classDebugInfo  = true;
+            else if (debugInfo.equalsIgnoreCase("false"))
+                this.classDebugInfo  = false;
+            else Constants.message ("jsp.warning.classDebugInfo", Logger.WARNING);
         }
 
         String ieClassId = config.getInitParameter("ieClassId");

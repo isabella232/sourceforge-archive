@@ -422,9 +422,9 @@ public class JspServlet extends HttpServlet {
         if (value.equals("true"))
             return (true);             // ?jsp_precompile=true
         else if (value.equals("false"))
-            return (false);            // ?jsp_precompile=false
+            return (true);             // ?jsp_precompile=false
         else
-            throw new ServletException("Cannott have request parameter " +
+            throw new ServletException("Cannot have request parameter " +
                                        Constants.PRECOMPILE + " set to " +
                                        value);
 
@@ -513,6 +513,11 @@ public class JspServlet extends HttpServlet {
 	boolean isErrorPage, HttpServletRequest req, HttpServletResponse res) 
 	throws JasperException, FileNotFoundException 
     {
+	// First check if the requested JSP page exists, to avoid creating
+	// unnecessary directories and files.
+	if (context.getResourceAsStream(jspUri) == null)
+	    throw new FileNotFoundException(jspUri);
+
 	JspServletWrapper jsw=(JspServletWrapper) jsps.get(jspUri);
 	if( jsw==null ) {
 	    throw new JasperException("Can't happen - JspServletWrapper=null");

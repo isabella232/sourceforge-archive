@@ -149,6 +149,7 @@ public class Constants {
     public static final String INC_REQUEST_URI = "javax.servlet.include.request_uri";
     public static final String INC_SERVLET_PATH = "javax.servlet.include.servlet_path";
     public static final String TMP_DIR = "javax.servlet.context.tempdir";
+    public static final String FORWARD_SEEN = "javax.servlet.forward.seen";
 
     /**
      * Public Id and the Resource path (of the cached copy) 

@@ -354,13 +354,13 @@ public class JspParseEventListener implements ParseEventListener {
 	    writer.println("response.setContentType(\"" +
 			   servletContentType +
 			   ";charset=ISO-8859-1\");");
-	writer.println("pageContext = _jspxFactory.getPageContext(this, request, response,\n"
-					+ "\t\t\t"
-					+ writer.quoteString(error) + ", "
-					+ genSessionVariable + ", "
-					+ bufferSize + ", "
-					+ autoFlush
-					+ ");");
+	writer.println("pageContext = _jspxFactory.getPageContext(this, request, response,");
+	writer.println("\t\t\t"
+			+ writer.quoteString(error) + ", "
+			+ genSessionVariable + ", "
+			+ bufferSize + ", "
+			+ autoFlush
+			+ ");");
 	writer.println();
 
 	writer.println("application = pageContext.getServletContext();");
@@ -736,7 +736,10 @@ public class JspParseEventListener implements ParseEventListener {
                 for(int i = 0; i < pdhis.length; i++) {
                     PageDirectiveHandlerInfo pdhi = pdhis[i];
                     if (attr.equals(pdhi.attribute)) {
-                        String value = (String) attrs.getValue(pdhi.attribute);
+			// Retrieve the attribute keyed by index, not by name,
+			// to handle page directives, where multiple import
+			// attributes may be specified
+			String value = attrs.getValue(j);
                         pdhi.handler.handlePageDirectiveAttribute(this, value,
                                                                   start, stop);
                     }

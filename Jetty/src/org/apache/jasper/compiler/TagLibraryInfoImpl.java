@@ -468,7 +468,7 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
     TagVariableInfo createVariable(TreeNode elem) {
         String nameGiven = null;
         String nameFromAttribute = null;
-	String className = null;
+	String className = "java.lang.String";
 	boolean declare = true;
 	int scope = VariableInfo.NESTED;
         

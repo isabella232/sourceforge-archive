@@ -79,7 +79,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+import javax.servlet.http.HttpServletResponseWrapper;
 
 import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.JspFactory;
@@ -171,9 +171,10 @@ public class PageContextImpl extends PageContext {
     public void release() {
 	try {
 	    if (isIncluded) {
-		((JspWriterImpl)out).flushBuffer(); // push it into the including jspWriter
+		((JspWriterImpl)out).flushBuffer();
+			// push it into the including jspWriter
 	    } else {
-		out.flush();
+	        out.flush();
 	    }
 	} catch (IOException ex) {
 	    loghelper.log("Internal error flushing the buffer in release()");
@@ -400,6 +401,10 @@ public class PageContextImpl extends PageContext {
     public void forward(String relativeUrlPath)
         throws ServletException, IOException
     {
+	// Make sure that the response object is not the wrapper for include
+	while (response instanceof HttpServletResponseWrapper)
+	    response = ((HttpServletResponseWrapper)response).getResponse();
+
         String path = getAbsolutePathRelativeToContext(relativeUrlPath);
         String includeUri 
             = (String) request.getAttribute(Constants.INC_SERVLET_PATH);
@@ -410,6 +415,7 @@ public class PageContextImpl extends PageContext {
         } finally {
             if (includeUri != null)
                 request.setAttribute(Constants.INC_SERVLET_PATH, includeUri);
+	    request.setAttribute(Constants.FORWARD_SEEN, "true");
         }
     }
 

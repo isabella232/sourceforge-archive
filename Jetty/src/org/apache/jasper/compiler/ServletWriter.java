@@ -71,11 +71,12 @@ import java.io.IOException;
  * @author Anil K. Vijendran
  */
 public class ServletWriter {
-    public static int TAB_WIDTH = 4;
+    public static int TAB_WIDTH = 2;
     public static String SPACES = "                              ";
 
     // Current indent level:
-    int indent = 0;
+    private int indent = 0;
+    private int virtual_indent = 0;
 
     // The sink writer:
     PrintWriter writer;
@@ -110,13 +111,15 @@ public class ServletWriter {
     // -------------------- Formatting --------------------
 
     public void pushIndent() {
-	if ((indent += TAB_WIDTH) > SPACES.length())
-	    indent = SPACES.length();
+	virtual_indent += TAB_WIDTH;
+	if (virtual_indent >= 0 && virtual_indent <= SPACES.length())
+	    indent = virtual_indent;
     }
 
     public void popIndent() {
-	if ((indent -= TAB_WIDTH) <= 0 )
-	    indent = 0;
+	virtual_indent -= TAB_WIDTH;
+	if (virtual_indent >= 0 && virtual_indent <= SPACES.length())
+	    indent = virtual_indent;
     }
 
     /**

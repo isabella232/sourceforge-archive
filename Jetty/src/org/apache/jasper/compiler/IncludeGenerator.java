@@ -187,6 +187,13 @@ public class IncludeGenerator
                            JspUtil.getExpr(page, isXml) + " + _jspx_qStr, " +
                            "out, " + flush + ");");
 
+	// If there is a forward in the include chain, quit.
+	writer.println("if (\"true\".equals(request.getAttribute(\"" +
+		Constants.FORWARD_SEEN + "\")))");
+	writer.pushIndent();
+	writer.println("return;");
+	writer.popIndent();
+
 	writer.popIndent();
 	writer.println("}");
     }

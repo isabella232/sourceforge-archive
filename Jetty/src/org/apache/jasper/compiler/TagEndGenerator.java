@@ -123,13 +123,12 @@ public class TagEndGenerator
         boolean implementsTryCatchFinally = 
 	    TryCatchFinally.class.isAssignableFrom(tagHandlerClass);
 
-	writer.popIndent();
 
         if (hasBody) {
-            if (implementsIterationTag)
+            if (implementsIterationTag) {
+		writer.popIndent();
                 writer.println("} while ("+thVarName+".doAfterBody() == javax.servlet.jsp.tagext.BodyTag.EVAL_BODY_AGAIN);");
-            else
-                writer.println("} while (false);");
+	    }
         }
 
         declareVariables(writer, vi, tvi, tagData, false, true, VariableInfo.AT_BEGIN);

@@ -89,6 +89,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspWriter;
+import javax.servlet.jsp.tagext.BodyContent;
 
 import org.apache.jasper.JasperException;
 import org.apache.jasper.Constants;
@@ -803,7 +804,7 @@ public class JspRuntimeLibrary {
                                boolean flush)
         throws IOException, ServletException {
 
-        if (flush)
+        if (flush && !(out instanceof BodyContent))
             out.flush();
 
         // FIXME - It is tempting to use request.getRequestDispatcher() to
@@ -815,10 +816,10 @@ public class JspRuntimeLibrary {
 
         String resourcePath = getContextRelativePath(request, relativePath);
         RequestDispatcher rd = request.getRequestDispatcher(resourcePath);
+
         rd.include(request,
                    new ServletResponseWrapperInclude(response, out));
 
     }
-
 
 }

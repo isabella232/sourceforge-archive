@@ -264,6 +264,7 @@ public class Compiler {
         javac.setClasspath( System.getProperty("java.class.path")+ sep + classpath);
         javac.setOutputDir(ctxt.getJavacOutputDir());
         javac.setMsgOutput(out);
+        javac.setClassDebugInfo(ctxt.getOptions().getClassDebugInfo());
 
         /**
          * Execute the compiler

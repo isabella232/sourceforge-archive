@@ -290,8 +290,13 @@ public class XmlOutputter {
         append("jsp:root", rootAttrs, buff, false);
 	buff.append(sb.toString());
         buff.append("</jsp:root>");
-	InputStream is = 
-	    new ByteArrayInputStream(buff.toString().getBytes());
+        InputStream is = null;
+        try {
+            is = new ByteArrayInputStream(buff.toString().getBytes("UTF-8"));
+        }
+        catch (java.io.UnsupportedEncodingException e) {
+            // Can never happen? I assume all platforms support UTF-8
+        }
         //System.out.println("XmlOutputter: \n" + buff);
 	PageData pageData = new PageDataImpl(is);
         return pageData;

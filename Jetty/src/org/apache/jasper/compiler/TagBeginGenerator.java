@@ -68,6 +68,7 @@ import javax.servlet.jsp.tagext.TagVariableInfo;
 import javax.servlet.jsp.tagext.TagData;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.BodyTag;
+import javax.servlet.jsp.tagext.IterationTag;
 
 import org.apache.jasper.JasperException;
 import org.apache.jasper.JspCompilationContext;
@@ -347,6 +348,10 @@ public class TagBeginGenerator
         // Need to update AT_BEGIN variables here
         declareVariables(writer, vi, tvi, tagData, false, true, VariableInfo.AT_BEGIN);
 
+/* The following check is unnecssary, becuase tag handlers that do not
+ * implement BodyTag can be assumed to return EVAL_BODY_INCLUDE when
+ * doStartTag returns anything other than SKIP_BODY, without bad side-effect.
+
         // FIXME: I'm not too sure if this is the right approach. I don't like
         //        throwing English language strings into the generated servlet.
         //        Perhaps, I'll just define an inner classes as necessary for these
@@ -359,6 +364,7 @@ public class TagBeginGenerator
                            " does not implement BodyTag, it can't return BodyTag.EVAL_BODY_TAG\");");
             writer.popIndent();
         }
+*/
 
         if (hasBody) {
             writer.println("if ("+evalVar+" != javax.servlet.jsp.tagext.Tag.SKIP_BODY) {");
@@ -369,19 +375,21 @@ public class TagBeginGenerator
                 writer.pushIndent();
 
 	        writer.println("if ("+evalVar+" != javax.servlet.jsp.tagext.Tag.EVAL_BODY_INCLUDE) {");
+		// Assumes that equals EVAL_BODY_BUFFERED
 	        writer.pushIndent();
 
 	        writer.println("out = pageContext.pushBody();");
 	        writer.println(thVarName+".setBodyContent((javax.servlet.jsp.tagext.BodyContent) out);");
+	        writer.println(thVarName+".doInitBody();");
 
 	        writer.popIndent();
 	        writer.println("}");
-
-	        writer.println(thVarName+".doInitBody();");
 	    }
 
-	    writer.println("do {");
-	    writer.pushIndent();
+            if (IterationTag.class.isAssignableFrom(tc.getTagHandlerClass())) {
+	        writer.println("do {");
+	        writer.pushIndent();
+            }
         }
         // Need to declare and update NESTED variables here
         declareVariables(writer, vi, tvi, tagData, true, true, VariableInfo.NESTED);

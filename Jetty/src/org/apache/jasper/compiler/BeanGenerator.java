@@ -357,12 +357,12 @@ public class BeanGenerator extends GeneratorBase implements ServiceMethodPhase,
 			   ") java.beans.Beans.instantiate(this.getClass().getClassLoader(), "+
 			   clsname +");");
 	writer.popIndent ();
-        // Beans.instantiate throws ClassNotFoundException if the bean class is
-        // abstract.
-        writer.println ("} catch (ClassNotFoundException exc) {");
-        writer.pushIndent ();
-        writer.println (" throw new InstantiationException(exc.getMessage());");
-        writer.popIndent ();
+	// Beans.instantiate throws ClassNotFoundException if the bean class is 
+	// abstract.
+	writer.println ("} catch (ClassNotFoundException exc) {");
+	writer.pushIndent ();
+	writer.println (" throw new InstantiationException(exc.getMessage());");
+	writer.popIndent ();
 	writer.println ("} catch (Exception exc) {");
 	writer.pushIndent ();
 	writer.println (" throw new ServletException (\" Cannot create bean of class \""  +

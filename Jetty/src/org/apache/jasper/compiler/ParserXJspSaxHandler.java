@@ -253,6 +253,17 @@ class ParserXJspSaxHandler
 	// They are therefore handled both at the start and at the
 	// end.
 	try {
+	    // If the parent tag is uninterpreted, then the
+	    // characters have to be flushed, to preserve the order
+	    // of the tags and characters that may appear in a XML
+	    // fragment, such as <a>xyz<b></b></a> or
+	    // <a>some text <jsp:expression>3+4</jsp:expression></a>
+	    if ((prevNode != null) && prevNode.isUninterpretedTag() &&
+		(prevNode.getText() != null)) {
+		jspHandler.handleCharData(prevNode.start, start,
+                                                  prevNode.getText());
+		prevNode.clearText();
+	    }
 	    if (name.equals("jsp:root")) {
 		jspHandler.handleRootBegin(node.attrs);
 	    } else if (name.equals("jsp:useBean")) {
@@ -274,16 +285,6 @@ class ParserXJspSaxHandler
 		}
 		if (!isCustomTag) {
 		    // uninterpreted tag
-                    // If the parent tag is also uninterpreted, then the
-                    // characters have to be flushed, to preserve the order
-                    // of the tags and characters that may appear in a XML
-                    // fragment, such as <a>xyz<b></b></a>.
-                    if ((prevNode != null) && prevNode.isUninterpretedTag() &&
-                        (prevNode.getText() != null)) {
-                        jspHandler.handleCharData(prevNode.start, start,
-                                                  prevNode.getText());
-                        prevNode.clearText();
-                    }
 		    node.setUninterpreted(true);
 		    jspHandler.handleUninterpretedTagBegin(node.start, 
                             node.start, node.rawName, node.attrs);

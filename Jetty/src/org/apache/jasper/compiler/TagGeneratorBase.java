@@ -145,6 +145,11 @@ abstract class TagGeneratorBase extends GeneratorBase {
      * "$1", '.' with "$2", and ':' with "$3".
      */
     protected String getTagVarName(String prefix, String shortTagName) {
+        if (prefix.indexOf('-') >= 0)
+            prefix = substitute(prefix, '-', "$1");
+        if (prefix.indexOf('.') >= 0)
+            prefix = substitute(prefix, '.', "$2");
+
         if (shortTagName.indexOf('-') >= 0)
             shortTagName = substitute(shortTagName, '-', "$1");
         if (shortTagName.indexOf('.') >= 0)

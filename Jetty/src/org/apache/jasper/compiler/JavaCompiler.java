@@ -98,6 +98,11 @@ public interface JavaCompiler {
     void setMsgOutput(OutputStream out);
 
     /**
+     * Set if you want debugging information in the class file 
+     */ 
+    void setClassDebugInfo(boolean classDebugInfo);
+
+    /**
      * Execute the compiler
      * @param source - file name of the source to be compiled
      */ 

@@ -332,7 +332,13 @@ public class JspReader {
     */
 
     public boolean hasMoreInput() throws ParseException {
-	if (current.cursor >= current.stream.length) {
+	// An extra '\n' seems to be inserted when there is none at end of
+	// a file.  Not only is this useless, but it causes problems when
+	// none is expected (e.g. after response.sendRedirect() ).
+
+	if (current.cursor >= current.stream.length ||
+		((current.cursor == current.stream.length - 1) &&
+			(peekChar() == '\n'))) {
             if (singleFile) return false; 
 	    while (popFile()) {
 		if (current.cursor < current.stream.length) return true;

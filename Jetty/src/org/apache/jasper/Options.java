@@ -98,6 +98,11 @@ public interface Options {
     public boolean getSendErrorToClient();
  
     /**
+     * Should we include debug information in compiled class?
+     */
+    public boolean getClassDebugInfo();
+
+    /**
      * Class ID for use in the plugin tag when the browser is IE. 
      */
     public String getIeClassId();

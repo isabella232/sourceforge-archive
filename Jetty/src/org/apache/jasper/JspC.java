@@ -181,6 +181,11 @@ public class JspC implements Options { //, JspCompilationContext {
         return true;
     }
  
+    public boolean getClassDebugInfo() {
+        // compile with debug info
+        return false;
+    }
+
     public String getIeClassId() {
         return ieClassId;
     }
