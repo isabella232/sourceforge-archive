@@ -138,11 +138,11 @@ LPTSTR *convertArgStringToArgList(LPTSTR *lpszArgs, PDWORD pdwLen, LPTSTR lpszAr
 
     strcpy(lpszArg, lpszArgstring);
 
-    lpszToken = strtok( lpszArg, " " ); 
+    lpszToken = strtok( lpszArg, "|" ); 
     uCount = 0;
     while( lpszToken != NULL ){
         uCount++;
-        lpszToken = strtok( NULL, " ");   
+        lpszToken = strtok( NULL, "|");   
     }
 
     GlobalFree((HGLOBAL)lpszArg);
@@ -151,13 +151,13 @@ LPTSTR *convertArgStringToArgList(LPTSTR *lpszArgs, PDWORD pdwLen, LPTSTR lpszAr
     *pdwLen = uCount;
 
 
-    lpszToken = strtok(lpszArgstring," ");
+    lpszToken = strtok(lpszArgstring,"|");
     uCount = 0;
     while(lpszToken != NULL){
         lpszArgs[uCount] = (LPTSTR)GlobalAlloc(GMEM_FIXED,strlen(lpszToken)+1);
         strcpy(lpszArgs[uCount],lpszToken);
         uCount++;
-        lpszToken = strtok( NULL, " "); 
+        lpszToken = strtok( NULL, "|"); 
     }
 
 
@@ -179,7 +179,7 @@ LPTSTR convertArgListToArgString(LPTSTR lpszTarget, DWORD dwStart, DWORD dwArgc,
     for(i=dwStart; i<dwArgc; i++){
 
         if(i != dwStart){
-            strcat(lpszTarget," ");
+            strcat(lpszTarget,"|");
         }
         strcat(lpszTarget,lpszArgv[i]);
     }

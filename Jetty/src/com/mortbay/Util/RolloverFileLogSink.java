@@ -12,7 +12,6 @@
 
 package com.mortbay.Util;
 
-
 /* ------------------------------------------------------------ */
 /** Rollover File Log Sink.
  * This implementation of Log Sink writes logs to a file. Files

@@ -315,10 +315,7 @@ public class ServletHolder
     {
         if (_initParams==null)
             return null;
-        Object obj = _initParams.get(param);
-        if (obj == null)
-            return null;
-        return obj.toString();
+        return (String)_initParams.get(param);
     }
 
     /* ------------------------------------------------------------ */

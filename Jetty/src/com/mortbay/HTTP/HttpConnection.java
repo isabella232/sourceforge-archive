@@ -270,7 +270,6 @@ public class HttpConnection
                 _response.setVersion(_version);
                 _response.setField(HttpFields.__Server,Version.__VersionDetail);
                 _response.setField(HttpFields.__ServletEngine,Version.__ServletEngine);
-                _response.setField(HttpFields.__MimeVersion,"1.0");
                 _response.setCurrentTime(HttpFields.__Date);
             
                 // Handle Connection header field

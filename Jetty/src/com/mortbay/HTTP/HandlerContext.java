@@ -1100,12 +1100,24 @@ public class HandlerContext implements LifeCycle
         }
         
         // Start the handlers
-        Iterator handlers = _handlers.iterator();
-        while(handlers.hasNext())
+        Thread thread = Thread.currentThread();
+        ClassLoader lastContextLoader=thread.getContextClassLoader();
+        try
         {
-            HttpHandler handler=(HttpHandler)handlers.next();
-            if (!handler.isStarted())
-                handler.start();
+            if (_loader!=null)
+                thread.setContextClassLoader(_loader);
+            
+            Iterator handlers = _handlers.iterator();
+            while(handlers.hasNext())
+            {
+                HttpHandler handler=(HttpHandler)handlers.next();
+                if (!handler.isStarted())
+                    handler.start();
+            }
+        }
+        finally
+        {
+            thread.setContextClassLoader(lastContextLoader);
         }
     }
     
@@ -1126,15 +1138,26 @@ public class HandlerContext implements LifeCycle
         throws InterruptedException
     {
         _started=false;
-        Iterator handlers = _handlers.iterator();
-        while(handlers.hasNext())
+        Thread thread = Thread.currentThread();
+        ClassLoader lastContextLoader=thread.getContextClassLoader();
+        try
         {
-            HttpHandler handler=(HttpHandler)handlers.next();
-            if (handler.isStarted())
+            if (_loader!=null)
+                thread.setContextClassLoader(_loader);
+            Iterator handlers = _handlers.iterator();
+            while(handlers.hasNext())
             {
-                try{handler.stop();}
-                catch(Exception e){Code.warning(e);}
+                HttpHandler handler=(HttpHandler)handlers.next();
+                if (handler.isStarted())
+                {
+                    try{handler.stop();}
+                    catch(Exception e){Code.warning(e);}
+                }
             }
+        }
+        finally
+        {
+            thread.setContextClassLoader(lastContextLoader);
         }
         _loader=null;
     }
@@ -1146,14 +1169,25 @@ public class HandlerContext implements LifeCycle
     public synchronized void destroy()
     {
         _started=false;
-        Iterator handlers = _handlers.iterator();
-        while(handlers.hasNext())
+        Thread thread = Thread.currentThread();
+        ClassLoader lastContextLoader=thread.getContextClassLoader();
+        try
         {
-            HttpHandler handler=(HttpHandler)handlers.next();
+            if (_loader!=null)
+                thread.setContextClassLoader(_loader);
+            Iterator handlers = _handlers.iterator();
+            while(handlers.hasNext())
             {
-                try{handler.destroy();}
-                catch(Exception e){Code.warning(e);}
+                HttpHandler handler=(HttpHandler)handlers.next();
+                {
+                    try{handler.destroy();}
+                    catch(Exception e){Code.warning(e);}
+                }
             }
+        }
+        finally
+        {
+            thread.setContextClassLoader(lastContextLoader);
         }
         
         _httpServer=null;
