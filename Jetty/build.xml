@@ -355,6 +355,7 @@
      compress="true">
        <include name="org/mortbay/util/*" />
        <include name="org/mortbay/http/*" />
+       <include name="org/mortbay/http/handler/AbstractHttpHandler.class" />
        <include name="org/mortbay/http/handler/ResourceHandler.class" />
        <include name="org/mortbay/http/handler/DumpHandler.class" />
        <include name="org/mortbay/http/handler/NullHandler.class" />
