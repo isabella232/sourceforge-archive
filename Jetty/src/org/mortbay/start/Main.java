@@ -368,7 +368,14 @@ public class Main
                         done.put(d,d);
                         
                         boolean added=_classpath.addComponent(d);
-                        if (_debug)
+
+                        if (!added)
+                        {
+                            added=_classpath.addClasspath(expand(subject));
+                            if (_debug)
+                                System.err.println((added?"  CLASSPATH+=":"  !")+d);
+                        }
+                        else if (_debug)
                             System.err.println((added?"  CLASSPATH+=":"  !")+d);
                     }
                 }
@@ -385,11 +392,7 @@ public class Main
     public void run(String[] args)
     {    
         // set up classpath:
-
-        // prefill existing paths in classpath_dirs...
-        _classpath.addClasspath(System.getProperty("java.class.path"));
-
-            
+        
         try
         {
             InputStream cpcfg =getClass().getClassLoader()
@@ -407,9 +410,9 @@ public class Main
         System.setProperty("java.class.path",_classpath.toString());
         ClassLoader cl = _classpath.getClassLoader();
 
-        if (_debug) System.err.println("JETTY_HOME="+System.getProperty("jetty.home"));
-        if (_debug) System.err.println("TEMPDIR="+System.getProperty("java.io.tmpdir"));
-        if (_debug) System.err.println("CLASSPATH="+_classpath.toString());
+        if (_debug) System.err.println("jetty.home="+System.getProperty("jetty.home"));
+        if (_debug) System.err.println("java.io.tmpdir="+System.getProperty("java.io.tmpdir"));
+        if (_debug) System.err.println("java.class.path="+_classpath.toString());
         
 
         // Invoke main(args) using new classloader.

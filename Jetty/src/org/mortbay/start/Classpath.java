@@ -67,16 +67,18 @@ public class Classpath {
         return false;
     }
 
-    public void addClasspath(String s)
+    public boolean addClasspath(String s)
     {
+        boolean added=false;
         if (s != null)
         {
             StringTokenizer t = new StringTokenizer(s, File.pathSeparator);
             while (t.hasMoreTokens())
             {
-                addComponent(t.nextToken());
+                added|=addComponent(t.nextToken());
             }
         }
+        return added;
     }    
     
     public String toString()

@@ -51,16 +51,28 @@ For example
 
 On some systems with graphical file browsers, it may be possible to start
 jetty by double clicking on this jar file. For more details see 
-$JETTY_HOME/src/org/mortbay/start/README.txt
+
+  $JETTY_HOME/src/org/mortbay/start/README.txt
 or
-http://jetty.mortbay.org/javadoc/org/mortbay/start/Main.html
+  http://jetty.mortbay.org/javadoc/org/mortbay/start/Main.html
+
+
+If jetty is not being started from the current directory, then 
+the jetty.home property should be set:
+
+  java -Djetty.home=C:\jetty -jar start.jar <configfile> ...
 
 
 If JSPs do not work with this start method, you may want to clearly specify 
 the location of the JDK so the compiler can be accessed:
 
-  java -Djava.home=C:\j2sdk1.4.1 -jar start.jar <configfile> ....
+  java -Djava.home=C:\j2sdk1.4.1 -jar start.jar <configfile> ...
 
+
+If an extra classpaths is needed, it can be added with the jetty.class.path
+property:
+ 
+  java -Djetty.class.path=/usr/share/java -jar start.jar <configfile> ...
 
 
 Ant Quick Start
