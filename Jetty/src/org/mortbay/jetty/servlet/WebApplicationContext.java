@@ -782,7 +782,7 @@ public class WebApplicationContext
             else
             {
                 _warnings.add(element);
-                Log.event("NOTICE: Element "+element+" not handled in "+this);
+                Code.debug("Element ",element," not handled in ",this);
                 Code.debug(node);
             }
         }
