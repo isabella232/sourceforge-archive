@@ -1,9 +1,11 @@
 Jetty3 Versions
 --------------
 
+ + Some buffer optimization
+ + Separation of URL params in HttpHandler API.
  + Fixed handling of default mime types
  + Allow contextpaths without leading /
-
+ + Removed race from dynamic servlet initialization.
 
 Jetty-3.1.rc7 - 9 Aug 2001
  + Fix bug in sendRedirect for HTTP/1.1

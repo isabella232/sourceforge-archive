@@ -886,6 +886,7 @@ public class HandlerContext implements LifeCycle
             return false;
         
         String pathInContext = request.getPath();
+        
         String contextPath=null;
         if (_contextPath.length()>1)
         {
@@ -909,15 +910,24 @@ public class HandlerContext implements LifeCycle
                              ", redirect to "+buf.toString());
             response.sendError(302);
             return true;
-        }	  
+        }
+        
+        String pathParams=null;
+        int semi = pathInContext.indexOf(';');
+        if (semi>=0)
+        {
+            pathParams=pathInContext.substring(semi+1);
+            pathInContext=pathInContext.substring(0,semi);
+        }
 
-        return handle(pathInContext,request,response);
+        return handle(pathInContext,pathParams,request,response);
     }
 
     /* ------------------------------------------------------------ */
     /** Handler request.
      * Call each HttpHandler until request is handled.
-     * @param pathInContext 
+     * @param pathInContext Path in context
+     * @param pathParams Path parameters such as encoded Session ID
      * @param request 
      * @param response 
      * @return True if the request has been handled.
@@ -925,6 +935,7 @@ public class HandlerContext implements LifeCycle
      * @exception IOException 
      */
     public boolean handle(String pathInContext,
+                          String pathParams,
                           HttpRequest request,
                           HttpResponse response)
         throws HttpException, IOException
@@ -955,6 +966,7 @@ public class HandlerContext implements LifeCycle
                     Code.debug("Try handler ",handler);
                 
                 handler.handle(pathInContext,
+                               pathParams,
                                request,
                                response);
                 

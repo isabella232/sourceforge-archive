@@ -777,6 +777,7 @@ public class WebApplicationContext extends ServletHandlerContext
     private class WebInfProtect extends NullHandler
     {
         public void handle(String pathInContext,
+                           String pathParams,
                            HttpRequest request,
                            HttpResponse response)
             throws HttpException, IOException

@@ -1513,6 +1513,7 @@ public class TestRFC2616
     {
         /* ------------------------------------------------------------ */
         public void handle(String pathInContext,
+                           String pathParams,
                            HttpRequest request,
                            HttpResponse response)
             throws HttpException, IOException

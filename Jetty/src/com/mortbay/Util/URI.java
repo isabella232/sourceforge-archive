@@ -504,14 +504,13 @@ public class URI
     public static String decodePath(String path)
     {
         int len=path.length();
-        byte[] bytes=new byte[len];
-        char[] characters = path.toCharArray();
+        byte[] bytes=null;
         int n=0;
         boolean noDecode=true;
         
         for (int i=0;i<len;i++)
         {
-            char c = characters[i];
+            char c = path.charAt(i);
             if (c<0||c>0xff)
                 throw new IllegalArgumentException("Not decoded");
             
@@ -522,6 +521,19 @@ public class URI
                 noDecode=false;
                 b=(byte)(0xff&Integer.parseInt(path.substring(i+1,i+3),16));
                 i+=2;
+            }
+            else if (bytes==null)
+            {
+                n++;
+                continue;
+            }
+            
+            if (bytes==null)
+            {
+                noDecode=false;
+                bytes=new byte[len];
+                for (int j=0;j<n;j++)
+                    bytes[j]=(byte)(0xff & path.charAt(j));                
             }
             
             bytes[n++]=b;

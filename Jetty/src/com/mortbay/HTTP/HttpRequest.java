@@ -217,6 +217,18 @@ public class HttpRequest extends HttpMessage
     }
     
     /* -------------------------------------------------------------- */
+    /** Append the HTTP request line as it was received.
+     */
+    public void appendRequestLine(StringBuffer buf)
+    {
+        buf.append(_method);
+        buf.append(' ');
+        buf.append(_uri);
+        buf.append(' ');
+        buf.append(_version);
+    }
+    
+    /* -------------------------------------------------------------- */
     /** Get the HTTP method for this request.
      * Returns the method with which the request was made. The returned
      * value can be "GET", "HEAD", "POST", or an extension method. Same

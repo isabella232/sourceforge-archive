@@ -63,13 +63,13 @@ public interface HttpHandler extends LifeCycle
     
     /* ------------------------------------------------------------ */
     /** Handle a request.
-     * If the response is not sending or committed, then the request
-     * is not considered handled.
-     * @param pathInContext 
+     * @param pathInContext The context path
+     * @param pathParams Path parameters such as encoded Session ID
      * @param request The request
      * @param response The response.
      */
     public void handle(String pathInContext,
+                       String pathParams,
                        HttpRequest request,
                        HttpResponse response)
         throws HttpException, IOException;

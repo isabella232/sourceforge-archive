@@ -174,7 +174,6 @@ public class Dispatcher implements RequestDispatcher
         httpRequest.removeAttribute(__CONTEXT_PATH);
         httpRequest.removeAttribute(__QUERY_STRING);
         httpRequest.removeAttribute(__PATH_INFO);
-        httpRequest.removeAttribute(ServletHandler.__SERVLET_PATH);
         
         // merge query params
         if (_query!=null && _query.length()>0)
@@ -220,7 +219,7 @@ public class Dispatcher implements RequestDispatcher
             //httpRequest.setAttribute(ServletHandler.__SERVLET_REQUEST,request);
             //httpRequest.setAttribute(ServletHandler.__SERVLET_RESPONSE,response);
             httpRequest.setAttribute(ServletHandler.__SERVLET_HOLDER,_holder);
-            _context.getHandlerContext().handle(_path,httpRequest,httpResponse);
+            _context.getHandlerContext().handle(_path,null,httpRequest,httpResponse);
         }
     }
         

@@ -23,6 +23,7 @@ public class TestTEHandler extends NullHandler
 {
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,
+                       String pathParams,
                        HttpRequest request,
                        HttpResponse response)
         throws HttpException, IOException

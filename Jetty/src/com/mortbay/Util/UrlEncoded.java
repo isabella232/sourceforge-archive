@@ -174,18 +174,19 @@ public class UrlEncoded extends MultiMap
     
     /* -------------------------------------------------------------- */
     /** Decode String with % encoding.
+     * This method makes the assumption that the majority of calls
+     * will need no decoding.
      */
     public static String decodeString(String encoded)
     {
         int len=encoded.length();
-        byte[] bytes=new byte[len];
-        char[] characters = encoded.toCharArray();
+        byte[] bytes=null;
         int n=0;
         boolean noDecode=true;
         
         for (int i=0;i<len;i++)
         {
-            char c = characters[i];
+            char c = encoded.charAt(i);
             if (c<0||c>0xff)
                 throw new IllegalArgumentException("Not decoded");
             
@@ -193,16 +194,27 @@ public class UrlEncoded extends MultiMap
             
             if (c=='+')
             {
-                noDecode=false;
                 b=(byte)' ';
             }
             else if (c=='%' && (i+2)<len)
             {
-                noDecode=false;
                 b=(byte)(0xff&Integer.parseInt(encoded.substring(i+1,i+3),16));
                 i+=2;
             }
-            
+            else if (bytes==null)
+            {
+                n++;
+                continue;
+            }
+
+            if (bytes==null)
+            {
+                noDecode=false;
+                bytes=new byte[len];
+                for (int j=0;j<n;j++)
+                    bytes[j]=(byte)(0xff & encoded.charAt(j));                
+            }
+                
             bytes[n++]=b;
         }
 
@@ -210,7 +222,7 @@ public class UrlEncoded extends MultiMap
             return encoded;
 
         try
-        {    
+        {
             return new String(bytes,0,n,StringUtil.__ISO_8859_1);
         }
         catch(UnsupportedEncodingException e)

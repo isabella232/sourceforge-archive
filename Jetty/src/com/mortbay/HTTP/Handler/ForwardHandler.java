@@ -78,14 +78,8 @@ public class ForwardHandler extends NullHandler
     }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @param pathInContext 
-     * @param request 
-     * @param response 
-     * @exception HttpException 
-     * @exception IOException 
-     */
     public void handle(String pathInContext,
+                       String pathParams,
                        HttpRequest request,
                        HttpResponse response)
         throws HttpException, IOException

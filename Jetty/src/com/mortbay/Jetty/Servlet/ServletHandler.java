@@ -57,9 +57,7 @@ public class ServletHandler
     /* ------------------------------------------------------------ */
     public final static String __JSP_SERVLET="org.apache.jasper.servlet.JspServlet";
     public final static String __SERVLET_REQUEST="com.mortbay.J.S.Request";
-    public final static String __SERVLET_RESPONSE="com.mortbay.J.S.Response";
     public final static String __SERVLET_HOLDER="com.mortbay.J.S.Holder";
-    public final static String __SERVLET_PATH="com.mortbay.J.S.Path";
     public final static String __J_SECURITY_CHECK="j_security_check";
     public final static String __J_USERNAME="j_username";
     public final static String __J_PASSWORD="j_password";
@@ -312,7 +310,6 @@ public class ServletHandler
             httpRequest.setAttribute(ServletHandler.__SERVLET_REQUEST,servletRequest);
             ServletResponse servletResponse =
                 new ServletResponse(servletRequest,httpResponse);
-            servletRequest.setAttribute(ServletHandler.__SERVLET_RESPONSE,servletResponse);
         }
         return servletRequest;
     }
@@ -326,19 +323,13 @@ public class ServletHandler
      * @param request The request made on the path.
      * @return The path in the context, stripped of any session ID.
      */
-    public String stripSession(String pathInContext,
-                               ServletRequest request)
+    public void setSessionId(String pathParams,
+                             ServletRequest request)
     {
-        String pic = (String)request.getAttribute(ServletHandler.__SERVLET_PATH);
-        if (pic==null)
-        {
-            pic=request.setSessionId(pathInContext);
-            request.setAttribute(ServletHandler.__SERVLET_PATH,pic);
-            HttpSession session=request.getSession(false);
-            if (session!=null)
-                Context.access(session);
-        }
-        return pic;
+        request.setSessionId(pathParams);
+        HttpSession session=request.getSession(false);
+        if (session!=null)
+            Context.access(session);
     }
     
 
@@ -352,18 +343,56 @@ public class ServletHandler
      * @exception IOException 
      */
     public void handle(String pathInContext,
+                       String pathParams,
                        HttpRequest httpRequest,
                        HttpResponse httpResponse)
          throws IOException
     {
         try
         {
-            ServletRequest request = getServletRequest(httpRequest,httpResponse);
-            ServletResponse response = request.getServletResponse();
-            pathInContext=stripSession(pathInContext,request);
+            ServletRequest request=null;
+            ServletResponse response=null;
             
             // handle
-            handle(pathInContext,request,response);
+            Code.debug("Looking for servlet at ",pathInContext);
+            
+            ServletHolder holder =(ServletHolder)
+                httpRequest.getAttribute(ServletHandler.__SERVLET_HOLDER);
+            if (holder!=null)
+            {
+                request = getServletRequest(httpRequest,httpResponse);
+                response = request.getServletResponse();
+                setSessionId(pathParams,request);
+            }
+            else
+            {
+                Map.Entry entry=getHolderEntry(pathInContext);
+                if (entry!=null)
+                {
+                    request = getServletRequest(httpRequest,httpResponse);
+                    response = request.getServletResponse();
+                    setSessionId(pathParams,request);
+                    String servletPathSpec=(String)entry.getKey();
+                    holder = (ServletHolder)entry.getValue();
+                    
+                    Code.debug("Pass request to servlet at ",entry);
+                    request.setPaths(PathMap.pathMatch(servletPathSpec,
+                                                       pathInContext),
+                                     PathMap.pathInfo(servletPathSpec,
+                                                  pathInContext));
+                }
+            }
+            
+            if (holder!=null)
+            {
+                // service request
+                holder.handle(request,response);
+                response.setOutputState(0);
+                Code.debug("Handled by ",holder);
+                if (!httpResponse.isCommitted())
+                httpResponse.commit();  
+            }
+            
         }
         catch(Exception e)
         {
@@ -421,74 +450,82 @@ public class ServletHandler
         // dynamci servlet
         if (entry!=null && servletClass==null)
             return entry;
-        
+
         // If it could be a dynamic servlet
-        if (servletClass!=null && servletClass.length()>2 &&
-            (entry==null||!PathMap.match(_dynamicServletPathSpec,(String)entry.getKey())))
+        synchronized(this)
         {
-            try
+            // sychronize and try again.
+            entry =_servletMap.getMatch(pathInContext);
+            if (entry!=null && servletClass==null)
+                return entry;
+            
+            if (servletClass!=null && servletClass.length()>2 &&
+                (entry==null||!PathMap.match(_dynamicServletPathSpec,(String)entry.getKey())))
             {
-                // OK lets look for a dynamic servlet.
-                String path=pathInContext;
-                Code.debug("looking for ",servletClass," in ",
-                           getHandlerContext().getClassPath());
-                
-                // remove prefix
-                servletClass=servletClass.substring(1);
-                
-                // remove suffix
-                int slash=servletClass.indexOf('/');
-                if (slash>=0)
-                    servletClass=servletClass.substring(0,slash);            
-                if (servletClass.endsWith(".class"))
-                    servletClass=servletClass.substring(0,servletClass.length()-6);
-                
-                // work out the actual servlet path
-                if ("/".equals(_dynamicServletPathSpec))
-                    path='/'+servletClass;
-                else
-                    path=PathMap.pathMatch(_dynamicServletPathSpec,path)+'/'+servletClass;
-                
-                Code.debug("Dynamic path=",path);
-                
-                // make a holder
-                ServletHolder holder=newServletHolder(servletClass);
-                
-                // Set params
-                Map params=getDynamicInitParams();
-                if (params!=null)
-                    holder.putAll(params);
-                Object servlet=holder.getServlet();
-
-                // Check that the class was intended as a dynamic
-                // servlet
-                if (!_serveDynamicSystemServlets &&
-                    _loader!=null &&
-                    _loader!=this.getClass().getClassLoader())
+                try
                 {
-                    // This context has a specific class loader.
-                    if (servlet.getClass().getClassLoader()!=_loader)
-                    {
-                        holder.destroy();
-                        String msg = "Dynamic servlet "+
-                            servletClass+
-                            " is not in context: "+
-                            getContext().getHandlerContext().getContextPath();
-                        
-                        Code.warning(msg);
-                        throw new UnavailableException(msg);
-                    }
-                }
+                    // OK lets look for a dynamic servlet.
+                    String path=pathInContext;
+                    Code.debug("looking for ",servletClass," in ",
+                               getHandlerContext().getClassPath());
                 
-                Log.event("Dynamic load '"+servletClass+"' at "+path);
-                addHolder(path+"/*",holder);
-                addHolder(path+".class/*",holder);
+                    // remove prefix
+                    servletClass=servletClass.substring(1);
+                
+                    // remove suffix
+                    int slash=servletClass.indexOf('/');
+                    if (slash>=0)
+                        servletClass=servletClass.substring(0,slash);            
+                    if (servletClass.endsWith(".class"))
+                        servletClass=servletClass.substring(0,servletClass.length()-6);
+                
+                    // work out the actual servlet path
+                    if ("/".equals(_dynamicServletPathSpec))
+                        path='/'+servletClass;
+                    else
+                        path=PathMap.pathMatch(_dynamicServletPathSpec,path)+'/'+servletClass;
+                
+                    Code.debug("Dynamic path=",path);
+                
+                    // make a holder
+                    ServletHolder holder=newServletHolder(servletClass);
+                
+                    // Set params
+                    Map params=getDynamicInitParams();
+                    if (params!=null)
+                        holder.putAll(params);
+                    Object servlet=holder.getServlet();
 
-                entry=_servletMap.getMatch(pathInContext);
-            }
-            catch(Exception e)
-            {
-                Code.ignore(e);
+                    // Check that the class was intended as a dynamic
+                    // servlet
+                    if (!_serveDynamicSystemServlets &&
+                        _loader!=null &&
+                        _loader!=this.getClass().getClassLoader())
+                    {
+                        // This context has a specific class loader.
+                        if (servlet.getClass().getClassLoader()!=_loader)
+                        {
+                            holder.destroy();
+                            String msg = "Dynamic servlet "+
+                                servletClass+
+                                " is not in context: "+
+                                getContext().getHandlerContext().getContextPath();
+                        
+                            Code.warning(msg);
+                            throw new UnavailableException(msg);
+                        }
+                    }
+                
+                    Log.event("Dynamic load '"+servletClass+"' at "+path);
+                    addHolder(path+"/*",holder);
+                    addHolder(path+".class/*",holder);
+                    
+                    entry=_servletMap.getMatch(pathInContext);
+                }
+                catch(Exception e)
+                {
+                    Code.ignore(e);
+                }
             }
         }
         
@@ -496,51 +533,6 @@ public class ServletHandler
     }
     
 
-    /* ------------------------------------------------------------ */
-    /** 
-     * @param pathInContext 
-     * @param request 
-     * @param response 
-     * @exception IOException 
-     * @exception ServletException 
-     * @exception UnavailableException 
-     */
-    void handle(String pathInContext,
-                ServletRequest request,
-                ServletResponse response)
-        throws IOException, ServletException, UnavailableException
-    {
-        Code.debug("Looking for servlet at ",pathInContext);
-        HttpResponse httpResponse=response.getHttpResponse();
-
-        ServletHolder holder =(ServletHolder)
-            request.getAttribute(ServletHandler.__SERVLET_HOLDER);
-        if (holder==null)
-        {
-            Map.Entry entry=getHolderEntry(pathInContext);
-            if (entry!=null)
-            {
-                String servletPathSpec=(String)entry.getKey();
-                holder = (ServletHolder)entry.getValue();
-        
-                Code.debug("Pass request to servlet at ",entry);
-                request.setPaths(PathMap.pathMatch(servletPathSpec,
-                                                   pathInContext),
-                                 PathMap.pathInfo(servletPathSpec,
-                                                  pathInContext));
-            }
-        }
-
-        if (holder!=null)
-        {
-            // service request
-            holder.handle(request,response);
-            response.setOutputState(0);
-            Code.debug("Handled by ",holder);
-            if (!httpResponse.isCommitted())
-                httpResponse.commit();  
-        }
-    }
         
     /* ------------------------------------------------------------ */
     public ServletHolder newServletHolder(String servletClass)
@@ -597,6 +589,7 @@ public class ServletHandler
      */
     public boolean formAuthenticated(SecurityHandler shandler,
                                      String pathInContext,
+                                     String pathParams,
                                      HttpRequest httpRequest,
                                      HttpResponse httpResponse)
         throws IOException
@@ -605,9 +598,8 @@ public class ServletHandler
         ServletResponse response = request.getServletResponse();
 
         // Handle paths
-        pathInContext = request.setSessionId(pathInContext); 
-        request.setAttribute(ServletHandler.__SERVLET_PATH,pathInContext);
-        String uri = request.setSessionId(httpRequest.getURI().toString());
+        request.setSessionId(pathParams); 
+        String uri = pathInContext;
         
         // Setup session 
         HttpSession session=request.getSession(true);             

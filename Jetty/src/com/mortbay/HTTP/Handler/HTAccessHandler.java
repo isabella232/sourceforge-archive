@@ -41,7 +41,10 @@ public class HTAccessHandler extends NullHandler
     HashMap _htCache = new HashMap();
  
     /* ------------------------------------------------------------ */
-    public void handle(String pathInContext,HttpRequest request,HttpResponse response)
+    public void handle(String pathInContext,
+                       String pathParams,
+                       HttpRequest request,
+                       HttpResponse response)
         throws HttpException, IOException
     {
         String user = null;

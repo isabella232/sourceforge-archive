@@ -334,7 +334,7 @@ public class ServletRequest
     }
     
     /* ------------------------------------------------------------ */
-    String setSessionId(String pathInContext)
+    void setSessionId(String pathParams)
     {
         _sessionId=null;
         
@@ -355,18 +355,11 @@ public class ServletRequest
         }
             
         // check if there is a url encoded session param.
-        int semi=pathInContext.indexOf(';');
-        int prefix=pathInContext.indexOf(Context.__SessionUrlPrefix,semi);
-        if (prefix<0)
+        if (pathParams!=null)
         {
-            if (semi>=0)
-                pathInContext=pathInContext.substring(0,semi);
-        }
-        else
-        {
+            // XXX - Assumes JSESSIONID
             String id =
-                pathInContext.substring(prefix+Context.__SessionUrlPrefix.length());
-            pathInContext=pathInContext.substring(0,prefix);
+                pathParams.substring(Context.__SessionId.length()+1);
             Code.debug("Got Session ",id," from URL");
             
             try
@@ -388,9 +381,7 @@ public class ServletRequest
         }
         
         if (_sessionId == null)
-            _sessionIdState = __SESSIONID_NONE;
-        
-        return pathInContext;
+            _sessionIdState = __SESSIONID_NONE;        
     }
     
     /* ------------------------------------------------------------ */

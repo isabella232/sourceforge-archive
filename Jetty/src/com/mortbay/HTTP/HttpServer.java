@@ -793,54 +793,67 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
         }	
         return null;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Log a request and response.
      * The log is written in combined format.
      * @param request 
      * @param response 
      */
-    public synchronized void log(HttpRequest request,
-                                 HttpResponse response,
-                                 int length)
+    public void log(HttpRequest request,
+                    HttpResponse response,
+                    int length)
     {
         // Log request - XXX should be in HttpHandler
         if (_logSink!=null && request!=null && response!=null)
         {
-            String bytes = ((length>=0)?Integer.toString(length):"-");
-            String user = (String)request.getAttribute(HttpRequest.__AuthUser);
-            if (user==null)
-                user = "-";
-            
-            String referer = request.getField(HttpFields.__Referer);
-            if (referer==null)
-                referer="-";
-            else
-                referer="\""+referer+"\"";
-            
-            String agent = request.getField(HttpFields.__UserAgent);
-            if (agent==null)
-                agent="-";
-            else
-                agent="\""+agent+"\"";	    
-            
-            String log= request.getRemoteAddr() +
-                " - "+
-                user +
-                " [" +
-                _dateCache.format(System.currentTimeMillis())+
-                "] \""+
-                request.getRequestLine()+
-                "\" "+
-                response.getStatus()+
-                " " +
-                bytes +
-                " " +
-                referer +
-                " " +
-                agent;
-
-            _logSink.log(log);
+            StringBuffer buf = new StringBuffer(256);
+    
+            synchronized(buf)
+            {
+                buf.setLength(0);
+                buf.append(request.getRemoteAddr());
+                buf.append(" - ");
+                String user = (String)request.getAttribute(HttpRequest.__AuthUser);
+                buf.append((user==null)?"-":user);
+                buf.append(" [");
+                buf.append(_dateCache.format(System.currentTimeMillis()));
+                buf.append("] \"");
+                request.appendRequestLine(buf);
+                buf.append("\" ");
+                buf.append(response.getStatus());
+                if (length>=0)
+                {
+                    buf.append(' ');
+                    buf.append(length);
+                    buf.append(' ');
+                }
+                else
+                    buf.append(" - ");
+                
+                String referer = request.getField(HttpFields.__Referer);
+                if(referer==null)
+                    buf.append("- ");
+                else
+                {
+                    buf.append('"');
+                    buf.append(referer);
+                    buf.append("\" ");
+                }
+                
+                String agent = request.getField(HttpFields.__UserAgent);
+                    
+                if(agent==null)
+                    buf.append('-');
+                else
+                {
+                    buf.append('"');
+                    buf.append(agent);
+                    buf.append('"');
+                }
+                
+                _logSink.log(buf.toString());
+            }
         }
     }
 

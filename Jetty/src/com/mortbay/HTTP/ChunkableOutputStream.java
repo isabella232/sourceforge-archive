@@ -7,9 +7,11 @@ package com.mortbay.HTTP;
 
 import com.mortbay.Util.Code;
 import com.mortbay.Util.ByteBufferOutputStream;
+import com.mortbay.Util.ByteArrayISO8859Writer;
 import com.mortbay.Util.IO;
 import com.mortbay.Util.StringUtil;
 import java.io.ByteArrayOutputStream;
+import java.io.CharArrayWriter;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,8 +62,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     boolean _written;
     int _filters;
     ArrayList _observers;
-    OutputStreamWriter _rawWriter;
-    RawOutputStream _rawWriterBuffer;
+    ByteArrayISO8859Writer _rawWriter;
     boolean _nulled=false;
     int _bytes;
     
@@ -102,18 +103,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     public Writer getRawWriter()
     {
         if (_rawWriter==null)
-        {
-            try
-            {
-                _rawWriterBuffer=new RawOutputStream(1024);
-                _rawWriter=new OutputStreamWriter(_rawWriterBuffer,StringUtil.__ISO_8859_1);
-            }
-            catch(IOException e)
-            {
-                Code.warning(e);
-            }
-        }
-        
+            _rawWriter=new ByteArrayISO8859Writer(2048);
         return _rawWriter;
     }
     
@@ -294,17 +284,7 @@ public class ChunkableOutputStream extends FilterOutputStream
 
         if (_rawWriter!=null)
         {
-            try
-            {    
-                _rawWriter.flush();
-                _rawWriterBuffer.reset();
-            }
-            catch(IOException e)
-            {
-                Code.warning(e);
-                _rawWriterBuffer=null;
-                _rawWriter=null;
-            }
+            _rawWriter.reset();
         }
     }
         
@@ -406,15 +386,13 @@ public class ChunkableOutputStream extends FilterOutputStream
         // Flush filters
         if (out!=null)
             out.flush();
-        if (_rawWriter!=null)
-            _rawWriter.flush();
 
         // Save non-raw size
         int size=_buffer.size();
         
         // Do we need to commit?
         boolean commiting=false;
-        if (!_committed && (size>0 || (_rawWriterBuffer!=null && _rawWriterBuffer.size()>0)))
+        if (!_committed && (size>0 || (_rawWriter!=null && _rawWriter.size()>0)))
         {
             // this may recurse to flush so set committed now
             _committed=true;
@@ -422,8 +400,6 @@ public class ChunkableOutputStream extends FilterOutputStream
             notify(OutputObserver.__COMMITING);
             if (out!=null)
                 out.flush();
-            if (_rawWriter!=null)
-                _rawWriter.flush();
             size=_buffer.size();
         }
 
@@ -432,8 +408,8 @@ public class ChunkableOutputStream extends FilterOutputStream
             if (_nulled)
             {
                 // Just write the contents of the rawWriter
-                if (null != _rawWriterBuffer)
-                    _rawWriterBuffer.writeTo(_realOut);
+                if (_rawWriter!=null)
+                    _rawWriter.writeTo(_realOut);
             }
             else
             {
@@ -458,17 +434,16 @@ public class ChunkableOutputStream extends FilterOutputStream
                 }
                 
                 // Pre write the raw writer to the buffer
-                if (_rawWriterBuffer!=null && _rawWriterBuffer.size()>0)
-                    _buffer.prewrite(_rawWriterBuffer.getBuf(),0,_rawWriterBuffer.getCount());
+                if (_rawWriter!=null && _rawWriter.size()>0)
+                    _buffer.prewrite(_rawWriter.getBuf(),0,_rawWriter.size());
                 
                 // Handle any trailers
                 if (_trailer!=null && endChunking)
                 {
                     Writer writer=getRawWriter();
-                    _rawWriterBuffer.reset();
+                    _rawWriter.reset();
                     _trailer.write(writer);
-                    writer.flush();
-                    _rawWriterBuffer.writeTo(_buffer);
+                    _rawWriter.writeTo(_buffer);
                 }
                 
                 // Write the buffer
@@ -480,8 +455,8 @@ public class ChunkableOutputStream extends FilterOutputStream
         finally
         {
             _buffer.reset();
-            if (_rawWriterBuffer!=null)
-                _rawWriterBuffer.reset();
+            if (_rawWriter!=null)
+                _rawWriter.reset();
 
             if (endChunking)
             {

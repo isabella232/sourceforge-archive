@@ -64,6 +64,7 @@ public class SecurityHandler extends NullHandler
          */
         public boolean formAuthenticated(SecurityHandler shandler,
                                          String pathInContext,
+                                         String pathParams,
                                          HttpRequest request,
                                          HttpResponse response)
         throws IOException;
@@ -225,6 +226,7 @@ public class SecurityHandler extends NullHandler
     
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,
+                       String pathParams,
                        HttpRequest request,
                        HttpResponse response)
         throws HttpException, IOException
@@ -260,7 +262,7 @@ public class SecurityHandler extends NullHandler
                     // Does it fail a role check?
                     if (sc.isAuthenticated() &&
                         !sc.hasRole(SecurityConstraint.NONE) &&
-                        !authenticatedInRole(pathInContext,request,response,sc.roles()))
+                        !authenticatedInRole(pathInContext,pathParams,request,response,sc.roles()))
                         // return as an auth challenge will have been set
                         return;
                     
@@ -282,6 +284,7 @@ public class SecurityHandler extends NullHandler
      * @return True if request is authenticated in the role.
      */
     private boolean authenticatedInRole(String pathInContext,
+                                        String pathParams,
                                         HttpRequest request,
                                         HttpResponse response,
                                         Iterator roles)
@@ -298,7 +301,8 @@ public class SecurityHandler extends NullHandler
                 response.sendError(HttpResponse.__500_Internal_Server_Error);
                 return false;
             }
-            return _formAuthenticator.formAuthenticated(this,pathInContext,request,response);
+            return _formAuthenticator
+                .formAuthenticated(this,pathInContext,pathParams,request,response);
         }
         else
         {

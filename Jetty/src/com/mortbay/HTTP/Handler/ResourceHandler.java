@@ -233,14 +233,11 @@ public class ResourceHandler extends NullHandler
  
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,
+                       String pathParams,
                        HttpRequest request,
                        HttpResponse response)
         throws HttpException, IOException
     {
-        // Strip any path params
-        if (pathInContext!=null && pathInContext.indexOf(';')>0)
-            pathInContext=pathInContext.substring(0,pathInContext.indexOf(';'));
-        
         // Extract and check filename
         pathInContext=Resource.canonicalPath(pathInContext);
         if (pathInContext==null)

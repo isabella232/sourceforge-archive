@@ -368,7 +368,7 @@ public class HttpFields
     /* -------------------------------------------------------------- */
     private ArrayList _fields=new ArrayList(15);
     private int[] _index=new int[2*FieldInfo.__hashCode];
-    
+
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
@@ -908,6 +908,7 @@ public class HttpFields
             writer.write(__CRLF);
         }
     }
+    
     
     /* -------------------------------------------------------------- */
     public String toString()
