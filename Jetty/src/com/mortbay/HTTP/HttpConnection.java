@@ -268,7 +268,7 @@ public class HttpConnection
                 catch(HttpException e){throw e;}
                 catch(IOException e)
                 {
-                    Code.ignore(e);
+                    exception(e);
                     _persistent=false;
                     _response.destroy();
                     _response=null;
@@ -460,19 +460,19 @@ public class HttpConnection
 
     /* ------------------------------------------------------------ */
     /* Exception reporting policy method.
-     * @param th 
+     * @param e the Throwable to report.
      */
     private void exception(Throwable e)
     {
-        try{
+	try{
             if ( !Code.debug() && e instanceof IOException )
                 // Assume it was the browser closing early
                 Code.ignore(e);
             else
                 Code.warning(_request.toString(),e);
-            
+
             _persistent=false;
-            if (!_response.isCommitted())
+            if (_response != null && !_response.isCommitted())
             {
                 _response.reset();
                 _response.removeField(HttpFields.__TransferEncoding);
@@ -875,6 +875,3 @@ public class HttpConnection
         }
     }
 }
-
-
-
