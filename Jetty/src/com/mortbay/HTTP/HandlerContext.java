@@ -508,6 +508,7 @@ public class HandlerContext
 	    _mimeMap.put("vcd","application/x-cdlink");
 	    _mimeMap.put("vrml","model/vrml");
 	    _mimeMap.put("wav","audio/x-wav");
+	    _mimeMap.put("wml","text/vnd.wap.wml");
 	    _mimeMap.put("wrl","model/vrml");
 	    _mimeMap.put("xbm","image/x-xbitmap");
 	    _mimeMap.put("xml","text/xml");

@@ -92,7 +92,7 @@ LIBDIR := lib/perl
 endif
 #
 ifndef SUBDIRS
-SUBDIRS = $(strip $(patsubst %/,%,$(filter-out RCS/ ./,$(filter %/,$(shell /bin/ls -pd *)))))
+SUBDIRS = $(strip $(patsubst %/,%,$(filter-out RCS/ ./,$(filter %/,$(shell /bin/ls -dF *)))))
 endif
 
 #

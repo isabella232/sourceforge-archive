@@ -1,5 +1,5 @@
 ifndef SUBDIRS
-ALLSUBDIRS := $(strip $(patsubst %/,%,$(filter-out idl/ ISS/ RCS/ ./,$(filter %/,$(shell /bin/ls -pd *)))))
+ALLSUBDIRS := $(strip $(patsubst %/,%,$(filter-out idl/ CVS/ RCS/ ./,$(filter %/,$(shell /bin/ls -Fd *)))))
 OKSUBDIRS := $(filter-out $(EXCLUDE),$(ALLSUBDIRS))
 SUBDIRS := $(filter $(patsubst %/Makefile,%,$(wildcard $(addsuffix /Makefile,$(ALLSUBDIRS)))),$(OKSUBDIRS))
 NOMKSUBDIRS := $(filter-out $(patsubst %/Makefile,%,$(wildcard $(addsuffix /Makefile,$(ALLSUBDIRS)))),$(OKSUBDIRS))
