@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
- + Fixed HandlerContext.addAuthConstraint authentication.
+ + Made SecurityConstraint.addRole() require authentication.
  + Fixed singled threaded dynamic servlets
  + Fixed no slash context redirection.
 

@@ -105,6 +105,7 @@ public class SecurityConstraint
      */
     public synchronized void addRole(String role)
     {
+        _authenticate=true;
         if (ANY_ROLE.equals(role))
         {
             _roles=null;
