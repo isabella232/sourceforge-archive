@@ -32,7 +32,6 @@ read Y
     [ -d Jetty ] && mv Jetty Jetty.cvs
     [ -d JettyExtra ] && mv JettyExtra JettyExtra.cvs
     cvs $CVS_ARGS rtag $CVS_BRANCH -F Jetty_$TAG Jetty JettyExtra
-    cvs $CVS_ARGS rtag $CVS_BRANCH -r Jetty_$TAG -F JBossJetty_$TAG Jetty JettyExtra/jmx
 
     cvs $CVS_ARGS export -r Jetty_$TAG Jetty JettyExtra
     cd Jetty

@@ -58,6 +58,7 @@ public class Tests extends junit.framework.TestCase
     public static junit.framework.Test suite() {
         TestSuite suite = new TestSuite(Tests.class);
         suite.addTest(TestResource.suite());
+        suite.addTest(TestThreadedServer.suite());
         return suite;                  
     }
 
