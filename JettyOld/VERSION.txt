@@ -1,3 +1,11 @@
+Release 2.4.7 6th Oct 2000
+  + Set content length on errors for keep alive.
+  + Added encode methods to URI
+  + Improved win32 build
+  + fixes to SSL doco
+  + Support key and keystore passwords
+  + Various improvements to  ServletDispatch, PropertyTree and
+    associated classes.
 
 Release 2.4.6 - 16th Aug 2000 
   + Turn Linger off before closing sockets, to allow restart.
