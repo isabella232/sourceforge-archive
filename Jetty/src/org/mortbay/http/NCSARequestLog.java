@@ -39,7 +39,7 @@ public class NCSARequestLog implements RequestLog
     private int _retainDays;
     private boolean _closeOut;
     private String _logDateFormat="dd/MMM/yyyy:HH:mm:ss ZZZ";
-    private Locale _logLocale=Locale.US;
+    private Locale _logLocale=Locale.getDefault();
     private String _logTimeZone=TimeZone.getDefault().getID();
     private String[] _ignorePaths;
     

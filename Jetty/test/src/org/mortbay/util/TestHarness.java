@@ -550,9 +550,9 @@ public class TestHarness
             }
             synchronized(job)
             {
-                if(log.isDebugEnabled())log.debug("JOB wait: "+job);
+                if(TestHarness.log.isDebugEnabled())TestHarness.log.debug("JOB wait: "+job);
                 job.wait();
-                if(log.isDebugEnabled())log.debug("JOB wake: "+job);
+                if(TestHarness.log.isDebugEnabled())TestHarness.log.debug("JOB wake: "+job);
             }
             synchronized(_lock)
             {

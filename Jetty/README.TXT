@@ -121,7 +121,7 @@ stop.jar:
    java -jar stop.jar
 
 This connects via a local port to stop the server. The default port can be set with the 
-STOP.PORT system property (a port of < 0 disables the stop mechanism). 
+STOP.PORT system property (default 8079 and a port of < 0 disables the stop mechanism). 
 If the STOP.KEY system property is set, then a random key is generated and 
 written to stdout. This key  must be passed to the stop.jar. eg
 

@@ -40,6 +40,7 @@ the Ant optional tasks from:
   <property name="lib"            value="${basedir}/lib"/>
   <property name="ext"            value="${basedir}/ext"/>
   <property name="classes"        value="${basedir}/classes"/>
+  <property name="classes1.4"     value="${basedir}/classes1.4"/>
   <property name="javadoc"        value="${basedir}/javadoc"/>
   <property name="logs"           value="${basedir}/logs"/>
   <property name="webapps"        value="${basedir}/webapps"/>
@@ -73,13 +74,15 @@ the Ant optional tasks from:
         <include name="*.ZIP"/>
         <exclude name="javax.xml.jaxp.jar"/>
         <exclude name="crimson.jar"/>
+        <exclude name="xercesImpl.jar"/>
+        <exclude name="xmlParserAPIs.jar"/>
        </fileset>
     </path>
 
     <path id="classpath">
-      <path refid="extpath" />
       <pathelement path="${classes1.4}" />
       <pathelement path="${classes}" />
+      <path refid="extpath" />
     </path>
 
     <property name="expanded.classpath" refid="classpath"/>

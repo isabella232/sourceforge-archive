@@ -794,8 +794,6 @@ public class HttpServer implements LifeCycle,
      */
     public synchronized void setRequestLog(RequestLog log)
     {
-        if (isStarted())
-            throw new IllegalStateException("Started");
         if (_requestLog!=null)
             removeComponent(_requestLog);
         _requestLog=log;
