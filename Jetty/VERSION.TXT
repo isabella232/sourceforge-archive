@@ -1,4 +1,5 @@
-   + Include 1.2 source hierarchy
+Jetty-3.0.A7 - 15 Apr 2000
+   + Include java 1.2 source hierarchy
    + removed excess ';' from source
    + fixed flush problem with chunked output for IE5
    + Added InetGateway to help debug IE5 problems
