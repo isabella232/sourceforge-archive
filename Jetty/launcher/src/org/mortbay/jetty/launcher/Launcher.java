@@ -15,6 +15,7 @@ import java.net.MalformedURLException;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Hashtable;
+import java.util.ArrayList;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
@@ -41,7 +42,8 @@ public class Launcher {
     private File _home_dir = null;
     private Classpath _classpath = new Classpath();
     private boolean _debug = Boolean.getBoolean("org.mortbay.jetty.launcher.debug");
-    
+    private ArrayList _xml = new ArrayList();
+        
     public static void main(String[] args)
     {
         try
@@ -104,7 +106,6 @@ public class Launcher {
     
     void configureClasspath(String home, Classpath classpath, InputStream config)
     {
-        
         try
         {
             BufferedReader cfg = new BufferedReader(new InputStreamReader(config,"ISO-8859-1"));
@@ -120,76 +121,65 @@ public class Launcher {
                 {
                     if (_debug) System.err.println(">"+line);
                     StringTokenizer st = new StringTokenizer(line);
-                    String jarfile = st.nextToken();
-                    boolean include_jar = true;
-                    while (include_jar && st.hasMoreTokens())
+                    String file = st.nextToken();
+                    boolean include_jar = false;
+                    boolean include_xml = false;
+                    String condition=null;
+                    while (st.hasMoreTokens())
                     {
-                        String condition = st.nextToken();
+                        condition = st.nextToken();
                         if (condition.equals("never"))
                         {
                             include_jar = false;
                         }
                         else if (condition.equals("always"))
                         {
-                            
+                            include_jar = true;
                         }
                         else if (condition.equals("available"))
                         {
                             String class_to_check = st.nextToken();
-                            if (!isAvailable(class_to_check))
-                            {
-                                include_jar = false;
-                            }
+                            if (isAvailable(class_to_check))
+                                include_jar = true;
                         }
                         else if (condition.equals("!available"))
                         {
                             String class_to_check = st.nextToken();
-                            if (isAvailable(class_to_check))
-                            {
-                                include_jar = false;
-                            }
+                            if (!isAvailable(class_to_check))
+                                include_jar = true;
                         }
                         else if (condition.equals("java"))
                         {
                             String operator = st.nextToken();
                             String version = st.nextToken();
                             ver.parse(version);
-                            if (operator.equals("<"))
-                            {
-                                if (java_version.compare(ver) >= 0) include_jar = false;
-                            }
-                            else if (operator.equals(">"))
-                            {
-                                if (java_version.compare(ver) <= 0) include_jar = false;
-                            }
-                            else if (operator.equals("<=")||operator.equals("=<"))
-                            {
-                                if (java_version.compare(ver) > 0) include_jar = false;
-                            }
-                            else if (operator.equals(">=")||operator.equals("=>"))
-                            {
-                                if (java_version.compare(ver) < 0) include_jar = false;
-                            }
-                            else if (operator.equals("=="))
-                            {
-                                if (java_version.compare(ver) != 0) include_jar = false;
-                            }
-                            else if (operator.equals("!=")||operator.equals("<>"))
-                            {
-                                if (java_version.compare(ver) == 0) include_jar = false;
-                            }
-                            else
-                            {
-                                // report error
-                            }
+                            include_jar =
+                                (operator.equals("<") && java_version.compare(ver)<0) ||
+                                (operator.equals(">") && java_version.compare(ver)>0) ||
+                                (operator.equals("<=") && java_version.compare(ver)<=0) ||
+                                (operator.equals("=<") && java_version.compare(ver)<=0) ||
+                                (operator.equals("=>") && java_version.compare(ver)>=0) ||
+                                (operator.equals(">=") && java_version.compare(ver)>=0) ||
+                                (operator.equals("==") && java_version.compare(ver)==0) ||
+                                (operator.equals("!=") && java_version.compare(ver)!=0);
+                        }
+                        else if (condition.equals("defaultXML"))
+                        {
+                            include_xml=true;
+                        }
+                        else
+                        {
+                            System.err.println("ERROR: Unknown condition: "+condition);
                         }
                     }
+
+                    // System.err.println("file="+file+" condition="+condition+" include_jar="+include_jar);
                     
                     // ok, should we include?
-                    if (jarfile.endsWith("/*"))
+                    if (file.endsWith("/*"))
                     {
                         // directory of JAR files
-                        File extdir = new File(home+File.separatorChar+jarfile.substring(0,jarfile.length()-1).replace('/',File.separatorChar));
+                        File extdir = new File(home+File.separatorChar+file.substring(0,file.length()-1).replace('/',File.separatorChar));
                         File[] jars = extdir.listFiles(new FilenameFilter()
                             {
                                 public boolean accept(File dir, String name)
@@ -215,10 +205,10 @@ public class Launcher {
                             }
                         }
                     }
-                    else if (jarfile.endsWith("/"))
+                    else if (file.endsWith("/"))
                     {
                         // class directory
-                        File cd = new File(home+File.separatorChar+jarfile.replace('/',File.separatorChar));
+                        File cd = new File(home+File.separatorChar+file.replace('/',File.separatorChar));
                         String d = cd.getCanonicalPath();
                         if (!done.containsKey(d))
                         {
@@ -233,9 +223,9 @@ public class Launcher {
                     else
                     {
                         // single JAR file
-                        File f = jarfile.startsWith("/")
-                            ?new File(jarfile.replace('/',File.separatorChar))
-                            :new File(home+File.separatorChar+jarfile.replace('/',File.separatorChar));
+                        File f = file.startsWith("/")
+                            ?new File(file.replace('/',File.separatorChar))
+                            :new File(home+File.separatorChar+file.replace('/',File.separatorChar));
                         String d = f.getCanonicalPath();
                         if (!done.containsKey(d))
                         {
@@ -245,6 +235,9 @@ public class Launcher {
                                 if (classpath.addComponent(d) &&_debug)
                                     System.err.println("Adding single JAR: "+d);
                             }
+
+                            if (include_xml)
+                                _xml.add(d);
                         }
                     }
                 }
@@ -259,8 +252,7 @@ public class Launcher {
     
     
     public void run(String[] args)
-    {
-        
+    {        
         //--------------------
         // detect jetty.home:
         //--------------------
@@ -275,8 +267,9 @@ public class Launcher {
                 _home_dir = extdir.getParentFile();
             }
         }
-        if (_home_dir == null) {
-            
+
+        if (_home_dir == null)
+        {    
             // test for parent
             File extdir = getDirectory(".."+File.separator+"ext");
             if (extdir != null)
@@ -398,34 +391,33 @@ public class Launcher {
             
             try
             {
-                if (args.length == 0)
-                { // no args, try demo
-                   invokeMain(cl,"org.mortbay.jetty.Server", new String[] { "etc"+File.separator+"demo.xml", "etc"+File.separator+"admin.xml" } );
-                   // for demo, try to invoke web browser on Windows
-                   if (System.getProperty("os.name").indexOf("Windows")!=-1)
-                   {
-                        if (_debug) System.err.println("Trying to launch IE browser...");
-                        Process p = Runtime.getRuntime().exec( new String[] {"C:\\Program Files\\Internet Explorer\\iexplore.exe","http://localhost:8080/"});
-                        if (p==null)
-                        {
-                            if (_debug) System.err.println("Failed to start browser.");
-                        }
-                   }
-                }
-                else
+                if (args.length==0)
+                    args=(String[])_xml.toArray(args);    
+                invokeMain(cl,"org.mortbay.jetty.Server",args);
+
+                boolean demo=false;
+                for (int i=0;i<args.length;i++)
+                    demo|=args[i].indexOf("demo.xml")>=0;
+                
+                // for demo, try to invoke web browser on Windows
+                if (demo && System.getProperty("os.name").indexOf("Windows")!=-1)
                 {
-                   invokeMain(cl,"org.mortbay.jetty.Server",args);
+                    Process p = Runtime.getRuntime().exec( new String[] {"C:\\Program Files\\Internet Explorer\\iexplore.exe","http://localhost:8080/"});
+                    if (p==null)
+                    {
+                        System.err.println("ERROR: Failed to start browser.");
+                    }
                 }
             }
             catch (Exception e)
             {
-            }
-            
+                e.printStackTrace();
+            } 
         }
         else
         {
             // if not, warn user
-            System.err.println("WARNING: jetty.home cound not be autodetected, bailing out.");
+            System.err.println("ERROR: jetty.home cound not be autodetected, bailing out.");
             System.err.flush();
         }
     }
