@@ -47,7 +47,7 @@ import org.mortbay.util.UrlEncoded;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class HttpRequest extends HttpMessage
+public class HttpRequest extends HttpMessage.Implementation
 {
     /* ------------------------------------------------------------ */
     /** Request METHODS.

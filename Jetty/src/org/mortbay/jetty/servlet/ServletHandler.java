@@ -43,7 +43,6 @@ import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.HttpServer;
-import org.mortbay.http.Message;
 import org.mortbay.http.PathMap;
 import org.mortbay.http.UserPrincipal;
 import org.mortbay.http.UserRealm;
@@ -417,7 +416,7 @@ public class ServletHandler
     {
         // Look for a previously built servlet request.
         ServletHttpRequest servletHttpRequest = null;
-        Message facade = httpRequest.getFacade();
+        HttpMessage facade = httpRequest.getFacade();
         if (facade!=null)
             servletHttpRequest =((ServletHttpRequest.Facade)facade).getServletHttpRequest();
         
@@ -440,7 +439,7 @@ public class ServletHandler
     public HttpServletResponse getHttpServletResponse(HttpResponse httpResponse)
     {
         // Look for a previously built servlet request.
-        Message facade = httpResponse.getFacade();
+        HttpMessage facade = httpResponse.getFacade();
         if (facade==null)
             return null;
         return ((ServletHttpResponse.Facade)facade).getServletHttpResponse();
@@ -525,7 +524,7 @@ public class ServletHandler
             Code.debug("ServletHandler: ",pathInContext);
 
             // Do we already have servlet facades?
-            Message facade = httpRequest.getFacade();
+            HttpMessage facade = httpRequest.getFacade();
             if (facade!=null)
                 request =((ServletHttpRequest.Facade)facade).getServletHttpRequest();
             if (request==null)

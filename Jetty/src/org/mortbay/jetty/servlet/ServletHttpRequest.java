@@ -43,7 +43,6 @@ import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.http.Message;
 import org.mortbay.http.handler.NullHandler;
 import org.mortbay.util.Code;
 import org.mortbay.util.LazyList;
@@ -98,7 +97,7 @@ public class ServletHttpRequest
     private ServletHolder _servletHolder;
     private String _pathInContext;
     private ServletRequest _wrapper;
-    private Message _facade = new Facade();
+    private HttpMessage _facade = new Facade();
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -117,7 +116,7 @@ public class ServletHttpRequest
     }
 
     /* ------------------------------------------------------------ */
-    Message getFacade()
+    HttpMessage getFacade()
     {
         return _facade;
     }
@@ -790,7 +789,11 @@ public class ServletHttpRequest
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public class Facade implements Message
+    /** HttpMessage Facade.
+     * This facade allows the ServletHttpRequest to be treated as a
+     * HttpMessage by HttpHandlers.
+     */
+    public class Facade implements HttpMessage
     {
         public ServletHttpRequest getServletHttpRequest()
         {return ServletHttpRequest.this;}

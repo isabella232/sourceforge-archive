@@ -29,7 +29,7 @@ import org.mortbay.util.StringUtil;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class HttpResponse extends HttpMessage
+public class HttpResponse extends HttpMessage.Implementation
 { 
       public final static int
           __100_Continue = 100,
@@ -360,7 +360,7 @@ public class HttpResponse extends HttpMessage
             }
             else
             {
-                Message facade=getFacade();
+                HttpMessage facade=getFacade();
                 if (facade==null)
                     facade=this;
                 

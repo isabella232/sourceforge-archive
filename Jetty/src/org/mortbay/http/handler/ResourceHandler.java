@@ -25,7 +25,6 @@ import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.InclusiveByteRange;
-import org.mortbay.http.Message;
 import org.mortbay.http.MultiPartResponse;
 import org.mortbay.http.PathMap;
 import org.mortbay.util.ByteArrayISO8859Writer;
@@ -354,7 +353,7 @@ public class ResourceHandler extends NullHandler
                         buf.append('?');
                         buf.append(q);
                     }
-                    response.getMessageFacade().setField(HttpFields.__Location, URI.addPaths(buf.toString(),"/"));
+                    response.getHttpMessage().setField(HttpFields.__Location, URI.addPaths(buf.toString(),"/"));
                     response.sendError(302);
                     return;
                 }
@@ -405,7 +404,7 @@ public class ResourceHandler extends NullHandler
             // check any modified headers.
             long date=0;
             
-            if ((date=request.getMessageFacade().getDateField(HttpFields.__IfUnmodifiedSince))>0)
+            if ((date=request.getHttpMessage().getDateField(HttpFields.__IfUnmodifiedSince))>0)
             {
                 if (resource.lastModified() > date)
                 {
@@ -414,7 +413,7 @@ public class ResourceHandler extends NullHandler
                 }
             }
             
-            if ((date=request.getMessageFacade().getDateField(HttpFields.__IfModifiedSince))>0)
+            if ((date=request.getHttpMessage().getDateField(HttpFields.__IfModifiedSince))>0)
             {
                 if (resource.lastModified() <= date)
                 {
@@ -446,7 +445,7 @@ public class ResourceHandler extends NullHandler
         
         try
         {
-            Message facade = request.getMessageFacade();
+            HttpMessage facade = request.getHttpMessage();
             int toRead = facade.getContentLength();
             InputStream in = facade.getInputStream();
      
@@ -543,7 +542,7 @@ public class ResourceHandler extends NullHandler
             return;
         }
  
-        String newPath = Resource.canonicalPath(request.getMessageFacade().getField("New-uri"));
+        String newPath = Resource.canonicalPath(request.getHttpMessage().getField("New-uri"));
         if (newPath==null)
         {
             response.sendError(response.__405_Method_Not_Allowed,
@@ -622,7 +621,7 @@ public class ResourceHandler extends NullHandler
             sb.append(HttpRequest.__OPTIONS);
             _allowHeader = sb.toString();
         }
-        response.getMessageFacade().setField(HttpFields.__Allow, _allowHeader);
+        response.getHttpMessage().setField(HttpFields.__Allow, _allowHeader);
     }
  
 
@@ -639,14 +638,14 @@ public class ResourceHandler extends NullHandler
         //  see if there are any range headers
         Enumeration reqRanges =
             request.getDotVersion()>0
-            ?request.getMessageFacade().getFieldValues(HttpFields.__Range)
+            ?request.getHttpMessage().getFieldValues(HttpFields.__Range)
             :null;
         
         if (!writeHeaders || reqRanges == null || !reqRanges.hasMoreElements())
         {
             //  if there were no ranges, send entire entity
             if (writeHeaders) data.writeHeaders(request,response, resLength);
-            data.writeBytes(response.getMessageFacade().getOutputStream(), 0, resLength);
+            data.writeBytes(response.getHttpMessage().getOutputStream(), 0, resLength);
             request.setHandled(true);
             return;
         }
@@ -682,11 +681,11 @@ public class ResourceHandler extends NullHandler
             response.setStatus(response.__416_Requested_Range_Not_Satisfiable);
             response.setReason((String)response.__statusMsg
                                .get(new Integer(response.__416_Requested_Range_Not_Satisfiable)));
-            response.getMessageFacade().setField(
+            response.getHttpMessage().setField(
                        HttpFields.__ContentRange, 
                        InclusiveByteRange.to416HeaderRangeString(resLength)
             );
-            data.writeBytes(response.getMessageFacade().getOutputStream(), 0, resLength);
+            data.writeBytes(response.getHttpMessage().getOutputStream(), 0, resLength);
             request.setHandled(true);
             return;
         }
@@ -702,9 +701,9 @@ public class ResourceHandler extends NullHandler
             response.setStatus(response.__206_Partial_Content);
             response.setReason((String)response.__statusMsg
                                .get(new Integer(response.__206_Partial_Content)));
-            response.getMessageFacade().setField(HttpFields.__ContentRange, 
+            response.getHttpMessage().setField(HttpFields.__ContentRange, 
                               singleSatisfiableRange.toHeaderRangeString(resLength));
-            data.writeBytes(response.getMessageFacade().getOutputStream(), 
+            data.writeBytes(response.getHttpMessage().getOutputStream(), 
                             singleSatisfiableRange.getFirst(resLength), 
                             singleLength);
             request.setHandled(true);
@@ -725,11 +724,11 @@ public class ResourceHandler extends NullHandler
 	// send an old style multipart/x-byteranges Content-Type. This
 	// keeps Netscape and acrobat happy. This is what Apache does.
 	String ctp;
-	if (request.getMessageFacade().containsField(HttpFields.__RequestRange))
+	if (request.getHttpMessage().containsField(HttpFields.__RequestRange))
 	    ctp = "multipart/x-byteranges; boundary=";
 	else
 	    ctp = "multipart/byteranges; boundary=";
-	response.getMessageFacade().setContentType(ctp+multi.getBoundary());
+	response.getHttpMessage().setContentType(ctp+multi.getBoundary());
 
         rit = validRanges.listIterator();
         while (rit.hasNext())
@@ -806,7 +805,7 @@ public class ResourceHandler extends NullHandler
 
             Code.debug("sendDirectory: "+file);
             String base = URI.addPaths(request.getPath(),"/");
-            response.getMessageFacade().setContentType("text/html");
+            response.getHttpMessage().setContentType("text/html");
             if (request.getMethod().equals(HttpRequest.__HEAD))
             {
                 // Bail out here otherwise we build the page fruitlessly and get
@@ -855,7 +854,7 @@ public class ResourceHandler extends NullHandler
                 out.write("</TD></TR>\n");
             }
             out.write("</TABLE>\n");
-            out.writeTo(response.getMessageFacade().getOutputStream());
+            out.writeTo(response.getHttpMessage().getOutputStream());
             request.setHandled(true);
         }
         else
@@ -942,7 +941,7 @@ public class ResourceHandler extends NullHandler
         /* ------------------------------------------------------------ */
         public void writeHeaders(HttpRequest request, HttpResponse response, long count)
         {
-            Message facade = response.getMessageFacade();
+            HttpMessage facade = response.getHttpMessage();
             facade.setContentType(encoding);
             if (length != -1) 
                 facade.setContentLength((int)count);
@@ -1100,7 +1099,7 @@ public class ResourceHandler extends NullHandler
             throws IOException
         {
             Code.debug("HIT: ",resource);
-            Message facade = response.getMessageFacade();
+            HttpMessage facade = response.getHttpMessage();
             facade.setContentType(encoding);
             if (count != -1)
             {

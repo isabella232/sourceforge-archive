@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Merged HttpMessage and Message
  + LineInput waits for LF after CF if seen CRLF before.
  + Added setClassLoader and moved getFileClassPath to HttpContext
  + Updated examples webapp from tomcat

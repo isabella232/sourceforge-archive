@@ -26,7 +26,6 @@ import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.http.Message;
 import org.mortbay.http.handler.NullHandler;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URI;
@@ -68,7 +67,7 @@ public class ServletHttpResponse implements HttpServletResponse
     private boolean _noSession=false;
     private Locale _locale=null;
     private ServletResponse _wrapper;  
-    private Message _facade = new Facade();  
+    private HttpMessage _facade = new Facade();  
 
     private static Map __charSetMap = new HashMap();
     static
@@ -125,7 +124,7 @@ public class ServletHttpResponse implements HttpServletResponse
     }
 
     /* ------------------------------------------------------------ */
-    Message getFacade()
+    HttpMessage getFacade()
     {
         return _facade;
     }
@@ -587,7 +586,11 @@ public class ServletHttpResponse implements HttpServletResponse
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public class Facade implements Message
+    /** HttpMessage Facade.
+     * This facade allows the ServletHttpResponse to be treated as a
+     * HttpMessage by HttpHandlers.
+     */
+    public class Facade implements HttpMessage
     {
         public ServletHttpResponse getServletHttpResponse()
         {return ServletHttpResponse.this;}
