@@ -189,10 +189,11 @@ public class HttpContext implements LifeCycle,
     
     /* ------------------------------------------------------------ */
     /** Get the ThreadLocal HttpConnection.
-     * Get the ThreadLocal HttpConnection.
+     * Get the HttpConnection for current thread, if any.  This method is
+     * not static in order to control access.
      * @return HttpConnection for this thread.
      */
-    protected HttpConnection getHttpConnection()
+    public HttpConnection getHttpConnection()
     {
         return HttpConnection.getHttpConnection();
     }

@@ -160,7 +160,7 @@ public class Dispatcher implements RequestDispatcher
         HttpServletResponse httpServletResponse=(HttpServletResponse)servletResponse;
 
         HttpConnection httpConnection=
-            ((ServletHttpContext)_servletHandler.getHttpContext()).getHttpConnection();
+            _servletHandler.getHttpContext().getHttpConnection();
         ServletHttpRequest servletHttpRequest= (httpConnection!=null)
             ?(ServletHttpRequest)httpConnection.getRequest().getWrapper()
             :ServletHttpRequest.unwrap(servletRequest);

@@ -29,16 +29,6 @@ public class ServletHttpContext extends HttpContext
     {
         super();
     }
-
-    /* ------------------------------------------------------------ */
-    /** Get the ThreadLocal HttpConnection.
-     * Get the ThreadLocal HttpConnection.
-     * @return HttpConnection for this thread.
-     */
-    protected HttpConnection getHttpConnection()
-    {
-        return super.getHttpConnection();
-    }
     
     /* ------------------------------------------------------------ */
     /**
