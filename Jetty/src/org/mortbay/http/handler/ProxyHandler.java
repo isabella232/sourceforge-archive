@@ -10,12 +10,14 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.Socket;
+import org.mortbay.http.ChunkableOutputStream;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
+import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.URI;
@@ -94,43 +96,84 @@ public class ProxyHandler extends NullHandler
 
             header.put("Connection","close");
             header.add("Via","Via: 1.1 host (Jetty/4.x)");
-            
-            
-            // XXX yuck!
-            String req=
-                request.getMethod()+" "+path+" "+request.getVersion()+"\015\012"+
-                header;
-            System.err.println("\nreq=\n"+req);
-            sout.write(req.getBytes(StringUtil.__ISO_8859_1));
 
+            // Convert the header to byte array.
+            // Should assoc writer with connection for recycling!
+            ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer();
+            writer.write(request.getMethod());
+            writer.write(' ');
+            writer.write(path);
+            writer.write(' ');
+            writer.write(request.getDotVersion()==0
+                         ?HttpMessage.__HTTP_1_0
+                         :HttpMessage.__HTTP_1_1);
+            writer.write('\015');
+            writer.write('\012');
+            header.write(writer);
             
-            // XXX If expect 100-continue flush the header now!
+            // Send the request to the next hop.
+            System.err.println("\nreq=\n"+new String(writer.getBuf(),0,writer.length()));
+            writer.writeTo(sout);
+            writer.reset();
+            
+            // XXX If expect 100-continue flush or no body the header now!
+            sout.flush();
+            
             // XXX cache http versions and do 417
             
             // XXX To to copy content with content length or chunked.
 
 
+            // get ready to read the results back
             LineInput lin = new LineInput(socket.getInputStream());
             System.err.println("lin="+lin);
 
             // XXX need to do something about timeouts here
             String resLine = lin.readLine();
-            System.err.println("resLine="+resLine);
-            // XXX handle/forward 100 responses
-
+            if (resLine==null)
+                return; // XXX what should we do?
+            
+            // At this point we are committed to sending a response!!!!
             request.setHandled(true);
             response.setState(HttpMessage.__MSG_SENT);
+            ChunkableOutputStream out=response.getOutputStream();
             
-            HttpFields res = new HttpFields();
-            res.read(lin);
-            res.add("Via","Via: 1.1 host (Jetty/4.x)");
-            String resHeader = resLine+"\015\012"+res;
+            // Forward 100 responses
+            while (resLine.startsWith("100"))
+            {
+                writer.write(resLine);
+                writer.writeTo(out);
+                out.flush();
+                writer.reset();
+                
+                resLine = lin.readLine();
+                if (resLine==null)
+                    return; // XXX what should we do?
+            }
             
-            System.err.println("\nres=\n"+resHeader);
+            System.err.println("resLine="+resLine);
 
-            OutputStream out=response.getOutputStream().getRawStream();
-            
-            out.write(resHeader.getBytes(StringUtil.__ISO_8859_1));
+            // Receive the response headers
+            HttpFields resHeader = response.getHeader();
+            resHeader.clear();
+
+            // Modify them
+            resHeader.read(lin);
+            resHeader.add("Via","Via: 1.1 host (Jetty/4.x)"); // XXX
+            // XXX do the connection based stuff here!
+
+            // return the header
+            // XXX this should really be set in the 
+            writer.write(resLine);
+            writer.write('\015');
+            writer.write('\012');
+            resHeader.write(writer);
+            System.err.println("\nres=\n"+resLine+"\015\012"+resHeader);
+            writer.writeTo(out);
+
+            // return the body
+            // XXX need more content length options here
+            // XXX need to handle prechunked 
             IO.copy(lin,out);
         }
         catch(Exception e)

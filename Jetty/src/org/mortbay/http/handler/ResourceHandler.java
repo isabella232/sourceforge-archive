@@ -27,6 +27,7 @@ import org.mortbay.http.HttpResponse;
 import org.mortbay.http.InclusiveByteRange;
 import org.mortbay.http.MultiPartResponse;
 import org.mortbay.http.PathMap;
+import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.Log;
@@ -807,19 +808,19 @@ public class ResourceHandler extends NullHandler
      
             String title = "Directory: "+base;
      
-            ChunkableOutputStream out=response.getOutputStream();
-     
-            out.print("<HTML><HEAD><TITLE>");
-            out.print(title);
-            out.print("</TITLE></HEAD><BODY>\n<H1>");
-            out.print(title);
-            out.print("</H1><TABLE BORDER=0>");
+            ByteArrayISO8859Writer out = new ByteArrayISO8859Writer();
+            
+            out.write("<HTML><HEAD><TITLE>");
+            out.write(title);
+            out.write("</TITLE></HEAD><BODY>\n<H1>");
+            out.write(title);
+            out.write("</H1><TABLE BORDER=0>");
      
             if (parent)
             {
-                out.print("<TR><TD><A HREF=");
-                out.print(padSpaces(URI.addPaths(base,"../")));
-                out.print(">Parent Directory</A></TD><TD></TD><TD></TD></TR>\n");
+                out.write("<TR><TD><A HREF=");
+                out.write(padSpaces(URI.addPaths(base,"../")));
+                out.write(">Parent Directory</A></TD><TD></TD><TD></TD></TR>\n");
             }
      
             DateFormat dfmt=DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
@@ -828,21 +829,22 @@ public class ResourceHandler extends NullHandler
             {
                 Resource item = file.addPath(ls[i]);
   
-                out.print("<TR><TD><A HREF=\"");
+                out.write("<TR><TD><A HREF=\"");
                 String path=URI.addPaths(base,ls[i]);
                 if (item.isDirectory() && !path.endsWith("/"))
                     path=URI.addPaths(path,"/");
-                out.print(padSpaces(path));
-                out.print("\">");
-                out.print(ls[i]);
-                out.print("&nbsp;");
-                out.print("</TD><TD ALIGN=right>");
-                out.print(""+item.length());
-                out.print(" bytes&nbsp;</TD><TD>");
-                out.print(dfmt.format(new Date(item.lastModified())));
-                out.print("</TD></TR>\n");
+                out.write(padSpaces(path));
+                out.write("\">");
+                out.write(ls[i]);
+                out.write("&nbsp;");
+                out.write("</TD><TD ALIGN=right>");
+                out.write(""+item.length());
+                out.write(" bytes&nbsp;</TD><TD>");
+                out.write(dfmt.format(new Date(item.lastModified())));
+                out.write("</TD></TR>\n");
             }
-            out.println("</TABLE>");
+            out.write("</TABLE>\n");
+            out.writeTo(response.getOutputStream());
             request.setHandled(true);
         }
         else

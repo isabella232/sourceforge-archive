@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Removed limits on mark in LineInput.
  + Corrected name to HTTP_REFERER in CGI Servlet.
  + Fixed UrlEncoding for % + combination.
  + Generalized temp file handling

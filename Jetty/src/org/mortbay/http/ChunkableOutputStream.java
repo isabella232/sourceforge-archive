@@ -249,7 +249,6 @@ public class ChunkableOutputStream extends FilterOutputStream
     /** Set chunking mode.
      */
     public void setChunking()
-        throws IOException
     {
         _chunking=true;
     }
@@ -525,27 +524,4 @@ public class ChunkableOutputStream extends FilterOutputStream
         IO.copy(in,this,len);
     }
     
-    /* ------------------------------------------------------------ */
-    public void println()
-        throws IOException
-    {
-        write("\n".getBytes());
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void println(Object o)
-        throws IOException
-    {
-        if (o!=null)
-            write(o.toString().getBytes());
-        write("\n".getBytes());
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void print(Object o)
-        throws IOException
-    {
-        if (o!=null)
-            write(o.toString().getBytes());
-    }
 }

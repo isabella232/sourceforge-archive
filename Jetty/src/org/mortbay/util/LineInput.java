@@ -353,7 +353,11 @@ public class LineInput extends FilterInputStream
         throws IllegalArgumentException
     {
         if (limit>_buf.length)
-            throw new IllegalArgumentException("limit larger than buffer");
+        {
+            byte[] new_buf=new byte[limit];
+            System.arraycopy(_buf,_pos,new_buf,_pos,_avail-_pos);
+            _buf=new_buf;
+        }
         _mark=_pos;
     }
 
@@ -644,89 +648,5 @@ public class LineInput extends FilterInputStream
 
         public String toString(){return new String(buffer,0,size);}
     }
-
-
-    
-//      /* ------------------------------------------------------------ */
-//      /* ------------------------------------------------------------ */
-//      /* ------------------------------------------------------------ */
-//      private static final String __dash =
-//          "==================================================================================================================================================================================================";
-    
-//      /* ------------------------------------------------------------ */
-//      private static final String __blank=
-//          "                                                                                                                                                                                                  ";
-  
-//      /* ------------------------------------------------------------ */
-//      private void dump(String label)
-//      {
-//          StringBuffer buf= new StringBuffer();
-
-//          buf.append(label);
-//          buf.append("           [".substring(label.length()));
-//          String buffer=new String(_buf,0,_contents);
-//          buffer=StringUtil.replace(buffer,"\r","<");
-//          buffer=StringUtil.replace(buffer,"\n","|");
-//          buf.append(buffer);
-//          buf.append("] ");
-//          buf.append(_byteLimit);
-//          buf.append(" ");
-//          buf.append(_buf.length);
-//          buf.append(" ");
-//          buf.append(_lastCr);
-
-//          if (_pos<_avail)
-//          {
-//              buf.append("\n            ");
-//              if (_mark<0)
-//              {
-//                  buf.append(__blank.substring(0,_avail));
-//                  buf.append("|");
-//              }
-//              else if (_mark<_pos)
-//              {
-//                  buf.append(__blank.substring(0,_mark));
-//                  buf.append("^");
-//                  buf.append(__dash.substring(0,_pos-_mark-1));
-//                  buf.append(__blank.substring(0,_avail-_pos));
-//                  buf.append("|");
-//              }
-//              else if (_mark==_pos)
-//              {
-//                  buf.append(__blank.substring(0,_mark));
-//                  buf.append("+");
-//                  buf.append(__blank.substring(0,_avail-_pos-1));
-//                  buf.append("|");
-//              }
-//              else
-//                  buf.append("?");   
-//          }
-//          else if (_pos==_avail)
-//          {
-//              buf.append("\n            ");
-//              if (_mark<0)
-//              {
-//                  buf.append(__blank.substring(0,_avail));
-//                  buf.append("|");
-//              }
-//              else if (_mark<_avail)
-//              {
-//                  buf.append(__blank.substring(0,_mark));
-//                  buf.append("^");
-//                  buf.append(__dash.substring(0,_avail-_mark-1));
-//                  buf.append("|");
-//              }
-//              else if (_mark==_avail)
-//              {
-//                  buf.append(__blank.substring(0,_mark));
-//                  buf.append("#");
-//              }
-//              else
-//                  buf.append("?");   
-//          }
-
-//          if (Code.debug())
-//              System.err.println(buf.toString());
-//      }
 }
 
