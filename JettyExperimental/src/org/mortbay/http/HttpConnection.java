@@ -20,8 +20,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.Log;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
@@ -36,13 +35,13 @@ import org.mortbay.io.nio.NIOBuffer;
  */
 public class HttpConnection extends HttpParser.Handler
 {
-    private static Log log = LogFactory.getLog(HttpConnection.class);
+    private static Log log = Log.getInstance(HttpConnection.class);
     private static int UNKNOWN = -2;
 
     private EndPoint _endpoint;
 
     EndPoint _endp;
-    HttpListener _listener;
+    HttpConnector _connector;
     HttpParser _parser;
     HttpBuilder _builder;
 
@@ -60,9 +59,9 @@ public class HttpConnection extends HttpParser.Handler
     /**
      *  
      */
-    public HttpConnection(HttpListener listener, EndPoint endpoint)
+    public HttpConnection(HttpConnector connector, EndPoint endpoint)
     {
-        _listener = listener;
+        _connector = connector;
         _endp = endpoint;
         _endpoint = endpoint;
         _parser = new HttpParser(null, endpoint, this);
@@ -76,7 +75,7 @@ public class HttpConnection extends HttpParser.Handler
             // check read buffer buffers
             if (_parser.isState(HttpParser.STATE_START))
             {
-                if (_parser.getBuffer() == null) _parser.setBuffer(_listener.getBuffer());
+                if (_parser.getBuffer() == null) _parser.setBuffer(_connector.getBuffer());
             }
 
             if (!_parser.isState(HttpParser.STATE_END)) _parser.parseAvailable();
@@ -92,13 +91,13 @@ public class HttpConnection extends HttpParser.Handler
             {
                 if (_parser.isState(HttpParser.STATE_END) && _parser.getBuffer() != null)
                 {
-                    _listener.returnBuffer(_parser.getBuffer());
+                    _connector.returnBuffer(_parser.getBuffer());
                     _parser.setBuffer(null);
                 }
                 
                 if (_builder.isState(HttpBuilder.STATE_END) && _builder.getBuffer() != null)
                 {
-                    _listener.returnBuffer(_builder.getBuffer());
+                    _connector.returnBuffer(_builder.getBuffer());
                     _builder.setBuffer(null);
                 }
             }
@@ -175,7 +174,7 @@ public class HttpConnection extends HttpParser.Handler
         else
         {
             // get builder buffer from pool
-            _builder.setBuffer(_listener.getBuffer());
+            _builder.setBuffer(_connector.getBuffer());
         }
 
         switch (_version)

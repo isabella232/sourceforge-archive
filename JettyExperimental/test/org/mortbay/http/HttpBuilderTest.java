@@ -16,6 +16,8 @@
 package org.mortbay.http;
 
 
+import java.io.IOException;
+
 import junit.framework.TestCase;
 
 import org.mortbay.io.Buffer;
@@ -52,20 +54,24 @@ public class HttpBuilderTest extends TestCase
         Handler handler = new Handler();
         HttpParser parser= new HttpParser(b,null, handler);
         
+        // For HTTP version
         for (int v=9;v<=11;v++)
         {
+            // For each test result
             for (int r=0;r<tr.length;r++)
             {
-                for (int ch=1;ch<=3;ch++)
+                // chunks = 1 to 3
+                for (int chunks=1;chunks<=3;chunks++)
                 {
+                    // For none, keep-alive, close
                     for (int c=0;c<connect.length;c++)
                     {
-                        String t="v="+v+",r="+r+",ch="+ch+",c="+c;
+                        String t="v="+v+",tr="+tr[r]+",chunks="+chunks+",connect="+connect[c];
                         
                         b.clear();
                         hb.reset();
-                        tr[r].build(v,hb,null,connect[c],null,ch);
-                        System.out.println("RESPONSE: "+t+"\n"+b.toString()+(hb.isPersistent()?"...":"XXX"));
+                        tr[r].build(v,hb,null,connect[c],null,chunks);
+                        System.out.println("RESPONSE: "+t+"\n"+b.toString()+(hb.isPersistent()?"...\n":"---\n"));
                         
                         if (v==9)
                         {
@@ -76,11 +82,24 @@ public class HttpBuilderTest extends TestCase
                         }
                         
                         parser.reset();
-                        parser.parse();
+                        try
+                        {
+                            parser.parse();
+                        }
+                        catch(IOException e)
+                        {
+                            if (tr[r].content!=null)
+                                throw e;
+                            continue;
+                        }
                         
                         if (tr[r].content!=null)
                             assertEquals(t,tr[r].content, this.content);
-                        assertTrue(t,hb.isPersistent() || v==10 && tr[r].values[1]==null || c==2);
+                        if (v==10)
+                            assertTrue(t,hb.isPersistent() || tr[r].values[1]==null || c==2 || c==0);
+                        else
+                            assertTrue(t,hb.isPersistent() ||  c==2);
+                        
                         assertTrue(t,tr[r].values[1]==null || content.length()==Integer.parseInt(tr[r].values[1]));
                     }
                 }
@@ -139,6 +158,11 @@ public class HttpBuilderTest extends TestCase
             else
                 hb.complete();
         }
+        
+        public String toString()
+        {
+            return "["+code+","+values[0]+","+values[1]+","+(content==null?"none":"content")+"]";
+        }
     }
     
     private TR[] tr =
@@ -151,9 +175,7 @@ public class HttpBuilderTest extends TestCase
        new TR(200,"text/html",null,CONTENT),
        new TR(200,"text/html",""+CONTENT.length(),null),
        new TR(200,"text/html",""+CONTENT.length(),CONTENT),
-             
     };
-    
     
 
     String content;

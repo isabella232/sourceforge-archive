@@ -22,8 +22,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.Log;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.LogSupport;
 
@@ -34,7 +33,7 @@ import org.mortbay.util.LogSupport;
  */
 public class IO extends ThreadPool
 {
-    private static Log log = LogFactory.getLog(IO.class);
+    private static Log log = Log.getInstance(IO.class);
 
     /* ------------------------------------------------------------------- */
     public final static String

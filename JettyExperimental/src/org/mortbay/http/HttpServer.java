@@ -15,22 +15,37 @@
 
 package org.mortbay.http;
 
+import org.mortbay.thread.AbstractLifeCycle;
 import org.mortbay.thread.ThreadPool;
 
-public class HttpServer 
+public class HttpServer extends AbstractLifeCycle
 {
     private ThreadPool _threadPool = new ThreadPool();
     
     public HttpServer()
     	throws Exception
     {
+    }
+    
+    protected void doStart() throws Exception
+    {
         _threadPool.start();
+    }
+    
+    protected void doStop() throws Exception
+    {
+        _threadPool.stop();
     }
     
     public void dispatch(Runnable job)
     	throws InterruptedException
     {
-        _threadPool.run(job);
+        if (isRunning())
+            _threadPool.run(job,true);
     }
     
+    public String toString()
+    {
+        return "HttpServer";
+    }
 }

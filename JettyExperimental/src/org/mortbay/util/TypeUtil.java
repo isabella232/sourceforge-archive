@@ -20,8 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.Log;
 
 /* ------------------------------------------------------------ */
 /** TYPE Utilities.
@@ -34,7 +33,7 @@ import org.apache.commons.logging.LogFactory;
  */
 public class TypeUtil
 {
-    private static Log log = LogFactory.getLog(TypeUtil.class);
+    private static Log log = Log.getInstance(TypeUtil.class);
 
     /* ------------------------------------------------------------ */
     private static final HashMap name2Class=new HashMap();

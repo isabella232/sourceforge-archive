@@ -65,8 +65,8 @@ public class HttpParser implements HttpTokens
     private boolean _close = false;
     private boolean _content = false;
     private Handler _handler;
-    private View _tok0;
-    private View _tok1;
+    private View _tok0;   // Saved token: header name, request method or response version
+    private View _tok1;   // Saved token: header value, request URI or response code
     private String _continuation;
     private boolean _response = false;
 
@@ -226,6 +226,7 @@ public class HttpParser implements HttpTokens
             {
                 if (_buffer.space() == 0)
                 {
+                    // Compress buffer if handling content, starting or TODO
                     if (_state >= STATE_END || _state == STATE_START || _tok0.length() == 0)
                     {
                         _buffer.compact();

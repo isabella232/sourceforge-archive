@@ -16,7 +16,7 @@
 package org.mortbay.util;
 import java.lang.reflect.Method;
 
-import org.apache.commons.logging.Log;
+import org.mortbay.log.Log;
 
 /*-----------------------------------------------------------------------*/
 /** Log Support class.

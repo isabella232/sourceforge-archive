@@ -29,8 +29,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Map;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.Log;
 import org.mortbay.util.Loader;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.TypeUtil;
@@ -49,7 +48,7 @@ import org.xml.sax.SAXException;
  */
 public class XmlConfiguration
 {
-    private static Log log = LogFactory.getLog(XmlConfiguration.class);
+    private static Log log = Log.getInstance(XmlConfiguration.class);
 
     private static Class[] __primitives =
     {

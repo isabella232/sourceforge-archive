@@ -21,8 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.Log;
 
 /* ------------------------------------------------------------ */
 /** URI Holder.
@@ -39,7 +38,7 @@ import org.apache.commons.logging.LogFactory;
 public class URI
     implements Cloneable
 {
-    private static Log log = LogFactory.getLog(URI.class);
+    private static Log log = Log.getInstance(URI.class);
 
 
     public static final String __CHARSET=

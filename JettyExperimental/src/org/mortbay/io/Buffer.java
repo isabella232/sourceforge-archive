@@ -159,14 +159,16 @@ public interface Buffer extends Cloneable
     /**
      * 
      * @return a <code>boolean</code> value true if the buffer is readonly. The buffer indexes may
-     * be modified, but the buffer contents may not.
+     * be modified, but the buffer contents may not. For example a View onto an immutable Buffer will be
+     * read only.
      */
     boolean isReadOnly();
     
     /**
      * 
      * @return a <code>boolean</code> value true if the buffer contents may change 
-     * via alternate paths than this buffer. 
+     * via alternate paths than this buffer.  If the contents of this buffer are to be used outside of the
+     * current context, then a copy must be made.
      */
     boolean isVolatile();
 

@@ -13,7 +13,9 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.thread;/* ------------------------------------------------------------ */
+package org.mortbay.thread;
+
+/* ------------------------------------------------------------ */
 /** A component LifeCycle.
  * Represents the life cycle interface for an abstract
  * software component. 
@@ -34,18 +36,41 @@ public interface LifeCycle
     /** Stop the LifeCycle.
      * The LifeCycle may wait for current activities to complete
      * normally, but it can be interrupted.
-     * @exception InterruptedException Stopping a lifecycle is rarely atomic
-     * and may be interrupted by another thread.  If this happens
-     * InterruptedException is throw and the component will be in an
-     * indeterminant state and should probably be discarded.
+     * @exception Exception An arbitrary exception may be thrown.
      */
     public void stop()
-        throws InterruptedException;
+        throws Exception;
    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if the LifeCycle is starting or has been started. 
+     */
+    public boolean isRunning();
+
     /* ------------------------------------------------------------ */
     /** 
      * @return True if the LifeCycle has been started. 
      */
     public boolean isStarted();
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if the LifeCycle is starting. 
+     */
+    public boolean isStarting();
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if the LifeCycle is stopping 
+     */
+    public boolean isStopping();
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if the LifeCycle is failed
+     */
+    public boolean isFailed();
+
+
 }
 

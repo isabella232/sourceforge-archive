@@ -40,27 +40,27 @@ import java.util.Set;
  * @author Juancarlo A�ez <juancarlo@modelistica.com>
  * @author Greg Wilkins <gregw@mortbay.com>
  */
-public class ThreadPool implements LifeCycle, Serializable
+public class ThreadPool extends AbstractLifeCycle implements Serializable
 {
+    
     private static int __id;
-
-    private final String _jobLock = "JOB";
-    private final String _joinLock = "JOIN";
+    private transient List _blocked;
+    private int _blockMs=10000;
     
     private boolean _daemon;
+
+    private transient int _id;
+    private transient int _idle;
+
+    private final String _jobLock = "JOB";
+    private transient List _jobs;
+    private final String _joinLock = "JOIN";
     private int _maxIdleTimeMs=10000;
     private int _maxThreads=255;
     private int _minThreads=1;
     private String _name;
     int _priority= Thread.NORM_PRIORITY;
     private boolean _queue;
-    private int _blockMs=10000;
-
-    private transient int _id;
-    private transient int _idle;
-    private transient List _blocked;
-    private transient List _jobs;
-    private transient boolean _started;
     private transient Set _threads;
 
     /* ------------------------------------------------------------------- */
@@ -168,14 +168,12 @@ public class ThreadPool implements LifeCycle, Serializable
     {
         return _daemon;
     }
-
-    /* ------------------------------------------------------------ */
-    /** Is the pool running jobs.
-     * @return True if start() has been called.
+    /**
+     * @return Returns the queue.
      */
-    public boolean isStarted()
+    public boolean isQueue()
     {
-        return _started;
+        return _queue;
     }
 
     /* ------------------------------------------------------------ */
@@ -183,11 +181,12 @@ public class ThreadPool implements LifeCycle, Serializable
     {
         synchronized (_joinLock)
         {
-            while (isStarted())
+            while (isRunning())
                 _joinLock.wait(getMaxIdleTimeMs());
         }
     }
 
+    /* ------------------------------------------------------------ */
     protected void newThread()
     {
         synchronized(_jobLock)
@@ -199,23 +198,28 @@ public class ThreadPool implements LifeCycle, Serializable
             thread.start();   
         }
     }
-
+    
     /* ------------------------------------------------------------ */
     /** Run job.
-     * Give a job to the pool. 
-     * @param job  If the job is derived from Runnable, the run method
-     * is called, otherwise it is passed as the argument to the handle
-     * method.
-     * @param waitMs
      * @return true if the job was given to a thread, false if no thread was
      * available.
      */
     public boolean run(Object job) 
     {
+        return run(job,_queue);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Run job.
+     * @return true if the job was given to a thread, false if no thread was
+     * available.
+     */
+    public boolean run(Object job, boolean queue) 
+    {
         boolean queued=false;
         synchronized(_jobLock)
         {	
-            if (!_started)
+            if (!isRunning())
                 return false;
             
             int blockMs = _blockMs;
@@ -226,12 +230,13 @@ public class ThreadPool implements LifeCycle, Serializable
                 // Are we at max size?
                 if (_threads.size()<_maxThreads)
                 {    
+                    // No
                     newThread();
                     break;
                 }
                  
                 // Can we queue?
-                if (_queue)
+                if (queue)
                     break;
                 
                 // pool is full
@@ -310,6 +315,14 @@ public class ThreadPool implements LifeCycle, Serializable
     {
         _name= name;
     }
+    
+    /**
+     * @param queue The queue to set.
+     */
+    public void setQueue(boolean queue)
+    {
+        _queue = queue;
+    }
 
     /* ------------------------------------------------------------ */
     /** Set the priority of the pool threads.
@@ -324,9 +337,8 @@ public class ThreadPool implements LifeCycle, Serializable
     /* Start the ThreadPool.
      * Construct the minimum number of threads.
      */
-    public void start() throws Exception
+    protected void doStart() throws Exception
     {
-        _started= true;
         _threads=new HashSet();
         _jobs=new LinkedList();
         _blocked=new LinkedList();
@@ -335,8 +347,7 @@ public class ThreadPool implements LifeCycle, Serializable
         for (int i=0;i<_minThreads;i++)
         {
             newThread();
-        }
-        
+        }   
     }
 
     /* ------------------------------------------------------------ */
@@ -347,10 +358,8 @@ public class ThreadPool implements LifeCycle, Serializable
      * min(getMaxStopTimeMs(),getMaxIdleTimeMs()), for all jobs to
      * stop, at which time killJob is called.
      */
-    public void stop() throws InterruptedException
-    {
-        _started= false;
-        
+    protected void doStop() throws Exception
+    {   
         // TODO STOP!
         
         synchronized (_joinLock)
@@ -372,6 +381,7 @@ public class ThreadPool implements LifeCycle, Serializable
         thread.interrupt();
     }
     
+
     
 
     /* ------------------------------------------------------------ */
@@ -397,7 +407,7 @@ public class ThreadPool implements LifeCycle, Serializable
         {
             try
             {
-                while (_started)
+                while (isRunning())
                 {
                     _job=null;
                     
@@ -405,15 +415,15 @@ public class ThreadPool implements LifeCycle, Serializable
                     {
                         synchronized (_jobLock)
                         {
-                            while(_jobs.size()==0 && _started)
+                            while(_jobs.size()==0 && isRunning())
                                 _jobLock.wait();
-                            if (_jobs.size()>0 && _started)
+                            if (_jobs.size()>0 && isRunning())
                                 _job=_jobs.remove(0);
                             if (_job!=null)
                                 _idle--;
                         }
                         
-                        if (_started && _job!=null)
+                        if (isRunning() && _job!=null)
                             handle(_job);
                     }
                     catch (InterruptedException e) {}

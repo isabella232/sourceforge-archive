@@ -17,8 +17,10 @@ package org.mortbay.http;
 
 import java.io.IOException;
 
+import org.mortbay.content.Content;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
+import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
 import org.mortbay.io.View;
@@ -355,6 +357,30 @@ public class HttpBuilder implements HttpTokens
         }
     }
     
+    public void addHeader(Buffer name,long value)
+    {
+        if (_state==STATE_START)
+            Portable.throwIllegalState("STATE==START");
+        if (_state==STATE_HEADER)
+        {
+            _buffer.put(name);
+            _buffer.put(COLON);
+            BufferUtil.putDecLong(_buffer,value);
+            if (_buffer.put(CRLF)<2)
+                Portable.throwIllegalState("Header>Buffer.capacity()");
+        }
+        
+        int header = HttpHeaders.CACHE.getOrdinal(name);
+        switch (header)
+        {
+            case HttpHeaders.CONTENT_LENGTH_ORDINAL:
+                _contentLengthSet=true;
+                _contentLength=(int)value;
+            	break;
+            	
+        }
+    }
+    
     public void addContent(Buffer content, boolean last) throws IOException
     {
         _last=_last || last;
@@ -622,44 +648,37 @@ public class HttpBuilder implements HttpTokens
         _state=STATE_CONTENT;
         
     }
-    
 
-    
-    public void setContent(HttpContent content) throws IOException
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param content_type_buffer
+     * @param v
+     */
+    public void addHeader(Buffer buffer, String v)
     {
-        Buffer v = content.getContentType();
+        addHeader(buffer,new ByteArrayBuffer(v));
+        
+    }
+
+
+    /* ------------------------------------------------------------ */
+    private void setContent(Content content) throws IOException
+    {
+        // TODO - lookup strings in BufferCaches.
+        String v = content.getMimeType();
         if (v!=null)
             addHeader(HttpHeaders.CONTENT_TYPE_BUFFER,v);
         
-        v=content.getContentEncoding();
+        v = content.getContentEncoding();
         if (v!=null)
             addHeader(HttpHeaders.CONTENT_ENCODING_BUFFER,v);
         
-        int l = content.getContentLength();
+        int l = content.getLength();
         if (l>=0)
             addHeader(HttpHeaders.CONTENT_LENGTH_BUFFER,l);
         
-        v=content.getLastModifiedBuffer();
-        if (v!=null)
-            addHeader(HttpHeaders.LAST_MODIFIED_BUFFER,v);
-        
-        v=content.getExpiryBuffer();
-        if (v!=null)
-            addHeader(HttpHeaders.EXPIRES_BUFFER,v);
-        
-        v=content.getContent();
-        if (v!=null)
-        {
-            if (_view==null)
-                _view=new View(v);
-            else
-                _view.update(v);
-            addContent(_view,LAST);
-            complete();
-        }
-        else
-            // TODO WRONG!!!!
-            content.generateContent(this);
+        // TODO
     }
     
 }

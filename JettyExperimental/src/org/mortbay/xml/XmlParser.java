@@ -30,8 +30,7 @@ import java.util.Stack;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.Log;
 import org.mortbay.util.LogSupport;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -56,7 +55,7 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class XmlParser 
 {
-    private static Log log = LogFactory.getLog(XmlParser.class);
+    private static Log log = Log.getInstance(XmlParser.class);
 
     private Map _redirectMap = new HashMap();
     private SAXParser _parser;
