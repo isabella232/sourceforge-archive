@@ -7,7 +7,6 @@ package com.mortbay.Tools;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintStream;
 
 /* ------------------------------------------------------------ */
 /** Filtered OutputStream that summarized throughput on stderr
@@ -104,7 +103,7 @@ public class SummaryFilterOutputStream extends FilterOutputStream
         int i=0;
         for (i=0; (_size==0 || i<_size) && i<len; i++)
         {
-            char c = (char)b[i];
+            char c = (char)b[off + i];
             if (Character.isISOControl(c) && c!=10 && c!=13)
                 buf.append('.');
             else 
