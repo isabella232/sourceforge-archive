@@ -1,11 +1,13 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.18 - 1 Mar 2004
  + Added log4j context repository to jettyplus
  + NPE guard for no-listener junit deployment
  + Improved log performance
  + Fixed j2se 1.3 problem with HttpFields
  + Suppress some more IOExceptions
+ + Default servlet respectes servlet path
 
 Jetty-4.2.17 - 1 Feb 2004
  + Fixed busy loop in threadpool run  
