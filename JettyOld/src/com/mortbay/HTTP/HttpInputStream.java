@@ -180,7 +180,15 @@ public class HttpInputStream extends ServletInputStream
 	    chunksize=(len<0)?-1:(chunksize-len);
 	}
 	else
-	    len=read(b,0,len);
+	{
+	    if (contentLength==0)
+		return -1;
+	    if (len>contentLength && contentLength>=0)
+		len=contentLength;
+	    len=in.read(b,0,len);
+	    if (contentLength>0 && len>0)
+		contentLength-=len;
+	}
 
 	return len;
     }
@@ -201,7 +209,7 @@ public class HttpInputStream extends ServletInputStream
 	{
 	    if (contentLength==0)
 		return -1;
-	    if (len>contentLength)
+	    if (len>contentLength && contentLength>=0)
 		len=contentLength;
 	    len=in.read(b,off,len);
 	    if (contentLength>0 && len>0)
