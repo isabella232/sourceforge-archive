@@ -170,8 +170,6 @@ public class SocketListener
     public void handleConnection(Socket socket)
         throws IOException
     {
-        socket.setTcpNoDelay(true);
-        
         HttpConnection connection =
             new HttpConnection(this,
                                socket.getInetAddress(),

@@ -181,11 +181,17 @@
   </Call>
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- Add tomcat examples web applications.                           -->
+  <!-- Add jakarta examples web applications.                          -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Call name="addWebApplication">
-    <Arg>/examples/*</Arg>
-    <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/examples</Arg>
+    <Arg>/servlets-examples/*</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/servlets-examples.war</Arg>
+    <Set name="extractWAR">false</Set>
+  </Call>
+  <Call name="addWebApplication">
+    <Arg>/jsp-examples/*</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/jsp-examples.war</Arg>
+    <Set name="extractWAR">true</Set>
   </Call>
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

@@ -345,19 +345,29 @@ public class WebApplicationContext
             Resource datatypesdtd = Resource.newSystemResource ("/javax/servlet/resources/datatypes.dtd");
 
 
+            xmlParser.redirectEntity("web.dtd",dtd23);
             xmlParser.redirectEntity("web-app_2_2.dtd",dtd22);
             xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN",dtd22);
-            xmlParser.redirectEntity("web.dtd",dtd23);
             xmlParser.redirectEntity("web-app_2_3.dtd",dtd23);
             xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN",dtd23);
-            xmlParser.redirectEntity("http://java.sun.com/xml/ns/j2ee/jsp_2_0.xsd", jsp20xsd);
-            xmlParser.redirectEntity("http://java.sun.com/xml/ns/j2ee/j2ee_1_4.xsd", j2ee14xsd);
-            xmlParser.redirectEntity("http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd", webapp24xsd);
-            xmlParser.redirectEntity("-//W3C//DTD XMLSCHEMA 200102//EN", schemadtd);
+            
+            xmlParser.redirectEntity("XMLSchema.dtd", schemadtd);
             xmlParser.redirectEntity("http://www.w3.org/2001/XMLSchema.dtd", schemadtd);
+            xmlParser.redirectEntity("-//W3C//DTD XMLSCHEMA 200102//EN", schemadtd);
+            
+            xmlParser.redirectEntity("jsp_2_0.xsd", jsp20xsd);
+            xmlParser.redirectEntity("http://java.sun.com/xml/ns/j2ee/jsp_2_0.xsd", jsp20xsd);
+            xmlParser.redirectEntity("j2ee_1_4.xsd", j2ee14xsd);
+            xmlParser.redirectEntity("http://java.sun.com/xml/ns/j2ee/j2ee_1_4.xsd", j2ee14xsd);
+            xmlParser.redirectEntity("web-app_2_4.xsd",webapp24xsd);
+            xmlParser.redirectEntity("http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd", webapp24xsd);
+            xmlParser.redirectEntity("xml.xsd", xmlxsd);
             xmlParser.redirectEntity("http://www.w3.org/2001/xml.xsd", xmlxsd);
+            xmlParser.redirectEntity("datatypes.dtd", datatypesdtd);
             xmlParser.redirectEntity("http://www.w3.org/2001/datatypes.dtd", datatypesdtd);
+            xmlParser.redirectEntity("j2ee_web_services_client_1_1.xsd", webservice11xsd);
             xmlParser.redirectEntity("http://www.ibm.com/webservices/xsd/j2ee_web_services_client_1_1.xsd", webservice11xsd);
+
             // Find the webapp
             resolveWebApp();
             

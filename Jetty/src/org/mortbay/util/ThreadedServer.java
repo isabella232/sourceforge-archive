@@ -34,6 +34,7 @@ abstract public class ThreadedServer extends ThreadPool
     private InetAddrPort _address = null;  
     private int _soTimeOut=-1;
     private int _lingerTimeSecs=30;
+    private boolean _tcpNoDelay=true;
     
     private transient Acceptor _acceptor=null;  
     private transient ServerSocket _listen = null;
@@ -242,6 +243,24 @@ abstract public class ThreadedServer extends ThreadPool
     }
     
     
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param tcpNoDelay if true then setTcpNoDelay(true) is called on accepted sockets.
+     */
+    public void setTcpNoDelay(boolean tcpNoDelay)
+    {
+        _tcpNoDelay=tcpNoDelay;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return true if setTcpNoDelay(true) is called on accepted sockets.
+     */
+    public boolean getTcpNoDelay()
+    {
+        return _tcpNoDelay;
+    }
+    
     
     /* ------------------------------------------------------------------- */
     /** Handle new connection.
@@ -286,6 +305,8 @@ abstract public class ThreadedServer extends ThreadPool
         Socket socket =(Socket)job;
         try
         {
+            if (_tcpNoDelay)
+                socket.setTcpNoDelay(true);
             handleConnection(socket);
         }
         catch(Exception e){Code.warning("Connection problem",e);}

@@ -138,6 +138,7 @@
     <delete file="${etc}/webdefault.xml" quiet="false"/>
     <delete file="${demo.webapps}/jetty/LICENSE.html" quiet="false"/>
     <delete file="${demo.webapps}/jetty/versions.txt" quiet="false"/>
+    <delete file="${webapps}/javadoc.war"/>
 
     <!--
     <delete quiet="false">

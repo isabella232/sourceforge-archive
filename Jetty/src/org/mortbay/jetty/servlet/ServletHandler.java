@@ -1037,7 +1037,7 @@ public class ServletHandler extends AbstractHttpHandler
         /* ------------------------------------------------------------ */
         public String getServerInfo()
         {
-            return Version.__Version;
+            return Version.__VersionImpl;
         }
 
 

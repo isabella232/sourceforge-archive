@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Update jakarta examples
+
 Jetty-5.0.alpha1 - 12 August 2003
  + Switched to mx4j
  + Improve combinations of Security Constraints

@@ -22,7 +22,7 @@ public class Version
     public static boolean __paranoid = 
         Boolean.getBoolean("org.mortbay.http.Version.paranoid");
     
-    public static String __Version="Jetty/4.2";
+    public static String __Version="Jetty/5.0";
     public static String __VersionImpl=__Version+".x";
     public static String __VersionDetail="Unknown";
     public static String __Container=
