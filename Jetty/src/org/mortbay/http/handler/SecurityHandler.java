@@ -6,13 +6,15 @@
 package org.mortbay.http.handler;
 
 import java.io.IOException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.BasicAuthenticator;
 import org.mortbay.http.ClientCertAuthenticator;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.SecurityConstraint;
-import org.mortbay.util.Code;
 
 /* ------------------------------------------------------------ */
 /** Handler to enforce SecurityConstraints.
@@ -22,6 +24,8 @@ import org.mortbay.util.Code;
  */
 public class SecurityHandler extends AbstractHttpHandler
 {   
+    private static Log log = LogFactory.getLog(SecurityHandler.class);
+
     /* ------------------------------------------------------------ */
     private String _authMethod=SecurityConstraint.__BASIC_AUTH;
 
@@ -51,7 +55,7 @@ public class SecurityHandler extends AbstractHttpHandler
             else if (SecurityConstraint.__CERT_AUTH.equalsIgnoreCase(_authMethod))
                 getHttpContext().setAuthenticator(new ClientCertAuthenticator());
             else
-                Code.warning("Unknown Authentication method:"+_authMethod);
+                log.warn("Unknown Authentication method:"+_authMethod);
         }
         
         super.start();

@@ -1,27 +1,26 @@
 package org.mortbay.jetty.plus;
 
 import java.io.IOException;
-import java.util.Hashtable;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.LinkRef;
-import javax.naming.NamingException;
-import javax.naming.Name;
-import javax.naming.NameAlreadyBoundException;
-import javax.naming.NameNotFoundException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.jetty.servlet.WebApplicationContext;
 import org.mortbay.jndi.Util;
-import org.mortbay.xml.XmlParser;
-import org.mortbay.util.Code;
-import org.mortbay.util.Log;
 import org.mortbay.util.TypeUtil;
+import org.mortbay.xml.XmlParser;
 
 /* ------------------------------------------------------------ */
 public class PlusWebAppContext extends WebApplicationContext
 {
+    private static Log log = LogFactory.getLog(PlusWebAppContext.class);
+
 
     private InitialContext _initialCtx = null;
  
@@ -84,11 +83,11 @@ public class PlusWebAppContext extends WebApplicationContext
             // bind it to the local context
             String name=node.getString("res-ref-name",false,true);
             
-            Code.debug ("Linking resource-ref java:comp/env/"+name+" to global "+name);
+            if(log.isDebugEnabled())log.debug("Linking resource-ref java:comp/env/"+name+" to global "+name);
             
             Object o = _initialCtx.lookup (name);
             
-            Code.debug ("Found Object in global namespace: "+o.toString());
+            if(log.isDebugEnabled())log.debug("Found Object in global namespace: "+o.toString());
             Util.bind (envCtx, name,  new LinkRef(name));
         }
         else if ("resource-env-ref".equals(element))
@@ -103,14 +102,14 @@ public class PlusWebAppContext extends WebApplicationContext
             // bind it to the local context
             String name=node.getString("resource-env-ref-name",false,true);
             
-            Code.debug ("Linking resource-env-ref java:comp/env/"+name +" to global "+name);
+            if(log.isDebugEnabled())log.debug("Linking resource-env-ref java:comp/env/"+name +" to global "+name);
             Util.bind (envCtx, name, new LinkRef(name));
         }
         else if ("ejb-ref".equals(element) ||
                  "ejb-local-ref".equals(element) ||
                  "security-domain".equals(element))
         {
-            Code.warning("Entry " + element+" => "+node+" is not supported yet");
+            log.warn("Entry " + element+" => "+node+" is not supported yet");
         }
         else
         {
@@ -135,10 +134,11 @@ public class PlusWebAppContext extends WebApplicationContext
         //create ENC for this webapp 
         Context compCtx =  (Context)_initialCtx.lookup ("java:comp");
         Context envCtx = compCtx.createSubcontext("env");
+        log.trace(envCtx);
 
         //bind UserTransaction
         compCtx.rebind ("UserTransaction", new LinkRef ("javax.transaction.UserTransaction"));
-        Code.debug ("Bound ref to javax.transaction.UserTransaction to java:comp/UserTransaction");   
+        if(log.isDebugEnabled())log.debug("Bound ref to javax.transaction.UserTransaction to java:comp/UserTransaction");   
     }
 
 
@@ -172,17 +172,17 @@ public class PlusWebAppContext extends WebApplicationContext
             try
             {
                 subCtx = (Context)subCtx.lookup (name.get(i));
-                Code.debug ("Subcontext "+name.get(i)+" already exists");
+                if(log.isDebugEnabled())log.debug("Subcontext "+name.get(i)+" already exists");
             }
             catch (NameNotFoundException e)
             {
                 subCtx = subCtx.createSubcontext(name.get(i));
-                Code.debug ("Subcontext "+name.get(i)+" created");
+                if(log.isDebugEnabled())log.debug("Subcontext "+name.get(i)+" created");
             }
         }
 
         subCtx.rebind (name.get(name.size() - 1), obj);
-        Code.debug ("Bound object to "+name.get(name.size() - 1));
+        if(log.isDebugEnabled())log.debug("Bound object to "+name.get(name.size() - 1));
     }
     */
 }

@@ -15,14 +15,15 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+
 import javax.security.auth.Subject;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import org.mortbay.jaas.JAASUserPrincipal;
 import org.mortbay.util.Loader;
-import org.mortbay.util.Code;
 
 
 
@@ -84,8 +85,8 @@ public class Servlet extends HttpServlet
                                                   
                                               },
                                               null);
-            
-            
+            log("Got "+o);
+           
             //authorization success if we get here
             writer.write ("<H1>Congratulations "+userPrincipal.getName()+" you are AUTHORIZED</h1>");
             

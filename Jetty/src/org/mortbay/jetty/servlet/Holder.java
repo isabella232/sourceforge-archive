@@ -12,8 +12,10 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpHandler;
-import org.mortbay.util.Code;
 import org.mortbay.util.LifeCycle;
 
 
@@ -27,6 +29,8 @@ public class Holder
     implements LifeCycle,
                Serializable
 {
+    private static Log log = LogFactory.getLog(Holder.class);
+
     /* ---------------------------------------------------------------- */
     protected HttpHandler _httpHandler;
     protected String _name;
@@ -163,7 +167,7 @@ public class Holder
         throws Exception
     {
         _class=_httpHandler.getHttpContext().loadClass(_className);
-        Code.debug("Started holder of ",_class);
+        if(log.isDebugEnabled())log.debug("Started holder of "+_class);
     }
     
     /* ------------------------------------------------------------ */

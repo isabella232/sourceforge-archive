@@ -9,14 +9,15 @@ package org.mortbay.http.ajp;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpListener;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpServer;
-import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
-import org.mortbay.util.Log;
 import org.mortbay.util.ThreadedServer;
 
 
@@ -36,6 +37,8 @@ public class AJP13Listener
     extends ThreadedServer
     implements HttpListener
 {
+    private static Log log = LogFactory.getLog(AJP13Listener.class);
+
     /* ------------------------------------------------------------------- */
     private HttpServer _server;
     private boolean _lastOut=false;
@@ -62,8 +65,6 @@ public class AJP13Listener
     /* ------------------------------------------------------------ */
     public void setHttpServer(HttpServer server)
     {
-        Code.assertTrue(_server==null || _server==server,
-                        "Cannot share listeners");
         _server=server;
     }
 
@@ -84,7 +85,7 @@ public class AJP13Listener
     {
         _bufferSize=size;
         if (_bufferSize>8192)
-            Code.warning("AJP Data buffer > 8192: "+size);
+            log.warn("AJP Data buffer > 8192: "+size);
     }
         
     /* ------------------------------------------------------------ */
@@ -126,8 +127,8 @@ public class AJP13Listener
         throws Exception
     {
         super.start();
-        Log.event("Started AJP13Listener on "+getInetAddrPort());
-        Log.event("NOTICE: AJP13 is not a secure protocol. Please protect the port "+
+        log.info("Started AJP13Listener on "+getInetAddrPort());
+        log.info("NOTICE: AJP13 is not a secure protocol. Please protect the port "+
                   getInetAddrPort());
     }
 
@@ -136,7 +137,7 @@ public class AJP13Listener
         throws InterruptedException
     {
         super.stop();
-        Log.event("Stopped AJP13Listener on "+getInetAddrPort());
+        log.info("Stopped AJP13Listener on "+getInetAddrPort());
     }
 
     /* ------------------------------------------------------------ */
@@ -187,7 +188,7 @@ public class AJP13Listener
             }
             if (!match)
             {
-                Code.warning("AJP13 Connection from un-approved host: "+inetAddress);
+                log.warn("AJP13 Connection from un-approved host: "+inetAddress);
                 return;
             }
         }
@@ -251,10 +252,10 @@ public class AJP13Listener
             getThreads()==getMaxThreads() &&
             getIdleThreads()<getMinThreads();
         if (low && !_lastLow)
-            Log.event("LOW ON THREADS: "+this);
+            log.info("LOW ON THREADS: "+this);
         else if (!low && _lastLow)
         {
-            Log.event("OK on threads: "+this);
+            log.info("OK on threads: "+this);
             _lastOut=false;
         }
         _lastLow=low;
@@ -271,7 +272,7 @@ public class AJP13Listener
             getThreads()==getMaxThreads() &&
             getIdleThreads()==0;
         if (out && !_lastOut)
-            Code.warning("OUT OF THREADS: "+this);
+            log.warn("OUT OF THREADS: "+this);
             
         _lastOut=out;
         return out;

@@ -58,9 +58,8 @@ public class B64Code
         }
         catch (UnsupportedEncodingException e)
         {
-            Code.fail(e);
+            throw new IllegalArgumentException(e.toString());
         }
-        return null;
     }
 
     // ------------------------------------------------------------------
@@ -159,9 +158,8 @@ public class B64Code
         }
         catch (UnsupportedEncodingException e)
         {
-            Code.fail(e);
+            throw new IllegalArgumentException(e.toString());
         }
-        return null;
     }
 
     // ------------------------------------------------------------------

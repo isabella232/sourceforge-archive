@@ -15,13 +15,17 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LifeCycleThread;
-import org.mortbay.util.Log;
+import org.mortbay.util.LogSupport;
 
 public class Listener extends LifeCycleThread
 {
+    private static Log log = LogFactory.getLog(Listener.class);
+
     Policy _policy;
     Selector _selector;
     ServerSocketChannel _acceptChannel;
@@ -111,7 +115,7 @@ public class Listener extends LifeCycleThread
 	// Bind the server socket to the local host and port
 	_acceptChannel.socket().bind(_address);
 
-        Log.event("Listening on "+_acceptChannel);
+        log.info("Listening on "+_acceptChannel);
         
         // create a selector;
         _selector=Selector.open();
@@ -119,7 +123,7 @@ public class Listener extends LifeCycleThread
 	// Register accepts on the server socket with the selector.
         _acceptChannel.register(_selector,SelectionKey.OP_ACCEPT);
 
-        Code.debug("Selector ",_selector);
+        if(log.isDebugEnabled())log.debug("Selector "+_selector);
         
         super.start();
         
@@ -130,16 +134,16 @@ public class Listener extends LifeCycleThread
         throws InterruptedException
     {
         super.stop();
-        try{_selector.close();}catch(Exception e){Code.warning(e);}
-        try{_acceptChannel.close();}catch(Exception e){Code.warning(e);}
+        try{_selector.close();}catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
+        try{_acceptChannel.close();}catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
     }
     
     /* ------------------------------------------------------------ */
     public void loop()
         throws Exception
     {
-        if (Code.debug())
-            Code.debug("client keys=",_selector.keys());
+        if (log.isDebugEnabled())
+            if(log.isDebugEnabled())log.debug("client keys="+_selector.keys());
         
         if (_selector.select()>0)
         {
@@ -151,8 +155,8 @@ public class Listener extends LifeCycleThread
                 iter.remove();
 
                 Channel channel = key.channel();
-                if (Code.debug())
-                    Code.debug("Ready key "+key+" for "+channel);
+                if (log.isDebugEnabled())
+                    if(log.isDebugEnabled())log.debug("Ready key "+key+" for "+channel);
 
                 if (!channel.isOpen())
                     key.cancel();
@@ -185,7 +189,7 @@ public class Listener extends LifeCycleThread
                     }
                     catch(ClosedChannelException e)
                     {
-                        Code.ignore(e);
+                        log.trace(LogSupport.IGNORED,e);
                     }
                 }
             }

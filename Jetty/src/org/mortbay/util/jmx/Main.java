@@ -7,13 +7,16 @@ package org.mortbay.util.jmx;
 
 import java.util.Iterator;
 import java.util.Set;
+
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
 import javax.management.ObjectInstance;
 import javax.management.ObjectName;
 import javax.management.loading.MLet;
-import org.mortbay.util.Code;
-import org.mortbay.util.Log;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.util.LogSupport;
 
 /* ------------------------------------------------------------ */
 /** 
@@ -23,6 +26,8 @@ import org.mortbay.util.Log;
  */
 public class Main
 {
+    private static Log log = LogFactory.getLog(Main.class);
+
     static MLet mlet;
         
     /* ------------------------------------------------------------ */
@@ -36,14 +41,14 @@ public class Main
             // Create a MBeanServer
             final MBeanServer server =
                 MBeanServerFactory.createMBeanServer(ModelMBeanImpl.getDefaultDomain());
-            Code.debug("MBeanServer=",server);
+            if(log.isDebugEnabled())log.debug("MBeanServer="+server);
             
             // Create and register the MLet
             mlet = new MLet();
             server.registerMBean(mlet,
                                  new ObjectName(server.getDefaultDomain(),
                                                 "service", "MLet"));
-            Code.debug("MLet=",mlet);
+            if(log.isDebugEnabled())log.debug("MLet="+mlet);
             
             // Set MLet as classloader for this app
             Thread.currentThread().setContextClassLoader(mlet);
@@ -52,7 +57,7 @@ public class Main
             // load config files
             for (int i=0;i<arg.length;i++)
             {
-                Log.event("Load "+arg[i]);
+                log.info("Load "+arg[i]);
                 Set beans=mlet.getMBeansFromURL(arg[i]);
                 Iterator iter=beans.iterator();
                 while(iter.hasNext())
@@ -61,7 +66,7 @@ public class Main
                     if (bean instanceof Throwable)
                     {
                         iter.remove();
-                        Code.warning((Throwable)bean);
+                        log.warn((Throwable)bean);
                     }
                     else if (bean instanceof ObjectInstance)
                     {
@@ -69,19 +74,19 @@ public class Main
 
                         if ("com.sun.jdmk.comm.HtmlAdaptorServer".equals(oi.getClassName()))
                         {
-                            Log.event("Starting com.sun.jdmk.comm.HtmlAdaptorServer");
+                            log.info("Starting com.sun.jdmk.comm.HtmlAdaptorServer");
                             try{server.invoke(oi.getObjectName(),"start",null,null);}
-                            catch(Exception e){Code.warning(e);}
+                            catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
                         }
                     }
                 }
                 
-                Code.debug("Loaded "+beans.size(),"MBeans: ",beans);
+                if(log.isDebugEnabled())log.debug("Loaded "+beans.size()+" MBeans: "+beans);
             }
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
     }
 

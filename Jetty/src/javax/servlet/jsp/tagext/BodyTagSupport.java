@@ -54,14 +54,8 @@
  */
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import javax.servlet.*;
-
-import java.io.Writer;
-
-import java.util.Hashtable;
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.JspWriter;
 
 /**
  * A base class for defining tag handlers implementing BodyTag.

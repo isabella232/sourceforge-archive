@@ -5,23 +5,16 @@
 
 package org.mortbay.jaas.spi;
 
-import org.mortbay.util.Code;
-import org.mortbay.util.Credential;
-import org.mortbay.util.Loader;
-import org.mortbay.util.Log;
-import org.mortbay.jaas.JAASGroup;
-import org.mortbay.jaas.JAASPrincipal;
-import org.mortbay.jaas.JAASRole;
-import org.mortbay.jaas.callback.ObjectCallback;
 import java.io.IOException;
 import java.security.Principal;
 import java.security.acl.Group;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
+
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -29,6 +22,15 @@ import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.LoginException;
 import javax.security.auth.spi.LoginModule;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.jaas.JAASGroup;
+import org.mortbay.jaas.JAASPrincipal;
+import org.mortbay.jaas.JAASRole;
+import org.mortbay.jaas.callback.ObjectCallback;
+import org.mortbay.util.Credential;
+import org.mortbay.util.Loader;
 
 
 
@@ -53,6 +55,8 @@ import javax.security.auth.spi.LoginModule;
  */
 public class JDBCLoginModule implements LoginModule
 {
+    private static Log log = LogFactory.getLog(JDBCLoginModule.class);
+
     private CallbackHandler callbackHandler = null;
  
     private boolean authState = false;
@@ -249,8 +253,8 @@ public class JDBCLoginModule implements LoginModule
             
             rolesQuery = "select "+dbUserRoleTableRoleField+" from "+dbUserRoleTable+" where "+dbUserRoleTableUserField+"=?";
             
-            Code.debug ("userQuery = "+userQuery);
-            Code.debug ("rolesQuery = "+rolesQuery);
+            if(log.isDebugEnabled())log.debug("userQuery = "+userQuery);
+            if(log.isDebugEnabled())log.debug("rolesQuery = "+rolesQuery);
             
             this.subject = subject;
             this.callbackHandler = callbackHandler;
@@ -290,7 +294,7 @@ public class JDBCLoginModule implements LoginModule
                   (dbUrl != null)))
                 throw new IllegalStateException ("Database connection information not configured");
 
-            Code.debug("Connecting using dbDriver="+dbDriver+", dbUserName="+dbUserName+", dbPassword="+dbUrl);
+            if(log.isDebugEnabled())log.debug("Connecting using dbDriver="+dbDriver+"+ dbUserName="+dbUserName+", dbPassword="+dbUrl);
             
             connection = DriverManager.getConnection (dbUrl,
                                                       dbUserName,

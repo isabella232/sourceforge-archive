@@ -8,6 +8,9 @@ package org.mortbay.util;
 import java.io.Serializable;
 import java.util.HashMap;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /* ------------------------------------------------------------ */
 /** A pool of Objects.
  * <p>
@@ -18,6 +21,8 @@ import java.util.HashMap;
 public class Pool
     implements LifeCycle, Serializable
 {
+    private static Log log = LogFactory.getLog(Pool.class);
+
     /* ------------------------------------------------------------ */
     static int __max = 
         Integer.getInteger("POOL_MAX",256).intValue();
@@ -427,7 +432,7 @@ public class Pool
             }
             catch (Exception e)
             {
-                Code.warning(e);
+                log.warn(LogSupport.EXCEPTION,e);
                 throw new java.io.InvalidObjectException(e.toString());
             }
         }

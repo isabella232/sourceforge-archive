@@ -5,7 +5,6 @@
 // ---------------------------------------------------------------------------
 
 package org.mortbay.ftp;
-import org.mortbay.util.Code;
 
 public class FtpReplyException extends FtpException
 {
@@ -22,7 +21,6 @@ public class FtpReplyException extends FtpException
     /* ------------------------------------------------------------------ */
     static String replyDescription(CmdReply reply)
     {
-        Code.assertTrue(reply!=null,"Use FtpCmdStreamException for null reply");
         return reply.toString();
     }
 }

@@ -7,9 +7,11 @@ package org.mortbay.http.handler;
 
 import java.io.IOException;
 import java.util.Enumeration;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;

@@ -9,7 +9,9 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.StringUtil;
 
@@ -32,6 +34,8 @@ import org.mortbay.util.StringUtil;
  */
 public class HttpInputStream extends FilterInputStream
 {
+    private static Log log = LogFactory.getLog(HttpInputStream.class);
+
     /* ------------------------------------------------------------ */
     private static ClosedStream __closedStream=new ClosedStream();
     
@@ -59,7 +63,7 @@ public class HttpInputStream extends FilterInputStream
         }
         catch(UnsupportedEncodingException e)
         {
-            Code.fail(e);
+            log.fatal(e); System.exit(1);
         }
         this.in=_realIn;
     }
@@ -135,8 +139,7 @@ public class HttpInputStream extends FilterInputStream
         if ((_deChunker!=null && _deChunker._chunkSize>0) ||
             _realIn.getByteLimit()>0)
             throw new IllegalStateException("Unread input");
-        if (Code.verbose())
-            Code.debug("resetStream()");
+        log.trace("resetStream()");
         in=_realIn;
         if (_deChunker!=null)
             _deChunker.resetStream();

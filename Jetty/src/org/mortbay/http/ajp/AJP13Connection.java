@@ -6,12 +6,18 @@
 package org.mortbay.http.ajp;
 
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpFields;
@@ -19,11 +25,8 @@ import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.Version;
-import org.mortbay.util.Code;
 import org.mortbay.util.LineInput;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.io.ByteArrayInputStream;
+import org.mortbay.util.LogSupport;
 
 /* ------------------------------------------------------------ */
 /** 
@@ -32,6 +35,8 @@ import java.io.ByteArrayInputStream;
  */
 public class AJP13Connection extends HttpConnection
 {
+    private static Log log = LogFactory.getLog(AJP13Connection.class);
+
     private AJP13Listener _listener;
     private AJP13InputStream _ajpIn;
     private AJP13OutputStream _ajpOut;
@@ -163,13 +168,13 @@ public class AJP13Connection extends HttpConnection
             }
             catch (IOException e)
             {
-                Code.ignore(e);
+                log.trace(LogSupport.IGNORED,e);
                 return false;
             }
             
             int type=packet.getByte();
-            if (Code.debug())
-                Code.debug("AJP13 type="+type+" size="+packet.unconsumedData());
+            if (log.isDebugEnabled())
+                if(log.isDebugEnabled())log.debug("AJP13 type="+type+" size="+packet.unconsumedData());
             
             switch (type)
             {
@@ -213,7 +218,7 @@ public class AJP13Connection extends HttpConnection
                             request.setAttribute(value,packet.getString());
                             break;
                         case 9: // SSL session
-                            //Code.warning("not implemented: sslsession="+value);
+                            //log.warn("not implemented: sslsession="+value);
                             break;
                         case 8: // SSL cipher
                             request.setAttribute("javax.servlet.request.cipher_suite",value);
@@ -245,7 +250,7 @@ public class AJP13Connection extends HttpConnection
                         case 2:  // servlet path not implemented
                         case 1:  // context not implemented
                         default:
-                            Code.warning("Unknown attr: "+attr+"="+value);  
+                            log.warn("Unknown attr: "+attr+"="+value);  
                       }
                       
                       attr=packet.getByte();
@@ -269,32 +274,32 @@ public class AJP13Connection extends HttpConnection
                   response.setField(HttpFields.__Server,Version.__VersionDetail);
                   
                   // Service request
-                  Code.debug("REQUEST:\n",request);
+                  if(log.isDebugEnabled())log.debug("REQUEST:\n"+request);
                   context=service(request,response);
-                  Code.debug("RESPONSE:\n",response);
+                  if(log.isDebugEnabled())log.debug("RESPONSE:\n"+response);
 
                   break;
                   
               default:
-                  Code.debug("Ignored: "+packet);
+                  if(log.isDebugEnabled())log.debug("Ignored: "+packet);
                   _persistent=false;
             }
   
         }
         catch (SocketException e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
             _persistent=false; 
         }
         catch (Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             _persistent=false; 
             try{
                 if (gotRequest)
                     _ajpOut.close();
             }
-            catch (IOException e2){Code.ignore(e2);}
+            catch (IOException e2){log.trace(LogSupport.IGNORED,e2);}
         }
         finally
         {
@@ -324,7 +329,7 @@ public class AJP13Connection extends HttpConnection
             }
             catch (Exception e)
             {
-                Code.debug(e);
+                log.debug(LogSupport.EXCEPTION,e);
                 _persistent=false;
             }
             finally
@@ -342,14 +347,14 @@ public class AJP13Connection extends HttpConnection
     protected void firstWrite()
         throws IOException
     {
-        Code.debug("ajp13 firstWrite()");
+        log.debug("ajp13 firstWrite()");
     }
     
     /* ------------------------------------------------------------ */
     protected void commit()
         throws IOException
     {
-        Code.debug("ajp13 commit()");
+        log.debug("ajp13 commit()");
         if (_response.isCommitted())
             return;
         _request.setHandled(true);

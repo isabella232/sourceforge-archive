@@ -61,7 +61,6 @@
 
 package javax.servlet.http;
 
-import java.util.EventObject;
 
 
 /**

@@ -12,8 +12,11 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Locale;
 import java.util.TimeZone;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.DateCache;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.RolloverFileOutputStream;
 import org.mortbay.util.StringUtil;
 
@@ -27,6 +30,8 @@ import org.mortbay.util.StringUtil;
  */
 public class NCSARequestLog implements RequestLog
 {
+    private static Log log = LogFactory.getLog(NCSARequestLog.class);
+
     private String _filename;
     private boolean _extended;
     private boolean _append;
@@ -281,9 +286,9 @@ public class NCSARequestLog implements RequestLog
     /* ------------------------------------------------------------ */
     public void stop()
     {
-        try{if (_writer!=null)_writer.flush();} catch (IOException e){Code.ignore(e);}
+        try{if (_writer!=null)_writer.flush();} catch (IOException e){log.trace(LogSupport.IGNORED,e);}
         if (_out!=null && _closeOut)
-            try{_out.close();}catch(IOException e){Code.ignore(e);}
+            try{_out.close();}catch(IOException e){log.trace(LogSupport.IGNORED,e);}
         _out=null;
         _fileOut=null;
         _closeOut=false;
@@ -365,7 +370,7 @@ public class NCSARequestLog implements RequestLog
         }
         catch(IOException e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
     }
     

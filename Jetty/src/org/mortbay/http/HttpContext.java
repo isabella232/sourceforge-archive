@@ -8,9 +8,9 @@ package org.mortbay.http;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.security.Permission;
 import java.security.PermissionCollection;
@@ -26,13 +26,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.util.CachedResource;
-import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LifeCycle;
-import org.mortbay.util.Log;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
 import org.mortbay.util.StringUtil;
@@ -68,6 +70,8 @@ import org.mortbay.util.URI;
 public class HttpContext implements LifeCycle,
                                     Serializable
 {
+    private static Log log = LogFactory.getLog(HttpContext.class);
+
     /* ------------------------------------------------------------ */
     /** File class path attribute.
      * If this name is set as a context init parameter, then the attribute
@@ -511,7 +515,7 @@ public class HttpContext implements LifeCycle,
     {
         HttpHandler handler = _handlersArray[i];
         if (handler.isStarted())
-            try{handler.stop();} catch (InterruptedException e){Code.warning(e);}
+            try{handler.stop();} catch (InterruptedException e){log.warn(LogSupport.EXCEPTION,e);}
         _handlers.remove(i);
         _handlersArray=null;
         return handler;
@@ -524,7 +528,7 @@ public class HttpContext implements LifeCycle,
     public synchronized void removeHandler(HttpHandler handler)
     {
         if (handler.isStarted())
-            try{handler.stop();} catch (InterruptedException e){Code.warning(e);}
+            try{handler.stop();} catch (InterruptedException e){log.warn(LogSupport.EXCEPTION,e);}
         _handlers.remove(handler);
         _handlersArray=null;
     }
@@ -649,11 +653,11 @@ public class HttpContext implements LifeCycle,
     {
         try{
             _resourceBase=Resource.newResource(resourceBase);
-            Code.debug("resourceBase=",_resourceBase," for ", this);
+            if(log.isDebugEnabled())log.debug("resourceBase="+_resourceBase+" for "+this);
         }
         catch(IOException e)
         {
-            Code.debug(e);
+            log.debug(LogSupport.EXCEPTION,e);
             throw new IllegalArgumentException(resourceBase+":"+e.toString());
         }
     }
@@ -739,7 +743,7 @@ public class HttpContext implements LifeCycle,
             welcomeFile.startsWith(java.io.File.separator) ||
             welcomeFile.endsWith("/") ||
             welcomeFile.endsWith(java.io.File.separator))
-            Code.warning("Invalid welcome file: "+welcomeFile);
+            log.warn("Invalid welcome file: "+welcomeFile);
         List list = new ArrayList(Arrays.asList(_welcomes));
         list.add(welcomeFile);
         _welcomes=(String[])list.toArray(_welcomes);
@@ -779,7 +783,7 @@ public class HttpContext implements LifeCycle,
             CachedResource cached = (CachedResource)_cache.get(pathInContext);
             if (cached!=null)
             {
-                if (Code.verbose()) Code.debug("CACHE HIT: ",cached);
+                if(log.isTraceEnabled())log.trace("CACHE HIT: "+cached);
                 CachedMetaData cmd = (CachedMetaData)cached.getAssociate();
                 if (cmd!=null && cmd.isValid())
                     return cached;
@@ -787,7 +791,7 @@ public class HttpContext implements LifeCycle,
 
             // Make the resource
             resource=_resourceBase.addPath(_resourceBase.encode(pathInContext));
-            if (Code.verbose()) Code.debug("CACHE MISS: ",resource);
+            if(log.isTraceEnabled())log.trace("CACHE MISS: "+resource);
             if (resource==null)
                 return null;
 
@@ -795,7 +799,7 @@ public class HttpContext implements LifeCycle,
             // Check for file aliasing
             if (resource.getAlias()!=null)
             {
-                Code.warning("Alias request of '"+resource.getAlias()+
+                log.warn("Alias request of '"+resource.getAlias()+
                              "' for '"+resource+"'");
                 return null;
             }
@@ -825,7 +829,7 @@ public class HttpContext implements LifeCycle,
                         _leastRecentlyUsed.invalidate();
 
                     cached=resource.cache();
-                    if (Code.verbose()) Code.debug("CACHED: ",resource);
+                    if(log.isTraceEnabled())log.trace("CACHED: "+resource);
                     new CachedMetaData(cached,pathInContext);
                     return cached;
                 }
@@ -989,7 +993,7 @@ public class HttpContext implements LifeCycle,
     {
         _classPath=classPath;
         if (isStarted())
-            Code.warning("classpath set while started");
+            log.warn("classpath set while started");
     }
 
     /* ------------------------------------------------------------ */
@@ -1003,7 +1007,7 @@ public class HttpContext implements LifeCycle,
     public void setClassPaths(Resource lib, boolean append)
     {
         if (isStarted())
-            Code.warning("classpaths set while started");
+            log.warn("classpaths set while started");
 
         if (lib.exists() && lib.isDirectory())
         {
@@ -1026,7 +1030,7 @@ public class HttpContext implements LifeCycle,
                 }
                 catch (Exception ex)
                 {
-                    Code.warning(ex);
+                    log.warn(LogSupport.EXCEPTION,ex);
                 }
             }
 
@@ -1089,7 +1093,7 @@ public class HttpContext implements LifeCycle,
         if (dir!=null)
         {
             try{dir=new File(dir.getCanonicalPath());}
-            catch (IOException e){Code.warning(e);}
+            catch (IOException e){log.warn(LogSupport.EXCEPTION,e);}
         }
 
         if (dir!=null && !dir.exists())
@@ -1139,14 +1143,14 @@ public class HttpContext implements LifeCycle,
 
                 if (_tmpDir.isDirectory() && _tmpDir.canWrite())
                 {
-                    Code.debug("Converted to File ",_tmpDir," for ",this);
+                    if(log.isDebugEnabled())log.debug("Converted to File "+_tmpDir+" for "+this);
                     setAttribute("javax.servlet.context.tempdir",_tmpDir);
                     return _tmpDir;
                 }
             }
             catch(Exception e)
             {
-                Code.warning(e);
+                log.warn(LogSupport.EXCEPTION,e);
             }
         }
 
@@ -1174,9 +1178,9 @@ public class HttpContext implements LifeCycle,
             _tmpDir=new File(System.getProperty("java.io.tmpdir"),temp);
             if (_tmpDir.exists())
             {
-                Code.debug("Delete existing temp dir ",_tmpDir," for ",this);
+                if(log.isDebugEnabled())log.debug("Delete existing temp dir "+_tmpDir+" for "+this);
                 if (!IO.delete(_tmpDir))
-                    Code.debug("Failed to delete temp dir "+_tmpDir);
+                    if(log.isDebugEnabled())log.debug("Failed to delete temp dir "+_tmpDir);
 
                 if (_tmpDir.exists())
                 {
@@ -1184,18 +1188,18 @@ public class HttpContext implements LifeCycle,
                     _tmpDir=File.createTempFile(temp+"_","");
                     if (_tmpDir.exists())
                         _tmpDir.delete();
-                    Code.warning("Can't reuse "+old+", using "+_tmpDir);
+                    log.warn("Can't reuse "+old+", using "+_tmpDir);
                 }
             }
 
             _tmpDir.mkdir();
             _tmpDir.deleteOnExit();
-            Code.debug("Created temp dir ",_tmpDir," for ",this);
+            if(log.isDebugEnabled())log.debug("Created temp dir "+_tmpDir+" for "+this);
         }
         catch(Exception e)
         {
             _tmpDir=null;
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
 
         if (_tmpDir==null)
@@ -1207,11 +1211,11 @@ public class HttpContext implements LifeCycle,
                     _tmpDir.delete();
                 _tmpDir.mkdir();
                 _tmpDir.deleteOnExit();
-                Code.debug("Created temp dir ",_tmpDir," for ",this);
+                if(log.isDebugEnabled())log.debug("Created temp dir "+_tmpDir+" for "+this);
             }
             catch(IOException e)
             {
-                Code.fail(e);
+                log.fatal(e); System.exit(1);
             }
         }
 
@@ -1293,8 +1297,8 @@ public class HttpContext implements LifeCycle,
             if (_parent==null)
                 _parent=this.getClass().getClassLoader();
 
-            Code.debug("Init classloader from ",_classPath,
-                       ", ",_parent," for ",this);
+            if(log.isDebugEnabled())log.debug("Init classloader from "+_classPath+
+                       ", "+_parent+" for "+this);
 
             if (forceContextLoader || _classPath!=null || _permissions!=null)
             {
@@ -1316,7 +1320,7 @@ public class HttpContext implements LifeCycle,
             try{initClassLoader(false);}
             catch(Exception e)
             {
-                Code.warning(e);
+                log.warn(LogSupport.EXCEPTION,e);
                 return null;
             }
         }
@@ -1380,7 +1384,7 @@ public class HttpContext implements LifeCycle,
         }
         scs.add(sc);
 
-        Code.debug("added ",sc," at ",pathSpec);
+        if(log.isDebugEnabled())log.debug("added "+sc+" at "+pathSpec);
     }
 
     /* ------------------------------------------------------------ */
@@ -1546,7 +1550,7 @@ public class HttpContext implements LifeCycle,
                 Socket s=(Socket)o;
                 if (!_hosts.contains(s.getLocalAddress()))
                 {
-                    Code.debug(s.getLocalAddress()," not in ",_hosts);
+                    if(log.isDebugEnabled())log.debug(s.getLocalAddress()+" not in "+_hosts);
                     return false;
                 }
             }
@@ -1584,8 +1588,8 @@ public class HttpContext implements LifeCycle,
                 buf.append("?"+q);
             response.setField(HttpFields.__Location,
                               buf.toString());
-            if (Code.debug())
-                Code.warning(this+" consumed all of path "+
+            if (log.isDebugEnabled())
+                log.warn(this+" consumed all of path "+
                              request.getPath()+
                              ", redirect to "+buf.toString());
             response.sendError(302);
@@ -1646,11 +1650,11 @@ public class HttpContext implements LifeCycle,
 
                 if (!handler.isStarted())
                 {
-                    Code.debug(handler," not started in ",this);
+                    if(log.isDebugEnabled())log.debug(handler+" not started in "+this);
                     continue;
                 }
 
-                Code.debug("Handler ",handler);
+                if(log.isDebugEnabled())log.debug("Handler "+handler);
 
                 handler.handle(pathInContext,
                                pathParams,
@@ -1659,7 +1663,7 @@ public class HttpContext implements LifeCycle,
 
                 if (request.isHandled())
                 {
-                    Code.debug("Handled by ",handler);
+                    if(log.isDebugEnabled())log.debug("Handled by "+handler);
                     return true;
                 }
             }
@@ -1764,7 +1768,7 @@ public class HttpContext implements LifeCycle,
         {
             _userRealm=_httpServer.getRealm(_realmName);
             if (_userRealm==null)
-                Code.warning("No Realm: "+_realmName);
+                log.warn("No Realm: "+_realmName);
         }
 
         // setup the context loader
@@ -1794,7 +1798,7 @@ public class HttpContext implements LifeCycle,
             _started=true;
         }
 
-        Log.event("Started "+this);
+        log.info("Started "+this);
     }
 
     /* ------------------------------------------------------------ */
@@ -1841,7 +1845,7 @@ public class HttpContext implements LifeCycle,
         while (graceful && _statsOn && _requestsActive>0 && _httpServer!=null)
             try {Thread.sleep(100);}
             catch (InterruptedException e){throw e;}
-            catch (Exception e){Code.ignore(e);}
+            catch (Exception e){log.trace(LogSupport.IGNORED,e);}
 
         stop();
     }
@@ -1873,7 +1877,7 @@ public class HttpContext implements LifeCycle,
                     if (handler.isStarted())
                     {
                         try{handler.stop();}
-                        catch(Exception e){Code.warning(e);}
+                        catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
                     }
                 }
                 
@@ -1890,7 +1894,7 @@ public class HttpContext implements LifeCycle,
 	_constraintMap.clear();
         if (_attributes!=null)
             _attributes.clear();
-        Log.event("Stopped "+this);
+        log.info("Stopped "+this);
     }
 
 
@@ -1951,7 +1955,7 @@ public class HttpContext implements LifeCycle,
      */
     public void setStatsOn(boolean on)
     {
-        Log.event("setStatsOn "+on+" for "+this);
+        log.info("setStatsOn "+on+" for "+this);
         _statsOn=on;
         statsReset();
     }

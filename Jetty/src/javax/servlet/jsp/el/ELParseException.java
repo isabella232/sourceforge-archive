@@ -54,7 +54,6 @@
 
 package javax.servlet.jsp.el;
 
-import java.text.MessageFormat;
 
 /**
  * Represents a parsing error encountered while parsing an EL expression.

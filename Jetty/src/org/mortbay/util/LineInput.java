@@ -12,6 +12,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 
 /* ------------------------------------------------------------ */
 /** Fast LineInput InputStream.
@@ -38,6 +41,8 @@ import java.io.UnsupportedEncodingException;
  */
 public class LineInput extends FilterInputStream                           
 {
+    private static Log log = LogFactory.getLog(LineInput.class);
+
     /* ------------------------------------------------------------ */
     private byte _buf[];
     private ByteBuffer _byteBuffer;
@@ -178,7 +183,7 @@ public class LineInput extends FilterInputStream
             }
             catch(UnsupportedEncodingException e)
             {
-                Code.warning(e);
+                log.warn(LogSupport.EXCEPTION,e);
             }
         }
         _mark=-1;

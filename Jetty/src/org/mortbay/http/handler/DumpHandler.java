@@ -15,12 +15,16 @@ import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
 import javax.servlet.http.Cookie;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.util.Code;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
@@ -33,6 +37,8 @@ import org.mortbay.util.StringUtil;
  */
 public class DumpHandler extends AbstractHttpHandler
 {
+    private static Log log = LogFactory.getLog(DumpHandler.class);
+
     /* ----------------------------------------------------------------- */
     public String realPath(String pathSpec, String path)
     {
@@ -55,7 +61,7 @@ public class DumpHandler extends AbstractHttpHandler
             !HttpRequest.__POST.equals(request.getMethod()))
             return;
 
-        Code.debug("Dump");
+        log.debug("Dump");
         
         response.setField(HttpFields.__ContentType,
                           HttpFields.__TextHtml);
@@ -116,7 +122,7 @@ public class DumpHandler extends AbstractHttpHandler
             {
                 writer.write("</PRE>\n<H3>BAD Set-Cookie:</H3>\n<PRE>");
                 writer.write(e.toString());
-                Code.ignore(e);
+                log.trace(LogSupport.IGNORED,e);
             }
         }
         
@@ -158,7 +164,7 @@ public class DumpHandler extends AbstractHttpHandler
         }
         catch(IOException e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
             writer.write(e.toString());
         }
         

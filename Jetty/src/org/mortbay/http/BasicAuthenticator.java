@@ -6,11 +6,14 @@
 package org.mortbay.http;
 
 import java.io.IOException;
+import java.security.Principal;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.util.B64Code;
-import org.mortbay.util.Code;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.StringUtil;
-import java.security.Principal;
 
 /* ------------------------------------------------------------ */
 /** BASIC authentication.
@@ -20,6 +23,8 @@ import java.security.Principal;
  */
 public class BasicAuthenticator implements Authenticator
 {
+    private static Log log = LogFactory.getLog(BasicAuthenticator.class);
+
     /* ------------------------------------------------------------ */
     /** 
      * @return UserPrinciple if authenticated or null if not. If
@@ -42,7 +47,7 @@ public class BasicAuthenticator implements Authenticator
         {
             try
             {
-                Code.debug("Credentials: ",credentials);
+                if(log.isDebugEnabled())log.debug("Credentials: "+credentials);
                 credentials = credentials.substring(credentials.indexOf(' ')+1);
                 credentials = B64Code.decode(credentials,StringUtil.__ISO_8859_1);
                 int i = credentials.indexOf(':');
@@ -63,12 +68,12 @@ public class BasicAuthenticator implements Authenticator
                     request.setUserPrincipal(user);                
                 }
                 else if (check)
-                    Code.warning("AUTH FAILURE: user "+username);
+                    log.warn("AUTH FAILURE: user "+username);
             }
             catch (Exception e)
             {
-                Code.warning("AUTH FAILURE: "+e.toString());
-                Code.ignore(e);
+                log.warn("AUTH FAILURE: "+e.toString());
+                log.trace(LogSupport.IGNORED,e);
             }
         }
 

@@ -10,11 +10,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.Vector;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpServer;
 import org.mortbay.jetty.Server;
-import org.mortbay.util.Code;
-import org.mortbay.util.Log;
-import org.mortbay.util.OutputStreamLogSink;
+import org.mortbay.util.LogSupport;
 
 /* ------------------------------------------------------------ */
 /** Run Jetty as a Win32 service.
@@ -34,6 +35,8 @@ import org.mortbay.util.OutputStreamLogSink;
  */
 public class Service 
 {
+    private static Log log = LogFactory.getLog(Service.class);
+
     /* ------------------------------------------------------------ */
     static String serviceLogFile=
     System.getProperty("SERVICE_LOG_FILE","logs"+File.separator+"yyyy_mm_dd.service.log");
@@ -103,7 +106,7 @@ public class Service
                     }
                     catch(Exception e)
                     {
-                        Code.warning(_configs.get(i)+" configuration problem: ",e);
+                        log.warn(_configs.get(i)+" configuration problem: ",e);
                     }
                 }
             }
@@ -131,7 +134,7 @@ public class Service
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
     }
     
@@ -170,7 +173,7 @@ public class Service
         }
         else
         {
-            Code.notImplemented();
+            log.warn(LogSupport.NOT_IMPLEMENTED);
         }
     }
     
@@ -186,7 +189,7 @@ public class Service
                 PrintStream stdout = new PrintStream(new FileOutputStream(opt));
                 System.setOut(stdout);
             }
-            catch(Exception e){Code.warning(e);}
+            catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
         }
 		
         opt = System.getProperty("SERVICE_ERR");
@@ -197,22 +200,9 @@ public class Service
                 PrintStream stderr = new PrintStream(new FileOutputStream(opt));
                 System.setErr(stderr);
             }
-            catch(Exception e){Code.warning(e);}
+            catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
         }
         
-        try
-        {
-            if (Code.debug())
-                Log.instance().add(new OutputStreamLogSink());
-                             
-	    OutputStreamLogSink sink= new OutputStreamLogSink(serviceLogFile);
-            sink.start();
-            Log.instance().add(sink);
-        }
-        catch(Exception e)
-        {
-            Code.warning(e);
-        }
         
         if (arg.length==0)
             arg=new String[] {"etc/jetty.xml"};
@@ -227,7 +217,7 @@ public class Service
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
     }
 }

@@ -6,11 +6,13 @@
 package org.mortbay.http.handler;
 
 import java.io.IOException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.util.Code;
 
 /* ------------------------------------------------------------ */
 /** Handler for resources that were not found.
@@ -21,6 +23,8 @@ import org.mortbay.util.Code;
  */
 public class NotFoundHandler extends AbstractHttpHandler
 {
+    private static Log log = LogFactory.getLog(NotFoundHandler.class);
+
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,
                        String pathParams,
@@ -28,7 +32,7 @@ public class NotFoundHandler extends AbstractHttpHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
-        Code.debug("Not Found");
+        log.debug("Not Found");
         String method=request.getMethod();
         
         // Not found  requests.

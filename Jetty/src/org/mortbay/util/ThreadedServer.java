@@ -13,6 +13,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 
 /* ======================================================================= */
 /** Threaded socket server.
@@ -29,7 +32,9 @@ import java.net.UnknownHostException;
  * @author Greg Wilkins
  */
 abstract public class ThreadedServer extends ThreadPool
-{    
+{
+    private static Log log = LogFactory.getLog(ThreadedServer.class);
+    
     /* ------------------------------------------------------------------- */
     private InetAddrPort _address = null;  
     private int _soTimeOut=-1;
@@ -99,7 +104,7 @@ abstract public class ThreadedServer extends ThreadPool
             return;
 
         if (isStarted())
-            Log.warning(this+" is started");
+            log.warn(this+" is started");
         
         _address=address;
     }
@@ -126,7 +131,7 @@ abstract public class ThreadedServer extends ThreadPool
             return;
 
         if (isStarted())
-            Log.warning(this+" is started");
+            log.warn(this+" is started");
 
         if (_address==null)
             _address=new InetAddrPort(host,0);
@@ -158,7 +163,7 @@ abstract public class ThreadedServer extends ThreadPool
             return;
 
         if (isStarted())
-            Log.warning(this+" is started");
+            log.warn(this+" is started");
 
         if (_address==null)
             _address=new InetAddrPort(addr,0);
@@ -187,7 +192,7 @@ abstract public class ThreadedServer extends ThreadPool
             return;
         
         if (isStarted())
-            Log.warning(this+" is started");
+            log.warn(this+" is started");
         
         if (_address==null)
             _address=new InetAddrPort(port);
@@ -212,7 +217,7 @@ abstract public class ThreadedServer extends ThreadPool
      */
     public void setMaxReadTimeMs(int ms)
     {
-        Code.warning("setMaxReadTimeMs is deprecated. Use setMaxIdleTimeMs()");
+        log.warn("setMaxReadTimeMs is deprecated. Use setMaxIdleTimeMs()");
     }
     
     /* ------------------------------------------------------------ */
@@ -283,7 +288,7 @@ abstract public class ThreadedServer extends ThreadPool
     protected void handleConnection(Socket connection)
         throws IOException
     {
-        Code.debug("Handle ",connection);
+        if(log.isDebugEnabled())log.debug("Handle "+connection);
         InputStream in  = connection.getInputStream();
         OutputStream out = connection.getOutputStream();
         
@@ -309,11 +314,11 @@ abstract public class ThreadedServer extends ThreadPool
                 socket.setTcpNoDelay(true);
             handleConnection(socket);
         }
-        catch(Exception e){Code.warning("Connection problem",e);}
+        catch(Exception e){log.warn("Connection problem",e);}
         finally
         {
             try {socket.close();}
-            catch(Exception e){Code.warning("Connection problem",e);}
+            catch(Exception e){log.warn("Connection problem",e);}
         }
     }
     
@@ -374,24 +379,23 @@ abstract public class ThreadedServer extends ThreadPool
                     else
                         s.setSoLinger(false,0);
                 }
-                catch(Exception e){Code.ignore(e);}
+                catch(Exception e){log.trace(LogSupport.IGNORED,e);}
             }
             return s;
         }
         catch(java.net.SocketException e)
         {
-            // XXX - this is caught and ignored due strange
+            // TODO - this is caught and ignored due strange
             // exception from linux java1.2.v1a
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
         catch(InterruptedIOException e)
         {
-            if (Code.verbose(99))
-                Code.ignore(e);
+          	log.trace(LogSupport.IGNORED,e);
         }
         catch(IOException e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
         return null;
     }
@@ -448,7 +452,7 @@ abstract public class ThreadedServer extends ThreadPool
         }
         catch(Exception e)
         {
-            Code.warning("Failed to start: "+this);
+            log.warn("Failed to start: "+this);
             throw e;
         }
     }
@@ -464,8 +468,8 @@ abstract public class ThreadedServer extends ThreadPool
             _running=false;
             
             // Close the listener socket.
-            Code.debug("closing ",_listen);
-            try {if (_listen!=null)_listen.close();}catch(IOException e){Code.warning(e);}
+            if(log.isDebugEnabled())log.debug("closing "+_listen);
+            try {if (_listen!=null)_listen.close();}catch(IOException e){log.warn(LogSupport.EXCEPTION,e);}
             
             // Do we have an acceptor thread (running or not)
             Thread.yield();
@@ -487,7 +491,7 @@ abstract public class ThreadedServer extends ThreadPool
         }
 
         // Stop the thread pool
-        try{super.stop();}catch(Exception e){Code.warning(e);}
+        try{super.stop();}catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
 
         // Clean up
         _listen=null;
@@ -506,7 +510,7 @@ abstract public class ThreadedServer extends ThreadPool
          if (job instanceof Socket)
          {
              try{((Socket)job).close();}
-             catch(Exception e){Code.ignore(e);}
+             catch(Exception e){log.trace(LogSupport.IGNORED,e);}
          }
          super.stopJob(thread,job);
     }
@@ -559,13 +563,13 @@ abstract public class ThreadedServer extends ThreadPool
                     catch(Exception e)
                     {
                         if (_running)
-                            Code.warning(e);
+                            log.warn(LogSupport.EXCEPTION,e);
                         else
-                            Code.debug(e);
+                            log.debug(LogSupport.EXCEPTION,e);
                     }
                     catch(Error e)
                     {
-                        Code.warning(e);
+                        log.warn(LogSupport.EXCEPTION,e);
                         break;
                     }  
                 }
@@ -573,9 +577,9 @@ abstract public class ThreadedServer extends ThreadPool
             finally
             {
                 if (_running)
-                    Code.warning("Stopping "+this.getName());
+                    log.warn("Stopping "+this.getName());
                 else
-                    Log.event("Stopping "+this.getName());
+                    log.info("Stopping "+this.getName());
                 synchronized(threadedServer)
                 {
                     _acceptor=null;
@@ -593,7 +597,7 @@ abstract public class ThreadedServer extends ThreadPool
                 try{
                     if (addr==null || addr.toString().startsWith("0.0.0.0"))
                         addr=InetAddress.getByName("127.0.0.1");
-                    Code.debug("Self connect to close listener ",addr,
+                    if(log.isDebugEnabled())log.debug("Self connect to close listener "+addr+
                                ":"+_address.getPort());
                     Socket socket = new
                         Socket(addr,_address.getPort());
@@ -603,7 +607,7 @@ abstract public class ThreadedServer extends ThreadPool
                 }
                 catch(IOException e)
                 {
-                    Code.debug("problem stopping acceptor ",addr,": ",e);
+                    if(log.isDebugEnabled())log.debug("problem stopping acceptor "+addr+": ",e);
                 }
             }
         }

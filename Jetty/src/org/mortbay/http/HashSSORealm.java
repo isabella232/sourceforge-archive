@@ -9,13 +9,18 @@ import java.security.Principal;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.Random;
+
 import javax.servlet.http.Cookie;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.Credential;
 
 
 public class HashSSORealm implements SSORealm
 {
+    private static Log log = LogFactory.getLog(HashSSORealm.class);
+
     /* ------------------------------------------------------------ */
     public static final String SSO_COOKIE_NAME = "SSO_ID";
     private HashMap _ssoId2Principal = new HashMap();
@@ -37,7 +42,7 @@ public class HashSSORealm implements SSORealm
                 break;
             }
         }
-        Code.debug("get ssoID=",ssoID);
+        if(log.isDebugEnabled())log.debug("get ssoID="+ssoID);
         
         Principal principal=null;
         Credential credential=null;
@@ -47,7 +52,7 @@ public class HashSSORealm implements SSORealm
             credential=(Credential)_ssoPrincipal2Credential.get(principal);
         }
         
-        Code.debug("SSO principal=",principal);
+        if(log.isDebugEnabled())log.debug("SSO principal="+principal);
         
         if (principal!=null && credential!=null)
         {
@@ -91,7 +96,7 @@ public class HashSSORealm implements SSORealm
                     break;
             }
             
-            Code.debug("set ssoID=",ssoID);
+            if(log.isDebugEnabled())log.debug("set ssoID="+ssoID);
             _ssoId2Principal.put(ssoID,principal);
             _ssoPrincipal2Credential.put(principal,credential);
             _ssoUsername2Id.put(principal.getName(),ssoID);

@@ -24,41 +24,26 @@ package org.mortbay.ftp;
 
 
 
-import org.mortbay.util.Code;
-
-import org.mortbay.util.LineInput;
-
-import java.io.IOException;
-
 import java.io.ByteArrayInputStream;
-
 import java.io.ByteArrayOutputStream;
-
 import java.io.FileInputStream;
-
 import java.io.FileOutputStream;
-
+import java.io.IOException;
 import java.io.InputStream;
-
 import java.io.OutputStream;
-
 import java.io.OutputStreamWriter;
-
 import java.io.PipedInputStream;
-
 import java.io.PipedOutputStream;
-
 import java.io.Writer;
-
 import java.net.InetAddress;
-
 import java.net.Socket;
-
-import java.util.StringTokenizer;
-
 import java.util.NoSuchElementException;
-
+import java.util.StringTokenizer;
 import java.util.Vector;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.util.LineInput;
 
 
 
@@ -115,6 +100,8 @@ import java.util.Vector;
 public class Ftp
 
 {
+    private static Log log = LogFactory.getLog(Ftp.class);
+
 
     /* -------------------------------------------------------------------- */
 
@@ -268,7 +255,7 @@ public class Ftp
 
     {
 
-        Code.debug("Command="+cmd);
+        if(log.isDebugEnabled())log.debug("Command="+cmd);
 
         out.write(cmd);
 
@@ -326,8 +313,8 @@ public class Ftp
 
     {
 
-        Code.assertTrue(command==null,"Ftp already opened");
-
+        if(command!=null)
+			throw new IllegalStateException("Ftp already opened");
 
 
         if (port==0)
@@ -342,7 +329,7 @@ public class Ftp
 
         in.waitForCompleteOK();
 
-        Code.debug("Command Port Opened");
+        log.debug("Command Port Opened");
 
     }
 
@@ -380,7 +367,7 @@ public class Ftp
 
         {
 
-            Code.debug("Sending password");
+            log.debug("Sending password");
 
             cmd("PASS "+password);
 
@@ -388,7 +375,7 @@ public class Ftp
 
         else if (reply.positive())
 
-            Code.debug("No password required");
+            log.debug("No password required");
 
         else
 
@@ -398,7 +385,7 @@ public class Ftp
 
         in.waitForCompleteOK();
 
-        Code.debug("Authenticated");
+        log.debug("Authenticated");
 
     }
 
@@ -542,7 +529,7 @@ public class Ftp
 
                 throw (IOException)transferException;
 
-            Code.fail("Bad exception type",transferException);
+            log.fatal("Bad exception type",transferException); System.exit(1);
 
         }
 
@@ -580,7 +567,7 @@ public class Ftp
 
         {
 
-            Code.debug("waitUntilTransferComplete...");
+            log.debug("waitUntilTransferComplete...");
 
             try{wait(10000);}catch(InterruptedException e){};
 
@@ -600,7 +587,7 @@ public class Ftp
 
                 throw (IOException)transferException;
 
-            Code.fail("Bad exception type",transferException);
+            log.fatal("Bad exception type",transferException); System.exit(1);
 
         }
 
@@ -624,7 +611,7 @@ public class Ftp
 
     {
 
-        Code.debug("Transfer Complete");
+        log.debug("Transfer Complete");
 
         transferException=dataPortException;
 
@@ -1184,7 +1171,7 @@ public class Ftp
 
          in.waitForCompleteOK();
 
-         Code.debug("Created "+remoteName);
+         if(log.isDebugEnabled())log.debug("Created "+remoteName);
 
      }
 
@@ -1234,7 +1221,7 @@ public class Ftp
 
     {
 
-        Code.debug("startSend("+
+        if(log.isDebugEnabled())log.debug("startSend("+
 
                    srcName+','+
 
@@ -1276,7 +1263,7 @@ public class Ftp
 
                                  reply.text.lastIndexOf(")"));
 
-        Code.debug(portCommand);
+        log.debug(portCommand);
 
         cmd(portCommand);
 
@@ -1332,7 +1319,7 @@ public class Ftp
 
         CmdReply reply =in.waitForCompleteOK();
 
-        Code.debug("PWD="+reply.text);
+        if(log.isDebugEnabled())log.debug("PWD="+reply.text);
 
 
 
@@ -1368,7 +1355,7 @@ public class Ftp
 
         CmdReply reply =in.waitForCompleteOK();
 
-        Code.debug("CWD="+reply.text);
+        if(log.isDebugEnabled())log.debug("CWD="+reply.text);
 
     }
 
@@ -1404,7 +1391,7 @@ public class Ftp
 
         in.waitForCompleteOK();
 
-        Code.debug("Renamed");
+        log.debug("Renamed");
 
     }
 
@@ -1434,7 +1421,7 @@ public class Ftp
 
         in.waitForCompleteOK();
 
-        Code.debug("Deleted "+remoteName);
+        if(log.isDebugEnabled())log.debug("Deleted "+remoteName);
 
     }
 
@@ -1488,7 +1475,7 @@ public class Ftp
 
     {
 
-        Code.debug("list");
+        log.debug("list");
 
         waitUntilTransferComplete();
 
@@ -1574,7 +1561,7 @@ public class Ftp
 
 
 
-        Code.debug("Got list "+listVector.toString());
+        if(log.isDebugEnabled())log.debug("Got list "+listVector.toString());
 
         return listVector;
 
@@ -1608,7 +1595,7 @@ public class Ftp
 
         CmdReply reply =in.waitForCompleteOK();
 
-        Code.debug("STAT="+reply.text);
+        if(log.isDebugEnabled())log.debug("STAT="+reply.text);
 
 
 
@@ -1681,13 +1668,9 @@ public class Ftp
          throws FtpException,IOException
 
     {
-
-        Code.assertTrue(url.startsWith("ftp://"),
-
-                    "url must be for the form: "+
-
-                    "ftp://username:password@host:port/path/to/file");
-
+		if (!url.startsWith("ftp://"))
+			throw new IllegalArgumentException(
+                    "url must be for the form: ftp://username:password@host:port/path/to/file");
 
 
         String uri = url.substring(6);
@@ -1794,7 +1777,7 @@ public class Ftp
 
 
 
-        Code.debug("getUrl=ftp://"+user+
+        if(log.isDebugEnabled())log.debug("getUrl=ftp://"+user+
 
                    ((pass==null)?"":(":"+pass))+
 
@@ -1852,7 +1835,7 @@ public class Ftp
 
         in.waitForCompleteOK();
 
-        Code.debug("Deleted "+remoteName);
+        if(log.isDebugEnabled())log.debug("Deleted "+remoteName);
 
     }
 
@@ -1938,7 +1921,7 @@ public class Ftp
 
     {
 
-        Code.debug("list [",mask,"]");
+        if(log.isDebugEnabled())log.debug("list ["+mask+"]");
 
         waitUntilTransferComplete();
 
@@ -2034,7 +2017,7 @@ public class Ftp
 
 
 
-        Code.debug("Got list "+listVector.toString());
+        if(log.isDebugEnabled())log.debug("Got list "+listVector.toString());
 
         return listVector;
 
@@ -2204,7 +2187,7 @@ public class Ftp
 
                             System.err.println(e.toString());
 
-                            Code.debug(args[3]+" failed",e);
+                            if(log.isDebugEnabled())log.debug(args[3]+" failed",e);
 
                         }
 
@@ -2220,13 +2203,13 @@ public class Ftp
 
             System.err.println(e.toString());
 
-            Code.debug("Ftp failed",e);
+            if(log.isDebugEnabled())log.debug("Ftp failed",e);
 
         }
 
         finally{
 
-            Code.debug("Exit main thread");
+            log.debug("Exit main thread");
 
         }
 

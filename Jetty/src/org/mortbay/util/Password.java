@@ -6,6 +6,9 @@
 package org.mortbay.util;
 import java.io.IOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /* ------------------------------------------------------------ */
 /** Password utility class.
  *
@@ -34,6 +37,8 @@ import java.io.IOException;
  */
 public class Password extends Credential
 {
+    private static Log log = LogFactory.getLog(Password.class);
+
     private String _pw;
     
     /* ------------------------------------------------------------ */
@@ -186,7 +191,7 @@ public class Password extends Credential
             }
             catch(IOException e)
             {
-                Code.warning(e);
+                log.warn(LogSupport.EXCEPTION,e);
             }
             if (passwd==null || passwd.length()==0)
                 passwd=promptDft;

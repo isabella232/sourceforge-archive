@@ -7,6 +7,9 @@ package org.mortbay.util;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /* ------------------------------------------------------------ */
 /** ByteBuffer OutputStream.
  * This stream is similar to the java.io.ByteArrayOutputStream,
@@ -18,6 +21,8 @@ import java.io.OutputStream;
  */
 public class ByteBufferOutputStream extends OutputStream
 {
+    private static Log log = LogFactory.getLog(ByteBufferOutputStream.class);
+
     protected byte[] _buf;
     
     /** The start of data capacity in the buffer 
@@ -274,17 +279,17 @@ public class ByteBufferOutputStream extends OutputStream
     {
         if (n>_start)
         {
-            if (Code.debug())Code.debug("Reserve: "+n+">"+_start);
+            if (log.isDebugEnabled())if(log.isDebugEnabled())log.debug("Reserve: "+n+">"+_start);
             if ((_pos+n)<_end)
             {
-                if (Code.debug())Code.debug("Shift reserve: "+_pos+"+"+n+"<"+_end);
+                if (log.isDebugEnabled())if(log.isDebugEnabled())log.debug("Shift reserve: "+_pos+"+"+n+"<"+_end);
                 System.arraycopy(_buf,_start,_buf,n,_pos-_start);
                 _pos=_pos+n-_start;
                 _start=n;
             }
             else
             {
-                if (Code.debug())Code.debug("New reserve: "+_pos+"+"+n+">="+_end);
+                if (log.isDebugEnabled())if(log.isDebugEnabled())log.debug("New reserve: "+_pos+"+"+n+">="+_end);
                 byte[] buf = new byte[_buf.length+n-_start];
                 System.arraycopy(_buf,_start,buf,n,_pos-_start);
                 _pos=n+_pos-_start;

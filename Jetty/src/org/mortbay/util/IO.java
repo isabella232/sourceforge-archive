@@ -12,6 +12,9 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /* ======================================================================== */
 /** IO Utilities.
  * Provides stream handling utilities in
@@ -19,6 +22,8 @@ import java.io.Writer;
  */
 public class IO extends ThreadPool
 {
+    private static Log log = LogFactory.getLog(IO.class);
+
     /* ------------------------------------------------------------------- */
     public final static String
         CRLF      = "\015\012";
@@ -36,7 +41,7 @@ public class IO extends ThreadPool
         static
         {
             try{__instance.start();}
-            catch(Exception e){Code.fail(e);}
+            catch(Exception e){log.fatal(e); System.exit(1);}
         }
     }
     
@@ -80,7 +85,7 @@ public class IO extends ThreadPool
         }
         catch(InterruptedException e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
     }
     
@@ -105,7 +110,7 @@ public class IO extends ThreadPool
         }
         catch(InterruptedException e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
     }
     
@@ -241,7 +246,7 @@ public class IO extends ThreadPool
         }
         catch(IOException e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
             try{
                 if (job.out!=null)
                     job.out.close();
@@ -250,7 +255,7 @@ public class IO extends ThreadPool
             }
             catch(IOException e2)
             {
-                Code.ignore(e2);
+                log.trace(LogSupport.IGNORED,e2);
             }
         }
     }

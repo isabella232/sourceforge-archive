@@ -2,18 +2,20 @@ package org.mortbay.jndi.java;
 
 
 import java.util.Hashtable;
+
 import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.NameParser;
-import javax.naming.NamingException;
 import javax.naming.NamingEnumeration;
-import javax.naming.OperationNotSupportedException;
+import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.jndi.ContextFactory;
 import org.mortbay.jndi.NamingContext;
-import org.mortbay.util.Code;
-import org.mortbay.util.Log;
+import org.mortbay.util.LogSupport;
 
 
 
@@ -36,6 +38,8 @@ import org.mortbay.util.Log;
 */
 public class javaRootURLContext implements Context
 {
+    private static Log log = LogFactory.getLog(javaRootURLContext.class);
+
     public static final String URL_PREFIX = "java:";
 
     protected Hashtable _env;
@@ -65,7 +69,7 @@ public class javaRootURLContext implements Context
         }
         catch (Exception e)
         {
-            Log.event (e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
     }
 
@@ -281,7 +285,7 @@ public class javaRootURLContext implements Context
         {
             String head = name.get(0);
             
-            Code.debug ("Head element of name is: "+head);
+            if(log.isDebugEnabled())log.debug("Head element of name is: "+head);
 
             if (head.startsWith(URL_PREFIX))
             {
@@ -290,7 +294,7 @@ public class javaRootURLContext implements Context
                 if (head.length() > 0)
                     name.add(0, head);
 
-                Code.debug ("name modified to "+name.toString());
+                if(log.isDebugEnabled())log.debug("name modified to "+name.toString());
             }
         }
         

@@ -29,10 +29,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpFields;
-import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.LineInput;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.StringUtil;
 
 //-----------------------------------------------------------------------------
@@ -54,6 +56,8 @@ import org.mortbay.util.StringUtil;
  */
 public class CGI extends HttpServlet
 {
+    private static Log log = LogFactory.getLog(CGI.class);
+
     protected File _docRoot;
     protected String _path;
     protected String _cmdPrefix;
@@ -69,48 +73,48 @@ public class CGI extends HttpServlet
         if (tmp==null)
             tmp = getServletContext().getRealPath("/");
 
-        Code.debug("CGI: CGI bin "+tmp);
+        if(log.isDebugEnabled())log.debug("CGI: CGI bin "+tmp);
 
         if (tmp==null)
         {
-            Code.warning("CGI: no CGI bin !");
+            log.warn("CGI: no CGI bin !");
             throw new ServletException();
         }
 
         File dir = new File(tmp);
         if (!dir.exists())
         {
-            Code.warning("CGI: CGI bin does not exist - "+dir);
+            log.warn("CGI: CGI bin does not exist - "+dir);
             throw new ServletException();
         }
 
         if (!dir.canRead())
         {
-            Code.warning("CGI: CGI bin is not readable - "+dir);
+            log.warn("CGI: CGI bin is not readable - "+dir);
             throw new ServletException();
         }
 
         if (!dir.isDirectory())
         {
-            Code.warning("CGI: CGI bin is not a directory - "+dir);
+            log.warn("CGI: CGI bin is not a directory - "+dir);
             throw new ServletException();
         }
 
         try
         {
             _docRoot=dir.getCanonicalFile();
-            Code.debug("CGI: CGI bin accepted - "+_docRoot);
+            if(log.isDebugEnabled())log.debug("CGI: CGI bin accepted - "+_docRoot);
         }
         catch (IOException e)
         {
-            Code.warning("CGI: CGI bin failed - "+dir);
+            log.warn("CGI: CGI bin failed - "+dir);
             e.printStackTrace();
             throw new ServletException();
         }
 
         _path=getInitParameter("Path");
-        Code.debug("CGI: PATH accepted - "+_path);
-        Code.debug("CGI: System.Properties : " + System.getProperties().toString());
+        if(log.isDebugEnabled())log.debug("CGI: PATH accepted - "+_path);
+        if(log.isDebugEnabled())log.debug("CGI: System.Properties : " + System.getProperties().toString());
     }
 
     /* ------------------------------------------------------------ */
@@ -121,10 +125,10 @@ public class CGI extends HttpServlet
 	    StringUtil.nonNull(req.getServletPath()) +
 	    StringUtil.nonNull(req.getPathInfo());
 
-	Code.debug("CGI: req.getContextPath() : "+req.getContextPath());
-        Code.debug("CGI: req.getServletPath() : "+req.getServletPath());
-        Code.debug("CGI: req.getPathInfo()    : "+req.getPathInfo());
-        Code.debug("CGI: _docRoot             : "+_docRoot);
+	if(log.isDebugEnabled())log.debug("CGI: req.getContextPath() : "+req.getContextPath());
+        if(log.isDebugEnabled())log.debug("CGI: req.getServletPath() : "+req.getServletPath());
+        if(log.isDebugEnabled())log.debug("CGI: req.getPathInfo()    : "+req.getPathInfo());
+        if(log.isDebugEnabled())log.debug("CGI: _docRoot             : "+_docRoot);
 
 
         // pathInContext may actually comprises scriptName/pathInfo...We will
@@ -153,8 +157,8 @@ public class CGI extends HttpServlet
             res.sendError(404);
         else
         {
-            Code.debug("CGI: script is "+exe);
-            Code.debug("CGI: pathInfo is "+last);
+            if(log.isDebugEnabled())log.debug("CGI: script is "+exe);
+            if(log.isDebugEnabled())log.debug("CGI: pathInfo is "+last);
 
             exec(exe, last, req, res);
         }
@@ -176,7 +180,7 @@ public class CGI extends HttpServlet
     {
         String path=command.toString();
         File dir=command.getParentFile();
-        Code.debug("CGI: execing: "+path);
+        if(log.isDebugEnabled())log.debug("CGI: execing: "+path);
 
 	EnvList env = new EnvList();
 
@@ -252,7 +256,7 @@ public class CGI extends HttpServlet
                             IO.copy(inFromReq,outToCgi,inputLength);
                         outToCgi.close();
                     }
-                    catch(IOException e){Code.ignore(e);}
+                    catch(IOException e){log.trace(LogSupport.IGNORED,e);}
                 }
             }).start();
 
@@ -272,7 +276,7 @@ public class CGI extends HttpServlet
 
             if (status!=null)
             {
-                Code.debug("Found a Status header - setting status on response");
+                log.debug("Found a Status header - setting status on response");
                 fields.remove(ContentStatus);
 
                 // NOTE: we ignore any reason phrase, otherwise we
@@ -306,10 +310,10 @@ public class CGI extends HttpServlet
 
 	    p.waitFor();
 	    int exitValue = p.exitValue();
-	    Code.debug("CGI: p.exitValue(): " + exitValue);
+	    if(log.isDebugEnabled())log.debug("CGI: p.exitValue(): " + exitValue);
 	    if (0 != exitValue)
 	    {
-		Code.warning("Non-zero exit status ("+exitValue+
+		log.warn("Non-zero exit status ("+exitValue+
 			     ") from CGI program: "+path);
 		if (!res.isCommitted())
 		    res.sendError(500, "Failed to exec CGI");
@@ -319,18 +323,18 @@ public class CGI extends HttpServlet
         {
             // browser has probably closed its input stream - we
             // terminate and clean up...
-            Code.debug("CGI: Client closed connection!");
+            log.debug("CGI: Client closed connection!");
         }
 	catch (InterruptedException ie)
         {
-            Code.debug("CGI: interrupted!");
+            log.debug("CGI: interrupted!");
         }
 	finally
 	{
             p.destroy();
 	}
 
-	Code.debug("CGI: Finished exec: " + p);
+	if(log.isDebugEnabled())log.debug("CGI: Finished exec: " + p);
     }
 
 

@@ -16,9 +16,10 @@ import java.security.CodeSource;
 import java.security.PermissionCollection;
 import java.util.Arrays;
 import java.util.StringTokenizer;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.IO;
-import org.mortbay.util.Log;
 import org.mortbay.util.Resource;
 
 /* ------------------------------------------------------------ */
@@ -36,6 +37,8 @@ import org.mortbay.util.Resource;
  */
 public class ContextLoader extends URLClassLoader
 {
+    private static Log log = LogFactory.getLog(ContextLoader.class);
+
     private boolean _java2compliant=false;
     private ClassLoader _parent;
     private PermissionCollection _permissions;
@@ -74,7 +77,7 @@ public class ContextLoader extends URLClassLoader
             while (tokenizer.hasMoreTokens())
             {
                 Resource resource = Resource.newResource(tokenizer.nextToken());
-                Code.debug("Path resource=",resource);
+                if(log.isDebugEnabled())log.debug("Path resource="+resource);
                 
                 // Resolve file path if possible
                 File file=resource.getFile();
@@ -107,7 +110,7 @@ public class ContextLoader extends URLClassLoader
                         File jar=File.createTempFile("Jetty-",".jar",lib);
                         
                         jar.deleteOnExit();
-                        Code.debug("Extract ",resource," to ",jar);
+                        if(log.isDebugEnabled())log.debug("Extract "+resource+" to "+jar);
                         FileOutputStream out = new FileOutputStream(jar);
                         IO.copy(in,out);
                         out.close();
@@ -132,12 +135,12 @@ public class ContextLoader extends URLClassLoader
             }
         }
         
-        if (Code.debug())
+        if (log.isDebugEnabled())
         {
-            Code.debug("ClassPath=",_urlClassPath);
-            Code.debug("FileClassPath=",_fileClassPath);
-            Code.debug("Permissions=",_permissions);
-            Code.debug("URL=",Arrays.asList(getURLs()));
+            if(log.isDebugEnabled())log.debug("ClassPath="+_urlClassPath);
+            if(log.isDebugEnabled())log.debug("FileClassPath="+_fileClassPath);
+            if(log.isDebugEnabled())log.debug("Permissions="+_permissions);
+            if(log.isDebugEnabled())log.debug("URL="+Arrays.asList(getURLs()));
         }
     }
 
@@ -163,10 +166,10 @@ public class ContextLoader extends URLClassLoader
         {
             _fileClassPathWarning=false;
             if (_fileClassPath==null)
-                Log.event("No File Classpath derived from URL path \""+
+                log.info("No File Classpath derived from URL path \""+
                              _urlClassPath+"\"");
             else
-                Log.event("Incomplete File Classpath \""+ _fileClassPath+
+                log.info("Incomplete File Classpath \""+ _fileClassPath+
                              "\" derived from URL path \""+
                              _urlClassPath+"\"");
         }
@@ -186,7 +189,7 @@ public class ContextLoader extends URLClassLoader
     {
         PermissionCollection pc =(_permissions==null)?
             super.getPermissions(cs):_permissions;
-        Code.debug("loader.getPermissions("+cs+")="+pc);
+        if(log.isDebugEnabled())log.debug("loader.getPermissions("+cs+")="+pc);
         return pc;    
     }
     
@@ -206,32 +209,32 @@ public class ContextLoader extends URLClassLoader
         boolean tried_parent=false;
         if (c==null && (_java2compliant||isSystemPath(name)))
         {
-            if (Code.verbose()) Code.debug("try loadClass ",name," from ",_parent);
+            if(log.isTraceEnabled())log.trace("try loadClass "+name+" from "+_parent);
             tried_parent=true;
             try
             {
                 c=_parent.loadClass(name);
-                if (Code.verbose()) Code.debug("loaded ",c);
+                if(log.isTraceEnabled())log.trace("loaded "+c);
             }
             catch(ClassNotFoundException e){ex=e;}
         }
         
         if (c==null)    
         {
-            if (Code.verbose()) Code.debug("try findClass ",name," from ",_urlClassPath);
+            if(log.isTraceEnabled())log.trace("try findClass "+name+" from "+_urlClassPath);
             try
             {
                 c=this.findClass(name);
-                if (Code.verbose()) Code.debug("loaded ",c);
+                if(log.isTraceEnabled())log.trace("loaded "+c);
             }
             catch(ClassNotFoundException e){ex=e;}
         }
         
         if (c==null && !tried_parent)
         {
-            if (Code.verbose()) Code.debug("try loadClass ",name," from ",_parent);
+            if(log.isTraceEnabled())log.trace("try loadClass "+name+" from "+_parent);
             c=_parent.loadClass(name);
-            if (Code.verbose()) Code.debug("loaded ",c);
+            if(log.isTraceEnabled())log.trace("loaded "+c);
         }
         
         if (c==null)
@@ -250,31 +253,31 @@ public class ContextLoader extends URLClassLoader
         boolean tried_parent=false;
         if (_java2compliant||isSystemPath(name) )
         {
-            if (Code.verbose()) Code.debug("try getResource ",name," from ",_parent);
+            if(log.isTraceEnabled())log.trace("try getResource "+name+" from "+_parent);
             tried_parent=true;
             url=_parent.getResource(name);           
         }
         
         if (url==null)    
         {
-            if (Code.verbose()) Code.debug("try findResource ",name," from ",_urlClassPath);
+            if(log.isTraceEnabled())log.trace("try findResource "+name+" from "+_urlClassPath);
             url=this.findResource(name);
 
             if (url==null && name.startsWith("/"))
             {
-                Code.debug("HACK leading / off ",name);
+                if(log.isDebugEnabled())log.debug("HACK leading / off "+name);
                 url=this.findResource(name.substring(1));
             }
         }
         
         if (url==null && !tried_parent)
         {
-            if (Code.verbose()) Code.debug("try getResource ",name," from ",_parent);
+            if(log.isTraceEnabled())log.trace("try getResource "+name+" from "+_parent);
             url=_parent.getResource(name); 
         }
         
-        if (url!=null && Code.verbose())
-            Code.debug("found ",url);
+        if (url!=null)
+            if(log.isTraceEnabled())log.trace("found "+url);
         
         return url;
     }

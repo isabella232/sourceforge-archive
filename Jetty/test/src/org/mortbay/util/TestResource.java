@@ -11,6 +11,7 @@ import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.Writer;
 import java.net.URL;
+
 import junit.framework.TestSuite;
 
 public class TestResource extends junit.framework.TestCase

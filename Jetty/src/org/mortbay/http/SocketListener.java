@@ -6,9 +6,11 @@
 package org.mortbay.http;
 import java.io.IOException;
 import java.net.Socket;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.InetAddrPort;
-import org.mortbay.util.Log;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.ThreadedServer;
 
 
@@ -30,6 +32,8 @@ public class SocketListener
     extends ThreadedServer
     implements HttpListener
 {
+    private static Log log = LogFactory.getLog(SocketListener.class);
+
     /* ------------------------------------------------------------------- */
     private int _lowResourcePersistTimeMs=2000;
     private String _scheme=HttpMessage.__SCHEME;
@@ -59,7 +63,8 @@ public class SocketListener
     /* ------------------------------------------------------------ */
     public void setHttpServer(HttpServer server)
     {
-        Code.assertTrue(server==null || _server==null || _server==server,"Cannot share listeners");
+        if (server!=null && _server!=null && _server!=server)
+            throw new IllegalStateException("Cannot share listeners");
         _server=server;
     }
 
@@ -151,7 +156,7 @@ public class SocketListener
         throws Exception
     {
         super.start();
-        Log.event("Started SocketListener on "+getInetAddrPort());
+        log.info("Started SocketListener on "+getInetAddrPort());
     }
 
     /* --------------------------------------------------------------- */
@@ -159,7 +164,7 @@ public class SocketListener
         throws InterruptedException
     {
         super.stop();
-        Log.event("Stopped SocketListener on "+getInetAddrPort());
+        log.info("Stopped SocketListener on "+getInetAddrPort());
     }
 
     /* ------------------------------------------------------------ */
@@ -193,7 +198,7 @@ public class SocketListener
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
 
         connection.handle();
@@ -239,7 +244,7 @@ public class SocketListener
         }
         catch(Exception e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
     }
 
@@ -269,7 +274,7 @@ public class SocketListener
         }
         catch(Exception e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
     }
 
@@ -287,7 +292,7 @@ public class SocketListener
         
         if (low && !_isLow)
         {
-            Log.event("LOW ON THREADS: "+this);
+            log.info("LOW ON THREADS: "+this);
             _warned=System.currentTimeMillis();
             _isLow=true;
         }
@@ -316,7 +321,7 @@ public class SocketListener
         
         if (out && !_isOut)
         {
-            Code.warning("OUT OF THREADS: "+this);
+            log.warn("OUT OF THREADS: "+this);
             _warned=System.currentTimeMillis();
             _isOut=true;
         }

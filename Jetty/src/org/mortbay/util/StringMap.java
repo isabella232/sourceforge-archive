@@ -32,13 +32,13 @@ public class StringMap extends AbstractMap implements Externalizable
     private static final int __HASH_WIDTH=9;
     
     /* ------------------------------------------------------------ */
-    private int _width=__HASH_WIDTH;
-    private Node _root=new Node();
-    private boolean _ignoreCase=false;
-    private NullEntry _nullEntry=null;
-    private Object _nullValue=null;
-    private HashSet _entrySet=new HashSet(3);
-    private Set _umEntrySet=Collections.unmodifiableSet(_entrySet);
+    protected int _width=__HASH_WIDTH;
+    protected Node _root=new Node();
+    protected boolean _ignoreCase=false;
+    protected NullEntry _nullEntry=null;
+    protected Object _nullValue=null;
+	protected HashSet _entrySet=new HashSet(3);
+	protected Set _umEntrySet=Collections.unmodifiableSet(_entrySet);
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -536,7 +536,6 @@ public class StringMap extends AbstractMap implements Externalizable
         Node(boolean ignoreCase,String s, int offset)
         {
             int l=s.length()-offset;
-            Code.assertTrue(l>0,"Node._char.length>0");
             _char=new char[l];
             _ochar=new char[l];
             for (int i=0;i<l;i++)
@@ -559,9 +558,6 @@ public class StringMap extends AbstractMap implements Externalizable
         {
             Node split = new Node();
             int sl=_char.length-offset;
-            
-            Code.assertTrue(offset>0,"split offset>0");
-            Code.assertTrue(sl>0,"split remainder>0");
             
             char[] tmp=this._char;
             this._char=new char[offset];

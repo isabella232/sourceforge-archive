@@ -17,7 +17,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.TypeUtil;
 
@@ -34,6 +37,8 @@ import org.mortbay.util.TypeUtil;
 
 public abstract class HttpMessage
 {
+    private static Log log = LogFactory.getLog(HttpMessage.class);
+
     /* ------------------------------------------------------------ */
     public final static String __SCHEME ="http";
     public final static String __SSL_SCHEME ="https";
@@ -127,7 +132,7 @@ public abstract class HttpMessage
         _header=new HttpFields();
         _trailer=null;
 
-        // XXX - also need to cancel any encodings added to output stream!
+        // TODO - also need to cancel any encodings added to output stream!
     }
     
     /* ------------------------------------------------------------ */
@@ -780,7 +785,7 @@ public abstract class HttpMessage
         }
         catch(IOException e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
         finally
         {

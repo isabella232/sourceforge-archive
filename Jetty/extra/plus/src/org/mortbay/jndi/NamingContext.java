@@ -4,7 +4,7 @@ package org.mortbay.jndi;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.NoSuchElementException;
-import java.util.Properties;
+
 import javax.naming.Binding;
 import javax.naming.CompoundName;
 import javax.naming.Context;
@@ -14,14 +14,16 @@ import javax.naming.Name;
 import javax.naming.NameAlreadyBoundException;
 import javax.naming.NameClassPair;
 import javax.naming.NameNotFoundException;
-import javax.naming.NamingException;
-import javax.naming.NamingEnumeration;
 import javax.naming.NameParser;
-import javax.naming.spi.NamingManager;
-import javax.naming.OperationNotSupportedException;
+import javax.naming.NamingEnumeration;
+import javax.naming.NamingException;
 import javax.naming.NotContextException;
+import javax.naming.OperationNotSupportedException;
 import javax.naming.Reference;
-import org.mortbay.util.Code;
+import javax.naming.spi.NamingManager;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 /*------------------------------------------------*/    
@@ -44,6 +46,8 @@ import org.mortbay.util.Code;
 */
 public class NamingContext implements Context, Cloneable
 {
+    private static Log log = LogFactory.getLog(NamingContext.class);
+
     public static final Enumeration EMPTY_ENUM = new Enumeration ()
         {       
             public boolean hasMoreElements()
@@ -314,7 +318,7 @@ public class NamingContext implements Context, Cloneable
         }
         else
         {
-            Code.debug ("Checking for existing binding for name="+cname+" for first element of name="+cname.get(0));
+            if(log.isDebugEnabled())log.debug("Checking for existing binding for name="+cname+" for first element of name="+cname.get(0));
           
             //walk down the subcontext hierarchy       
             //need to ignore trailing empty "" name components
@@ -429,7 +433,7 @@ public class NamingContext implements Context, Cloneable
             if (ctx instanceof Reference)
             {  
                 //deference the object
-                Code.debug ("Object bound at "+firstComponent +" is a Reference");
+                if(log.isDebugEnabled())log.debug("Object bound at "+firstComponent +" is a Reference");
                 try
                 {
                     ctx = NamingManager.getObjectInstance(ctx, getNameParser("").parse(firstComponent), this, _env);
@@ -508,12 +512,12 @@ public class NamingContext implements Context, Cloneable
     public Object lookup(Name name)
         throws NamingException
     {
-        Code.debug ("Looking up name=\""+name+"\"");
+        if(log.isDebugEnabled())log.debug("Looking up name=\""+name+"\"");
         Name cname = toCanonicalName(name);
 
         if ((cname == null) || (cname.size() == 0))
         {
-            Code.debug("Null or empty name, returning copy of this context");
+            log.debug("Null or empty name, returning copy of this context");
             NamingContext ctx = new NamingContext (_env, _name, _parent, _parser);
             ctx._bindings = _bindings;
             return ctx;
@@ -743,7 +747,7 @@ public class NamingContext implements Context, Cloneable
     public NamingEnumeration list(Name name)
         throws NamingException
     {
-        Code.debug ("list() on Context="+getName()+" for name="+name);
+        if(log.isDebugEnabled())log.debug("list() on Context="+getName()+" for name="+name);
         Name cname = toCanonicalName(name);
 
      
@@ -778,7 +782,7 @@ public class NamingContext implements Context, Cloneable
             if (ctx instanceof Reference)
             {  
                 //deference the object
-                Code.debug ("Dereferencing Reference for "+name.get(0));
+                if(log.isDebugEnabled())log.debug("Dereferencing Reference for "+name.get(0));
                 try
                 {
                     ctx = NamingManager.getObjectInstance(ctx, getNameParser("").parse(firstComponent), this, _env);
@@ -924,14 +928,13 @@ public class NamingContext implements Context, Cloneable
 
         //if no subcontexts, just bind it
         if (cname.size() == 1)
-        {
-            Binding binding = getBinding (cname);           
+        {         
             addBinding (cname, obj);
         }
         else
         { 
             //walk down the subcontext hierarchy
-            Code.debug ("Checking for existing binding for name="+cname+" for first element of name="+cname.get(0));
+            if(log.isDebugEnabled())log.debug("Checking for existing binding for name="+cname+" for first element of name="+cname.get(0));
                     
             String firstComponent = cname.get(0);
             Object ctx = null;
@@ -1218,7 +1221,7 @@ public class NamingContext implements Context, Cloneable
     protected void addBinding (Name name, Object obj)
     {
         String key = name.toString();
-        Code.debug ("Adding binding with key="+key+" obj="+obj+" for context="+_name);
+        if(log.isDebugEnabled())log.debug("Adding binding with key="+key+" obj="+obj+" for context="+_name);
         _bindings.put (key, new Binding (key, obj));
     }
 
@@ -1231,7 +1234,7 @@ public class NamingContext implements Context, Cloneable
      */
     protected Binding getBinding (Name name)
     {
-        Code.debug ("Looking up binding for "+name.toString()+" for context="+_name);
+        if(log.isDebugEnabled())log.debug("Looking up binding for "+name.toString()+" for context="+_name);
         return (Binding) _bindings.get(name.toString());
     }
 
@@ -1245,7 +1248,7 @@ public class NamingContext implements Context, Cloneable
      */
     protected Binding getBinding (String name)
     {
-        Code.debug ("Looking up binding for "+name+" for context="+_name);
+        if(log.isDebugEnabled())log.debug("Looking up binding for "+name+" for context="+_name);
         return (Binding) _bindings.get(name);
     }
 

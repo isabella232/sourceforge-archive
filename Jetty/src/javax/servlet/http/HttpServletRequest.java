@@ -61,8 +61,9 @@
 
 package javax.servlet.http;
 
-import javax.servlet.ServletRequest;
 import java.util.Enumeration;
+
+import javax.servlet.ServletRequest;
 
 /**
  *

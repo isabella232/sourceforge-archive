@@ -55,7 +55,6 @@
  
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
 
 
 /**

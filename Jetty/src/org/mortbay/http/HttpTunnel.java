@@ -8,8 +8,11 @@ package org.mortbay.http;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.IO;
+import org.mortbay.util.LogSupport;
 
 /* ------------------------------------------------------------ */
 /** HTTP Tunnel.
@@ -24,6 +27,8 @@ import org.mortbay.util.IO;
  */
 public class HttpTunnel
 {
+    private static Log log = LogFactory.getLog(HttpTunnel.class);
+
     private Socket _socket;
     private Thread _thread;
     private int _timeoutMs;
@@ -70,7 +75,7 @@ public class HttpTunnel
         }
         catch (Exception e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
         finally
         {
@@ -80,7 +85,7 @@ public class HttpTunnel
                 _socket.shutdownOutput();
                 _socket.close();
             }
-            catch (Exception e){Code.ignore(e);}
+            catch (Exception e){log.trace(LogSupport.IGNORED,e);}
             copy.interrupt();
         }
     }
@@ -101,7 +106,7 @@ public class HttpTunnel
 	    }
             catch (java.net.SocketTimeoutException e)
             {
-                Code.ignore(e);
+                log.trace(LogSupport.IGNORED,e);
                 if (timestamp==0)
                     timestamp=System.currentTimeMillis();
                 else if (_timeoutMs>0 &&
@@ -126,7 +131,7 @@ public class HttpTunnel
             }
             catch (Exception e)
             {
-                Code.ignore(e);
+                log.trace(LogSupport.IGNORED,e);
             }
             finally
             {
@@ -136,7 +141,7 @@ public class HttpTunnel
                     _socket.shutdownInput();
                     _socket.close();
                 }
-                catch (Exception e){Code.ignore(e);}
+                catch (Exception e){log.trace(LogSupport.IGNORED,e);}
                 _thread.interrupt();
             }
         }

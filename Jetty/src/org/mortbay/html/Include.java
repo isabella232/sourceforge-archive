@@ -17,7 +17,9 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URL;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.IO;
 
 /* -------------------------------------------------------------------- */
@@ -31,6 +33,8 @@ import org.mortbay.util.IO;
 */
 public class Include extends Element
 {
+    private static Log log = LogFactory.getLog(Include.class);
+
     Reader reader=null;
     
     /* ------------------------------------------------------------ */
@@ -53,7 +57,7 @@ public class Include extends Element
             fileName  = fileName .replace('/',File.separatorChar);
         }
 
-        Code.debug("IncludeTag(",directory,",",fileName,")");
+        if(log.isDebugEnabled())log.debug("IncludeTag("+directory+","+fileName+")");
         includeFile(new File(directory,fileName));
     }
     
@@ -68,7 +72,7 @@ public class Include extends Element
     {
         if (File.separatorChar != '/')
             fileName  = fileName .replace('/',File.separatorChar);
-        Code.debug("IncludeTag(",fileName,")");
+        if(log.isDebugEnabled())log.debug("IncludeTag("+fileName+")");
         includeFile(new File(fileName));
     }
 
@@ -81,7 +85,7 @@ public class Include extends Element
     public Include(File file)
         throws IOException
     {
-        Code.debug("IncludeTag(",file,")");
+        if(log.isDebugEnabled())log.debug("IncludeTag("+file+")");
         includeFile(file);
     }
 

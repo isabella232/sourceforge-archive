@@ -7,8 +7,11 @@ package org.mortbay.http;
 
 import java.io.IOException;
 import java.io.InputStream;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.LineInput;
+import org.mortbay.util.LogSupport;
 
 
 /* ------------------------------------------------------------ */
@@ -17,6 +20,8 @@ import org.mortbay.util.LineInput;
  */
 public class ChunkingInputStream extends InputStream
 {
+    private static Log log = LogFactory.getLog(ChunkingInputStream.class);
+
     /* ------------------------------------------------------------ */
     int _chunkSize=0;
     HttpFields _trailer=null;
@@ -117,7 +122,7 @@ public class ChunkingInputStream extends InputStream
      */
     public void reset()
     {
-        Code.notImplemented();
+        log.warn(LogSupport.NOT_IMPLEMENTED);
     }
     
     /* ------------------------------------------------------------ */
@@ -126,7 +131,7 @@ public class ChunkingInputStream extends InputStream
      */
     public void mark(int readlimit)
     {
-        Code.notImplemented();
+        log.warn(LogSupport.NOT_IMPLEMENTED);
     }
     
     /* ------------------------------------------------------------ */
@@ -152,7 +157,7 @@ public class ChunkingInputStream extends InputStream
         // Handle early EOF or error in format
         if (line_buffer==null)
         {
-            Code.warning("EOF");
+            log.warn("EOF");
             return -1;
         }
         String line= new String(line_buffer.buffer,0,line_buffer.size);
@@ -169,8 +174,8 @@ public class ChunkingInputStream extends InputStream
         catch (NumberFormatException e)
         {
             _chunkSize=-1;
-            Code.warning("Bad Chunk:"+line);
-            Code.debug(e);
+            log.warn("Bad Chunk:"+line);
+            log.debug(LogSupport.EXCEPTION,e);
         }
                  
         // check for EOF

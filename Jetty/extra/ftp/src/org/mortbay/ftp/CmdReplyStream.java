@@ -6,10 +6,12 @@
 
 package org.mortbay.ftp;
 
-import org.mortbay.util.Code;
-import org.mortbay.util.LineInput;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.util.LineInput;
 
 // ===========================================================================
 /** FTP Command Reply Stream
@@ -28,6 +30,8 @@ import java.io.IOException;
 */
 class CmdReplyStream
 {
+	private static Log log = LogFactory.getLog(CmdReplyStream.class);
+	
     /* ------------------------------------------------------------ */
     /** The actual input stream.
      */
@@ -64,7 +68,7 @@ class CmdReplyStream
                     if (line.charAt(3)==' ')
                     {
                         reply.text += "\n" + line.substring(4);
-                        Code.debug("Reply="+reply);
+                        if(log.isDebugEnabled())log.debug("Reply="+reply);
                         return reply;
                     }
                     else if (line.charAt(3)=='-')
@@ -88,7 +92,7 @@ class CmdReplyStream
                     reply.text=line.substring(4);
                     if (line.charAt(3)==' ')
                     {
-                        Code.debug("Reply="+reply);
+                        if(log.isDebugEnabled())log.debug("Reply="+reply);
                         return reply;
                     }
                     if (line.charAt(3)=='-')

@@ -12,10 +12,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.util.Code;
 
 /* ------------------------------------------------------------ */
 /**
@@ -26,6 +28,8 @@ import org.mortbay.util.Code;
  */
 public class SetResponseHeadersHandler extends AbstractHttpHandler
 {
+    private static Log log = LogFactory.getLog(SetResponseHeadersHandler.class);
+
     /* ------------------------------------------------------------ */
     /**
      * The Map of _fields that will be asserted on outgoing responses.
@@ -73,7 +77,7 @@ public class SetResponseHeadersHandler extends AbstractHttpHandler
                        HttpResponse response)
             throws HttpException,IOException
     {
-        Code.debug("SetResponseHeadersHandler.handle()");
+        log.debug("SetResponseHeadersHandler.handle()");
 
         for (Iterator iterator=_fields.entrySet().iterator();iterator.hasNext();)
         {

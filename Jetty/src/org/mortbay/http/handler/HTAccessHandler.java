@@ -18,6 +18,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.StringTokenizer;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
@@ -26,7 +29,7 @@ import org.mortbay.http.HttpResponse;
 import org.mortbay.http.SecurityConstraint;
 import org.mortbay.http.UserRealm;
 import org.mortbay.util.B64Code;
-import org.mortbay.util.Code;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.Resource;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URI;
@@ -45,6 +48,8 @@ import org.mortbay.util.UnixCrypt;
  */
 public class HTAccessHandler extends AbstractHttpHandler
 {
+    private static Log log = LogFactory.getLog(HTAccessHandler.class);
+
     String _default=null;
     String _accessFile=".htaccess";
 
@@ -61,7 +66,7 @@ public class HTAccessHandler extends AbstractHttpHandler
         String password=null;
         boolean IPValid=true;
 
-        Code.debug("HTAccessHandler pathInContext=",pathInContext);
+        if(log.isDebugEnabled())log.debug("HTAccessHandler pathInContext="+pathInContext);
 
         String credentials=request.getField(HttpFields.__Authorization);
 
@@ -73,7 +78,7 @@ public class HTAccessHandler extends AbstractHttpHandler
             user=credentials.substring(0,i);
             password=credentials.substring(i+1);
 
-            Code.debug("User="+user+", password="+
+            if(log.isDebugEnabled())log.debug("User="+user+", password="+
                     "******************************".substring(0,password.length()));
         }
 
@@ -91,7 +96,7 @@ public class HTAccessHandler extends AbstractHttpHandler
             {
                 String htPath=directory+_accessFile;
                 resource=getHttpContext().getResource(htPath);
-                Code.debug("directory=",directory," resource=",resource);
+                if(log.isDebugEnabled())log.debug("directory="+directory+" resource="+resource);
 
                 if (resource!=null && resource.exists() && !resource.isDirectory())
                     break;
@@ -109,14 +114,14 @@ public class HTAccessHandler extends AbstractHttpHandler
             if (resource==null)
                 return;
 
-            Code.debug("HTACCESS=",resource);
+            if(log.isDebugEnabled())log.debug("HTACCESS="+resource);
 
             ht=(HTAccess)_htCache.get(resource);
             if (ht==null || ht.getLastModified()!=resource.lastModified())
             {
                 ht=new HTAccess(resource);
                 _htCache.put(resource,ht);
-                Code.debug("HTCache loaded ",ht);
+                if(log.isDebugEnabled())log.debug("HTCache loaded "+ht);
             }
 
             // prevent access to htaccess files
@@ -130,7 +135,7 @@ public class HTAccessHandler extends AbstractHttpHandler
             // See if there is a config problem
             if (ht.isForbidden())
             {
-                Code.warning("Mis-configured htaccess: "+ht);
+                log.warn("Mis-configured htaccess: "+ht);
                 response.sendError(HttpResponse.__403_Forbidden);
                 request.setHandled(true);
                 return;
@@ -146,7 +151,7 @@ public class HTAccessHandler extends AbstractHttpHandler
 
             // second check IP address
             IPValid=ht.checkAccess("",request.getRemoteAddr());
-            Code.debug("IPValid = "+IPValid);
+            if(log.isDebugEnabled())log.debug("IPValid = "+IPValid);
 
             // If IP is correct and satify is ANY then access is allowed
             if (IPValid==true && satisfy==HTAccess.ANY)
@@ -163,7 +168,7 @@ public class HTAccessHandler extends AbstractHttpHandler
             // set required page
             if (!ht.checkAuth(user,password,getHttpContext(),request))
             {
-                Code.debug("Auth Failed");
+                log.debug("Auth Failed");
                 response.setField(HttpFields.__WwwAuthenticate,"basic realm="+ht.getName());
                 response.sendError(HttpResponse.__401_Unauthorized);
                 response.commit();
@@ -181,7 +186,7 @@ public class HTAccessHandler extends AbstractHttpHandler
         }
         catch (Exception ex)
         {
-            Code.warning(ex);
+            log.warn(LogSupport.EXCEPTION,ex);
             if (ht!=null)
             {
                 response.sendError(HttpResponse.__500_Internal_Server_Error);
@@ -271,10 +276,10 @@ public class HTAccessHandler extends AbstractHttpHandler
                     if (!_userResource.exists())
                     {
                         _forbidden=true;
-                        Code.warning("Could not find ht user file: "+_userFile);
+                        log.warn("Could not find ht user file: "+_userFile);
                     }
                     else
-                        Code.debug("user file: ",_userResource);
+                        if(log.isDebugEnabled())log.debug("user file: "+_userResource);
                 }
 
                 if (_groupFile!=null)
@@ -283,16 +288,16 @@ public class HTAccessHandler extends AbstractHttpHandler
                     if (!_groupResource.exists())
                     {
                         _forbidden=true;
-                        Code.warning("Could not find ht group file: "+_groupResource);
+                        log.warn("Could not find ht group file: "+_groupResource);
                     }
                     else
-                        Code.debug("group file: ",_groupResource);
+                        if(log.isDebugEnabled())log.debug("group file: "+_groupResource);
                 }
             }
             catch (IOException e)
             {
                 _forbidden=true;
-                Code.warning(e);
+                log.warn(LogSupport.EXCEPTION,e);
             }
         }
 
@@ -493,7 +498,7 @@ public class HTAccessHandler extends AbstractHttpHandler
 
             if (_users==null || _userModified!=_userResource.lastModified())
             {
-                Code.debug("LOAD ",_userResource);
+                if(log.isDebugEnabled())log.debug("LOAD "+_userResource);
                 _users=new HashMap();
                 BufferedReader ufin=null;
                 try
@@ -515,7 +520,7 @@ public class HTAccessHandler extends AbstractHttpHandler
                 }
                 catch (IOException e)
                 {
-                    Code.warning(e);
+                    log.warn(LogSupport.EXCEPTION,e);
                 }
                 finally
                 {
@@ -525,7 +530,7 @@ public class HTAccessHandler extends AbstractHttpHandler
                     }
                     catch (IOException e2)
                     {
-                        Code.warning(e2);
+                        log.warn(LogSupport.EXCEPTION,e2);
                     }
                 }
             }
@@ -541,7 +546,7 @@ public class HTAccessHandler extends AbstractHttpHandler
 
             if (_groups==null || _groupModified!=_groupResource.lastModified())
             {
-                Code.debug("LOAD ",_groupResource);
+                if(log.isDebugEnabled())log.debug("LOAD "+_groupResource);
 
                 _groups=new HashMap();
                 BufferedReader ufin=null;
@@ -577,7 +582,7 @@ public class HTAccessHandler extends AbstractHttpHandler
                 }
                 catch (IOException e)
                 {
-                    Code.warning(e);
+                    log.warn(LogSupport.EXCEPTION,e);
                 }
                 finally
                 {
@@ -587,7 +592,7 @@ public class HTAccessHandler extends AbstractHttpHandler
                     }
                     catch (IOException e2)
                     {
-                        Code.warning(e2);
+                        log.warn(LogSupport.EXCEPTION,e2);
                     }
                 }
             }
@@ -718,20 +723,20 @@ public class HTAccessHandler extends AbstractHttpHandler
                         }
                         else if (line.startsWith("order"))
                         {
-                            Code.debug("orderline="+line+"order="+_order);
+                            if(log.isDebugEnabled())log.debug("orderline="+line+"order="+_order);
                             if (line.indexOf("allow,deny")>0)
                             {
-                                Code.debug("==>allow,deny");
+                                log.debug("==>allow+deny");
                                 _order=1;
                             }
                             else if (line.indexOf("deny,allow")>0)
                             {
-                                Code.debug("==>deny,allow");
+                                log.debug("==>deny,allow");
                                 _order=-1;
                             }
                             else if (line.indexOf("mutual-failure")>0)
                             {
-                                Code.debug("==>mutual");
+                                log.debug("==>mutual");
                                 _order=0;
                             }
                             else
@@ -743,7 +748,7 @@ public class HTAccessHandler extends AbstractHttpHandler
                             int pos1=10;
                             limit=line.length();
                             while ((pos1<limit) && (line.charAt(pos1)<=' ')) pos1++;
-                            Code.debug("allow process:"+line.substring(pos1));
+                            if(log.isDebugEnabled())log.debug("allow process:"+line.substring(pos1));
                             tkns=new StringTokenizer(line.substring(pos1));
                             while (tkns.hasMoreTokens())
                             {
@@ -755,7 +760,7 @@ public class HTAccessHandler extends AbstractHttpHandler
                             int pos1=9;
                             limit=line.length();
                             while ((pos1<limit) && (line.charAt(pos1)<=' ')) pos1++;
-                            Code.debug("deny process:"+line.substring(pos1));
+                            if(log.isDebugEnabled())log.debug("deny process:"+line.substring(pos1));
 
                             tkns=new StringTokenizer(line.substring(pos1));
                             while (tkns.hasMoreTokens())

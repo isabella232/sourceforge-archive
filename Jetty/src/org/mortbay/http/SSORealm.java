@@ -5,8 +5,9 @@
 
 package org.mortbay.http;
 
-import org.mortbay.util.Credential;
 import java.security.Principal;
+
+import org.mortbay.util.Credential;
 
 /* ------------------------------------------------------------ */
 /** Single Sign On Realm.

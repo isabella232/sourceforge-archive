@@ -8,7 +8,6 @@ package org.mortbay.util;
 /* ------------------------------------------------------------ */
 /** Blocking queue.
  *
- * XXX temp implementation. Should use java2 containers.
  * Implemented as circular buffer in a Vector. Synchronization is on the
  * vector to avoid double synchronization.
  *
@@ -17,6 +16,8 @@ package org.mortbay.util;
  */
 public class BlockingQueue
 {
+    // TODO temp implementation. Should use java2 containers.
+
     Object[] elements;
     Object lock;
     int maxSize;

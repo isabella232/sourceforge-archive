@@ -7,8 +7,10 @@ package org.mortbay.jetty.servlet;
 
 import java.io.Serializable;
 import java.util.EventListener;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
 import org.mortbay.util.LifeCycle;
 
     

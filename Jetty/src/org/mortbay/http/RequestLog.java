@@ -6,6 +6,7 @@
 package org.mortbay.http;
 
 import java.io.Serializable;
+
 import org.mortbay.util.LifeCycle;
 
 /* ------------------------------------------------------------ */

@@ -11,23 +11,21 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.security.PermissionCollection;
-import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.ServletContextAttributeEvent;
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
-import javax.servlet.ServletRequest;
 import javax.servlet.UnavailableException;
-import javax.servlet.http.HttpSessionActivationListener;
-import javax.servlet.http.HttpSessionAttributeListener;
-import javax.servlet.http.HttpSessionBindingListener;
-import javax.servlet.http.HttpSessionListener;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.BasicAuthenticator;
 import org.mortbay.http.ClientCertAuthenticator;
 import org.mortbay.http.DigestAuthenticator;
@@ -35,13 +33,12 @@ import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.http.SecurityConstraint;
 import org.mortbay.http.UserRealm;
-import org.mortbay.util.Code;
+import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.util.JarResource;
 import org.mortbay.util.LazyList;
-import org.mortbay.util.Log;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
 import org.mortbay.xml.XmlConfiguration;
@@ -70,6 +67,8 @@ public class WebApplicationContext
     extends ServletHttpContext
     implements Externalizable
 {
+    private static Log log = LogFactory.getLog(WebApplicationContext.class);
+
     /* ------------------------------------------------------------ */
     private String _deploymentDescriptor;
     private String _defaultsDescriptor="org/mortbay/jetty/servlet/webdefault.xml";
@@ -197,12 +196,12 @@ public class WebApplicationContext
             // Accept aliases for WAR files
             if (_webApp.getAlias()!=null)
             {
-                Log.event(_webApp+" anti-aliased to "+_webApp.getAlias());
+                log.info(_webApp+" anti-aliased to "+_webApp.getAlias());
                 _webApp= Resource.newResource(_webApp.getAlias());
             }
 
-            if (Code.debug())
-                Code.debug("Try webapp=",_webApp+
+            if (log.isDebugEnabled())
+                if(log.isDebugEnabled())log.debug("Try webapp="+_webApp+
                            ", exists="+_webApp.exists()+
                            ", directory="+_webApp.isDirectory());
             
@@ -217,8 +216,8 @@ public class WebApplicationContext
                 {
                     _webApp=jarWebApp;
                     _war=_webApp.toString();
-                    if (Code.debug())
-                        Code.debug("Try webapp=",_webApp+
+                    if (log.isDebugEnabled())
+                        if(log.isDebugEnabled())log.debug("Try webapp="+_webApp+
                                    ", exists="+_webApp.exists()+
                                    ", directory="+_webApp.isDirectory());
                 }
@@ -236,12 +235,12 @@ public class WebApplicationContext
                     tempDir.delete();
                 tempDir.mkdir();
                 tempDir.deleteOnExit();
-                Log.event("Extract "+_war+" to "+tempDir);
+                log.info("Extract "+_war+" to "+tempDir);
                 JarResource.extract(_webApp,tempDir,true);
                 _webApp=Resource.newResource(tempDir.getCanonicalPath());
                 
-                if (Code.debug())
-                    Code.debug("Try webapp=",_webApp+
+                if (log.isDebugEnabled())
+                    if(log.isDebugEnabled())log.debug("Try webapp="+_webApp+
                                ", exists="+_webApp.exists()+
                                ", directory="+_webApp.isDirectory());
             }
@@ -249,11 +248,11 @@ public class WebApplicationContext
             // Now do we have something usable?
             if (!_webApp.exists() || !_webApp.isDirectory())
             {
-                Code.warning("Web application not found "+_war);
+                log.warn("Web application not found "+_war);
                 throw new java.io.FileNotFoundException(_war);
             }
 
-            Code.debug("webapp=",_webApp);
+            if(log.isDebugEnabled())log.debug("webapp="+_webApp);
 
             // Iw there a WEB-INF directory?
             _webInf = _webApp.addPath("WEB-INF/");
@@ -292,7 +291,7 @@ public class WebApplicationContext
     public void setPermissions(PermissionCollection permissions)
     {
         if (!_ignorewebjetty)
-            Code.warning("Permissions set with web-jetty.xml enabled");
+            log.warn("Permissions set with web-jetty.xml enabled");
         super.setPermissions(permissions);
     }
     
@@ -311,7 +310,7 @@ public class WebApplicationContext
     {
         _ignorewebjetty=b;
         if (b && getPermissions()!=null)
-            Code.warning("Permissions set with web-jetty.xml enabled");
+            log.warn("Permissions set with web-jetty.xml enabled");
     }
     
     /* ------------------------------------------------------------ */
@@ -414,7 +413,6 @@ public class WebApplicationContext
                 if (dftResource==null)
                     dftResource= Resource.newResource(_defaultsDescriptor);
                 
-                // XXX - don't know why? _defaultsDescriptor=dftResource.toString();
                 XmlParser.Node defaultConfig =
                     xmlParser.parse(dftResource.getURL().toString());
                 initialize(defaultConfig);
@@ -427,7 +425,7 @@ public class WebApplicationContext
                 Resource web = _webInf.addPath("web.xml");
                 if (!web.exists())
                 {
-                    Log.event("No WEB-INF/web.xml in "+_war+". Serving files and default/dynamic servlets only");
+                    log.info("No WEB-INF/web.xml in "+_war+". Serving files and default/dynamic servlets only");
                 }
                 else
                 {
@@ -443,7 +441,7 @@ public class WebApplicationContext
                     jetty = _webInf.addPath("jetty-web.xml");
                 if (!_ignorewebjetty && jetty.exists())
                 {
-                    Code.debug("Configure: "+jetty);
+                    if(log.isDebugEnabled())log.debug("Configure: "+jetty);
                     XmlConfiguration jetty_config=new
                         XmlConfiguration(jetty.getURL());
                     jetty_config.configure(this);
@@ -459,7 +457,7 @@ public class WebApplicationContext
                 {
                     String fileClassPath=getFileClassPath();
                     jspHolder.setInitParameter("classpath",fileClassPath);
-                    Code.debug("Set classpath=",fileClassPath," for ",jspHolder);
+                    if(log.isDebugEnabled())log.debug("Set classpath="+fileClassPath+" for "+jspHolder);
                 }
             }
             
@@ -495,7 +493,7 @@ public class WebApplicationContext
         }	
         catch(Exception e)
         {
-            Code.warning("Configuration error on "+_war,e);
+            log.warn("Configuration error on "+_war,e);
             throw e;
         }
         finally
@@ -737,7 +735,7 @@ public class WebApplicationContext
             }
             catch(Exception e)
             {
-                Code.warning("Configuration problem at "+node,e);
+                log.warn("Configuration problem at "+node,e);
                 throw new UnavailableException("Configuration problem");
             }
         }
@@ -778,7 +776,7 @@ public class WebApplicationContext
         else if ("taglib".equals(element))
             initTagLib(node);
         else if ("resource-ref".equals(element))
-            Code.debug("No implementation: ",node);
+            if(log.isDebugEnabled())log.debug("No implementation: "+node);
         else if ("security-constraint".equals(element))
             initSecurityConstraint(node);
         else if ("login-config".equals(element))
@@ -797,12 +795,12 @@ public class WebApplicationContext
                 _warnings=new HashSet(3);
             
             if (_warnings.contains(element))
-                Code.debug("Not Implemented: ",node);
+                if(log.isDebugEnabled())log.debug("Not Implemented: "+node);
             else
             {
                 _warnings.add(element);
-                Code.debug("Element ",element," not handled in ",this);
-                Code.debug(node);
+                if(log.isDebugEnabled())log.debug("Element "+element+" not handled in "+this);
+                if(log.isDebugEnabled())log.debug(node);
             }
         }
     }
@@ -818,7 +816,7 @@ public class WebApplicationContext
     {
         String name=node.getString("param-name",false,true);
         String value=node.getString("param-value",false,true);
-        Code.debug("ContextParam: ",name,"=",value);
+        if(log.isDebugEnabled())log.debug("ContextParam: "+name+"="+value);
 
         setInitParameter(name,value); 
     }
@@ -832,7 +830,7 @@ public class WebApplicationContext
         
         if (className==null)
         {
-            Code.warning("Missing filter-class in "+node);
+            log.warn("Missing filter-class in "+node);
             return;
         }
         if (name==null)
@@ -895,7 +893,7 @@ public class WebApplicationContext
 
             if (className==null)
             {
-                Code.warning("Missing servlet-class|jsp-file in "+node);
+                log.warn("Missing servlet-class|jsp-file in "+node);
                 return;
             }
         }
@@ -926,7 +924,7 @@ public class WebApplicationContext
             String s=startup.toString(false,true).toLowerCase();
             if (s.startsWith("t"))
             {
-                Code.warning("Deprecated boolean load-on-startup.  Please use integer");
+                log.warn("Deprecated boolean load-on-startup.  Please use integer");
                 holder.setInitOrder(1);
             }
             else
@@ -939,8 +937,8 @@ public class WebApplicationContext
                 }
                 catch(Exception e)
                 {
-                    Code.warning("Cannot parse load-on-startup "+s+". Please use integer");
-                    Code.ignore(e);
+                    log.warn("Cannot parse load-on-startup "+s+". Please use integer");
+                    log.trace(LogSupport.IGNORED,e);
                 }
                 holder.setInitOrder(order);
             }
@@ -955,12 +953,12 @@ public class WebApplicationContext
             if (roleName!=null && roleName.length()>0
                     && roleLink!=null && roleLink.length()>0)
             {
-                Code.debug("link role ",roleName," to ",roleLink," for ",this);
+                if(log.isDebugEnabled())log.debug("link role "+roleName+" to "+roleLink+" for "+this);
                 holder.setUserRoleLink(roleName,roleLink);
             }
             else
             {
-                Code.warning("Ignored invalid security-role-ref element: "
+                log.warn("Ignored invalid security-role-ref element: "
                         +"servlet-name="+name+", "+securityRef);
             }
         }
@@ -995,13 +993,13 @@ public class WebApplicationContext
         }
         catch(Exception e)
         {
-            Code.warning("Could not instantiate listener "+className,e);
+            log.warn("Could not instantiate listener "+className,e);
             return;
         }
 
         if (!(listener instanceof EventListener))
         {
-            Code.warning("Not an EventListener: "+listener);
+            log.warn("Not an EventListener: "+listener);
             return;
         }
 
@@ -1013,7 +1011,7 @@ public class WebApplicationContext
         }
         catch(Exception e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
 
         try
@@ -1023,11 +1021,11 @@ public class WebApplicationContext
         }
         catch(Exception e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
         
         if (!known)
-            Code.warning("Unknown: "+listener);
+            log.warn("Unknown: "+listener);
     }
     
     
@@ -1061,7 +1059,7 @@ public class WebApplicationContext
         {
             XmlParser.Node indexNode=(XmlParser.Node)iter.next();
             String index=indexNode.toString(false,true);
-            Code.debug("Index: ",index);
+            if(log.isDebugEnabled())log.debug("Index: "+index);
             addWelcomeFile(index);
         }
     }
@@ -1131,7 +1129,7 @@ public class WebApplicationContext
                 scBase.setDataConstraint(SecurityConstraint.DC_CONFIDENTIAL);
             else
             {
-                Code.warning("Unknown user-data-constraint:"+guarantee);
+                log.warn("Unknown user-data-constraint:"+guarantee);
                 scBase.setDataConstraint(SecurityConstraint.DC_CONFIDENTIAL);
             }
         }
@@ -1179,7 +1177,7 @@ public class WebApplicationContext
             else if (SecurityConstraint.__CERT_AUTH2.equals(m))
                 authenticator=new ClientCertAuthenticator();
             else
-                Code.warning("UNKNOWN AUTH METHOD: "+m);
+                log.warn("UNKNOWN AUTH METHOD: "+m);
 
             setAuthenticator(authenticator);
         }
@@ -1192,7 +1190,7 @@ public class WebApplicationContext
         if(formConfig != null)
         {
             if (_formAuthenticator==null)
-                Code.warning("FORM Authentication miss-configured");
+                log.warn("FORM Authentication miss-configured");
             else
             {
                 XmlParser.Node loginPage = formConfig.get("form-login-page");
@@ -1231,21 +1229,21 @@ public class WebApplicationContext
     /* ------------------------------------------------------------ */
     public void setClassPath(String classPath)
     {
-        Code.warning("ClassPath should not be set for WebApplication");
+        log.warn("ClassPath should not be set for WebApplication");
         super.setClassPath(classPath);
     }
     
     /* ------------------------------------------------------------ */
     public void setResourceBase(String resourceBase)
     {
-        Code.warning("ResourceBase should not be set for WebApplication");
+        log.warn("ResourceBase should not be set for WebApplication");
         super.setResourceBase(resourceBase);
     }
     
     /* ------------------------------------------------------------ */
     public void setBaseResource(Resource baseResource)
     {
-        Code.warning("BaseResource should not be set for WebApplication");
+        log.warn("BaseResource should not be set for WebApplication");
         super.setBaseResource(baseResource);
     }
 

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Arrays;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -109,6 +110,23 @@ public class Classpath {
         if (parent == null) {
             parent = ClassLoader.getSystemClassLoader();
         }
-        return new URLClassLoader(urls, parent);
+        return new Loader(urls, parent);
     }
+
+    private class Loader extends URLClassLoader
+    {
+        String name;
+        
+        Loader(URL[] urls, ClassLoader parent)
+        {
+            super(urls, parent);
+            name = "StartLoader"+Arrays.asList(urls);
+        }
+
+        public String toString()
+        {
+            return name;
+        }
+    }
+    
 }

@@ -6,14 +6,18 @@
 package org.mortbay.servlet;
 import java.io.IOException;
 import java.io.PrintWriter;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.html.Heading;
 import org.mortbay.html.Page;
 import org.mortbay.html.TableForm;
-import org.mortbay.util.Code;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.URI;
 
 /* ------------------------------------------------------------ */
@@ -22,6 +26,8 @@ import org.mortbay.util.URI;
  */
 public class SendRedirect extends HttpServlet
 {
+    private static Log log = LogFactory.getLog(SendRedirect.class);
+
     /* ------------------------------------------------------------ */
     public void doGet(HttpServletRequest request, HttpServletResponse response) 
         throws ServletException, IOException
@@ -60,7 +66,7 @@ public class SendRedirect extends HttpServlet
             }
             catch (Exception e)
             {
-                Code.warning(e);
+                log.warn(LogSupport.EXCEPTION,e);
             }
         }
     }

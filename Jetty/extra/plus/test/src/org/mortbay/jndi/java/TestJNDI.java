@@ -21,11 +21,15 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.mortbay.jndi.NamingContext;
-import org.mortbay.util.Code;
+import org.mortbay.util.LogX;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 public class TestJNDI extends TestCase
 {
+    private static Log log = LogFactory.getLog(TestJNDI.class);
+
     public static class MyObjectFactory implements ObjectFactory
     {
         public static String myString = "xxx";
@@ -84,49 +88,49 @@ public class TestJNDI extends TestCase
         InitialContext initCtx = new InitialContext();
         Context sub0 = (Context)initCtx.lookup("java:");
 
-        Code.debug ("------ Looked up java: --------------");
+        if(log.isDebugEnabled())log.debug("------ Looked up java: --------------");
 
         Name n = sub0.getNameParser("").parse("/red/green/");
 
 
-        Code.debug ("get(0)="+n.get(0));
-        Code.debug ("getPrefix(1)="+n.getPrefix(1));
+        if(log.isDebugEnabled())log.debug("get(0)="+n.get(0));
+        if(log.isDebugEnabled())log.debug("getPrefix(1)="+n.getPrefix(1));
         n = n.getSuffix(1);
-        Code.debug ("getSuffix(1)="+n);
-        Code.debug ("get(0)="+n.get(0));
-        Code.debug ("getPrefix(1)="+n.getPrefix(1));
+        if(log.isDebugEnabled())log.debug("getSuffix(1)="+n);
+        if(log.isDebugEnabled())log.debug("get(0)="+n.get(0));
+        if(log.isDebugEnabled())log.debug("getPrefix(1)="+n.getPrefix(1));
         n = n.getSuffix(1);
-        Code.debug ("getSuffix(1)="+n);
-        Code.debug ("get(0)="+n.get(0));
-        Code.debug ("getPrefix(1)="+n.getPrefix(1));
+        if(log.isDebugEnabled())log.debug("getSuffix(1)="+n);
+        if(log.isDebugEnabled())log.debug("get(0)="+n.get(0));
+        if(log.isDebugEnabled())log.debug("getPrefix(1)="+n.getPrefix(1));
         n = n.getSuffix(1);
-        Code.debug ("getSuffix(1)="+n);
+        if(log.isDebugEnabled())log.debug("getSuffix(1)="+n);
 
         n = sub0.getNameParser("").parse("pink/purple/");
-        Code.debug ("get(0)="+n.get(0));
-        Code.debug ("getPrefix(1)="+n.getPrefix(1));
+        if(log.isDebugEnabled())log.debug("get(0)="+n.get(0));
+        if(log.isDebugEnabled())log.debug("getPrefix(1)="+n.getPrefix(1));
         n = n.getSuffix(1);
-        Code.debug ("getSuffix(1)="+n);
-        Code.debug ("get(0)="+n.get(0));
-        Code.debug ("getPrefix(1)="+n.getPrefix(1));
+        if(log.isDebugEnabled())log.debug("getSuffix(1)="+n);
+        if(log.isDebugEnabled())log.debug("get(0)="+n.get(0));
+        if(log.isDebugEnabled())log.debug("getPrefix(1)="+n.getPrefix(1));
 
         NamingContext ncontext = (NamingContext)sub0;
 
         Name nn = ncontext.toCanonicalName(ncontext.getNameParser("").parse("/yellow/blue/"));
-        Code.debug (nn);
+        log.debug(nn);
         assertEquals (2, nn.size());
 
         nn = ncontext.toCanonicalName(ncontext.getNameParser("").parse("/yellow/blue"));
-        Code.debug(nn);
+        log.debug(nn);
         assertEquals (2, nn.size());
 
         nn = ncontext.toCanonicalName(ncontext.getNameParser("").parse("/"));
-        Code.debug ("/ parses as: "+nn+" with size="+nn.size());
-        Code.debug(nn);
+        if(log.isDebugEnabled())log.debug("/ parses as: "+nn+" with size="+nn.size());
+        log.debug(nn);
         assertEquals (1, nn.size());
 
         nn = ncontext.toCanonicalName(ncontext.getNameParser("").parse(""));
-        Code.debug(nn);
+        log.debug(nn);
         assertEquals (0, nn.size());
 
         Context fee = ncontext.createSubcontext("fee");

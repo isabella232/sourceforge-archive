@@ -12,11 +12,14 @@ import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Enumeration;
 import java.util.List;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LineInput;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.OutputObserver;
 import org.mortbay.util.StringUtil;
-import org.mortbay.util.InetAddrPort;
 
 
 /* ------------------------------------------------------------ */
@@ -38,6 +41,8 @@ import org.mortbay.util.InetAddrPort;
 public class HttpConnection
     implements OutputObserver
 {
+    private static Log log = LogFactory.getLog(HttpConnection.class);
+
     /* ------------------------------------------------------------ */
     private static ThreadLocal __threadConnection=new ThreadLocal();
 
@@ -95,7 +100,7 @@ public class HttpConnection
                           OutputStream out,
                           Object connection)
     {
-        Code.debug("new HttpConnection: ",connection);
+        if(log.isDebugEnabled())log.debug("new HttpConnection: "+connection);
         _listener=listener;
         _remoteInetAddress=remoteAddr;
         int bufferSize=listener==null?4096:listener.getBufferSize();
@@ -414,7 +419,7 @@ public class HttpConnection
             _inputStream.setContentLength(content_length);
         else if (content_length<0)
         {
-            // XXX - can't do this check because IE does this after
+            // TODO - can't do this check because IE does this after
             // a redirect.
             // Can't have content without a content length
             // String content_type=_request.getField(HttpFields.__ContentType);
@@ -477,7 +482,7 @@ public class HttpConnection
             // else we need a content length
             else
             {
-                // XXX - can't do this check as IE stuff up on
+                // TODO - can't do this check as IE stuff up on
                 // a redirect.
                 // throw new HttpException(HttpResponse.__411_Length_Required);
                 _inputStream.setContentLength(0);
@@ -755,14 +760,14 @@ public class HttpConnection
                 error_code=((HttpException)e).getCode();
                 
                 if (_request==null)
-                    Code.warning(e.toString());
+                    log.warn(e.toString());
                 else
-                    Code.warning(_request.getRequestLine()+" "+e.toString());
-                Code.debug(e);
+                    log.warn(_request.getRequestLine()+" "+e.toString());
+                log.debug(LogSupport.EXCEPTION,e);
             }
             else if (e instanceof EOFException)
             {
-                Code.ignore(e);
+                log.trace(LogSupport.IGNORED,e);
                 return;
             }
             else
@@ -771,9 +776,9 @@ public class HttpConnection
                 _request.setAttribute("javax.servlet.error.exception",e);
 
                 if (_request==null)
-                    Code.warning(e);
+                    log.warn(LogSupport.EXCEPTION,e);
                 else
-                    Code.warning(_request.getRequestLine(),e);
+                    log.warn(_request.getRequestLine(),e);
             }
             
 	    if (_response != null && !_response.isCommitted())
@@ -786,7 +791,7 @@ public class HttpConnection
 	}
         catch(Exception ex)
         {
-            Code.ignore(ex);
+            log.trace(LogSupport.IGNORED,ex);
         }
     }
 
@@ -855,7 +860,7 @@ public class HttpConnection
     protected void readRequest()
         throws IOException
     {
-        Code.debug("readRequest() ...");
+        log.debug("readRequest() ...");
         _request.readHeader((LineInput)(_inputStream)
                             .getInputStream());
     }
@@ -880,7 +885,7 @@ public class HttpConnection
         // Handle a HTTP tunnel
         if (_tunnel!=null)
         {
-            Code.debug("Tunnel: ",_tunnel);
+            if(log.isDebugEnabled())log.debug("Tunnel: "+_tunnel);
             _outputStream.resetObservers();
             _tunnel.handle(_inputStream.getInputStream(),
                            _outputStream.getOutputStream());
@@ -907,11 +912,11 @@ public class HttpConnection
             
             // We have a valid request!
             statsRequestStart();
-            if (Code.debug())
+            if (log.isDebugEnabled())
             {
                 _response.setField("Jetty-Request",
                                    _request.getRequestLine());
-                Code.debug("REQUEST:\n",_request);
+                if(log.isDebugEnabled())log.debug("REQUEST:\n"+_request);
             }
             
             // Pick response version, we assume that _request.getVersion() == 1
@@ -962,12 +967,7 @@ public class HttpConnection
             else if (_dotVersion!=-1)
                 throw new HttpException(HttpResponse.__505_HTTP_Version_Not_Supported);
             
-            if (Code.verbose(99))
-                Code.debug("IN is "+
-                           (_inputStream.isChunking()
-                            ?"chunked":"not chunked")+
-                           " Content-Length="+
-                           _inputStream.getContentLength());
+            if(log.isTraceEnabled())log.trace("IN is "+(_inputStream.isChunking()?"chunked":"not chunked")+" Content-Length="+_inputStream.getContentLength());
             
             // service the request
             if (!_request.isHandled())
@@ -978,10 +978,10 @@ public class HttpConnection
         {
             if (_request.getState()!=HttpMessage.__MSG_RECEIVED)
             {
-                if (Code.debug())
+                if (log.isDebugEnabled())
                 {
-                    if (Code.verbose()) Code.debug(e);
-                    else Code.debug(e.toString());
+                    if (log.isTraceEnabled()) log.debug(LogSupport.EXCEPTION,e);
+                    else if(log.isDebugEnabled())log.debug(e.toString());
                 }
                 _response.destroy();
                 _response=null;
@@ -1009,7 +1009,7 @@ public class HttpConnection
                     if (_inputStream.getContentLength()>0)
                         _inputStream.setContentLength(0);
                     _persistent=false;
-                    Code.ignore(e);
+                    log.trace(LogSupport.IGNORED,e);
                     exception(new HttpException(HttpResponse.__400_Bad_Request,
                                                 "Missing Content"));
                 }
@@ -1041,7 +1041,7 @@ public class HttpConnection
                         while(_inputStream.skip(4096)>0 || _inputStream.read()>=0);
                     _inputStream.resetStream();
                 }
-                catch(IOException e){Code.ignore(e);}
+                catch(IOException e){log.trace(LogSupport.IGNORED,e);}
                 
                 // commit non persistent
                 try{
@@ -1057,16 +1057,16 @@ public class HttpConnection
             // Check response length
             if (_response!=null)
             {
-                Code.debug("RESPONSE:\n",_response);
+                if(log.isDebugEnabled())log.debug("RESPONSE:\n"+_response);
                 if (_persistent &&
                     content_length>=0 && bytes_written>0 && content_length!=bytes_written)
                 {
-                    Code.warning("Invalid length: Content-Length="+content_length+
+                    log.warn("Invalid length: Content-Length="+content_length+
                                  " written="+bytes_written+
                                  " for "+_request.getRequestURL());
                     _persistent=false;
                     try{_outputStream.close();}
-                    catch(IOException e) {Code.warning(e);}
+                    catch(IOException e) {log.warn(LogSupport.EXCEPTION,e);}
                 }    
             }
             
@@ -1124,8 +1124,8 @@ public class HttpConnection
     protected void destroy()
     {
         try{close();}
-        catch (IOException e){Code.ignore(e);}
-        catch (Exception e){Code.warning(e);}
+        catch (IOException e){log.trace(LogSupport.IGNORED,e);}
+        catch (Exception e){log.warn(LogSupport.EXCEPTION,e);}
         
         // Destroy request and response
         if (_request!=null)

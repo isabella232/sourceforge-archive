@@ -5,16 +5,18 @@
 
 package org.mortbay.webapps.jetty;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.Writer;
+
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.html.Include;
-import org.mortbay.util.Code;
 import org.mortbay.util.IO;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.Resource;
 
 /* ------------------------------------------------------------ */
@@ -25,6 +27,8 @@ import org.mortbay.util.Resource;
  */
 public class JettyServlet extends HttpServlet
 {
+    private static Log log = LogFactory.getLog(JettyServlet.class);
+
     public static long __minModTime = System.currentTimeMillis();
     
     /* ------------------------------------------------------------ */
@@ -45,7 +49,7 @@ public class JettyServlet extends HttpServlet
             return;
         }
         
-        Code.debug("Resource=",resource);
+        if(log.isDebugEnabled())log.debug("Resource="+resource);
 
         JettyPage page = new JettyPage(request.getContextPath(),path);
         if (page.getSection()!=null)
@@ -87,7 +91,7 @@ public class JettyServlet extends HttpServlet
         }
         catch(Exception e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
         return lm;
     }   

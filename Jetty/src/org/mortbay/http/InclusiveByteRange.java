@@ -3,8 +3,11 @@ package org.mortbay.http;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.StringTokenizer;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.LazyList;
+import org.mortbay.util.LogSupport;
 
 /* ------------------------------------------------------------ */
 /** Byte range inclusive of end points.
@@ -28,6 +31,8 @@ import org.mortbay.util.LazyList;
  * @author Helmut Hissen
  */
 public class InclusiveByteRange {
+    private static Log log = LogFactory.getLog(InclusiveByteRange.class);
+
 
     long first = 0;
     long last  = 0;    
@@ -81,7 +86,7 @@ public class InclusiveByteRange {
                     {           
                         if ("bytes".equals(t))
                             continue;
-                        Code.warning("Bad range format: "+t);
+                        log.warn("Bad range format: "+t);
                         continue headers;
                     }
                     else if (d==0)
@@ -90,7 +95,7 @@ public class InclusiveByteRange {
                             last = Long.parseLong(t.substring(d+1).trim());
                         else
                         {
-                            Code.warning("Bad range format: "+t);
+                            log.warn("Bad range format: "+t);
                             continue headers;
                         }
                     }
@@ -119,8 +124,8 @@ public class InclusiveByteRange {
             }
             catch(Exception e)
             {
-                Code.warning("Bad range format: "+t);
-                Code.ignore(e);
+                log.warn("Bad range format: "+t);
+                log.trace(LogSupport.IGNORED,e);
             }    
         }
         return LazyList.getList(satRanges,true);

@@ -7,13 +7,16 @@ package org.mortbay.http;
 
 import java.io.IOException;
 import java.security.MessageDigest;
+import java.security.Principal;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.SecurityConstraint.Authenticator;
-import org.mortbay.util.Code;
 import org.mortbay.util.Credential;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
-import java.security.Principal;
 
 /* ------------------------------------------------------------ */
 /** DIGEST authentication.
@@ -23,6 +26,8 @@ import java.security.Principal;
  */
 public class DigestAuthenticator implements Authenticator
 {
+    static Log log = LogFactory.getLog(DigestAuthenticator.class);
+
     /* ------------------------------------------------------------ */
     /** 
      * @return UserPrinciple if authenticated or null if not. If
@@ -51,7 +56,7 @@ public class DigestAuthenticator implements Authenticator
         
         if (credentials!=null )
         {
-            Code.debug("Credentials: "+credentials);
+            if(log.isDebugEnabled())log.debug("Credentials: "+credentials);
             QuotedStringTokenizer tokenizer = new QuotedStringTokenizer(credentials,
                                                                         "=, ",
                                                                         true,
@@ -117,7 +122,7 @@ public class DigestAuthenticator implements Authenticator
                 request.setUserPrincipal(user);                
             }
             else if (check)
-                Code.warning("AUTH FAILURE: user "+digest.username);
+                log.warn("AUTH FAILURE: user "+digest.username);
         }
 
         // Challenge if we have no user
@@ -210,7 +215,7 @@ public class DigestAuthenticator implements Authenticator
                 return (TypeUtil.toString(digest,16).equalsIgnoreCase(response));
             }
             catch (Exception e)
-            {Code.warning(e);}
+            {log.warn(LogSupport.EXCEPTION,e);}
 
             return false;
         }

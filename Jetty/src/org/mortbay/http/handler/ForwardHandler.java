@@ -7,12 +7,14 @@ package org.mortbay.http.handler;
 
 import java.io.IOException;
 import java.util.Map;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.PathMap;
-import org.mortbay.util.Code;
 import org.mortbay.util.URI;
 import org.mortbay.util.UrlEncoded;
 
@@ -25,6 +27,8 @@ import org.mortbay.util.UrlEncoded;
  */
 public class ForwardHandler extends AbstractHttpHandler
 {
+    private static Log log = LogFactory.getLog(ForwardHandler.class);
+
     PathMap _forward = new PathMap();
     String _root;
     boolean _handleQueries = false;
@@ -83,9 +87,7 @@ public class ForwardHandler extends AbstractHttpHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
-
-        if (Code.verbose())
-            Code.debug("Look for "+pathInContext+" in "+_forward);
+        if(log.isTraceEnabled())log.trace("Look for "+pathInContext+" in "+_forward);
         
         String newPath=null;
         String query=null;
@@ -106,15 +108,14 @@ public class ForwardHandler extends AbstractHttpHandler
                     }
                 }
                 String info=PathMap.pathInfo((String)entry.getKey(),pathInContext);
-                Code.debug("Forward: match:\"", match, "\" info:",
-                           info, "\" query:", query);
+                if(log.isDebugEnabled())log.debug("Forward: match:\""+ match+ "\" info:"+info+"\" query:"+query);
                 newPath=info==null?match:(URI.addPaths(match,info));
             }
         }
         
         if (newPath!=null)
         {
-            Code.debug("Forward from ",pathInContext," to ",newPath);
+            if(log.isDebugEnabled())log.debug("Forward from "+pathInContext+" to "+newPath);
             
             int last=request.setState(HttpMessage.__MSG_EDITABLE);
             String context=getHttpContext().getContextPath();

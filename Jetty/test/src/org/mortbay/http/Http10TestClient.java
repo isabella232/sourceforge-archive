@@ -7,9 +7,12 @@ package org.mortbay.http;
 
 import java.io.OutputStream;
 import java.net.Socket;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LineInput;
+import org.mortbay.util.LogSupport;
 
 /* ------------------------------------------------------------ */
 /** HTTP 1.0 Test Client.
@@ -19,6 +22,8 @@ import org.mortbay.util.LineInput;
  */
 public class Http10TestClient extends Thread
 {
+    private static Log log = LogFactory.getLog(Http10TestClient.class);
+
 
     static String[] url=
     {
@@ -130,7 +135,10 @@ public class Http10TestClient extends Thread
                 while((line=in.readLine())!=null && line.length()>0)
                 {
                     if (headers++==0 && !line.startsWith("HTTP"))
-                        Code.fail("Bad response:"+line);
+                    {
+                        log.fatal("Bad response:"+line);
+                        System.exit(1);
+                    }
 
                     if (line.startsWith("Content-Length:"))
                         len=Integer.parseInt(line.substring(16));
@@ -163,16 +171,16 @@ public class Http10TestClient extends Thread
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
         finally
         {
             if (byteCount>0)
-                Code.warning("Missed "+byteCount+" bytes");
+                log.warn("Missed "+byteCount+" bytes");
             if (_requests>0)
-                Code.warning("Missed "+_requests+" requests");
+                log.warn("Missed "+_requests+" requests");
             if (_responses>0)
-                Code.warning("Missed "+_responses+" responses");
+                log.warn("Missed "+_responses+" responses");
 
             try{
                 if (socket!=null)
@@ -180,7 +188,7 @@ public class Http10TestClient extends Thread
             }
             catch(Exception e)
             {
-                Code.warning(e);
+                log.warn(LogSupport.EXCEPTION,e);
             }
         }
     }
@@ -217,7 +225,7 @@ public class Http10TestClient extends Thread
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
     }
 }

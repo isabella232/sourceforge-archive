@@ -11,9 +11,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.ByteArrayPool;
-import org.mortbay.util.Code;
 import org.mortbay.util.StringUtil;
 
 
@@ -25,6 +27,8 @@ import org.mortbay.util.StringUtil;
  */
 public abstract class AJP13Packet
 {
+    private static Log log = LogFactory.getLog(AJP13Packet.class);
+
     /* ------------------------------------------------------------ */
     public static final int __MAX_BUF=8192;
     public static final int __HDR_SIZE=4;
@@ -216,8 +220,7 @@ public abstract class AJP13Packet
         }
         while (_bytes<packetLength);
         
-        if (Code.verbose(99))
-            Code.debug("AJP13 rcv: "+this.toString(64));
+        if(log.isTraceEnabled())log.trace("AJP13 rcv: "+this.toString(64));
 	//System.err.println(Thread.currentThread()+" AJP13 rcv "+this.toString());
 
         return true;
@@ -227,8 +230,7 @@ public abstract class AJP13Packet
     public void write(OutputStream out)
         throws IOException
     {
-        if (Code.verbose(99))
-            Code.debug("AJP13 snd: "+this.toString(64));
+        if(log.isTraceEnabled())log.trace("AJP13 snd: "+this.toString(64));
 	//System.err.println(Thread.currentThread()+" AJP13 snd "+this.toString());
         out.write(_buf,0,_bytes);
     }
@@ -277,7 +279,7 @@ public abstract class AJP13Packet
         }
         catch (UnsupportedEncodingException e)
         {
-            Code.fail(e);
+            log.fatal(e); System.exit(1);
             return null;
         }
     }

@@ -6,6 +6,7 @@
 package org.mortbay.html;
 import java.io.IOException;
 import java.io.Writer;
+
 import org.mortbay.http.HttpFields;
 
 /* -------------------------------------------------------------------- */

@@ -15,17 +15,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
-import javax.servlet.http.HttpSessionContext; // Deprecated but required to implement SessionManager
+import javax.servlet.http.HttpSessionContext;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.LazyList;
+import org.mortbay.util.LogSupport;
 
 
 /* ------------------------------------------------------------ */
@@ -46,6 +50,8 @@ import org.mortbay.util.LazyList;
  */
 public abstract class AbstractSessionManager implements SessionManager
 {
+    private static Log log = LogFactory.getLog(AbstractSessionManager.class);
+
     /* ------------------------------------------------------------ */
     public final static int __distantFuture = 60*60*24*7*52*20;
 
@@ -324,11 +330,11 @@ public abstract class AbstractSessionManager implements SessionManager
     {
         if (_random==null)
         {
-            Code.debug("New random session seed");
+            log.debug("New random session seed");
             _random=new Random();
         }
         else
-            Code.debug("Initializing random session key: ",_random);
+            if(log.isDebugEnabled())log.debug("Initializing random session key: "+_random);
         _random.nextLong();
         
         if (_sessions==null)
@@ -400,7 +406,7 @@ public abstract class AbstractSessionManager implements SessionManager
             }
             catch(ConcurrentModificationException e)
             {
-                Code.ignore(e);
+                log.trace(LogSupport.IGNORED,e);
                 // Oops something changed while we were looking.
                 // Lock the context and try again.
                 // Set our priority high while we have the sessions locked
@@ -448,21 +454,21 @@ public abstract class AbstractSessionManager implements SessionManager
                     try {
                         if (period!=_scavengePeriodMs)
                         {
-                            Code.debug("Session scavenger period = "+_scavengePeriodMs/1000+"s");
+                            if(log.isDebugEnabled())log.debug("Session scavenger period = "+_scavengePeriodMs/1000+"s");
                             period=_scavengePeriodMs;
                         }
                         sleep(period>1000?period:1000);
                         AbstractSessionManager.this.scavenge();
                     }
                     catch (InterruptedException ex){continue;}
-                    catch (Error e) {Code.warning(e);}
-                    catch (Exception e) {Code.warning(e);}
+                    catch (Error e) {log.warn(LogSupport.EXCEPTION,e);}
+                    catch (Exception e) {log.warn(LogSupport.EXCEPTION,e);}
                 }
             }
             finally
             {
                 AbstractSessionManager.this._scavenger=null;
-                Code.debug("Session scavenger exited");
+                log.debug("Session scavenger exited");
             }
         }
 

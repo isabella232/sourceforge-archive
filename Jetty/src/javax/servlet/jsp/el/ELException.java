@@ -54,7 +54,6 @@
 
 package javax.servlet.jsp.el;
 
-import java.text.MessageFormat;
 
 /**
  * Represents any of the exception conditions that arise during the

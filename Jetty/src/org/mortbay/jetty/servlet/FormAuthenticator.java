@@ -7,23 +7,25 @@ package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.security.Principal;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
-import java.security.Principal;
-import org.mortbay.http.HttpContext;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.http.SecurityConstraint;
-import org.mortbay.http.SecurityConstraint.Authenticator;
-import org.mortbay.http.UserRealm;
 import org.mortbay.http.SSORealm;
-import org.mortbay.util.Code;
-import org.mortbay.util.URI;
+import org.mortbay.http.SecurityConstraint;
+import org.mortbay.http.UserRealm;
+import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.util.Credential;
 import org.mortbay.util.Password;
+import org.mortbay.util.URI;
 
 /* ------------------------------------------------------------ */
 /** FORM Authentication Authenticator.
@@ -37,6 +39,8 @@ import org.mortbay.util.Password;
  */
 public class FormAuthenticator implements Authenticator
 {
+    private static Log log = LogFactory.getLog(FormAuthenticator.class);
+
     /* ------------------------------------------------------------ */
     public final static String __J_URI="org.mortbay.jetty.URI";
     public final static String __J_AUTHENTICATED="org.mortbay.jetty.Auth";
@@ -62,7 +66,7 @@ public class FormAuthenticator implements Authenticator
     {
         if (!path.startsWith("/"))
         {
-            Code.warning("form-login-page must start with /");
+            log.warn("form-login-page must start with /");
             path="/"+path;
         }
         _formLoginPage=path;
@@ -89,7 +93,7 @@ public class FormAuthenticator implements Authenticator
         {
             if (!path.startsWith("/"))
             {
-                Code.warning("form-error-page must start with /");
+                log.warn("form-error-page must start with /");
                 path="/"+path;
             }
             _formErrorPage=path;
@@ -125,7 +129,7 @@ public class FormAuthenticator implements Authenticator
             _ssoRealm=(SSORealm)realm;
         else if (_ssoRealm!=null)
         {
-            Code.warning("Mixed realms");
+            log.warn("Mixed realms");
             _ssoRealm=null;
         }
         
@@ -156,7 +160,7 @@ public class FormAuthenticator implements Authenticator
             if (form_cred._userPrincipal!=null)
             {
                 // Authenticated OK
-                Code.debug("Form authentication OK for ",form_cred._jUserName);
+                if(log.isDebugEnabled())log.debug("Form authentication OK for "+form_cred._jUserName);
                 session.removeAttribute(__J_URI); // Remove popped return URI.
                 httpRequest.setAuthType(SecurityConstraint.__FORM_AUTH);
                 httpRequest.setAuthUser(form_cred._jUserName);
@@ -180,7 +184,7 @@ public class FormAuthenticator implements Authenticator
             }
             else
             {
-                Code.debug("Form authentication FAILED for ",form_cred._jUserName);
+                if(log.isDebugEnabled())log.debug("Form authentication FAILED for "+form_cred._jUserName);
                 if (_formErrorPage!=null)
                 {
                     response.setContentLength(0);
@@ -229,7 +233,7 @@ public class FormAuthenticator implements Authenticator
             // If this credential is still authenticated
             if (form_cred._userPrincipal!=null)
             {
-                Code.debug("FORM Authenticated for ",form_cred._userPrincipal.getName());
+                if(log.isDebugEnabled())log.debug("FORM Authenticated for "+form_cred._userPrincipal.getName());
                 httpRequest.setAuthType(SecurityConstraint.__FORM_AUTH);
                 httpRequest.setAuthUser(form_cred._userPrincipal.getName());
                 httpRequest.setUserPrincipal(form_cred._userPrincipal);
@@ -250,7 +254,7 @@ public class FormAuthenticator implements Authenticator
                 form_cred._jUserName=form_cred._userPrincipal.toString();
                 if (cred!=null)
                     form_cred._jPassword=cred.toString();
-                Code.debug("SSO for ",form_cred._userPrincipal);
+                if(log.isDebugEnabled())log.debug("SSO for "+form_cred._userPrincipal);
                            
                 httpRequest.setAuthType(SecurityConstraint.__FORM_AUTH);
                 session.setAttribute(__J_AUTHENTICATED,form_cred);
@@ -288,9 +292,9 @@ public class FormAuthenticator implements Authenticator
      */
     private static class FormCredential implements Serializable
     {
-        private String _jUserName;
-        private String _jPassword;
-        private transient Principal _userPrincipal;
+        String _jUserName;
+        String _jPassword;
+        transient Principal _userPrincipal;
         
         public int hashCode()
         {
@@ -325,7 +329,7 @@ public class FormAuthenticator implements Authenticator
         
         public void valueUnbound(HttpSessionBindingEvent event)
         {
-            Code.debug("SSO signoff",_username);
+            if(log.isDebugEnabled())log.debug("SSO signoff"+_username);
             if(_ssoRealm!=null)
                 _ssoRealm.clearSingleSignOn(_username);
         }

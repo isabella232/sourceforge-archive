@@ -19,6 +19,9 @@ import java.util.GregorianCalendar;
 import java.util.ListIterator;
 import java.util.StringTokenizer;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /* ------------------------------------------------------------ */
 /** A File OutputStream that rolls overs.
  * If the passed filename contains the string "yyyy_mm_dd" on daily intervals.
@@ -27,9 +30,10 @@ import java.util.StringTokenizer;
  */
 public class RolloverFileOutputStream extends FilterOutputStream
 {
-    private final static String YYYY_MM_DD="yyyy_mm_dd";
-    private final static ArrayList __rollovers = new ArrayList();
-    private static Rollover __rollover;
+    static Log log = LogFactory.getLog(RolloverFileOutputStream.class);
+	static Rollover __rollover;
+    final static String YYYY_MM_DD="yyyy_mm_dd";
+    final static ArrayList __rollovers = new ArrayList();
 
     private SimpleDateFormat _fileBackupFormat =
         new SimpleDateFormat(System.getProperty("ROLLOVERFILE_BACKUP_FORMAT","HHmmssSSS"));
@@ -149,7 +153,7 @@ public class RolloverFileOutputStream extends FilterOutputStream
             out=new FileOutputStream(file.toString(),_append);
             if (oldOut!=null)
                 oldOut.close();
-            Code.debug("Opened ",_file);
+            if(log.isDebugEnabled())log.debug("Opened "+_file);
         }
     }
 
@@ -194,13 +198,13 @@ public class RolloverFileOutputStream extends FilterOutputStream
                              nMonth==borderMonth &&
                              nDay<=borderDay))
                         {
-                            Log.event("Log age "+fn);
+                            log.info("Log age "+fn);
                             new File(dir,fn).delete();
                         }
                     }
                     catch(Exception e)
                     {
-                        if (Code.debug())
+                        if (log.isDebugEnabled())
                             e.printStackTrace();
                     }
                 }
@@ -270,7 +274,7 @@ public class RolloverFileOutputStream extends FilterOutputStream
                     long sleeptime=
                         midnight.getTime().getTime()-
                         now.getTime().getTime();
-                    Code.debug("Rollover sleep until "+midnight.getTime());
+                    if(log.isDebugEnabled())log.debug("Rollover sleep until "+midnight.getTime());
                     Thread.sleep(sleeptime);
                 }
                 catch(InterruptedException e)

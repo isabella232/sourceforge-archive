@@ -1,24 +1,26 @@
 package org.mortbay.jetty.plus;
 
 import java.io.IOException;
-import java.util.Hashtable;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.naming.Name;
-import javax.naming.NameNotFoundException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.jetty.servlet.WebApplicationContext;
-import org.mortbay.xml.XmlParser;
-import org.mortbay.util.Code;
-import org.mortbay.util.Log;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.TypeUtil;
+import org.mortbay.xml.XmlParser;
 
 /* ------------------------------------------------------------ */
 public class JotmWebAppContext extends WebApplicationContext
 {
+    private static Log log = LogFactory.getLog(JotmWebAppContext.class);
+
 //    MemoryContext _root;
     Context _rootComp;
     Context _rootCompEnv;
@@ -90,7 +92,7 @@ public class JotmWebAppContext extends WebApplicationContext
                  "ejb-local-ref".equals(element) ||
                  "security-domain".equals(element))
         {
-           Code.warning("Entry " + element+" => "+node+" is not supported yet");
+           log.warn("Entry " + element+" => "+node+" is not supported yet");
         }
         else
         {
@@ -122,13 +124,12 @@ public class JotmWebAppContext extends WebApplicationContext
         } 
         catch (NamingException e) 
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw e;
         }
 
-        Code.debug("bind in ",ctx," ",name,"=",value);
+        if(log.isDebugEnabled())log.debug("bind in "+ctx+" "+name+"="+value);
         ctx.rebind(name,value);
-        Code.debug("Entry bound in JNDI with name " + name);
     }
     
     /* ------------------------------------------------------------ */
@@ -145,18 +146,16 @@ public class JotmWebAppContext extends WebApplicationContext
         } 
         catch (NamingException e) 
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw e;
         }
 
         Object objValue;
 
-        Code.debug("Searching for global entry in JNDI with name " + strGlobalName);
+        if(log.isDebugEnabled())log.debug("Searching for global entry in JNDI with name " + strGlobalName);
         objValue = ctx.lookup(strGlobalName);
-        Code.debug("Found global entry in JNDI with name " + strGlobalName);
 
-        Code.debug("bind in ",ctx," ",name,"=",objValue);
+        if(log.isDebugEnabled())log.debug("bind in "+ctx+" "+name+"="+objValue);
         ctx.rebind(name,objValue);
-        Code.debug("Entry bound in JNDI with name " + name);
     }
 }

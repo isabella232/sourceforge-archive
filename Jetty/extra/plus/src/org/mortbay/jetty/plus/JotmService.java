@@ -2,22 +2,23 @@ package org.mortbay.jetty.plus;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.HashMap;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
-import javax.transaction.UserTransaction;
-import javax.transaction.TransactionManager;
 import javax.sql.XADataSource;
-import org.mortbay.jndi.Util;
-import org.mortbay.util.Code;
-import org.mortbay.util.Log;
+import javax.transaction.TransactionManager;
+import javax.transaction.UserTransaction;
 
-
-import org.enhydra.jdbc.standard.StandardXADataSource;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.enhydra.jdbc.pool.StandardXAPoolDataSource;
+import org.enhydra.jdbc.standard.StandardXADataSource;
+import org.mortbay.jndi.Util;
+import org.mortbay.util.LogSupport;
 
 /**
  * Implementation of TMService for Objectweb JOTM (www.objectweb.org)
@@ -26,6 +27,8 @@ import org.enhydra.jdbc.pool.StandardXAPoolDataSource;
  */
 public class JotmService extends TMService
 {
+    private static Log log = LogFactory.getLog(JotmService.class);
+
    
     public static final String DEFAULT_SERVICE_NAME = "JotmService";
 
@@ -93,7 +96,7 @@ public class JotmService extends TMService
         if (!isStarted())
         {
             
-            Log.event("Starting JoTM transaction manager.");
+            log.info("Starting JoTM transaction manager.");
             
             // Start the transaction manager
             try
@@ -103,7 +106,7 @@ public class JotmService extends TMService
             }
             catch(Exception eExc)
             {
-                Code.warning(eExc);
+                log.warn(LogSupport.EXCEPTION,eExc);
                 throw new IOException("Failed to start JoTM: " + eExc);
             }
 
@@ -114,34 +117,34 @@ public class JotmService extends TMService
             try 
             {
                 ictx = new InitialContext();
-                Code.debug("InitialContext instanceof "+ictx.getClass().getName());
-                Code.debug("java.naming.factory.initial="+System.getProperty("java.naming.factory.initial"));
+                if(log.isDebugEnabled())log.debug("InitialContext instanceof "+ictx.getClass().getName());
+                if(log.isDebugEnabled())log.debug("java.naming.factory.initial="+System.getProperty("java.naming.factory.initial"));
             } 
             catch (NamingException e) 
             {
-                Code.warning(e);
+                log.warn(LogSupport.EXCEPTION,e);
                 throw new IOException("No initial context: "+e);
             }
             
             try 
             {
                 Util.bind(ictx, getJNDI(), m_tm.getUserTransaction());
-                Code.debug("UserTransaction object bound in JNDI with name " + getJNDI());
+                if(log.isDebugEnabled())log.debug("UserTransaction object bound in JNDI with name " + getJNDI());
             }
             catch (NamingException e) 
             {
-                Code.warning(e);
+                log.warn(LogSupport.EXCEPTION,e);
                 throw new IOException("UserTransaction rebind failed :" + e.getExplanation());
             }
  
             try
             {
                 Util.bind(ictx, getTransactionManagerJNDI(), m_tm.getTransactionManager());
-                Code.debug("TransactionManager object bound in JNDI with name " + getTransactionManagerJNDI());
+                if(log.isDebugEnabled())log.debug("TransactionManager object bound in JNDI with name " + getTransactionManagerJNDI());
             } 
             catch (NamingException e) 
             {
-                Code.warning(e);
+                log.warn(LogSupport.EXCEPTION,e);
                 throw new IOException("TransactionManager rebind failed :" + e.getExplanation());
             }
             
@@ -152,11 +155,9 @@ public class JotmService extends TMService
             // which to enrol their transactions when necessary 
             XADataSource xadsDataSource;
             Iterator             itrDataSources;
-            TransactionManager   tmManager;
             Map.Entry            meDataSource;
             String               strDataSourceName;
             
-            tmManager = m_tm.getTransactionManager();
             for (itrDataSources = m_mpDataSources.entrySet().iterator();
                  itrDataSources.hasNext();)
             {
@@ -173,14 +174,14 @@ public class JotmService extends TMService
                     try 
                     {
                         Util.bind(ictx, "XA"+ strDataSourceName, xadsDataSource);
-                        Code.debug("XA Data source bound in JNDI with name XA" + strDataSourceName);
+                        if(log.isDebugEnabled())log.debug("XA Data source bound in JNDI with name XA" + strDataSourceName);
                         Util.bind(ictx, strDataSourceName, xapdsPoolDataSource);
-                        Code.debug("Data Source Pool bound in JNDI with name " + strDataSourceName);
+                        if(log.isDebugEnabled())log.debug("Data Source Pool bound in JNDI with name " + strDataSourceName);
                     } 
                     catch (NamingException e) 
                     {
-                        Code.debug("Data source rebind failed :" + e.getExplanation());
-                        Code.warning(e);
+                        if(log.isDebugEnabled())log.debug("Data source rebind failed :" + e.getExplanation());
+                        log.warn(LogSupport.EXCEPTION,e);
                         throw e;
                     }
                 }
@@ -191,12 +192,12 @@ public class JotmService extends TMService
                     try
                     {
                         Util.bind(ictx, strDataSourceName, xadsDataSource);
-                        Code.debug("Data Source bound in JNDI with name "+ strDataSourceName);
+                        if(log.isDebugEnabled())log.debug("Data Source bound in JNDI with name "+ strDataSourceName);
                     }
                     catch (NamingException e)
                     {
-                        Code.debug("Data source rebind failed : "+e.getExplanation());
-                        Code.warning(e);
+                        if(log.isDebugEnabled())log.debug("Data source rebind failed : "+e.getExplanation());
+                        log.warn(LogSupport.EXCEPTION,e);
                         throw e;
                     }
                 }
@@ -206,10 +207,10 @@ public class JotmService extends TMService
 
             super.start();
             
-            Log.event("JoTM is running.");
+            log.info("JoTM is running.");
         }
         else
-            Log.event ("JoTM is already running");
+            log.info("JoTM is already running");
     }
 
 
@@ -229,14 +230,14 @@ public class JotmService extends TMService
     {
        if (!isStarted())
        {
-          Log.event("Stopping JoTM...");
+          log.info("Stopping JoTM...");
           m_tm.stop();
           super.stop();
-          Log.event("JoTM is stopped.");
+          log.info("JoTM is stopped.");
        }
        else
        {
-          Code.warning("No JoTM to stop.");
+          log.warn("No JoTM to stop.");
        }
     }
 
@@ -272,7 +273,7 @@ public class JotmService extends TMService
         // add to map of datasources
         m_mpDataSources.put(dsJNDIName, xaPool);
 
-        Log.event("Pooled data source: " +dsJNDIName+" configured");
+        log.info("Pooled data source: " +dsJNDIName+" configured");
     }
 
 
@@ -291,7 +292,7 @@ public class JotmService extends TMService
     {  
         // add to map of datasources
         m_mpDataSources.put(dsJNDIName, xaDataSource);
-        Log.event("Data source: " +dsJNDIName+" configured");
+        log.info("Data source: " +dsJNDIName+" configured");
 
     }
 

@@ -9,7 +9,6 @@ package org.mortbay.http.ajp;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import org.mortbay.http.ajp.AJP13RequestPacket;
 
 public class AJP13InputStream extends InputStream
 {   

@@ -8,9 +8,11 @@ package org.mortbay.xml;
 import java.io.File;
 import java.io.FilePermission;
 import java.net.URL;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.InetAddrPort;
-import org.mortbay.util.Resource;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.TestCase;
 
 
@@ -22,6 +24,8 @@ import org.mortbay.util.TestCase;
  */
 public class TestHarness
 {
+    private static Log log = LogFactory.getLog(TestHarness.class);
+
     public final static String __CRLF = "\015\012";
     public static String __userDir =
         System.getProperty("user.dir",".");
@@ -42,7 +46,7 @@ public class TestHarness
         }
         catch(Exception e)
         {
-            Code.fail(e);
+            log.fatal(e); System.exit(1);
         }
     }    
 
@@ -67,14 +71,14 @@ public class TestHarness
             String url = __userURL+"TestData/configure.xml";
             XmlParser.Node testDoc = parser.parse(url);
             String testDocStr = testDoc.toString().trim();
-            Code.debug(testDocStr);
+            log.debug(testDocStr);
             
             t.check(testDocStr.startsWith("<Configure"),"Parsed");
             t.check(testDocStr.endsWith("</Configure>"),"Parsed");
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -174,11 +178,11 @@ public class TestHarness
 
             t.checkEquals(77,tc.testField1,"static to field");
             t.checkEquals(2,tc.testField2,"field to field");
-            t.checkEquals(42,tc.VALUE,"literal to static");
+            t.checkEquals(42,TestConfiguration.VALUE,"literal to static");
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -196,7 +200,7 @@ public class TestHarness
         }
         catch(Throwable th)
         {
-            Code.warning(th);
+            log.warn(LogSupport.EXCEPTION,th);
             TestCase t = new TestCase("org.mortbay.xml.TestHarness");
             t.check(false,th.toString());
         }

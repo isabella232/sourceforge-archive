@@ -5,23 +5,25 @@
 
 package org.mortbay.webapps.jetty;
 
-import org.mortbay.html.Block;
-import org.mortbay.html.Font;
-import org.mortbay.html.Link;
-import org.mortbay.html.Page;
-import org.mortbay.html.Table;
-import org.mortbay.http.PathMap;
-import org.mortbay.util.Code;
-import org.mortbay.util.Log;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
-import java.net.InetAddress;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.html.Block;
+import org.mortbay.html.Page;
+import org.mortbay.html.Table;
+import org.mortbay.http.PathMap;
+import org.mortbay.util.LogSupport;
 
 /* ================================================================ */
 public class JettyPage extends Page
 {
+    private static Log log = LogFactory.getLog(JettyPage.class);
+
     private static  Section[][] __section;
     private static final PathMap __pathMap = new PathMap();
     private static final PathMap __linkMap = new PathMap();
@@ -33,11 +35,11 @@ public class JettyPage extends Page
         {
             if (InetAddress.getLocalHost().getHostName().indexOf("jetty")>=0)
             {
-                Log.event("Real Jetty Site");
+                log.info("Real Jetty Site");
                 __realSite=true;
             }
         }
-        catch(Exception e) {Code.ignore(e);}
+        catch(Exception e) {log.trace(LogSupport.IGNORED,e);}
     }
     
     /* ------------------------------------------------------------ */
@@ -50,7 +52,7 @@ public class JettyPage extends Page
 	    return;
 
         // This only works for 1 context.
-        Code.debug("Loading JettyPage Index");
+        log.debug("Loading JettyPage Index");
         int i=0;
         int j=0;
         ArrayList major=new ArrayList(10);
@@ -70,7 +72,7 @@ public class JettyPage extends Page
                     do
                     {
                         Section section=new Section(context,value);
-                        Code.debug(key," = ",section);
+                        if(log.isDebugEnabled())log.debug(key+" = "+section);
                         minor.add(section);
                         if (section._pathSpec!=null)
                         {
@@ -82,7 +84,7 @@ public class JettyPage extends Page
                                     __linkMap.put(section._pathSpec,new Links(links)); }
                             catch(MissingResourceException e)
                             {
-                                Code.ignore(e);
+                                log.trace(LogSupport.IGNORED,e);
                             }
                         }
                         
@@ -94,8 +96,8 @@ public class JettyPage extends Page
                 }
                 catch(MissingResourceException e)
                 {
-                    if (Code.verbose(99999))
-                        Code.ignore(e);
+                    
+                        log.trace(LogSupport.IGNORED,e);
                 }
                 finally
                 {
@@ -108,15 +110,12 @@ public class JettyPage extends Page
         }
         catch(MissingResourceException e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
         catch(Throwable th)
         {
-            Code.warning(th);
+            log.warn(LogSupport.EXCEPTION,th);
         }
-
-        Code.assertTrue(major.size()>0 && ((ArrayList)(major.get(0))).size()>0,
-                        "No index");
         
         __section=new Section[major.size()][];
         for (i=0;i<major.size();i++)
@@ -269,7 +268,7 @@ public class JettyPage extends Page
 
                      if (__section[i][0]._link != null)
                      {
-                         Code.debug ("Section "+__section[i][0]._section+" has link "+__section[i][0]._link);
+                         if(log.isDebugEnabled())log.debug("Section "+__section[i][0]._section+" has link "+__section[i][0]._link);
                          
                          if (_selectedSection._section.equals(__section[i][0]._section))
                              menu.add ("<a class=selhdr href="+__section[i][0]._link+">"+__section[i][0]._section+"</a>");
@@ -278,7 +277,7 @@ public class JettyPage extends Page
                      }
                      else
                      {
-                         Code.debug ("Section has no link: "+__section[i][0]._section);
+                         if(log.isDebugEnabled())log.debug("Section has no link: "+__section[i][0]._section);
                          menu.add ("<font color=#ffffff><b>"+__section[i][0]._section+"</b></font>");
                      }
                  }
@@ -375,9 +374,7 @@ public class JettyPage extends Page
         Section(String context, String value)
         {
             StringTokenizer tok = new StringTokenizer(value,"\t ");
-            Code.assertTrue(tok.hasMoreTokens(),"No name");
             _key=tok.nextToken();
-            //Code.assertTrue(tok.hasMoreTokens(),"No URI");
             if (tok.hasMoreTokens())
                 _uri=tok.nextToken();
             

@@ -10,12 +10,17 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.util.LogSupport;
 
 /* ------------------------------------------------------------ */
 public class Connection 
 {
-    private ByteBufferPool _bufferPool;
+    static Log log = LogFactory.getLog(Connection.class);
+    ByteBufferPool _bufferPool;
+    
     private Listener _listener;
     private Server _server;
     private QueuedChannel _serverQ;
@@ -103,7 +108,7 @@ public class Connection
         _serverQ._selector=selector;
         if (!_serverQ.isEmpty())
             _serverQ.writeWakeup(null);
-        Code.debug("Connect ",this);
+        if(log.isDebugEnabled())log.debug("Connect "+this);
     }
     
     /* ------------------------------------------------------------ */
@@ -115,7 +120,7 @@ public class Connection
     /* ------------------------------------------------------------ */
     public synchronized void close()
     {
-        Code.debug("Closing ",this);
+        if(log.isDebugEnabled())log.debug("Closing "+this);
         try{
             if (_clientQ._channel!=null && _clientQ._channel.isOpen())
             {
@@ -125,7 +130,7 @@ public class Connection
                 _clientQ._channel.close();
             }
         }
-        catch(IOException e){Code.warning(e);}
+        catch(IOException e){log.warn(LogSupport.EXCEPTION,e);}
         
         try{
             if (_serverQ._channel!=null && _serverQ._channel.isOpen())
@@ -133,7 +138,7 @@ public class Connection
                 _serverQ._channel.close();
             }
         }
-        catch(IOException e){Code.warning(e);}
+        catch(IOException e){log.warn(LogSupport.EXCEPTION,e);}
     }
 
     /* ------------------------------------------------------------ */
@@ -183,7 +188,7 @@ public class Connection
         synchronized void read(SelectionKey key)
             throws IOException
         {
-            Code.debug("Read ",key);
+            if(log.isDebugEnabled())log.debug("Read "+key);
             // Do we have space?
             if (isFull())
                 // No - unregister READs from src
@@ -223,13 +228,13 @@ public class Connection
             // Are we using the queue
             if (!isEmpty() || _channel==null)
             {
-                Code.debug("QUEUE! ",buffer);
+                if(log.isDebugEnabled())log.debug("QUEUE! "+buffer);
                 queue(buffer);
             }
             else
             {
                 // No - write buffer directly
-                Code.debug("Write! ",buffer);
+                if(log.isDebugEnabled())log.debug("Write! "+buffer);
 
                 if (_channel.write(buffer)<0)
                 {
@@ -240,7 +245,7 @@ public class Connection
                 // If we have bytes remaining
                 if (buffer.remaining()>0)
                 {
-                    Code.debug("QUEUE ",buffer);
+                    if(log.isDebugEnabled())log.debug("QUEUE "+buffer);
                     // Queue it
                     queue(buffer);
                     synchronized(_selector)
@@ -266,18 +271,18 @@ public class Connection
         synchronized void writeWakeup(SelectionKey key)
             throws IOException
         {
-            Code.debug("WRITE WAKEUP: ",key);
+            if(log.isDebugEnabled())log.debug("WRITE WAKEUP: "+key);
             
             boolean was_full = isFull();
 
-            if (Code.debug())
-                Code.debug("was_full=="+was_full+" isEmpty()=="+isEmpty());
+            if (log.isDebugEnabled())
+                if(log.isDebugEnabled())log.debug("was_full=="+was_full+" isEmpty()=="+isEmpty());
             
             // While we have buffers to write
             while (!isEmpty())
             {
                 ByteBuffer buffer = (ByteBuffer)peek();
-                Code.debug("Write  ",buffer);
+                if(log.isDebugEnabled())log.debug("Write  "+buffer);
                 int len=_channel.write(buffer);
                 
                 if (len<0)
@@ -307,7 +312,7 @@ public class Connection
         void readRegister()
             throws IOException
         {
-            Code.debug("READ REGISTER: ",this);
+            if(log.isDebugEnabled())log.debug("READ REGISTER: "+this);
             
             SelectionKey key=_channel.keyFor(_selector);
             if (key!=null)

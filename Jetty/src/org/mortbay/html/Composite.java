@@ -9,7 +9,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
-import org.mortbay.util.Code;
+
 
 /* -------------------------------------------------------------------- */
 /** HTML Composite Element.
@@ -68,8 +68,8 @@ public class Composite extends Element
             {
                 if (o instanceof Element)
                 {
-                    Code.assertTrue(!(o instanceof Page),
-                                    "Can't insert Page in Composite");
+                    if(o instanceof Page)
+                        throw new IllegalArgumentException("Can't insert Page in Composite");
                     elements.add(o);
                 }
                 else if (o instanceof String)

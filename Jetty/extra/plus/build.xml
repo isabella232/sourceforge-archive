@@ -33,7 +33,6 @@ Other targets:
   <property name="jaas.webapp.classes"   value="${jaas.webapp.webinf}/classes"/>
   <property name="jaas.jar"              value="${lib}/org.mortbay.jaas.jar"/>
   <property name="policy.file"           value="${etc}/jaas.policy"/>
-  <property name="${package}.resources.jar" value="${package}.resources.jar"/>
 
 
   <!-- ==================================================================== -->
@@ -131,20 +130,11 @@ Other targets:
   <!-- jars                                                                 -->
   <!-- ==================================================================== -->
   <target name="jars" 
-          depends="classes, build.jaas.jar, build.package.jar, build.resources.jar" 
+          depends="classes, build.jaas.jar, build.package.jar" 
 	  description="Make jars">
   </target>
 
 
-  <!-- ==================================================================== -->
-  <!-- build.resources.jar                                                  -->
-  <!-- ==================================================================== -->
-  <target name="build.resources.jar" description="Make the JettyPlus resource jar">
-    <jar basedir="${resources}"
-         destfile="${resource.jar}"
-	 includes="**/*.properties, **/*.xml">
-    </jar>
-  </target>
 
   <!-- ==================================================================== -->
   <!-- build.package.jar                                                    -->
@@ -253,7 +243,6 @@ Other targets:
   <target name="run.jettyplus.demo" depends="build.jettyplus.webapp" 
           description="Run a JettyPlus webapp demo"> 
      <java fork="true" jar="${jetty.home}/start.jar" dir="${jetty.home}"> 
-       <jvmarg value="-Dlog4j.configuration=log4j.xml"/>
        <jvmarg value="-Djetty.server=org.mortbay.jetty.plus.Server"/>      
        <arg value="${etc}/jettyplus.xml"/>
      </java>

@@ -6,20 +6,21 @@
 package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
-import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestAttributeEvent;
-import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletRequestAttributeListener;
+import javax.servlet.ServletRequestEvent;
+import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
-import org.mortbay.util.Code;
+
 import org.mortbay.util.LazyList;
 
 /* ------------------------------------------------------------ */

@@ -14,13 +14,17 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LifeCycleThread;
-import org.mortbay.util.Log;
+import org.mortbay.util.LogSupport;
 
 public class Server extends LifeCycleThread
 {
+    private static Log log = LogFactory.getLog(Server.class);
+
     Selector _selector;
     InetSocketAddress _address;
     ByteBufferPool _bufferPool;
@@ -80,7 +84,7 @@ public class Server extends LifeCycleThread
     {
         SocketChannel socket_channel= SocketChannel.open();
         socket_channel.configureBlocking(false);
-        Code.debug("Connecting... ",socket_channel);
+        if(log.isDebugEnabled())log.debug("Connecting... "+socket_channel);
 
         if (socket_channel.connect(_address))
             connection.connected(socket_channel,_selector);
@@ -88,7 +92,7 @@ public class Server extends LifeCycleThread
         _pending.add(socket_channel);
         _pending.add(connection);
         
-        Code.debug("wakeup ",_selector);
+        if(log.isDebugEnabled())log.debug("wakeup "+_selector);
         _selector.wakeup();
     }
 
@@ -108,7 +112,7 @@ public class Server extends LifeCycleThread
     public void loop()
         throws Exception
     {
-        Code.debug("server keys=",_selector.keys());
+        if(log.isDebugEnabled())log.debug("server keys="+_selector.keys());
         if (_selector.select()>0)
         {
             Set ready=_selector.selectedKeys();
@@ -119,8 +123,8 @@ public class Server extends LifeCycleThread
                 iter.remove();
                 
                 Channel channel = key.channel();
-                if (Code.debug())
-                    Code.debug("Ready key "+key+" for "+channel);
+                if (log.isDebugEnabled())
+                    if(log.isDebugEnabled())log.debug("Ready key "+key+" for "+channel);
 
                 if (!channel.isOpen())
                     key.cancel();
@@ -136,8 +140,8 @@ public class Server extends LifeCycleThread
                         try{connected=socket_channel.finishConnect();}
                         catch(Exception e)
                         {
-                            if (Code.debug())Code.warning(e);
-                            else Log.event(e.toString());
+                            if (log.isDebugEnabled())log.warn(LogSupport.EXCEPTION,e);
+                            else log.info(e.toString());
                             key.cancel();
                             connection.deallocate();
                         }
@@ -150,7 +154,7 @@ public class Server extends LifeCycleThread
                                             |SelectionKey.OP_READ);
                         }
                         else
-                            Code.debug("Not Connected ",socket_channel);
+                            if(log.isDebugEnabled())log.debug("Not Connected "+socket_channel);
                     }
                     else if ((key.interestOps()&SelectionKey.OP_WRITE)!=0)
                         connection.serverWriteWakeup(key);
@@ -168,7 +172,7 @@ public class Server extends LifeCycleThread
             {
                 SocketChannel sc = (SocketChannel)_pending.get(i++);
                 Connection c=(Connection)_pending.get(i);
-                Code.debug("register ",sc);
+                if(log.isDebugEnabled())log.debug("register "+sc);
                 sc.register(_selector,
                             sc.isConnected()
                             ?SelectionKey.OP_WRITE:SelectionKey.OP_CONNECT,

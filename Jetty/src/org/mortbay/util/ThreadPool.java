@@ -7,6 +7,9 @@ package org.mortbay.util;
 
 import java.io.Serializable;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /* ------------------------------------------------------------ */
 /** A pool of threads.
  * <p>
@@ -29,6 +32,8 @@ import java.io.Serializable;
 public class ThreadPool
     implements LifeCycle, Serializable
 {
+    static Log log = LogFactory.getLog(ThreadPool.class);
+
     public static final String __DAEMON="org.mortbay.util.ThreadPool.daemon";
     
     /* ------------------------------------------------------------------- */
@@ -242,7 +247,7 @@ public class ThreadPool
      */
     public void setMaxStopTimeMs(int ms)
     {
-        Code.warning("setMaxStopTimeMs is deprecated. No longer required.");
+        log.warn("setMaxStopTimeMs is deprecated. No longer required.");
     }
     
     /* ------------------------------------------------------------ */
@@ -286,7 +291,7 @@ public class ThreadPool
                 catch (Exception e)
                 {
                     e.printStackTrace();
-                    Code.ignore(e);
+                    log.trace(LogSupport.IGNORED,e);
                 }
             }
         }
@@ -321,12 +326,12 @@ public class ThreadPool
                 thread.run(this,job);
             else
             {
-                Code.warning("No thread for "+job);
+                log.warn("No thread for "+job);
                 stopJob(null,job);
             }
         }
         catch (InterruptedException e) {throw e;}
-        catch (Exception e){Code.warning(e);}
+        catch (Exception e){log.warn(LogSupport.EXCEPTION,e);}
     }
     
 
@@ -344,7 +349,7 @@ public class ThreadPool
         if (job!=null && job instanceof Runnable)
             ((Runnable)job).run();
         else
-            Code.warning("Invalid job: "+job);
+            log.warn("Invalid job: "+job);
     }
     
     /* ------------------------------------------------------------ */
@@ -382,7 +387,7 @@ public class ThreadPool
             this.setName(_name);
             this.setDaemon(pool.getAttribute(__DAEMON)!=null);
             this.start();
-            if (Code.verbose())Code.debug("enterPool ",this," -> ",pool);
+            if(log.isTraceEnabled())log.trace("enterPool "+this+" -> "+pool);
         }
 
         /* ------------------------------------------------------------ */
@@ -406,7 +411,7 @@ public class ThreadPool
         /* ------------------------------------------------------------ */
         public void leavePool()
         {
-            if (Code.verbose())Code.debug("leavePool ",this," <- ",_pool);
+            if(log.isTraceEnabled())log.trace("leavePool "+this+" <- "+_pool);
             synchronized(this)
             {
                 _pool=null;
@@ -455,7 +460,7 @@ public class ThreadPool
                 }
                 catch (InterruptedException e)
                 {
-                    Code.ignore(e);
+                    log.trace(LogSupport.IGNORED,e);
                 }
                 finally
                 {
@@ -469,7 +474,7 @@ public class ThreadPool
                             if (got&&_pool!=null)
                                 _pool.put(this);
                         }
-                        catch (InterruptedException e){Code.ignore(e);}
+                        catch (InterruptedException e){log.trace(LogSupport.IGNORED,e);}
                     }
                 }
             }

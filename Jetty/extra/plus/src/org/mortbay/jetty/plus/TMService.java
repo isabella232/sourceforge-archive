@@ -1,9 +1,7 @@
 package org.mortbay.jetty.plus;
 
-import javax.transaction.UserTransaction;
 import javax.transaction.TransactionManager;
-
-import org.mortbay.util.LifeCycle;
+import javax.transaction.UserTransaction;
 
 /**
  * A <code>TMService</code> represents a JTA Service and is used to acces JTA

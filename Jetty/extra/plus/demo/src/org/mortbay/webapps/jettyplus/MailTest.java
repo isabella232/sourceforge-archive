@@ -4,19 +4,21 @@ import java.io.IOException;
 import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import javax.mail.Session;
+
 import javax.mail.Message;
+import javax.mail.Session;
 import javax.mail.Transport;
-import javax.mail.internet.MimeMessage;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.mortbay.util.Log;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.util.LogSupport;
 
 /**
  * MailTest.java
@@ -29,6 +31,8 @@ import org.mortbay.util.Code;
  */
 public class MailTest extends HttpServlet
 {
+    private static Log log = LogFactory.getLog(MailTest.class);
+
     public static final String DATE_FORMAT = "EEE, d MMM yy HH:mm:ss Z";
     SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
 
@@ -64,8 +68,8 @@ public class MailTest extends HttpServlet
                 throw new ServletException ("No recipient configured");
                 
 
-            Log.event("Sender="+sender);
-            Log.event("Recipient="+recipient);
+            log.info("Sender="+sender);
+            log.info("Recipient="+recipient);
 
             // set the from and to address
             InternetAddress addressFrom = new InternetAddress(sender);
@@ -82,7 +86,7 @@ public class MailTest extends HttpServlet
         }
         catch (Throwable e)
         {
-            Code.warning (e);
+            log.warn(LogSupport.EXCEPTION,e);
             writer.write ("<font color=red>Test failed: "+e+"</font>");
         }
 

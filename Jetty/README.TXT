@@ -386,33 +386,9 @@ Support FAQ
 DEBUGGING
 =========
 
-The debug and logging output of jetty can be controlled with java
-System properties:
-
-    DEBUG - If set, debug output is enabled
-
-    DEBUG_PATTERNS - If set to a comma separated list of strings, Then
-        debug output is only produced from those classes whose fully
-        qualified class name contains one of the strings as a substring.
-
-    DEBUG_VERBOSE - Set to an integer verbosity level for use in
-        controlling debug verbosity (see verbose(int))
-
-Using this with the java program:
-
-   java [-DDEBUG [-DDEBUG_PATTERNS="MyClass,my.package"] [-DDEBUG_VERBOSE=n] ] my.package.main
-
-example:
-
-   java -DDEBUG -DDEBUG_PATTERNS=com.acme.MyServlet,HttpHandler org.mortbay.jetty.Server
-
-
-There is also a debug servlet that can change the debug setting of a
-running server.  It is configured by the admin.xml file and is run on
-port 8081 as part of the standard Jetty demo.
-
-Finally the JMX MBeans provided by the JettyExtra package also provide
-a mechanism to configure debugging and logging at runtime.
+Since 5.0, Jetty has used jakarta commons logging.  This is a facade over
+other logging mechanism.  If the Jetty extra package is available, then
+log4j is used and is configured in $JETTY_HOME/extra/resources
 
 
 

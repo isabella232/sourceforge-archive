@@ -56,11 +56,6 @@ $Id$
     </Call>
 
     <Call name="addServlet">
-      <Arg>Debug</Arg>
-      <Arg>/Debug/*</Arg>
-      <Arg>org.mortbay.servlet.Debug</Arg>
-    </Call>
-    <Call name="addServlet">
       <Arg>Admin</Arg>
       <Arg>/</Arg>
       <Arg>org.mortbay.servlet.AdminServlet</Arg>

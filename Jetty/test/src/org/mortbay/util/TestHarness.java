@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.jar.JarFile;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 
 /* ------------------------------------------------------------ */
 /** Util meta TestHarness.
@@ -25,6 +28,8 @@ import java.util.jar.JarFile;
  */
 public class TestHarness
 {
+    private static Log log = LogFactory.getLog(TestHarness.class);
+
     public static String __userDir =
         System.getProperty("user.dir",".");
     public static URL __userURL=null;
@@ -45,7 +50,7 @@ public class TestHarness
         }
         catch(Exception e)
         {
-            Code.fail(e);
+            log.fatal(e); System.exit(1);
         }
     }    
 
@@ -206,7 +211,7 @@ public class TestHarness
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             test.check(false,e.toString());
         }
     }
@@ -459,7 +464,7 @@ public class TestHarness
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             test.check(false,e.toString());
         }
     }
@@ -492,7 +497,7 @@ public class TestHarness
                 len=c;
             if(c==0)
             {
-                Code.debug("read(b,o,l)==0");
+                log.debug("read(b,o,l)==0");
                 c=size;
                 return 0;
             }
@@ -508,7 +513,7 @@ public class TestHarness
         {   
             if(c==0)
             {
-                Code.debug("available==0");
+                log.debug("available==0");
                 c=size;
                 return 0;
             }
@@ -545,9 +550,9 @@ public class TestHarness
             }
             synchronized(job)
             {
-                Code.debug("JOB wait: ",job);
+                if(log.isDebugEnabled())log.debug("JOB wait: "+job);
                 job.wait();
-                Code.debug("JOB wake: ",job);
+                if(log.isDebugEnabled())log.debug("JOB wake: "+job);
             }
             synchronized(_lock)
             {
@@ -590,7 +595,7 @@ public class TestHarness
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -678,7 +683,7 @@ public class TestHarness
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -806,7 +811,7 @@ public class TestHarness
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }    
@@ -845,7 +850,7 @@ public class TestHarness
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -887,7 +892,7 @@ public class TestHarness
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -909,7 +914,7 @@ public class TestHarness
         }
         catch(Throwable th)
         {
-            Code.warning(th);
+            log.warn(LogSupport.EXCEPTION,th);
             TestCase t = new TestCase("org.mortbay.util.TestHarness");
             t.check(false,th.toString());
         }

@@ -17,6 +17,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletRequest;
@@ -24,13 +25,16 @@ import javax.servlet.ServletRequestWrapper;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpInputStream;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.SecurityConstraint;
-import org.mortbay.util.Code;
 import org.mortbay.util.LazyList;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.Resource;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URI;
@@ -51,6 +55,8 @@ import org.mortbay.util.URI;
 public class ServletHttpRequest
     implements HttpServletRequest
 {
+    private static Log log = LogFactory.getLog(ServletHttpRequest.class);
+
     /* -------------------------------------------------------------- */
     public static final String
         __SESSIONID_NOT_CHECKED = "not checked",
@@ -350,7 +356,7 @@ public class ServletHttpRequest
             }
             catch(Exception e)
             {
-                Code.debug(e);
+                log.debug(LogSupport.EXCEPTION,e);
             }
         }
         
@@ -425,12 +431,12 @@ public class ServletHttpRequest
                             SessionManager manager = _servletHandler.getSessionManager();
                             if (manager!=null && manager.getHttpSession(_sessionId)!=null)
                                 break;
-                            Code.debug("multiple session cookies");
+                            log.debug("multiple session cookies");
                         }
                         
                         _sessionId=cookies[i].getValue();
                         _sessionIdState = __SESSIONID_COOKIE;
-                        Code.debug("Got Session ",_sessionId," from cookie");
+                        if(log.isDebugEnabled())log.debug("Got Session "+_sessionId+" from cookie");
                     }
                 }
             }
@@ -441,7 +447,7 @@ public class ServletHttpRequest
         {
             String id =
                 pathParams.substring(SessionManager.__SessionURL.length()+1);
-            Code.debug("Got Session ",id," from URL");
+            if(log.isDebugEnabled())log.debug("Got Session "+id+" from URL");
             
             if (_sessionId==null)
             {
@@ -449,7 +455,7 @@ public class ServletHttpRequest
                 _sessionIdState = __SESSIONID_URL;
             }
             else if (!id.equals(_sessionId))
-                Code.debug("Mismatched session IDs");
+                log.debug("Mismatched session IDs");
         }
         
         if (_sessionId == null)
@@ -765,7 +771,7 @@ public class ServletHttpRequest
             }
             catch(UnsupportedEncodingException e)
             {
-                Code.warning(e);
+                log.warn(LogSupport.EXCEPTION,e);
                 _reader=new BufferedReader(new InputStreamReader(getInputStream()));
             }
         }

@@ -14,6 +14,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.Permission;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 /* ------------------------------------------------------------ */
@@ -33,6 +35,7 @@ import java.security.Permission;
  */
 class FileResource extends URLResource
 {
+    private static Log log = LogFactory.getLog(FileResource.class);
     private static boolean __checkAliases;
     static
     {
@@ -41,7 +44,7 @@ class FileResource extends URLResource
             (System.getProperty("org.mortbay.util.FileResource.checkAliases","true"));
  
        if (__checkAliases)
-            Log.event("Checking Resource aliases");
+            log.info("Checking Resource aliases");
     }
     
     /* ------------------------------------------------------------ */
@@ -106,15 +109,15 @@ class FileResource extends URLResource
                 if (!abs.equals(can))
                     _alias=Resource.newResource(can).getURL();
                 
-                if (_alias!=null && Code.debug())
+                if (_alias!=null && log.isDebugEnabled())
                 {
-                    Code.debug("ALIAS abs=",abs);
-                    Code.debug("ALIAS can=",can);
+                    if(log.isDebugEnabled())log.debug("ALIAS abs="+abs);
+                    if(log.isDebugEnabled())log.debug("ALIAS can="+can);
                 }
             }
             catch(IOException e)
             {
-                Code.ignore(e);
+                log.trace(LogSupport.IGNORED,e);
             }
         }
         return _alias;

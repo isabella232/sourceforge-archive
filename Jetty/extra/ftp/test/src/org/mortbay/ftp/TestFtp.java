@@ -6,10 +6,13 @@
 
 package org.mortbay.ftp;
 
-import org.mortbay.util.*;
-import java.io.*;
-import java.net.*;
-import java.util.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.net.InetAddress;
+
+import org.mortbay.util.TestCase;
 
 public class TestFtp
 {

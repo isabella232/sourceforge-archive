@@ -5,14 +5,18 @@
 
 package org.mortbay.util.jmx;
 
-import org.mortbay.util.Code;
-import org.mortbay.util.Log;
-import mx4j.adaptor.http.HttpAdaptor;
-import javax.management.ObjectName;
 import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
+import mx4j.adaptor.http.HttpAdaptor;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class MX4JHttpAdaptor extends HttpAdaptor
 {
+    private static Log log = LogFactory.getLog(MX4JHttpAdaptor.class);
+
     public MX4JHttpAdaptor()
     {
         super();
@@ -45,7 +49,7 @@ public class MX4JHttpAdaptor extends HttpAdaptor
         if (done.booleanValue())
         {
             try{start();} catch(Exception e){e.printStackTrace();}
-            Log.event("Started MX4J HTTP Adaptor on : "+this.getPort());
+            log.info("Started MX4J HTTP Adaptor on : "+this.getPort());
         }
     }
 }

@@ -7,9 +7,8 @@ package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -18,14 +17,16 @@ import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpOutputStream;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.util.Code;
 import org.mortbay.util.IO;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.StringUtil;
-import org.mortbay.util.TypeUtil;
 import org.mortbay.util.URI;
 
 /* ------------------------------------------------------------ */
@@ -42,6 +43,8 @@ import org.mortbay.util.URI;
  */
 public class ServletHttpResponse implements HttpServletResponse
 {
+    private static Log log = LogFactory.getLog(ServletHttpResponse.class);
+
     public static final int
         DISABLED=-1,
         NO_OUT=0,
@@ -60,7 +63,7 @@ public class ServletHttpResponse implements HttpServletResponse
         }
         catch (Exception e)
         {
-            Code.fail(e);
+            log.fatal(e); System.exit(1);
         }
     }
     
@@ -295,7 +298,7 @@ public class ServletHttpResponse implements HttpServletResponse
             return url;
         
         // Check host and port are for this server
-        // XXX not implemented
+        // TODO not implemented
         
         // Already encoded
         int prefix=url.indexOf(SessionManager.__SessionUrlPrefix);
@@ -384,7 +387,7 @@ public class ServletHttpResponse implements HttpServletResponse
             }
             catch(ServletException e)
             {
-                Code.warning(e);
+                log.warn(LogSupport.EXCEPTION,e);
                 _httpResponse.sendError(status,message); 
             }
         }
@@ -432,35 +435,35 @@ public class ServletHttpResponse implements HttpServletResponse
     public void setDateHeader(String name, long value) 
     {
         try{_httpResponse.setDateField(name,value);}
-        catch(IllegalStateException e){Code.ignore(e);}
+        catch(IllegalStateException e){log.trace(LogSupport.IGNORED,e);}
     }
 
     /* ------------------------------------------------------------ */
     public void setHeader(String name, String value) 
     {
         try{_httpResponse.setField(name,value);}
-        catch(IllegalStateException e){Code.ignore(e);}
+        catch(IllegalStateException e){log.trace(LogSupport.IGNORED,e);}
     }
 
     /* ------------------------------------------------------------ */
     public void setIntHeader(String name, int value) 
     {
         try{_httpResponse.setIntField(name,value);}
-        catch(IllegalStateException e){Code.ignore(e);}
+        catch(IllegalStateException e){log.trace(LogSupport.IGNORED,e);}
     }
     
     /* ------------------------------------------------------------ */
     public void addDateHeader(String name, long value) 
     {
         try{_httpResponse.addDateField(name,value);}
-        catch(IllegalStateException e){Code.ignore(e);}
+        catch(IllegalStateException e){log.trace(LogSupport.IGNORED,e);}
     }
 
     /* ------------------------------------------------------------ */
     public void addHeader(String name, String value) 
     {
         try{_httpResponse.addField(name,value);}
-        catch(IllegalStateException e){Code.ignore(e);}
+        catch(IllegalStateException e){log.trace(LogSupport.IGNORED,e);}
     }
     
 
@@ -468,7 +471,7 @@ public class ServletHttpResponse implements HttpServletResponse
     public void addIntHeader(String name, int value) 
     {
         try{_httpResponse.addIntField(name,value);}
-        catch(IllegalStateException e){Code.ignore(e);}
+        catch(IllegalStateException e){log.trace(LogSupport.IGNORED,e);}
     }
 
     /* ------------------------------------------------------------ */

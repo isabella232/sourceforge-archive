@@ -3,12 +3,14 @@ package org.mortbay.jndi;
 
 import java.util.Hashtable;
 import java.util.WeakHashMap;
+
 import javax.naming.Context;
 import javax.naming.Name;
-import javax.naming.NamingException;
 import javax.naming.NameParser;
 import javax.naming.spi.ObjectFactory;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -22,6 +24,8 @@ import org.mortbay.util.Code;
  */
 public class ContextFactory implements ObjectFactory
 {
+    private static Log log = LogFactory.getLog(ContextFactory.class);
+
 
     //map of classloaders to contexts
     private static WeakHashMap _contextMap;
@@ -60,7 +64,7 @@ public class ContextFactory implements ObjectFactory
                                          name.get(0),
                                          nameCtx,
                                          _parser);
-                Code.debug ("No entry for classloader: "+loader);
+                if(log.isDebugEnabled())log.debug("No entry for classloader: "+loader);
                 _contextMap.put (loader, ctx);
             }
         }

@@ -11,11 +11,15 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.html.Block;
 import org.mortbay.html.Break;
 import org.mortbay.html.Composite;
@@ -36,11 +40,10 @@ import org.mortbay.http.HttpResponse;
 import org.mortbay.http.HttpServer;
 import org.mortbay.http.PathMap;
 import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.util.Code;
 import org.mortbay.util.LifeCycle;
-import org.mortbay.util.Log;
-import org.mortbay.util.UrlEncoded;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.URI;
+import org.mortbay.util.UrlEncoded;
 
 
 /* ------------------------------------------------------------ */
@@ -54,6 +57,8 @@ import org.mortbay.util.URI;
  */
 public class AdminServlet extends HttpServlet
 {
+    static Log log = LogFactory.getLog(AdminServlet.class);
+
     private Collection _servers;
     
     /* ------------------------------------------------------------ */
@@ -76,16 +81,16 @@ public class AdminServlet extends HttpServlet
                     public void run()
                     {
                         try{Thread.sleep(1000);}
-                        catch(Exception e){Code.ignore(e);}
-                        Log.event("Stopping All servers");
+                        catch(Exception e){log.trace(LogSupport.IGNORED,e);}
+                        log.info("Stopping All servers");
                         Iterator s=_servers.iterator();
                         while(s.hasNext())
                         {
                             HttpServer server=(HttpServer)s.next();
                             try{server.stop();}
-                            catch(Exception e){Code.ignore(e);}
+                            catch(Exception e){log.trace(LogSupport.IGNORED,e);}
                         }
-                        Log.event("Exiting JVM");
+                        log.info("Exiting JVM");
                         System.exit(1);
                     }
                 }).start();
@@ -167,11 +172,11 @@ public class AdminServlet extends HttpServlet
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
         catch(Error e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
         
         return target;

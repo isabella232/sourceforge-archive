@@ -12,15 +12,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
@@ -29,6 +27,9 @@ import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.EOFException;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
@@ -39,10 +40,7 @@ import org.mortbay.http.PathMap;
 import org.mortbay.http.Version;
 import org.mortbay.http.handler.AbstractHttpHandler;
 import org.mortbay.util.ByteArrayISO8859Writer;
-import org.mortbay.util.Code;
-import org.mortbay.util.Frame;
-import org.mortbay.util.Log;
-import org.mortbay.util.LogSink;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
 import org.mortbay.util.URI;
@@ -67,6 +65,8 @@ import org.mortbay.util.URI;
  */
 public class ServletHandler extends AbstractHttpHandler
 {
+    private static Log log = LogFactory.getLog(ServletHandler.class);
+
     /* ------------------------------------------------------------ */
     public static final String __DEFAULT_SERVLET="default";
     public static final String __J_S_CONTEXT_TEMPDIR="javax.servlet.context.tempdir";
@@ -84,7 +84,6 @@ public class ServletHandler extends AbstractHttpHandler
     
     /* ------------------------------------------------------------ */
     private boolean _usingCookies=true;
-    private LogSink _logSink;
     private boolean _autoInitializeServlets=true;
     
     /* ------------------------------------------------------------ */
@@ -152,7 +151,7 @@ public class ServletHandler extends AbstractHttpHandler
      */
     public void setDynamicServletPathSpec(String dynamicServletPathSpec)
     {
-        Code.warning("setDynamicServletPathSpec is Deprecated.");
+        log.warn("setDynamicServletPathSpec is Deprecated.");
     }
     
     /* ------------------------------------------------------------ */
@@ -161,7 +160,7 @@ public class ServletHandler extends AbstractHttpHandler
      */
     public void setDynamicInitParams(Map initParams)
     {
-        Code.warning("setDynamicInitParams is Deprecated.");
+        log.warn("setDynamicInitParams is Deprecated.");
     }
 
     /* ------------------------------------------------------------ */
@@ -170,7 +169,7 @@ public class ServletHandler extends AbstractHttpHandler
      */
     public void setServeDynamicSystemServlets(boolean b)
     {
-        Code.warning("setServeDynamicSystemServlets is Deprecated.");
+        log.warn("setServeDynamicSystemServlets is Deprecated.");
     }
     
     /* ------------------------------------------------------------ */
@@ -186,18 +185,6 @@ public class ServletHandler extends AbstractHttpHandler
     public void setUsingCookies(boolean uc)
     {
         _usingCookies=uc;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setLogSink(LogSink logSink)
-    {
-        _logSink=logSink;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public LogSink getLogSink()
-    {
-        return _logSink;
     }
 
     /* ------------------------------------------------------------ */
@@ -234,7 +221,7 @@ public class ServletHandler extends AbstractHttpHandler
 
         if (!pathSpec.startsWith("/") && !pathSpec.startsWith("*"))
         {
-            Code.warning("pathSpec should start with '/' or '*' : "+pathSpec);
+            log.warn("pathSpec should start with '/' or '*' : "+pathSpec);
             pathSpec="/"+pathSpec;
         }
         
@@ -266,7 +253,7 @@ public class ServletHandler extends AbstractHttpHandler
         if (isStarted() && !holder.isStarted())
         {
             try{holder.start();}
-            catch(Exception e){Code.warning(e);}
+            catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
         }
         return holder;
     }
@@ -311,7 +298,7 @@ public class ServletHandler extends AbstractHttpHandler
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
     }
     
@@ -379,7 +366,7 @@ public class ServletHandler extends AbstractHttpHandler
             try{holders[i].start();}
             catch(Exception e)
             {
-                Code.debug(e);
+                log.debug(LogSupport.EXCEPTION,e);
                 mx.add(e);
             }
         } 
@@ -403,7 +390,7 @@ public class ServletHandler extends AbstractHttpHandler
                 if (holders[i].isStarted())
                     holders[i].stop();
             }
-            catch(Exception e){Code.warning(e);}
+            catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
         }
         
         // Stop the session manager
@@ -476,7 +463,7 @@ public class ServletHandler extends AbstractHttpHandler
         // Look for the servlet
         Map.Entry servlet=getHolderEntry(pathInContext);
         ServletHolder servletHolder=servlet==null?null:(ServletHolder)servlet.getValue();
-        Code.debug("servlet=",servlet);
+        if(log.isDebugEnabled())log.debug("servlet="+servlet);
             
         try
         {
@@ -494,7 +481,7 @@ public class ServletHandler extends AbstractHttpHandler
             HttpSession session=request.getSession(false);
             if (session!=null)
                 ((SessionManager.Session)session).access();
-            Code.debug("session=",session);
+            if(log.isDebugEnabled())log.debug("session="+session);
             
             // Do that funky filter and servlet thang!
             if (servletHolder!=null)
@@ -502,7 +489,7 @@ public class ServletHandler extends AbstractHttpHandler
         }
         catch(Exception e)
         {
-            Code.debug(e);
+            log.debug(LogSupport.EXCEPTION,e);
             
             Throwable th=e;
             if (e instanceof ServletException)
@@ -513,7 +500,7 @@ public class ServletHandler extends AbstractHttpHandler
                 if (root instanceof HttpException ||
                     root instanceof EOFException)
                 {
-                    Code.debug("Extracting root cause from ",e);
+                    if(log.isDebugEnabled())log.debug("Extracting root cause from ",e);
                     th=root;
                 }
             }
@@ -522,12 +509,12 @@ public class ServletHandler extends AbstractHttpHandler
                 throw (HttpException)th;
             if (th instanceof EOFException)
                 throw (IOException)th;
-            else if (!Code.debug() && th instanceof java.io.IOException)
-                Code.warning("Exception for "+httpRequest.getURI()+": "+th);
+            else if (!log.isDebugEnabled() && th instanceof java.io.IOException)
+                log.warn("Exception for "+httpRequest.getURI()+": "+th);
             else
             {
-                Code.warning("Exception for "+httpRequest.getURI(),th);
-                Code.debug(httpRequest);
+                log.warn("Exception for "+httpRequest.getURI(),th);
+                if(log.isDebugEnabled())log.debug(httpRequest);
             }
             
             httpResponse.getHttpConnection().forceClose();
@@ -541,12 +528,12 @@ public class ServletHandler extends AbstractHttpHandler
                                    e.getMessage());
             }
             else
-                Code.debug("Response already committed for handling ",th);
+                if(log.isDebugEnabled())log.debug("Response already committed for handling "+th);
         }
         catch(Error e)
         {   
-            Code.warning("Error for "+httpRequest.getURI(),e);
-            Code.debug(httpRequest);
+            log.warn("Error for "+httpRequest.getURI(),e);
+            if(log.isDebugEnabled())log.debug(httpRequest);
             
             httpResponse.getHttpConnection().forceClose();
             if (!httpResponse.isCommitted())
@@ -557,7 +544,7 @@ public class ServletHandler extends AbstractHttpHandler
                                    e.getMessage());
             }
             else
-                Code.debug("Response already committed for handling ",e);
+                if(log.isDebugEnabled())log.debug("Response already committed for handling ",e);
         }
         finally
         {
@@ -629,7 +616,7 @@ public class ServletHandler extends AbstractHttpHandler
         }
         catch(Exception e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
         
         return Collections.EMPTY_SET;
@@ -653,7 +640,7 @@ public class ServletHandler extends AbstractHttpHandler
         }
         catch(IllegalArgumentException e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
         catch(MalformedURLException e)
         {
@@ -661,7 +648,7 @@ public class ServletHandler extends AbstractHttpHandler
         }
         catch(IOException e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
         return null;
     }
@@ -676,16 +663,16 @@ public class ServletHandler extends AbstractHttpHandler
             if (url!=null)
                 return url.openStream();
         }
-        catch(MalformedURLException e) {Code.ignore(e);}
-        catch(IOException e) {Code.ignore(e);}
+        catch(MalformedURLException e) {log.trace(LogSupport.IGNORED,e);}
+        catch(IOException e) {log.trace(LogSupport.IGNORED,e);}
         return null;
     }
 
     /* ------------------------------------------------------------ */
     public String getRealPath(String path)
     {
-        if(Code.debug())
-            Code.debug("getRealPath of ",path," in ",this);
+        if(log.isDebugEnabled())
+            if(log.isDebugEnabled())log.debug("getRealPath of "+path+" in "+this);
 
         if (__Slosh2Slash)
             path=path.replace('\\','/');
@@ -705,7 +692,7 @@ public class ServletHandler extends AbstractHttpHandler
         }
         catch(IOException e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             return null;
         }
     }
@@ -742,7 +729,7 @@ public class ServletHandler extends AbstractHttpHandler
         }
         catch(Exception e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
         return null;
     }
@@ -759,7 +746,7 @@ public class ServletHandler extends AbstractHttpHandler
             name=__DEFAULT_SERVLET;
 
         try { return new Dispatcher(ServletHandler.this,name); }
-        catch(Exception e) {Code.ignore(e);}
+        catch(Exception e) {log.trace(LogSupport.IGNORED,e);}
         
         return null;
     }
@@ -771,7 +758,7 @@ public class ServletHandler extends AbstractHttpHandler
                   HttpServletResponse response)
         throws IOException
     {
-        Code.debug("Not Found ",request.getRequestURI());
+        if(log.isDebugEnabled())log.debug("Not Found "+request.getRequestURI());
         String method=request.getMethod();
             
         // Not found special requests.
@@ -939,8 +926,6 @@ public class ServletHandler extends AbstractHttpHandler
         {
             return Collections.enumeration(Collections.EMPTY_LIST);
         }
-
-
     
         /* ------------------------------------------------------------ */
         /** Servlet Log.
@@ -951,11 +936,7 @@ public class ServletHandler extends AbstractHttpHandler
          */
         public void log(String msg)
         {
-            if (_logSink!=null)
-                _logSink.log(Log.EVENT,msg,new
-                             Frame(2),System.currentTimeMillis());
-            else
-                Log.message(Log.EVENT,msg,new Frame(2));
+            log.info(msg);
         }
 
         /* ------------------------------------------------------------ */
@@ -966,15 +947,13 @@ public class ServletHandler extends AbstractHttpHandler
          */
         public void log(Exception e, String msg)
         {
-            Code.warning(msg,e);
-            log(msg+": "+e.toString());
+            log.warn(msg,e);
         }
 
         /* ------------------------------------------------------------ */
         public void log(String msg, Throwable th)
         {
-            Code.warning(msg,th);
-            log(msg+": "+th.toString());
+            log.warn(msg,th);
         }
 
         /* ------------------------------------------------------------ */

@@ -6,6 +6,7 @@
 package org.mortbay.http;
 import java.io.IOException;
 import java.io.OutputStream;
+
 import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.ByteBufferOutputStream;
 import org.mortbay.util.OutputObserver;

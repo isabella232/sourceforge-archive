@@ -2,9 +2,11 @@ package org.mortbay.jndi;
 
 import javax.naming.Context;
 import javax.naming.Name;
-import javax.naming.NamingException;
 import javax.naming.NameNotFoundException;
-import org.mortbay.util.Code;
+import javax.naming.NamingException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 /**
@@ -17,7 +19,9 @@ import org.mortbay.util.Code;
  * @version 1.0
  */
 public class Util 
-{    
+{
+    private static Log log = LogFactory.getLog(Util.class);
+    
   
 
 
@@ -49,16 +53,16 @@ public class Util
             try
             {
                 subCtx = (Context)subCtx.lookup (name.get(i));
-                Code.debug ("Subcontext "+name.get(i)+" already exists");
+                if(log.isDebugEnabled())log.debug("Subcontext "+name.get(i)+" already exists");
             }
             catch (NameNotFoundException e)
             {
                 subCtx = subCtx.createSubcontext(name.get(i));
-                Code.debug ("Subcontext "+name.get(i)+" created");
+                if(log.isDebugEnabled())log.debug("Subcontext "+name.get(i)+" created");
             }
         }
 
         subCtx.rebind (name.get(name.size() - 1), obj);
-        Code.debug ("Bound object to "+name.get(name.size() - 1));
+        if(log.isDebugEnabled())log.debug("Bound object to "+name.get(name.size() - 1));
     }   
 }

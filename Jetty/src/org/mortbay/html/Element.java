@@ -11,7 +11,10 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.util.LogSupport;
 
 /* -------------------------------------------------------------------- */
 /** HTML Element.
@@ -27,6 +30,8 @@ import org.mortbay.util.Code;
 */
 public abstract class Element
 {
+    private static Log log = LogFactory.getLog(Element.class);
+
     /* ----------------------------------------------------------------- */
     public static final String
         noAttributes="",
@@ -159,8 +164,8 @@ public abstract class Element
      */
     public Element attributes(String attributes)
     {
-        if (Code.debug() && attributes!=null && attributes.indexOf('=')>=0)
-            Code.warning("Set attribute with old method: "+attributes+
+        if (log.isDebugEnabled() && attributes!=null && attributes.indexOf('=')>=0)
+            log.warn("Set attribute with old method: "+attributes+
                          " on " + getClass().getName());
 
         if (attributes==null)
@@ -203,8 +208,8 @@ public abstract class Element
      */
     public Element attribute(String attributes)
     {
-        if (Code.debug() && attributes!=null && attributes.indexOf('=')>=0)
-            Code.warning("Set attribute with old method: "+attributes+
+        if (log.isDebugEnabled() && attributes!=null && attributes.indexOf('=')>=0)
+            log.warn("Set attribute with old method: "+attributes+
                          " on " + getClass().getName());
         
         if (attributes==null ||
@@ -276,7 +281,7 @@ public abstract class Element
             return out.toString();
         }
         catch(IOException e){
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
         return null;    
     }

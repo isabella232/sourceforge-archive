@@ -8,8 +8,11 @@ package org.mortbay.http;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.LineInput;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.TestCase;
 import org.mortbay.util.URI;
 
@@ -20,7 +23,9 @@ import org.mortbay.util.URI;
  * @author Greg Wilkins (gregw)
  */
 public class TestRequest
-{    
+{
+    private static Log log = LogFactory.getLog(TestRequest.class);
+    
     /* --------------------------------------------------------------- */
     public static HttpRequest getRequest(String data)
         throws IOException
@@ -93,13 +98,13 @@ public class TestRequest
                 catch(IOException e)
                 {
                     if (rl[i+1]!=null)
-                        Code.warning(e);
+                        log.warn(LogSupport.EXCEPTION,e);
                     test.check(rl[i+1]==null,rl[i]);
                 }
                 catch(IllegalArgumentException e)
                 {
                     if (rl[i+1]!=null)
-                        Code.warning(e);
+                        log.warn(LogSupport.EXCEPTION,e);
                     test.check(rl[i+1]==null,rl[i]);
                 }
             }
@@ -107,7 +112,7 @@ public class TestRequest
         catch(Exception e)
         {
             test.check(false,e.toString());
-            Code.warning("failed",e);
+            log.warn("failed",e);
         }
     }
     
@@ -127,7 +132,7 @@ public class TestRequest
                                "Content-Length: 5\n"+
                                "\n"+
                                "123\015\012");
-            Code.debug("Request: ",request);
+            if(log.isDebugEnabled())log.debug("Request: "+request);
             t.checkEquals(request.getParameterNames().size(),0,"No parameters");
             
 
@@ -137,7 +142,7 @@ public class TestRequest
                                "Content-Length: 5\n"+
                                "\n"+
                                "123\015\012");
-            Code.debug("Request: ",request);
+            if(log.isDebugEnabled())log.debug("Request: "+request);
             t.checkEquals(request.getQuery(),null,"No query");
             
             request=getRequest("GET /R1?A=1,2,3&B=4&B=5&B=6 HTTP/1.0\n"+
@@ -145,7 +150,7 @@ public class TestRequest
                                "Content-Length: 5\n"+
                                "\n"+
                                "123\015\012");
-            Code.debug("Request: ",request);
+            if(log.isDebugEnabled())log.debug("Request: "+request);
             t.checkEquals(request.getParameterNames().size(),2,"Query parameters");
             t.checkEquals(request.getParameter("A"),"1,2,3","Single Query");
             t.checkEquals(request.getParameter("B"),"4","Multi as Single");
@@ -221,7 +226,7 @@ public class TestRequest
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -257,7 +262,7 @@ public class TestRequest
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }

@@ -7,6 +7,7 @@ package org.mortbay.servlet;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -16,7 +17,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.StringUtil;
 
 
@@ -28,6 +31,8 @@ import org.mortbay.util.StringUtil;
  */
 public class RequestDispatchTest extends HttpServlet
 {
+    private static Log log = LogFactory.getLog(RequestDispatchTest.class);
+
     /* ------------------------------------------------------------ */
     String pageType;
 
@@ -224,7 +229,7 @@ public class RequestDispatchTest extends HttpServlet
     /* ------------------------------------------------------------ */
     public synchronized void destroy()
     {
-        Code.debug("Destroyed");
+        log.debug("Destroyed");
     }
     
 }

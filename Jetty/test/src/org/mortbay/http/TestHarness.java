@@ -13,8 +13,11 @@ import java.io.FilePermission;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.LineInput;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.TestCase;
 
 /* ------------------------------------------------------------ */
@@ -25,6 +28,8 @@ import org.mortbay.util.TestCase;
  */
 public class TestHarness
 {
+    private static Log log = LogFactory.getLog(TestHarness.class);
+
     public final static String CRLF = "\015\012";
     public static String __userDir =
         System.getProperty("user.dir",".");
@@ -45,7 +50,7 @@ public class TestHarness
         }
         catch(Exception e)
         {
-            Code.fail(e);
+            log.fatal(e); System.exit(1);
         }
     }
     
@@ -134,10 +139,10 @@ public class TestHarness
         try{
             File tmpFile=File.createTempFile("HTTP.TestHarness",".chunked");
 
-            if (!Code.debug())
+            if (!log.isDebugEnabled())
                 tmpFile.deleteOnExit();
             else
-                Code.debug("Chunk out tmp = ",tmpFile);
+                if(log.isDebugEnabled())log.debug("Chunk out tmp = "+tmpFile);
             
             FileOutputStream fout = new FileOutputStream(tmpFile);
             HttpOutputStream cout = new HttpOutputStream(fout,4020);
@@ -195,7 +200,7 @@ public class TestHarness
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             test.check(false,e.toString());
         }
     }
@@ -209,10 +214,10 @@ public class TestHarness
         try{
             File tmpFile=File.createTempFile("HTTP.TestHarness",".chunked");
 
-            if (!Code.debug())
+            if (!log.isDebugEnabled())
                 tmpFile.deleteOnExit();
             else
-                Code.debug("Chunk out tmp = ",tmpFile);
+                if(log.isDebugEnabled())log.debug("Chunk out tmp = "+tmpFile);
             
             FileOutputStream fout = new FileOutputStream(tmpFile);
             ChunkingOutputStream cout = new ChunkingOutputStream(fout,4020,512);
@@ -268,7 +273,7 @@ public class TestHarness
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             test.check(false,e.toString());
         }
     }
@@ -311,7 +316,7 @@ public class TestHarness
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -448,7 +453,7 @@ public class TestHarness
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -582,7 +587,7 @@ public class TestHarness
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -606,7 +611,7 @@ public class TestHarness
         }
         catch(Throwable e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             new TestCase("org.mortbay.http.TestHarness").check(false,e.toString());
         }
         finally

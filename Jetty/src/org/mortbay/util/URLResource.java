@@ -13,6 +13,9 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.security.Permission;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /* ------------------------------------------------------------ */
 /** Abstract resource class.
  *
@@ -22,6 +25,8 @@ import java.security.Permission;
  */
 public class URLResource extends Resource
 {
+    private static Log log = LogFactory.getLog(URLResource.class);
+
     protected URL _url;
     protected String _urlString;
     protected transient URLConnection _connection;
@@ -46,7 +51,7 @@ public class URLResource extends Resource
             catch(IOException e)
             {
                 e.printStackTrace();
-                Code.ignore(e);
+                log.trace(LogSupport.IGNORED,e);
             }
         }
         return _connection!=null;
@@ -59,7 +64,7 @@ public class URLResource extends Resource
     {
         if (_in!=null)
         {
-            try{_in.close();}catch(IOException e){Code.ignore(e);}
+            try{_in.close();}catch(IOException e){log.trace(LogSupport.IGNORED,e);}
             _in=null;
         }
 
@@ -86,7 +91,7 @@ public class URLResource extends Resource
         }
         catch (IOException e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
         return _in!=null;
     }
@@ -153,7 +158,7 @@ public class URLResource extends Resource
 
         // Try the URL file arg
         try {return new File(_url.getFile());}
-        catch(Exception e) {Code.ignore(e);}
+        catch(Exception e) {log.trace(LogSupport.IGNORED,e);}
 
         // Don't know the file
         return null;    

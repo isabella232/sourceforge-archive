@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -15,7 +16,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /* ------------------------------------------------------------ */
 /** Forward Servlet Request.
@@ -31,6 +34,8 @@ import org.mortbay.util.Code;
  */
 public class Forward extends HttpServlet
 {
+    private static Log log = LogFactory.getLog(Forward.class);
+
     /* ------------------------------------------------------------ */
     Map _forwardMap= new HashMap();
 
@@ -73,7 +78,7 @@ public class Forward extends HttpServlet
         }
 
         String forward=(String)_forwardMap.get(path);
-        Code.debug("Forward ",path," to ",forward);
+        if(log.isDebugEnabled())log.debug("Forward "+path+" to "+forward);
         if (forward!=null)
         {            
             ServletContext context =
@@ -103,7 +108,7 @@ public class Forward extends HttpServlet
     /* ------------------------------------------------------------ */
     public synchronized void destroy()
     {
-        Code.debug("Destroyed");
+        log.debug("Destroyed");
     }
     
 }

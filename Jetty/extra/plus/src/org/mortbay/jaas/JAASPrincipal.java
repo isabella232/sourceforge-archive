@@ -7,7 +7,6 @@ package org.mortbay.jaas;
 
 import java.io.Serializable;
 import java.security.Principal;
-import org.mortbay.util.Code;
 
 
 

@@ -54,10 +54,6 @@
 
 package javax.servlet.jsp.el;
 
-import javax.servlet.*;
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-import java.util.Map;
 
 /**
  * <p>The abstract base class for an expression-language evaluator.

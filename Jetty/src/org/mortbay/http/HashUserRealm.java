@@ -8,6 +8,7 @@ package org.mortbay.http;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -15,8 +16,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import java.security.Principal;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.Credential;
 import org.mortbay.util.Password;
 import org.mortbay.util.Resource;
@@ -51,6 +53,8 @@ public class HashUserRealm
     extends HashMap
     implements UserRealm, SSORealm, Externalizable
 {
+    private static Log log = LogFactory.getLog(HashUserRealm.class);
+
     /** HttpContext Attribute to set to activate SSO.
      */
     public static final String __SSO = "org.mortbay.http.SSO";
@@ -120,7 +124,7 @@ public class HashUserRealm
         throws IOException
     {
         _config=config;
-        Code.debug("Load ",this," from ",config);
+        if(log.isDebugEnabled())log.debug("Load "+this+" from "+config);
         Properties properties = new Properties();
         Resource resource=Resource.newResource(config);
         properties.load(resource.getInputStream());

@@ -1,26 +1,25 @@
 package org.mortbay.jetty.plus;
 
 import java.util.Collection;
-import java.util.Hashtable;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+
 import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.Name;
-import javax.naming.NameNotFoundException;
-import javax.naming.NamingException;
 import javax.naming.Reference;
 import javax.naming.StringRefAddr;
 import javax.naming.spi.ObjectFactory;
-import org.mortbay.jetty.plus.AbstractService;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.jndi.Util;
-import org.mortbay.util.Code;
-import org.mortbay.util.Log;
 
 /**
  * MailService.java
@@ -33,6 +32,8 @@ import org.mortbay.util.Log;
  */
 public class MailService extends AbstractService implements Map
 {
+    static Log log = LogFactory.getLog(MailService.class);
+
     public static final String DEFAULT_MAIL_JNDI = "mail/Session";
     protected Properties _sessionProperties;
     protected String _user;
@@ -76,7 +77,7 @@ public class MailService extends AbstractService implements Map
                                         Hashtable environment)
             throws Exception
         {
-            Code.debug ("ObjectFactory getObjectInstance() called");
+            if(log.isDebugEnabled())log.debug("ObjectFactory getObjectInstance() called");
 
             if (obj instanceof Reference)
             {
@@ -84,13 +85,13 @@ public class MailService extends AbstractService implements Map
                 if (ref.getClassName().equals(Session.class.getName()))
                 {
                     Object inst = _sessionMap.get(ref.get("xx"));
-                    Code.debug ("Returning object: "+inst+" for reference: "+ref.get("xx"));
+                    if(log.isDebugEnabled())log.debug("Returning object: "+inst+" for reference: "+ref.get("xx"));
                   
                     return inst;
                 }
             }
 
-            Code.debug ("Returning null");
+            if(log.isDebugEnabled())log.debug("Returning null");
             return null;
         }
     };
@@ -209,12 +210,12 @@ public class MailService extends AbstractService implements Map
         {
 
             MailAuthenticator authenticator = new MailAuthenticator (getUser(), getPassword());            
-            Code.debug("Mail authenticator: user="+getUser());
+            if(log.isDebugEnabled())log.debug("Mail authenticator: user="+getUser());
 
             // create a Session object
             Session session = Session.getInstance (_sessionProperties, authenticator);
             
-            Code.debug ("Created Session="+session+" with ClassLoader="+session.getClass().getClassLoader());
+            if(log.isDebugEnabled())log.debug("Created Session="+session+" with ClassLoader="+session.getClass().getClassLoader());
 
             // create an ObjectFactory for Session as Session isn't serializable            
             StringRefAddr refAddr = new StringRefAddr ("xx", getJNDI());
@@ -228,17 +229,17 @@ public class MailService extends AbstractService implements Map
            
             Util.bind(initialCtx, getJNDI(), reference);
             
-            Code.debug ("Bound reference to "+getJNDI());
+            if(log.isDebugEnabled())log.debug("Bound reference to "+getJNDI());
 
             //look up the Session object to test
             Object o = initialCtx.lookup (getJNDI());
-            Code.debug ("Looked up Session="+o+" from classloader="+o.getClass().getClassLoader());
+            if(log.isDebugEnabled())log.debug("Looked up Session="+o+" from classloader="+o.getClass().getClassLoader());
 
             super.start();
-            Log.event ("Mail Service started");
+            log.info ("Mail Service started");
         }
         else
-            Log.warning ("MailService is already started");
+            log.warn ("MailService is already started");
     }
     
    

@@ -6,16 +6,18 @@
 package org.mortbay.jetty.plus;
 
 import java.io.IOException;
-import java.net.URL;
 import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.ListIterator;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.servlet.WebApplicationContext;
-import org.mortbay.util.Code;
-import org.mortbay.util.Log;
-import org.mortbay.util.Resource;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiException;
+import org.mortbay.util.Resource;
 
 /* ------------------------------------------------------------ */
 /** The Jetty HttpServer.
@@ -27,6 +29,8 @@ import org.mortbay.util.MultiException;
  */
 public class Server extends org.mortbay.jetty.Server 
 {
+    static Log log = LogFactory.getLog(Server.class);
+
     private  ArrayList _serviceList;
 
 
@@ -92,7 +96,7 @@ public class Server extends org.mortbay.jetty.Server
             _serviceList = new ArrayList(5);
 
         _serviceList.add (service);
-        Code.debug ("Service List contains: "+_serviceList.size()+" services");
+        if(log.isDebugEnabled())log.debug("Service List contains: "+_serviceList.size()+" services");
     }
 
 
@@ -161,7 +165,7 @@ public class Server extends org.mortbay.jetty.Server
         
         if (arg.length==0)
         {
-            Log.event("Using default configuration: etc/jetty.xml");
+            log.info("Using default configuration: etc/jetty.xml");
             arg=dftConfig;
         }
 
@@ -178,7 +182,7 @@ public class Server extends org.mortbay.jetty.Server
             }
             catch(Exception e)
             {
-                Code.warning(e);
+                log.warn(LogSupport.EXCEPTION,e);
             }
         }
 
@@ -195,17 +199,17 @@ public class Server extends org.mortbay.jetty.Server
                             public void run()
                             {
                                 setName("Shutdown");
-                                Log.event("Shutdown hook executing");
+                                log.info("Shutdown hook executing");
                                 for (int i=0;i<servers.length;i++)
                                 {
 				    if (servers[i]==null) continue;
                                     try{servers[i].stop();}
-                                    catch(Exception e){Code.warning(e);}
+                                    catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
                                 }
                                 
                                 // Try to avoid JVM crash
                                 try{Thread.sleep(1000);}
-                                catch(Exception e){Code.warning(e);}
+                                catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
                             }
                         };
                 shutdownHook.invoke(Runtime.getRuntime(),
@@ -213,7 +217,7 @@ public class Server extends org.mortbay.jetty.Server
             }
             catch(Exception e)
             {
-                Code.debug("No shutdown hook in JVM ",e);
+                if(log.isDebugEnabled())log.debug("No shutdown hook in JVM ",e);
             }
         }
 
@@ -221,7 +225,7 @@ public class Server extends org.mortbay.jetty.Server
         for (int i=0;i<arg.length;i++)
         {
             try{servers[i].join();}
-            catch (Exception e){Code.ignore(e);}
+            catch (Exception e){log.trace(LogSupport.IGNORED,e);}
         }
     }
 

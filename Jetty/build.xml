@@ -332,7 +332,7 @@
   </target>
 
   <!-- ==================================================================== -->
-  <target name="webapps" depends="webapp.jetty,webapp.examples"
+  <target name="webapps" depends="webapp.jetty"
    description="Build the demonstration webapplications"
    >
   </target>
@@ -353,6 +353,7 @@
            deprecation="${javac.deprecation}"
            >
       <classpath>
+        <path refid="extpath"/>
         <pathelement path="${servlet.jar}" />
         <pathelement path="${jetty.jar}"   />
       </classpath>
@@ -361,36 +362,6 @@
 
     <copy file="LICENSE.html" tofile="${jetty.webapp}/LICENSE.html" />
     <copy file="VERSION.TXT" tofile="${jetty.webapp}/versions.txt" />
-  </target>
-
-  <!-- ==================================================================== -->
-  <target name="webapp.examples" depends="jars" if="demo.available">
-    <!--
-    <javac srcdir="${demo.webapps}/examples/WEB-INF/classes"
-           destdir="${demo.webapps}/examples/WEB-INF/classes"
-           debug="${javac.debug}"
-           optimize="${javac.optimize}"
-           deprecation="${javac.deprecation}"
-           >
-      <classpath>
-        <pathelement path="${servlet.jar}" />
-        <pathelement path="${jetty.jar}"   />
-      </classpath>
-      <include name="**/*.java" />
-    </javac> 
-    <javac srcdir="${demo.webapps}/examples/jsp/plugin/applet"
-           destdir="${demo.webapps}/examples/jsp/plugin/applet"
-           debug="${javac.debug}"
-           optimize="${javac.optimize}"
-           deprecation="${javac.deprecation}"
-           >
-      <classpath>
-        <pathelement path="${servlet.jar}" />
-        <pathelement path="${jetty.jar}"   />
-      </classpath>
-      <include name="**/*.java" />
-    </javac>
-    -->
   </target>
 
 

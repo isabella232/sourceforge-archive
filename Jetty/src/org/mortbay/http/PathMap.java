@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.SingletonList;
 import org.mortbay.util.StringMap;
@@ -50,6 +52,7 @@ import org.mortbay.util.StringMap;
  */
 public class PathMap extends HashMap implements Externalizable
 {
+    private static Log log = LogFactory.getLog(PathMap.class);
     
     /* ------------------------------------------------------------ */
     private static String __pathSpecSeparators =
@@ -142,7 +145,7 @@ public class PathMap extends HashMap implements Externalizable
             
             if (!spec.startsWith("/") && !spec.startsWith("*."))
             {
-                Code.warning("PathSpec "+spec+". must start with '/' or '*.'");
+                log.warn("PathSpec "+spec+". must start with '/' or '*.'");
                 spec="/"+spec;
             }
             

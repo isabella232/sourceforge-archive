@@ -54,16 +54,12 @@
  */
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
-import javax.servlet.jsp.tagext.*;
-
-import javax.servlet.*;
-
-import java.io.Writer;
 import java.io.Serializable;
-
-import java.util.Hashtable;
 import java.util.Enumeration;
+import java.util.Hashtable;
+
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
 
 /**
  * A base class for defining new tag handlers implementing Tag.

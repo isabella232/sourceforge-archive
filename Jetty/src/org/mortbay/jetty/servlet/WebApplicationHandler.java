@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -26,9 +27,11 @@ import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.util.Code;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.MultiMap;
@@ -49,6 +52,8 @@ import org.mortbay.util.TypeUtil;
  */
 public class WebApplicationHandler extends ServletHandler 
 {
+    private static Log log = LogFactory.getLog(WebApplicationHandler.class);
+
     private Map _filterMap=new HashMap();
     private List _pathFilters=new ArrayList();
     private List _filters=new ArrayList();
@@ -100,7 +105,7 @@ public class WebApplicationHandler extends ServletHandler
         FilterHolder holder =(FilterHolder)_filterMap.get(filterName);
         if (holder==null)
             throw new IllegalArgumentException("Unknown filter :"+filterName);
-        Code.debug("Filter servlet ",servletName," --> ",filterName);
+        if(log.isDebugEnabled())log.debug("Filter servlet "+servletName+" --> "+filterName);
         _servletFilterMap.add(servletName,holder);
         holder.addServlet(servletName);
         return holder;
@@ -120,7 +125,7 @@ public class WebApplicationHandler extends ServletHandler
         if (holder==null)
             throw new IllegalArgumentException("Unknown filter :"+filterName);
         
-        Code.debug("Filter path ",pathSpec," --> ",filterName);
+        if(log.isDebugEnabled())log.debug("Filter path "+pathSpec+" --> "+filterName);
 
         if (!holder.isMappedToPath())
             _pathFilters.add(holder);
@@ -237,8 +242,8 @@ public class WebApplicationHandler extends ServletHandler
     {
         // Start Servlet Handler
         super.start();
-        Code.debug("Path Filters: ",_pathFilters);
-        Code.debug("Servlet Filters: ",_servletFilterMap);
+        if(log.isDebugEnabled())log.debug("Path Filters: "+_pathFilters);
+        if(log.isDebugEnabled())log.debug("Servlet Filters: "+_servletFilterMap);
         _started=true;
         if (getHttpContext() instanceof WebApplicationContext)
             _webApplicationContext=(WebApplicationContext)getHttpContext();
@@ -456,7 +461,7 @@ public class WebApplicationHandler extends ServletHandler
             // Call servlet
             if (servletHolder!=null)
             {
-                if (Code.verbose()) Code.debug("call servlet ",servletHolder);
+                if(log.isTraceEnabled())log.trace("call servlet "+servletHolder);
                 servletHolder.handle(request,response);
             }
             else // Not found
@@ -489,13 +494,13 @@ public class WebApplicationHandler extends ServletHandler
             throws IOException,
                    ServletException
         {
-            if (Code.verbose()) Code.debug("doFilter ",_filter);
+            if(log.isTraceEnabled())log.trace("doFilter "+_filter);
             
             // pass to next filter
             if (_filter<LazyList.size(_filters))
             {
                 FilterHolder holder = (FilterHolder)LazyList.get(_filters,_filter++);
-                if (Code.verbose()) Code.debug("call filter ",holder);
+                if(log.isTraceEnabled())log.trace("call filter "+holder);
                 Filter filter = holder.getFilter();
                 filter.doFilter(request,response,this);
                 return;
@@ -504,7 +509,7 @@ public class WebApplicationHandler extends ServletHandler
             // Call servlet
             if (_servletHolder!=null)
             {
-                if (Code.verbose()) Code.debug("call servlet ",_servletHolder);
+                if(log.isTraceEnabled())log.trace("call servlet "+_servletHolder);
                 _servletHolder.handle(request,response);
             }
             else // Not found

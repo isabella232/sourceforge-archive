@@ -9,26 +9,25 @@ package org.mortbay.http.handler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.MalformedURLException;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
-import org.mortbay.http.HttpConnection;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
-import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.HttpTunnel;
-import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.InetAddrPort;
-import org.mortbay.http.handler.AbstractHttpHandler;
-import org.mortbay.util.Resource;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.StringMap;
 import org.mortbay.util.URI;
 
@@ -43,6 +42,8 @@ import org.mortbay.util.URI;
  */
 public class ProxyHandler extends AbstractHttpHandler
 {
+    private static Log log = LogFactory.getLog(ProxyHandler.class);
+
     protected Set _proxyHostsWhiteList;
     protected Set _proxyHostsBlackList;
     protected int _tunnelTimeoutMs=250;
@@ -187,7 +188,7 @@ public class ProxyHandler extends AbstractHttpHandler
         // Is this a CONNECT request?
         if (HttpRequest.__CONNECT.equalsIgnoreCase(request.getMethod()))
         {
-            response.setField(HttpFields.__Connection,"close"); // XXX Needed for IE????
+            response.setField(HttpFields.__Connection,"close"); // TODO Needed for IE????
             handleConnect(pathInContext,pathParams,request,response);
             return;
         }
@@ -203,7 +204,7 @@ public class ProxyHandler extends AbstractHttpHandler
                 return;
             }
             
-            Code.debug("PROXY URL=",url);
+            if(log.isDebugEnabled())log.debug("PROXY URL="+url);
 
             URLConnection connection = url.openConnection();
             connection.setAllowUserInteraction(false);
@@ -230,7 +231,7 @@ public class ProxyHandler extends AbstractHttpHandler
             Enumeration enum = request.getFieldNames();
             while (enum.hasMoreElements())
             {
-                // XXX could be better than this!
+                // TODO could be better than this!
                 String hdr=(String)enum.nextElement();
 
                 if (_DontProxyHeaders.containsKey(hdr))
@@ -287,7 +288,7 @@ public class ProxyHandler extends AbstractHttpHandler
             }
             catch (Exception e)
             {
-                Code.ignore(e);
+                log.trace(LogSupport.IGNORED,e);
             }
             
             InputStream proxy_in = null;
@@ -308,7 +309,7 @@ public class ProxyHandler extends AbstractHttpHandler
                 try {proxy_in=connection.getInputStream();}
                 catch (Exception e)
                 {
-                    Code.ignore(e);
+                    log.trace(LogSupport.IGNORED,e);
                     proxy_in = http.getErrorStream();
                 }
             }
@@ -339,8 +340,8 @@ public class ProxyHandler extends AbstractHttpHandler
         }
         catch (Exception e)
         {
-            Code.warning(e.toString());
-            Code.ignore(e);
+            log.warn(e.toString());
+            log.trace(LogSupport.IGNORED,e);
             if (!response.isCommitted())
                 response.sendError(HttpResponse.__400_Bad_Request);
         }
@@ -357,7 +358,7 @@ public class ProxyHandler extends AbstractHttpHandler
         
         try
         {
-            Code.debug("CONNECT: ",uri);
+            if(log.isDebugEnabled())log.debug("CONNECT: "+uri);
             InetAddrPort addrPort=new InetAddrPort(uri.toString());
 
             if (isForbidden(HttpMessage.__SSL_SCHEME,addrPort.getHost(),addrPort.getPort(),false))
@@ -368,7 +369,7 @@ public class ProxyHandler extends AbstractHttpHandler
             {
                 Socket socket = new Socket(addrPort.getInetAddress(),addrPort.getPort());
 
-                // XXX - need to setup semi-busy loop for IE.
+                // TODO - need to setup semi-busy loop for IE.
                 int timeoutMs=30000;
 		if (_tunnelTimeoutMs > 0)
                 {
@@ -382,7 +383,7 @@ public class ProxyHandler extends AbstractHttpHandler
 		    }
                     catch (Exception e)
                     {
-			Code.ignore(e);
+			log.trace(LogSupport.IGNORED,e);
 		    }
 		}
                 
@@ -395,7 +396,7 @@ public class ProxyHandler extends AbstractHttpHandler
         }
         catch (Exception e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
             response.sendError(HttpResponse.__500_Internal_Server_Error);
         }
     }

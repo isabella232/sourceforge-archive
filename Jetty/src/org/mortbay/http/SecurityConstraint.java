@@ -7,11 +7,13 @@ package org.mortbay.http;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.LazyList;
-import java.security.Principal;
 
 
 
@@ -24,6 +26,8 @@ import java.security.Principal;
 public class SecurityConstraint
     implements Cloneable, Serializable
 {
+    private static Log log = LogFactory.getLog(SecurityConstraint.class);
+    
     /* ------------------------------------------------------------ */
     public final static String __BASIC_AUTH="BASIC";
     public final static String __FORM_AUTH="FORM";
@@ -342,7 +346,7 @@ public class SecurityConstraint
                 if (sc.getAuthenticate())
                 {
 
-                    // XXX - this is as per spec - but it sucks!
+                    // TODO - this is as per spec - but it sucks!
 //                     if (roles!=ANY_ROLE)
 //                     {
 //                         if (sc.isAnyRole())
@@ -486,7 +490,7 @@ public class SecurityConstraint
             else
             {
                 // don't know how authenticate
-                Code.warning("Mis-configured Authenticator for "+request.getPath());
+                log.warn("Mis-configured Authenticator for "+request.getPath());
                 response.sendError(HttpResponse.__500_Internal_Server_Error);
             }
                 
@@ -511,7 +515,7 @@ public class SecurityConstraint
                 
                 if (!inRole)
                 {
-                    Code.warning("AUTH FAILURE: role for "+user.getName());
+                    log.warn("AUTH FAILURE: role for "+user.getName());
                     if ("BASIC".equalsIgnoreCase(authenticator.getAuthMethod()))
                         ((BasicAuthenticator)authenticator).sendChallenge(realm,response);
                     else

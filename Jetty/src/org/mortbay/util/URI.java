@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /* ------------------------------------------------------------ */
 /** URI Holder.
  * This class assists with the decoding and encoding or HTTP URI's.
@@ -25,6 +28,8 @@ import java.util.Set;
 public class URI
     implements Cloneable
 {
+    private static Log log = LogFactory.getLog(URI.class);
+
 
     public static final String __CHARSET=
         System.getProperty("org.mortbay.util.URI.charset",StringUtil.__ISO_8859_1);
@@ -229,7 +234,7 @@ public class URI
         }
         catch (Exception e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
             throw new IllegalArgumentException("Malformed URI '"+uri+
                                                "' : "+e.toString());
         }        
@@ -702,7 +707,7 @@ public class URI
         }
         catch(UnsupportedEncodingException e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             return new String(bytes,0,n);
         }
     }

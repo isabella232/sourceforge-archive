@@ -13,9 +13,13 @@ import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /* ------------------------------------------------------------ */
 class JarFileResource extends JarResource
 {
+	private static Log log = LogFactory.getLog(JarFileResource.class);
     transient JarFile _jarFile;
     transient File _file;
     transient String[] _list;
@@ -95,7 +99,7 @@ class JarFileResource extends JarResource
         {
             String file_url=_urlString.substring(4,_urlString.length()-2);
             try{return newResource(file_url).exists();}
-            catch(Exception e) {Code.ignore(e); return false;}
+            catch(Exception e) {log.trace(LogSupport.IGNORED,e); return false;}
         }
         
         boolean check=checkConnection();
@@ -125,8 +129,7 @@ class JarFileResource extends JarResource
                 }
                 catch(Exception e)
                 {
-                    if (Code.verbose(9999))
-                        Code.ignore(e);
+                       log.trace(LogSupport.IGNORED,e);
                 }
             }
 
@@ -210,8 +213,7 @@ class JarFileResource extends JarResource
                 }
                 catch(Exception e)
                 {
-                    if (Code.verbose(9999))
-                        Code.ignore(e);
+                     log.trace(LogSupport.IGNORED,e);
                 }
             }
             

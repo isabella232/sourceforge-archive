@@ -7,9 +7,12 @@ package org.mortbay.http;
 
 import java.io.IOException;
 import java.security.Principal;
+
 import javax.net.ssl.SSLSocket;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.SecurityConstraint.Authenticator;
-import org.mortbay.util.Code;
 
 /* ------------------------------------------------------------ */
 /** Client Certificate Authenticator.
@@ -22,12 +25,14 @@ import org.mortbay.util.Code;
  */
 public class ClientCertAuthenticator implements Authenticator
 {
+    private static Log log = LogFactory.getLog(ClientCertAuthenticator.class);
+
     private int _maxHandShakeSeconds =60;
     
     /* ------------------------------------------------------------ */
     public ClientCertAuthenticator()
     {
-        Code.warning("Client Cert Authentication is EXPERIMENTAL");
+        log.warn("Client Cert Authentication is EXPERIMENTAL");
     }
     
     /* ------------------------------------------------------------ */
@@ -112,8 +117,7 @@ public class ClientCertAuthenticator implements Authenticator
     }
     
     /* ------------------------------------------------------------ */
-    public Principal identify(UserRealm realm,
-                              HttpRequest request)
+    public Principal identify(UserRealm realm,HttpRequest request)
     {
         return null;
     }

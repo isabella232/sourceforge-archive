@@ -16,12 +16,15 @@ import java.net.URL;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.handler.AbstractHttpHandler;
 import org.mortbay.http.handler.DumpHandler;
 import org.mortbay.http.handler.NotFoundHandler;
 import org.mortbay.http.handler.ResourceHandler;
 import org.mortbay.http.handler.TestTEHandler;
-import org.mortbay.util.Code;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.Resource;
 import org.mortbay.util.TestCase;
 import org.mortbay.util.ThreadPool;
@@ -36,6 +39,8 @@ public class TestRFC2616
     extends ThreadPool
     implements HttpListener
 {
+    private static Log log = LogFactory.getLog(TestRFC2616.class);
+
     private HttpServer _server;
     private static File docRoot = null;
     private static TestFileData [] testFiles = null;
@@ -88,7 +93,7 @@ public class TestRFC2616
                FileOutputStream fos = new FileOutputStream(file);
                fos.write(data.getBytes());
                fos.close();
-               Code.debug("created " + file.getPath());
+               if(log.isDebugEnabled())log.debug("created " + file.getPath());
 
                try {
                   this.resource = Resource.newResource(
@@ -97,7 +102,7 @@ public class TestRFC2616
                   this.modDate = HttpFields.__dateSend.format(new Date(resource.lastModified()));
                }
                catch (MalformedURLException mue) {  
-                  Code.warning(mue);
+                  log.warn(LogSupport.EXCEPTION,mue);
                }
 
           }
@@ -290,7 +295,7 @@ public class TestRFC2616
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }    
     }
@@ -316,7 +321,7 @@ public class TestRFC2616
                                            "5;\015\012"+
                                            "123\015\012\015\012"+
                                            "0;\015\012\015\012");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             t.checkContains(response,"HTTP/1.1 400 Bad","Chunked last");
             
             // Chunked
@@ -347,7 +352,7 @@ public class TestRFC2616
                                            "Host: localhost\n"+
                                            "Connection: close\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset = t.checkContains(response,offset,"HTTP/1.1 200","3.6.1 Chunking");
             offset = t.checkContains(response,offset,"12345","3.6.1 Chunking");
             offset = t.checkContains(response,offset,"HTTP/1.1 200","3.6.1 Chunking");
@@ -383,7 +388,7 @@ public class TestRFC2616
                                            "Host: localhost\n"+
                                            "Connection: close\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             t.checkNotContained(response, "HTTP/1.1 100", "3.6.1 Chunking");
             offset = t.checkContains(response,offset,"HTTP/1.1 200","3.6.1 Chunking");
             offset = t.checkContains(response,offset,"12345","3.6.1 Chunking");
@@ -409,17 +414,17 @@ public class TestRFC2616
                                            "Host: localhost\n"+
                                            "Connection: close\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset = t.checkContains(response,offset,"HTTP/1.1 200","3.6.1 Chunking")+10;
             offset = t.checkContains(response,offset,"123456","3.6.1 Chunking");
             offset = t.checkContains(response,offset,"/R2","3.6.1 Chunking")+10;
         }
         catch(Exception e)
         {
-            Code.warning("FAIL: ",e);
+            log.warn("FAIL: ",e);
             t.check(false,e.toString());
             if (response!=null)
-                Code.warning(response);
+                log.warn(response);
         }
     }
    
@@ -450,7 +455,7 @@ public class TestRFC2616
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     } 
@@ -481,7 +486,7 @@ public class TestRFC2616
                                            "Host: localhost\n"+
                                            "Connection: close\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200 OK","2. identity")+10;
             offset=t.checkContains(response,offset,
@@ -515,7 +520,7 @@ public class TestRFC2616
                                            "Content-Length: 6\n"+
                                            "\n"+
                                            "123456");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200 OK","3. ignore c-l")+1;
             offset=t.checkContains(response,offset,
@@ -551,7 +556,7 @@ public class TestRFC2616
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -575,7 +580,7 @@ public class TestRFC2616
                                            "Host: localhost\n"+
                                            "\n");
             
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200",
                                    "Default host")+1;
@@ -592,7 +597,7 @@ public class TestRFC2616
                                            "Host: ignored\n"+
                                            "\n");
             
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200",
                                    "1. virtual host uri")+1;
@@ -608,7 +613,7 @@ public class TestRFC2616
             response=listener.getResponses("GET /path/R1 HTTP/1.1\n"+
                                            "Host: VirtualHost\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200",
                                    "2. virtual host field")+1;
@@ -624,7 +629,7 @@ public class TestRFC2616
             response=listener.getResponses("GET /path/R1 HTTP/1.1\n"+
                                            "Host: ViRtUalhOst\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200",
                                    "2. virtual host field")+1;
@@ -639,13 +644,13 @@ public class TestRFC2616
             offset=0;
             response=listener.getResponses("GET /path/R1 HTTP/1.1\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 400","3. no host")+1;            
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -664,7 +669,7 @@ public class TestRFC2616
             response=listener.getResponses("GET /R1 HTTP/1.1\n"+
                                            "Host: localhost\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200 OK\015\012","8.1.2 default")+10;
             
@@ -685,7 +690,7 @@ public class TestRFC2616
                                            "Host: localhost\n"+
                                            "Connection: close\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200 OK\015\012","8.1.2 default")+1;
             offset=t.checkContains(response,offset,
@@ -702,7 +707,7 @@ public class TestRFC2616
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -713,11 +718,6 @@ public class TestRFC2616
         TestCase t = new TestCase("RFC2616 8.2 Transmission");
         try
         {
-            // Suppress EOF warnings. Premature EOF used to trigger
-            // sending of 100-Continue.
-            // This is not a very good way of doingit, but ...
-            Code.setSuppressWarnings(!Code.debug());
-            
             TestRFC2616 listener = new TestRFC2616();
             String response;
             int offset=0;
@@ -730,7 +730,7 @@ public class TestRFC2616
                                            "Content-Type: text/plain\n"+
                                            "Content-Length: 8\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 417","8.2.3 expect failure")+1;
 
@@ -742,7 +742,7 @@ public class TestRFC2616
                                            "Content-Type: text/plain\n"+
                                            "Content-Length: 8\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             t.checkEquals(response.indexOf("HTTP/1.1 100"),-1,
                           "8.2.3 no expect no 100");
             offset=t.checkContains(response,offset,
@@ -759,7 +759,7 @@ public class TestRFC2616
                                            "Connection: close\n"+
                                            "\n"+
                                            "123456\015\012");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200 OK","8.2.3 expect with body")+1;
             t.checkEquals(response.indexOf("HTTP/1.1 100"),-1,
@@ -773,7 +773,7 @@ public class TestRFC2616
                                            "Content-Type: text/plain\n"+
                                            "Content-Length: 8\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 100 Continue","8.2.3 expect 100")+1;
             offset=t.checkContains(response,offset,
@@ -782,11 +782,10 @@ public class TestRFC2616
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
         finally{
-            Code.setSuppressWarnings(Code.debug());
         }
     }
     
@@ -806,7 +805,7 @@ public class TestRFC2616
                                            "Connection: close\n"+
                                            "Host: localhost\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200","200")+1;
             offset=t.checkContains(response,offset,
@@ -815,7 +814,7 @@ public class TestRFC2616
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -831,7 +830,7 @@ public class TestRFC2616
                                       "Host: localhost\n"+
                                       "\n");
             
-            Code.debug("GET: ",get);
+            if(log.isDebugEnabled())log.debug("GET: "+get);
             t.checkContains(get,0,"HTTP/1.1 200","GET");
             t.checkContains(get,0,"Content-Type: text/html","GET content");
             t.checkContains(get,0,"Content-Length: ","GET length");
@@ -841,7 +840,7 @@ public class TestRFC2616
             String head=listener.getResponses("HEAD /R1 HTTP/1.0\n"+
                                               "Host: localhost\n"+
                                               "\n");
-            Code.debug("HEAD: ",head);
+            if(log.isDebugEnabled())log.debug("HEAD: "+head);
             t.checkContains(head,0,"HTTP/1.1 200","HEAD");
             t.checkContains(head,0,"Content-Type: text/html","HEAD content");
             t.checkContains(head,0,"Content-Length: ","HEAD length");
@@ -849,7 +848,7 @@ public class TestRFC2616
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -870,7 +869,7 @@ public class TestRFC2616
                                            "Host: localhost\n"+
                                            "Connection: close\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200","200")+1;
             offset=t.checkContains(response,offset,
@@ -883,7 +882,7 @@ public class TestRFC2616
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -911,7 +910,7 @@ public class TestRFC2616
                                            "Host: localhost\n"+
                                            "Connection: close\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
 
             boolean noRangeHasContentLocation = (response.indexOf("\r\nContent-Location: ") != -1);
 
@@ -924,7 +923,7 @@ public class TestRFC2616
                                            "Range: bytes=1-3\n"+
                                            "\n");
 
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=0;
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 206 Partial Content\r\n",
@@ -949,7 +948,7 @@ public class TestRFC2616
                                   "5. Content-Location header as with 200");
             } 
             else {
-                    Code.debug("no need to check for Conten-Location header in 206 response");
+                    log.debug("no need to check for Conten-Location header in 206 response");
                     // spec does not require existence or absence if these want any
                     // header for the get w/o range
             }
@@ -961,7 +960,7 @@ public class TestRFC2616
 	}
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     } 
@@ -983,7 +982,7 @@ public class TestRFC2616
                                            "Connection: Keep-Alive\n"+
                                            "\n"
                                            );
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 302","302")+1;
             t.checkContains(response,offset,
@@ -1004,7 +1003,7 @@ public class TestRFC2616
                                            "Connection: close\n"+
                                            "\n"
                                            );
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 302","302")+1;
             t.checkContains(response,offset,
@@ -1031,7 +1030,7 @@ public class TestRFC2616
                                            "GET /redirect/content HTTP/1.0\n"+
                                            "\n"
                                            );
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 302","302")+1;
             t.checkContains(response,offset,
@@ -1051,7 +1050,7 @@ public class TestRFC2616
                                            "Connection: close\n"+
                                            "\n"
                                            );
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 302","302")+1;
             t.checkContains(response,offset,
@@ -1073,7 +1072,7 @@ public class TestRFC2616
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -1142,7 +1141,7 @@ public class TestRFC2616
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -1261,7 +1260,7 @@ public class TestRFC2616
 
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     } 
@@ -1281,7 +1280,7 @@ public class TestRFC2616
             response=listener.getResponses("GET /R1 HTTP/1.0\n"+
                                            "\n"
                                            );
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200","200")+1;
 
@@ -1290,7 +1289,7 @@ public class TestRFC2616
             response=listener.getResponses("GET /R1 HTTP/1.1\n"+
                                            "\n"
                                            );
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 400","400")+1;
             
@@ -1299,7 +1298,7 @@ public class TestRFC2616
                                            "Host: localhost\n"+
                                            "\n"
                                            );
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200","200")+1;
             
@@ -1308,14 +1307,14 @@ public class TestRFC2616
                                            "Host:\n"+
                                            "\n"
                                            );
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200","200")+1;
             
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -1391,7 +1390,7 @@ public class TestRFC2616
 
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     } 
@@ -1414,7 +1413,7 @@ public class TestRFC2616
                                            "TE: gzip;q=0.5\n"+
                                            "Connection: close\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200","TE: coding")+1;
             offset=t.checkContains(response,offset,
@@ -1427,7 +1426,7 @@ public class TestRFC2616
                                            "TE: deflate\n"+
                                            "Connection: close\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 501","TE: coding not accepted")+1;
 
@@ -1439,7 +1438,7 @@ public class TestRFC2616
                                            "TE: trailer\n"+
                                            "Connection: close\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200","TE: trailer")+1;
             offset=t.checkContains(response,offset,
@@ -1447,7 +1446,7 @@ public class TestRFC2616
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -1465,7 +1464,7 @@ public class TestRFC2616
             offset=0;
             response=listener.getResponses("GET /R1 HTTP/1.0\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200 OK\015\012","19.6.2 default close")+10;
             t.checkNotContained(response,offset,
@@ -1486,7 +1485,7 @@ public class TestRFC2616
                                            "Host: localhost\n"+
                                            "Connection: close\n"+
                                            "\n");
-            Code.debug("RESPONSE: ",response);
+            if(log.isDebugEnabled())log.debug("RESPONSE: "+response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200 OK\015\012","19.6.2 Keep-alive 1")+1;
             offset=t.checkContains(response,offset,
@@ -1511,7 +1510,7 @@ public class TestRFC2616
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
     }
@@ -1529,7 +1528,7 @@ public class TestRFC2616
         }
         catch(Throwable e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             new TestCase("org.mortbay.http.TestRFC2616").check(false,e.toString());
         }
         finally

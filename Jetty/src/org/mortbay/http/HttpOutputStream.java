@@ -12,9 +12,12 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.ByteArrayPool;
-import org.mortbay.util.Code;
 import org.mortbay.util.IO;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.OutputObserver;
 import org.mortbay.util.StringUtil;
 
@@ -42,6 +45,8 @@ public class HttpOutputStream
     implements OutputObserver,
                HttpMessage.HeaderWriter
 {
+    private static Log log = LogFactory.getLog(HttpOutputStream.class);
+
     /* ------------------------------------------------------------ */
     final static String
         __CRLF      = IO.CRLF;
@@ -63,13 +68,13 @@ public class HttpOutputStream
     private ChunkingOutputStream _chunkingOut;    
     private boolean _written;
     private ArrayList _observers;
-    private int _bytes;
     private int _bufferSize;
     private int _headerReserve;
     private boolean _bufferHeaders;
     private HttpWriter _iso8859writer;
     private HttpWriter _utf8writer;
 
+	int _bytes;
     boolean _closing=false;
     
     /* ------------------------------------------------------------ */
@@ -203,7 +208,7 @@ public class HttpOutputStream
                 _chunkingOut.setFixed(fixed);
             }
         }
-        catch (IOException e){Code.warning(e);}
+        catch (IOException e){log.warn(LogSupport.EXCEPTION,e);}
     }
 
     /* ------------------------------------------------------------ */
@@ -233,7 +238,7 @@ public class HttpOutputStream
             }
             catch(Exception e)
             {
-                Code.ignore(e);
+                log.trace(LogSupport.IGNORED,e);
             }
             finally
             {
@@ -258,7 +263,7 @@ public class HttpOutputStream
         }
         catch(IOException e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
     }
 
@@ -526,7 +531,7 @@ public class HttpOutputStream
         }
         catch (IOException e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
     }
 

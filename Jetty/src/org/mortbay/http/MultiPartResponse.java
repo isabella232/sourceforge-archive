@@ -7,7 +7,9 @@ package org.mortbay.http;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.StringUtil;
 
 /* ================================================================ */
@@ -19,6 +21,8 @@ import org.mortbay.util.StringUtil;
 */
 public class MultiPartResponse
 {
+    private static Log log = LogFactory.getLog(MultiPartResponse.class);
+    
     /* ------------------------------------------------------------ */
     private static byte[] __CRLF;
     private static byte[] __DASHDASH;
@@ -29,7 +33,7 @@ public class MultiPartResponse
             __CRLF="\015\012".getBytes(StringUtil.__ISO_8859_1);
             __DASHDASH="--".getBytes(StringUtil.__ISO_8859_1);
         }
-        catch (Exception e) {Code.fail(e);}
+        catch (Exception e) {log.fatal(e); System.exit(1);}
     }
     
     /* ------------------------------------------------------------ */
@@ -47,7 +51,7 @@ public class MultiPartResponse
         }
         catch (Exception e)
         {
-            Code.fail(e);
+            log.fatal(e); System.exit(1);
         }
     }    
     

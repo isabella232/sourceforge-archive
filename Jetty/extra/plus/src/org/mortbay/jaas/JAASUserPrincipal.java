@@ -5,16 +5,17 @@
 
 package org.mortbay.jaas;
 
-import javax.security.auth.Subject;
 import java.security.Principal;
 import java.security.acl.Group;
-import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.Stack;
-import org.mortbay.util.Code;
-import java.security.Principal;
+
+import javax.security.auth.Subject;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 /* ---------------------------------------------------- */
@@ -27,6 +28,8 @@ import java.security.Principal;
  */
 public class JAASUserPrincipal implements Principal 
 {
+    private static Log log = LogFactory.getLog(JAASUserPrincipal.class);
+
     
     
     /* ------------------------------------------------ */
@@ -101,7 +104,6 @@ public class JAASUserPrincipal implements Principal
     //holds the JAAS Credential and roles associated with
     //this UserPrincipal 
     private Subject subject = null;
-    private static RoleStack runAsRoles = new RoleStack();
     private RoleCheckPolicy roleCheckPolicy = null;
     private String name = null;
     
@@ -130,7 +132,7 @@ public class JAASUserPrincipal implements Principal
             roleCheckPolicy = new StrictRoleCheckPolicy();
 
         return roleCheckPolicy.checkRole (new JAASRole(roleName),
-                                          runAsRoles.peek(),
+                                          RoleStack.peek(),
                                           getRoles());
     }
 
@@ -156,20 +158,20 @@ public class JAASUserPrincipal implements Principal
                 roleGroup = g;
         }
 
-        Code.debug ("Group named \"Roles\""+(roleGroup==null?"does not exist":"does exist"));
+        if(log.isDebugEnabled())log.debug("Group named \"Roles\""+(roleGroup==null?"does not exist":"does exist"));
         
         
         if (roleGroup != null)
         {
             Enumeration members = roleGroup.members();
             while (members.hasMoreElements())
-                Code.debug ("Member = "+((Principal)members.nextElement()).getName());
+                if(log.isDebugEnabled())log.debug("Member = "+((Principal)members.nextElement()).getName());
             
             return roleGroup;
         }
         
 
-        Code.debug ("Trying to find org.mortbay.jaas.JAASRoles instead");
+        if(log.isDebugEnabled())log.debug("Trying to find org.mortbay.jaas.JAASRoles instead");
 
         //try extracting roles put into the Subject directly
         Set roles = subject.getPrincipals (org.mortbay.jaas.JAASRole.class);
@@ -184,7 +186,7 @@ public class JAASUserPrincipal implements Principal
         }
         
         //else - user has no roles
-        Code.debug ("User has no roles");
+        if(log.isDebugEnabled())log.debug("User has no roles");
         
         return new JAASGroup(JAASGroup.ROLES);
     }
@@ -205,7 +207,7 @@ public class JAASUserPrincipal implements Principal
      */
     public void pushRole (String roleName)
     {
-        runAsRoles.push (new JAASRole(roleName));
+        RoleStack.push (new JAASRole(roleName));
     }
 
     
@@ -214,7 +216,7 @@ public class JAASUserPrincipal implements Principal
      */
     public void popRole ()
     {
-        runAsRoles.pop ();
+        RoleStack.pop ();
     }
 
 
@@ -223,7 +225,7 @@ public class JAASUserPrincipal implements Principal
      */
     public void disassociate ()
     {
-        runAsRoles.clear();
+        RoleStack.clear();
     }
 
 

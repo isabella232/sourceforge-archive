@@ -11,10 +11,10 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -25,10 +25,12 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.http.HttpSession;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.PathMap;
-import org.mortbay.util.Code;
-import org.mortbay.util.LazyList;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringMap;
 import org.mortbay.util.URI;
@@ -44,7 +46,8 @@ import org.mortbay.util.WriterOutputStream;
  */
 public class Dispatcher implements RequestDispatcher
 {
-    
+    static Log log = LogFactory.getLog(Dispatcher.class);
+
     public final static String __INCLUDE_REQUEST_URI= "javax.servlet.include.request_uri";
     public final static String __INCLUDE_CONTEXT_PATH= "javax.servlet.include.context_path";
     public final static String __INCLUDE_SERVLET_PATH= "javax.servlet.include.servlet_path";
@@ -98,7 +101,7 @@ public class Dispatcher implements RequestDispatcher
                Map.Entry entry)
         throws IllegalStateException
     {
-        Code.debug("Dispatcher for ",servletHandler,",",uriInContext,",",query);
+        if(log.isDebugEnabled())log.debug("Dispatcher for "+servletHandler+","+uriInContext+","+query);
         
         _servletHandler=servletHandler;
         _uriInContext=uriInContext;
@@ -552,7 +555,7 @@ public class Dispatcher implements RequestDispatcher
             {
                 if (_xSession==null)
                 {
-                    Code.debug("Ctx dispatch session");
+                    log.debug("Ctx dispatch session");
                     _xSession=_servletHandler.getHttpSession(getRequestedSessionId());
                     if (create && ( _xSession==null ||
                                     !((SessionManager.Session)_xSession).isValid()))
@@ -602,7 +605,7 @@ public class Dispatcher implements RequestDispatcher
                 try {_out=super.getOutputStream();}
                 catch(IllegalStateException e)
                 {
-                    Code.ignore(e);
+                    log.trace(LogSupport.IGNORED,e);
                     _flushNeeded=true;
                     _out=new ServletOut(new WriterOutputStream(super.getWriter()));
                 }
@@ -626,7 +629,7 @@ public class Dispatcher implements RequestDispatcher
                 try{_writer=super.getWriter();}
                 catch(IllegalStateException e)
                 {
-                    if (Code.debug()) Code.warning(e);
+                    if (log.isDebugEnabled()) log.warn(LogSupport.EXCEPTION,e);
                     _flushNeeded=true;
                     _writer = new ServletWriter(super.getOutputStream(),
                                                 getCharacterEncoding());

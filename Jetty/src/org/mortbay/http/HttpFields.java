@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -23,11 +22,15 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
+
 import javax.servlet.http.Cookie;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.DateCache;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LineInput;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringMap;
 import org.mortbay.util.StringUtil;
@@ -46,7 +49,9 @@ import org.mortbay.util.URI;
  * @author Greg Wilkins (gregw)
  */
 public class HttpFields
-{        
+{
+    private static Log log = LogFactory.getLog(HttpFields.class);
+        
     /* ------------------------------------------------------------ */
     /** General Fields.
      */
@@ -897,7 +902,7 @@ public class HttpFields
             }
             catch(java.lang.Exception e)
             {
-                Code.ignore(e);
+                log.trace(LogSupport.IGNORED,e);
             }
         }
         if (val.endsWith(" GMT"))
@@ -911,7 +916,7 @@ public class HttpFields
                 }
                 catch(java.lang.Exception e)
                 {
-                    Code.ignore(e);
+                    log.trace(LogSupport.IGNORED,e);
                 }
             }
         }

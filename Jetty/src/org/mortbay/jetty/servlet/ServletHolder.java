@@ -11,6 +11,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -18,9 +19,12 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.UserRealm;
-import org.mortbay.util.Code;
+import org.mortbay.util.LogSupport;
 
 
 /* --------------------------------------------------------------------- */
@@ -36,6 +40,8 @@ import org.mortbay.util.Code;
 public class ServletHolder extends Holder
     implements Comparable
 {
+    private static Log log = LogFactory.getLog(ServletHolder.class);
+
     /* ---------------------------------------------------------------- */
     
     private int _initOrder;
@@ -311,7 +317,7 @@ public class ServletHolder extends Holder
         {
             _servlet=null;
             _config=null;
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw new UnavailableException(_servlet,e.toString());
         }    
     }

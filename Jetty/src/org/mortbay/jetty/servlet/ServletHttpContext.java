@@ -8,12 +8,15 @@ package org.mortbay.jetty.servlet;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Locale;
+
 import javax.servlet.ServletContext;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpContext;
+import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.http.HttpException;
-import org.mortbay.util.Code;
 
 /* ------------------------------------------------------------ */
 /** ServletHttpContext.
@@ -24,6 +27,8 @@ import org.mortbay.util.Code;
  */
 public class ServletHttpContext extends HttpContext
 {
+    private static Log log = LogFactory.getLog(ServletHttpContext.class);
+
     private HashMap _localeEncodingMap  = new HashMap();
     
     /* ------------------------------------------------------------ */
@@ -110,7 +115,7 @@ public class ServletHttpContext extends HttpContext
      */
     public synchronized void setDynamicServletPathSpec(String pathSpecInContext)
     {
-        Code.warning("setDynamicServletPathSpec is deprecated.");
+        log.warn("setDynamicServletPathSpec is deprecated.");
     }
 
     /* ------------------------------------------------------------ */

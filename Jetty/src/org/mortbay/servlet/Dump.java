@@ -10,6 +10,7 @@ import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.Enumeration;
 import java.util.Locale;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
@@ -17,6 +18,9 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.html.Break;
 import org.mortbay.html.Font;
 import org.mortbay.html.Heading;
@@ -25,8 +29,8 @@ import org.mortbay.html.Select;
 import org.mortbay.html.Table;
 import org.mortbay.html.TableForm;
 import org.mortbay.http.HttpException;
-import org.mortbay.util.Code;
 import org.mortbay.util.Loader;
+import org.mortbay.util.LogSupport;
 
 /* ------------------------------------------------------------ */
 /** Dump Servlet Request.
@@ -34,6 +38,8 @@ import org.mortbay.util.Loader;
  */
 public class Dump extends HttpServlet
 {
+    private static Log log = LogFactory.getLog(Dump.class);
+
     /* ------------------------------------------------------------ */
     String pageType;
 
@@ -94,7 +100,7 @@ public class Dump extends HttpServlet
             }
             catch(Exception e)
             {
-                Code.ignore(e);
+                log.trace(LogSupport.IGNORED,e);
                 response.setLocale(Locale.getDefault());
             }
         }
@@ -442,7 +448,7 @@ public class Dump extends HttpServlet
         }
         catch (Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
     
         page.write(pout);
@@ -484,7 +490,7 @@ public class Dump extends HttpServlet
     /* ------------------------------------------------------------ */
     public synchronized void destroy()
     {
-        Code.debug("Destroyed");
+        log.debug("Destroyed");
     }
     
     /* ------------------------------------------------------------ */

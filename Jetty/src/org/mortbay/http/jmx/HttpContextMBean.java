@@ -5,13 +5,17 @@
 
 package org.mortbay.http.jmx;
 
+import java.util.HashMap;
+
 import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpContext;
-import org.mortbay.util.Code;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.jmx.LifeCycleMBean;
-import java.util.HashMap;
 
 
 /* ------------------------------------------------------------ */
@@ -22,6 +26,8 @@ import java.util.HashMap;
  */
 public class HttpContextMBean extends LifeCycleMBean
 {
+    private static Log log = LogFactory.getLog(HttpContextMBean.class);
+
     private HttpContext _httpContext;
     private HashMap _rlMap=new HashMap(3);
 
@@ -121,7 +127,7 @@ public class HttpContextMBean extends LifeCycleMBean
         if (context.length()==0)
             context="/";
         try{oName=new ObjectName(oName+",context="+context);}
-        catch(Exception e){Code.warning(e);}
+        catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
         return oName;
     }
 

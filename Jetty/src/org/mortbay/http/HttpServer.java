@@ -21,13 +21,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.handler.DumpHandler;
 import org.mortbay.http.handler.NotFoundHandler;
 import org.mortbay.http.handler.ResourceHandler;
-import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LifeCycle;
-import org.mortbay.util.Log;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
 import org.mortbay.util.StringMap;
@@ -60,6 +62,9 @@ import org.mortbay.util.URI;
 public class HttpServer implements LifeCycle,
                                    Serializable
 {
+    private static Log log = LogFactory.getLog(HttpServer.class);
+    private static LogSupport logx = new LogSupport();
+    
     /* ------------------------------------------------------------ */
     private static WeakHashMap __servers = new WeakHashMap();
     private static Collection __roServers =
@@ -265,7 +270,7 @@ public class HttpServer implements LifeCycle,
                 _listeners.remove(l);
                 removeComponent(listener);
                 if (listener.isStarted())
-                    try{listener.stop();}catch(InterruptedException e){Code.warning(e);}
+                    try{listener.stop();}catch(InterruptedException e){log.warn(LogSupport.EXCEPTION,e);}
                 listener.setHttpServer(null);
             }
         }
@@ -348,7 +353,7 @@ public class HttpServer implements LifeCycle,
         {
             removeComponent(context);
             if (context.isStarted())
-                try{context.stop();} catch (InterruptedException e){Code.warning(e);}
+                try{context.stop();} catch (InterruptedException e){log.warn(LogSupport.EXCEPTION,e);}
             context.setHttpServer(null);
             return true;
         }
@@ -515,7 +520,7 @@ public class HttpServer implements LifeCycle,
         // Add the context to the list
         contextList.add(context);
             
-        Code.debug("Added ",context," for host ",(virtualHost==null?"*":virtualHost));
+        if(log.isDebugEnabled())log.debug("Added "+context+" for host "+(virtualHost==null?"*":virtualHost));
     }
     
 
@@ -636,22 +641,22 @@ public class HttpServer implements LifeCycle,
     public synchronized void start()
         throws MultiException
     {
-        Log.event("Starting "+Version.__VersionImpl);
+        log.info("Starting "+Version.__VersionImpl);
         MultiException mex = new MultiException();
 
         statsReset();
         
-        if (Code.verbose(99))
+        if (log.isDebugEnabled())
         {
-            Code.debug("LISTENERS: ",_listeners);
-            Code.debug("HANDLER: ",_virtualHostMap);
+            log.debug("LISTENERS: "+_listeners);
+            log.debug("HANDLER: "+_virtualHostMap);
         }   
 
         if (_requestLog!=null && !_requestLog.isStarted())
         {
             try{
                 _requestLog.start();
-                Log.event("Started "+_requestLog);
+                log.info("Started "+_requestLog);
             }
             catch(Exception e){mex.add(e);}
         }
@@ -672,7 +677,7 @@ public class HttpServer implements LifeCycle,
         }
 
         mex.ifExceptionThrowMulti();
-        Log.event("Started "+this);
+        log.info("Started "+this);
     }
     
     /* ------------------------------------------------------------ */
@@ -717,10 +722,10 @@ public class HttpServer implements LifeCycle,
                 try{listener.stop();}
                 catch(Exception e)
                 {
-                    if (Code.debug())
-                        Code.warning(e);
+                    if (log.isDebugEnabled())
+                        log.warn(LogSupport.EXCEPTION,e);
                     else
-                        Code.warning(e.toString());
+                        log.warn(e.toString());
                 }
             }
         }
@@ -742,10 +747,10 @@ public class HttpServer implements LifeCycle,
         if (_requestLog!=null && _requestLog.isStarted())
         {
             _requestLog.stop();
-            Log.event("Stopped "+_requestLog);
+            log.info("Stopped "+_requestLog);
         }
         
-        Log.event("Stopped "+this);
+        log.info("Stopped "+this);
     }
     
     /* ------------------------------------------------------------ */
@@ -776,7 +781,7 @@ public class HttpServer implements LifeCycle,
      */
     public void addHostAlias(String virtualHost, String alias)
     {
-        Code.warning("addHostAlias is deprecated. Use HttpContext.addVirtualHost");
+        log.warn("addHostAlias is deprecated. Use HttpContext.addVirtualHost");
         Object contextMap=_virtualHostMap.get(virtualHost);
         if (contextMap==null)
             throw new IllegalArgumentException("No Such Host: "+virtualHost);
@@ -857,9 +862,7 @@ public class HttpServer implements LifeCycle,
                 List contextLists =contextMap.getMatches(request.getPath());
                 if(contextLists!=null)
                 {
-                    if (Code.verbose(99))
-                        Code.debug("Contexts at ",request.getPath(),
-                                   ": ",contextLists);
+                    if(log.isTraceEnabled())log.trace("Contexts at "+request.getPath()+": "+contextLists);
                     
                     for (int i=0;i<contextLists.size();i++)
                     {
@@ -873,8 +876,7 @@ public class HttpServer implements LifeCycle,
                             HttpContext context=
                                 (HttpContext)contextList.get(j);
                             
-                            if (Code.debug())
-                                Code.debug("Try ",context,","+j);
+                            if(log.isDebugEnabled())log.debug("Try "+context+","+j);
 
                             if (context.handle(request,response))
                                 return context;
@@ -909,7 +911,7 @@ public class HttpServer implements LifeCycle,
                 }
                 
                 addComponent(_notFoundContext);
-                try{_notFoundContext.start();}catch(Exception e){Code.warning(e);}
+                try{_notFoundContext.start();}catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
             }
             if (!_notFoundContext.handle(request,response))
                 response.sendError(HttpResponse.__404_Not_Found);
@@ -990,7 +992,7 @@ public class HttpServer implements LifeCycle,
         {
             if (_realmMap.size()==1)
                 return (UserRealm)_realmMap.values().iterator().next();
-            Code.warning("Null realmName with multiple known realms");
+            log.warn("Null realmName with multiple known realms");
         }
         return (UserRealm)_realmMap.get(realmName);
     }
@@ -1060,7 +1062,7 @@ public class HttpServer implements LifeCycle,
     /* ------------------------------------------------------------ */
     public void setStatsOn(boolean on)
     {
-        Log.event("Statistics on = "+on+" for "+this);
+        log.info("Statistics on = "+on+" for "+this);
         _statsOn=on;
     }
     
@@ -1240,7 +1242,7 @@ public class HttpServer implements LifeCycle,
     /* ------------------------------------------------------------ */
     private void addComponent(Object o)
     {
-        Code.debug("add component: ",o);
+        if(log.isDebugEnabled())log.debug("add component: "+o);
         if (_components==null)
             _components=new ArrayList();
         _components.add(o);
@@ -1261,7 +1263,7 @@ public class HttpServer implements LifeCycle,
     /* ------------------------------------------------------------ */
     private void removeComponent(Object o)
     {
-        Code.debug("remove component: ",o);
+        if(log.isDebugEnabled())log.debug("remove component: "+o);
         if (_components.remove(o) && _eventListeners!=null)
         {
             ComponentEvent event = new ComponentEvent(o);
@@ -1283,19 +1285,19 @@ public class HttpServer implements LifeCycle,
      */
     public void addEventListener(EventListener listener)
     {
-        Code.debug("addEventListener: ",listener);
+        if(log.isDebugEnabled())log.debug("addEventListener: "+listener);
         if (_eventListeners==null)
             _eventListeners=new ArrayList();
         if (listener instanceof ComponentEventListener)
             _eventListeners.add(listener);
         else
-            Code.warning("Not a ComponentEventListener: "+listener);
+            log.warn("Not a ComponentEventListener: "+listener);
     }
     
     /* ------------------------------------------------------------ */
     public void removeEventListener(EventListener listener)
     {
-        Code.debug("removeEventListener: ",listener);
+        if(log.isDebugEnabled())log.debug("removeEventListener: "+listener);
         _eventListeners.remove(listener);
     }
 
@@ -1316,7 +1318,7 @@ public class HttpServer implements LifeCycle,
         out.writeObject(this);
         out.flush();
         out.close();
-        Log.event("Saved "+this+" to "+resource);
+        log.info("Saved "+this+" to "+resource);
     }
     
     /* ------------------------------------------------------------ */
@@ -1432,7 +1434,7 @@ public class HttpServer implements LifeCycle,
         }
         catch (Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
     }
 
@@ -1442,7 +1444,7 @@ public class HttpServer implements LifeCycle,
     public class ComponentEvent extends EventObject
     {
         private Object component;
-        private ComponentEvent(Object component)
+        ComponentEvent(Object component)
         {
             super(HttpServer.this);
             this.component=component;

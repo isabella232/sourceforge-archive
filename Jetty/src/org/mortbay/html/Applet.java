@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import org.mortbay.util.Code;
 
 /* ---------------------------------------------------------------- */
 /** An Applet Block.
@@ -34,7 +33,7 @@ public class Applet extends Block
     public String codeBase = null;
 
     /* ------------------------------------------------------------ */
-    private boolean debug = Code.debug();
+    private boolean debug =false;
     private Hashtable params = null;
     private Composite paramHolder = new Composite();
     

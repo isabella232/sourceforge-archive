@@ -10,9 +10,12 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpOutputStream;
-import org.mortbay.util.Code;
 import org.mortbay.util.IO;
+import org.mortbay.util.LogSupport;
 
 
 /* ------------------------------------------------------------ */
@@ -25,6 +28,8 @@ import org.mortbay.util.IO;
  */
 class ServletWriter extends PrintWriter
 {
+	private static Log log = LogFactory.getLog(ServletWriter.class);
+
     String encoding=null;
     OutputStream os=null;
     boolean written=false;
@@ -67,7 +72,7 @@ class ServletWriter extends PrintWriter
         }
         catch(UnsupportedEncodingException e)
         {
-            Code.fail(e);
+            log.fatal(e); System.exit(1);
         }
     }
     
@@ -110,7 +115,7 @@ class ServletWriter extends PrintWriter
             written=true;
             out.write(c);
         }
-        catch (IOException e){Code.ignore(e);setError();}
+        catch (IOException e){log.trace(LogSupport.IGNORED,e);setError();}
     }
     
     public void write(char[] cbuf, int off, int len)
@@ -122,7 +127,7 @@ class ServletWriter extends PrintWriter
             written=true;
             out.write(cbuf,off,len);
         }
-        catch (IOException e){Code.ignore(e);setError();}
+        catch (IOException e){log.trace(LogSupport.IGNORED,e);setError();}
     }
     
     public void write(char[] cbuf)
@@ -134,7 +139,7 @@ class ServletWriter extends PrintWriter
             written=true;
             out.write(cbuf,0,cbuf.length);
         }
-        catch (IOException e){Code.ignore(e);setError();}
+        catch (IOException e){log.trace(LogSupport.IGNORED,e);setError();}
     }
 
     public void write(String s, int off, int len)
@@ -146,7 +151,7 @@ class ServletWriter extends PrintWriter
             written=true;
             out.write(s,off,len);
         }
-        catch (IOException e){Code.ignore(e);setError();}
+        catch (IOException e){log.trace(LogSupport.IGNORED,e);setError();}
     }
 
     public void write(String s)
@@ -158,6 +163,6 @@ class ServletWriter extends PrintWriter
             written=true;
             out.write(s,0,s.length());
         }
-        catch (IOException e){Code.ignore(e);setError();}
+        catch (IOException e){log.trace(LogSupport.IGNORED,e);setError();}
     }
 }

@@ -9,12 +9,13 @@ package org.mortbay.http.ajp;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Enumeration;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.BufferedOutputStream;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.util.Code;
-import org.mortbay.http.ajp.AJP13ResponsePacket;
-import org.mortbay.http.ajp.AJP13Packet;
+import org.mortbay.util.LogSupport;
 
 /** OutputStream for AJP13 protocol.
  * 
@@ -24,6 +25,8 @@ import org.mortbay.http.ajp.AJP13Packet;
  */
 public class AJP13OutputStream extends BufferedOutputStream
 {
+    private static Log log = LogFactory.getLog(AJP13OutputStream.class);
+
     private AJP13ResponsePacket _packet;
     private boolean _complete;
     private boolean _completed;
@@ -167,7 +170,7 @@ public class AJP13OutputStream extends BufferedOutputStream
     protected void bypassWrite(byte[] b, int offset, int length)
         throws IOException
     {
-        Code.notImplemented();
+        log.warn(LogSupport.NOT_IMPLEMENTED);
     }
    
     /* ------------------------------------------------------------ */

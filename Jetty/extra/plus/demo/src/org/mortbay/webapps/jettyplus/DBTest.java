@@ -5,17 +5,18 @@
 
 package org.mortbay.webapps.jettyplus;
 
-import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.sql.DataSource;
 import javax.transaction.UserTransaction;
-import org.mortbay.util.Log;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 /* ---------------------------------------------------- */
@@ -38,6 +39,8 @@ import org.mortbay.util.Code;
  */
 public class DBTest
 {
+    private static Log log = LogFactory.getLog(DBTest.class);
+
     public static final String COMMIT = "commit";
     public static final String ROLLBACK = "rollback";
     
@@ -69,20 +72,20 @@ public class DBTest
             {
                 //jndi env lookup
                 context = new InitialContext();
-                Log.event("<<< Retrieving environment >>>");
+                log.info("<<< Retrieving environment >>>");
                 selectString = (String)context.lookup("java:comp/env/select");
                 updateString = (String)context.lookup("java:comp/env/update");
-                Log.event("<<< Environment retrieved >>>");
+                log.info("<<< Environment retrieved >>>");
                 
                 //get datasource
-                Log.event("<<< Retrieving DataSource >>>");
+                log.info("<<< Retrieving DataSource >>>");
                 datasource = (DataSource)context.lookup("java:comp/env/jdbc/myDB");
-                Log.event("<<< DataSource retrieved >>>");
+                log.info("<<< DataSource retrieved >>>");
             }
         }
         catch (Exception e)
         {
-            Log.warning (e.getMessage());
+            log.warn (e.getMessage());
         }
         
     }
@@ -96,14 +99,14 @@ public class DBTest
         try
         {
             init();
-            Log.event ("<<< Looking up UserTransaction >>>");
+            log.info("<<< Looking up UserTransaction >>>");
             UserTransaction usertransaction = (UserTransaction)context.lookup("java:comp/UserTransaction");
-            Log.event ("<<< Connecting to datasource >>>");
+            log.info("<<< Connecting to datasource >>>");
             Connection connection = datasource.getConnection();
-            Log.event ("<<< Connected >>>");
+            log.info("<<< Connected >>>");
             
             //start a user transaction, get foo from db
-            Log.event("<<< beginning the transaction >>>");
+            log.info("<<< beginning the transaction >>>");
             usertransaction.begin();
             Statement statement = connection.createStatement();
             ResultSet resultset = statement.executeQuery(selectString);
@@ -112,7 +115,7 @@ public class DBTest
             {
                 this.foo = resultset.getInt(2);
             }
-            Log.event(new StringBuffer().append("<<< ").append("foo = ").append(this.foo).append(" (before completion) >>>").toString());
+            log.info(new StringBuffer().append("<<< ").append("foo = ").append(this.foo).append(" (before completion) >>>").toString());
 
             //update foo and commit or rollback
             preparedStatement = connection.prepareStatement(updateString);
@@ -120,24 +123,24 @@ public class DBTest
             preparedStatement.executeUpdate();
             if ( (action != null) && action.equals("commit") )
             {
-                Log.event("<<< committing the transaction >>>");
+                log.info("<<< committing the transaction >>>");
                 usertransaction.commit();
             }
             else
             { 
-                Log.event("<<< rolling back the transaction >>>");
+                log.info("<<< rolling back the transaction >>>");
                 usertransaction.rollback();
             }
             connection.close();
             
             //get foo again (without a transaction)
             foo = readFoo();
-            Log.event(new StringBuffer().append("<<< foo = ").append(this.foo).append(" (after completion) >>>").toString());
-            Log.event("<<< done >>>");
+            log.info(new StringBuffer().append("<<< foo = ").append(this.foo).append(" (after completion) >>>").toString());
+            log.info("<<< done >>>");
         }
         catch ( Exception  exception  )
         {
-            Log.warning(exception.getMessage());
+            log.warn(exception.getMessage());
         }
         return;
     }
@@ -156,7 +159,7 @@ public class DBTest
         {
             init();
             
-            Log.event ("<<< Getting connection >>>");
+            log.info("<<< Getting connection >>>");
 
             connection = datasource.getConnection();
             Statement statement = connection.createStatement();
@@ -166,12 +169,12 @@ public class DBTest
                 fooValue = resultset.getInt(2);
             }
 
-            Log.event ("<<< Read foo from db = "+fooValue+" >>>");
+            log.info("<<< Read foo from db = "+fooValue+" >>>");
             return fooValue;
         }
         catch (Exception e)
         {
-            Log.warning(e.getMessage());
+            log.info(e.getMessage());
             return fooValue;
         }
         finally
@@ -183,7 +186,7 @@ public class DBTest
             }
             catch (Exception e)
             {
-                Log.warning (e.getMessage());
+                log.warn(e.getMessage());
             }
         }
     }

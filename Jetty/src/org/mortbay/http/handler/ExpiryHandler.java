@@ -7,11 +7,13 @@ package org.mortbay.http.handler;
 
 import java.io.IOException;
 import java.util.Date;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.util.Code;
 
 /* ------------------------------------------------------------ */
 /**
@@ -22,6 +24,8 @@ import org.mortbay.util.Code;
  */
 public class ExpiryHandler extends AbstractHttpHandler
 {
+    private static Log log = LogFactory.getLog(ExpiryHandler.class);
+
     /**
      * The default expiry time in seconds
      */
@@ -58,7 +62,7 @@ public class ExpiryHandler extends AbstractHttpHandler
                        HttpResponse response)
             throws HttpException,IOException
     {
-        Code.debug("ExpiryHandler.handle()");
+        log.debug("ExpiryHandler.handle()");
         String expires;
         if (_ttl<0)
             expires=HttpFields.__01Jan1970;

@@ -5,7 +5,9 @@
 
 package org.mortbay.html;
 import java.util.Enumeration;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /* -------------------------------------------------------------------- */
 /** HTML select Block.
@@ -13,6 +15,8 @@ import org.mortbay.util.Code;
  */
 public class Select extends Block
 {
+    private static Log log = LogFactory.getLog(Select.class);
+
     /* ----------------------------------------------------------------- */
     /**
      * @param name Name of the form element
@@ -143,17 +147,17 @@ public class Select extends Block
         int i;
         int from = 0;
         int res = 0;
-        Code.debug("Result:"+result);
+        if(log.isDebugEnabled())log.debug("Result:"+result);
         String sres = null;
         while ((i = result.indexOf(' ', from)) != -1){
             sres = result.substring(from, i);
             res = res | Integer.parseInt(sres);
-            Code.debug("Match:"+sres+", res="+res);
+            if(log.isDebugEnabled())log.debug("Match:"+sres+"+ res="+res);
             from = i+1;
         }
         sres = result.substring(from);
         res = res | Integer.parseInt(sres);
-        Code.debug("Match:"+sres+", res="+res);
+        if(log.isDebugEnabled())log.debug("Match:"+sres+", res="+res);
         return res;     
     }
 }

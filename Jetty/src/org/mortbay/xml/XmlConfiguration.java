@@ -18,11 +18,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Map;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.Loader;
-import org.mortbay.util.TypeUtil;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.Resource;
+import org.mortbay.util.TypeUtil;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -38,6 +41,8 @@ import org.xml.sax.SAXException;
  */
 public class XmlConfiguration
 {
+    private static Log log = LogFactory.getLog(XmlConfiguration.class);
+
     private static Class[] __primitives =
     {
         Boolean.TYPE, Character.TYPE, Byte.TYPE, Short.TYPE, Integer.TYPE,
@@ -255,7 +260,7 @@ public class XmlConfiguration
         if (value!=null)
             vClass[0]=value.getClass();
 
-        Code.debug(obj,".",name,"(",vClass[0]," ",value,")");
+        if(log.isDebugEnabled())log.debug(obj+"."+name+"("+vClass[0]+" "+value+")");
         
         // Try for trivial match
         try{
@@ -264,11 +269,11 @@ public class XmlConfiguration
             return;
         }
         catch(IllegalArgumentException e)
-        {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
+        {log.trace(LogSupport.IGNORED,e);}
         catch(IllegalAccessException e)
-        {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
+        {log.trace(LogSupport.IGNORED,e);}
         catch(NoSuchMethodException e)
-        {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
+        {log.trace(LogSupport.IGNORED,e);}
         
         // Try for native match
         try{
@@ -279,13 +284,13 @@ public class XmlConfiguration
             return;
         }
         catch(NoSuchFieldException e)
-        {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
+        {log.trace(LogSupport.IGNORED,e);}
         catch(IllegalArgumentException e)
-        {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
+        {log.trace(LogSupport.IGNORED,e);}
         catch(IllegalAccessException e)
-        {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
+        {log.trace(LogSupport.IGNORED,e);}
         catch(NoSuchMethodException e)
-        {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
+        {log.trace(LogSupport.IGNORED,e);}
 
 
         // Try a field
@@ -299,7 +304,7 @@ public class XmlConfiguration
             }
         }
         catch (NoSuchFieldException e)
-        {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
+        {log.trace(LogSupport.IGNORED,e);}
 
         // Search for a match by trying all the set methods
         Method[] sets = oClass.getMethods();
@@ -316,8 +321,8 @@ public class XmlConfiguration
                     sets[s].invoke(obj,arg);
                     return;
                 }
-                catch(IllegalArgumentException e){if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
-                catch(IllegalAccessException e){if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
+                catch(IllegalArgumentException e){log.trace(LogSupport.IGNORED,e);}
+                catch(IllegalAccessException e){log.trace(LogSupport.IGNORED,e);}
             }
         }
 
@@ -344,11 +349,11 @@ public class XmlConfiguration
                 return;
             }
             catch(NoSuchMethodException e)
-            {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
+            {log.trace(LogSupport.IGNORED,e);}
             catch(IllegalAccessException e)
-            {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
+            {log.trace(LogSupport.IGNORED,e);}
             catch(InstantiationException e)
-            {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
+            {log.trace(LogSupport.IGNORED,e);}
         }
 
         // No Joy
@@ -375,7 +380,7 @@ public class XmlConfiguration
         String name = node.getAttribute("name");
         Object value= value(obj,node);
         map.put(name,value);
-        Code.debug(obj+".put("+name+","+value+")");
+        if(log.isDebugEnabled())log.debug(obj+".put("+name+"+"+value+")");
     }
     
     
@@ -404,7 +409,7 @@ public class XmlConfiguration
             oClass = obj.getClass();        
         
         String name=node.getAttribute("name");
-        Code.debug("get ",name);
+        if(log.isDebugEnabled())log.debug("get "+name);
         
         try
         {
@@ -485,7 +490,7 @@ public class XmlConfiguration
         }
         
         String method=node.getAttribute("name");
-        Code.debug("call ",method);
+        if(log.isDebugEnabled())log.debug("call "+method);
         
         // Lets just try all methods for now
         Method[] methods = oClass.getMethods();
@@ -504,9 +509,9 @@ public class XmlConfiguration
             boolean called=false;
             try{n=methods[c].invoke(obj,arg);called=true;}
             catch(IllegalAccessException e)
-            {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
+            {log.trace(LogSupport.IGNORED,e);}
             catch(IllegalArgumentException e)
-            {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
+            {log.trace(LogSupport.IGNORED,e);}
             if (called)
             {
                 configure(n,node,argi);
@@ -558,7 +563,7 @@ public class XmlConfiguration
             arg[j++]=value(obj,(XmlParser.Node)o);
         }
 
-        Code.debug("new ",oClass);
+        if(log.isDebugEnabled())log.debug("new "+oClass);
         
         // Lets just try all constructors for now
         Constructor[] constructors = oClass.getConstructors();
@@ -574,11 +579,11 @@ public class XmlConfiguration
                 called=true;
             }
             catch(IllegalAccessException e)
-            {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
+            {log.trace(LogSupport.IGNORED,e);}
             catch(InstantiationException e)
-            {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
+            {log.trace(LogSupport.IGNORED,e);}
             catch(IllegalArgumentException e)
-            {if(Code.verbose(Integer.MAX_VALUE))Code.ignore(e);}
+            {log.trace(LogSupport.IGNORED,e);}
             if(called)
             {
                 configure(n,node,argi);
@@ -816,7 +821,7 @@ public class XmlConfiguration
             return System.getProperty(name, defaultValue);
         }
         
-        Code.warning("Unknown value tag: "+node,new Throwable());
+        log.warn("Unknown value tag: "+node,new Throwable());
         return null;
     }    
     
@@ -833,7 +838,7 @@ public class XmlConfiguration
         }
         catch (Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
     }
 }

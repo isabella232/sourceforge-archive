@@ -10,15 +10,19 @@ import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.Security;
+
 import javax.net.ssl.SSLServerSocketFactory;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.util.InetAddrPort;
+import org.mortbay.util.Password;
+
 import com.sun.net.ssl.KeyManager;
 import com.sun.net.ssl.KeyManagerFactory;
 import com.sun.net.ssl.SSLContext;
 import com.sun.net.ssl.TrustManager;
 import com.sun.net.ssl.TrustManagerFactory;
-import org.mortbay.util.InetAddrPort;
-import org.mortbay.util.Log;
-import org.mortbay.util.Password;
 
 
 /* ------------------------------------------------------------ */
@@ -37,6 +41,8 @@ import org.mortbay.util.Password;
  **/
 public class SunJsseListener extends JsseListener
 {
+    private static Log log = LogFactory.getLog(SunJsseListener.class);
+
     private String _keystore=DEFAULT_KEYSTORE ;
     private transient Password _password;
     private transient Password _keypassword;
@@ -165,22 +171,22 @@ public class SunJsseListener extends JsseListener
     {
         _keystore = System.getProperty( KEYSTORE_PROPERTY,_keystore);
         
-        Log.event(KEYSTORE_PROPERTY+"="+_keystore);
+        log.info(KEYSTORE_PROPERTY+"="+_keystore);
 
         if (_password==null)
             _password = Password.getPassword(PASSWORD_PROPERTY,null,null);
-        Log.event(PASSWORD_PROPERTY+"="+_password.toStarString());
+        log.info(PASSWORD_PROPERTY+"="+_password.toStarString());
         
         if (_keypassword==null)
             _keypassword = Password.getPassword(KEYPASSWORD_PROPERTY,
                                                 null,
                                                 _password.toString());
-        Log.event(KEYPASSWORD_PROPERTY+"="+_keypassword.toStarString());
+        log.info(KEYPASSWORD_PROPERTY+"="+_keypassword.toStarString());
 
 
         KeyStore ks = null;
 
-        Log.event(KEYSTORE_TYPE_PROPERTY+"="+_keystore_type);
+        log.info(KEYSTORE_TYPE_PROPERTY+"="+_keystore_type);
         
         if (_keystore_provider_class != null) {
             // find provider.
@@ -198,14 +204,14 @@ public class SunJsseListener extends JsseListener
                 myprovider = (java.security.Provider) Class.forName(_keystore_provider_class).newInstance();
                 Security.addProvider(myprovider);
             }
-            Log.event(KEYSTORE_PROVIDER_CLASS_PROPERTY+"="+_keystore_provider_class);
+            log.info(KEYSTORE_PROVIDER_CLASS_PROPERTY+"="+_keystore_provider_class);
             ks = KeyStore.getInstance(_keystore_type,myprovider.getName());
         } else if (_keystore_provider_name != null) {
-            Log.event(KEYSTORE_PROVIDER_NAME_PROPERTY+"="+_keystore_provider_name);
+            log.info(KEYSTORE_PROVIDER_NAME_PROPERTY+"="+_keystore_provider_name);
             ks = KeyStore.getInstance(_keystore_type,_keystore_provider_name);
         } else {
             ks = KeyStore.getInstance(_keystore_type);
-            Log.event(KEYSTORE_PROVIDER_NAME_PROPERTY+"=[DEFAULT]");
+            log.info(KEYSTORE_PROVIDER_NAME_PROPERTY+"=[DEFAULT]");
         }
         
         ks.load( new FileInputStream( new File( _keystore ) ),
@@ -228,7 +234,7 @@ public class SunJsseListener extends JsseListener
         sslc.init( kma, tma, SecureRandom.getInstance("SHA1PRNG"));
         
         SSLServerSocketFactory ssfc = sslc.getServerSocketFactory();
-        Log.event("SSLServerSocketFactory="+ssfc);
+        log.info("SSLServerSocketFactory="+ssfc);
         return ssfc;
     }
 }

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
@@ -17,7 +18,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.URI;
 
 /* ------------------------------------------------------------ */
@@ -44,6 +48,8 @@ import org.mortbay.util.URI;
  */
 public class Invoker extends HttpServlet
 {
+    private static Log log = LogFactory.getLog(Invoker.class);
+
     private ServletHandler _servletHandler;
     private Map.Entry _invokerEntry;
     private Map _parameters;
@@ -150,7 +156,7 @@ public class Invoker extends HttpServlet
                     try {holder.start();}
                     catch (Exception e)
                     {
-                        Code.debug(e);
+                        log.debug(LogSupport.EXCEPTION,e);
                         throw new UnavailableException(e.toString());
                     }
                     
@@ -163,7 +169,7 @@ public class Invoker extends HttpServlet
                             s.getClass().getClassLoader())
                         {
                             holder.stop();
-                            Code.warning("Dynamic servlet "+s+
+                            log.warn("Dynamic servlet "+s+
                                          " not loaded from context "+
                                          request.getContextPath());
                             throw new UnavailableException("Not in context");

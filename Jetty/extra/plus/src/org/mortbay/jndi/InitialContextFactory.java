@@ -3,12 +3,15 @@ package org.mortbay.jndi;
 
 import java.util.Hashtable;
 import java.util.Properties;
-import javax.naming.Context;
+
 import javax.naming.CompoundName;
+import javax.naming.Context;
 import javax.naming.Name;
 import javax.naming.NameParser;
 import javax.naming.NamingException;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 /*------------------------------------------------*/    
@@ -23,6 +26,8 @@ import org.mortbay.util.Code;
  */
 public class InitialContextFactory implements javax.naming.spi.InitialContextFactory
 {
+    private static Log log = LogFactory.getLog(InitialContextFactory.class);
+
     private static final Hashtable _roots = new Hashtable();
 
     public static class DefaultParser implements NameParser
@@ -55,18 +60,18 @@ public class InitialContextFactory implements javax.naming.spi.InitialContextFac
      */
     public Context getInitialContext(Hashtable env) 
     {
-        Code.debug("InitialContextFactory.getInitialContext()");
+        log.debug("InitialContextFactory.getInitialContext()");
 
         Context ctx = (Context)_roots.get(env);
         
-        Code.debug ("Returning context root: "+ctx);
+        if(log.isDebugEnabled())log.debug("Returning context root: "+ctx);
 
         if (ctx == null)
         {
             ctx = new NamingContext (env);
             ((NamingContext)ctx).setNameParser(new DefaultParser());
             _roots.put (env, ctx);
-            Code.debug("Created new root context:"+ctx);
+            if(log.isDebugEnabled())log.debug("Created new root context:"+ctx);
         }
 
         return ctx;

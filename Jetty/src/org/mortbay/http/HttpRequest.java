@@ -16,13 +16,17 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
+
 import javax.servlet.http.Cookie;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.ByteArrayOutputStream2;
-import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LineInput;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringMap;
@@ -47,6 +51,8 @@ import org.mortbay.util.UrlEncoded;
  */
 public class HttpRequest extends HttpMessage
 {
+    private static Log log = LogFactory.getLog(HttpRequest.class);
+
     /* ------------------------------------------------------------ */
     /** Request METHODS.
      */
@@ -463,7 +469,7 @@ public class HttpRequest extends HttpMessage
                         _port=TypeUtil.parseInt(_host,colon+1,-1,10);
                     }
                     catch(Exception e)
-                    {Code.ignore(e);}
+                    {log.trace(LogSupport.IGNORED,e);}
                 }
                 _host=_host.substring(0,colon);
             }
@@ -482,7 +488,7 @@ public class HttpRequest extends HttpMessage
 
         // Return the local host
         try {_host=InetAddress.getLocalHost().getHostAddress();}
-        catch(java.net.UnknownHostException e){Code.ignore(e);}
+        catch(java.net.UnknownHostException e){log.trace(LogSupport.IGNORED,e);}
         return _host;
     }
     
@@ -692,7 +698,7 @@ public class HttpRequest extends HttpMessage
         }
         catch(IllegalArgumentException e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
             throw new HttpException(HttpResponse.__400_Bad_Request,new String(buf,s3,e3-s3+1));
         }            
     }
@@ -835,7 +841,7 @@ public class HttpRequest extends HttpMessage
                 {
                     int content_length = getIntField(HttpFields.__ContentLength);
                     if (content_length==0)
-                        Code.debug("No form content");
+                        log.debug("No form content");
                     else
                     {
                         try
@@ -849,12 +855,12 @@ public class HttpRequest extends HttpMessage
                                 max=__maxFormContentSize;
                             else if (max>__maxFormContentSize)
                             {
-                                Code.warning("Form content truncated");
+                                log.warn("Form content truncated");
                                 max=__maxFormContentSize;
                             }
 
                             // Copy to a byte array.
-                            // XXX - this is very inefficient and we could
+                            // TODO - this is very inefficient and we could
                             // save lots of memory by streaming this!!!!
                             IO.copy(in,bout,max);
                             
@@ -865,14 +871,14 @@ public class HttpRequest extends HttpMessage
                         }
                         catch (EOFException e)
                         {
-                            Code.ignore(e);
+                            log.trace(LogSupport.IGNORED,e);
                         }
                         catch (IOException e)
                         {
-                            if (Code.debug())
-                                Code.warning(e);
+                            if (log.isDebugEnabled())
+                                log.warn(LogSupport.EXCEPTION,e);
                             else
-                                Code.warning(e.toString());
+                                log.warn(e.toString());
                         }
                     }
                 }
@@ -1077,8 +1083,8 @@ public class HttpRequest extends HttpMessage
                     }
                     catch(Exception e)
                     {
-                        Code.ignore(e);
-                        Code.warning("Bad Cookie received: "+e.toString());
+                        log.trace(LogSupport.IGNORED,e);
+                        log.warn("Bad Cookie received: "+e.toString());
                     }
                 }
             }
@@ -1098,7 +1104,7 @@ public class HttpRequest extends HttpMessage
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
         
         return _cookies;

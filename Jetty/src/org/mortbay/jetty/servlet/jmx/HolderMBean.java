@@ -9,8 +9,10 @@ import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.servlet.Holder;
-import org.mortbay.util.Code;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.jmx.LifeCycleMBean;
 
 
@@ -22,6 +24,8 @@ import org.mortbay.util.jmx.LifeCycleMBean;
  */
 public class HolderMBean extends LifeCycleMBean  
 {
+    private static Log log = LogFactory.getLog(HolderMBean.class);
+
     /* ------------------------------------------------------------ */
     private Holder _holder;
     
@@ -65,7 +69,7 @@ public class HolderMBean extends LifeCycleMBean
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             return super.uniqueObjectName(server,objectName);
         }
     }

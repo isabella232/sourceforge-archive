@@ -5,12 +5,11 @@
 
 package org.mortbay.jaas;
 
+import java.security.Principal;
+import java.security.acl.Group;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.security.Principal;
-import java.security.acl.Group;
-import org.mortbay.util.Code;
 
 
 public class JAASGroup implements Group 

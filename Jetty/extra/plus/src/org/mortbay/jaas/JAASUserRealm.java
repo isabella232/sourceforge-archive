@@ -5,16 +5,18 @@
 
 package org.mortbay.jaas;
 
+import java.security.Principal;
 import java.util.HashMap;
-import javax.security.auth.login.FailedLoginException;
+
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.UserRealm;
 import org.mortbay.jaas.callback.AbstractCallbackHandler;
 import org.mortbay.jaas.callback.DefaultCallbackHandler;
-import org.mortbay.util.Log;
-import java.security.Principal;
 
 
 
@@ -37,6 +39,8 @@ import java.security.Principal;
  */
 public class JAASUserRealm implements UserRealm
 {
+	private static Log log = LogFactory.getLog(JAASUserRealm.class);
+	
     protected String realmName;
     protected String loginModuleName;
     protected AbstractCallbackHandler callbackHandler;
@@ -101,7 +105,7 @@ public class JAASUserRealm implements UserRealm
             
             if (callbackHandler == null)
             {
-                Log.warning ("No CallbackHandler configured: using DefaultCallbackHandler");
+                log.warn("No CallbackHandler configured: using DefaultCallbackHandler");
                 callbackHandler = new DefaultCallbackHandler();
             }
 
@@ -126,7 +130,7 @@ public class JAASUserRealm implements UserRealm
         }
         catch (LoginException e)
         {
-            Log.warning (e);
+            log.warn(e);
             return null;
         }     
     }
@@ -135,7 +139,7 @@ public class JAASUserRealm implements UserRealm
     /* ------------------------------------------------------------ */
     public boolean isAuthenticated(Principal user)
     {
-        // XXX This is not correct if auth can expire! We need to
+        // TODO This is not correct if auth can expire! We need to
         // get the user out of the cache
         return (userMap.get(user.getName()) != null);
     }

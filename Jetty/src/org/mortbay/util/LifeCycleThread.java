@@ -2,6 +2,9 @@ package org.mortbay.util;
 
 import java.io.InterruptedIOException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /* ------------------------------------------------------------ */
 /** Base Thread class implementing LifeCycle.
  *
@@ -10,6 +13,8 @@ import java.io.InterruptedIOException;
  */
 public abstract class LifeCycleThread implements LifeCycle, Runnable
 {
+    private static Log log = LogFactory.getLog(LifeCycleThread.class);
+
     private boolean _running;
     private boolean _daemon ;
     private Thread _thread;
@@ -44,7 +49,7 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
     {
         if (_running)
         {
-            Code.debug("Already started");
+            log.debug("Already started");
             return;
         }
         _running=true;
@@ -86,13 +91,11 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
                 }
                 catch(InterruptedException e)
                 {
-                    if (Code.verbose())
-                        Code.ignore(e);
+                    log.trace(LogSupport.IGNORED,e);
                 }
                 catch(InterruptedIOException e)
                 {
-                    if (Code.verbose())
-                        Code.ignore(e);
+                    log.trace(LogSupport.IGNORED,e);
                 }
                 catch(Exception e)
                 {
@@ -119,7 +122,7 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
      */
     public boolean exception(Exception e)
     {
-        Code.warning(e);
+        log.warn(LogSupport.EXCEPTION,e);
         return true;
     }
     
@@ -130,7 +133,7 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
      */
     public boolean error(Error e)
     {
-        Code.warning(e);
+        log.warn(LogSupport.EXCEPTION,e);
         return true;
     }
     

@@ -6,6 +6,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /* ------------------------------------------------------------ */
 /** Handles coding of MIME  "x-www-form-urlencoded".
  * This class handles the encoding and decoding for either
@@ -24,6 +27,8 @@ import java.util.Map;
  */
 public class UrlEncoded extends MultiMap
 {
+    private static Log log = LogFactory.getLog(UrlEncoded.class);
+
     /* ----------------------------------------------------------------- */
     public UrlEncoded(UrlEncoded url)
     {
@@ -277,7 +282,7 @@ public class UrlEncoded extends MultiMap
             }
             catch(UnsupportedEncodingException e)
             {
-                Code.warning(e);
+                log.warn(LogSupport.EXCEPTION,e);
             }
         }
     }
@@ -425,7 +430,7 @@ public class UrlEncoded extends MultiMap
         }
         catch(UnsupportedEncodingException e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             bytes=string.getBytes();
         }
         
@@ -475,7 +480,7 @@ public class UrlEncoded extends MultiMap
         }
         catch(UnsupportedEncodingException e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             return new String(encoded,0,n);
         }
     }

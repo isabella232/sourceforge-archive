@@ -6,6 +6,7 @@
 package org.mortbay.jetty.servlet;
 import java.util.Collections;
 import java.util.Enumeration;
+
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionContext;
 

@@ -6,17 +6,22 @@
 
 package org.mortbay.ftp;
 
-import org.mortbay.util.Code;
-import org.mortbay.util.IO;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.util.IO;
+import org.mortbay.util.LogSupport;
+
 public class DataPort extends Thread
 {
+    private static Log log = LogFactory.getLog(DataPort.class);
+
     /* ------------------------------------------------------------------- */
     public static void main(String[] args)
     {
@@ -52,10 +57,10 @@ public class DataPort extends Thread
             start();
             try{
                 wait();
-                Code.debug("Listening on "+addr+" "+port);
+                if(log.isDebugEnabled())log.debug("Listening on "+addr+" "+port);
             }
             catch(InterruptedException e){
-                Code.fail("Interrupted");
+                log.fatal("Interrupted"); System.exit(1);
             }
         }
     }
@@ -74,10 +79,10 @@ public class DataPort extends Thread
             start();
             try{
                 wait();
-                Code.debug("Listening on "+addr+" "+port);
+                if(log.isDebugEnabled())log.debug("Listening on "+addr+" "+port);
             }
             catch(InterruptedException e){
-                Code.fail("Interrupted");
+                log.fatal("Interrupted"); System.exit(1);
             }
         }
     }
@@ -99,10 +104,10 @@ public class DataPort extends Thread
             start();
             try{
                 wait();
-                Code.debug("Connected to "+addr+" "+port);
+                if(log.isDebugEnabled())log.debug("Connected to "+addr+" "+port);
             }
             catch(InterruptedException e){
-                Code.fail("Interrupted");
+                log.fatal("Interrupted"); System.exit(1);
             }
         }
     }
@@ -123,10 +128,10 @@ public class DataPort extends Thread
             start();
             try{
                 wait();
-                Code.debug("Connected to "+addr+" "+port);
+                if(log.isDebugEnabled())log.debug("Connected to "+addr+" "+port);
             }
             catch(InterruptedException e){
-                Code.fail("Interrupted");
+                log.fatal("Interrupted"); System.exit(1);
             }
         }
     }
@@ -144,7 +149,7 @@ public class DataPort extends Thread
 		else
 		    connect();
 
-		// XXX Lets not loop here on failure 
+                // TODO Lets not loop here on failure 
 		terminated=(connection==null);
 		
                 if (terminated) 
@@ -155,7 +160,7 @@ public class DataPort extends Thread
         catch(Exception e){
             if (ftp!=null)
             {
-                Code.debug("DataPort failed",e);
+                if(log.isDebugEnabled())log.debug("DataPort failed",e);
                 ftp.transferCompleteNotification(e);
                 ftp=null;
             }
@@ -164,7 +169,7 @@ public class DataPort extends Thread
             if (connection!=null)
             {
                 try{connection.close();
-                }catch(Exception e){Code.debug("Close Exception",e);}
+                }catch(Exception e){if(log.isDebugEnabled())log.debug("Close Exception",e);}
                         
                 connection = null;
             }
@@ -179,30 +184,30 @@ public class DataPort extends Thread
      */
     final public void close() 
     {
-        Code.debug("Close DataPort");
+        log.debug("Close DataPort");
         terminated = true;
         if (connection != null)
         {
             try {connection.close();}
-            catch (IOException ioe) { Code.ignore(ioe);}
+            catch (IOException ioe) { log.trace(LogSupport.IGNORED,ioe);}
             connection = null;
         }
         if (listen != null)
         {
             try {listen.close();}
-            catch (IOException ioe) { Code.ignore(ioe);}
+            catch (IOException ioe) { log.trace(LogSupport.IGNORED,ioe);}
             listen = null;
         }
         if (in != null)
         {
             try {in.close();}
-            catch (IOException ioe) { Code.ignore(ioe);}
+            catch (IOException ioe) { log.trace(LogSupport.IGNORED,ioe);}
             in = null;
         }
         if (out != null)
         {
             try {out.close();}
-            catch (IOException ioe) { Code.ignore(ioe);}
+            catch (IOException ioe) { log.trace(LogSupport.IGNORED,ioe);}
             out = null;
         }
         ftp=null;
@@ -232,10 +237,10 @@ public class DataPort extends Thread
         if (!terminated)
         {
             // wait for connection
-            Code.debug("Waiting for connection... ",listen);
+            if(log.isDebugEnabled())log.debug("Waiting for connection... "+listen);
             listen.setSoTimeout( SOCKET_LISTEN_TIMEOUT );
             connection = listen.accept();
-            Code.debug("Accepted ",connection);
+            if(log.isDebugEnabled())log.debug("Accepted "+connection);
         }
     }
 
@@ -248,9 +253,9 @@ public class DataPort extends Thread
 	{
             try
 	    {
-		Code.debug("Making connection: ",addr,":"+port+"...");
+		if(log.isDebugEnabled())log.debug("Making connection: "+addr+":"+port+"...");
 		connection = new Socket(addr,port);
-		Code.debug("Connected "+connection);
+		if(log.isDebugEnabled())log.debug("Connected "+connection);
             }
             finally{
                 notify();
@@ -282,7 +287,7 @@ public class DataPort extends Thread
                     out.close();
                 }
                 catch(IOException e)
-                {Code.debug("Exception ignored",e);}       
+                {if(log.isDebugEnabled())log.debug("Exception ignored",e);}       
             }
             if (connection!=null)
                 connection.close();

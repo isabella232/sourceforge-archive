@@ -7,13 +7,15 @@ package org.mortbay.http.handler;
 
 import java.io.IOException;
 import java.io.OutputStream;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.util.ByteArrayISO8859Writer;
-import org.mortbay.util.Code;
 import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
@@ -23,6 +25,8 @@ import org.mortbay.util.StringUtil;
  */
 public class RootNotFoundHandler extends NotFoundHandler
 {
+    private static Log log = LogFactory.getLog(RootNotFoundHandler.class);
+
     
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,
@@ -31,7 +35,7 @@ public class RootNotFoundHandler extends NotFoundHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
-        Code.debug("Root Not Found");
+        log.debug("Root Not Found");
         String method=request.getMethod();
         
         if (!method.equals(HttpRequest.__GET) ||

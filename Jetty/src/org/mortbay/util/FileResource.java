@@ -12,10 +12,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URISyntaxException;
 import java.security.Permission;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 
 /* ------------------------------------------------------------ */
@@ -35,6 +38,7 @@ import java.security.Permission;
  */
 class FileResource extends URLResource
 {
+	private static Log log = LogFactory.getLog(Credential.class);
     private static boolean __checkAliases;
     static
     {
@@ -43,7 +47,7 @@ class FileResource extends URLResource
             (System.getProperty("org.mortbay.util.FileResource.checkAliases","true"));
  
        if (__checkAliases)
-            Log.event("Checking Resource aliases");
+            log.info("Checking Resource aliases");
     }
     
     /* ------------------------------------------------------------ */
@@ -64,7 +68,7 @@ class FileResource extends URLResource
         }
         catch (Exception e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
             try
             {
                 // Assume that File.toURL produced unencoded chars. So try
@@ -75,7 +79,7 @@ class FileResource extends URLResource
             }
             catch (Exception e2)
             {
-                Code.ignore(e2);
+                log.trace(LogSupport.IGNORED,e2);
 
                 // Still can't get the file.  Doh! try good old hack!
                 checkConnection();
@@ -132,15 +136,15 @@ class FileResource extends URLResource
                 if (abs.length()!=can.length() || !abs.equals(can))
                     _alias=new File(can).toURL();
                 
-                if (_alias!=null && Code.debug())
+                if (_alias!=null && log.isDebugEnabled())
                 {
-                    Code.debug("ALIAS abs=",abs);
-                    Code.debug("ALIAS can=",can);
+                    log.debug("ALIAS abs="+abs);
+                    log.debug("ALIAS can="+can);
                 }
             }
             catch(Exception e)
             {
-                Code.warning(e);
+                log.warn(LogSupport.EXCEPTION,e);
                 return getURL();
             }                
         }

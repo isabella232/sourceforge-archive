@@ -5,10 +5,13 @@
 
 package org.mortbay.util;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Constructor;
 import java.util.HashMap;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /* ------------------------------------------------------------ */
 /** TYPE Utilities.
@@ -21,6 +24,8 @@ import java.util.HashMap;
  */
 public class TypeUtil
 {
+    private static Log log = LogFactory.getLog(TypeUtil.class);
+
     /* ------------------------------------------------------------ */
     private static final HashMap name2Class=new HashMap();
     static
@@ -136,7 +141,7 @@ public class TypeUtil
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
     }
 
@@ -196,21 +201,21 @@ public class TypeUtil
         }
         catch(NoSuchMethodException e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
         catch(IllegalAccessException e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
         catch(InstantiationException e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
         catch(InvocationTargetException e)
         {
             if (e.getTargetException() instanceof Error)
                 throw (Error)(e.getTargetException());
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
         return null;
     }

@@ -8,7 +8,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Properties;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.Loader;
 import org.mortbay.util.Resource;
 
@@ -38,6 +40,8 @@ import org.mortbay.util.Resource;
 
 public class JDBCUserRealm extends HashUserRealm
 {
+    private static Log log = LogFactory.getLog(JDBCUserRealm.class);
+
     private String _jdbcDriver;
     private String _url;
     private String _userName;
@@ -122,7 +126,7 @@ public class JDBCUserRealm extends HashUserRealm
             || _password == null
             || _cacheTime < 0)
         {
-            Code.debug("UserRealm " + getName()
+            if(log.isDebugEnabled())log.debug("UserRealm " + getName()
                         + " has not been properly configured");
         }
         _cacheTime *= 1000;
@@ -151,7 +155,7 @@ public class JDBCUserRealm extends HashUserRealm
         catch(SQLException e)
         {
             e.printStackTrace(System.err);
-            Code.debug("UserRealm " + getName()
+            if(log.isDebugEnabled())log.debug("UserRealm " + getName()
                       + " could not connect to database; will try later");
         }
     }
@@ -217,7 +221,7 @@ public class JDBCUserRealm extends HashUserRealm
         catch (SQLException e)
         {
             e.printStackTrace(System.err);
-            Code.debug("UserRealm " + getName()
+            if(log.isDebugEnabled())log.debug("UserRealm " + getName()
                       + " could not load user information from database");
             connectDatabase();
         }

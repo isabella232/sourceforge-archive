@@ -13,10 +13,15 @@ import java.net.URL;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 
 /* ------------------------------------------------------------ */
 public class JarResource extends URLResource
 {
+    private static Log log = LogFactory.getLog(JarResource.class);
+
     protected transient JarURLConnection _jarConnection;
     
     /* -------------------------------------------------------- */
@@ -43,7 +48,7 @@ public class JarResource extends URLResource
         }
         catch(IOException e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
             _jarConnection=null;
         }
         
@@ -91,7 +96,7 @@ public class JarResource extends URLResource
     public static void extract(Resource resource, File directory, boolean deleteOnExit)
         throws IOException
     {
-        Code.debug("Extract ",resource," to ",directory);
+        if(log.isDebugEnabled())log.debug("Extract "+resource+" to "+directory);
         JarInputStream jin = new JarInputStream(resource.getInputStream());
         JarEntry entry=null;
         while((entry=jin.getNextJarEntry())!=null)

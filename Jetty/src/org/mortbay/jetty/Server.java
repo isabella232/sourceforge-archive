@@ -9,12 +9,14 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpServer;
 import org.mortbay.jetty.servlet.ServletHttpContext;
 import org.mortbay.jetty.servlet.WebApplicationContext;
-import org.mortbay.util.Code;
-import org.mortbay.util.Log;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.Resource;
 import org.mortbay.xml.XmlConfiguration;
 
@@ -43,6 +45,8 @@ import org.mortbay.xml.XmlConfiguration;
  */
 public class Server extends HttpServer 
 {
+    static Log log = LogFactory.getLog(Server.class);
+
     private String _configuration;
     private String _rootWebApp;
 
@@ -94,7 +98,7 @@ public class Server extends HttpServer
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw new IOException("Jetty configuration problem: "+e);
         }
     }
@@ -143,7 +147,7 @@ public class Server extends HttpServer
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw new IOException("Jetty configuration problem: "+e);
         }
     }
@@ -218,7 +222,7 @@ public class Server extends HttpServer
             newWebApplicationContext(webApp);
         appContext.setContextPath(contextPathSpec);
         addContext(virtualHost,appContext);
-        Code.debug("Web Application ",appContext," added");
+        if(log.isDebugEnabled())log.debug("Web Application "+appContext+" added");
         return appContext;
     }
 
@@ -347,65 +351,6 @@ public class Server extends HttpServer
 
     
     /* ------------------------------------------------------------ */
-    /** Add Web Application.
-     * @param contextPathSpec The context path spec. Which must be of
-     * the form / or /path/*
-     * @param webApp The Web application directory or WAR as file or URL.
-     * @param defaults The defaults xml filename or URL which is
-     * loaded before any in the web app. Must respect the web.dtd.
-     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
-     * @param extractWar If true, WAR files are extracted to the
-     * webapp subdirectory of the contexts temporary directory.
-     * @return The WebApplicationContext
-     * @exception IOException 
-     * @deprecated use addWebApplicaton(host,path,webapp)
-     */
-    public WebApplicationContext addWebApplication(String contextPathSpec,
-                                                   String webApp,
-                                                   String defaults,
-                                                   boolean extractWar)
-        throws IOException
-    {
-        return addWebApplication(null,
-                                 contextPathSpec,
-                                 webApp,
-                                 defaults,
-                                 extractWar);
-    }
-    
-    
-    /* ------------------------------------------------------------ */
-    /**  Add Web Application.
-     * @param virtualHost Virtual host name or null
-     * @param contextPathSpec The context path spec. Which must be of
-     * the form / or /path/*
-     * @param webApp The Web application directory or WAR file.
-     * @param defaults The defaults xml filename or URL which is
-     * loaded before any in the web app. Must respect the web.dtd.
-     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
-     * @param extractWar If true, WAR files are extracted to the
-     * webapp subdirectory of the contexts temporary directory.
-     * @return The WebApplicationContext
-     * @exception IOException
-     * @deprecated use addWebApplicaton(host,path,webapp)
-     */
-    public WebApplicationContext addWebApplication(String virtualHost,
-                                                   String contextPathSpec,
-                                                   String webApp,
-                                                   String defaults,
-                                                   boolean extractWar)
-        throws IOException
-    {
-        Log.warning("DEPRECATED: use addWebApplicaton(host,path,webapp)");
-        WebApplicationContext appContext =
-            addWebApplication(virtualHost,contextPathSpec,webApp);
-        appContext.setDefaultsDescriptor(defaults);
-        appContext.setExtractWAR(extractWar);        
-        return appContext;
-    }
-
-    
-    /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     public static void main(String[] arg)
@@ -414,7 +359,7 @@ public class Server extends HttpServer
         
         if (arg.length==0)
         {
-            Log.event("Using default configuration: etc/jetty.xml");
+            log.info("Using default configuration: etc/jetty.xml");
             arg=dftConfig;
         }
 
@@ -431,7 +376,7 @@ public class Server extends HttpServer
             }
             catch(Exception e)
             {
-                Code.warning(e);
+                log.warn(LogSupport.EXCEPTION,e);
             }
         }
 
@@ -448,17 +393,17 @@ public class Server extends HttpServer
                             public void run()
                             {
                                 setName("Shutdown");
-                                Log.event("Shutdown hook executing");
+                                log.info("Shutdown hook executing");
                                 for (int i=0;i<servers.length;i++)
                                 {
 				    if (servers[i]==null) continue;
                                     try{servers[i].stop();}
-                                    catch(Exception e){Code.warning(e);}
+                                    catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
                                 }
                                 
                                 // Try to avoid JVM crash
                                 try{Thread.sleep(1000);}
-                                catch(Exception e){Code.warning(e);}
+                                catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
                             }
                         };
                 shutdownHook.invoke(Runtime.getRuntime(),
@@ -466,7 +411,7 @@ public class Server extends HttpServer
             }
             catch(Exception e)
             {
-                Code.debug("No shutdown hook in JVM ",e);
+                if(log.isDebugEnabled())log.debug("No shutdown hook in JVM ",e);
             }
         }
 
@@ -474,7 +419,7 @@ public class Server extends HttpServer
         for (int i=0;i<arg.length;i++)
         {
             try{servers[i].join();}
-            catch (Exception e){Code.ignore(e);}
+            catch (Exception e){log.trace(LogSupport.IGNORED,e);}
         }
     }
 }

@@ -12,10 +12,16 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.HashSet;
+
 import junit.framework.TestSuite;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 public class TestThreadedServer extends junit.framework.TestCase
 {
+    static Log log = LogFactory.getLog(TestThreadedServer.class);
+
     TestServer server;
         
     public TestThreadedServer(String name)
@@ -41,7 +47,7 @@ public class TestThreadedServer extends junit.framework.TestCase
     {
         server=new TestServer();
         server.start();
-        Log.event("ThreadedServer test started");
+        log.info("ThreadedServer test started");
         Thread.sleep(500);
     }
 
@@ -94,7 +100,7 @@ public class TestThreadedServer extends junit.framework.TestCase
         assertEquals("reuse thread",3,server._connections);
         assertEquals("reuse thread",2,server._jobs);
 
-        // XXX - this needs to be reworked.
+        // TODO - this needs to be reworked.
     }
     
     /* ------------------------------------------------------------ */
@@ -121,7 +127,7 @@ public class TestThreadedServer extends junit.framework.TestCase
             {
                 synchronized(this.getClass())
                 {
-                    Code.debug("Connection ",in);
+                    if(log.isDebugEnabled())log.debug("Connection "+in);
                     _jobs++;
                     _connections++;
                 }
@@ -130,7 +136,7 @@ public class TestThreadedServer extends junit.framework.TestCase
                 LineInput lin= new LineInput(in);
                 while((line=lin.readLine())!=null)
                 {
-                    Code.debug("Line ",line);		    
+                    if(log.isDebugEnabled())log.debug("Line "+line);		    
                     if ("Exit".equals(line))
                     {
                         return;
@@ -139,18 +145,18 @@ public class TestThreadedServer extends junit.framework.TestCase
             }
             catch(Error e)
             {
-                Code.ignore(e);
+                log.trace(LogSupport.IGNORED,e);
             }
             catch(Exception e)
             {
-                Code.ignore(e);
+                log.trace(LogSupport.IGNORED,e);
             }
             finally
             {    
                 synchronized(this.getClass())
                 {
                     _jobs--;
-                    Code.debug("Disconnect: ",in);
+                    if(log.isDebugEnabled())log.debug("Disconnect: "+in);
                 }
             }
         }
@@ -164,7 +170,7 @@ public class TestThreadedServer extends junit.framework.TestCase
             addr.setPort(8765);
             Socket s = new Socket(addr.getInetAddress(),addr.getPort());
             _sockets.add(s);
-            Code.debug("Socket ",s);
+            if(log.isDebugEnabled())log.debug("Socket "+s);
             return new PrintWriter(new OutputStreamWriter(s.getOutputStream()));
         }    
     }

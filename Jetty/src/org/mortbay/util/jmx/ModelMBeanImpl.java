@@ -10,10 +10,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 import java.util.ResourceBundle;
+
 import javax.management.Attribute;
 import javax.management.AttributeChangeNotification;
 import javax.management.AttributeList;
@@ -41,8 +42,10 @@ import javax.management.modelmbean.ModelMBeanInfo;
 import javax.management.modelmbean.ModelMBeanInfoSupport;
 import javax.management.modelmbean.ModelMBeanNotificationInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
-import org.mortbay.util.Code;
-import org.mortbay.util.Log;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.TypeUtil;
 
 
@@ -75,6 +78,8 @@ public class ModelMBeanImpl
     implements ModelMBean,
                MBeanRegistration
 {
+    private static Log log = LogFactory.getLog(ModelMBeanImpl.class);
+
     public final static int IMPACT_ACTION = MBeanOperationInfo.ACTION;
     public final static int IMPACT_ACTION_INFO = MBeanOperationInfo.ACTION_INFO;
     public final static int IMPACT_INFO = MBeanOperationInfo.INFO;
@@ -150,27 +155,27 @@ public class ModelMBeanImpl
 
                 try{
                     Class mClass=loader.loadClass(mName);
-		    if (Code.verbose())Code.debug("mbeanFor ",o," mClass=",mClass);
+		    if(log.isTraceEnabled())log.trace("mbeanFor "+o+" mClass="+mClass);
                     mbean=(ModelMBean)mClass.newInstance();
                     mbean.setManagedResource(o,"objectReference");
-		    Code.debug("mbeanFor ",o," is ",mbean);
+		    if(log.isDebugEnabled())log.debug("mbeanFor "+o+" is "+mbean);
                     return mbean;
                 }
                 catch(ClassNotFoundException e)
                 {
                     if (e.toString().endsWith("MBean"))
-		    { if (Code.verbose()) Code.debug(e.toString());}
+		    { if(log.isTraceEnabled())log.trace(e.toString());}
                     else
-                        Code.warning(e);
+                        log.warn(LogSupport.EXCEPTION,e);
                 }
                 catch(Error e)
                 {
-                    Code.warning(e);
+                    log.warn(LogSupport.EXCEPTION,e);
                     mbean=null;
                 }
                 catch(Exception e)
                 {
-                    Code.warning(e);
+                    log.warn(LogSupport.EXCEPTION,e);
                     mbean=null;
                 }
 
@@ -201,7 +206,7 @@ public class ModelMBeanImpl
         }
         catch(Exception e)
         {
-            Code.ignore(e);
+            log.trace(LogSupport.IGNORED,e);
         }
         return null;
     }
@@ -227,7 +232,7 @@ public class ModelMBeanImpl
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw new IllegalArgumentException(e.toString());
         }
     }
@@ -261,7 +266,7 @@ public class ModelMBeanImpl
             return;
         }
         
-        Code.debug("setManagedResource");
+        log.debug("setManagedResource");
         if (!"objectreference".equalsIgnoreCase(type))
             throw new InvalidTargetObjectTypeException(type);
 
@@ -410,7 +415,7 @@ public class ModelMBeanImpl
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw new IllegalArgumentException(e.toString());
         }
     }
@@ -453,7 +458,7 @@ public class ModelMBeanImpl
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw new IllegalArgumentException(e.toString());
         }
     }
@@ -541,7 +546,7 @@ public class ModelMBeanImpl
         }
         catch(Exception e)
         {
-            Code.warning("operation "+name,e);
+            log.warn("operation "+name,e);
             throw new IllegalArgumentException(e.toString());
         }
         
@@ -579,7 +584,7 @@ public class ModelMBeanImpl
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw new IllegalArgumentException(e.toString());
         }   
     }
@@ -587,7 +592,7 @@ public class ModelMBeanImpl
     /* ------------------------------------------------------------ */
     public synchronized MBeanInfo getMBeanInfo()
     {
-        Code.debug("getMBeanInfo");
+        log.debug("getMBeanInfo");
 
         if (_dirty)
         {
@@ -617,7 +622,7 @@ public class ModelMBeanImpl
                MBeanException,
                ReflectionException
     {
-        Code.debug("getAttribute ",name);
+        if(log.isDebugEnabled())log.debug("getAttribute "+name);
         Method getter = (Method)_getter.get(name);
         if (getter==null)
             throw new AttributeNotFoundException(name);
@@ -630,12 +635,12 @@ public class ModelMBeanImpl
         }
         catch(IllegalAccessException e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw new AttributeNotFoundException(e.toString());
         }
         catch(InvocationTargetException e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw new ReflectionException((Exception)e.getTargetException());
         }
     }
@@ -643,7 +648,7 @@ public class ModelMBeanImpl
     /* ------------------------------------------------------------ */
     public AttributeList getAttributes(String[] names)
     {
-        Code.debug("getAttributes");
+        log.debug("getAttributes");
         AttributeList results=new AttributeList(names.length);
         for (int i=0;i<names.length;i++)
         {
@@ -654,7 +659,7 @@ public class ModelMBeanImpl
             }
             catch(Exception e)
             {
-                Code.warning(e);
+                log.warn(LogSupport.EXCEPTION,e);
             }
         }
         return results;
@@ -668,7 +673,7 @@ public class ModelMBeanImpl
                MBeanException,
                ReflectionException
     {
-        Code.debug("setAttribute ",attr.getName(),"=",attr.getValue());
+        if(log.isDebugEnabled())log.debug("setAttribute "+attr.getName()+"="+attr.getValue());
         Method setter = (Method)_setter.get(attr.getName());
         if (setter==null)
             throw new AttributeNotFoundException(attr.getName());
@@ -681,12 +686,12 @@ public class ModelMBeanImpl
         }
         catch(IllegalAccessException e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw new AttributeNotFoundException(e.toString());
         }
         catch(InvocationTargetException e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw new ReflectionException((Exception)e.getTargetException());
         }
     }
@@ -694,7 +699,7 @@ public class ModelMBeanImpl
     /* ------------------------------------------------------------ */
     public AttributeList setAttributes(AttributeList attrs)
     {
-        Code.debug("setAttributes");
+        log.debug("setAttributes");
 
         AttributeList results=new AttributeList(attrs.size());
         Iterator iter = attrs.iterator();
@@ -709,7 +714,7 @@ public class ModelMBeanImpl
             }
             catch(Exception e)
             {
-                Code.warning(e);
+                log.warn(LogSupport.EXCEPTION,e);
             }
         }
         return results;
@@ -720,7 +725,7 @@ public class ModelMBeanImpl
         throws MBeanException,
                ReflectionException
     {
-        Code.debug("invoke ",name);
+        if(log.isDebugEnabled())log.debug("invoke "+name);
 
         String methodKey=name+"(";
         for (int i=0;i<signature.length;i++)
@@ -737,17 +742,17 @@ public class ModelMBeanImpl
         }
         catch(NoSuchMethodException e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw new ReflectionException(e);
         }
         catch(IllegalAccessException e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw new MBeanException(e);
         }
         catch(InvocationTargetException e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw new ReflectionException((Exception)e.getTargetException());
         }
         
@@ -759,7 +764,7 @@ public class ModelMBeanImpl
                RuntimeOperationsException,
                InstanceNotFoundException
     {
-        Code.debug("load");
+        log.debug("load");
     }
     
     /* ------------------------------------------------------------ */
@@ -768,7 +773,7 @@ public class ModelMBeanImpl
                RuntimeOperationsException,
                InstanceNotFoundException
     {
-        Code.debug("store");
+        log.debug("store");
     }
 
     /* ------------------------------------------------------------ */
@@ -777,13 +782,13 @@ public class ModelMBeanImpl
                                         Object handback)
         throws IllegalArgumentException
     {
-        Code.debug("addNotificationListener");
+        log.debug("addNotificationListener");
     }
     
     /* ------------------------------------------------------------ */
     public MBeanNotificationInfo[] getNotificationInfo()
     {
-        Code.debug("getNotificationInfo");
+        log.debug("getNotificationInfo");
         return null;
     }
     
@@ -791,7 +796,7 @@ public class ModelMBeanImpl
     public void removeNotificationListener(NotificationListener listener)
         throws ListenerNotFoundException
     {
-        Code.debug("removeNotificationListener");
+        log.debug("removeNotificationListener");
     }
 
     /* ------------------------------------------------------------ */
@@ -802,7 +807,7 @@ public class ModelMBeanImpl
                RuntimeOperationsException,
                IllegalArgumentException
     {
-        Code.debug("addAttributeChangeNotificationListener");
+        log.debug("addAttributeChangeNotificationListener");
     }
     
     /* ------------------------------------------------------------ */
@@ -812,7 +817,7 @@ public class ModelMBeanImpl
                RuntimeOperationsException,
                ListenerNotFoundException
     {
-        Code.debug("removeAttributeChangeNotificationListener");
+        log.debug("removeAttributeChangeNotificationListener");
     }
     
     /* ------------------------------------------------------------ */
@@ -821,7 +826,7 @@ public class ModelMBeanImpl
         throws MBeanException,
                RuntimeOperationsException
     {
-        Code.debug("sendAttributeChangeNotification");
+        log.debug("sendAttributeChangeNotification");
     }
     
     /* ------------------------------------------------------------ */
@@ -829,7 +834,7 @@ public class ModelMBeanImpl
         throws MBeanException,
                RuntimeOperationsException
     {
-        Code.debug("sendAttributeChangeNotification");
+        log.debug("sendAttributeChangeNotification");
     }
     
     /* ------------------------------------------------------------ */
@@ -837,7 +842,7 @@ public class ModelMBeanImpl
         throws MBeanException,
                RuntimeOperationsException
     {
-        Code.debug("sendNotification");
+        log.debug("sendNotification");
     }
     
     /* ------------------------------------------------------------ */
@@ -845,7 +850,7 @@ public class ModelMBeanImpl
         throws MBeanException,
                RuntimeOperationsException
     {
-        Code.debug("sendNotification");
+        log.debug("sendNotification");
     }
 
     /* ------------------------------------------------------------ */
@@ -903,7 +908,7 @@ public class ModelMBeanImpl
             }
 
             String resource=(pkg==null?"mbean":(pkg.replace('.','/')+"/mbean"));
-            Code.debug("Look for: ",resource);
+            if(log.isDebugEnabled())log.debug("Look for: "+resource);
 
             try
             {
@@ -912,7 +917,7 @@ public class ModelMBeanImpl
                                              Locale.getDefault(),
                                              _object.getClass().getClassLoader());
             
-                Code.debug("Bundle ",resource);
+                if(log.isDebugEnabled())log.debug("Bundle "+resource);
                 
                 for (int i=0;i<objectNames.length;i++)
                 {
@@ -930,10 +935,10 @@ public class ModelMBeanImpl
                         if (description!=null && description.length()>0)
                             return description;
                     }
-                    catch(Exception e) { if(Code.verbose())Code.debug(e.toString()); }
+                    catch(Exception e) { if(log.isTraceEnabled())log.trace(e.toString()); }
                 }
             }
-            catch(Exception e) { if(Code.verbose())Code.debug(e.toString()); }
+            catch(Exception e) { if(log.isTraceEnabled())log.trace(e.toString()); }
 
             lookIn=lookIn.getSuperclass();
         }
@@ -993,9 +998,9 @@ public class ModelMBeanImpl
         if (_objectName==null)
         {
             try{oName=newObjectName(server);}
-            catch(Exception e){Code.warning(e);}
+            catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
         }
-        Code.debug("preRegister ",_objectName," -> ",oName);
+        if(log.isDebugEnabled())log.debug("preRegister "+_objectName+" -> "+oName);
         _objectName=oName;
 
         return _objectName;
@@ -1006,7 +1011,7 @@ public class ModelMBeanImpl
     public void postRegister(Boolean ok)
     {
         if (ok.booleanValue())
-            Log.event("Registered "+_objectName);
+            log.info("Registered "+_objectName);
         else
         {
             _mBeanServer=null;
@@ -1017,7 +1022,7 @@ public class ModelMBeanImpl
     /* ------------------------------------------------------------ */
     public void preDeregister()
     {
-        Log.event("Deregister "+_objectName);
+        log.info("Deregister "+_objectName);
         getComponentMBeans(null,_components);
         _components.clear();
     }
@@ -1108,8 +1113,7 @@ public class ModelMBeanImpl
         }
         catch(Exception e)
         {
-            e.printStackTrace();
-            Log.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
 
         return oName;
@@ -1145,7 +1149,7 @@ public class ModelMBeanImpl
                 {
                     ModelMBean mbean = mbeanFor(components[i]);
                     if (mbean==null)
-                        Code.warning("No mbean for "+components[i]);
+                        log.warn("No mbean for "+components[i]);
                     else
                     {
                         try
@@ -1166,7 +1170,7 @@ public class ModelMBeanImpl
                         }
                         catch (Exception e)
                         {
-                            Code.warning(e);
+                            log.warn(LogSupport.EXCEPTION,e);
                         }
                     }
                 }
@@ -1196,7 +1200,7 @@ public class ModelMBeanImpl
             for (;d-->0;)
             {
                 try{getMBeanServer().unregisterMBean((ObjectName)map.remove(to_delete[d]));}
-                catch (Exception e) {Code.warning(e);}
+                catch (Exception e) {log.warn(LogSupport.EXCEPTION,e);}
             }
         }
         

@@ -7,13 +7,15 @@ package org.mortbay.http.handler;
 
 import java.io.IOException;
 import java.io.OutputStream;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.util.ByteArrayISO8859Writer;
-import org.mortbay.util.Code;
 
 /* ------------------------------------------------------------ */
 /** Base HTTP Handler.
@@ -24,6 +26,8 @@ import org.mortbay.util.Code;
  */
 abstract public class AbstractHttpHandler implements HttpHandler
 {
+    private static Log log = LogFactory.getLog(AbstractHttpHandler.class);
+
     /* ----------------------------------------------------------------- */
     private String _name;
     
@@ -43,7 +47,7 @@ abstract public class AbstractHttpHandler implements HttpHandler
         if (_name==null)
         {
             _name=this.getClass().getName();
-            if (!Code.debug())
+            if (!log.isDebugEnabled())
                 _name=_name.substring(_name.lastIndexOf('.')+1);
         }
         return _name;
@@ -75,7 +79,7 @@ abstract public class AbstractHttpHandler implements HttpHandler
         if (_context==null)
             throw new IllegalStateException("No context for "+this);        
         _started=true;
-        Code.debug("Started "+this);
+        if(log.isDebugEnabled())log.debug("Started "+this);
     }
     
     /* ----------------------------------------------------------------- */
@@ -83,7 +87,7 @@ abstract public class AbstractHttpHandler implements HttpHandler
         throws InterruptedException
     {
         _started=false;
-        Code.debug("Stopped "+this);
+        if(log.isDebugEnabled())log.debug("Stopped "+this);
     }
 
     /* ----------------------------------------------------------------- */

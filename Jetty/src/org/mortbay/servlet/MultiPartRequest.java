@@ -10,14 +10,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.StringTokenizer;
+
 import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpFields;
-import org.mortbay.util.Code;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringUtil;
-import java.util.List;
 
 /* ------------------------------------------------------------ */
 /** Multipart Form Data request.
@@ -39,6 +42,8 @@ import java.util.List;
  */
 public class MultiPartRequest
 {
+    private static Log log = LogFactory.getLog(MultiPartRequest.class);
+
     /* ------------------------------------------------------------ */
     HttpServletRequest _request;
     LineInput _in;
@@ -62,7 +67,7 @@ public class MultiPartRequest
         if (!content_type.startsWith("multipart/form-data"))
             throw new IOException("Not multipart/form-data request");
 
-        Code.debug("Multipart content type = ",content_type);
+        if(log.isDebugEnabled())log.debug("Multipart content type = "+content_type);
         
         _in = new LineInput(request.getInputStream());
         
@@ -70,7 +75,7 @@ public class MultiPartRequest
         _boundary="--"+
             value(content_type.substring(content_type.indexOf("boundary=")));
         
-        Code.debug("Boundary=",_boundary);
+        if(log.isDebugEnabled())log.debug("Boundary="+_boundary);
         _byteBoundary= (_boundary+"--").getBytes(StringUtil.__ISO_8859_1);
         
         loadAllParts();
@@ -209,7 +214,7 @@ public class MultiPartRequest
         String line = _in.readLine();
         if (!line.equals(_boundary))
         {
-            Code.warning(line);
+            log.warn(line);
             throw new IOException("Missing initial multi part boundary");
         }
         
@@ -226,7 +231,7 @@ public class MultiPartRequest
                 if (line.length()==0)
                     break;
 
-                Code.debug("LINE=",line);
+                if(log.isDebugEnabled())log.debug("LINE="+line);
                 
                 // place part header key and value in map
                 int c = line.indexOf(':',0);
@@ -236,7 +241,7 @@ public class MultiPartRequest
                     String value = line.substring(c+1,line.length()).trim();
                     String ev = (String) part._headers.get(key);
                     part._headers.put(key,(ev!=null)?(ev+';'+value):value);
-                    Code.debug(key,": ",value);
+                    if(log.isDebugEnabled())log.debug(key+": "+value);
                     if (key.equals("content-disposition"))
                         content_disposition=value;
                 }
@@ -266,16 +271,16 @@ public class MultiPartRequest
             // Check disposition
             if (!form_data)
             {
-                Code.warning("Non form-data part in multipart/form-data");
+                log.warn("Non form-data part in multipart/form-data");
                 continue;
             }
             if (part._name==null || part._name.length()==0)
             {
-                Code.warning("Part with no name in multipart/form-data");
+                log.warn("Part with no name in multipart/form-data");
                 continue;
             }
-            Code.debug("name=",part._name);
-            Code.debug("filename=",part._filename);
+            if(log.isDebugEnabled())log.debug("name="+part._name);
+            if(log.isDebugEnabled())log.debug("filename="+part._filename);
             _partMap.add(part._name,part);
             part._data=readBytes();
         }       
@@ -351,7 +356,7 @@ public class MultiPartRequest
             lf=(c==10 || _char==10);
             if (_char==10) _char=-2;  
         }
-        if (Code.verbose()) Code.debug(baos.toString());
+        if(log.isTraceEnabled())log.trace(baos.toString());
         return baos.toByteArray();
     }
     

@@ -9,6 +9,9 @@ import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /*-------------------------------------------------------------------*/
 /** Test Harness and report.
  * Test Harness for production of standard test reports:
@@ -37,6 +40,8 @@ import java.util.Vector;
  */
 public class TestCase
 {
+    private static Log log = LogFactory.getLog(TestCase.class);
+
     /*-------------------------------------------------------------------*/
     private static Vector tests = new Vector();
     private static final String fail = "FAIL";
@@ -56,7 +61,7 @@ public class TestCase
      */
     public TestCase(String testCase)
     {
-        Code.debug("Constructed test case: "+testCase);
+        if(log.isDebugEnabled())log.debug("Constructed test case: "+testCase);
         this.testCase=testCase;
         tests.addElement(this);
     }
@@ -71,13 +76,12 @@ public class TestCase
         if (!b)
         {
             reportBuf.append(testCase+" : "+check+" - ");
-            Frame frame = new Frame(1);
             passed=false;
-            reportBuf.append(fail + " at " + frame);
+            reportBuf.append(fail);
             reportBuf.append('\n');
             reportBuf.append(spaces,0,testCase.length()+3);
             reportBuf.append("check!=true");
-            Code.debug(check," FAILED");
+            if(log.isDebugEnabled())log.debug(check+" FAILED");
         }
         reportBuf.append('\n');
     }
@@ -121,9 +125,8 @@ public class TestCase
         else
         {
             reportBuf.append(testCase+" : "+check+" - ");
-            Frame frame = new Frame(2);
             passed=false;
-            reportBuf.append(fail + " at " + frame);
+            reportBuf.append(fail);
             reportBuf.append('\n');
             reportBuf.append(spaces,0,testCase.length()+3);
             reportBuf.append('"' + subString + "\" not contained in \"" );
@@ -133,7 +136,7 @@ public class TestCase
             else
                 reportBuf.append("string<offset:"+offset+":'"+string+"'");
             reportBuf.append("\"");
-            Code.debug(check," FAILED: ",reportBuf.toString());
+            if(log.isDebugEnabled())log.debug(check+" FAILED: "+reportBuf.toString());
             reportBuf.append('\n');
         }
         return index;
@@ -163,14 +166,13 @@ public class TestCase
                                  (index=string.indexOf(subString,offset))>=0)))
         {
             reportBuf.append(testCase+" : "+check+" - ");
-            Frame frame = new Frame(1);
             passed=false;
-            reportBuf.append(fail + " at " + frame);
+            reportBuf.append(fail);
             reportBuf.append('\n');
             reportBuf.append(spaces,0,testCase.length()+3);
             reportBuf.append('"' + subString + "\" IS contained in \"" +
                              string.substring(offset) + '"');
-            Code.debug(check," FAILED");
+            if(log.isDebugEnabled())log.debug(check+" FAILED");
             reportBuf.append('\n');
         }
         return index;
@@ -264,14 +266,13 @@ public class TestCase
         else
         {
             reportBuf.append(testCase+" : "+check+" - ");
-            Frame frame = new Frame(2);
             passed=false;
-            reportBuf.append(fail + " at " + frame);
+            reportBuf.append(fail);
             reportBuf.append('\n');
             reportBuf.append(spaces,0,testCase.length()+3);
             reportBuf.append(((o1!=null)?(o1.toString()):"null") + " != " +
                              ((o2!=null)?(o2.toString()):"null"));
-            Code.debug(3,check+" FAILED");
+            if(log.isDebugEnabled())log.debug(3+check+" FAILED");
             reportBuf.append('\n');
         }
     }

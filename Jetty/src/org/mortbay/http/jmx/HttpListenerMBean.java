@@ -6,6 +6,7 @@
 package org.mortbay.http.jmx;
 
 import javax.management.MBeanException;
+
 import org.mortbay.util.jmx.ThreadedServerMBean;
 
 /* ------------------------------------------------------------ */

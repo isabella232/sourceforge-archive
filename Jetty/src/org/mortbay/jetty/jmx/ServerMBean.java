@@ -6,13 +6,17 @@
 package org.mortbay.jetty.jmx;
 
 import java.io.IOException;
+
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.jmx.HttpServerMBean;
 import org.mortbay.jetty.Server;
-import org.mortbay.util.Code;
+import org.mortbay.util.LogSupport;
 
 /* ------------------------------------------------------------ */
 /** JettyServer MBean.
@@ -26,6 +30,8 @@ import org.mortbay.util.Code;
  */
 public class ServerMBean extends HttpServerMBean
 {
+    private static Log log = LogFactory.getLog(ServerMBean.class);
+
     private Server _jettyServer;
     private String _configuration;
 
@@ -117,7 +123,7 @@ public class ServerMBean extends HttpServerMBean
                 }
                 catch(Exception e)
                 {
-                    Code.warning(e);
+                    log.warn(LogSupport.EXCEPTION,e);
                 }
             }
         }

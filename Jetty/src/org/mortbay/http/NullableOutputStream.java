@@ -7,8 +7,11 @@ package org.mortbay.http;
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.ByteArrayISO8859Writer;
-import org.mortbay.util.Code;
+import org.mortbay.util.LogSupport;
 
 /* ------------------------------------------------------------ */
 /** Buffered Output Stream.
@@ -20,6 +23,8 @@ public class NullableOutputStream
     extends FilterOutputStream
     implements HttpMessage.HeaderWriter
 {
+    private static Log log = LogFactory.getLog(NullableOutputStream.class);
+
     private ByteArrayISO8859Writer _httpMessageWriter;
     private boolean _nulled=false;
     private boolean _closed=false;
@@ -78,7 +83,7 @@ public class NullableOutputStream
         if (_httpMessageWriter!=null)
             _httpMessageWriter.destroy();
         _httpMessageWriter=null;
-        try{out.close();} catch (Exception e){Code.warning(e);}
+        try{out.close();} catch (Exception e){log.warn(LogSupport.EXCEPTION,e);}
     }
     
     /* ------------------------------------------------------------ */

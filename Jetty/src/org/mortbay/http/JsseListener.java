@@ -12,16 +12,19 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
+
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.servlet.ServletSSL;
-import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
-import org.mortbay.util.Log;
+import org.mortbay.util.LogSupport;
 
 /* ------------------------------------------------------------ */
 /** JSSE Socket Listener.
@@ -40,6 +43,8 @@ import org.mortbay.util.Log;
  **/
 public abstract class JsseListener extends SocketListener
 {
+    private static Log log = LogFactory.getLog(JsseListener.class);
+
     /** String name of keystore location path property. */
     public static final String KEYSTORE_PROPERTY = "jetty.ssl.keystore";
     
@@ -169,7 +174,7 @@ public abstract class JsseListener extends SocketListener
             }
 
 	    socket.setNeedClientAuth(_needClientAuth);
-	    Log.event("JsseListener.needClientAuth=" + _needClientAuth);
+	    log.info("JsseListener.needClientAuth=" + _needClientAuth);
 	}
         catch (IOException e)
         {
@@ -177,7 +182,7 @@ public abstract class JsseListener extends SocketListener
         }
         catch( Exception e )
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw new IOException("Could not create JsseListener: "
 				  +e.toString());
         }
@@ -203,7 +208,7 @@ public abstract class JsseListener extends SocketListener
         }
         catch( SSLException e )
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw new IOException( e.getMessage() );
         }
     }
@@ -277,7 +282,7 @@ public abstract class JsseListener extends SocketListener
         }
         catch (Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
     }
 
@@ -322,7 +327,7 @@ public abstract class JsseListener extends SocketListener
 	} catch (SSLPeerUnverifiedException pue) {
 	    return null;
         } catch (Exception e) {
-	    Code.warning(e);
+	    log.warn(LogSupport.EXCEPTION,e);
             return null;
         }
     }

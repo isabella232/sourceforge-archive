@@ -10,12 +10,15 @@ import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
+
 import javax.servlet.http.Cookie;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.ByteArrayISO8859Writer;
-import org.mortbay.util.Code;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
-import org.mortbay.util.URI;
 import org.mortbay.util.UrlEncoded;
 
 
@@ -33,7 +36,9 @@ import org.mortbay.util.UrlEncoded;
  * @author Greg Wilkins (gregw)
  */
 public class HttpResponse extends HttpMessage
-{ 
+{
+    private static Log log = LogFactory.getLog(HttpResponse.class);
+ 
       public final static int
           __100_Continue = 100,
           __101_Switching_Protocols = 101,
@@ -110,7 +115,7 @@ public class HttpResponse extends HttpMessage
         }
         catch (Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
     }
     
@@ -121,7 +126,7 @@ public class HttpResponse extends HttpMessage
         try{
             __Continue="HTTP/1.1 100 Continue\015\012\015\012".getBytes(StringUtil.__ISO_8859_1);
         }
-        catch (Exception e){Code.fail(e);}
+        catch (Exception e){log.fatal(e); System.exit(1);}
     }
     
     /* -------------------------------------------------------------- */
@@ -199,7 +204,7 @@ public class HttpResponse extends HttpMessage
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw new IllegalStateException(e.toString());
         }
     }
@@ -235,7 +240,7 @@ public class HttpResponse extends HttpMessage
         throws IOException
     {
         _state=__MSG_BAD;
-        Code.notImplemented();
+        log.warn(LogSupport.NOT_IMPLEMENTED);
     }
     
     

@@ -10,6 +10,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
 import java.util.TimeZone;
+
 import junit.framework.TestSuite;
 
 
@@ -126,64 +127,6 @@ public class Tests extends junit.framework.TestCase
             String s3=dc.format(System.currentTimeMillis());
             assertTrue(s1==s2 || s2==s3);
     }
-
-    /* ------------------------------------------------------------ */
-    private void testFrameChecker(Frame f, String desc,
-                                  String method, int depth,
-                                  String thread, String file)
-    {
-        checkContains(desc+": method", f.getStack(),  method);
-        assertEquals( desc+": depth",     f.getDepth(),  depth);
-        assertEquals( desc+": thread", thread,    f.getThread());
-        if (file!=null)
-            checkContains(desc+": file",   f.getFile(),   file);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void testFrame()
-    {
-        callFrame();
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void callFrame()
-    {
-        Frame f = new Frame();
-        int depth = f.getDepth();
-        testFrameChecker(f, "method",
-                         "org.mortbay.util.Tests.callFrame",
-                         depth, "main", "Tests.java");
-
-        f = f.getParent();
-        testFrameChecker(f, "getParent",
-                         "org.mortbay.util.Tests.testFrame",
-                         depth-1, "main", "Tests.java");
-
-        f = new Frame(0);
-        testFrameChecker(f, "new Frame(0)",
-                         "org.mortbay.util.Tests.callFrame",
-                         depth, "main", "Tests.java");
-
-        f = new Frame(1);
-        testFrameChecker(f, "new Frame(1)",
-                         "org.mortbay.util.Tests.testFrame",
-                         depth-1, "main", "Tests.java");
-
-        f = new Frame(2);
-        testFrameChecker(f, "new Frame(2)",
-                         "java.lang.reflect.Method.invoke",
-                         depth-2, "main", null);
-
-        f = new Frame(1, true);
-        testFrameChecker(f, "partial",
-                         "callFrame", 0, "unknownThread", null);
-
-        f.complete();
-        testFrameChecker(f, "complete",
-                         "org.mortbay.util.Tests.testFrame",
-                         depth-1, "main", "Tests.java");
-    }
-
 
 
     /* ------------------------------------------------------------ */

@@ -6,15 +6,19 @@
 package org.mortbay.http.jmx;
 
 import java.util.HashMap;
+
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.ObjectName;
 import javax.management.modelmbean.InvalidTargetObjectTypeException;
 import javax.management.modelmbean.ModelMBean;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpServer;
 import org.mortbay.http.Version;
 import org.mortbay.http.HttpServer.ComponentEvent;
-import org.mortbay.util.Code;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.jmx.LifeCycleMBean;
 import org.mortbay.util.jmx.ModelMBeanImpl;
 
@@ -31,6 +35,8 @@ import org.mortbay.util.jmx.ModelMBeanImpl;
 public class HttpServerMBean extends LifeCycleMBean
     implements HttpServer.ComponentEventListener
 {
+    private static Log log = LogFactory.getLog(HttpServerMBean.class);
+
     private HttpServer _httpServer;
     private HashMap _mbeanMap = new HashMap();
 
@@ -45,7 +51,7 @@ public class HttpServerMBean extends LifeCycleMBean
         _httpServer=httpServer;
         _httpServer.addEventListener(this);
         try{super.setManagedResource(_httpServer,"objectReference");}
-        catch(InvalidTargetObjectTypeException e){Code.warning(e);}
+        catch(InvalidTargetObjectTypeException e){log.warn(LogSupport.EXCEPTION,e);}
     }
 
     /* ------------------------------------------------------------ */
@@ -120,12 +126,12 @@ public class HttpServerMBean extends LifeCycleMBean
     {
         try
         {
-            Code.debug("Component added ",event);
+            if(log.isDebugEnabled())log.debug("Component added "+event);
             Object o=event.getComponent();
             
             ModelMBean mbean=ModelMBeanImpl.mbeanFor(o);
             if (mbean==null)
-                Code.warning("No MBean for "+o);
+                log.warn("No MBean for "+o);
             else
             {
                 ObjectName oName=null;
@@ -149,7 +155,7 @@ public class HttpServerMBean extends LifeCycleMBean
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
     }
 
@@ -174,7 +180,7 @@ public class HttpServerMBean extends LifeCycleMBean
     /* ------------------------------------------------------------ */
     public synchronized void removeComponent(ComponentEvent event)
     {
-        Code.debug("Component removed ",event);
+        if(log.isDebugEnabled())log.debug("Component removed "+event);
         
         try
         {
@@ -187,7 +193,7 @@ public class HttpServerMBean extends LifeCycleMBean
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            log.warn(LogSupport.EXCEPTION,e);
         }
     }
     

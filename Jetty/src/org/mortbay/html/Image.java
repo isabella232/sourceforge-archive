@@ -7,7 +7,10 @@ package org.mortbay.html;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import org.mortbay.util.Code;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.mortbay.util.LogSupport;
 
 /* ---------------------------------------------------------------- */
 /** HTML Image Tag.
@@ -17,6 +20,8 @@ import org.mortbay.util.Code;
 */
 public class Image extends Tag
 {
+    private static Log log = LogFactory.getLog(Image.class);
+
     /* ------------------------------------------------------------ */
     public Image(String src)
     {
@@ -101,7 +106,7 @@ public class Image extends Tag
                 FileInputStream in = new FileInputStream(gif);
                 if (in.read(buf,0,10)==10)
                 {
-                    Code.debug("Image "+gif.getName()+
+                    if(log.isDebugEnabled())log.debug("Image "+gif.getName()+
                                " is " +
                                ((0x00ff&buf[7])*256+(0x00ff&buf[6])) +
                                " x " +
@@ -111,7 +116,7 @@ public class Image extends Tag
                 }
             }
             catch (IOException e){
-                Code.ignore(e);
+                log.trace(LogSupport.IGNORED,e);
             }
         }
         

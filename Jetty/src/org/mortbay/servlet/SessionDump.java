@@ -8,15 +8,19 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.Date;
 import java.util.Enumeration;
+
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.mortbay.html.Page;
 import org.mortbay.html.TableForm;
-import org.mortbay.util.Code;
+import org.mortbay.util.LogSupport;
 
 
 /* ------------------------------------------------------------ */
@@ -27,6 +31,8 @@ import org.mortbay.util.Code;
  */
 public class SessionDump extends HttpServlet
 {
+    private static Log log = LogFactory.getLog(SessionDump.class);
+
     int redirectCount=0;
     /* ------------------------------------------------------------ */
     String pageType;
@@ -69,7 +75,7 @@ public class SessionDump extends HttpServlet
                 }
                 catch(Exception e)
                 {
-                    Code.ignore(e);
+                    log.trace(LogSupport.IGNORED,e);
                 }
             }
             else if (action.equals("Remove"))
@@ -143,7 +149,7 @@ public class SessionDump extends HttpServlet
             }
             catch (IllegalStateException e)
             {
-                Code.debug(e);
+                log.debug(LogSupport.EXCEPTION,e);
                 page.add("<H1>INVALID Session</H1>");
                 tf=new TableForm(request.getRequestURI());
                 tf.addButton("Action","New Session");

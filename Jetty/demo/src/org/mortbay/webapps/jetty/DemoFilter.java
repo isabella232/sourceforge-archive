@@ -13,15 +13,18 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import org.mortbay.util.Code;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /* ------------------------------------------------------------ */
 public  class DemoFilter implements Filter
 {
+    private static Log log = LogFactory.getLog(DemoFilter.class);
+
     public void init(FilterConfig filterConfig)
         throws ServletException
     {
-        Code.debug("init:",filterConfig);
+        if(log.isDebugEnabled())log.debug("init:"+filterConfig);
     }
 
     /* ------------------------------------------------------------ */
@@ -30,7 +33,7 @@ public  class DemoFilter implements Filter
                          FilterChain chain)
 	throws IOException, ServletException
     {
-        Code.debug("doFilter:",request);
+        if(log.isDebugEnabled())log.debug("doFilter:"+request);
         synchronized(this)
         {
             Integer called = (Integer)request.getAttribute("DemoFilter called");
@@ -45,7 +48,7 @@ public  class DemoFilter implements Filter
 
     public void destroy()
     {
-        Code.debug("destroy");
+        log.debug("destroy");
     }
 }
 
