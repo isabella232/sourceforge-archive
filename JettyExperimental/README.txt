@@ -23,11 +23,13 @@ Very little doco at the moment, but the things you need to know are:
 
  + You can run it with
 
-    java -classpath target/jetty-EXP0.jar org.mortbay.http.HttpServer
+    java -classpath target/jetty-EXP0.jar org.mortbay.http.nio.SocketChannelListener
+   or
+    java -classpath target/jetty-EXP0.jar org.mortbay.http.bio.SocketListener
 
 
  + The HttpServer is nailed to port 8080 and just does a simple
-   dump.
+   dump or serves a static files from the current directory.
 
  + Most of RFC2616 is covered and the server handles HTTP 0.9, 1.0
    and 1.1 requests in persistent and non-persistent forms.
@@ -38,15 +40,8 @@ Very little doco at the moment, but the things you need to know are:
 TODO:
 
  + Lots more javadoc
- + NIO implementation of Buffers.
- + Optional of DirectBuffers for constants and memory buffers.
- + Buffer bypass handling so that large writes can be written directly
- + Proper threadpool or equiv
- + Move more behaviour from blocking HttpConnection to HttpInput and HttpOutput
- + Nonblocking implementations of HttpInput, HttpOutput and HttpConnection.
  + A Connector architecture (same as Jetty)
  + A Handler architecture (probably nested as with tomcat)
  + A resource handler
  + Contentlets
- + Benchmarking
 
