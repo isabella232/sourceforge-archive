@@ -29,8 +29,7 @@ import java.util.TimeZone;
  * 
  * <p> If the property LOG_DATE_FORMAT is set, then it is interpreted
  * as a format string for java.text.SimpleDateFormat and used to
- * format the log timestamps. Note: The character '+' is replaced with
- * space in the date format string. Default value: HH:mm:ss.SSS
+ * format the log timestamps. Default value: HH:mm:ss.SSS
  *
  * <p> If LOG_TIMEZONE is set, it is used to set the timezone of the log date
  * format, otherwise GMT is used.
@@ -63,7 +62,7 @@ public class OutputStreamLogSink
     private int _retainDays =Integer.getInteger("LOG_FILE_RETAIN_DAYS",31).intValue();
     
     protected DateCache _dateFormat=
-        new DateCache(System.getProperty("LOG_DATE_FORMAT","HH:mm:ss.SSS "));
+        new DateCache(System.getProperty("LOG_DATE_FORMAT","HH:mm:ss.SSS"));
     protected String _logTimezone=
 	System.getProperty("LOG_TIME_ZONE");    
     {
@@ -161,7 +160,6 @@ public class OutputStreamLogSink
     /* ------------------------------------------------------------ */
     public void setLogDateFormat(String logDateFormat)
     {
-        logDateFormat = logDateFormat.replace('+',' ');
         _dateFormat = new DateCache(logDateFormat);
         if (_logTimezone!=null)
             _dateFormat.getFormat().setTimeZone(TimeZone.getTimeZone(_logTimezone));
@@ -390,7 +388,11 @@ public class OutputStreamLogSink
         {
             // Log the time stamp
             if (_logTimeStamps)
+            {
                 _buffer.write(_dateFormat.format(time));
+                _buffer.write(' ');
+            }
+            
             
             // Log the tag
             if (_logTags)
@@ -405,7 +407,10 @@ public class OutputStreamLogSink
             // Log the stack depth.
             if (_logStackSize && frame != null)
             {
-                _buffer.write(((frame.getDepth()>9)?"":"0")+frame.getDepth()+"> ");
+                if (frame.getDepth()<10)    
+                    _buffer.write('0');
+                _buffer.write(Integer.toString(frame.getDepth()));  
+                _buffer.write("> ");
             }
             
             // Determine the indent string for the message and append it
