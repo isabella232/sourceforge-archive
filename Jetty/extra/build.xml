@@ -82,6 +82,32 @@ Other targets:
 
 
   <!-- ==================================================================== -->
+  <!-- Tidy                                                                -->
+  <!-- ==================================================================== -->
+  <target name="tidy" depends="tidy.plus,tidy.loadbalancer,tidy.ftp,tidy.jdk1.2">
+  </target>
+
+  <target name="tidy.plus">
+    <ant antfile="${plus}/build.xml" inheritAll="false" target="tidy"/>
+  </target>
+
+  <target name="tidy.loadbalancer">
+    <ant antfile="${loadbalancer}/build.xml" inheritAll="false" target="tidy"/>
+  </target>
+
+  <target name="tidy.ftp">
+    <ant antfile="${ftp}/build.xml" inheritAll="false" target="tidy"/>
+  </target>
+
+  <target name="tidy.jdk1.2">
+    <ant antfile="${jdk1.2}/build.xml" inheritAll="false" target="tidy"/>
+  </target>
+
+  <target name="tidy.ibmjsse">
+    <ant antfile="${ibmjsse}/build.xml" inheritAll="false" target="tidy"/>
+  </target>
+
+  <!-- ==================================================================== -->
   <!-- Clean                                                                -->
   <!-- ==================================================================== -->
   <target name="clean" depends="clean.plus,clean.loadbalancer,clean.ftp,clean.jdk1.2">

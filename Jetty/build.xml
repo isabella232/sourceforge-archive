@@ -126,7 +126,7 @@
     <delete dir="${test.classes}" quiet="true"/>
     <delete file="${mini.http.jar}" quiet="true"/>
     <ant antfile="${test}/build.xml" inheritAll="false" target="tidy"/>
-  
+    <ant antfile="${extra}/build.xml" inheritAll="false" target="tidy"/>
   </target>
   
 
@@ -161,6 +161,7 @@
       </fileset>
     </delete>
     <ant antfile="${test}/build.xml" inheritAll="false" target="clean"/>
+    <ant antfile="${extra}/build.xml" inheritAll="false" target="clean"/>
   </target>
 
 
@@ -171,7 +172,6 @@
     <mkdir dir="${classes}" />
     <copy todir="${classes}">
       <fileset dir="${src}">
-        <include name="**/defaultManifest.mf" />
         <include name="**/*.properties" />
         <include name="**/*.dtd" />
         <include name="**/*.xml" />
@@ -218,27 +218,13 @@
 
 
   <!-- ==================================================================== -->
-  <target name="manifest" depends="classes">
-    <copy todir="${classes}">
-      <fileset dir="${src}">
-        <include name="**/MANIFEST.MF" />
-      </fileset>
-    </copy>
-    <replace dir="${classes}">
-      <include name="**/MANIFEST.MF" />
-      <replacefilter token="RELEASE_MAJOR_MINOR" value="${RELEASE.MAJOR.MINOR}" />
-      <replacefilter token="RELEASE_MAJOR" value="${RELEASE.MAJOR}" />
-    </replace>
-  </target>
-
-
-  <!-- ==================================================================== -->
-  <target name="start.jar" depends="classes,manifest">
-    <jar jarfile="${start.jar}" basedir="${classes}" 
-     manifest="${classes}/org/mortbay/start/MANIFEST.MF" >
+  <target name="start.jar" depends="classes">
+    <jar jarfile="${start.jar}" basedir="${classes}"  >
+       <manifest>    
+         <attribute name="Main-Class" value="org.mortbay.start.Main"/>
+       </manifest>    
        <include name="org/mortbay/start/**" />
        <exclude name="**/jmx/**" />
-       <exclude name="**/MANIFEST.MF" />
     </jar>
   </target>
   
@@ -251,23 +237,50 @@
 
 
   <!-- ==================================================================== -->
-  <target name="jetty.jar" depends="classes,servlet.jar,manifest" >
-    <jar jarfile="${jetty.jar}" manifest="${classes}/org/mortbay/jetty/MANIFEST.MF">
+  <target name="jetty.jar" depends="classes,servlet.jar" >
+    <jar jarfile="${jetty.jar}">
+       <manifest>    
+         <attribute name="Sealed" value="true"/>
+         <attribute name="Built-By" value="${user.name}"/>
+         <attribute name="Specification-Version" value="${RELEASE.MAJOR}"/>
+         <attribute name="Implementation-Version" value="${RELEASE.MAJOR.MINOR}"/>
+         <attribute name="Package-Title" value="org.mortbay.http"/>
+         <attribute name="Implementation-Vendor" value="Mort Bay Consulting, Pty. Ltd."/>
+         <attribute name="Implementation-URL" value="http://jetty.mortbay.org"/>
+         <attribute name="Main-Class" value="org.mortbay.http.HttpServer"/>
+
+         <section name="org/mortbay/jetty/">
+           <attribute name="Specification-Title" value="Servlet/2.3"/>
+           <attribute name="Implementation-Title" value="Jetty/${RELEASE.MAJOR}"/>
+         </section>
+
+         <section name="org/mortbay/http/">
+           <attribute name="Implementation-Title" value="Mort Bay HTTP Server"/>
+         </section>
+
+         <section name="org/mortbay/util/">
+           <attribute name="Implementation-Title" value="Mort Bay Misc. Utilities"/>
+         </section>
+
+       </manifest>
+
        <fileset dir="${classes}">
          <include name="org/mortbay/**"/>
          <exclude name="org/mortbay/start/**" />
          <exclude name="**/jmx/**" />
-         <exclude name="**/MANIFEST.MF" />
        </fileset>
     </jar>
   </target>
 
 
   <!-- ==================================================================== -->
-  <target name="mortbay.jmx.jar" depends="classes,manifest">
+  <target name="mortbay.jmx.jar" depends="classes">
     <copy file="${src}/org/mortbay/jetty/jmx/demo.mlet" tofile="${etc}/demo.mlet" />
-    <jar jarfile="${mortbay.jmx.jar}"
-     manifest="${classes}/org/mortbay/util/jmx/MANIFEST.MF">
+    <jar jarfile="${mortbay.jmx.jar}">
+       <manifest>    
+         <attribute name="Main-Class" value="org.mortbay.util.jmx.Main"/>
+         <attribute name="Class-Path" value="org.mortbay.jetty.jar org.mortbay.jetty.jar ../ext/jmxri.jar ../ext/jmxtools.jar"/>
+       </manifest>    
        <fileset dir="${classes}">
          <include name="org/mortbay/**/jmx/**"/>
        </fileset>
@@ -275,11 +288,9 @@
   </target>
 
   <!-- ==================================================================== -->
-  <target name="mini.http.jar" depends="classes,manifest"
+  <target name="mini.http.jar" depends="classes"
      description="Builds minimal dynmaic http server">
-    <jar jarfile="${mini.http.jar}" basedir="${classes}" 
-     manifest="${classes}/org/mortbay/http/MANIFEST.MF"
-     compress="true">
+    <jar jarfile="${mini.http.jar}" basedir="${classes}" compress="true">
        <include name="org/mortbay/util/*" />
        <include name="org/mortbay/http/*" />
        <include name="org/mortbay/http/handler/AbstractHttpHandler.class" />
@@ -294,7 +305,6 @@
        <exclude name="org/mortbay/util/Converter" />
        <exclude name="org/mortbay/util/KeyPairTool.class" />
        <exclude name="org/mortbay/util/TestCase.class" />
-       <exclude name="**/MANIFEST.MF" />
        <exclude name="**/jmx" />
        <exclude name="**/ajp" />
        <exclude name="org/mortbay/start/**" />
@@ -317,7 +327,6 @@
   <target name="webapp.jetty" depends="jars" if="demo.available">
     <copy todir="${jetty.webapp.classes}">
       <fileset dir="${demo.src}">
-        <include name="**/defaultManifest.mf" />
         <include name="**/*.properties" />
       </fileset>
     </copy>
@@ -375,7 +384,6 @@
    description="Build the javadoc">
     <mkdir dir="${javadoc}"/>
     <javadoc packagenames="org.mortbay.*,javax.servlet.*"
-             sourcepath="${src};${contrib}/src;${extra}/*/src"
              destdir="${javadoc}"
              author="true"
              version="true"
@@ -383,7 +391,20 @@
              windowtitle="${ant.project.name} API"
              doctitle="${ant.project.name}"
              bottom="Copyright &#169; 2000 Mortbay Consulting Pty. Ltd. All Rights Reserved.">
-       <classpath refid="classpath" />
+       <classpath>
+         <path refid="classpath"/> 
+         <fileset dir="${extra}">
+            <include name="*/classes"/>
+            <exclude name="jdk1.2/classes"/>
+         </fileset>
+       </classpath>
+       <sourcepath>
+         <pathelement path="${src}"/>  
+         <pathelement path="${extra}/plus/src"/> 
+         <pathelement path="${extra}/ibmjsse/src"/> 
+         <pathelement path="${extra}/loadbalancer/src"/>  
+         <pathelement path="${extra}/ftp/src"/>  
+       </sourcepath>
     </javadoc>
   </target>
 
