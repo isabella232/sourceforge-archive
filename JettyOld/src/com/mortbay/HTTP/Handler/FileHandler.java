@@ -6,7 +6,6 @@
 package com.mortbay.HTTP.Handler;
 import com.mortbay.Base.*;
 import com.mortbay.HTTP.*;
-import com.mortbay.HTML.*;
 import java.io.*;
 import java.util.*;
 import javax.servlet.http.*;
@@ -425,16 +424,21 @@ public class FileHandler extends NullHandler
 	}
 	
 	String title = "Directory: "+base;
-	
-	Page page = new Page(title);
-	page.add(new Heading(1,title));
-	Table table = new Table(0);
-	page.add(table);
 
+	PrintWriter out=response.getWriter();
+
+	out.print("<HTML><HEAD><TITLE>");
+	out.print(title);
+	out.print("</TITLE></HEAD><BODY>\n<H1>");
+	out.print(title);
+	out.print("</H1><TABLE BORDER=0>");
+	
 	if (parent)
 	{
-	    table.newRow();
-	    table.addCell(new Link(base+"../","Parent Directory"));
+	    out.print("<TR><TD><A HREF=");
+	    out.print(base);
+	    out.print("../>Parent Directory</A></TD><TD></TD><TD></TD></TR>\n");
+	    
 	}
 	
 	DateFormat dfmt=DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
@@ -443,16 +447,22 @@ public class FileHandler extends NullHandler
 	for (int i=0 ; i< ls.length ; i++)
 	{
 	    File item = new File(file.getPath()+File.separator+ls[i]);
-	    table.newRow();
+	    out.print("<TR><TD><A HREF=");
 	    String uri=base+ls[i];
 	    if (item.isDirectory())
 		uri+="/";
-	    table.addCell(new Link(uri,ls[i])+"&nbsp;");
-	    table.addCell(item.length()+" bytes&nbsp;").cell().right();
-	    table.addCell(dfmt.format(new Date(item.lastModified())));
+	    out.print(uri);
+	    out.print(">");
+	    out.print(ls[i]);
+	    out.print("&nbsp;");
+	    out.print("</TD><TD ALIGN=right>");
+	    out.print(item.length());
+	    out.print(" bytes&nbsp;</TD><TD>");
+	    out.print(dfmt.format(new Date(item.lastModified())));
+	    out.print("</TD></TR>\n");
 	}
-	
-	page.write(response.getOutputStream());
+	out.println("</TABLE>");
+	out.flush();
     }
 }
 

@@ -6,7 +6,6 @@
 package com.mortbay.HTTP.Handler;
 import com.mortbay.Base.*;
 import com.mortbay.HTTP.*;
-import com.mortbay.HTML.*;
 import com.mortbay.Util.*;
 import com.mortbay.FTP.*;
 import java.io.*;

@@ -5,7 +5,6 @@
 
 package com.mortbay.HTTP;
 import com.mortbay.Util.*;
-import com.mortbay.HTML.*;
 import java.net.*;
 
 

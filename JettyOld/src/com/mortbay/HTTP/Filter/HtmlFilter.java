@@ -7,7 +7,6 @@ package com.mortbay.HTTP.Filter;
 import com.mortbay.HTTP.HTML.*;
 import com.mortbay.Base.*;
 import com.mortbay.HTTP.*;
-import com.mortbay.HTML.*;
 import com.mortbay.Util.*;
 import java.io.*;
 import java.util.*;

@@ -7,8 +7,6 @@ package com.mortbay.HTTP.Configure;
 
 import com.mortbay.Base.*;
 import com.mortbay.Util.*;
-import com.mortbay.Servlets.*;
-import com.mortbay.HTML.*;
 import com.mortbay.HTTP.*;
 import com.mortbay.HTTP.Handler.*;
 import java.io.*;

@@ -6,7 +6,6 @@
 package com.mortbay.HTTP.Handler;
 import com.mortbay.Base.*;
 import com.mortbay.HTTP.*;
-import com.mortbay.HTML.*;
 import java.io.*;
 import java.util.*;
 import javax.servlet.http.*;
