@@ -118,7 +118,7 @@ main.root.NotFound.CLASS		  : com.mortbay.HTTP.Handler.NotFoundHandler
 # PATHS           - List of PathMap path specifiactions for each stack
 # name.CLASS      - The classname for the handler "name"
 # ------------------------------------------------------------------------
-main.defaultEx.PATHS			  : /servlets;/Jetty
+main.defaultEx.PATHS			  : /servlet;/Jetty
 main.defaultEx.HANDLERS			  : DefaultEx
 main.defaultEx.DefaultEx.CLASS		  : com.mortbay.HTTP.Handler.DefaultExceptionHandler
 main.terseEx.PATHS			  : /
