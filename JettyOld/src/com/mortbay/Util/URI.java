@@ -49,6 +49,8 @@ public class URI
 		    Code.ignore(e);
 		}
 	    }
+	    else
+		path=uri.substring(0,q);
 	}
     }
     

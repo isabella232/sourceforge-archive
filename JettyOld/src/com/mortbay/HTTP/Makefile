@@ -11,7 +11,7 @@ rall: all
 
 #JAVAOPTIONS := 
 #JAVACOPTIONS :=
-TESTS := Cookies.java HttpTests.java
+TESTS := HttpTests.java
 ROOTNAME := com
 BINFILES := 
 CFGFILES := 

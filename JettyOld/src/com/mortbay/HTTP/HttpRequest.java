@@ -105,59 +105,17 @@ public class HttpRequest extends HttpHeader
 	this.address=address;
 
 	// Decode request header
-	requestLine=in.readLine();
-	if (requestLine==null)
+	com.mortbay.HTTP.HttpInputStream$CharBuffer cb = in.readCharBufferLine();
+	if (cb==null)
 	    throw new IOException("EOF");
-	requestLine.trim();
-	try{
-	    int s1=requestLine.indexOf(' ',0);
-	    method = requestLine.substring(0,s1);
-	    requestURI = requestLine.substring(s1+1).trim();
+	decodeRequestLine(cb.chars,cb.size);
 	
-	    int s2=requestURI.lastIndexOf(' ');
-	    if (s2>0)
-	    {
-		version = requestURI.substring(s2+1).toUpperCase().trim();
-		requestURI = requestURI.substring(0,s2);
-	    }
-	}
-	catch(Exception e)
-	{
-	    Code.ignore(e);
-	    if (requestURI==null)
-		requestURI="/";
-	}
-
-	// handle full URL
-	if (!requestURI.startsWith("/"))
-	{
-	    int slash = requestURI.indexOf("//");
-	    if (slash<0)
-		slash=0;
-	    else
-		slash+=2;
-	    if (slash<requestURI.length())
-	    {
-		slash=requestURI.indexOf("/",slash);
-		if (slash>0)
-		{
-		    protocolHostPort=requestURI.substring(0,slash);
-		    requestURI=requestURI.substring(slash);
-		}
-	    }
-	}
-	if (protocolHostPort==null)
-	    protocolHostPort="";
-
 	// Build URI
 	uri = new URI(requestURI);
 	pathInfo=uri.getPath();
 
 	// Handle version
-	if (version==null || !version.startsWith("HTTP/"))
-	    // fix missing or corrupt version
-	    version=HttpHeader.HTTP_1_0;
-	else if (HTTP_1_1.equals(version))
+	if (HTTP_1_1.equals(version))
 	{
 	    // reset HTTP/1.1 version for faster matching
 	    version=HTTP_1_1;
@@ -990,6 +948,134 @@ public class HttpRequest extends HttpHeader
 	Code.notImplemented();
 	return null;
     }
+
+    /* -------------------------------------------------------------- */
+    void decodeRequestLine(char[] buf,int len)
+	throws IOException
+    {
+	// Search for first space separated chunk
+	int s1=-1,s2=-1,s3=-1;
+	int state=0;
+    startloop:
+	for (int i=0;i<len;i++)
+	{
+	    char c=buf[i];
+	    switch(state)
+	    {
+	      case 0: // leading white
+		  if (c==' ')
+		      continue;
+		  state=1;
+		  s1=i;
+		  
+	      case 1: // reading method
+		  if (c==' ')
+		      state=2;
+		  else
+		      s2=i;
+		  continue;
+		  
+	      case 2: // skip whitespace after method
+		  s3=i;
+		  if (c!=' ')
+		      break startloop;
+	    }
+	}
+
+	// Search for first space separated chunk
+	int e1=-1,e2=-1,e3=-1;
+	state=0;
+    endloop:
+	for (int i=len;i-->0;)
+	{
+	    char c=buf[i];
+	    switch(state)
+	    {
+	      case 0: // leading white
+		  if (c==' ')
+		      continue;
+		  state=1;
+		  e1=i;
+		  
+	      case 1: // reading method
+		  if (c==' ')
+		      state=2;
+		  else
+		      e2=i;
+		  continue;
+		  
+	      case 2: // skip whitespace after method
+		  e3=i;
+		  if (c!=' ')
+		      break endloop;
+	    }
+	}
+	
+	// Check sufficient params
+	if (s3<0 || e1<0 || e3<s2 )
+	    throw new IOException("Bad requestline");
+
+	// get method
+	method=new String(buf,s1,s2-s1+1);
+	
+	// get version
+	if (s2!=e3 || s3!=e2)
+	{
+	    for (int i=e1;i<=e2;i++)
+		if (buf[i]>'a'&&buf[i]<'z')
+		    buf[i]=(char)(buf[i]-'a'+'A');
+	    version=new String(buf,e2,e1-e2+1);
+	}
+	else
+	{
+	    // missing version
+	    version=HttpHeader.HTTP_1_0;
+	    e3=e1;
+	}
+
+	// rebuild requestline
+	StringBuffer rl = new StringBuffer();
+	rl.append(buf,s1,s2-s1+2);
+	rl.append(buf,s3,e3-s3+1);
+	rl.append(" ");
+	rl.append(version);
+	requestLine=rl.toString();
+
+	// handle requestURI
+	requestURI=null;
+	if (buf[s3]!='/')
+	{
+	    // look for //
+	    for (int i=s3;i<e3;i++)
+	    {
+		if (buf[i]=='/')
+		{
+		    if (buf[i+1]!='/')
+			break;
+
+		    // look for next /
+		    for (int j=i+2;j<=e3;j++)
+		    {
+			if (buf[j]=='/')
+			{
+			    protocolHostPort=new String(buf,s3,j-s3+1);
+			    requestURI=new String(buf,j,e3-j+1);
+			    break;
+			}
+		    }
+		    break;
+		}
+	    }
+	}
+	if (requestURI==null)
+	{
+	    protocolHostPort="";
+	    requestURI = new String(buf,s3,e3-s3+1);
+	}
+	
+	Code.debug(requestLine);
+    }
+    
 }
 
 	   

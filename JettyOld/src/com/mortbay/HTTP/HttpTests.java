@@ -36,7 +36,7 @@ public class HttpTests
     {
 	String h1 =
 	    "Content-Type: xyz" + CRLF +
-	    "I1: 42" + CRLF +
+	    "  I1  : 42   " + CRLF +
 	    "D1: Fri, 31 Dec 1999 23:59:59 GMT" + CRLF +
 	    "D2: Friday, 31-Dec-99 23:59:59 GMT" + CRLF +
 	    "D3: Fri Dec 31 23:59:59 1999" + CRLF +
@@ -161,6 +161,57 @@ public class HttpTests
 	}
     }
     
+    
+    /* --------------------------------------------------------------- */
+    public static void httpRequest()
+    {
+	Test test = new Test("com.mortbay.HTTP.HttpHeader");
+
+	String[] rl =
+	{
+	    "GET /xxx HTTP/1.0",          "GET", "/xxx",    "HTTP/1.0",
+	    " GET /xxx HTTP/1.0 ",        "GET", "/xxx",    "HTTP/1.0",
+	    "  PUT  /xxx  HTTP/1.1  ",    "PUT", "/xxx",    "HTTP/1.1",
+	    "  GET  /xxx   ",             "GET", "/xxx",    "HTTP/1.0",
+	    "GET  /xxx",                  "GET", "/xxx",    "HTTP/1.0",
+	    "  GET  /xxx   ",             "GET", "/xxx",    "HTTP/1.0",
+	    "GET / ",                     "GET", "/",       "HTTP/1.0",
+	    "GET /",                      "GET", "/",       "HTTP/1.0",
+	    "GET http://h:p/ HTTP/1.0",   "GET", "/",       "HTTP/1.0",
+	    "GET http://h:p/xx HTTP/1.0", "GET", "/xx",     "HTTP/1.0",
+	    "GET http HTTP/1.0",          "GET", "http",    "HTTP/1.0",
+	    "GET http://h:p/",            "GET", "/",       "HTTP/1.0",
+	    "GET http://h:p/xxx",         "GET", "/xxx",    "HTTP/1.0",
+	    "  GET     ",                 null,  null,      null,
+	    "GET",                        null,  null,      null,
+	    "",                           null,  null,      null,
+	};
+
+	HttpRequest r = new HttpRequest("GET","/");
+	
+	try{
+	    for (int i=0; i<rl.length ; i+=4)
+	    {
+		try{
+		    r.decodeRequestLine(rl[i].toCharArray(),rl[i].length());
+		    test.checkEquals(r.getMethod(),rl[i+1],rl[i]);
+		    test.checkEquals(r.getRequestURI(),rl[i+2],rl[i]);
+		    test.checkEquals(r.getVersion(),rl[i+3],rl[i]);
+		}
+		catch(IOException e)
+		{
+		    test.check(rl[i+1]==null,rl[i]);
+		}
+	    }
+	}
+	catch(Exception e)
+	{
+	    test.check(false,e.toString());
+	    Code.warning("failed",e);
+	}
+    }
+    
+	    
     /* -------------------------------------------------------------- */
     public static void chunkInTest()
 	throws Exception
@@ -260,8 +311,9 @@ public class HttpTests
     public static void main(String[] args)
     {
 	try{
-	    //pathMap();
-	    //httpHeader();
+	    pathMap();
+	    httpHeader();
+	    httpRequest();
 	    chunkInTest();
 	    chunkOutTest();
 	}

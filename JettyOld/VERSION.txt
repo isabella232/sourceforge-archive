@@ -5,6 +5,7 @@ Release 2.1.1 - n March 1999
   + Handle '.' in configured paths (temp fix until PropertyTrees)
   + Fast char buffer handling in HttpInputStream
   + Faster version of HttpHeader.read()
+  + Faster version of HttpRequest
 
 Release 2.1.0 - 22 February 1999
   + Session URL Encoding
