@@ -884,6 +884,14 @@ public class HttpContext implements LifeCycle,
             }
         }
 
+        if (type==null)
+        {
+            if (_mimeMap!=null)
+                type=(String)_mimeMap.get("*");
+             if (type==null)
+                 type=(String)__dftMimeMap.get("*");
+        }
+
         return type;
     }
 
