@@ -17,7 +17,6 @@ the Jetty 2 code base. The aims of the Jetty 3 developement include:
   + Utilize java collection classes for improved performance.
   + Improved coding standards and increasing test coverage.
 
-
 Currently the release contains the Utils package (with about half a 
 cleanup done) and the HTTP package. Work to date in the HTTP package 
 has concentrated on RFC2616 compliance, performance and testing.  
@@ -84,10 +83,10 @@ configured and started with:
    server.mapFiles(null,"/",".");
    server.mapHandler(null,"/",new DumpHandler());
    server.mapHandler(null,"/",new NotFoundHandler());
-   
+   server.addListener(new SocketListener(server,new InetAddrPort(8080)));
+
    // Start handlers and listener
-   server.startAllHandlers();
-   server.startListener(new InetAddrPort(8080));
+   server.startAll();
 
 
 Distribution
@@ -105,3 +104,12 @@ Mort Bay FTP site or the document vault of the jetty3-discuss egroups page:
 How to Contribute
 =================
 Comments, contributions, feedback, bugs, testing, etc. please....
+
+The mailing list for Jetty3 development can be subscribed to via
+  http://www.egroups.com/group/jetty3-discuss
+
+Other information can be obtained via
+  http://www.mortbay.com/software/Jetty.html
+
+A dedicated project host will soon be available at
+  http://jetty.mortbay.com

@@ -12,9 +12,9 @@ import java.io.*;
 
 /* ------------------------------------------------------------ */
 /** A HTTP Connection
- * This abstract class provides the generic HTTP handling for
- * a connection to a HTTP server. A concrete instance of HttpConnection
- * is normally created by a concrete HttpListener and then given control
+ * This class provides the generic HTTP handling for
+ * a connection to a HTTP server. An instance of HttpConnection
+ * is normally created by a HttpListener and then given control
  * in order to run the protocol handling before and after passing
  * a request to the HttpServer of the HttpListener.
  *
@@ -164,6 +164,8 @@ public class HttpConnection
      * connection.  The method only returns once all requests have been
      * handled, an error has been returned to the requestor or the
      * connection has been closed.
+     * The service(request,response) method is called by handle to
+     * service each request received on the connection.
      */
     public synchronized void handle()
     {
@@ -191,6 +193,26 @@ public class HttpConnection
                 Code.warning(e);
             }
         }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Service a Request.
+     * This implementation passes the request and response to the
+     * service method of the HttpServer for this connections listener.
+     * If no HttpServer has been associated, the 503 is returned.
+     * This method may be specialized to implement other ways of
+     * servicing a request.
+     * @param request The request
+     * @param response The response
+     * @exception HttpException 
+     * @exception IOException 
+     */
+    protected void service(HttpRequest request, HttpResponse response)
+        throws HttpException, IOException
+    {
+        if (getServer()==null)
+                throw new HttpException(response.__503_Service_Unavailable);
+        getServer().service(request,response);
     }
     
     /* ------------------------------------------------------------ */
@@ -311,10 +333,9 @@ public class HttpConnection
                            " Content-Length="+
                            _inputStream.getContentLength());
             
-            // Pass the request to the server
-            if (getServer()==null)
-                throw new HttpException(_response.__503_Service_Unavailable);
-            getServer().service(_request,_response);
+            // service the request
+            service(_request,_response);
+            
 
             // Complete the request
             if (_persistent)

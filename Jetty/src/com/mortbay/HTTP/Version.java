@@ -7,5 +7,5 @@ package com.mortbay.HTTP;
 
 public class Version
 {
-    final public static String __Version="Jetty3_0_AlphaX";
+    final public static String __Version="Jetty3_0_A3";
 };
