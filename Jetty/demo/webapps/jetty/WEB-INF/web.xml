@@ -36,7 +36,11 @@
     <servlet-name>Dump</servlet-name>
     <servlet-class>org.mortbay.servlet.Dump</servlet-class>
     <load-on-startup>0</load-on-startup>
-  </servlet>
+    <security-role-ref>
+      <role-name>dumpRole</role-name>
+      <role-link>server-administrator</role-link>
+    </security-role-ref>
+ </servlet>
 
   <servlet>
     <servlet-name>Dispatch</servlet-name>

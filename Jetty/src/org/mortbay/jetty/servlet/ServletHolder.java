@@ -163,6 +163,7 @@ public class ServletHolder extends Holder
     {
         if (_roleMap==null)
             _roleMap=new HashMap();
+        _roleMap.put(name,link);
     }
     
     /* ------------------------------------------------------------ */

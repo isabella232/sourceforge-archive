@@ -398,6 +398,8 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     public boolean isUserInRole(String role)
     {
+        if (_servletHolder!=null)
+            role=_servletHolder.getUserRoleLink(role);
         return _httpRequest.isUserInRole(role);
     }
 

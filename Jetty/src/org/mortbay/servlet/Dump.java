@@ -178,7 +178,11 @@ public class Dump extends HttpServlet
             table.addCell(""+request.getRemoteHost());            
             table.newRow();
             table.addHeading("getRequestedSessionId:&nbsp;").cell().right();
-            table.addCell(""+request.getRequestedSessionId());                                  
+            table.addCell(""+request.getRequestedSessionId());                                           
+            table.newRow();
+            table.addHeading("isUserInRole(dumpRole):&nbsp;").cell().right();
+            table.addCell(""+request.isUserInRole("dumpRole"));
+            
             table.newRow();
             table.addHeading("getLocale:&nbsp;").cell().right();
             table.addCell(""+request.getLocale());

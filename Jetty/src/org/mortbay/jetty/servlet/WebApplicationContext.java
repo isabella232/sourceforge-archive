@@ -924,8 +924,11 @@ public class WebApplicationContext
         {
             String roleName=securityRef.getString("role-name",false,true);
             String roleLink=securityRef.getString("role-link",false,true);
-            Code.debug("link role ",roleName," to ",roleLink," for ",this);
-            holder.setUserRoleLink(roleName,roleLink);
+            if (roleLink!=null && roleLink.length()>0)
+            {
+                Code.debug("link role ",roleName," to ",roleLink," for ",this);
+                holder.setUserRoleLink(roleName,roleLink);
+            }
         }
 
         XmlParser.Node run_as = node.get("run-as");
