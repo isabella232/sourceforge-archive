@@ -81,7 +81,7 @@ public class Log4jSink implements LogSink
 
         log.log("org.mortbay.util.Log4jSink",
                 priority,
-                msg.toString(),
+                ""+msg,
                 null);
     }
 

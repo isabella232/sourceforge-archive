@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.mortbay.util.Log;
+import org.mortbay.util.Code;
 
 /**
  * MailTest.java
@@ -43,6 +44,11 @@ public class MailTest extends HttpServlet
         try
         {
             InitialContext ctx = new InitialContext();
+
+            Object o = ctx.lookup ("java:comp/env/mail/TestMail");
+	    Log.event("o="+o);
+	    Log.event("o.class.classloader="+o.getClass().getClassLoader());
+	    Log.event("session.class.classloader="+Session.class.getClassLoader());
             Session session = (Session)ctx.lookup ("java:comp/env/mail/TestMail");
             
             // create a message
@@ -78,10 +84,10 @@ public class MailTest extends HttpServlet
 
             writer.write ("Congratulations, your test of the JettyPlus Mail Service succeeded. Your recipient should now have mail");
         }
-        catch (Exception e)
+        catch (Throwable e)
         {
-            Log.warning (e.getMessage());
-            writer.write ("<font color=red>Test failed: "+e.getMessage()+"</font>");
+            Code.warning (e);
+            writer.write ("<font color=red>Test failed: "+e+"</font>");
         }
 
         writer.write ("</BODY></HTML>");
