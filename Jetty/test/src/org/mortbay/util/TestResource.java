@@ -133,7 +133,7 @@ public class TestResource extends junit.framework.TestCase
         System.err.println("Rel  Dir="+__relDir);
         System.err.println("User URL="+__userURL);
 
-        tmpFile=File.createTempFile("test",null);
+        tmpFile=File.createTempFile("test",null).getCanonicalFile();
         tmpFile.deleteOnExit();
         
         data = new Data[50];
