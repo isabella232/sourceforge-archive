@@ -172,13 +172,7 @@ public class ServletHttpResponse implements HttpServletResponse
             _out=null;
         }
         else
-        {
             _outputState=s;
-            if (_writer!=null)
-                _writer.flush();
-            if (_out!=null)
-                _out.flush();
-        }
     }
     
     
@@ -538,6 +532,11 @@ public class ServletHttpResponse implements HttpServletResponse
                                    
         if (_outputState!=NO_OUT && _outputState!=WRITER_OUT)
             throw new IllegalStateException();
+
+        // If we are switching modes, flush output to try avoid overlaps.
+        if (_out!=null)
+            _out.flush();
+        
         /* if there is no writer yet */
         if (_writer==null)
         {
