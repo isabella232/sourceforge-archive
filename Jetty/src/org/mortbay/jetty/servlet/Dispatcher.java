@@ -163,7 +163,7 @@ public class Dispatcher implements RequestDispatcher
         DispatcherRequest request = new DispatcherRequest(httpServletRequest);
         DispatcherResponse response = new DispatcherResponse(httpServletResponse);
         
-        if (_include)
+        if (!_include)
             servletResponse.resetBuffer();
         
         // Merge parameters
@@ -475,7 +475,7 @@ public class Dispatcher implements RequestDispatcher
                 throw new IllegalStateException("getOutputStream called");
 
             if (_writer==null)
-            {
+            {                
                 try{_writer=super.getWriter();}
                 catch(IllegalStateException e)
                 {

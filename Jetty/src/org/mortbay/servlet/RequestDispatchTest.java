@@ -82,13 +82,8 @@ public class RequestDispatchTest extends HttpServlet
             if (System.currentTimeMillis()%2==0)
             {
                 PrintWriter pout=null;
-                if (info.startsWith("/null"))
-                    info=info.substring(5);
-                else
-                {
-                    pout = sres.getWriter();
-                    pout.write("<H1>Include: "+info+"</H1><HR>");
-                }
+                pout = sres.getWriter();
+                pout.write("<H1>Include: "+info+"</H1><HR>");
                 
                 RequestDispatcher dispatch = getServletContext()
                     .getRequestDispatcher(info);
@@ -99,20 +94,15 @@ public class RequestDispatchTest extends HttpServlet
                 }
                 else
                     dispatch.include(sreq,sres);
-                pout = sres.getWriter();
+                
                 pout.write("<HR><H1>-- Included (writer)</H1>");
             }
             else 
             {
                 OutputStream out=null;
-                if (info.startsWith("/null"))
-                    info=info.substring(5);
-                else
-                {
-                    out = sres.getOutputStream();
-                    out.write(("<H1>Include: "+info+"</H1><HR>").getBytes());
-                }                
-                
+                out = sres.getOutputStream();
+                out.write(("<H1>Include: "+info+"</H1><HR>").getBytes());   
+
                 RequestDispatcher dispatch = getServletContext()
                     .getRequestDispatcher(info);
                 if (dispatch==null)
@@ -123,7 +113,6 @@ public class RequestDispatchTest extends HttpServlet
                 else
                     dispatch.include(sreq,sres);
                 
-                out = sres.getOutputStream();
                 out.write("<HR><H1>-- Included (outputstream)</H1>".getBytes());
             }
         }
