@@ -8,7 +8,7 @@ package org.mortbay.tools;
 import org.mortbay.tools.dataclasstest.T1;
 import org.mortbay.tools.dataclasstest.T2;
 import org.mortbay.util.Code;
-import org.mortbay.util.Test;
+import org.mortbay.util.TestCase;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -67,7 +67,7 @@ public class TestHarness
     /* ------------------------------------------------------------ */
     public static void testDataHelper()
     {
-        Test t = new Test("org.mortbay.tools.DataHelper");
+        TestCase t = new TestCase("org.mortbay.tools.DataHelper");
         try{
             T2 t2 = (org.mortbay.tools.dataclasstest.T2)
                 DataClass.emptyInstance(org.mortbay.tools.dataclasstest.T2.class);
@@ -114,12 +114,12 @@ public class TestHarness
         catch(Throwable th)
         {
             Code.warning(th);
-            Test t = new Test("org.mortbay.tools.TestHarness");
+            TestCase t = new TestCase("org.mortbay.tools.TestHarness");
             t.check(false,th.toString());
         }
         finally
         {
-            Test.report();
+            TestCase.report();
         }
     }
 }

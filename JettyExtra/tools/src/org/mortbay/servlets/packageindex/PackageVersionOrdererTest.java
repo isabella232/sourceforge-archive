@@ -5,7 +5,7 @@
 
 package org.mortbay.servlets.packageindex;
 
-import org.mortbay.util.Test;
+import org.mortbay.util.TestCase;
 
 public class PackageVersionOrdererTest 
 {
@@ -14,7 +14,7 @@ public class PackageVersionOrdererTest
      * @param argv 
      */
     public static void main(String argv[]) {
-	Test test = new Test("comparison");
+	TestCase test = new TestCase("comparison");
 	PackageVersionOrderer pvo = new PackageVersionOrderer();
 	test.checkEquals(pvo.compare("1", "2"), -1, "1 < 2");
 	test.checkEquals(pvo.compare("2", "1"), 1, "2 > 1");

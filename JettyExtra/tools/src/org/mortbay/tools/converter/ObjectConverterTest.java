@@ -6,7 +6,7 @@
 package org.mortbay.tools.converter;
 
 import org.mortbay.util.Code;
-import org.mortbay.util.Test;
+import org.mortbay.util.TestCase;
 import org.mortbay.tools.PropertyTree;
 import java.io.FileInputStream;
 
@@ -93,7 +93,7 @@ public class ObjectConverterTest
     /* ------------------------------------------------------------ */
     public static void main(String argv[])
     {
-        Test test = new Test("ObjectConverter:convert");
+        TestCase test = new TestCase("ObjectConverter:convert");
 	PropertyTree testProps = null;
 	ConverterSet cs = new ConverterSet();
 	cs.registerPrimitiveConverters();
@@ -122,7 +122,7 @@ public class ObjectConverterTest
             Code.warning(e);
             test.check(false,e.toString());
         }
-	test = new Test("ObjectConverter:unsafeConvert");
+	test = new TestCase("ObjectConverter:unsafeConvert");
 	try
         {
 	    PropertyTree props = testProps.getTree("conversions");
@@ -180,7 +180,7 @@ public class ObjectConverterTest
 	    PropertyTree props =
 		(PropertyTree)cv.convert(a, PropertyTree.class, null);
 	    test = new
-		Test("PropertyTreeConverter/ObjectConverter orthogonality");
+		TestCase("PropertyTreeConverter/ObjectConverter orthogonality");
 	    cs.register(new ArrayConverter(","));
 	    A a2 = (A)cs.convert(props, a.getClass(), null);
 	    test.checkEquals(a, a2, "A == A->props->A");

@@ -6,7 +6,7 @@
 package org.mortbay.tools;
 
 import org.mortbay.util.Code;
-import org.mortbay.util.Test;
+import org.mortbay.util.TestCase;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Enumeration;
@@ -19,12 +19,12 @@ public class PropertyTreeTest
     public static void main(String argv[])
     {
         test();
-	Test.report();
+	TestCase.report();
     }
      
     public static void test()
     {
-        Test test = new Test("PropertyTree");
+        TestCase test = new TestCase("PropertyTree");
         try
         {
             PropertyTree props = new PropertyTree();
