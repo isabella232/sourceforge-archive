@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import org.mortbay.util.Code;
+import org.mortbay.util.TypeUtil;
 
 
 /* ------------------------------------------------------------ */
@@ -421,7 +422,7 @@ public abstract class HttpMessage
     public void setIntField(String name, int value)
         throws IllegalStateException
     {
-        setFields().put(name, Integer.toString(value));
+        setFields().put(name, TypeUtil.toString(value));
     }
     
     /* -------------------------------------------------------------- */
@@ -435,7 +436,7 @@ public abstract class HttpMessage
     public void addIntField(String name, int value)
         throws IllegalStateException
     {
-        setFields().add(name, Integer.toString(value));
+        setFields().add(name, TypeUtil.toString(value));
     }
     
     /* -------------------------------------------------------------- */
@@ -834,12 +835,3 @@ public abstract class HttpMessage
             _attributes.remove(name);
     }
 }
-
-
-
-
-
-
-
-
-

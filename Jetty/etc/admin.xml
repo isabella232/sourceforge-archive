@@ -42,10 +42,18 @@ $Id$
 
   <Call name="addContext">
     <Arg>/</Arg>   
-    <Set name="Realm">Jetty Demo Realm</Set>
-    <Call name="addAuthConstraint">
-      <Arg>/</Arg> 
-      <Arg>server-administrator</Arg>   
+    <Set name="realmName">Jetty Demo Realm</Set>
+    <Call name="addHandler">
+      <Arg>  
+        <New class="org.mortbay.http.handler.SecurityHandler">
+            <Call name="addSecurityConstraint">
+                <Arg>/</Arg> 
+                <Arg><New class="org.mortbay.http.SecurityConstraint">
+                     <Arg>Admin</Arg>
+                     <Arg>server-administrator</Arg></New></Arg>
+            </Call>
+        </New>
+      </Arg>  
     </Call>
     <Call name="addServlet">
       <Arg>Debug</Arg>

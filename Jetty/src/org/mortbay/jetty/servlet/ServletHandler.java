@@ -68,11 +68,16 @@ import org.mortbay.util.URI;
 /** Servlet HttpHandler.
  * This handler maps requests to servlets that implement the
  * javax.servlet.http.HttpServlet API.
- *
+ * <P>
+ * This handler does not implement the full J2EE features and is intended to
+ * be used when a full web application is not required.  Specifically filters
+ * and request wrapping are not supported.
+ * <P>
  * If a SessionManager is not added to the handler before it is
  * initialized, then a HashSessionManager with a standard
  * java.util.Random generator is created.
- * 
+ * <P>
+ * @see org.mortbay.jetty.servlet.WebApplicationHandler
  * @version $Id$
  * @author Greg Wilkins
  */

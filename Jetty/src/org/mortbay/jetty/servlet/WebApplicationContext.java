@@ -64,6 +64,10 @@ import org.mortbay.xml.XmlParser;
  * WEB-INF directory it is applied to the context using the
  * XmlConfiguration format.
  *
+ * A single WebApplicationHandler instance is used to provide
+ * security, filter, sevlet and resource handling.
+ *
+ * @see org.mortbay.jetty.servlet.WebApplicationHandler
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -961,23 +965,9 @@ public class WebApplicationContext extends ServletHttpContext
             {
                 String url=
                     ((XmlParser.Node)iter2.next()).toString(false,true);
-                addSecurityConstraint(url,sc);
+                _webAppHandler.getSecurityBase().addSecurityConstraint(url,sc);
             }
         }
-    }
-
-    /* ------------------------------------------------------------ */
-    public void addSecurityConstraint(String pathSpec,SecurityConstraint sc)
-    {
-        _webAppHandler.getSecurityBase()
-            .addSecurityConstraint(pathSpec,sc);
-    }
-
-    /* ------------------------------------------------------------ */
-    public void addAuthConstraint(String pathSpec,String role)
-    {
-        _webAppHandler.getSecurityBase()
-            .addSecurityConstraint(pathSpec,new SecurityConstraint(role,role));
     }
                                       
     /* ------------------------------------------------------------ */
@@ -1004,7 +994,7 @@ public class WebApplicationContext extends ServletHttpContext
         
         XmlParser.Node name=node.get("realm-name");
         if (name!=null)
-            securityBase.setUserRealm(getUserRealm(name.toString(false,true)));
+            setRealmName(name.toString(false,true));
 
         XmlParser.Node formConfig = node.get("form-login-config");
         if(formConfig != null)

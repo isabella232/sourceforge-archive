@@ -613,42 +613,47 @@ public class HttpConnection
         if (_close)
             _persistent=false;
         
-        // if we have no content or encoding,
-        // and no content length
+        // if we have no content or encoding, and no content length
         int status = _response.getStatus();
-        if (!_outputStream.isWritten() &&
-            !_response.containsField(HttpFields.__TransferEncoding) &&
+        if (status!=HttpResponse.__304_Not_Modified &&
+            status!=HttpResponse.__204_No_Content &&
+            !_outputStream.isWritten() &&
             !_response.containsField(HttpFields.__ContentLength) &&
-            status!=HttpResponse.__304_Not_Modified &&
-            status!=HttpResponse.__204_No_Content)
+            !_response.containsField(HttpFields.__TransferEncoding))
         {
-            // Persist only if idle threads are available.
             if(_persistent)
             {
-                switch (_dotVersion)
+                if (status>=300 && status<400)
                 {
-                  case 0:
-                      {
-			  _close=true;
-			  _persistent=false;
-			  _response.setField(HttpFields.__Connection,
-					     HttpFields.__Close);
-                      }
-                      break;
-                  case 1:
-                      {
-                          // force chunking on.
-                          _response.setField(HttpFields.__TransferEncoding,
-                                             HttpFields.__Chunked);
-                          _outputStream.setChunking();
-                      }
-                      break;
-                      
-                  default:
-                      _close=true;
-                      _response.setField(HttpFields.__Connection,
-                                         HttpFields.__Close);
-                      break;
+                    _response.setField(HttpFields.__ContentLength,"0");
+                }
+                else
+                {    
+                    switch (_dotVersion)
+                    {
+                      case 0:
+                          {
+                              _close=true;
+                              _persistent=false;
+                              _response.setField(HttpFields.__Connection,
+                                                 HttpFields.__Close);
+                          }
+                          break;
+                      case 1:
+                          {
+                              // force chunking on.
+                              _response.setField(HttpFields.__TransferEncoding,
+                                                 HttpFields.__Chunked);
+                              _outputStream.setChunking();
+                          }
+                          break;
+                          
+                      default:
+                          _close=true;
+                          _response.setField(HttpFields.__Connection,
+                                             HttpFields.__Close);
+                          break;
+                    }
                 }
             }
             else
@@ -669,29 +674,39 @@ public class HttpConnection
     {
 	try{
 	    boolean gotIOException = false;
+            int error_code=HttpResponse.__500_Internal_Server_Error;
+            
             if (e instanceof HttpException)
             {
+                error_code=((HttpException)e).getCode();
+                
                 if (_request==null)
                     Code.warning(e.toString());
                 else
                     Code.warning(_request.getRequestLine()+" "+e.toString());
                 Code.debug(e);
             }
-            else if (e instanceof IOException)
-	    {
-                // Assume browser closed connection
-                gotIOException = true;
-                if (Code.verbose())
-                    Code.debug(e);
-                else if (Code.debug())
-                    Code.debug(e.toString());
-	    }
-	    else 
-            {
-                if (_request==null)
-                    Code.warning(e);
-                else
-                    Code.warning(_request.getRequestLine(),e);
+            else
+            {    
+                _request.setAttribute("javax.servlet.error.exception_type",e.getClass());
+                _request.setAttribute("javax.servlet.error.exception",e);
+
+                if (e instanceof IOException)
+                {
+                    // Assume browser closed connection
+                    gotIOException = true;
+                    if (Code.verbose())
+                        Code.debug(e);
+                    else if (Code.debug())
+                        Code.debug(e.toString());
+                }
+                else 
+                {
+                    if (_request==null)
+                        Code.warning(e);
+                    else
+                        Code.warning(_request.getRequestLine(),e);
+                }
             }
             
 	    _persistent=false;
@@ -699,12 +714,8 @@ public class HttpConnection
 	    {
 		_response.reset();
 		_response.removeField(HttpFields.__TransferEncoding);
-		_response.setField(HttpFields.__Connection,
-				   HttpFields.__Close);
-		
-                _request.setAttribute("javax.servlet.error.exception_type",e.getClass());
-                _request.setAttribute("javax.servlet.error.exception",e);
-		_response.sendError(HttpResponse.__500_Internal_Server_Error);
+		_response.setField(HttpFields.__Connection,HttpFields.__Close);
+		_response.sendError(error_code);
 
                 // probabluy not browser so be more verbose
 		if (gotIOException)

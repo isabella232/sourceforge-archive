@@ -51,6 +51,13 @@ import org.mortbay.util.URI;
 
 /* --------------------------------------------------------------------- */
 /** WebApp HttpHandler.
+ * This handler extends the ServletHandler with security, filter and resource
+ * capabilities to provide full J2EE web container support.
+ * <p>
+ * @since Jetty 4.1
+ * @see org.mortbay.jetty.servlet.WebApplicationContext
+ * @see org.mortbay.http.SecurityBase
+ * @see org.mortbay.http.ResourceBase
  * @version $Id$
  * @author Greg Wilkins
  */
@@ -139,6 +146,7 @@ public class WebApplicationHandler extends ServletHandler
         throws Exception
     {
         _base.setHttpContext(getHttpContext());
+        _security.setHttpContext(getHttpContext());
         
         // Start filters
         MultiException mex = new MultiException();
@@ -182,6 +190,13 @@ public class WebApplicationHandler extends ServletHandler
                        HttpResponse httpResponse)
          throws IOException
     {
+        // Handle TRACE
+        if (HttpRequest.__TRACE.equals(httpRequest.getMethod()))
+        {
+            handleTrace(httpRequest,httpResponse);
+            return;
+        }
+        
         // Extract and check filename
         pathInContext=URI.canonicalPath(pathInContext);
         if (pathInContext==null)
@@ -198,7 +213,9 @@ public class WebApplicationHandler extends ServletHandler
             reentrant=false;
             // Build the request and response.
             request = new ServletHttpRequest(this,pathInContext,httpRequest);
+            httpRequest.setWrapper(request);
             response = new ServletHttpResponse(request,httpResponse);
+            httpResponse.setWrapper(response);
         }
         
         // protect web-inf and meta-inf
@@ -730,11 +747,6 @@ public class WebApplicationHandler extends ServletHandler
             HttpServletResponse httpServletResponse=(HttpServletResponse)response;
             notFound(httpServletRequest,httpServletResponse);
         }
-        else
-        {
-            // Handle non HTTP request
-            Code.notImplemented();
-        }
     }
     
     /* ------------------------------------------------------------ */
@@ -743,7 +755,35 @@ public class WebApplicationHandler extends ServletHandler
         throws IOException
     {
         Code.debug("Not Found ",request.getRequestURI());
-        response.sendError(HttpResponse.__404_Not_Found);
+        String method=request.getMethod();
+            
+        // Not found special requests.
+        if (method.equals(HttpRequest.__GET)    ||
+            method.equals(HttpRequest.__HEAD)   ||
+            method.equals(HttpRequest.__POST))
+        {
+            response.sendError(HttpResponse.__404_Not_Found,request.getRequestURI()+" Not Found");
+        }
+        
+        else if (method.equals(HttpRequest.__OPTIONS))
+        {
+            // Handle OPTIONS request for entire server
+            if ("*".equals(request.getRequestURI()))
+            {
+                // 9.2
+                response.setIntHeader(HttpFields.__ContentLength,0);
+                response.setHeader(HttpFields.__Allow,_base.getAllowedString());                
+                response.flushBuffer();
+            }
+            else
+                response.sendError(HttpResponse.__404_Not_Found);
+        }
+        else
+        {
+            // Unknown METHOD
+            response.setHeader(HttpFields.__Allow,_base.getAllowedString());
+            response.sendError(HttpResponse.__405_Method_Not_Allowed);
+        }
     }
     
 
@@ -863,7 +903,7 @@ public class WebApplicationHandler extends ServletHandler
 
             if (_authenticator instanceof FormAuthenticator &&
                 pathInContext.endsWith(FormAuthenticator.__J_SECURITY_CHECK) &&
-                _authenticator.authenticated(_realm,
+                _authenticator.authenticated(_httpContext.getRealm(),
                                              pathInContext,
                                              request,
                                              response)==null)

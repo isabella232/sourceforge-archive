@@ -221,13 +221,8 @@ public class ServletHolder extends Holder
         }
 
         if (_run_as!=null)
-        {
-            SecurityHandler security_handler = (SecurityHandler)
-                _servletHandler.getHttpContext().getHandler(SecurityHandler.class);
-
-            if (security_handler!=null)
-                _realm=security_handler.getUserRealm();
-        }
+            _realm=_servletHandler.getHttpContext().getRealm();
+        
     }
 
     /* ------------------------------------------------------------ */

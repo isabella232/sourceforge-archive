@@ -76,7 +76,7 @@ abstract public class NullHandler implements HttpHandler
 
     /* ----------------------------------------------------------------- */
     public void handleTrace(HttpRequest request,
-                        HttpResponse response)
+                            HttpResponse response)
         throws IOException
     {
         // Handle TRACE by returning request header

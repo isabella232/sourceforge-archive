@@ -19,7 +19,13 @@ import org.mortbay.util.Code;
 import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
-/** 
+/** Base handling for Security Constraints
+ * 
+ * @see org.mortbay.http.handler.SecurityHandler
+ * @see org.mortbay.jetty.servlet.WebApplicationHandler
+ * @since Jetty 4.1
+ * @version $Id$
+ * @author Greg Wilkins (gregw)
  */
 public class SecurityBase
 {
@@ -29,20 +35,8 @@ public class SecurityBase
     
     /* ------------------------------------------------------------ */
     protected PathMap _constraintMap=new PathMap();
-    protected UserRealm _realm;
     protected Authenticator _authenticator;
-    
-    /* ------------------------------------------------------------ */
-    public UserRealm getUserRealm()
-    {        
-        return _realm;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void setUserRealm(UserRealm realm)
-    {
-        _realm=realm;
-    }
+    protected HttpContext _httpContext;
     
     /* ------------------------------------------------------------ */
     public Authenticator getAuthenticator()
@@ -55,7 +49,13 @@ public class SecurityBase
     {
         _authenticator=authenticator;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public void setHttpContext(HttpContext context)
+    {
+        _httpContext=context;
+    }
+        
     /* ------------------------------------------------------------ */
     public void addSecurityConstraint(String pathSpec, SecurityConstraint sc)
     {
@@ -96,6 +96,8 @@ public class SecurityBase
                          HttpResponse response)
         throws HttpException, IOException
     {
+        UserRealm realm = _httpContext.getRealm();
+
         // Get all path matches
         List scss =_constraintMap.getMatches(pathInContext);
         if (scss!=null)
@@ -115,7 +117,7 @@ public class SecurityBase
                 
                 switch (SecurityConstraint.check(scs,
                                                  _authenticator,
-                                                 _realm,
+                                                 realm,
                                                  pathInContext,
                                                  request,
                                                  response))

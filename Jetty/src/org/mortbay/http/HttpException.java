@@ -6,6 +6,7 @@
 package org.mortbay.http;
 import java.io.IOException;
 import java.util.HashMap;
+import org.mortbay.util.TypeUtil;
 
 
 /* ------------------------------------------------------------ */
@@ -25,7 +26,7 @@ public class HttpException extends IOException
     
     public String getReason()
     {
-        return (String)HttpResponse.__statusMsg.get(new Integer(_code));
+        return (String)HttpResponse.__statusMsg.get(TypeUtil.newInteger(_code));
     }
     
     public HttpException()

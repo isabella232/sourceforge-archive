@@ -210,12 +210,22 @@ path, the directory or <tt>war</tt> file of your application.
 Jetty is then able to discover and configure all the required handlers 
 including security, static content and servlets. 
 </p>
+
 <p>
 The method call will transparently create and return an
 instance of&nbsp;<a href="/javadoc/org/mortbay/jetty/servlet/WebApplicationContext.html"> org.mortbay.jetty.servlet.WebApplicationContext</a>  (NOTE: there
 is no equivalent to <tt>getContext()</tt> provided by the <a href="/jetty/javadoc/org/mortbay/http/HttpServer.html">
             org.mortbay.http.HttpServer </a>&nbsp;class).</p>
-             
+        
+<p>
+Web Applications use the 
+<a href="/javadoc/org/mortbay/jetty/servlet/WebApplicationHandler.html">WebApplicationHandler</a>
+extension of <a href="/javadoc/org/mortbay/jetty/servlet/ServletHandler.html">ServletHandler</a>, 
+which combines security, servlet and resource handling while adding support for
+Servlet spec features such as Filters (In previous version of Jetty, this was
+done with separate Security, Filter, Servlet and Resource handlers).
+</p>
+
 <p>This example configures a web application located in the directory <tt>
        ./webapps/myapp/</tt> at the context path <tt>/</tt> for a virtual 
 host   <tt> myhost</tt>:<br>

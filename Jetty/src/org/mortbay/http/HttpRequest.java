@@ -40,7 +40,7 @@ import org.mortbay.util.UrlEncoded;
  * This class manages the headers, trailers and content streams
  * of a HTTP request. It can be used for receiving or generating
  * requests.
- *
+ * <P>
  * This class is not synchronized. It should be explicitly
  * synchronized if it is used by multiple threads.
  *

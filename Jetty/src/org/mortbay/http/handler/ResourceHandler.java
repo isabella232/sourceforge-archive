@@ -35,6 +35,7 @@ import org.mortbay.util.IO;
 import org.mortbay.util.Log;
 import org.mortbay.util.Resource;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.TypeUtil;
 import org.mortbay.util.URI;
 
 /* ------------------------------------------------------------ */
@@ -495,7 +496,7 @@ public class ResourceHandler extends NullHandler
             writeHeaders(response, resource, resLength);
             response.setStatus(response.__416_Requested_Range_Not_Satisfiable);
             response.setReason((String)response.__statusMsg
-                               .get(new Integer(response.__416_Requested_Range_Not_Satisfiable)));
+                               .get(TypeUtil.newInteger(response.__416_Requested_Range_Not_Satisfiable)));
             response.setField(HttpFields.__ContentRange, 
                               InclusiveByteRange.to416HeaderRangeString(resLength));
             
@@ -517,7 +518,7 @@ public class ResourceHandler extends NullHandler
             writeHeaders(response,resource,singleLength);
             response.setStatus(response.__206_Partial_Content);
             response.setReason((String)response.__statusMsg
-                               .get(new Integer(response.__206_Partial_Content)));
+                               .get(TypeUtil.newInteger(response.__206_Partial_Content)));
             response.setField(HttpFields.__ContentRange, 
                               singleSatisfiableRange.toHeaderRangeString(resLength));
             OutputStream out = response.getOutputStream();
@@ -538,7 +539,7 @@ public class ResourceHandler extends NullHandler
         MultiPartResponse multi = new MultiPartResponse(response);
         response.setStatus(response.__206_Partial_Content);
         response.setReason((String)response.__statusMsg
-                           .get(new Integer(response.__206_Partial_Content)));
+                           .get(TypeUtil.newInteger(response.__206_Partial_Content)));
 
 	// If the request has a "Request-Range" header then we need to
 	// send an old style multipart/x-byteranges Content-Type. This

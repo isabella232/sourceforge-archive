@@ -35,24 +35,18 @@ public class NotFoundHandler extends NullHandler
         throws HttpException, IOException
     {
         Code.debug("Not Found");
-        
-        // Not found GET request
         String method=request.getMethod();
-        if (method.equals(HttpRequest.__GET))
+        
+        // Not found  requests.
+        if (method.equals(HttpRequest.__GET)    ||
+            method.equals(HttpRequest.__HEAD)   ||
+            method.equals(HttpRequest.__POST)   ||
+            method.equals(HttpRequest.__PUT)    ||
+            method.equals(HttpRequest.__DELETE) ||
+            method.equals(HttpRequest.__MOVE)   )
         {
             response.sendError(response.__404_Not_Found,
-                               "Could not find resource for "+
-                               request.getPath());
-        }
-
-        // Not found special requests.
-        else if (method.equals(HttpRequest.__HEAD)   ||
-                 method.equals(HttpRequest.__POST)   ||
-                 method.equals(HttpRequest.__PUT)    ||
-                 method.equals(HttpRequest.__DELETE) ||
-                 method.equals(HttpRequest.__MOVE)   )
-        {
-            response.sendError(response.__404_Not_Found);
+                               request.getPath()+" Not Found");
         }
         
         else if (method.equals(HttpRequest.__OPTIONS))
@@ -69,8 +63,6 @@ public class NotFoundHandler extends NullHandler
             else
                 response.sendError(response.__404_Not_Found);
         }
-        
-        
         else if (method.equals(HttpRequest.__TRACE))
         {
             handleTrace(request,response);

@@ -15,6 +15,7 @@ import javax.servlet.http.Cookie;
 import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.Code;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.TypeUtil;
 
 
 /* ------------------------------------------------------------ */
@@ -270,7 +271,7 @@ public class HttpResponse extends HttpMessage
     {
         if (_reason!=null)
             return _reason;
-        _reason=(String)__statusMsg.get(new Integer(_status));
+        _reason=(String)__statusMsg.get(TypeUtil.newInteger(_status));
         if (_reason==null)
             _reason="unknown";
         return _reason;
@@ -311,7 +312,7 @@ public class HttpResponse extends HttpMessage
     public void sendError(int code,String message) 
         throws IOException
     {        
-        Integer code_integer=new Integer(code);
+        Integer code_integer=TypeUtil.newInteger(code);
         if (message == null)
             message = (String)__statusMsg.get(code_integer);
         HttpRequest request=getRequest();
@@ -336,7 +337,7 @@ public class HttpResponse extends HttpMessage
             }
             
             if (error_page==null && _httpContext!=null)
-                error_page = _httpContext.getErrorPage(""+code);
+                error_page = _httpContext.getErrorPage(TypeUtil.toString(code));
 
             // Handle error page
             if (error_page!=null)

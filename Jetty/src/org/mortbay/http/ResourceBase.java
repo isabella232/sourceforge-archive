@@ -23,8 +23,11 @@ import org.mortbay.util.StringUtil;
 import org.mortbay.util.URI;
 
 /* ------------------------------------------------------------ */
-/** 
+/** Base handling for serving Resources.
  *
+ * @see org.mortbay.http.handler.ResourceHandler
+ * @see org.mortbay.jetty.servlet.WebApplicationHandler
+ * @since Jetty 4.1
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

@@ -56,7 +56,7 @@ import org.mortbay.util.URI;
 /** Servlet Request Wrapper.
  * This class wraps a Jetty HTTP request as a 2.2 Servlet
  * request.
- *
+ * <P>
  * Note that this wrapper is not synchronized and if a request is to
  * be operated on by multiple threads, then higher level
  * synchronizations may be required.

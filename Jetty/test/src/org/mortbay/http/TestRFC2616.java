@@ -293,13 +293,14 @@ public class TestRFC2616
     /* --------------------------------------------------------------- */
     public static void test3_6()
     {        
+        
         TestCase t = new TestCase("RFC2616 3.6 Transfer Coding");
         String response=null;
         try
         {
             TestRFC2616 listener = new TestRFC2616();
             int offset=0;
-
+            
             // Chunk once
             offset=0;
             response=listener.getResponses("GET /R1 HTTP/1.1\n"+
@@ -1055,8 +1056,8 @@ public class TestRFC2616
                             "Location: /dump",
                             "redirected");
             t.checkContains(response,offset,
-                            "Connection: close",
-                            "connection close");
+                            "Content-Length: 0",
+                            "Content-Length: 0");
             
             
             // HTTP/1.1
@@ -1076,8 +1077,8 @@ public class TestRFC2616
                             "Location: /dump",
                             "redirected");
             t.checkContains(response,offset,
-                            "Transfer-Encoding: chunked",
-                            "content length");
+                            "Content-Length: 0",
+                            "Content-Length: 0");
             
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 302","302")+1;

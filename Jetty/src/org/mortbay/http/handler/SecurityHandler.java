@@ -57,39 +57,6 @@ public class SecurityHandler extends NullHandler
     }
     
     /* ------------------------------------------------------------ */
-    public UserRealm getUserRealm()
-    {        
-        return _securityBase.getUserRealm();
-    }
-    
-    /* ------------------------------------------------------------ */
-    public String getRealmName()
-    {        
-        return _realmName;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void setRealmName(String realmName)
-    {
-        if (isStarted() &&
-            ((_realmName!=null && !_realmName.equals(realmName)) ||
-             (_realmName==null && realmName!=null)))
-            throw new IllegalStateException("Handler started");
-        _realmName=realmName;
-        _realmForced=false;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void setRealm(String realmName, UserRealm realm)
-    {
-        if (isStarted())
-            throw new IllegalStateException("Handler started");
-        _realmName=realmName;
-        _realmForced=realm!=null;
-        _securityBase.setUserRealm(realm);
-    }
-    
-    /* ------------------------------------------------------------ */
     public String getAuthMethod()
     {
         return _authMethod;
@@ -114,24 +81,7 @@ public class SecurityHandler extends NullHandler
     public void start()
         throws Exception
     {
-        // Check there is a realm
-        if (_realmName!=null && _realmName.length()>0)
-        {
-            
-            if (!_realmForced)
-                _securityBase.setUserRealm(getHttpContext().getHttpServer().getRealm(_realmName));
-            super.start();
-            if (_securityBase.getUserRealm()==null)
-                Code.warning("Unknown realm: "+_realmName+" for "+this);
-        }
-        // Or that we have some contraints.
-        else if (_securityBase.isAuthConstrained())
-        {
-            Code.warning("No Realm set for "+this);
-            super.start();
-            return;
-        }
-
+        _securityBase.setHttpContext(getHttpContext());
         if (_securityBase.getAuthenticator()==null)
         {
             // Find out the Authenticator.

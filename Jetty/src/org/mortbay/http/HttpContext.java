@@ -108,6 +108,7 @@ public class HttpContext implements LifeCycle
     private Map _resourceAliases;
     private Map _errorPages;
     private UserRealm _userRealm;
+    private String _realmName;
     private PermissionCollection _permissions;
     
     /* ------------------------------------------------------------ */
@@ -1042,81 +1043,34 @@ public class HttpContext implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the SecurityHandler realm name.
-     * Conveniance method.
-     * If a SecurityHandler is not in the context, one is created
-     * as the 0th handler.
+    /** Set the realm name.
      * @param realmName The name to use to retrieve the actual realm
      * from the HttpServer
      */
-    public void setRealm(String realmName)
+    public void setRealmName(String realmName)
     {
-        SecurityHandler sh=getSecurityHandler();
-        sh.setRealmName(realmName);
+        _realmName=realmName;
     }
     
     /* ------------------------------------------------------------ */
-    public String getRealm()
+    public String getRealmName()
     {
-        SecurityHandler handler = (SecurityHandler)
-            getHandler(org.mortbay.http.handler.SecurityHandler.class);
-        if (handler!=null)
-            return handler.getRealmName();
-        return null;
+        return _realmName;
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the SecurityHandler realm.
-     * Conveniance method.
-     * If a SecurityHandler is not in the context, one is created
-     * as the 0th handler.
-     * @param realmName The name of the realm
-     * @param realm The realm instance to use, instead of one
-     * retrieved from the HttpServer.
+    /** Set the  realm.
      */
-    public void setUserRealm(String realmName, UserRealm realm)
+    public void setRealm(UserRealm realm)
     {
-        SecurityHandler sh=getSecurityHandler();
-        sh.setRealm(realmName,realm);
+        _userRealm=realm;
     }
 
     /* ------------------------------------------------------------ */
-    public UserRealm getUserRealm()
+    public UserRealm getRealm()
     {
-        SecurityHandler handler = (SecurityHandler)
-            getHandler(org.mortbay.http.handler.SecurityHandler.class);
-        if (handler!=null)
-            return handler.getUserRealm();
-        return null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Add a security constraint.
-     * Conveniance method.
-     * If a SecurityHandler is not in the context, one is created
-     * as the 0th handler.
-     * @param pathSpec 
-     * @param sc 
-     */
-    public void addSecurityConstraint(String pathSpec,
-                                      SecurityConstraint sc)
-    {
-        SecurityHandler sh=getSecurityHandler();
-        sh.addSecurityConstraint(pathSpec,sc);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Add an auth security constraint.
-     * Conveniance method.
-     * @param pathSpec 
-     * @param Auth role
-     */
-    public void addAuthConstraint(String pathSpec,
-                                  String role)
-    {
-        SecurityHandler sh=getSecurityHandler();
-        sh.addSecurityConstraint(pathSpec,new SecurityConstraint(role,role));
-    }
+        return _userRealm;
+    }    
 
     /* ------------------------------------------------------------ */
     public synchronized Map getMimeMap()
@@ -1463,6 +1417,14 @@ public class HttpContext implements LifeCycle
         // start the context itself
         getMimeMap();
         getEncodingMap();
+
+        // Setup realm
+        if (_userRealm==null && _realmName!=null)
+        {
+            _userRealm=_httpServer.getRealm(_realmName);
+            if (_userRealm==null)
+                Code.warning("No Realm: "+_realmName);
+        }
         
         // setup the context loader
         initClassLoader(false);
@@ -1479,7 +1441,6 @@ public class HttpContext implements LifeCycle
         }
         finally
         {
-            _userRealm=getUserRealm();
             thread.setContextClassLoader(lastContextLoader);
             _started=true;
         }
