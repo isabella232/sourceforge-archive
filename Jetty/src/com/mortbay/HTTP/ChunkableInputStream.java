@@ -8,11 +8,16 @@ import com.mortbay.Util.*;
 
 import java.io.*;
 
-/** HTTP input stream
- * @version $Id$
- * @author Greg Wilkins
-*/
-public class HttpInputStream extends FilterInputStream
+/* ------------------------------------------------------------ */
+/** HTTP Chunking InputStream. 
+ * This FilterInputStream acts as a BufferedInputStream until
+ * setChunking(true) is called.  Once chunking is
+ * enabled, the raw stream is chunk decoded as per RFC2616.
+ *
+ * @version 1.0 Wed Sep 29 1999
+ * @author Greg Wilkins (gregw)
+ */
+public class ChunkableInputStream extends FilterInputStream
 {
     /* ------------------------------------------------------------ */
     /** Limit max line length */
@@ -27,23 +32,22 @@ public class HttpInputStream extends FilterInputStream
     private HttpFields _footers=null;
     private boolean _chunking=false;
     private int _contentLength=-1;
-
     
     /* ------------------------------------------------------------ */
-    /** Buffer for readLine.
-     * The buffer gets reused across calls.
-     * Note that the readCharBufferLine method breaks encapsulation
+    /** Buffer for readRawLine.
+     * Note that the readRawBufferLine method breaks encapsulation
      * by returning this buffer, so BE CAREFUL!!!
      */
     static class CharBuffer
     {
         private int _size=0;
-        char[] _chars = new char[128];
+        private char[] _chars = new char[128];
 
+        char[] buffer()          { return _chars; }
         void add(char c)         { _chars[_size++]=c; }
         void reset()             { _size=0; }
         int size()               { return _size; }
-        int capacity()           { return _chars.length-_size; }
+        int capacityRemaining()  { return _chars.length-_size; }
         public String toString() { return new String(_chars,0,_size); }
         void expand()
         {
@@ -62,14 +66,14 @@ public class HttpInputStream extends FilterInputStream
     /* ------------------------------------------------------------ */
     /** Constructor
      */
-    public HttpInputStream( InputStream in)
+    public ChunkableInputStream( InputStream in)
     {
         super(new BufferedInputStream(in));
     }
 
     /* ------------------------------------------------------------ */
-    /** 
-     * @param on 
+    /** Set chunking mode 
+     * @param on Chunk if this is true.
      */
     public void setChunking(boolean on)
     {
@@ -77,6 +81,15 @@ public class HttpInputStream extends FilterInputStream
             throw new IllegalStateException("Can't chunk and have content length");
         
         _chunking=on;
+        _footers=null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get chunking mode 
+     */
+    public boolean getChunking()
+    {
+        return _chunking;
     }
 
     /* ------------------------------------------------------------ */
@@ -89,76 +102,6 @@ public class HttpInputStream extends FilterInputStream
         if (_chunking && len>=0)
             throw new IllegalStateException("Can't chunk and have content length");
         _contentLength=len;
-    }
-        
-    /* ------------------------------------------------------------ */
-    /** Read a line ended by CR or CRLF or LF.
-     * This method only read raw data, that may be chunked.  Calling
-     * readLine() will always return unchunked data.
-     */
-    public String readLine() throws IOException
-    {
-        CharBuffer buf = readCharBufferLine();
-        if (buf==null)
-            return null;
-        return buf.toString();
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Read a line ended by CR or CRLF or LF.
-     * This method only read raw data, that may be chunked.  Calling
-     * readLine() will always return unchunked data.
-     */
-    CharBuffer readCharBufferLine() throws IOException
-    {
-        BufferedInputStream in = (BufferedInputStream)this.in;
-        _charBuffer.reset();
-        int room = _charBuffer.capacity();
-        int c=0;
-        boolean cr = false;
-        boolean lf = false;
-
-    LineLoop:
-        while (_charBuffer._size<__maxLineLength &&
-               (c=_chunking?read():in.read())!=-1)
-        {
-            switch(c)
-            {
-              case 10:
-                  lf = true;
-                  break LineLoop;
-        
-              case 13:
-                  cr = true;
-                  if (!_chunking)
-                      in.mark(2);
-                  break;
-        
-              default:
-                  if(cr)
-                  {
-                      if (_chunking)
-                          Code.fail("Cannot handle CR in chunking mode");
-                      in.reset();
-                      break LineLoop;
-                  }
-                  else
-                  {
-                      if (--room < 0)
-                      {
-                          _charBuffer.expand();
-                          room = _charBuffer.capacity();
-                      }
-                      _charBuffer.add((char)c);
-                  }
-                  break;
-            }    
-        }
-
-        if (c==-1 && _charBuffer._size==0)
-            return null;
-
-        return _charBuffer;
     }
     
     /* ------------------------------------------------------------ */
@@ -259,10 +202,8 @@ public class HttpInputStream extends FilterInputStream
     }
 
     /* ------------------------------------------------------------ */
-    /** Available bytes to read without blocking.
-     * If you are unlucky may return 0 when there are more
-     */
-    public int available() throws IOException
+    public int available()
+        throws IOException
     {
         if (_chunking)
         {
@@ -276,13 +217,10 @@ public class HttpInputStream extends FilterInputStream
     }
  
     /* ------------------------------------------------------------ */
-    /** Close stream.
-     * The close is not passed to the wrapped stream, as this is
-     * needed for the response
-     */
-    public void close() throws IOException
+    public void close()
+        throws IOException
     {
-        Code.debug("Close");
+        in.close();
         _chunksize=-1;
     }
  
@@ -310,9 +248,13 @@ public class HttpInputStream extends FilterInputStream
     public void mark(int readlimit)
     {
         Code.notImplemented();
-    }    
+    }
     
     /* ------------------------------------------------------------ */
+    /* Get the size of the next chunk.
+     * @return size of the next chunk or -1 for EOF.
+     * @exception IOException 
+     */
     private int getChunkSize()
         throws IOException
     {
@@ -324,9 +266,9 @@ public class HttpInputStream extends FilterInputStream
 
         // Get next non blank line
         _chunking=false;
-        String line=readLine();
+        String line=readRawLine();
         while(line!=null && line.length()==0)
-            line=readLine();
+            line=readRawLine();
         _chunking=true;
         
         // Handle early EOF or error in format
@@ -351,10 +293,11 @@ public class HttpInputStream extends FilterInputStream
 
         return _chunksize;
     }
+
     
     /* ------------------------------------------------------------ */
-    /** Get footers
-     * Only valid after EOF has been returned
+    /** Get footers.
+     * Only valid after EOF has been returned from a chunked stream.
      * @return HttpHeader containing footer fields
      */
     public HttpFields getFooters()
@@ -362,6 +305,74 @@ public class HttpInputStream extends FilterInputStream
         return _footers;
     }
 
+    
+    /* ------------------------------------------------------------ */
+    /** Read a line ended by CR or CRLF or LF.
+     * This method only read raw data, that may be chunked.  Calling
+     * readLine() will always return unchunked data.
+     */
+    String readRawLine() throws IOException
+    {
+        CharBuffer buf = readRawBufferLine();
+        if (buf==null)
+            return null;
+        return buf.toString();
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    /** Read a line ended by CR or CRLF or LF.
+     * This method only read raw data, that may be chunked.  Calling
+     * readLine() will always return unchunked data.
+     */
+    CharBuffer readRawBufferLine() throws IOException
+    {
+        BufferedInputStream in = (BufferedInputStream)this.in;
+        _charBuffer.reset();
+        int room = _charBuffer.capacityRemaining();
+        int c=0;
+        boolean cr = false;
+        boolean lf = false;
+
+    LineLoop:
+        while (_charBuffer._size<__maxLineLength &&
+               (c=_chunking?read():in.read())!=-1)
+        {
+            switch(c)
+            {
+              case 10:
+                  lf = true;
+                  break LineLoop;
+        
+              case 13:
+                  cr = true;
+                  in.mark(2);
+                  break;
+        
+              default:
+                  if(cr)
+                  {
+                      in.reset();
+                      break LineLoop;
+                  }
+                  else
+                  {
+                      if (--room < 0)
+                      {
+                          _charBuffer.expand();
+                          room = _charBuffer.capacityRemaining();
+                      }
+                      _charBuffer.add((char)c);
+                  }
+                  break;
+            }    
+        }
+
+        if (c==-1 && _charBuffer._size==0)
+            return null;
+
+        return _charBuffer;
+    }
 };
 
 

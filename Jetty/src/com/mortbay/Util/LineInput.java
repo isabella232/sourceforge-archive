@@ -12,24 +12,6 @@ import java.util.*;
 // ====================================================================
 public class LineInput extends InputStream
 {
-    // ----------------------------------------------------------------
-    // ----------------------------------------------------------------
-    public static void main(String args[])
-    {
-        LineInput input = new LineInput(System.in);
-        
-        try
-        {
-            String line;
-            while ((line=input.readLine())!=null)
-               System.out.println(line);
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
-    }
-
     /* ------------------------------------------------------------ */
     /**
      * The actual input stream.
@@ -42,8 +24,7 @@ public class LineInput extends InputStream
     public LineInput(InputStream in)
     {
         this.in = new BufferedInputStream(in);
-    }
-    
+    } 
     
     /* ------------------------------------------------------------ */
     /** Read a line ended by CR or CRLF or LF.

@@ -10,30 +10,15 @@ import java.util.Observer;
 import java.io.*;
 
 /* ---------------------------------------------------------------- */
-/** HTTP output stream
- * <p> Implements ServletOutputStream
+/** HTTP Chunkable OutputStream
+ * Acts as a BufferedOutputStream until setChunking(true) is called.
+ * Once chunking is enabled, the raw stream is chunk encoded as per RFC2616.
  *
- * <p><h4>Notes</h4>
- * Implements a callback to the HttpResponse to trigger a writeHeader
- * on the first output.  Not if HttpFilters are used, this may result
- * in replaceOut being called on this HttpOutputStream.
- * <p>
- * The path that a single call to write on HttpOutputStream
- * can be delegated to the following output streams:
- * <PRE>
- *  ---> HttpOutputSteam.out --> Filter out 1 --> ... -> Filter out N
- *                                                               |
- *             HttpOutputStream$SwitchedOutStream switchOut <----+
- *                                   /     \
- *                                  /       \
- *                                 V         V
- * socket <---  HttpOutputStream.realOut <-- ByteArrayOutputStream chunk
- *
- * </PRE>
+ * Implements a callback to an Observer before the first output.  
  * @version $Id$
  * @author Greg Wilkins
 */
-public class HttpOutputStream extends FilterOutputStream
+public class ChunkableOutputStream extends FilterOutputStream
 {
     /* ------------------------------------------------------------ */
     final static byte[]
@@ -45,11 +30,17 @@ public class HttpOutputStream extends FilterOutputStream
     /* ------------------------------------------------------------ */
     OutputStream _realOut;
     ByteArrayOutputStream _buffer;
-    byte[] _chunkHead;
+    byte[] _chunkSize;
     Observer _observer;
     
     /* ------------------------------------------------------------ */
-    public HttpOutputStream(OutputStream outputStream, Observer notifyFirstWrite)
+    /** Constructor. 
+     * @param outputStream The outputStream to buffer or chunk to.
+     * @param notifyFirstWrite An observer that is called when the first
+     *                         write is called.
+     */
+    public ChunkableOutputStream(OutputStream outputStream,
+                                 Observer notifyFirstWrite)
     {
         super(new ByteArrayOutputStream(4096));
         _buffer=(ByteArrayOutputStream)out;
@@ -64,15 +55,18 @@ public class HttpOutputStream extends FilterOutputStream
     }
     
     /* ------------------------------------------------------------ */
-    public OutputStream insertFilter(OutputStream newOut)
+    /** Insert FilterOutputStream.
+     * Place a FilterOutputStream into this stream, but before the
+     * chunking stream.
+     * @param filter 
+     */
+    public void insertFilter(OutputStream filter)
     {
-        OutputStream oldOut = out;
-        out=newOut;
-        return oldOut;
+        out=filter;
     }
     
     /* ------------------------------------------------------------ */
-    /** Switch chunking on an off
+    /** Set chunking mode.
      * @param on 
      */
     public void setChunking(boolean on)
@@ -80,9 +74,17 @@ public class HttpOutputStream extends FilterOutputStream
     {
         flush();
         if (on)
-            _chunkHead=new byte[16];
+            _chunkSize=new byte[16];
         else
-            _chunkHead=null;
+            _chunkSize=null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get chunking mode 
+     */
+    public boolean getChunking()
+    {
+        return _chunkSize!=null;
     }
     
     /* ------------------------------------------------------------ */
@@ -133,17 +135,17 @@ public class HttpOutputStream extends FilterOutputStream
         out.flush();
         if (_buffer.size()>0)
         {
-            if (_chunkHead!=null)
+            if (_chunkSize!=null)
             {
                 String size = Integer.toString(_buffer.size(),16);
                 byte[] b = size.getBytes();
                 int i;
                 for (i=0;i<b.length;i++)
-                    _chunkHead[i]=b[i];
-                _chunkHead[i++]=(byte)';';
-                _chunkHead[i++]=__CRLF_B[0];
-                _chunkHead[i++]=__CRLF_B[1];
-                _realOut.write(_chunkHead,0,i);
+                    _chunkSize[i]=b[i];
+                _chunkSize[i++]=(byte)';';
+                _chunkSize[i++]=__CRLF_B[0];
+                _chunkSize[i++]=__CRLF_B[1];
+                _realOut.write(_chunkSize,0,i);
                 _buffer.writeTo(_realOut);
                 _buffer.reset();
                 _realOut.write(__CRLF_B);
@@ -158,6 +160,11 @@ public class HttpOutputStream extends FilterOutputStream
     }
 
     /* ------------------------------------------------------------ */
+    /** Close the stream.
+     * In chunking mode, the underlying stream is not closed.
+     * All filters are closed and discarded.
+     * @exception IOException 
+     */
     public synchronized void close()
         throws IOException
     {
@@ -168,12 +175,13 @@ public class HttpOutputStream extends FilterOutputStream
             out.close();
             
             // If chunking
-            if (_chunkHead!=null)
+            if (_chunkSize!=null)
             {
                 // send last chunk and revert to normal output
                 _realOut.write(__CHUNK_EOF_B);
                 _realOut.flush();
-                _chunkHead=null;
+                _chunkSize=null;
+                out=_buffer=new ByteArrayOutputStream(4096);
             }
             else
                 _realOut.close();
@@ -184,12 +192,3 @@ public class HttpOutputStream extends FilterOutputStream
         }
     }
 }
-
-
-
-
-
-
-
-
-

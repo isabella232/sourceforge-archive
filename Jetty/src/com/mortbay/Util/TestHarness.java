@@ -411,11 +411,79 @@ public class TestHarness
     }
     
     /* ------------------------------------------------------------ */
+    public static void testQuotedStringTokenizer()
+    {
+        Test test = new Test("com.mortbay.Util.QuotedStringTokenizer");
+        try
+        {
+            QuotedStringTokenizer tok;
+            
+            tok=new QuotedStringTokenizer
+                ("aaa, bbb, 'ccc, \"ddd\", \\'eee\\''",", ");
+            test.check(tok.hasMoreTokens(),"hasMoreTokens");
+            test.check(tok.hasMoreTokens(),"hasMoreTokens");
+            test.checkEquals(tok.nextToken(),"aaa","aaa");
+            test.check(tok.hasMoreTokens(),"hasMoreTokens");
+            test.checkEquals(tok.nextToken(),"bbb","bbb");
+            test.check(tok.hasMoreTokens(),"hasMoreTokens");
+            test.checkEquals(tok.nextToken(),"ccc, \"ddd\", 'eee'","quoted");
+            test.check(!tok.hasMoreTokens(),"hasMoreTokens");
+            test.check(!tok.hasMoreTokens(),"hasMoreTokens");
+            
+            tok=new QuotedStringTokenizer
+                ("aaa, bbb, 'ccc, \"ddd\", \\'eee\\''",", ",false,true);
+            test.checkEquals(tok.nextToken(),"aaa","aaa");
+            test.checkEquals(tok.nextToken(),"bbb","bbb");
+            test.checkEquals(tok.nextToken(),"'ccc, \"ddd\", \\'eee\\''","quoted");
+            
+            tok=new QuotedStringTokenizer
+                ("aa,bb;\"cc\",,'dd',;'',',;','\\''",";,");
+            test.checkEquals(tok.nextToken(),"aa","aa");
+            test.checkEquals(tok.nextToken(),"bb","bb");
+            test.checkEquals(tok.nextToken(),"cc","cc");
+            test.checkEquals(tok.nextToken(),"dd","dd");
+            test.checkEquals(tok.nextToken(),"","empty");
+            test.checkEquals(tok.nextToken(),",;","delimiters");
+            test.checkEquals(tok.nextToken(),"'","escaped");
+            
+            tok=new QuotedStringTokenizer
+                ("xx,bb;\"cc\",,'dd',;'',',;','\\''",";,",true);
+            test.checkEquals(tok.nextToken(),"xx","xx");
+            test.checkEquals(tok.nextToken(),",",",");
+            test.checkEquals(tok.nextToken(),"bb","bb");
+            test.checkEquals(tok.nextToken(),";",";");
+            test.checkEquals(tok.nextToken(),"cc","cc");
+            test.checkEquals(tok.nextToken(),",",",");
+            test.checkEquals(tok.nextToken(),",",",");
+            test.checkEquals(tok.nextToken(),"dd","dd");
+            test.checkEquals(tok.nextToken(),",",",");
+            test.checkEquals(tok.nextToken(),";",";");
+            test.checkEquals(tok.nextToken(),"","empty");
+            test.checkEquals(tok.nextToken(),",",",");
+            test.checkEquals(tok.nextToken(),",;","delimiters");
+            test.checkEquals(tok.nextToken(),",",",");
+            test.checkEquals(tok.nextToken(),"'","escaped");
+            
+            tok=new QuotedStringTokenizer
+                ("aaa;bbb,ccc;ddd",";");
+            test.checkEquals(tok.nextToken(),"aaa","aaa");
+            test.check(tok.hasMoreTokens(),"hasMoreTokens");
+            test.checkEquals(tok.nextToken(","),"bbb","bbb");
+            test.checkEquals(tok.nextToken(),"ccc;ddd","ccc;ddd");
+        }
+        catch(Exception e)
+        {
+            test.check(false,e.toString());
+        }
+    }
+    /* ------------------------------------------------------------ */
     /** main
      */
     public static void main(String[] args)
     {
         try{
+            testQuotedStringTokenizer();
+            
             testDateCache();
             testTest();
             testLog();
