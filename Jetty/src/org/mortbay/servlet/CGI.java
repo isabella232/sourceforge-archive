@@ -135,6 +135,7 @@ public class CGI extends HttpServlet
         String both=pathInContext;
         String first=both;
         String last="";
+        
         File exe=new File(_docRoot, first);
 
         while ((first.endsWith("/") || !exe.exists()) && first.length()>=0)
@@ -145,18 +146,20 @@ public class CGI extends HttpServlet
             last=both.substring(index, both.length());
             exe=new File(_docRoot, first);
         }
-
-	if (first.length()==0 || !exe.exists())
+        
+        if (first.length()==0 ||
+            !exe.exists() ||
+            !exe.getCanonicalPath().equals(exe.getAbsolutePath()) ||
+            exe.isDirectory())
             res.sendError(404);
-
-        exe = exe.getCanonicalFile();
-
-        Code.debug("CGI: script is "+exe);
-        Code.debug("CGI: pathInfo is "+last);
-
-        exec(exe, last, req, res);
+        else
+        {
+            Code.debug("CGI: script is "+exe);
+            Code.debug("CGI: pathInfo is "+last);
+            
+            exec(exe, last, req, res);
+        }
     }
-    
 
     /* ------------------------------------------------------------ */
     /* 
