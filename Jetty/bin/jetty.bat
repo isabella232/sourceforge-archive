@@ -68,13 +68,13 @@ IF EXIST jettyenv.bat CALL jettyenv.bat
 rem ===========================================================
 rem == check for JAVA_HOME environment variable
 rem ===========================================================
-if NOT "%JAVA_HOME%"=="" goto got_java_home
-        echo The environment variable JAVA_HOME must be set.
-        goto done
+if NOT [%JAVA_HOME%]==[] goto got_java_home
+	echo The environment variable JAVA_HOME must be set.
+	goto done
 :got_java_home
 
 rem == if JETTY_HOME is not set
-if NOT "%JETTY_HOME%"=="" goto got_jetty_home
+if NOT [%JETTY_HOME%]==[] goto got_jetty_home
 rem ==   set JETTY_HOME to the current directory
 
 rem ===========================================================
@@ -123,16 +123,16 @@ rem == if no args then set admin.xml and demo.xml
 rem == note: since we will cd to the JETTY_HOME directory
 rem          we do not need to append JETTY_HOME onto the
 rem          file names.
-if "%1"=="" (set ARGS=etc\admin.xml etc\demo.xml & goto args_done)
+if [%1]==[] (set ARGS=etc\admin.xml etc\demo.xml & goto args_done)
 rem == append command line arguments on ARGS
 :setargs
-if NOT "%1"=="" (set ARGS=%ARGS% "%1" & shift & goto setargs)
+if NOT [%1]==[] (set ARGS=%ARGS% "%1" & shift & goto setargs)
 :args_done
 
 rem ===========================================================
 rem == check for log directory
 rem ===========================================================
-if NOT "%JETTY_LOG%"=="" goto logs_set
+if NOT [%JETTY_LOG%]==[] goto logs_set
 dir /b /ad | find /I "logs" >NUL
 if ERRORLEVEL 0 goto found_logs
 	mkdir logs
