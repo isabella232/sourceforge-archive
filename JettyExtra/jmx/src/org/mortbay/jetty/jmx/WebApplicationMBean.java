@@ -26,13 +26,13 @@ import java.util.Iterator;
 
 /* ------------------------------------------------------------ */
 /** Web Application MBean.
- * Note that while Web Applications are HandlerContexts, the MBean is
- * not derived from HandlerContextMBean as they are managed differently.
+ * Note that while Web Applications are HttpContexts, the MBean is
+ * not derived from HttpContextMBean as they are managed differently.
  *
  * @version $Revision$
  * @author Greg Wilkins (gregw)
  */
-public class WebApplicationMBean extends ServletHandlerContextMBean
+public class WebApplicationMBean extends ServletHttpContextMBean
 {
     /* ------------------------------------------------------------ */
     /** Constructor. 

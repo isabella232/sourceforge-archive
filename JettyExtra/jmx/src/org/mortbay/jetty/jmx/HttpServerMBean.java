@@ -18,7 +18,7 @@ import org.mortbay.jetty.Server;
 import org.mortbay.http.HttpServer;
 import org.mortbay.http.HttpListener;
 import org.mortbay.http.SocketListener;
-import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpContext;
 import org.mortbay.jetty.servlet.WebApplicationContext;
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
@@ -167,8 +167,8 @@ public class HttpServerMBean extends LifeCycleMBean
                 }
                 else if (o instanceof WebApplicationContext)
                     mbean= new WebApplicationMBean(this,(WebApplicationContext)o);
-                else if (o instanceof HandlerContext)
-                    mbean= new HandlerContextMBean(this,(HandlerContext)o);
+                else if (o instanceof HttpContext)
+                    mbean= new HttpContextMBean(this,(HttpContext)o);
                 else if (o instanceof LogSink)
                 {
                     LogSink sink =(LogSink)o;
@@ -185,10 +185,10 @@ public class HttpServerMBean extends LifeCycleMBean
                     String name=getObjectName().toString();
                     if (sink!=_jettyServer.getLogSink())
                     {
-                        Iterator ctxs = _jettyServer.getHandlerContexts().iterator();
+                        Iterator ctxs = _jettyServer.getHttpContexts().iterator();
                         while (ctxs.hasNext())
                         {
-                            HandlerContext c = (HandlerContext)ctxs.next();
+                            HttpContext c = (HttpContext)ctxs.next();
                             if (sink==c.getLogSink())
                             {
                                 name+=",context="+c.getContextPath();

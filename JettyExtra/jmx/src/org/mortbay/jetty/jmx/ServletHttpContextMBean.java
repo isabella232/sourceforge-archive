@@ -14,7 +14,7 @@ import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 
 import org.mortbay.http.HttpServer;
-import org.mortbay.jetty.servlet.ServletHandlerContext;
+import org.mortbay.jetty.servlet.ServletHttpContext;
 import org.mortbay.jetty.servlet.WebApplicationContext;
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
@@ -27,20 +27,20 @@ import java.util.Iterator;
 
 /* ------------------------------------------------------------ */
 /** Web Application MBean.
- * Note that while Web Applications are HandlerContexts, the MBean is
- * not derived from HandlerContextMBean as they are managed differently.
+ * Note that while Web Applications are HttpContexts, the MBean is
+ * not derived from HttpContextMBean as they are managed differently.
  *
  * @version $Revision$
  * @author Greg Wilkins (gregw)
  */
-public class ServletHandlerContextMBean extends HandlerContextMBean
+public class ServletHttpContextMBean extends HttpContextMBean
 {
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @exception MBeanException 
      * @exception InstanceNotFoundException 
      */
-    public ServletHandlerContextMBean(HttpServerMBean server,ServletHandlerContext context)
+    public ServletHttpContextMBean(HttpServerMBean server,ServletHttpContext context)
         throws MBeanException, InstanceNotFoundException
     {
         super(server,context);

@@ -17,7 +17,7 @@ import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 
 import org.mortbay.http.HttpServer;
-import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpContext;
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
 import org.mortbay.util.LifeCycle;
@@ -35,9 +35,9 @@ import java.util.Iterator;
  * @version $Revision$
  * @author Greg Wilkins (gregw)
  */
-public class HandlerContextMBean extends LifeCycleMBean
+public class HttpContextMBean extends LifeCycleMBean
 {
-    private HandlerContext _handlerContext;
+    private HttpContext _httpContext;
     private HttpServerMBean _httpServerMBean;
     private ModelMBeanImpl _logMBean;
     
@@ -46,12 +46,12 @@ public class HandlerContextMBean extends LifeCycleMBean
      * @exception MBeanException 
      * @exception InstanceNotFoundException 
      */
-    public HandlerContextMBean(HttpServerMBean server,HandlerContext context)
+    public HttpContextMBean(HttpServerMBean server,HttpContext context)
         throws MBeanException, InstanceNotFoundException
     {
         super(context);
         _httpServerMBean=server;
-        _handlerContext=context;
+        _httpContext=context;
     }
 
     /* ------------------------------------------------------------ */
@@ -103,13 +103,13 @@ public class HandlerContextMBean extends LifeCycleMBean
                         new String[] {STRING},
                         IMPACT_ACTION);
         
-        defineOperation("addHandler",
+        defineOperation("addHttpHandler",
                         new String[] {INT, "org.mortbay.http.HttpHandler"},
                         IMPACT_ACTION);
-        defineOperation("getHandler",
+        defineOperation("getHttpHandler",
                         new String[] {INT},
                         IMPACT_INFO);
-        defineOperation("removeHandler",
+        defineOperation("removeHttpHandler",
                         new String[] {INT},
                         IMPACT_ACTION);
         
@@ -125,7 +125,7 @@ public class HandlerContextMBean extends LifeCycleMBean
         return
             uniqueObjectName(server,_httpServerMBean.getObjectName().toString()+
                              ",context="+
-                             _handlerContext.getContextPath());
+                             _httpContext.getContextPath());
     }
 }
 

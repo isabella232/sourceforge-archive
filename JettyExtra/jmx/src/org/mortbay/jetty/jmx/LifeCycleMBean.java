@@ -43,7 +43,6 @@ public class LifeCycleMBean extends ModelMBeanImpl
         defineAttribute("started");
         defineOperation("start",MBeanOperationInfo.ACTION);
         defineOperation("stop",MBeanOperationInfo.ACTION);
-        defineOperation("destroy",MBeanOperationInfo.ACTION);
     }    
 }
 
