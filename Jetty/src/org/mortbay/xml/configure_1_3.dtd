@@ -87,7 +87,7 @@ elements they are added as strings before being converted to any
 specified type.
 -->
 <!ELEMENT Put ( %VALUE; )* >
-<!ATTLIST Put %NAMEATTR; %TYPEATTR; %REFATTR; >
+<!ATTLIST Put %NAMEATTR; %TYPEATTR; >
 
 
 <!--
@@ -125,7 +125,7 @@ elements they are added as strings before being converted to any
 specified type.
 -->
 <!ELEMENT Arg ( %VALUE; )* >
-<!ATTLIST Arg %TYPEATTR; %REFATTR; >
+<!ATTLIST Arg %TYPEATTR; >
 
 
 
