@@ -31,4 +31,9 @@ public class Tests extends junit.framework.TestCase
     {
       junit.textui.TestRunner.run(suite());
     }    
+
+    public void testPlaceHolder()
+    {
+      assertTrue(true);
+    }
 }

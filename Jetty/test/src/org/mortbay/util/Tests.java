@@ -181,36 +181,37 @@ public class Tests extends junit.framework.TestCase
                                   String method, int depth,
                                   String thread, String file)
     {
-        checkContains(desc+": depth", f._method, method);
-        assertEquals( desc+": depth", f._depth, depth);
-        assertEquals( desc+": depth", f._thread, thread);
-        checkContains(desc+": depth", f._file, file);
+        checkContains(desc+": method", f._stack,  method);
+        assertEquals( desc+": depth",  depth,     f._depth);
+        assertEquals( desc+": thread", thread,    f._thread);
+        checkContains(desc+": file",   f._file,   file);
     }
     
     /* ------------------------------------------------------------ */
     public void testFrame()
     {
         Frame f = new Frame();
-        testFrameChecker(f, "default constructor",
-                         "org.mortbay.util.TestHarness.testFrame",
-                         2, "main", "TestHarness.java");
+        int depth = f._depth;
+        testFrameChecker(f, "method",
+                         "org.mortbay.util.Tests.testFrame",
+                         depth, "main", "Tests.java");
         f = f.getParent();
         testFrameChecker(f, "getParent",
-                         "org.mortbay.util.TestHarness.main",
-                         1, "main", "TestHarness.java");
+                         "org.mortbay.util.Tests.testFrame",
+                         depth-1, "main", "Tests.java");
         f = f.getParent();
         assertEquals("getParent() off top of stack", f, null);
         f = new Frame(1);
         testFrameChecker(f, "new Frame(1)",
-                         "org.mortbay.util.TestHarness.main",
-                         1, "main", "TestHarness.java");
+                         "org.mortbay.util.Tests.testFrame",
+                         depth-1, "testFrame", "Tests.java");
         f = new Frame(1, true);
         testFrameChecker(f, "partial",
                          "unknownMethod", 0, "unknownThread", "UnknownFile");
         f.complete();
         testFrameChecker(f, "new Frame(1)",
-                         "org.mortbay.util.TestHarness.main",
-                         1, "main", "TestHarness.java");
+                         "org.mortbay.util.Tests.testFrame",
+                         depth-1, "testFrame", "Tests.java");
     }
 
 
@@ -246,7 +247,14 @@ public class Tests extends junit.framework.TestCase
        assertEquals("decode(encode(abc^@))",  B64Code.decode(B64Code.encode("abc\000")),"abc\000");
        assertEquals("decode(encode(abcd^@))", B64Code.decode(B64Code.encode("abcd\000")),"abcd\000");
 
-	    // Test the reversibility of the full range of 8 bit values
+	    // Encoder compatibility tests
+	    assertEquals("encode(abc)",     "YWJj",         B64Code.encode("abc"));
+	    assertEquals("encode(abcd)",    "YWJjZA==",     B64Code.encode("abcd"));
+	    assertEquals("encode(abcde)",   "YWJjZGU=",     B64Code.encode("abcde"));
+	    assertEquals("encode(abcdef)",  "YWJjZGVm",     B64Code.encode("abcdef"));
+	    assertEquals("encode(abcdefg)", "YWJjZGVmZw==", B64Code.encode("abcdefg"));
+
+       // Test the reversibility of the full range of 8 bit values
 	    byte[] allValues= new byte[256];
 	    for (int i=0; i<256; i++)
          allValues[i] = (byte) i;
@@ -254,22 +262,313 @@ public class Tests extends junit.framework.TestCase
             String output=B64Code.decode(B64Code.encode(input));
 
             for (int i=0;i<256;i++)
-                if (input.charAt(i)!=output.charAt(i))
-                    System.err.println("DIFF at "+i+" "+
-                                       ((int)input.charAt(i))+
-                                       "!="+
-                                       ((int)output.charAt(i)));
+              assertEquals("DIFF at "+i, (int)input.charAt(i), (int)output.charAt(i));
 	    assertEquals( "decode(encode(ALL_128_ASCII_VALUES))", output,input);
 
-	    // Encoder compatibility tests
-	    assertEquals("YWJj","encode(abc)",         B64Code.encode("abc"));
-	    assertEquals("YWJjZA==","encode(abc)",     B64Code.encode("abcd"));
-	    assertEquals("YWJjZGU=","encode(abc)",     B64Code.encode("abcde"));
-	    assertEquals("YWJjZGVm","encode(abc)",     B64Code.encode("abcdef"));
-	    assertEquals("YWJjZGVmZw==","encode(abc)", B64Code.encode("abcdefg"));
     }
     
     
+    /* ------------------------------------------------------------ */
+    public void testPassword()
+    {
+        Password f1 = new Password("password","Foo");
+        Password f2 = new Password("password",
+                                   Password.obfuscate("Foo"));
+        Password f3 = new Password("password",
+                                   Password.checksum("Foo"));
+        
+        Password b1 = new Password("password","Bar");
+        Password b2 = new Password("password",
+                                   Password.obfuscate("Bar"));
+        Password b3 = new Password("password",
+                                   Password.checksum("Bar"));
+
+        assertTrue("PW to PW",   f1.equals(f1));
+        assertTrue("PW to Obf",  f1.equals(f2));
+        assertTrue("PW to CS",   !f1.equals(f3));
+        assertTrue("Obf to PW",  f2.equals(f1));
+        assertTrue("Obf to Obf", f2.equals(f2));
+        assertTrue("Obf to CS",  !f2.equals(f3));
+        assertTrue("CS to PW",   !f3.equals(f1));
+        assertTrue("CS to Obf",  !f3.equals(f2));
+        assertTrue("CS to CS",   f3.equals(f3));
+        
+        assertTrue("PW to Str",  f1.check("Foo"));
+        assertTrue("Obf to Str", f2.check("Foo"));
+        assertTrue("CS to Str",  f3.check("Foo"));
+        
+        assertTrue("PW to PW",   !f1.equals(b1));
+        assertTrue("PW to Obf",  !f1.equals(b2));
+        assertTrue("PW to CS",   !f1.equals(b3));
+        assertTrue("Obf to PW",  !f2.equals(b1));
+        assertTrue("Obf to Obf", !f2.equals(b2));
+        assertTrue("Obf to CS",  !f2.equals(b3));
+        assertTrue("CS to PW",   !f3.equals(b1));
+        assertTrue("CS to Obf",  !f3.equals(b2));
+        assertTrue("CS to CS",   !f3.equals(b3));
+        
+        assertTrue("PW to Str",  !f1.check("Bar"));
+        assertTrue("Obf to Str", !f2.check("Bar"));
+        assertTrue("CS to Str",  !f3.check("Bar"));
+    }
+
+    /* ------------------------------------------------------------ */
+    public void testURI()
+    {
+        URI uri;
+
+        // No host
+        uri = new URI("/");
+        assertEquals("root /", uri.getPath(),"/");
+
+        uri = new URI("/Test/URI");
+        assertEquals("no params", uri.toString(),"/Test/URI");
+
+        uri = new URI("/Test/URI?");
+        assertEquals("no params", uri.toString(),"/Test/URI?");
+        uri.getParameters();
+        assertEquals("no params", uri.toString(),"/Test/URI");
+        
+        uri = new URI("/Test/URI?a=1");
+        assertEquals("one param", uri.toString(),"/Test/URI?a=1");
     
+        uri = new URI("/Test/URI");
+        uri.put("b","2 !");
+        assertEquals("add param", uri.toString(),"/Test/URI?b=2+%21");
+
+        // Host but no port
+        uri = new URI("http://host");
+        assertEquals("root host", uri.getPath(),"/");
+        assertEquals("root host", uri.toString(),"http://host/");
+        
+        uri = new URI("http://host/");
+        assertEquals("root host/", uri.getPath(),"/");
+        
+        uri = new URI("http://host/Test/URI");
+        assertEquals("no params", uri.toString(),"http://host/Test/URI");
+
+        uri = new URI("http://host/Test/URI?");
+        assertEquals("no params", uri.toString(),"http://host/Test/URI?");
+        uri.getParameters();
+        assertEquals("no params", uri.toString(),"http://host/Test/URI");
+        
+        uri = new URI("http://host/Test/URI?a=1");
+        assertEquals("one param", uri.toString(),"http://host/Test/URI?a=1");
     
+        uri = new URI("http://host/Test/URI");
+        uri.put("b","2 !");
+        assertEquals("add param", uri.toString(),"http://host/Test/URI?b=2+%21");
+    
+        // Host and port and path
+        uri = new URI("http://host:8080");
+        assertEquals("root", uri.getPath(),"/");
+        
+        uri = new URI("http://host:8080/");
+        assertEquals("root", uri.getPath(),"/");
+        
+        uri = new URI("http://host:8080/xxx");
+        assertEquals("path", uri.getPath(),"/xxx");
+
+        String anez=UrlEncoded.decodeString("A%F1ez");
+        uri = new URI("http://host:8080/"+anez);
+        assertEquals("root", uri.getPath(),"/"+anez);            
+        
+        uri = new URI("http://host:8080/Test/URI");
+        assertEquals("no params", uri.toString(),"http://host:8080/Test/URI");
+
+        uri = new URI("http://host:8080/Test/URI?");
+        assertEquals("no params", uri.toString(),"http://host:8080/Test/URI?");
+        uri.getParameters();
+        assertEquals("no params", uri.toString(),"http://host:8080/Test/URI");
+        
+        uri = new URI("http://host:8080/Test/URI?a=1");
+        assertEquals("one param", uri.toString(),"http://host:8080/Test/URI?a=1");
+    
+        uri = new URI("http://host:8080/Test/URI");
+        uri.put("b","2 !");
+        assertEquals("add param", uri.toString(),"http://host:8080/Test/URI?b=2+%21");
+    
+        assertEquals("protocol", uri.getScheme(),"http");
+        assertEquals("host", uri.getHost(),"host");
+        assertEquals("port", uri.getPort(),8080);
+
+        uri.setScheme("ftp");
+        uri.setHost("fff");
+        uri.setPort(23);
+        assertEquals("add param", uri.toString(),"ftp://fff:23/Test/URI?b=2+%21");
+        
+    
+        uri = new URI("/Test/URI?c=1&d=2");
+        uri.put("e","3");
+        String s = uri.toString();
+        assertTrue("merge params path", s.startsWith("/Test/URI?"));
+        assertTrue("merge params c1", s.indexOf("c=1")>0);
+        assertTrue("merge params d2", s.indexOf("d=2")>0);
+        assertTrue("merge params e3", s.indexOf("e=3")>0);
+
+        uri = new URI("/Test/URI?a=");
+        assertEquals("null param", uri.toString(),"/Test/URI?a=");
+        uri.getParameters();
+        assertEquals("null param", uri.toString(),"/Test/URI?a");
+        
+        uri = new URI("/Test/Nasty%26%3F%20URI?c=%26&d=+%3F");
+        assertEquals("nasty", uri.getPath(),"/Test/Nasty&? URI");
+        uri.setPath("/test/nasty&? URI");
+        uri.getParameters();
+        assertTrue( "nasty",
+                    uri.toString().equals("/test/nasty&%3F%20URI?c=%26&d=+%3F")||
+                    uri.toString().equals("/test/nasty&%3F%20URI?d=+%3F&c=%26")
+                    );
+        uri=(URI)uri.clone();
+        assertTrue("clone",
+                   uri.toString().equals("/test/nasty&%3F%20URI?c=%26&d=+%3F")||
+                   uri.toString().equals("/test/nasty&%3F%20URI?d=+%3F&c=%26")
+                   );
+
+        assertEquals("null+null", URI.addPaths(null,null),null);
+        assertEquals("null+", URI.addPaths(null,""),null);
+        assertEquals("null+bbb", URI.addPaths(null,"bbb"),"bbb");
+        assertEquals("null+/", URI.addPaths(null,"/"),"/");
+        assertEquals("null+/bbb", URI.addPaths(null,"/bbb"),"/bbb");
+        
+        assertEquals("+null", URI.addPaths("",null),"");
+        assertEquals("+", URI.addPaths("",""),"");
+        assertEquals("+bbb", URI.addPaths("","bbb"),"bbb");
+        assertEquals("+/", URI.addPaths("","/"),"/");
+        assertEquals("+/bbb", URI.addPaths("","/bbb"),"/bbb");
+        
+        assertEquals("aaa+null", URI.addPaths("aaa",null),"aaa");
+        assertEquals("aaa+", URI.addPaths("aaa",""),"aaa");
+        assertEquals("aaa+bbb", URI.addPaths("aaa","bbb"),"aaa/bbb");
+        assertEquals("aaa+/", URI.addPaths("aaa","/"),"aaa/");
+        assertEquals("aaa+/bbb", URI.addPaths("aaa","/bbb"),"aaa/bbb");
+        
+        assertEquals("/+null", URI.addPaths("/",null),"/");
+        assertEquals("/+", URI.addPaths("/",""),"/");
+        assertEquals("/+bbb", URI.addPaths("/","bbb"),"/bbb");
+        assertEquals("/+/", URI.addPaths("/","/"),"/");
+        assertEquals("/+/bbb", URI.addPaths("/","/bbb"),"/bbb");
+        
+        assertEquals("aaa/+null", URI.addPaths("aaa/",null),"aaa/");
+        assertEquals("aaa/+", URI.addPaths("aaa/",""),"aaa/");
+        assertEquals("aaa/+bbb", URI.addPaths("aaa/","bbb"),"aaa/bbb");
+        assertEquals("aaa/+/", URI.addPaths("aaa/","/"),"aaa/");
+        assertEquals("aaa/+/bbb", URI.addPaths("aaa/","/bbb"),"aaa/bbb");
+        
+        assertEquals(";JS+null", URI.addPaths(";JS",null),";JS");
+        assertEquals(";JS+", URI.addPaths(";JS",""),";JS");
+        assertEquals(";JS+bbb", URI.addPaths(";JS","bbb"),"bbb;JS");
+        assertEquals(";JS+/", URI.addPaths(";JS","/"),"/;JS");
+        assertEquals(";JS+/bbb", URI.addPaths(";JS","/bbb"),"/bbb;JS");
+        
+        assertEquals("aaa;JS+null", URI.addPaths("aaa;JS",null),"aaa;JS");
+        assertEquals("aaa;JS+", URI.addPaths("aaa;JS",""),"aaa;JS");
+        assertEquals("aaa;JS+bbb", URI.addPaths("aaa;JS","bbb"),"aaa/bbb;JS");
+        assertEquals("aaa;JS+/", URI.addPaths("aaa;JS","/"),"aaa/;JS");
+        assertEquals("aaa;JS+/bbb", URI.addPaths("aaa;JS","/bbb"),"aaa/bbb;JS");
+        
+        assertEquals("aaa;JS+null", URI.addPaths("aaa/;JS",null),"aaa/;JS");
+        assertEquals("aaa;JS+", URI.addPaths("aaa/;JS",""),"aaa/;JS");
+        assertEquals("aaa;JS+bbb", URI.addPaths("aaa/;JS","bbb"),"aaa/bbb;JS");
+        assertEquals("aaa;JS+/", URI.addPaths("aaa/;JS","/"),"aaa/;JS");
+        assertEquals("aaa;JS+/bbb", URI.addPaths("aaa/;JS","/bbb"),"aaa/bbb;JS");
+        
+        assertEquals("?A=1+null", URI.addPaths("?A=1",null),"?A=1");
+        assertEquals("?A=1+", URI.addPaths("?A=1",""),"?A=1");
+        assertEquals("?A=1+bbb", URI.addPaths("?A=1","bbb"),"bbb?A=1");
+        assertEquals("?A=1+/", URI.addPaths("?A=1","/"),"/?A=1");
+        assertEquals("?A=1+/bbb", URI.addPaths("?A=1","/bbb"),"/bbb?A=1");
+        
+        assertEquals("aaa?A=1+null", URI.addPaths("aaa?A=1",null),"aaa?A=1");
+        assertEquals("aaa?A=1+", URI.addPaths("aaa?A=1",""),"aaa?A=1");
+        assertEquals("aaa?A=1+bbb", URI.addPaths("aaa?A=1","bbb"),"aaa/bbb?A=1");
+        assertEquals("aaa?A=1+/", URI.addPaths("aaa?A=1","/"),"aaa/?A=1");
+        assertEquals("aaa?A=1+/bbb", URI.addPaths("aaa?A=1","/bbb"),"aaa/bbb?A=1");
+        
+        assertEquals("aaa?A=1+null", URI.addPaths("aaa/?A=1",null),"aaa/?A=1");
+        assertEquals("aaa?A=1+", URI.addPaths("aaa/?A=1",""),"aaa/?A=1");
+        assertEquals("aaa?A=1+bbb", URI.addPaths("aaa/?A=1","bbb"),"aaa/bbb?A=1");
+        assertEquals("aaa?A=1+/", URI.addPaths("aaa/?A=1","/"),"aaa/?A=1");
+        assertEquals("aaa?A=1+/bbb", URI.addPaths("aaa/?A=1","/bbb"),"aaa/bbb?A=1");
+        
+        assertEquals(";JS?A=1+null", URI.addPaths(";JS?A=1",null),";JS?A=1");
+        assertEquals(";JS?A=1+", URI.addPaths(";JS?A=1",""),";JS?A=1");
+        assertEquals(";JS?A=1+bbb", URI.addPaths(";JS?A=1","bbb"),"bbb;JS?A=1");
+        assertEquals(";JS?A=1+/", URI.addPaths(";JS?A=1","/"),"/;JS?A=1");
+        assertEquals(";JS?A=1+/bbb", URI.addPaths(";JS?A=1","/bbb"),"/bbb;JS?A=1");
+        
+        assertEquals("aaa;JS?A=1+null", URI.addPaths("aaa;JS?A=1",null),"aaa;JS?A=1");
+        assertEquals("aaa;JS?A=1+", URI.addPaths("aaa;JS?A=1",""),"aaa;JS?A=1");
+        assertEquals("aaa;JS?A=1+bbb", URI.addPaths("aaa;JS?A=1","bbb"),"aaa/bbb;JS?A=1");
+        assertEquals("aaa;JS?A=1+/", URI.addPaths("aaa;JS?A=1","/"),"aaa/;JS?A=1");
+        assertEquals("aaa;JS?A=1+/bbb", URI.addPaths("aaa;JS?A=1","/bbb"),"aaa/bbb;JS?A=1");
+        
+        assertEquals("aaa;JS?A=1+null", URI.addPaths("aaa/;JS?A=1",null),"aaa/;JS?A=1");
+        assertEquals("aaa;JS?A=1+", URI.addPaths("aaa/;JS?A=1",""),"aaa/;JS?A=1");
+        assertEquals("aaa;JS?A=1+bbb", URI.addPaths("aaa/;JS?A=1","bbb"),"aaa/bbb;JS?A=1");
+        assertEquals("aaa;JS?A=1+/", URI.addPaths("aaa/;JS?A=1","/"),"aaa/;JS?A=1");
+        assertEquals("aaa;JS?A=1+/bbb", URI.addPaths("aaa/;JS?A=1","/bbb"),"aaa/bbb;JS?A=1");
+
+        assertEquals("parent /aaa/bbb/", URI.parentPath("/aaa/bbb/"),"/aaa/");
+        assertEquals("parent /aaa/bbb", URI.parentPath("/aaa/bbb"),"/aaa/");
+        assertEquals("parent /aaa/", URI.parentPath("/aaa/"),"/");
+        assertEquals("parent /aaa", URI.parentPath("/aaa"),"/");
+        assertEquals("parent /", URI.parentPath("/"),null);
+        assertEquals("parent null", URI.parentPath(null),null);
+
+        String[][] canonical = 
+        {
+            {"/aaa/bbb/","/aaa/bbb/"},
+            {"/aaa//bbb/","/aaa/bbb/"},
+            {"/aaa///bbb/","/aaa/bbb/"},
+            {"/aaa/./bbb/","/aaa/bbb/"},
+            {"/aaa/../bbb/","/bbb/"},
+            {"/aaa/./../bbb/","/bbb/"},
+            {"/aaa/bbb/ccc/../../ddd/","/aaa/ddd/"},
+            {"./bbb/","bbb/"},
+            {"./aaa/../bbb/","bbb/"},
+            {"./",""},
+            {".//",""},
+            {".///",""},
+            {"/.","/"},
+            {"//.","/"},
+            {"///.","/"},
+            {"/","/"},
+            {"aaa/bbb","aaa/bbb"},
+            {"aaa/","aaa/"},
+            {"aaa","aaa"},
+            {"/aaa/bbb","/aaa/bbb"},
+            {"/aaa//bbb","/aaa/bbb"},
+            {"/aaa/./bbb","/aaa/bbb"},
+            {"/aaa/../bbb","/bbb"},
+            {"/aaa/./../bbb","/bbb"},
+            {"./bbb","bbb"},
+            {"./aaa/../bbb","bbb"},
+            {"aaa/bbb/..","aaa/"},
+            {"aaa/bbb/../","aaa/"},
+            {"./",""},
+            {".",""},
+            {"",""},
+            {"..",null},
+            {"./..",null},
+            {"aaa/../..",null},
+            {"/foo/bar/../../..",null},
+            {"/../foo",null},
+            {"/foo/.","/foo/"},
+            {"a","a"},
+            {"a/","a/"},
+            {"a/.","a/"},
+            {"a/..",""},
+            {"a/../..",null},
+        };
+
+        for (int t=0;t<canonical.length;t++)
+            assertEquals( "canonical "+canonical[t][0],
+                          URI.canonicalPath(canonical[t][0]),
+                          canonical[t][1]
+                          );
+        
+    }
+
+
 }
