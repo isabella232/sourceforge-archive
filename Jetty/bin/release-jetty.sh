@@ -53,7 +53,7 @@ read Y
 
     cd Jetty-$VERSION
     ant clean
-    rm -fr demo ext etc/demo* test
+    rm -fr demo ext/* etc/demo* test
     cd ..
     tar cfz /usr/local/archive/Jetty-${VERSION}-src.tgz Jetty-$VERSION
     jar cf  /usr/local/archive/Jetty-${VERSION}-src.zip Jetty-$VERSION
