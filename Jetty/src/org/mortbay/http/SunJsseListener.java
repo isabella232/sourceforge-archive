@@ -83,6 +83,8 @@ public class SunJsseListener extends JsseListener
     {
         _keystore_type = keystore_type;
     }
+    
+    /* ------------------------------------------------------------ */
     public String getKeystoreType()
     {
         return _keystore_type;
@@ -93,6 +95,8 @@ public class SunJsseListener extends JsseListener
     {
         _keystore_provider_name = name;
     }
+
+    /* ------------------------------------------------------------ */
     public String getKeystoreProviderName()
     {
         return _keystore_provider_name;

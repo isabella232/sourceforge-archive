@@ -91,7 +91,7 @@ public class ByteArrayPool
         Pool(int size)
         {
             _bufSize=size;
-            Log.event("New byte[] pool. size="+size);
+            Code.debug("New byte[] pool. size="+size);
         }
         
         /* ------------------------------------------------------------ */

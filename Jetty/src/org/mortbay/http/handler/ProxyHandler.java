@@ -25,9 +25,8 @@ import org.mortbay.util.LineInput;
 import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
-/** Dump request handler.
- * Dumps GET and POST requests.
- * Useful for testing and debugging.
+/** Proxy request handler.
+ * Skeleton of a HTTP/1.1 Proxy
  * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
@@ -54,9 +53,9 @@ public class ProxyHandler extends AbstractHttpHandler
         if (!"http".equals(uri.getScheme()))
             return;
         
-        System.err.println("\nPROXY:");
-        System.err.println("pathInContext="+pathInContext);
-        System.err.println("URI="+uri);
+        Code.debug("\nPROXY:");
+        Code.debug("pathInContext=",pathInContext);
+        Code.debug("URI=",uri);
 
         Socket socket=null;
         try
@@ -68,20 +67,20 @@ public class ProxyHandler extends AbstractHttpHandler
             String path=uri.getPath();
             if (path==null || path.length()==0)
                 path="/";
-            
-            System.err.println("host="+host);
-            System.err.println("port="+port);
-            System.err.println("path="+path);
+
+            if (Code.debug())
+            {
+                Code.debug("host=",host);
+                Code.debug("port="+port);
+                Code.debug("path=",path);
+            }
             
             // XXX associate this socket with the connection so
             // that it may be persistent.
             
             socket = new Socket(host,port);
             socket.setSoTimeout(5000); // XXX configure this
-            System.err.println("socket="+socket);
-            
             OutputStream sout=socket.getOutputStream();
-            System.err.println("sout="+sout);
             
             request.setState(HttpMessage.__MSG_EDITABLE);
             HttpFields header=request.getHeader();
@@ -112,7 +111,7 @@ public class ProxyHandler extends AbstractHttpHandler
             header.write(writer);
             
             // Send the request to the next hop.
-            System.err.println("\nreq=\n"+new String(writer.getBuf(),0,writer.length()));
+            Code.debug("\nreq=\n"+new String(writer.getBuf(),0,writer.length()));
             writer.writeTo(sout);
             writer.reset();
             
@@ -126,7 +125,7 @@ public class ProxyHandler extends AbstractHttpHandler
 
             // get ready to read the results back
             LineInput lin = new LineInput(socket.getInputStream());
-            System.err.println("lin="+lin);
+            Code.debug("lin="+lin);
 
             // XXX need to do something about timeouts here
             String resLine = lin.readLine();
@@ -135,12 +134,14 @@ public class ProxyHandler extends AbstractHttpHandler
             
             // At this point we are committed to sending a response!!!!
             request.setHandled(true);
-            response.setState(HttpMessage.__MSG_SENT);
+            header = response.getHeader();
+            header.clear();
             OutputStream out=response.getOutputStream();
             
             // Forward 100 responses
             while (resLine.startsWith("100"))
             {
+                Code.debug("resLine = " + resLine);
                 writer.write(resLine);
                 writer.writeTo(out);
                 out.flush();
@@ -150,25 +151,18 @@ public class ProxyHandler extends AbstractHttpHandler
                 if (resLine==null)
                     return; // XXX what should we do?
             }
-            
-            System.err.println("resLine="+resLine);
 
-            // Receive the response headers
-            HttpFields resHeader = response.getHeader();
-            resHeader.clear();
-
-            // Modify them
-            resHeader.read(lin);
-            resHeader.add("Via","Via: 1.1 host (Jetty/4.x)"); // XXX
+            // Read Response lne
+            header.read(lin);
+            // Add VIA
+            header.add("Via","Via: 1.1 host (Jetty/4.x)"); // XXX
             // XXX do the connection based stuff here!
 
             // return the header
-            // XXX this should really be set in the 
             writer.write(resLine);
             writer.write('\015');
             writer.write('\012');
-            resHeader.write(writer);
-            System.err.println("\nres=\n"+resLine+"\015\012"+resHeader);
+            header.write(writer);
             writer.writeTo(out);
 
             // return the body
@@ -183,6 +177,7 @@ public class ProxyHandler extends AbstractHttpHandler
         finally
         {
             request.setState(HttpMessage.__MSG_RECEIVED);
+            response.setState(HttpMessage.__MSG_SENT);
             if (socket!=null)
             {
                 try{socket.close();}
