@@ -164,6 +164,7 @@
   <!-- Add and configure a specific web application                    -->
   <!-- + Set Unpack WAR files                                          -->
   <!-- + Set Default Descriptor.  Resource, file or URL                -->
+  <!-- + Set java 2 complaint classloading                             -->
   <!-- + Set Virtual Hosts. A Null host or empty array means all hosts -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- UNCOMMENT TO ACTIVATE
@@ -172,8 +173,8 @@
     <Arg>./webapps/root</Arg>
 
     <Set name="extractWAR">false</Set> 
-
     <Set name="defaultsDescriptor">org/mortbay/jetty/servlet/webdefault.xml</Set>
+    <Set name="classLoaderJava2Compliant">true</Set> 
 
     <Set name="virtualHosts">
       <Array type="java.lang.String">

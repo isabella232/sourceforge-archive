@@ -115,7 +115,7 @@ public class HttpContext extends Container
     private boolean _redirectNullPath=true;
     private boolean _statsOn=false;
     private PermissionCollection _permissions;
-    private boolean _classLoaderJava2Compliant;
+    private boolean _classLoaderJava2Compliant=true;
     private ResourceCache _resources;
 
     /* ------------------------------------------------------------ */

@@ -85,7 +85,6 @@ public class NCSARequestLog implements RequestLog
         _append=true;
         _retainDays=31;
         setFilename(filename);
-        _buffered=(filename!=null);
     }
 
     /* ------------------------------------------------------------ */

@@ -169,11 +169,18 @@ public class HttpFields
                 _inlineValues=inline;
                 
                 _hashCode=__hashCode++;
-                if (__hashCode<__maxCacheSize && !__info.containsKey(name))
+                
+                if (__hashCode < __maxCacheSize)
                 {
-                    __info.put(name,this);
-                    if (!name.equals(_lname))
-                        __info.put(_lname,this);
+                    FieldInfo oldInfo = (FieldInfo)__info.get(name);
+                    if (oldInfo == null)
+                    {
+                        __info.put(name, this);
+                        if (!name.equals(_lname))
+                            __info.put(_lname, this);
+                    }
+                    else
+                        _hashCode = oldInfo._hashCode;
                 }
             }
         }
