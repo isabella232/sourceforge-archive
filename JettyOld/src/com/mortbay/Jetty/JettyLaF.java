@@ -113,6 +113,8 @@ public class JettyLaF extends Page
 	
 	HttpServletRequest request =
 	    (HttpServletRequest)properties().get(Request);
+	HttpServletResponse response =
+	    (HttpServletResponse)properties().get(Response);
 
 	if (request!=null)
 	{
@@ -142,7 +144,7 @@ public class JettyLaF extends Page
 	}
 
 	if (alternate)
-	    alternateLaF(section,heading);
+	    alternateLaF(section,heading,response);
 	else
 	{
 	    // check up
@@ -155,8 +157,9 @@ public class JettyLaF extends Page
 	    {
 		mbImage = new Image("FileBase","/Images/mbLogoSmall.gif")
 		    .border(0);
-		mbImage = new Link("/",mbImage);
 	    }
+	    
+	    
 	    if (logo==null)
 	    {
 		//logo = new Applet("MortBayLogo.class")
@@ -172,7 +175,7 @@ public class JettyLaF extends Page
 	    grid.newRow();
 	    grid.newCell().cell().add("Home".equals(section)?
 				      (Element)logo:
-				      (Element)mbImage)
+				      (Element)new Link(response.encodeURL("/"),mbImage))
 		.left().width("30%").bottom();
 	    grid.newCell().cell()
 		.nest(new Block(Block.Bold))
@@ -222,8 +225,8 @@ public class JettyLaF extends Page
 			topRight.add("<B>");
 		    }
 		
-		    footer.add(new Link(url,label));
-		    topRight.add(new Link(url,label));
+		    footer.add(new Link(response.encodeURL(url),label));
+		    topRight.add(new Link(response.encodeURL(url),label));
 
 		    if (label.equals(section))
 		    {
@@ -238,7 +241,8 @@ public class JettyLaF extends Page
 	}	
     }
 
-    private void alternateLaF(String section, String heading)
+    private void alternateLaF(String section, String heading,
+			      HttpServletResponse response)
     {
 	// Build header
 	Table grid = new Table(0);
@@ -266,12 +270,12 @@ public class JettyLaF extends Page
 	    {
 		sn = s;
 		tabs.cell().bgColor("#c0c0c0");
-		tabs.add(new Link(navigation[s][1],
+		tabs.add(new Link(response.encodeURL(navigation[s][1]),
 				  "<B>"+navigation[s][0]+"</B>"));
 	    }
 	    else
 	    {
-		tabs.add(new Link(navigation[s][1],
+		tabs.add(new Link(response.encodeURL(navigation[s][1]),
 				  navigation[s][0]));
 	    }
 	    tabs.cell().unnest();
@@ -319,4 +323,11 @@ public class JettyLaF extends Page
 	return frameSet;
     }
 }
+
+
+
+
+
+
+
 

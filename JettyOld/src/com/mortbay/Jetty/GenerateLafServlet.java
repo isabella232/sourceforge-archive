@@ -8,7 +8,8 @@ public class GenerateLafServlet extends HttpServlet
     public void doGet(HttpServletRequest request, HttpServletResponse response)
 	 throws java.io.IOException
     {
-	Page page = Page.getPage(Page.getDefaultPageType(),request);
+	Page page = Page.getPage(Page.getDefaultPageType(),
+				 request,response);
 	
 	page.title("Generated HTML");
 

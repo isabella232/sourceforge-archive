@@ -43,7 +43,7 @@ public class ConfigDump extends HttpServlet
 	HttpServer server = (HttpServer) getServletContext();
 	HttpConfiguration config = server.configuration();
 
-	Page page = Page.getPage(pageType,request);
+	Page page = Page.getPage(pageType,request,response);
 
 	page.title("Jetty Configuration Dump");
 	

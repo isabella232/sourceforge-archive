@@ -100,7 +100,7 @@ public class BaseConfiguration implements HttpConfiguration
      */
     public void log(String message)
     {
-	Code.debug("Servlet Log: "+message);
+	Log.event(message);
     }
     
     /* ------------------------------------------------------------ */

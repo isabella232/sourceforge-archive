@@ -31,6 +31,7 @@ import java.util.*;
  * Ftp ftp = new Ftp(InetAddress.getByName("RemoteHost"),
  *                   "TestUser",
  *                   "TestPass");
+ * ftp.setType(Ftp.IMAGE);
  * ftp.startGet("RemoteFileName","LocalFileName");
  * ftp.waitUntilTransferComplete();
  * 
@@ -46,6 +47,14 @@ public class Ftp
     /* -------------------------------------------------------------------- */
     public final static String anonymous = "anonymous";
     public final static int defaultPort = 21;
+    public final static char ASCII = 'A';
+    public final static char LOCAL = 'L';
+    public final static char EBCDIC = 'E';
+    public final static char IMAGE = 'I';
+    public final static char BINARY = 'I';
+    public final static char NON_PRINT = 'N';
+    public final static char TELNET = 'T';
+    public final static char CARRIAGE_CONTROL = 'C';
 
     /* -------------------------------------------------------------------- */
     Socket command = null;
@@ -173,6 +182,57 @@ public class Ftp
 	Code.debug("Authenticated");
     }	 
    
+   
+    /* ------------------------------------------------------------ */
+    /** Set the connetion data type.
+     * The data type is not interpreted by the FTP client.
+     * @param type One of Ftp.ASCII, Ftp.EBCDIC or Ftp.IMAGE
+     * @exception FtpException For local problems or negative server responses
+     * @exception IOException IOException
+     */
+    public synchronized void setType(char type)
+	 throws FtpException,IOException
+    {
+	waitUntilTransferComplete();
+
+	cmd("TYPE "+type);
+	in.waitForCompleteOK();
+    }
+   
+    /* ------------------------------------------------------------ */
+    /** Set the connetion data type.
+     * The data type is not interpreted by the FTP client.
+     * @param type One of Ftp.ASCII or Ftp.EBCDIC
+     * @param param One of Ftp.NON_PRINT, Ftp.TELNET or Ftp.CARRIAGE_CONTROL
+     * @exception FtpException For local problems or negative server responses
+     * @exception IOException IOException
+     */
+    public synchronized void setType(char type, char param)
+	 throws FtpException,IOException
+    {
+	waitUntilTransferComplete();
+
+	cmd("TYPE "+type+' '+param);
+	in.waitForCompleteOK();
+    }
+   
+    /* ------------------------------------------------------------ */
+    /** Set the connetion data type to Local.
+     * The data type is not interpreted by the FTP client.
+     * @param length Length of word.
+     * @exception FtpException For local problems or negative server responses
+     * @exception IOException IOException
+     */
+    public synchronized void setType(int length)
+	 throws FtpException,IOException
+    {
+	waitUntilTransferComplete();
+
+	cmd("TYPE "+Ftp.LOCAL+' '+length);
+	in.waitForCompleteOK();
+    }
+    
+    
     /* -------------------------------------------------------------------- */
     /** Command complete query
      * @return    true if the no outstanding command is in progress, false
@@ -810,6 +870,10 @@ public class Ftp
 	    ftp.abort();
 	    test.check(ftp.transferComplete(),"Aborted");
 
+	    ftp.setType(Ftp.BINARY);
+	    ftp.setType(8);
+	    ftp.setType(Ftp.ASCII,Ftp.CARRIAGE_CONTROL);
+	    
 	}
 	catch(Exception e){
 	    if (test==null)

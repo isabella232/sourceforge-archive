@@ -33,6 +33,9 @@ import java.lang.reflect.*;
  * <li>Any HTTPRequest parameter
  * <ul>
  * Any object returned by the tag is sent to the response output.
+ * <P>
+ * The special tag &lt;!=SESSION&gt; is expanded to the session
+ * URL encoding if it is required.
  * @see com.mortbay.HTTP.Handler.FilterHandler
  * @version $Id$
  * @author Greg Wilkins
@@ -103,6 +106,13 @@ public class HtmlFilter extends HttpFilter
 		  named.put("info",info);
 		  named.put("out",out);
 		  named.put("request",request);
+
+		  // Special case handling
+		  if ("SESSION".equals(tag))
+		  {
+		      out.write(response.encodeUrl("").getBytes());
+		      break;
+		  }
 		  
 		  Object o = null;
 		  try{

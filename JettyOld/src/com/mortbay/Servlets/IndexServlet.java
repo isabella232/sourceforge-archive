@@ -86,7 +86,7 @@ public class IndexServlet extends HttpServlet
 	    Code.debug("Looking for " + address);
 	    Hashtable pageConfig = (Hashtable)index.getLongestMatch(address);
 	    
-	    Page page = Page.getPage(pageType,request);
+	    Page page = Page.getPage(pageType,request,response);
 	    page.nest(new Block(Block.Quote));
 	    page.nest(new Block(Block.Quote));
 	    page.nest(new Block(Block.Quote));
@@ -129,7 +129,7 @@ public class IndexServlet extends HttpServlet
 		else
 		{
 		    Block block = new Block(Block.Bold);
-		    block.add(new Link(items[i][1],items[i][0]));
+		    block.add(new Link(response.encodeURL(items[i][1]),items[i][0]));
 		    page.add(block);
 		    page.add(Break.line);
 		    page.add(items[i][2]);

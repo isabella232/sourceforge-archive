@@ -1,15 +1,22 @@
 
  + Update this todo list 
 
+ + Virtual Hosts
+
+ + New configuration file
+
+ + Graceful exit
+
+ + Reload servlets using own ClassLoader
+
+ + Improve servlet log 
+
+ + Dynamic Realms & Configuration
+
  + Test Resource URL methods for JSDK2.1
 
  + Use Java 1.2 features. (Mostly replace JDBC connection
    cache with weak references).
-
- + Write an EJB container container with Jetty in it, so
-   that it can report on all the other EJBs
-
- + Improve com.mortbay.Jetty.Server configuration options
 
  + Standard format server-side includes
  
@@ -19,11 +26,7 @@
      - Timeout connection
      - Handle termination of multipart mime server push.
 
- + Convert Servlets to use get & post methods
-
  + Implement encrypted password realm storage
-
- + Find XMLServlet and make it work
 
  + Include a CGI servlet
 

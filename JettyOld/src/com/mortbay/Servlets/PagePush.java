@@ -77,7 +77,7 @@ public abstract class PagePush
 	while (!finished){
 	    multi.startNextPart("text/html");
 	    PrintWriter pout = new PrintWriter(multi.out);
-	    Page page = Page.getPage(lookAndFeelName, req);
+	    Page page = Page.getPage(lookAndFeelName, req, res);
 	    fillPage(req, page);
 	    if (header && footer)
 		page.write(pout);

@@ -1,3 +1,20 @@
+
+Release 2.1.5 - 14 March 1999
+  + Session URL encoding fixed for relative URLs.
+  + Reduced session memory overhead of sessions
+  + Form parameters protected against multiple decodes when redirected.
+  + Added setType methods to com.mortbay.FTP.Ftp
+  + Fixed bugs with invalid sessions
+  + Page factory requires response for session encoding
+  + Moved SessionHandler to front of stacks
+  + HtmlFilter now expands <!=SESSION> to the URL encoded session if
+    required.
+  + Instrumented most of the demo to support URL session encoding.
+  + Implemented HttpRequest.getReader()
+  + Servlet log has been diverted to com.mortbay.Base.Log.event()
+    Thus debug does not need to be turned on to see servlet logs.
+  + Fixed alignment bug in TableForm
+
 Release 2.1.4 - 26 March 1999
   + Fixed problem compiling PathMap under some JDKs.
   + Reduced HTML dependance in HTTP package to allow minimal configuration

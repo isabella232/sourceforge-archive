@@ -94,10 +94,10 @@ ServerA./.Translate./Other%: /
 ServerA./.Translate./Translate%: /Dump/
 ServerA./.Translate./Proxy%: http://localhost:8080/
 
-ServerA./.Filter./	   : com.mortbay.HTTP.Filter.HtmlFilter
+ServerA./.Filter./Jetty%	    : com.mortbay.HTTP.Filter.HtmlFilter
 
 ServerA./.Servlet./Dump%            : Dump=com.mortbay.Servlets.Dump?./etc/ParamDemo.prp
-ServerA./.Servlet.*.DUMP           : Dump=com.mortbay.Servlets.Dump?./etc/ParamDemo.prp
+ServerA./.Servlet.*.DUMP            : Dump=com.mortbay.Servlets.Dump?./etc/ParamDemo.prp
 ServerA./.Servlet./Session          : Session=com.mortbay.Servlets.SessionDump
 ServerA./.Servlet./PropertyTree     : PropertyTree=com.mortbay.Servlets.PropertyTreeEditor
 ServerA./.Servlet./Config$          : Config=com.mortbay.Servlets.ConfigDump

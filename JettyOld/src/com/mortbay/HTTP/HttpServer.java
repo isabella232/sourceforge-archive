@@ -185,12 +185,13 @@ public class HttpServer implements ServletContext
 	}
 	
 	Integer defaultSessionMaxIdleTime = 
-		(Integer)config.getAttribute(HttpConfiguration.DefaultSessionMaxIdleTime);
-	if (defaultSessionMaxIdleTime != null) {
-		int defaultIdle = defaultSessionMaxIdleTime.intValue();
-		if (defaultIdle > 0)
-			HttpRequest.setDefaultSessionMaxIdleTime(defaultIdle);
-    }
+	    (Integer)config.getAttribute(HttpConfiguration.DefaultSessionMaxIdleTime);
+	if (defaultSessionMaxIdleTime != null)
+	{
+	    int defaultIdle = defaultSessionMaxIdleTime.intValue();
+	    if (defaultIdle > 0)
+		HttpRequest.setDefaultSessionMaxIdleTime(defaultIdle);
+	}
     }
 
     /* -------------------------------------------------------------------- */
@@ -468,7 +469,6 @@ public class HttpServer implements ServletContext
      */
     public void log(String message, Throwable th)
     {
-	// XXX - this needs to be improved
 	Code.warning(message,th);
     }
     

@@ -58,11 +58,10 @@ public class SessionDump extends HttpServlet
 		    session.removeValue(name);
 	    }
 	    
-	    page = Page.getPage(pageType,request);
+	    page = Page.getPage(pageType,request,response);
 	    page.title("Session Dump Servlet");	    
 
-	    page.add(new Link(response.encodeURL(request.getServletPath()),
-			      "Try url encoding"));
+	    page.add("Turn off cookies in your browser to try url encoding");
 	    
 	    Table table = new Table(0).cellPadding(0).cellSpacing(0);
 	    page.add(table);
@@ -99,7 +98,7 @@ public class SessionDump extends HttpServlet
 	    }
 	    
 	    page.add("<P><B>Form to modify session</B>");
-	    TableForm tf = new TableForm(request.getRequestURI());
+	    TableForm tf = new TableForm(response.encodeURL(request.getRequestURI()));
 	    page.add(tf);
 	    tf.addTextField("Name","Name",20,"name");
 	    tf.addTextField("Value","Value",20,"value");
@@ -109,8 +108,6 @@ public class SessionDump extends HttpServlet
 	catch (Exception e){
 	    Code.warning("SessionDump",e);
 	}
-	
-
     
 	page.write(pout);
 	pout.flush();

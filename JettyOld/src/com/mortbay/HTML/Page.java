@@ -44,6 +44,7 @@ public class Page extends Composite
     /* ----------------------------------------------------------------- */
     public static final String
         Request="Request",
+        Response="Response",
         Header="Header",
         Title="Title",
         Section="Section",
@@ -78,13 +79,13 @@ public class Page extends Composite
     /* ----------------------------------------------------------------- */
     private static Vector pageFactories = new Vector();
     private static String defaultPage = "com.mortbay.HTML.Page";
-    private static Hashtable classCache = new Hashtable();
+    private static Hashtable classCache = new Hashtable(10);
     
     /* ----------------------------------------------------------------- */
-    protected Hashtable properties = new Hashtable();
+    protected Hashtable properties = new Hashtable(10);
 
     /* ----------------------------------------------------------------- */
-    Hashtable sections = new Hashtable();
+    Hashtable sections = new Hashtable(10);
     private Composite head= new Composite();
     private String base="";
     private boolean writtenHtmlHead = false;
@@ -386,7 +387,8 @@ public class Page extends Composite
      *        Request property.
      */
     public static Page manufacturePage(String name,
-				       ServletRequest request)
+				       ServletRequest request,
+				       ServletResponse response)
 	 throws ClassNotFoundException,
 		InstantiationException,
 		IllegalAccessException,
@@ -397,7 +399,7 @@ public class Page extends Composite
 	{
 	    PageFactory factory =
 		(PageFactory) pageFactories.elementAt(f);
-	    Page p = factory.getPage(name,request);
+	    Page p = factory.getPage(name,request,response);
 	    if (p!=null)
 		return p;
 	}
@@ -410,6 +412,7 @@ public class Page extends Composite
 	Page p =(Page)c.newInstance();
 
 	p.properties().put(Request,request);
+	p.properties().put(Response,response);
 	return p;
     }
     
@@ -426,13 +429,17 @@ public class Page extends Composite
      *        Request property.
      */
     public static Page getPage(String name,
-			       ServletRequest request)
+			       ServletRequest request,
+			       ServletResponse response)
     {
 	Page p=null;
 	try{
-	    p = manufacturePage(name,request);
+	    p = manufacturePage(name,request,response);
 	    if (p!=null)
+	    {
+		
 		return p;
+	    }
 	}
 	catch(ClassNotFoundException e){
 	    Code.debug("getSafePage handled",e);
@@ -450,6 +457,7 @@ public class Page extends Composite
 	Code.debug("Vanilla Page for "+name);
 	p= new Page();
 	p.properties().put(Request,request);
+	p.properties().put(Response,response);
 	return p;
     }
 

@@ -358,6 +358,9 @@ public class HttpRequest extends HttpHeader
     public void decodeFormParameters()
 	 throws IOException
     {
+	if (formParameters!=null)
+	    return;
+	
 	String contentType = getContentType();
 	if (contentType!=null &&
 	    contentType.equals(HttpHeader.WwwFormUrlEncode))
@@ -873,26 +876,45 @@ public class HttpRequest extends HttpHeader
     /* -------------------------------------------------------------- */
     public String getRequestedSessionId()
     {
-	if (sessionIdState == SESSIONID_NOT_CHECKED){	    
+	if (sessionIdState == SESSIONID_NOT_CHECKED)
+	{	    
 	    // First, check if there is a url encoded session param.
-	    if (getRequestPath().indexOf(HttpResponse.SessionUrlPrefix) == 0)
+	    String path = getRequestPath();
+	    int prefix=path.indexOf(SessionContext.SessionUrlPrefix);
+	    
+	    if (prefix!=-1)
 	    {
-		String path = getRequestPath();
-		if ((path.indexOf(HttpResponse.SessionUrlPostfix) +
-		     HttpResponse.SessionUrlPostfix.length())
-		    == path.indexOf("/", 1))
+		int suffix=path.indexOf(SessionContext.SessionUrlSuffix);
+		if (suffix!=-1 && prefix<suffix)
 		{
 		    // definitely a session id in there!
-		    sessionId =
-			path.substring(HttpResponse.SessionUrlPrefix.length(),
-				       path.indexOf(HttpResponse.
-						    SessionUrlPostfix));
-		    sessionIdState = SESSIONID_URL;
-		    // translate our path to drop the prefix off.
-		    setRequestPath(path.substring(path.indexOf("/", 1)));
-		    Code.debug("XXX:"+getRequestPath());
+		    String id =
+			path.substring(prefix+SessionContext.SessionUrlPrefix.length(),
+				       suffix);
+		    try
+		    {
+			Long.parseLong(id,36);
+			sessionId=id;
+			sessionIdState = SESSIONID_URL;
+			
+			// translate our path to drop the prefix off.
+			if (suffix+SessionContext.SessionUrlSuffix.length()
+			    <path.length())
+			    setRequestPath(path.substring(0,prefix)+
+					   path.substring(suffix+
+							  SessionContext.SessionUrlSuffix.length()));
+			else
+			    setRequestPath(path.substring(0,prefix));
+			
+			Code.debug(getRequestPath());
+		    }
+		    catch(NumberFormatException e)
+		    {
+			Code.ignore(e);
+		    }
 		}
 	    }
+	    
 	    // Then try cookies
 	    if (sessionId == null){
 		sessionId =
@@ -915,7 +937,10 @@ public class HttpRequest extends HttpHeader
     public HttpSession getSession(boolean create)
     {
 	Code.debug("sessionIdState:"+sessionIdState);
-	if (session != null) return session;
+
+	if (session != null && !((SessionContext.Session)session).invalid)
+	    return session;
+    
 	String id = getRequestedSessionId();
 	if (id != null){
 	    session = sessions.getSession(id);
@@ -962,14 +987,13 @@ public class HttpRequest extends HttpHeader
     /* -------------------------------------------------------------- */
     public boolean isRequestedSessionIdValid()
     {
-	return sessionId != null && getSession(false) == null;
+	return sessionId != null && getSession(false) != null;
     }
     
     /* -------------------------------------------------------------- */
     public BufferedReader getReader()
     {
-	Code.notImplemented();
-	return null;
+	return new BufferedReader(new InputStreamReader(getInputStream()));
     }
 
     /* -------------------------------------------------------------- */

@@ -162,6 +162,24 @@ class TestServer extends Thread
 	    dataConnection.close();
 	    out.write(CmdReply.codeClosingData+" File transfer aborted\n");
 	    out.flush();
+	    
+	    line = in.readLine();
+	    out.write(CmdReply.codeCommandOK+" OK\n");
+	    out.flush();
+	    Code.debug("Test server got: "+line);
+	    test.checkEquals("TYPE I",line,"Received TYPE I");
+	    
+	    line = in.readLine();
+	    out.write(CmdReply.codeCommandOK+" OK\n");
+	    out.flush();
+	    Code.debug("Test server got: "+line);
+	    test.checkEquals("TYPE L 8",line,"Received TYPE L 8");
+	    
+	    line = in.readLine();
+	    out.write(CmdReply.codeCommandOK+" OK\n");
+	    out.flush();
+	    Code.debug("Test server got: "+line);
+	    test.checkEquals("TYPE A C",line,"Received TYPE A C");
     
 	    Code.debug("Tests completed");
 	}

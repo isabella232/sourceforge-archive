@@ -323,6 +323,9 @@ public class Server extends BaseConfiguration
 	    httpHandlersMap.put(stack.path,httpHandlers);
 	    int h=0;
 
+	    // Session handler
+	    httpHandlers[h++] = new SessionHandler();
+	    
 	    // Log Handler
 	    if (stack.logMap.size()>0)
 		httpHandlers[h++] = new LogHandler(stack.logMap,true, true);
@@ -344,9 +347,6 @@ public class Server extends BaseConfiguration
 	    {
 		// Parameter handler
 		httpHandlers[h++] = new ParamHandler();
-	    
-		// Session handler
-		httpHandlers[h++] = new SessionHandler();
 	    
 		// Servlet Handler
 		httpHandlers[h++] = new ServletHandler(stack.servletMap);

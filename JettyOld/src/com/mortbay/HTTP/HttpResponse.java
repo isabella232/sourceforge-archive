@@ -46,8 +46,6 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     public final static String Expires ="Expires"   ;
     public final static String Location ="Location"   ;
     public final static String Allow = "Allow"   ;
-    public final static String SessionUrlPrefix = "/js!*";
-    public final static String SessionUrlPostfix = "*!";
     
     /* -------------------------------------------------------------- */
     public final static Hashtable __errorCodeMap = new Hashtable();
@@ -491,8 +489,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      */
     public java.lang.String encodeRedirectUrl(java.lang.String url)
     {
-	//XXX - Dont support rewriting
-	return url;
+	return encodeRedirectURL(url);
     }
     
     /* -------------------------------------------------------------- */
@@ -507,29 +504,71 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     /* -------------------------------------------------------------- */
     public java.lang.String encodeRedirectURL(java.lang.String url)
     {
-	//XXX - Dont support rewriting
-	return url;
+	//XXX - Dont know what to do different here?
+	return encodeURL(url);
     }
     
-    /* -------------------------------------------------------------- */
+    /* ------------------------------------------------------------ */
+    /** Encode session ID in URL if required.
+     * The session ID is encoded in the file part of the URL between
+     * character guards configured in SessionContext.
+     * If '/' is in the URL, the encoded session is placed after the last
+     * '/', otherwise is is placed at the start of the URL. This encoding
+     * should not disturb any browser interpretation of reletive paths,
+     * file suffixes or URL references.
+     * @param url The URL to encode
+     * @return Encoded URL or the origianl URL
+     */
     public java.lang.String encodeURL(java.lang.String url)
     {
+	
+	// should not encode if cookies in evidence
+	if (request.isRequestedSessionIdFromCookie())
+	    return url;
+	
+	// get session;
 	HttpSession session = request.getSession();
-	if (session == null) return url;
+
+	// no session or no url
+	if (session == null || url==null)
+	    return url;
+
+	// invalid session
 	String id = session.getId();
-	if (id == null) return url;
-	try {
-	    URL theUrl = new URL(url);
-	    String file = SessionUrlPrefix + id + SessionUrlPostfix +
-		theUrl.getFile();
-	    String ref = theUrl.getRef();
-	    URL encoded = new URL(theUrl.getProtocol(), theUrl.getHost(),
-				  theUrl.getPort(), file + (ref == null ? "" :
-							    "#" + ref));
-	    return encoded.toString();
-	} catch (MalformedURLException ex){}
+	if (id == null)
+	    return url;
+
+	// insert the id
+	int from= url.length()-1;
+	if (from<0)
+	    return SessionContext.SessionUrlPrefix + id +
+		SessionContext.SessionUrlSuffix;
+	    
+	int hook = url.indexOf('?');
+	if (hook>=0 && hook<from)
+	    from=hook;
+	int hash = url.indexOf('#');
+	if (hash>=0 && hash<from)
+	    from=hash;
+	    
+	int slash = url.lastIndexOf('/',from);
+	if (slash==-1)
+	{
+	    url =
+		SessionContext.SessionUrlPrefix + id +
+		SessionContext.SessionUrlSuffix + url;    
+	}
+	else
+	{
+	    url =
+		url.substring(0,slash+1) +
+		SessionContext.SessionUrlPrefix + id +
+		SessionContext.SessionUrlSuffix + 
+		url.substring(slash+1); 
+	} 
+	
 	// Must be a partial url...
-	return SessionUrlPrefix + id + SessionUrlPostfix + url;
+	return url;
     }
     
     /* -------------------------------------------------------------- */

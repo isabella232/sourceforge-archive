@@ -17,6 +17,7 @@ import javax.servlet.http.*;
  */
 public class SessionHandler extends NullHandler
 {    
+    
     /* ----------------------------------------------------------------- */
     public SessionHandler()
     {}

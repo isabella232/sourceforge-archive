@@ -81,7 +81,7 @@ public class DebugServlet extends HttpServlet
 	Page page=null;
 
 	try{
-	    page = Page.getPage(pageType,request);
+	    page = Page.getPage(pageType,request,response);
 	    page.title("Debug Servlet");
 
 	    page.add("This form displays and sets the debug and log options<P>");

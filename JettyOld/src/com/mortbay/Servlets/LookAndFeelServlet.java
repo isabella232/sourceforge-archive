@@ -64,8 +64,7 @@ public class LookAndFeelServlet extends HttpServlet
 	    response.setContentType("text/html");
 	    OutputStream out = response.getOutputStream();
 
-	    Page page = Page.getPage(pageType,request);
-	    page.properties().put(Page.Request,request);
+	    Page page = Page.getPage(pageType,request,response);
 	    
 	    String referer = request.getHeader("Referer");
 	    if (referer != null)

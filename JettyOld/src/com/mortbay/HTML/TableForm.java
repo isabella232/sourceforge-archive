@@ -309,15 +309,16 @@ public class TableForm extends Form
 	else
 	{
 	    column.newRow();
-	    column.addCell(label).right().middle();
+	    column.addCell(label);
+	    column.cell().right();
 	
 	    if (fieldAttributes != null)
 	    {
-		column.addCell(field,fieldAttributes).left().middle();
+		column.addCell(field,fieldAttributes);
 		fieldAttributes = null;
 	    }
 	    else
-		column.addCell(field).left().middle();
+		column.addCell(field);
 	}
     }
     

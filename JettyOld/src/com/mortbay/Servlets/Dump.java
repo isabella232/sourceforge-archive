@@ -43,6 +43,8 @@ public class Dump extends HttpServlet
     public void doGet(HttpServletRequest sreq, HttpServletResponse sres) 
 	throws ServletException, IOException
     {
+	getServletContext().log("Dump "+sreq.getRequestURI());
+	
         sres.setContentType("text/html");
         OutputStream out = sres.getOutputStream();
 	PrintWriter pout = new PrintWriter(out);
@@ -50,7 +52,7 @@ public class Dump extends HttpServlet
 	Page page=null;
 
 	try{
-	    page = Page.getPage(pageType,sreq);
+	    page = Page.getPage(pageType,sreq,sres);
 	    page.title("Dump Request Servlet");	    
 
 	    Table table = new Table(0).cellPadding(0).cellSpacing(0);
@@ -86,7 +88,9 @@ public class Dump extends HttpServlet
 	    table.newRow();
 	    table.addHeading("getQueryString:&nbsp;").cell().right();
 	    table.addCell(sreq.getQueryString());
-	
+
+	    
+	    
 	    table.newRow();
 	    table.addHeading("getProtocol:&nbsp;").cell().right();
 	    table.addCell(sreq.getProtocol());
@@ -105,6 +109,9 @@ public class Dump extends HttpServlet
 	    table.newRow();
 	    table.addHeading("getRemoteHost:&nbsp;").cell().right();
 	    table.addCell(sreq.getRemoteHost());	    
+	    table.newRow();
+	    table.addHeading("getRequestedSessionId:&nbsp;").cell().right();
+	    table.addCell(sreq.getRequestedSessionId());	    
 	    table.newRow();
 	    table.addHeading("getInitParameter(\"param\"):&nbsp;").cell().right();
 	    table.addCell(getInitParameter("param"));
@@ -154,7 +161,7 @@ public class Dump extends HttpServlet
 	    page.add(Break.para);
 	    
 	    page.add(new Heading(1,"Form to generate Dump content"));
-	    TableForm tf = new TableForm(sreq.getRequestURI());
+	    TableForm tf = new TableForm(sres.encodeURL(sreq.getRequestURI()));
 	    tf.method("POST");
 	    page.add(tf);
 	    tf.addTextField("TextField","TextField",20,"value");

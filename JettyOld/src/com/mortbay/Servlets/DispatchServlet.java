@@ -44,7 +44,7 @@ public class DispatchServlet extends HttpServlet
     public void service(HttpServletRequest req, HttpServletResponse res) 
 	throws ServletException, IOException
     {
-	Page page = Page.getPage(lookAndFeelName, req);;
+	Page page = Page.getPage(lookAndFeelName, req, res);
 	try {
 	    try {
 		ServletDispatch disp = new ServletDispatch(req, res);
@@ -60,7 +60,7 @@ public class DispatchServlet extends HttpServlet
 	    }
 	} catch (Throwable e) {
 	    Code.debug(e);
-	    page = Page.getPage(lookAndFeelName, req);
+	    page = Page.getPage(lookAndFeelName, req, res);
 	    page.title("Exception Occurred...");
 	    page.nest(new Block(Block.Pre));
 	    StringWriter sw = new StringWriter();
@@ -88,7 +88,7 @@ public class DispatchServlet extends HttpServlet
 				  HttpServletResponse res)
 	throws Exception
     {
-	Page page = Page.getPage(lookAndFeelName, req);
+	Page page = Page.getPage(lookAndFeelName, req, res);
 	page.title("Unknown Method");
 	page.add(new Heading(2, "Bad URL Path: \"" + method + "\""));
 	return page;

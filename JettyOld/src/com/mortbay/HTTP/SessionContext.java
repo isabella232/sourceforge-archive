@@ -20,6 +20,10 @@ import javax.servlet.http.*;
 public class SessionContext extends Hashtable
     implements javax.servlet.http.HttpSessionContext	    
 {
+    public final static String SessionUrlPrefix = "_s_";
+    public final static String SessionUrlSuffix = "_S_";
+    
+    
     public static final String SessionId  = "JettySessionId";
     public static final String SessionStatus  = "JettySessionStatus";
     public static final String OldSession  = "Old";
@@ -49,6 +53,7 @@ public class SessionContext extends Hashtable
 	/* ------------------------------------------------------------- */
 	Session()
 	{
+	    super(10);
 	    this.id=Long.toString(nextSessionId++,36);
 	    put(SessionId,id);
 	    put(SessionStatus,NewSession);
@@ -306,13 +311,12 @@ public class SessionContext extends Hashtable
 	Thread.currentThread().setPriority(oldPriority);
     }
 
-    final static int scavangeDelay = 60000;	
+    // how often to check - XXX - make this configurable
+    final static int scavangeDelay = 60000;
+    
     /** SessionScavenger is a background thread that kills off old sessions */
-
     class SessionScavenger extends Thread
     {
-	// how often to check
-
 	public void run() {
 	    while (true) {
 		try {

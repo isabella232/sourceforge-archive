@@ -10,7 +10,8 @@ public class UploadServlet extends HttpServlet
 		       HttpServletResponse response)
 	 throws java.io.IOException
     {
-	Page page = Page.getPage(Page.getDefaultPageType(),request);
+	Page page = Page.getPage(Page.getDefaultPageType(),
+				 request,response);
 	
 	page.title("Upload File Demo");
 	page.add(new Heading(1,"Upload File Demo"));

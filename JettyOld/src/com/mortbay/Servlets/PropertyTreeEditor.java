@@ -306,7 +306,7 @@ public class PropertyTreeEditor
 		addHeader(context, req, false);
 		
 		// Unknown node...
-		context.page = Page.getPage(lookAndFeelName, req);
+		context.page = Page.getPage(lookAndFeelName, req,res);
 		context.page.title("Property Tree Editor");
 		context.page.add(new Heading(1, "Node "+
 					     req.getPathInfo()+
@@ -365,7 +365,7 @@ public class PropertyTreeEditor
     public void service(HttpServletRequest req, HttpServletResponse res) 
 	throws ServletException, IOException
     {
-	Context context = new Context(Page.getPage(lookAndFeelName, req),
+	Context context = new Context(Page.getPage(lookAndFeelName, req,res),
 				      tree);
 	context.page.unnest();
 	
