@@ -106,11 +106,11 @@ public class TestThreadedServer extends junit.framework.TestCase
         assertEquals("exit job",2,server.getThreads());
 
         p1 = server.stream();
-        Thread.sleep(250);
+        Thread.sleep(350);
         assertEquals("reuse thread",3,server._connections);
         assertEquals("reuse thread",2,server._jobs);
 
-        // TODO - this needs to be reworked.
+        // TODO - this needs to be reworked without timeouts!
     }
     
     /* ------------------------------------------------------------ */
