@@ -2,7 +2,7 @@ Jetty Versions
 --------------
 
 
-Jetty-5.0.RC2 - 30 June 2004
+Jetty-5.0.RC2 - 1 July 2004
  + Fixed DIGEST challenge delimiters
  + HTAccess calls UnixCrypt correctly
  + integrated jetty-jboss with jboss-3.2.4
@@ -15,12 +15,14 @@ Jetty-5.0.RC2 - 30 June 2004
  + Fixed session leak in j2ee
  + Fixed no-role security constraint combination.
  + Fix to use runas roles during servlet init and destroy
+ + Fixed JAAS logout
 
 Jetty-4.2
  + integrated jetty-jboss with jboss-3.2.4
  + add JMX support for JettyPlus
  + add listing of java:comp/env for webapp with JMX
  + make choice of override of JNDI ENC entries: config.xml or web.xml 
+ + Fixed JAAS logout
 
 Jetty-5.0.RC1 - 24 May 2004
  + Changed to apache 2.0 license

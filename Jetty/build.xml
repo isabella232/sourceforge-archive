@@ -333,6 +333,7 @@
   <target name="webapps" depends="webapp.jetty"
    description="Build the demonstration webapplications"
    >
+    <ant antfile="${extra}/build.xml" inheritAll="false"/>
   </target>
 
   <!-- ==================================================================== -->
