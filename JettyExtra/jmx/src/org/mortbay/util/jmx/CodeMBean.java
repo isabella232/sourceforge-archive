@@ -24,8 +24,6 @@ import java.util.Iterator;
 
 public class CodeMBean extends ModelMBeanImpl
 {
-    private Code _code;
-
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @exception MBeanException 
@@ -35,7 +33,17 @@ public class CodeMBean extends ModelMBeanImpl
         throws MBeanException, InstanceNotFoundException
     {
         super(Code.instance());
-        _code=(Code)getManagedResource(); 
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @exception MBeanException 
+     * @exception InstanceNotFoundException 
+     */
+    public CodeMBean(Code code)
+        throws MBeanException, InstanceNotFoundException
+    {
+        super(code);
     }
 
     /* ------------------------------------------------------------ */
@@ -48,7 +56,6 @@ public class CodeMBean extends ModelMBeanImpl
         defineAttribute("suppressWarnings");
         defineAttribute("verbose");
         defineAttribute("debugPatterns");
-        defineAttribute("debugTriggers");
     }
 }
 

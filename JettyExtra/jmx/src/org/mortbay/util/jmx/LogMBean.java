@@ -42,6 +42,18 @@ public class LogMBean extends ModelMBeanImpl
     }
 
     /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @exception MBeanException 
+     * @exception InstanceNotFoundException 
+     */
+    public LogMBean(Log log)
+        throws MBeanException, InstanceNotFoundException
+    {
+        super(log);
+        _log=(Log)getManagedResource(); 
+    }
+
+    /* ------------------------------------------------------------ */
     protected void defineManagedResource()
     {
         super.defineManagedResource();
