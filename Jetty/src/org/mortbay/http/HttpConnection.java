@@ -1007,8 +1007,8 @@ public class HttpConnection
                 
                 // Commit the response
                 try{
-                    _outputStream.flush(true);
                     _response.commit();
+                    _outputStream.flush(true);
                     bytes_written=_outputStream.getBytesWritten();
                     _outputStream.resetStream();
                     _outputStream.addObserver(this);
