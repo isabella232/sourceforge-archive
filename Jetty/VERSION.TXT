@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Fixed contextclassloader on ServletContextEvents.
  + Support graceful stopping of context and server.
  + Fixed "null" return from getRealPath
  + OutputStreamLogSink config improvements
