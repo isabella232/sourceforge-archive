@@ -101,7 +101,7 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
-    ServletHttpRequest(ServletHandler servletHandler,
+    public ServletHttpRequest(ServletHandler servletHandler,
                        String pathInContext,
                        HttpRequest request)
     {

@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+Jetty-5.1.3 - 1 April 2005
+
 Jetty-5.1.3rc4 - 31 March 2005
  + Moved servlet request wrapping to enterContextScope for geronimo security
  + refixed / mapping for filters

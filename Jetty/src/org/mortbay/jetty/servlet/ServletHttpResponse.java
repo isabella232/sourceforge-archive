@@ -92,7 +92,7 @@ public class ServletHttpResponse implements HttpServletResponse
 
     
     /* ------------------------------------------------------------ */
-    ServletHttpResponse(ServletHttpRequest request,HttpResponse response)
+    public ServletHttpResponse(ServletHttpRequest request,HttpResponse response)
     {
         _servletHttpRequest=request;
         _servletHttpRequest.setServletHttpResponse(this);
