@@ -102,7 +102,7 @@ frontend to com.mortbay.HTTP.HttpServer.
 
 Jetty comes with the tiny aelfred SAX parser from microstar.com.  This
 is only a partially validating parser, so care must be taken when 
-editing xml files.  If in doubt, use the org.sml.sax.parser property
+editing xml files.  If in doubt, use the org.xml.sax.parser property
 to specify an alternative parser (eg jaxp, xerces etc.).
 
 The DTDs used by jetty are resolved as resources from the system classpath,

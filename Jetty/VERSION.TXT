@@ -1,6 +1,11 @@
 Jetty Versions
 --------------
  
+ + Pass flush through ServletOut
+ + Avoid jprobe race warnings in DateCache 
+ + Allow null cookie values 
+ + Servlet exceptions cause 503 unavailable rather than 500 server error
+
 Jetty-3.0.0.rc4 - 6 Nov 2000
  + Provide default JettyIndex.properties
  + Fixed mis-synchronization in ThreadPool.stop()

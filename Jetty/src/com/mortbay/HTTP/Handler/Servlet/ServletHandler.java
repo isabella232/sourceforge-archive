@@ -275,7 +275,7 @@ public class ServletHandler extends NullHandler
                 throw new HttpException(503,th.toString());
             if (!Code.debug())
                 Code.warning(th.toString());    
-            throw new HttpException(500,th.toString());
+            throw new HttpException(503,th.toString());
         }
         catch(Error e)
         {
@@ -284,7 +284,7 @@ public class ServletHandler extends NullHandler
                 Code.warning(e);
                 Code.debug(httpRequest);
             }
-            throw new HttpException(500,e.toString());
+            throw new HttpException(503,e.toString());
         }
     }
 

@@ -30,9 +30,9 @@ import java.util.TimeZone;
 
 public class DateCache  
 {
-    SimpleDateFormat minuteFormat;
-    SimpleDateFormat format;
-    boolean millis=false;
+    private SimpleDateFormat minuteFormat;
+    private SimpleDateFormat format;
+    private boolean millis=false;
     private long lastMinutes = -1;
     private long lastSeconds = -1;
     private String lastResult = null;

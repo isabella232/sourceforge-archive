@@ -107,8 +107,12 @@ public class RequestDispatchTest extends HttpServlet
                 info+="?Dispatch=forward";
             else
                 info+="&Dispatch=forward";
-            RequestDispatcher dispatch = getServletContext().getRequestDispatcher(info);
-            dispatch.forward(sreq,sres);
+            RequestDispatcher dispatch =
+                getServletContext().getRequestDispatcher(info);
+            if (dispatch!=null)
+                dispatch.forward(sreq,sres);
+            else
+                sres.sendError(404);
         }
         else if (info.startsWith("/includeN/"))
         {

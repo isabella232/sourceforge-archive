@@ -26,4 +26,11 @@ class ServletOut extends ServletOutputStream
     {
         _out.write(ch);
     }
+
+    /* ------------------------------------------------------------ */
+    public void flush()
+        throws IOException
+    {
+        _out.flush();
+    }
 }

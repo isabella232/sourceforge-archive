@@ -55,11 +55,16 @@ public class Context implements ServletContext, HttpSessionContext
     }
 
     /* ------------------------------------------------------------ */
+    ServletHandler getServletHandler()
+    {
+        return _handler;
+    }
+    
+    /* ------------------------------------------------------------ */
     public String getContextPath()
     {
         return _handler.getHandlerContext().getContextPath();
     }
-
 
     /* ------------------------------------------------------------ */
     public ServletContext getContext(String uri)
@@ -94,7 +99,7 @@ public class Context implements ServletContext, HttpSessionContext
     }
 
     /* ------------------------------------------------------------ */
-    public URL getResource(String uri)
+    public URL getResource(String uriInContext)
         throws MalformedURLException
     {
         Resource resourceBase=_handler.getHandlerContext().getResourceBase();
@@ -102,22 +107,27 @@ public class Context implements ServletContext, HttpSessionContext
             return null;
 
         try{
-            Resource resource = resourceBase.addPath(uri);
-            return resource.getURL();
+            Resource resource = resourceBase.addPath(uriInContext);
+            if (resource.exists())
+                return resource.getURL();
+        }
+        catch(MalformedURLException e)
+        {
+            throw e;
         }
         catch(IOException e)
         {
             Code.warning(e);
-            return null;
         }
+        return null;
     }
 
     /* ------------------------------------------------------------ */
-    public InputStream getResourceAsStream(String uri)
+    public InputStream getResourceAsStream(String uriInContext)
     {
         try
         {
-            URL url = getResource(uri);
+            URL url = getResource(uriInContext);
             if (url!=null)
                 return url.openStream();
         }

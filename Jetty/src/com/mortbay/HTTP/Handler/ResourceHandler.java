@@ -252,11 +252,11 @@ public class ResourceHandler extends NullHandler
     }
 
     /* ------------------------------------------------------------------- */
-    void handleGet(HttpRequest request,
-                   HttpResponse response,
-                   String path,
-                   Resource resource,
-                   boolean endsWithSlash)
+    public void handleGet(HttpRequest request,
+                          HttpResponse response,
+                          String path,
+                          Resource resource,
+                          boolean endsWithSlash)
         throws IOException
     {
         Code.debug("Looking for ",resource);

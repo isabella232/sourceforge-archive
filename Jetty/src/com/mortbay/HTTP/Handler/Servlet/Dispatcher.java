@@ -7,12 +7,17 @@ package com.mortbay.HTTP.Handler.Servlet;
 
 import com.mortbay.HTTP.HttpFields;
 import com.mortbay.HTTP.HandlerContext;
+import com.mortbay.HTTP.Handler.ResourceHandler;
 import com.mortbay.HTTP.HttpRequest;
+import com.mortbay.HTTP.HttpResponse;
 import com.mortbay.HTTP.PathMap;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.MultiMap;
+import com.mortbay.Util.Resource;
 import com.mortbay.Util.UrlEncoded;
+import java.io.InputStream;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +39,8 @@ public class Dispatcher implements RequestDispatcher
     String _pathSpec;
     String _path;
     String _query;
-    
+    Resource _resource;
+    ResourceHandler _resourceHandler;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -44,6 +50,8 @@ public class Dispatcher implements RequestDispatcher
     Dispatcher(Context context, String pathInContext, String query)
         throws IllegalStateException
     {
+        Code.debug("Dispatcher for ",context,",",pathInContext,",",query);
+        
         _path = pathInContext;
         _query=query;
         
@@ -54,6 +62,7 @@ public class Dispatcher implements RequestDispatcher
         {
             if (_handlerContext.getHandler(i) instanceof ServletHandler)
             {
+                // Look for path in servlet handlers
                 ServletHandler handler=(ServletHandler)
                     _handlerContext.getHandler(i);
                 if (!handler.isStarted())
@@ -67,9 +76,35 @@ public class Dispatcher implements RequestDispatcher
                     break;
                 }
             }
+            else if (_handlerContext.getHandler(i) instanceof ResourceHandler &&
+                     _resourceHandler==null)
+            {
+                // remember resourceHandler as we may need it for a
+                // resource forward.
+                _resourceHandler=(ResourceHandler)_handlerContext.getHandler(i);
+            }
         }
-        
-        if (_holder==null)
+
+        // If no servlet found
+        if (_holder==null && _resourceHandler!=null)
+        {
+            // Look for a static resource
+            try{
+                Resource resource= context.getServletHandler()
+                    .getHandlerContext().getResourceBase();
+                if (resource!=null)
+                    resource = resource.addPath(_path);
+                if (resource.exists() && !resource.isDirectory())
+                {
+                    _resource=resource;
+                    Code.debug("Dispatcher for resource ",_resource);
+                }
+            }
+            catch(IOException e){Code.ignore(e);}
+        }
+
+        // if no servlet and no resource
+        if (_holder==null && _resource==null)
             throw new IllegalStateException("No servlet handlers in context");
     }
 
@@ -117,6 +152,7 @@ public class Dispatcher implements RequestDispatcher
         ServletRequest servletRequest=(ServletRequest)request;
         HttpRequest httpRequest=servletRequest.getHttpRequest();
         ServletResponse servletResponse=(ServletResponse)response;
+        HttpResponse httpResponse=servletResponse.getHttpResponse();
             
         if (servletRequest.getHttpRequest().isCommitted())
             throw new IllegalStateException("Request is committed");
@@ -129,9 +165,19 @@ public class Dispatcher implements RequestDispatcher
         httpRequest.removeAttribute( "javax.servlet.include.query_string");
         httpRequest.removeAttribute( "javax.servlet.include.path_info");
 
-        // handle named servlet
-        if (_pathSpec==null)
+        // Handler resource forward.
+        if (_resource!=null)
         {
+            Code.debug("Forward request to resource ",_resource);
+            _resourceHandler.handleGet(httpRequest,httpResponse,
+                                       _path,_resource,false);
+            return;
+        }
+            
+        // handle named servlet
+        if (_pathSpec==null )
+        {
+            Code.debug("Forward request to named ",_holder);
             // just call it with existing request/response
             _holder.handle(servletRequest,servletResponse);
             return;
@@ -148,7 +194,7 @@ public class Dispatcher implements RequestDispatcher
             if (oldQ!=null && oldQ.length()>0)
                 _query=oldQ+'&'+_query;
         }
-
+        
         // The path of the new request is the forward path
         // context must be the same, info is recalculate.
         Code.debug("Forward request to ",_holder,
@@ -177,11 +223,8 @@ public class Dispatcher implements RequestDispatcher
         ServletRequest servletRequest=(ServletRequest)request;
         HttpRequest httpRequest=servletRequest.getHttpRequest();
         ServletResponse servletResponse=(ServletResponse)response;
+        HttpResponse httpResponse=servletResponse.getHttpResponse();
             
-        // Request has all original path and info etc.
-        // New path is in attributes - whose values are
-        // saved to handle chains of includes.
-        
         // Need to ensure that there is no change to the
         // response other than write
         boolean old_locked = servletResponse.getLocked();
@@ -189,9 +232,30 @@ public class Dispatcher implements RequestDispatcher
         int old_output_state = servletResponse.getOutputState();
         servletResponse.setOutputState(0);
 
+        // handle static resource
+        if (_resource!=null)
+        {
+            Code.debug("Include resource ",_resource);
+            // just call it with existing request/response
+            InputStream in = _resource.getInputStream();
+            try
+            {
+                int len = (int)_resource.length();
+                httpResponse.getOutputStream().write(in,len);
+                return;
+            }
+            finally
+            {
+                try{in.close();}catch(IOException e){Code.ignore(e);}
+                servletResponse.setLocked(old_locked);
+                servletResponse.setOutputState(old_output_state);
+            }
+        }
+        
         // handle named servlet
         if (_pathSpec==null)
         {
+            Code.debug("Include named ",_holder);
             // just call it with existing request/response
             try
             {
@@ -214,6 +278,10 @@ public class Dispatcher implements RequestDispatcher
             UrlEncoded.decodeTo(_query,parameters);
             servletRequest.setParameters(parameters);
         }
+        
+        // Request has all original path and info etc.
+        // New path is in attributes - whose values are
+        // saved to handle chains of includes.
         
         // javax.servlet.include.request_uri
         Object old_request_uri =

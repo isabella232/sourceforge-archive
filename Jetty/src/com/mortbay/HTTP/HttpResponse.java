@@ -390,7 +390,6 @@ public class HttpResponse extends HttpMessage
         commit();
     }
 
-
     /* -------------------------------------------------------------- */
     /** Add a Set-Cookie field.
      */
@@ -411,8 +410,6 @@ public class HttpResponse extends HttpMessage
         // Check arguments
         if (name==null || name.length()==0)
             throw new IllegalArgumentException("Bad cookie name");
-        if (value==null || value.length()==0)
-            throw new IllegalArgumentException("Bad cookie value");
         
         // Format value and params
         StringBuffer buf = new StringBuffer(128);
@@ -420,9 +417,12 @@ public class HttpResponse extends HttpMessage
         synchronized(buf)
         {
             buf.append(name);
-            buf.append('=');
-            buf.append(UrlEncoded.encodeString(value));
-
+            if (value!=null && value.length()>0)
+            {
+                buf.append('=');
+                buf.append(UrlEncoded.encodeString(value));
+            }
+            
             int version=cookie.getVersion();
             if (version>0)
             {
