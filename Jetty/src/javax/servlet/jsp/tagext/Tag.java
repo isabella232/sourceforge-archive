@@ -210,8 +210,8 @@ public interface Tag {
      * specialized container that knows about that specific tag library,
      * as in the case of the JSP standard tag library.
      *
-     * @returns the current parent, or null if none.
-     * @seealso TagSupport.findAncestorWithClass().
+     * @return the current parent, or null if none.
+     * @see TagSupport#findAncestorWithClass(Tag from, Class klass)
      */
 
     Tag getParent();
@@ -250,7 +250,7 @@ public interface Tag {
      * any variable values that are indicated as so in TagExtraInfo after the
      * invocation of doStartTag().
      *
-     * @returns EVAL_BODY_INCLUDE if the tag wants to process body, SKIP_BODY if it
+     * @return EVAL_BODY_INCLUDE if the tag wants to process body, SKIP_BODY if it
      * does not want to process it.
      * @throws JspException.
      * @see BodyTag
@@ -281,7 +281,7 @@ public interface Tag {
      * any variable values that are indicated as so in TagExtraInfo after the
      * invocation of doEndTag().
      *
-     * @returns indication of whether to continue evaluating the JSP page.
+     * @return indication of whether to continue evaluating the JSP page.
      * @throws JspException.
      */
 

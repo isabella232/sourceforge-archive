@@ -95,7 +95,7 @@ public class BodyTagSupport extends TagSupport implements BodyTag {
      * Default processing of the start tag returning EVAL_BODY_BUFFERED
      *
      * @return EVAL_BODY_BUFFERED;
-     * @seealso BodyTag#doStartTag
+     * @see BodyTag#doStartTag
      */
  
     public int doStartTag() throws JspException {
@@ -107,7 +107,7 @@ public class BodyTagSupport extends TagSupport implements BodyTag {
      * Default processing of the end tag returning EVAL_PAGE.
      *
      * @return EVAL_PAGE
-     * @seealso Tag#doEndTag
+     * @see Tag#doEndTag
      */
 
     public int doEndTag() throws JspException {
@@ -121,9 +121,9 @@ public class BodyTagSupport extends TagSupport implements BodyTag {
      * Prepare for evaluation of the body: stash the bodyContent away.
      *
      * @param b the BodyContent
-     * @seealso #doAfterBody
-     * @seealso #doInitBody()
-     * @seealso BodyTag#setBodyContent
+     * @see #doAfterBody
+     * @see #doInitBody()
+     * @see BodyTag#setBodyContent
      */
 
     public void setBodyContent(BodyContent b) {
@@ -135,9 +135,9 @@ public class BodyTagSupport extends TagSupport implements BodyTag {
      * Prepare for evaluation of the body just before the first body evaluation:
      * no action.
      *
-     * @seealso #setBodyContent
-     * @seealso #doAfterBody
-     * @seealso BodyTag#doInitBody
+     * @see #setBodyContent
+     * @see #doAfterBody
+     * @see BodyTag#doInitBody
      */
 
     public void doInitBody() throws JspException {
@@ -149,8 +149,8 @@ public class BodyTagSupport extends TagSupport implements BodyTag {
      * By default nothing is done with the bodyContent data (if any).
      *
      * @return SKIP_BODY
-     * @seealso #doInitBody
-     * @seealso BodyTag#doAfterBody
+     * @see #doInitBody
+     * @see BodyTag#doAfterBody
      */
 
     public int doAfterBody() throws JspException {
@@ -161,7 +161,7 @@ public class BodyTagSupport extends TagSupport implements BodyTag {
     /**
      * Release state.
      *
-     * @seealso Tag#release
+     * @see Tag#release
      */
 
     public void release() {

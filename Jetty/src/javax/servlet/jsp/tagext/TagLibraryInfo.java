@@ -94,7 +94,7 @@ abstract public class TagLibraryInfo {
     /**
      * The value of the uri attribute from the <%@ taglib directive for this library.
      *
-     * @returns the value of the uri attribute
+     * @return the value of the uri attribute
      */
    
     public String getURI() {
@@ -104,7 +104,7 @@ abstract public class TagLibraryInfo {
     /**
      * The prefix assigned to this taglib from the <%taglib directive
      *
-     * @returns the prefix assigned to this taglib from the <%taglib directive
+     * @return the prefix assigned to this taglib from the <%taglib directive
      */
 
     public String getPrefixString() {
@@ -118,7 +118,7 @@ abstract public class TagLibraryInfo {
      * This may be used by authoring tools as the preferred prefix
      * to use when creating an include directive for this library.
      *
-     * @returns the preferred short name for the library
+     * @return the preferred short name for the library
      */
     public String getShortName() {
         return shortname;
@@ -130,7 +130,7 @@ abstract public class TagLibraryInfo {
      * (the uri attribute) to use when creating a taglib directive
      * for this library.
      *
-     * @returns a reliable URN to a TLD like this
+     * @return a reliable URN to a TLD like this
      */
     public String getReliableURN() {
         return urn;
@@ -140,7 +140,7 @@ abstract public class TagLibraryInfo {
     /**
      * Information (documentation) for this TLD.
      *
-     * @returns the info string for this tag lib
+     * @return the info string for this tag lib
      */
    
     public String getInfoString() {
@@ -151,8 +151,8 @@ abstract public class TagLibraryInfo {
     /**
      * A string describing the required version of the JSP container.
      * 
-     * @returns the (minimal) required version of the JSP container.
-     * @seealso JspEngineInfo.
+     * @return the (minimal) required version of the JSP container.
+     * @see javax.servlet.jsp.JspEngineInfo
      */
    
     public String getRequiredVersion() {
@@ -163,7 +163,7 @@ abstract public class TagLibraryInfo {
     /**
      * An array describing the tags that are defined in this tag library.
      *
-     * @returns the tags defined in this tag lib
+     * @return the tags defined in this tag lib
      */
    
     public TagInfo[] getTags() {
@@ -176,7 +176,7 @@ abstract public class TagLibraryInfo {
      * tags in this tag library.
      *
      * @param shortname The short name (no prefix) of the tag
-     * @returns the TagInfo for that tag. 
+     * @return the TagInfo for that tag. 
      */
 
     public TagInfo getTag(String shortname) {
