@@ -68,11 +68,17 @@ public class HttpContextMBean extends LifeCycleMBean
         defineAttribute("statsOn");
         defineOperation("statsReset",IMPACT_ACTION);
         defineAttribute("requests");
+        defineAttribute("requestsActive");
+        defineAttribute("requestsActiveMax");
         defineAttribute("responses1xx");
         defineAttribute("responses2xx");
         defineAttribute("responses3xx");
         defineAttribute("responses4xx");
         defineAttribute("responses5xx");
+        
+        defineOperation("stop",
+                        new String[] {"java.lang.Boolean.TYPE"},
+                        IMPACT_ACTION);
         
         defineOperation("destroy",
                         IMPACT_ACTION);
