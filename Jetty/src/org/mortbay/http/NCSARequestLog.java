@@ -12,6 +12,7 @@ import org.mortbay.util.DateCache;
 import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.StringUtil;
 import java.io.IOException;
+import java.io.BufferedOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Locale;
@@ -29,12 +30,14 @@ public class NCSARequestLog implements RequestLog
     private String _filename;
     private boolean _extended;
     private boolean _append;
+    private boolean _buffered=true;
     private int _retainDays;
-    private boolean _closeFileOut;
+    private boolean _closeOut;
     private String _logDateFormat="dd/MMM/yyyy:HH:mm:ss ZZZ";
     private Locale _logLocale=Locale.US;
     private String _logTimeZone=TimeZone.getDefault().getID();
     
+    private transient OutputStream _out;
     private transient OutputStream _fileOut;
     private transient DateCache _logDateCache;
     private transient ByteArrayISO8859Writer _buf;
@@ -84,6 +87,18 @@ public class NCSARequestLog implements RequestLog
         return _filename;
     }
 
+    /* ------------------------------------------------------------ */
+    public boolean isBuffered()
+    {
+        return _buffered;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setBuffered(boolean buffered)
+    {
+        _buffered = buffered;
+    }
+    
     /* ------------------------------------------------------------ */
     public String getDatedFilename()
     {
@@ -163,10 +178,15 @@ public class NCSARequestLog implements RequestLog
         if (_filename != null)
         {
             _fileOut=new RolloverFileOutputStream(_filename,_append,_retainDays);
-            _closeFileOut=true;
+            _closeOut=true;
         }
         else
             _fileOut=System.err;
+
+        if (_buffered)
+            _out=new BufferedOutputStream(_fileOut);
+        else
+            _out=_fileOut;
     }
 
     /* ------------------------------------------------------------ */
@@ -178,10 +198,11 @@ public class NCSARequestLog implements RequestLog
     /* ------------------------------------------------------------ */
     public void stop()
     {
-        if (_fileOut!=null && _closeFileOut)
-            try{_fileOut.close();}catch(IOException e){Code.ignore(e);}
+        if (_out!=null && _closeOut)
+            try{_out.close();}catch(IOException e){Code.ignore(e);}
+        _out=null;
         _fileOut=null;
-        _closeFileOut=false;
+        _closeOut=false;
         _buf=null;
         _logDateCache=null;
     }
@@ -256,7 +277,7 @@ public class NCSARequestLog implements RequestLog
                 }
                 _buf.write(StringUtil.__LINE_SEPARATOR);
                 _buf.flush();
-                _buf.writeTo(_fileOut);
+                _buf.writeTo(_out);
                 _buf.reset();
             }
         }
