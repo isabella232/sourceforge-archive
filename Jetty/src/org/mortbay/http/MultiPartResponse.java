@@ -33,12 +33,24 @@ public class MultiPartResponse
     }
     
     /* ------------------------------------------------------------ */
-    private String boundary =
-        "org.mortbay.http.MultiPartResponse.boundary."+
-        Long.toString(System.currentTimeMillis(),36);
-    
-    private byte[] boundaryBytes = boundary.getBytes(StringUtil.__ISO_8859_1);
+    private String boundary;
+    private byte[] boundaryBytes;
 
+    /* ------------------------------------------------------------ */
+    private MultiPartResponse()
+    {
+        try
+        {
+            boundary = "org.mortbay.http.MultiPartResponse.boundary."+
+                Long.toString(System.currentTimeMillis(),36);
+            boundaryBytes=boundary.getBytes(StringUtil.__ISO_8859_1);
+        }
+        catch (Exception e)
+        {
+            Code.fail(e);
+        }
+    }    
+    
     /* ------------------------------------------------------------ */
     public String getBoundary()
     {
@@ -58,6 +70,7 @@ public class MultiPartResponse
     public MultiPartResponse(OutputStream out)
          throws IOException
     {
+        this();
         this.out=out;
         inPart=false;
     }
@@ -68,6 +81,7 @@ public class MultiPartResponse
     public MultiPartResponse(HttpResponse response)
          throws IOException
     {
+        this();
         response.setField(HttpFields.__ContentType,"multipart/mixed;boundary="+boundary);
         out=response.getOutputStream();
         inPart=false;
