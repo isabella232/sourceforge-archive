@@ -207,7 +207,7 @@ public class ContextLoader extends URLClassLoader
         Class c = findLoadedClass(name);
         ClassNotFoundException ex=null;
         boolean tried_parent=false;
-        if (c==null && _java2compliant||isSystemPath(name) )
+        if (c==null && (_java2compliant||isSystemPath(name)))
         {
             if (Code.verbose()) Code.debug("try loadClass ",name," from ",_parent);
             tried_parent=true;

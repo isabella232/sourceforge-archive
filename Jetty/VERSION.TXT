@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Fixed ContextLoader parent delegation bug
+
 Jetty-4.1.3 - 24 October 2002
  + Fixed RolloverFileOutputStream without date.
  + Fixed SessionManager initialization
