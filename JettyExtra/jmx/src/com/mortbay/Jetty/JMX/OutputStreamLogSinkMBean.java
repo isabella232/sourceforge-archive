@@ -28,7 +28,7 @@ import java.beans.beancontext.BeanContextMembershipEvent;
  * @version $Revision$
  * @author Greg Wilkins (gregw)
  */
-public class WriterLogSinkMBean extends LogSinkMBean
+public class OutputStreamLogSinkMBean extends LogSinkMBean
 {
     private LogSink _logSink;
     private boolean _formatOptions;
@@ -40,7 +40,7 @@ public class WriterLogSinkMBean extends LogSinkMBean
      * @exception MBeanException 
      * @exception InstanceNotFoundException 
      */
-    public WriterLogSinkMBean(LogSink sink)
+    public OutputStreamLogSinkMBean(LogSink sink)
         throws MBeanException, InstanceNotFoundException
     {
         this(sink,true);
@@ -53,7 +53,7 @@ public class WriterLogSinkMBean extends LogSinkMBean
      * @exception MBeanException 
      * @exception InstanceNotFoundException 
      */
-    public WriterLogSinkMBean(LogSink sink, boolean formatOptions)
+    public OutputStreamLogSinkMBean(LogSink sink, boolean formatOptions)
         throws MBeanException, InstanceNotFoundException
     {
         super(null);
@@ -84,7 +84,7 @@ public class WriterLogSinkMBean extends LogSinkMBean
         }
         
         defineAttribute("append");
-        defineAttribute("writer");
+        defineAttribute("outputStream");
         defineAttribute("filename");
         defineAttribute("retainDays");
         defineAttribute("flushOn");
@@ -96,3 +96,5 @@ public class WriterLogSinkMBean extends LogSinkMBean
         return uniqueObjectName(server,getJettyDomain()+":name=Log");
     }
 }
+
+

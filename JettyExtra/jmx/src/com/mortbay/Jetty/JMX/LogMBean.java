@@ -18,6 +18,7 @@ import javax.management.modelmbean.ModelMBeanOperationInfo;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.Log;
 import com.mortbay.Util.LogSink;
+import com.mortbay.Util.OutputStreamLogSink;
 import com.mortbay.Util.WriterLogSink;
 
 import java.util.HashMap;
@@ -113,8 +114,10 @@ public class LogMBean extends ModelMBeanImpl
             {
                 try
                 {
-                    if (sink instanceof WriterLogSink)
-                        bean=new WriterLogSinkMBean(sink);
+                    if (sink instanceof OutputStreamLogSink)
+                        bean=new OutputStreamLogSinkMBean(sink,true);
+                    else if (sink instanceof WriterLogSink)
+                        bean=new WriterLogSinkMBean(sink,true);
                     else
                         bean=new LogSinkMBean(sink);
                     getMBeanServer().registerMBean(bean,null);

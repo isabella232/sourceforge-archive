@@ -23,6 +23,7 @@ import com.mortbay.Util.Code;
 import com.mortbay.Util.Log;
 import com.mortbay.Util.LogSink;
 import com.mortbay.Util.LifeCycle;
+import com.mortbay.Util.OutputStreamLogSink;
 import com.mortbay.Util.WriterLogSink;
 
 import java.beans.beancontext.BeanContextMembershipListener;
@@ -165,9 +166,12 @@ public class HttpServerMBean extends LifeCycleMBean
                 else if (o instanceof LogSink)
                 {
                     LogSink sink =(LogSink)o;
-                    mbean= (sink instanceof WriterLogSink)
-                        ? new WriterLogSinkMBean((WriterLogSink)sink,false)
-                        : new LogSinkMBean(sink);
+                    if (sink instanceof OutputStreamLogSink)
+                        mbean=new OutputStreamLogSinkMBean(sink,false);
+                    else if (sink instanceof WriterLogSink)
+                        mbean=new WriterLogSinkMBean(sink,false);
+                    else
+                        mbean= new LogSinkMBean(sink);
                     String className = sink.getClass().getName();
                     if (className.indexOf(".")>0)
                         className=className.substring(className.lastIndexOf(".")+1);
