@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + HttpConnection was too greedy. Fixed delayed response bug.
  + DTD allows static "Get" and "Set" methods to be invoked.
 
 Jetty-4.0.0 - 22 March 2002
