@@ -53,11 +53,11 @@ public class InetGateway extends ThreadedServer
     };
     private static final String[] __dumpFilter = 
     {
-        "com.mortbay.Util.DumpFilterOutputStream"
+        "com.mortbay.Tools.DumpFilterOutputStream"
     };
     private static final String[] __summaryFilter = 
     {
-        "com.mortbay.Util.SummaryFilterOutputStream"
+        "com.mortbay.Tools.SummaryFilterOutputStream"
     };
     
     /* ------------------------------------------------------------ */
