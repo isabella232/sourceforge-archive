@@ -97,11 +97,9 @@ set JETTY_DRIVE=%JETTY_HOME:~0,2%
 
 rem ===========================================================
 rem == Change directory to the JETTY_HOME root directory.
-rem == JTB: I have had problems with Jetty working under Windows NT
-rem == unless this is done! 
 rem ===========================================================
-rem %JETTY_DRIVE%
-rem cd "%JETTY_HOME%"
+%JETTY_DRIVE%
+cd "%JETTY_HOME%"
 
 rem ===========================================================
 rem == set CLASSPATH
@@ -174,8 +172,8 @@ rem pause
 rem ===========================================================
 rem == clean up our toys
 rem ===========================================================
-::%x_DRIVE%
-::cd "%x_PWD%"
+%x_DRIVE%
+cd "%x_PWD%"
 set PATH=%x_PATH%
 set CP=%x_CP%
 set ARGS=
