@@ -1,17 +1,6 @@
 Jetty Versions
 --------------
 
-Jetty-3.1.0test0 - 23 Feb 2001
- + Added JMX management framework.
- + Use Thread context classloader as default context loader parent.
- + Fixed init order for unnamed servlets.
- + Fixed session invalidation unbind notification to conform with spec
- + Improved handling of primitives in utilities.
- + Socket made available via HttpConnection.
- + Improved InetAddrPort and ThreadedServer to reduce DNS lookups.
- + Dynamic servlets may be restricted to Context classloader.
- + Changed getter and setter methods that did not conform to beans API.
-
 Jetty-3.0.4 - 23 Feb 2001
  + Fixed LineInput bug with split CRLF.
 
