@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
  
-Jetty-4.2.15rc0
+Jetty-4.2.15rc0 - 22 Nov 2003
  + PathMap uses own Map.Entry impl for IBM JVMs 
  + Race in HttpFields cache
  + Use ${jetty.home}/work or WEB-INF/work for temp directories if present
