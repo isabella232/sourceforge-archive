@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.0rc1 - 2 November 2002
  + Support default mime mapping defined by *
  + Recycling of HttpFields class.
  + Renamed Filter application methods.
@@ -9,7 +10,8 @@ Jetty Versions
  + Fixed problem setting the size of chunked buffers.
  + Removed unused Servlet and Servlet-Engine headers.
  + Fixed servletpath on invoker for named servlets.
- + Fixed directory resource bug in JarFileResource
+ + Fixed directory resource bug in JarFileResource.
+ + Improved handling of 2 byte encoded characters within forms.
 
 Jetty-4.2.0rc0 - 24 October 2002
  + Greg's birthday release!
