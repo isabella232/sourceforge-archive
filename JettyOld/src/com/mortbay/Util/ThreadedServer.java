@@ -30,6 +30,9 @@ abstract public class ThreadedServer
     implements Runnable 
 {    
     /* ------------------------------------------------------------ */
+    private static int _threadId=0;
+    
+    /* ------------------------------------------------------------ */
     static int __maxThreads =
         Integer.getInteger("THREADED_SERVER_MAX_THREADS",255).intValue();
     
@@ -51,7 +54,6 @@ abstract public class ThreadedServer
     private int _minThreads = __minThreads;
     private int _maxIdleTimeMs=0;
     private String _name="ThreadedServer";
-    private int _threadId=0;
     private int _accepting=0;
     private boolean _running=false;
     
@@ -337,7 +339,10 @@ abstract public class ThreadedServer
     protected Socket accept(ServerSocket serverSocket)
          throws java.io.IOException
     {
-        return serverSocket.accept();
+        Socket socket = serverSocket.accept();
+        if (_maxIdleTimeMs>0)
+            socket.setSoTimeout(_maxIdleTimeMs);
+        return socket;
     }
     
     
@@ -378,7 +383,12 @@ abstract public class ThreadedServer
         {
             Thread thread=
                 (Thread)_constructThread.newInstance(_constructThis);
-            thread.setName(_name+"-"+(_threadId++));
+
+            synchronized(com.mortbay.Util.ThreadedServer.class)
+            {
+                thread.setName(_name+"-"+(_threadId++));
+            }
+            
             _threadSet.put(thread,thread);
             thread.start();
         }
@@ -491,7 +501,8 @@ abstract public class ThreadedServer
         int runs=0;
         
         Code.debug( "Listen on ", listen );
-        try{
+        try
+        {
             while(_running) 
             {
                 Socket connection=null;
@@ -506,9 +517,14 @@ abstract public class ThreadedServer
                 }
                 catch ( InterruptedIOException e )
                 {
+                    if (Code.verbose(99))
+                        Code.debug(e);
+                    
                     synchronized(this)
                     {
                         // If we are still running, interrupt was due to accept timeout
+                        if (Code.verbose(99))
+                            Code.debug("Threads="+_threadSet.size());
                         if (_running && _threadSet.size()>_minThreads)
                         {
                             // Kill thread if it is in excess of the minimum.
@@ -530,13 +546,21 @@ abstract public class ThreadedServer
                 }
                 finally
                 {
-                    // If not more threads accepting - start one
+                    // If not more threads accepting and this
+                    // thread is not idle - start a new thread.
                     synchronized(this)
                     {
+                        if (Code.verbose(99))
+                            Code.debug("Threads="+_threadSet.size());
+                        
                         if (--_accepting==0 &&
                             _running &&
+                            connection!=null &&
                             _threadSet.size()<_maxThreads)
+                        {
+                            Code.debug("New Thread");
                             newThread();
+                        }
                     }
                 }
 
@@ -570,13 +594,17 @@ abstract public class ThreadedServer
             synchronized(this)
             {
                 if (_threadSet!=null)
-                    _threadSet.remove(Thread.currentThread());
+                    _threadSet.remove(thread);
                 notify();
             }
-            Code.debug("Stopped listening on " + listen);
+            Code.debug("Stopped listening on " + listen+
+                       "\nthreads="+_threadSet.size());
         }
     }
 }
+
+
+
 
 
 

@@ -1,10 +1,17 @@
-Release 2.3.1 -
-  + Added assert with no message to Code
+Release 2.3.1 - 14th October 1999
   + Force UTF8 for FTP commands
   + Force UTF8 for HTML 
   + Changed demo servlets to use writers in preference to outputstreams
-  + NullHandler/Server default name.name.PROPERTIES to load prefix/name.name.properties
+  + NullHandler/Server default name.name.PROPERTIES to load 
+    prefix/name.name.properties
   + Use UTF8 in HTTP headers
+  + Added Oracle DB adapter
+  + Added assert with no message to Code
+  + ThreadedServer calls setSoTimeout(_maxThreadIdleMs) on 
+    accepted sockets. Idle reads will timeout.
+  + Prevented thread churn on idle server.
+  + HTTP/1.0 Keep-Alive (about time!).
+  + Fixed GNUJSP 1.0 resource bug.
 
 Release 2.3.0 - 5th October 1999 - LATEST
   + Added SetUID class with native Unix call to set the 

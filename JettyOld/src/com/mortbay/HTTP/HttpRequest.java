@@ -113,8 +113,14 @@ public class HttpRequest extends HttpHeader
         this.in=new HttpInputStream(connection.getInputStream());
         this.address=address;
 
-        // Decode request header
-        com.mortbay.HTTP.HttpInputStream$CharBuffer cb = in.readCharBufferLine();
+        // Get and Decode request header
+        com.mortbay.HTTP.HttpInputStream$CharBuffer cb = null;
+        do
+        {
+            cb = in.readCharBufferLine();
+        }
+        while(cb!=null && cb.size==0);
+        
         if (cb==null)
             throw new IOException("EOF");
         decodeRequestLine(cb.chars,cb.size);

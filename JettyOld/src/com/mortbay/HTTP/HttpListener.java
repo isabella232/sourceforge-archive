@@ -98,7 +98,6 @@ public class HttpListener extends ThreadedServer
      */
     public void handleConnection(Socket connection)
     {
-
         try
         {
             while(true)
@@ -124,10 +123,18 @@ public class HttpListener extends ThreadedServer
 
                     response.complete();
                 
-                    if (HttpHeader.HTTP_1_0.equals(request.getProtocol()))
+                    String connection_header =response.getHeader(response.Connection);
+                    if (connection_header!=null)
+                        connection_header=
+                            StringUtil.asciiToLowerCase(connection_header);
+
+                    // Break request loop if 1.0 and not keep-alive
+                    if (HttpHeader.HTTP_1_0.equals(request.getProtocol())&&
+                        !"keep-alive".equals(connection_header))
                         break;
-                    if (HttpHeader.Close
-                        .equals(response.getHeader(HttpHeader.Connection)))
+
+                    // Break request loop of close requested
+                    if (HttpHeader.Close.equals(connection_header))
                     {
                         Code.debug("Closing persistent connection");
                         break;

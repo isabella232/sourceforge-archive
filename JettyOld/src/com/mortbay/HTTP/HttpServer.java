@@ -482,12 +482,19 @@ public class HttpServer implements ServletContext
         throws MalformedURLException
     {
         if (resourceBase==null)
+        {
+            String host=null;
+            if (listeners[0]!=null &&
+                listeners[0].getAddress()!=null &&
+                listeners[0].getAddress().getInetAddress()!=null)
+                host=listeners[0].getAddress().getInetAddress().getHostAddress();
+            if (host==null)
+                host="127.0.0.1";
             // Loop request back to this server
-            return new URL("http",
-                           listeners[0].getAddress().getInetAddress()
-                           .getHostAddress(),
+            return new URL("http",host,
                            listeners[0].getPort(),
                            path);
+        }
         else
             return new URL(resourceBase+path);
     }

@@ -94,6 +94,15 @@ public class HtmlFilter extends HttpFilter
             response.setDateHeader(HttpHeader.LastModified, now);
             response.setDateHeader(HttpHeader.Expires, now);
             response.setHeader(HttpHeader.ContentLength, null);
+
+            String connection_header =response.getHeader(response.Connection);
+            if (connection_header!=null)
+            {
+                connection_header=
+                    StringUtil.asciiToLowerCase(connection_header);
+                if ("keep-alive".equals(connection_header))
+                    response.setHeader(HttpHeader.Connection,HttpHeader.Close);
+            }
         }
     }
 
