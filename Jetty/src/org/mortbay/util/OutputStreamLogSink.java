@@ -371,7 +371,7 @@ public class OutputStreamLogSink
             // Determine the indent string for the message and append it
             // to the buffer. Only put a newline in the buffer if the first
             // line is not blank
-            String nl=__lineSeparator+(_logOneLine?"":"+ ");
+            String nl=__lineSeparator;
             
             if (_logLabels && !_logOneLine && _buffer.length() > 0)
                 _buffer.write(nl);

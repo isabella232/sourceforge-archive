@@ -300,7 +300,7 @@ public class HttpRequest extends HttpMessage
      * <p>
      * Because this method returns a <code>StringBuffer</code>,
      * not a string, you can modify the URL easily, for example,
-     * to append query parameters.
+     * to append path and query parameters.
      *
      * This method is useful for creating redirect messages
      * and for reporting errors.
@@ -467,6 +467,14 @@ public class HttpRequest extends HttpMessage
         return _uri.getPath();
     }
     
+    /* ------------------------------------------------------------ */
+    /** Get the encoded request path.
+     * @return 
+     */
+    public String getEncodedPath()
+    {
+        return _uri.getEncodedPath();
+    }
     
     /* ------------------------------------------------------------ */
     /** Get the request query.
@@ -605,7 +613,10 @@ public class HttpRequest extends HttpMessage
         }
 
         // handle URI
-        try{_uri= new URI(new String(buf,s3,e3-s3+1));}
+        try{
+            String raw_uri=new String(buf,s3,e3-s3+1);
+            _uri= new URI(raw_uri);
+        }
         catch(IllegalArgumentException e)
         {
             Code.ignore(e);

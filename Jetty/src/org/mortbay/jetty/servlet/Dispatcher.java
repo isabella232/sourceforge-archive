@@ -365,13 +365,6 @@ public class Dispatcher implements RequestDispatcher
             return(_forwarded)?_query:super.getQueryString();
         }
         
-        /* ------------------------------------------------------------ */
-        public String getRequestURI()
-        {
-            return (!_included)
-                ?URI.addPaths(_contextPath,URI.addPaths(_servletPath,_pathInfo))
-                :super.getRequestURI();
-        }
 
         /* ------------------------------------------------------------ */
         void addParameters(MultiMap parameters)

@@ -96,9 +96,12 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
-    ServletHttpRequest(ServletHandler servletHandler,HttpRequest request)
+    ServletHttpRequest(ServletHandler servletHandler,
+                       String pathInContext,
+                       HttpRequest request)
     {
         _servletHandler=servletHandler;
+        _pathInContext=pathInContext;
         _contextPath=_servletHandler.getHttpContext().getContextPath();
         if (_contextPath.length()<=1)
             _contextPath="";
@@ -146,12 +149,10 @@ public class ServletHttpRequest
      * @param servletPath 
      * @param pathInfo 
      */
-    void setServletPaths(String pathInContext,
-                         String servletPath,
+    void setServletPaths(String servletPath,
                          String pathInfo,
                          ServletHolder holder)
     {
-        _pathInContext=pathInContext;
         _servletPath=servletPath;
         _pathInfo=pathInfo;
         _servletHolder=holder;
@@ -338,6 +339,8 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     public String getPathInfo()
     {
+        if (_pathInfo==null)
+            return _pathInContext;
         return _pathInfo;
     }
     
@@ -462,20 +465,23 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     public String getRequestURI()
     {
-        return
-            URI.addPaths(getContextPath(),URI.addPaths(getServletPath(),getPathInfo()));
+        return _httpRequest.getEncodedPath();
     }
     
     /* ------------------------------------------------------------ */
     public StringBuffer getRequestURL()
     {
-        // XXX should move impl to here!!!
-        return HttpUtils.getRequestURL(this);
+        
+        StringBuffer buf = _httpRequest.getRootURL();
+        buf.append(getRequestURI());
+        return buf;
     }
     
     /* ------------------------------------------------------------ */
     public String getServletPath()
     {
+        if (_servletPath==null)
+            return "";
         return _servletPath;
     }
     

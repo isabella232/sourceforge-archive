@@ -35,6 +35,7 @@ public class URI
     private String _host;
     private int _port;
     private String _path;
+    private String _encodedPath;
     private String _query;
     private UrlEncoded _parameters = new UrlEncoded();
     private boolean _dirty;
@@ -51,6 +52,7 @@ public class URI
         _host=uri._host;
         _port=uri._port;
         _path=uri._path;
+        _encodedPath=uri._encodedPath;
         _query=uri._query;
         _parameters=(UrlEncoded)uri._parameters.clone();
         _dirty=false;
@@ -99,6 +101,7 @@ public class URI
                       {
                           state=5;
                           _path="*";
+                          _encodedPath="*";
                           break;
                       }
                       continue;
@@ -133,7 +136,8 @@ public class URI
                       if (c=='?')
                       {
                           // Found query
-                          _path=decodePath(uri.substring(mark,i));
+                          _encodedPath=uri.substring(mark,i);
+                          _path=decodePath(_encodedPath);
                           mark=i+1;
                           state=4;
                           break;
@@ -147,23 +151,27 @@ public class URI
             {
               case 0:
                   _dirty=false;
-                  _path=_uri;
+                  _encodedPath=_uri;
+                  _path=decodePath(_encodedPath);
                   break;
                   
               case 1:
                   _dirty=true;
-                  _path="/";
+                  _encodedPath="/";
+                  _path=_encodedPath;
                   _host=uri.substring(mark);
                   break;
                   
               case 2:
                   _dirty=true;
-                  _path="/";
+                  _encodedPath="/";
+                  _path=_encodedPath;
                   _port=Integer.parseInt(uri.substring(mark));
                   break;
               case 3:
                   _dirty=(mark==maxi);
-                  _path=decodePath(uri.substring(mark));
+                  _encodedPath=uri.substring(mark);
+                  _path=decodePath(_encodedPath);
                   break;
                   
               case 4:
@@ -266,12 +274,22 @@ public class URI
     }
     
     /* ------------------------------------------------------------ */
+    /** Get the encoded uri path.
+     * @return the URI path
+     */
+    public String getEncodedPath()
+    {
+        return _encodedPath;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Set the uri path.
      * @param path the URI path
      */
     public void setPath(String path)
     {
         _path=path;
+        _encodedPath=encodePath(_path);
         _dirty=true;
     }
     
@@ -429,7 +447,7 @@ public class URI
                         buf.append(_port);
                     }
                 }
-                encodePath(buf,_path);
+                buf.append(_encodedPath);
 
                 if (_query!=null && _query.length()>0)
                 {

@@ -926,7 +926,7 @@ public class Code
             
             for (int i=0;i<mx.size();i++)
             {
-                __out.println("getException("+i+"):");
+                __out.print("["+i+"]=");
                 Throwable ex2=mx.getException(i);
                 expandThrowable(ex2);
             }

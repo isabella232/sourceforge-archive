@@ -447,7 +447,7 @@ public class ServletHandler
                                           Map.Entry entry)
     {
         // Build the request and response.
-        ServletHttpRequest servletHttpRequest  = new ServletHttpRequest(this,httpRequest);
+        ServletHttpRequest servletHttpRequest  = new ServletHttpRequest(this,pathInContext,httpRequest);
         httpRequest.setFacade(servletHttpRequest);
         ServletHttpResponse servletHttpResponse =
             new ServletHttpResponse(servletHttpRequest,httpResponse);
@@ -463,8 +463,7 @@ public class ServletHandler
         if (entry!=null)
         {
             String servletPathSpec=(String)entry.getKey();            
-            servletHttpRequest.setServletPaths(pathInContext,
-                                               PathMap.pathMatch(servletPathSpec,
+            servletHttpRequest.setServletPaths(PathMap.pathMatch(servletPathSpec,
                                                                  pathInContext),
                                                PathMap.pathInfo(servletPathSpec,
                                                                 pathInContext),
