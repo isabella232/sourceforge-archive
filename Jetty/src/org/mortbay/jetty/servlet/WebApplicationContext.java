@@ -32,6 +32,7 @@ import javax.servlet.http.HttpSessionListener;
 import org.mortbay.http.ContextLoader;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
+import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.HttpServer;
@@ -77,9 +78,12 @@ public class WebApplicationContext extends ServletHttpContext
     private String _name;
     private Resource _webApp;
     private Resource _webInf;
+    private NotFoundHandler _notFoundHandler;
+    private HttpHandler _webInfHandler;
     private FilterHandler _filterHandler;
     private ServletHandler _servletHandler;
     private SecurityHandler _securityHandler;
+    private ResourceHandler _resourceHandler;
     private Map _tagLibMap=new HashMap(3);
     private String _deploymentDescriptor;
     private String _defaultsDescriptor;
@@ -254,7 +258,8 @@ public class WebApplicationContext extends ServletHttpContext
         }        
         
         // Protect WEB-INF
-        addHttpHandler(1,new WebInfProtect());
+        _webInfHandler=new WebInfProtect();
+        addHttpHandler(1,_webInfHandler);
         
         // Add filter Handler
         _filterHandler = (FilterHandler)getHttpHandler(FilterHandler.class);
@@ -281,25 +286,30 @@ public class WebApplicationContext extends ServletHttpContext
         }
         
         // Resource Handler
-        ResourceHandler rh = (ResourceHandler)getHttpHandler(ResourceHandler.class);
-        if (rh==null)
+        _resourceHandler = (ResourceHandler)getHttpHandler(ResourceHandler.class);
+        if (_resourceHandler==null)
         {
-            rh=new ResourceHandler();
-            rh.setPutAllowed(false);
-            rh.setDelAllowed(false);
-            addHttpHandler(rh);
+            _resourceHandler=new ResourceHandler();
+            _resourceHandler.setPutAllowed(false);
+            _resourceHandler.setDelAllowed(false);
+            addHttpHandler(_resourceHandler);
         }
 
         // Check order
         if (_servletHandler!=null &&
-            getHttpHandlerIndex(rh)<getHttpHandlerIndex(_servletHandler))
+            getHttpHandlerIndex(_resourceHandler)<getHttpHandlerIndex(_servletHandler))
         {
-            removeHttpHandler(rh);
-            addHttpHandler(rh);
+            removeHttpHandler(_resourceHandler);
+            addHttpHandler(_resourceHandler);
         }
         
         // NotFoundHandler
-        addHttpHandler(new NotFoundHandler());
+        _notFoundHandler=(NotFoundHandler)getHttpHandler(NotFoundHandler.class);
+        if (_notFoundHandler==null)
+            _notFoundHandler=new NotFoundHandler();
+        else
+            removeHttpHandler(_notFoundHandler);
+        addHttpHandler(_notFoundHandler);
         
         // Do the default configuration
         try
@@ -421,13 +431,18 @@ public class WebApplicationContext extends ServletHttpContext
                     .contextInitialized(event);
         }
         
-        if (rh.isPutAllowed())
+        if (_resourceHandler.isPutAllowed())
             Log.event("PUT allowed in "+this);
-        if (rh.isDelAllowed())
+        if (_resourceHandler.isDelAllowed())
             Log.event("DEL allowed in "+this);
     }
 
     /* ------------------------------------------------------------ */
+    /** Stop the web application.
+     * Handlers for resource, servlet, filter and security are removed
+     * as they are recreated and configured by any subsequent call to start().
+     * @exception InterruptedException 
+     */
     public void stop()
         throws  InterruptedException
     {
@@ -442,6 +457,30 @@ public class WebApplicationContext extends ServletHttpContext
         }
         else
             super.stop();
+
+        if (_resourceHandler!=null)
+            removeHttpHandler(_resourceHandler);
+        _resourceHandler=null;
+        
+        if (_servletHandler!=null)
+            removeHttpHandler(_servletHandler);
+        _servletHandler=null;
+        
+        if (_filterHandler!=null)
+            removeHttpHandler(_filterHandler);
+        _filterHandler=null;
+        
+        if (_webInfHandler!=null)
+            removeHttpHandler(_webInfHandler);
+        _webInfHandler=null;
+        
+        if (_securityHandler!=null)
+            removeHttpHandler(_securityHandler);
+        _securityHandler=null;
+        
+        if (_notFoundHandler!=null)
+            removeHttpHandler(_notFoundHandler);
+        _notFoundHandler=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -936,16 +975,14 @@ public class WebApplicationContext extends ServletHttpContext
     /* ------------------------------------------------------------ */
     private void initWelcomeFileList(XmlParser.Node node)
     {
-        ResourceHandler rh = getResourceHandler();
-        rh.setIndexFiles(null);
-        
+        _resourceHandler.setIndexFiles(null);
         Iterator iter= node.iterator("welcome-file");
         while(iter.hasNext())
         {
             XmlParser.Node indexNode=(XmlParser.Node)iter.next();
             String index=indexNode.toString(false,true);
             Code.debug("Index: ",index);
-            rh.addIndexFile(index);
+            _resourceHandler.addIndexFile(index);
         }
     }
 

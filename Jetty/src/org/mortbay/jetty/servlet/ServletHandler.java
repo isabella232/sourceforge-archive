@@ -388,8 +388,6 @@ public class ServletHandler
         super.stop();
     }
     
-    
-    
     /* ------------------------------------------------------------ */
     /** Get or create a ServletRequest.
      * Create a new or retrieve a previously created servlet request

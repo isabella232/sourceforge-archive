@@ -741,8 +741,6 @@ public class HttpContext implements LifeCycle
     {
         addHandler(_handlers.size(),handler);
     }
-
-
     
     /* ------------------------------------------------------------ */
     /**
