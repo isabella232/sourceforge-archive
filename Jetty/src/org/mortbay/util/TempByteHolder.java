@@ -196,7 +196,8 @@ public class TempByteHolder {
      * when it will not fit into backing memory buffer.
      * @return true when data is only accessible through InputStream interface;
      * false when data can be also retrieved directly as byte[] or String.
-     * @see #getBytes(), #getString(String)
+     * @see #getBytes()
+     * @see #getString(String)
      */
     public boolean isLarge() {
         return _file_mode;
@@ -210,7 +211,10 @@ public class TempByteHolder {
      * memory buffer, IllegalStateException is thrown.
      * @return byte[] with data as its first getLength() bytes.
      * @throws IllegalStateException when data is too big to be read this way.
-     * @see #isLarge(), #getLength(), #getString(String), #getInputStream()
+     * @see #isLarge()
+     * @see #getLength()
+     * @see #getString(String)
+     * @see #getInputStream()
      */
     public byte[] getBytes() {
         if (_file_mode) throw new IllegalStateException("data too large");
