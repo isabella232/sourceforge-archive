@@ -55,6 +55,6 @@ public class LogSinkMBean extends LifeCycleMBean
     /* ------------------------------------------------------------ */
     protected String newObjectName()
     {
-        return uniqueObjectName(":name=Log");
+        return uniqueObjectName(getJettyDomain()+":name=Log");
     }
 }

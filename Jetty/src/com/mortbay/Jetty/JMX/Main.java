@@ -41,7 +41,7 @@ public class Main
         {
             // Create a MBeanServer
             final MBeanServer server =
-                MBeanServerFactory.createMBeanServer("com.mortbay");
+                MBeanServerFactory.createMBeanServer(ModelMBeanImpl.getJettyDomain());
             Code.debug("MBeanServer=",server);
             
             // Create and register the MLet

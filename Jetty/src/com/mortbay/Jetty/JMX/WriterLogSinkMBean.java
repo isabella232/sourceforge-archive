@@ -31,6 +31,7 @@ public class WriterLogSinkMBean extends LogSinkMBean
 {
     private LogSink _logSink;
     private boolean _formatOptions;
+    private String  _domain="com.mortbay";
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -90,6 +91,6 @@ public class WriterLogSinkMBean extends LogSinkMBean
     /* ------------------------------------------------------------ */
     protected String newObjectName()
     {
-        return uniqueObjectName(":name=Log");
+        return uniqueObjectName(getJettyDomain()+":name=Log");
     }
 }

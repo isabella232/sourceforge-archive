@@ -104,16 +104,15 @@ public class WebApplicationContext extends HandlerContext
 
         // Set dir or WAR
         Resource _webApp = Resource.newResource(webApp);
-        if (!_webApp.isDirectory())
+        if (_webApp.exists() && !_webApp.isDirectory())
         {
-            webApp="jar:"+_webApp+"!/";
-            _webApp = Resource.newResource(webApp);
+            _webApp = Resource.newResource("jar:"+_webApp+"!/");
             _war=_webApp.toString();
         }
         _webAppName=_webApp.toString();
         if (!_webApp.exists()) {
-            Code.warning("Web application not found "+_webAppName);
-            throw new java.io.FileNotFoundException(_webAppName);
+            Code.warning("Web application not found "+webApp);
+            throw new java.io.FileNotFoundException(webApp);
         }
 
         // Expand

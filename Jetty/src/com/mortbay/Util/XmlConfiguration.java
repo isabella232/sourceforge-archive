@@ -184,7 +184,9 @@ public class XmlConfiguration
                NoSuchMethodException,
                InvocationTargetException
     {
-        String name = "set"+node.getAttribute("name");
+        String attr=node.getAttribute("name");
+        attr=attr.substring(0,1).toUpperCase()+attr.substring(1);
+        String name = "set"+attr;
         Object value= value(obj,node);
         Object[] arg={value};
         Class oClass = obj.getClass();

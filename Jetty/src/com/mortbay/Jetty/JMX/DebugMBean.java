@@ -56,7 +56,7 @@ public class DebugMBean extends ModelMBeanImpl
     /* ------------------------------------------------------------ */
     protected String newObjectName()
     {
-        return ":name=Debug";
+        return getJettyDomain()+":name=Debug";
     }
 }
 

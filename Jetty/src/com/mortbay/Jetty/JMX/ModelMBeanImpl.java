@@ -103,6 +103,8 @@ public class ModelMBeanImpl
     public final static String[] NO_PARAMS=new String[0];
     
     private static HashMap __objectId = new HashMap();
+
+    private static String __jettyDomain="com.mortbay.Jetty";
     
     protected ModelMBeanInfoSupport _beanInfo;
     private MBeanServer _mBeanServer;
@@ -152,15 +154,21 @@ public class ModelMBeanImpl
             throw new IllegalArgumentException(e.toString());
         }
     }
-
-    /* ------------------------------------------------------------ */
-    public MBeanServer getMBeanServer() { return _mBeanServer; }
-
-    /* ------------------------------------------------------------ */
-    public ObjectName getObjectName() { return _objectName; }
     
     /* ------------------------------------------------------------ */
-    public Object getManagedResource() { return _object; }
+    public static String getJettyDomain()    { return __jettyDomain; }
+    
+    /* ------------------------------------------------------------ */
+    public static void setJettyDomain(String d)   { __jettyDomain=d; }
+    
+    /* ------------------------------------------------------------ */
+    public MBeanServer getMBeanServer()       { return _mBeanServer; }
+
+    /* ------------------------------------------------------------ */
+    public ObjectName getObjectName()          { return _objectName; }
+    
+    /* ------------------------------------------------------------ */
+    public Object getManagedResource()             { return _object; }
   
     /* ------------------------------------------------------------ */
     public void setManagedResource(Object proxyObject, String type)
@@ -291,6 +299,9 @@ public class ModelMBeanImpl
             }
         }
 
+        if (getter==null && setter==null)
+            throw new IllegalArgumentException("No getter or setters found for "+name);
+        
         try
         {
             // Remember the methods
@@ -510,6 +521,8 @@ public class ModelMBeanImpl
     {
         Code.debug("getAttribute ",name);
         Method getter = (Method)_getter.get(name);
+        if (getter==null)
+            throw new AttributeNotFoundException(name);
         try
         {
             return getter.invoke(_object,null);
@@ -556,6 +569,8 @@ public class ModelMBeanImpl
     {
         Code.debug("setAttribute ",attr.getName(),"=",attr.getValue());
         Method setter = (Method)_setter.get(attr.getName());
+        if (setter==null)
+            throw new AttributeNotFoundException(attr.getName());
         try
         {
             setter.invoke(_object,new Object[]{attr.getValue()});
@@ -608,11 +623,18 @@ public class ModelMBeanImpl
             methodKey+=(i>0?",":"")+signature[i];
         methodKey+=")";
 
-        Method method = (Method)_method.get(methodKey);
-
         try
         {
+            Method method = (Method)_method.get(methodKey);
+            if (method==null)
+                throw new NoSuchMethodException(methodKey);
+
             return method.invoke(_object,params);
+        }
+        catch(NoSuchMethodException e)
+        {
+            Code.warning(e);
+            throw new ReflectionException(e);
         }
         catch(IllegalAccessException e)
         {
@@ -827,7 +849,7 @@ public class ModelMBeanImpl
     {
         // Create own ObjectName of the form:
         // package:class=id
-        return uniqueObjectName(getMBeanServer().getDefaultDomain()+":");
+        return uniqueObjectName(getJettyDomain()+":");
     }
     
     /* ------------------------------------------------------------ */

@@ -64,7 +64,7 @@ public class LogMBean extends ModelMBeanImpl
     /* ------------------------------------------------------------ */
     protected String newObjectName()
     {
-        return ":name=Log";
+        return getJettyDomain()+":name=Log";
     }
 
     /* ------------------------------------------------------------ */

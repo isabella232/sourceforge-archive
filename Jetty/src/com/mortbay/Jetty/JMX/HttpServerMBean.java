@@ -59,6 +59,7 @@ public class HttpServerMBean extends LifeCycleMBean
     {
         super(null);
         _jettyServer=new Server();
+        _jettyServer.addBeanContextMembershipListener(this);
         try{setManagedResource(_jettyServer,"objectReference");}
         catch(InvalidTargetObjectTypeException e){Code.warning(e);}
     }
@@ -82,7 +83,7 @@ public class HttpServerMBean extends LifeCycleMBean
     {
         // Create own ObjectName of the form:
         // package:class=id
-        return uniqueObjectName(getMBeanServer().getDefaultDomain()+":name=Jetty");
+        return uniqueObjectName(getJettyDomain()+":name=Jetty");
     }
 
     /* ------------------------------------------------------------ */
@@ -195,8 +196,6 @@ public class HttpServerMBean extends LifeCycleMBean
         
         if (ok.booleanValue())
         {
-            _jettyServer.addBeanContextMembershipListener(this);
-
             if (_configuration!=null)
             {
                 try
