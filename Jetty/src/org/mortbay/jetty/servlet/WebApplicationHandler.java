@@ -725,7 +725,7 @@ public class WebApplicationHandler extends ServletHandler
          */
         boolean appliesTo(String path, int type)
         {
-            boolean b=((_dispatches&type)!=0 || (_dispatches==0 && type==Dispatcher.__REQUEST)) && (_pathSpec==null || PathMap.match(_pathSpec, path));
+           boolean b=((_dispatches&type)!=0 || (_dispatches==0 && type==Dispatcher.__REQUEST)) && (_pathSpec==null || PathMap.match(_pathSpec, path,true));
            return b;
         }
     }

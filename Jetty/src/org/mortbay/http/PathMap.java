@@ -392,6 +392,32 @@ public class PathMap extends HashMap implements Externalizable
                                       pathSpec,1,pathSpec.length()-1);
         return false;
     }
+
+    /* --------------------------------------------------------------- */
+    /**
+     * @return true if match.
+     */
+    public static boolean match(String pathSpec, String path, boolean noDefault)
+        throws IllegalArgumentException
+    {
+        char c = pathSpec.charAt(0);
+        if (c=='/')
+        {
+            if (!noDefault && pathSpec.length()==1 || pathSpec.equals(path))
+                return true;
+            
+            if (pathSpec.endsWith("/*") &&
+                pathSpec.regionMatches(0,path,0,pathSpec.length()-2))
+                return true;
+            
+            if (path.startsWith(pathSpec) && path.charAt(pathSpec.length())==';')
+                return true;
+        }
+        else if (c=='*')
+            return path.regionMatches(path.length()-pathSpec.length()+1,
+                                      pathSpec,1,pathSpec.length()-1);
+        return false;
+    }
     
     /* --------------------------------------------------------------- */
     /** Return the portion of a path that matches a path spec.

@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
  + Moved servlet request wrapping to enterContextScope for geronimo security
+ + refixed / mapping for filters
 
 Jetty-5.1.3rc3
  + removed accidental enablement of DEBUG for JettyPlus jndi in log4j.properties
