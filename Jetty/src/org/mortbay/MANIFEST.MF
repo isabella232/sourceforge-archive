@@ -1,3 +1,5 @@
+Manifest-Version: 1.0
+
 Name: org/mortbay/jetty
 Sealed: true
 Specification-Title:  Jetty HTTP Server
