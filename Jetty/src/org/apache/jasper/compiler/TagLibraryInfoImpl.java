@@ -59,47 +59,18 @@
 
 package org.apache.jasper.compiler;
 
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.net.JarURLConnection;
-import java.util.Iterator;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipEntry;
+import java.net.*;
+import java.io.*;
+import java.util.*;
+import java.util.zip.*;
 import java.util.jar.*;
-import java.util.Enumeration;
-import java.io.ByteArrayOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.io.IOException;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Vector;
-import java.util.Hashtable;
-import java.util.Map;
-
-import javax.servlet.jsp.tagext.TagLibraryInfo;
-import javax.servlet.jsp.tagext.TagInfo;
-import javax.servlet.jsp.tagext.TagAttributeInfo;
-import javax.servlet.jsp.tagext.TagExtraInfo;
-import javax.servlet.jsp.tagext.TagLibraryValidator;
-import javax.servlet.jsp.tagext.PageData;
-import javax.servlet.jsp.tagext.VariableInfo;
-import javax.servlet.jsp.tagext.TagVariableInfo;
-import javax.servlet.jsp.tagext.ValidationMessage;
-
+import javax.servlet.jsp.tagext.*;
 import org.apache.jasper.JspCompilationContext;
 import org.apache.jasper.JasperException;
 import org.apache.jasper.Constants;
-
 import org.apache.jasper.logging.Logger;
-
-import org.apache.jasper.parser.ParserUtils;
-import org.apache.jasper.parser.TreeNode;
-
+import org.apache.jasper.xmlparser.ParserUtils;
+import org.apache.jasper.xmlparser.TreeNode;
 
 /**
  * Implementation of the TagLibraryInfo class from the JSP spec. 
@@ -115,8 +86,7 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
     Hashtable jarEntries;
 
     JspCompilationContext ctxt;
-
-    
+    ErrorDispatcher err;
 
     private final void print(String name, String value, PrintWriter w) {
         if (value != null) {
@@ -168,19 +138,14 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
     }
 
     public TagLibraryInfoImpl(JspCompilationContext ctxt, String prefix, 
-			      String uriIn) 
-        throws JasperException
-    {
-	this(ctxt, prefix, uriIn, null);
-    }
+			      String uriIn, String[] location,
+			      ErrorDispatcher err) 
+                throws JasperException {
 
-    public TagLibraryInfoImpl(JspCompilationContext ctxt, String prefix, 
-			      String uriIn, String[] location) 
-        throws JasperException
-    {
         super(prefix, uriIn);
 
 	this.ctxt = ctxt;
+	this.err = err;
         ZipInputStream zin;
         InputStream in = null;
         URL url = null;
@@ -191,9 +156,8 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
 	    // file where the TLD is located
 	    int uriType = TldLocationsCache.uriType(uri);
 	    if (uriType == TldLocationsCache.ABS_URI) {
-		throw new JasperException(
-                    Constants.getString("jsp.error.taglibDirective.absUriCannotBeResolved",
-					new Object[] {uri}));
+		err.jspError("jsp.error.taglibDirective.absUriCannotBeResolved",
+			     uri);
 	    } else if (uriType == 
 		       TldLocationsCache.NOROOT_REL_URI) {
 		uri = ctxt.resolveRelativeUri(uri);
@@ -209,11 +173,11 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
 	    // Location points to TLD file
 	    try {
 		in = getResourceAsStream(location[0]);
-		if (in == null) throw new FileNotFoundException(location[0]);
+		if (in == null) {
+		    throw new FileNotFoundException(location[0]);
+		}
 	    } catch (FileNotFoundException ex) {
-		throw new JasperException(
-                    Constants.getString("jsp.error.file.not.found",
-					new Object[] {location[0]}));
+		err.jspError("jsp.error.file.not.found", location[0]);
 	    }
 	    // Now parse the tld.
 	    parseTLD(ctxt, location[0], in);
@@ -226,14 +190,14 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
 	    try {
                 String path = location[0] ;
                 if(ctxt.getClassLoader() != null &&
-                   java.net.URLClassLoader.class.equals(ctxt.getClassLoader().getClass())
+                   URLClassLoader.class.equals(ctxt.getClassLoader().getClass())
                        && path.startsWith("/"))
                    path = path.substring(1,path.length()) ;
                 url = ctxt.getResource(path);
                 if (url == null) return;
 		url = new URL("jar:" + url.toString() + "!/");
-		JarURLConnection conn =
-		    (JarURLConnection) url.openConnection();
+		JarURLConnection conn = (JarURLConnection)
+		    url.openConnection();
 		conn.connect(); //@@@ necessary???
 		jarFile = conn.getJarFile();
 		jarEntry = jarFile.getEntry(location[1]);
@@ -263,18 +227,18 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
 	}
     }
     
-    /** Returns true if the given URI is relative in this web application, false if it is an internet URI.
+    /*
+     * Returns true if the given URI is relative in this web application,
+     * false if it is an internet URI.
      */
     private boolean isRelativeURI(String uri) {
         return (uri.indexOf(':') == -1);
     }
-    
-        
+      
     private void parseTLD(JspCompilationContext ctxt,
                           String uri, InputStream in) 
         throws JasperException
     {
-
         Vector tagVector = new Vector();
 
         // Create an iterator over the child elements of our <taglib> element
@@ -320,7 +284,6 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
             }
 
         }
-
 
         this.tags = new TagInfo[tagVector.size()];
         tagVector.copyInto (this.tags);
@@ -416,16 +379,13 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
             }
 
         // JSP.C1: It is a (translation time) error for an action that
-	// has one or more variable subelements to have a TagExtraInfo
-	// class that returns a non-null object.
+        // has one or more variable subelements to have a TagExtraInfo
+        // class that returns a non-null object.
 
-	if (tei != null && variableVector.size() != 0) {
-	    throw new JasperException(
-                          Constants.getString(
-                              "jsp.warning.teiclass.is.nonnull",
-                              new Object[] {teiclass}));
+        if (tei != null && variableVector.size() != 0) {
+            err.jspError("jsp.warning.teiclass.is.nonnull", teiclass);
         }
-	
+
         TagInfo taginfo = new TagInfo(name, tagclass, bodycontent,
                                       info, this, 
                                       tei,

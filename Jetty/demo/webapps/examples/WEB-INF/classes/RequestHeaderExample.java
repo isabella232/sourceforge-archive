@@ -8,6 +8,8 @@ import java.util.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
+import util.HTMLFilter;
+
 /**
  * Example servlet showing request headers
  *
@@ -53,8 +55,11 @@ public class RequestHeaderExample extends HttpServlet {
         while (e.hasMoreElements()) {
             String headerName = (String)e.nextElement();
             String headerValue = request.getHeader(headerName);
-            out.println("<tr><td bgcolor=\"#CCCCCC\">" + headerName);
-            out.println("</td><td>" + headerValue + "</td></tr>");
+            out.println("<tr><td bgcolor=\"#CCCCCC\">");
+            out.println(HTMLFilter.filter(headerName));
+            out.println("</td><td>");
+            out.println(HTMLFilter.filter(headerValue));
+            out.println("</td></tr>");
         }
         out.println("</table>");
     }

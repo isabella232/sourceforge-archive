@@ -79,7 +79,7 @@ import org.apache.jasper.Constants;
 public class BodyContentImpl extends BodyContent {
 
     private char[] cb;
-    protected int bufferSize = Constants.DEFAULT_BUFFER_SIZE;
+    protected int bufferSize = Constants.DEFAULT_TAG_BUFFER_SIZE;
     private int nextChar;
     static String lineSeparator = System.getProperty("line.separator");
     private boolean closed = false;
@@ -101,12 +101,10 @@ public class BodyContentImpl extends BodyContent {
      */
     public void write(int c) throws IOException {
 	ensureOpen();
-        synchronized (lock) {
-            if (nextChar >= bufferSize) {
-	        reAllocBuff (0);
-	    }
-            cb[nextChar++] = (char) c;
+        if (nextChar >= bufferSize) {
+            reAllocBuff (0);
         }
+        cb[nextChar++] = (char) c;
     }
 
     private void reAllocBuff (int len) {
@@ -115,11 +113,11 @@ public class BodyContentImpl extends BodyContent {
 
 	char[] tmp = null;
 
-	//XXX Should it be multiple of DEFAULT_BUFFER_SIZE??
+	//XXX Should it be multiple of DEFAULT_TAG_BUFFER_SIZE??
 
-	if (len <= Constants.DEFAULT_BUFFER_SIZE) {
-	    tmp = new char [bufferSize + Constants.DEFAULT_BUFFER_SIZE];
-	    bufferSize += Constants.DEFAULT_BUFFER_SIZE;
+	if (len <= Constants.DEFAULT_TAG_BUFFER_SIZE) {
+	    tmp = new char [bufferSize + Constants.DEFAULT_TAG_BUFFER_SIZE];
+	    bufferSize += Constants.DEFAULT_TAG_BUFFER_SIZE;
 	} else {
 	    tmp = new char [bufferSize + len];
 	    bufferSize += len;
@@ -148,21 +146,20 @@ public class BodyContentImpl extends BodyContent {
         throws IOException 
     {
 	ensureOpen();
-        synchronized (lock) {
 
-            if ((off < 0) || (off > cbuf.length) || (len < 0) ||
-                ((off + len) > cbuf.length) || ((off + len) < 0)) {
-                throw new IndexOutOfBoundsException();
-            } else if (len == 0) {
-                return;
-            } 
+        if ((off < 0) || (off > cbuf.length) || (len < 0) ||
+            ((off + len) > cbuf.length) || ((off + len) < 0)) {
+            throw new IndexOutOfBoundsException();
+        } else if (len == 0) {
+            return;
+        } 
 
-            if (len >= bufferSize - nextChar)
-		   reAllocBuff (len);
+        if (len >= bufferSize - nextChar)
+            reAllocBuff (len);
 
-            System.arraycopy(cbuf, off, cb, nextChar, len);
-	    nextChar+=len;
-        }
+        System.arraycopy(cbuf, off, cb, nextChar, len);
+        nextChar+=len;
+
     }
 
     /**
@@ -183,13 +180,11 @@ public class BodyContentImpl extends BodyContent {
      */
     public void write(String s, int off, int len) throws IOException {
 	ensureOpen();
-        synchronized (lock) {
-	    if (len >= bufferSize - nextChar)
-	        reAllocBuff(len);
+        if (len >= bufferSize - nextChar)
+            reAllocBuff(len);
 
-            s.getChars(off, off + len, cb, nextChar);
-	    nextChar += len;
-        }
+        s.getChars(off, off + len, cb, nextChar);
+        nextChar += len;
     }
 
     /**
@@ -371,10 +366,8 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void println(boolean x) throws IOException {
-	synchronized (lock) {
-	    print(x);
-	    println();
-	}
+        print(x);
+        println();
     }
 
     /**
@@ -385,10 +378,8 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void println(char x) throws IOException {
-	synchronized (lock) {
-	    print(x);
-	    println();
-	}
+        print(x);
+        println();
     }
 
     /**
@@ -399,10 +390,8 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void println(int x) throws IOException {
-	synchronized (lock) {
-	    print(x);
-	    println();
-	}
+        print(x);
+        println();
     }
 
     /**
@@ -413,10 +402,8 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void println(long x) throws IOException {
-	synchronized (lock) {
-	    print(x);
-	    println();
-	}
+        print(x);
+        println();
     }
 
     /**
@@ -427,10 +414,8 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void println(float x) throws IOException {
-	synchronized (lock) {
-	    print(x);
-	    println();
-	}
+        print(x);
+        println();
     }
 
     /**
@@ -441,10 +426,8 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void println(double x) throws IOException{
-	synchronized (lock) {
-	    print(x);
-	    println();
-	}
+        print(x);
+        println();
     }
 
     /**
@@ -455,10 +438,8 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void println(char x[]) throws IOException {
-	synchronized (lock) {
-	    print(x);
-	    println();
-	}
+        print(x);
+        println();
     }
 
     /**
@@ -469,10 +450,8 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void println(String x) throws IOException {
-	synchronized (lock) {
-	    print(x);
-	    println();
-	}
+        print(x);
+        println();
     }
 
     /**
@@ -483,10 +462,8 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void println(Object x) throws IOException {
-	synchronized (lock) {
-	    print(x);
-	    println();
-	}
+        print(x);
+        println();
     }
 
     /**
@@ -499,9 +476,7 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void clear() throws IOException {
-        synchronized (lock) {
-	    nextChar = 0;
-	}
+        nextChar = 0;
     }
 
     /**
@@ -543,7 +518,7 @@ public class BodyContentImpl extends BodyContent {
      * Note: this is after evaluation!!  There are no scriptlets,
      * etc in this stream.
      *
-     * @return the value of this BodyJspWriter as a Reader
+     * @returns the value of this BodyJspWriter as a Reader
      */
     public Reader getReader() {
         return new CharArrayReader (cb, 0, nextChar);
@@ -554,7 +529,7 @@ public class BodyContentImpl extends BodyContent {
      * Note: this is after evaluation!!  There are no scriptlets,
      * etc in this stream.
      *
-     * @return the value of the BodyJspWriter as a String
+     * @returns the value of the BodyJspWriter as a String
      */
     public String getString() {
         return new String(cb, 0, nextChar);

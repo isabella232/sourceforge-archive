@@ -154,7 +154,7 @@ public class TagData implements Cloneable {
      * Get the value for a given attribute.
      *
      * @return the attribute value string
-     * @throws ClassCastException if attribute value is not a String
+     * @throw ClassCastException if attribute value is not a String
      */
 
     public String getAttributeString(String attName) {

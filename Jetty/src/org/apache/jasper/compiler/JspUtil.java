@@ -273,19 +273,23 @@ public class JspUtil {
 	}
     }
 
-    public static void checkAttributes (String typeOfTag, Attributes attrs,
-    					ValidAttribute[] validAttributes, Mark start)
-					throws JasperException
-    {
+    public static void checkAttributes(String typeOfTag,
+				       Attributes attrs,
+				       ValidAttribute[] validAttributes,
+				       Mark start,
+				       ErrorDispatcher err)
+	                        throws JasperException {
 	boolean valid = true;
         // AttributesImpl.removeAttribute is broken, so we do this...
         int tempLength = attrs.getLength();
 	Vector temp = new Vector(tempLength, 1);
         for (int i = 0; i < tempLength; i++) {
-            temp.addElement(attrs.getQName(i));
+            String qName = attrs.getQName(i);
+            if ((!qName.equals("xmlns")) && (!qName.startsWith("xmlns:")))
+                temp.addElement(qName);
         }
 
-	/**
+	/*
 	 * First check to see if all the mandatory attributes are present.
 	 * If so only then proceed to see if the other attributes are valid
 	 * for the particular tag.
@@ -307,26 +311,17 @@ public class JspUtil {
 	    }
 	}
 
-	/**
-	 * If mandatory attribute is missing then the exception is thrown.
-	 */
+	// If mandatory attribute is missing then the exception is thrown
 	if (!valid)
-	    throw new ParseException(start, Constants.getString(
-			"jsp.error.mandatory.attribute", 
-                                 new Object[] { typeOfTag, missingAttribute}));
+	    err.jspError(start, "jsp.error.mandatory.attribute", typeOfTag,
+			 missingAttribute);
 
-	/**
-	 * Check to see if there are any more attributes for the specified
-	 * tag.
-	 */
+	// Check to see if there are any more attributes for the specified tag.
         int attrLeftLength = temp.size();
 	if (attrLeftLength == 0)
 	    return;
 
-	/**
-	 * Now check to see if the rest of the attributes are valid too.
-	 */
-   	//Enumeration enum = temp.keys ();
+	// Now check to see if the rest of the attributes are valid too.
 	String attribute = null;
 
 	for (int j = 0; j < attrLeftLength; j++) {
@@ -339,9 +334,8 @@ public class JspUtil {
 		}
 	    }
 	    if (!valid)
-	        throw new ParseException(start, Constants.getString(
-			"jsp.error.invalid.attribute", 
-                                 new Object[] { typeOfTag, attribute }));
+	        err.jspError(start, "jsp.error.invalid.attribute", typeOfTag,
+			     attribute);
 	}
     }
     
@@ -362,7 +356,7 @@ public class JspUtil {
 	}
 	return escString;
     }
-    
+ 
     /**
      *  Escape the 5 entities defined by XML.
      */
@@ -387,7 +381,33 @@ public class JspUtil {
         }
         return sb.toString();
     }
-    
+
+    /**
+     * Replaces any occurrence of <tt>replace</tt> with <tt>with</tt> in the
+     * given string.
+     */
+    public static String replace(String name, char replace, String with) {
+	StringBuffer buf = new StringBuffer();
+	int begin = 0;
+	int end;
+	int last = name.length();
+
+	while (true) {
+	    end = name.indexOf(replace, begin);
+	    if (end < 0) {
+		end = last;
+	    }
+	    buf.append(name.substring(begin, end));
+	    if (end == last) {
+		break;
+	    }
+	    buf.append(with);
+	    begin = end + 1;
+	}
+	
+	return buf.toString();
+    }
+
     public static class ValidAttribute {
    	String name;
 	boolean mandatory;

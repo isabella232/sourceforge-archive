@@ -184,8 +184,8 @@ public interface BodyTag extends IterationTag {
      * may be reused.
      *
      * @param b the BodyContent
-     * @see #doInitBody
-     * @see #doAfterBody
+     * @seealso #doInitBody
+     * @seealso #doAfterBody
      */
 
     void setBodyContent(BodyContent b);
@@ -205,7 +205,7 @@ public interface BodyTag extends IterationTag {
      * invocation of doInitBody().
      *
      * @throws JspException
-     * @see #doAfterBody
+     * @seealso #doAfterBody
      */
 
     void doInitBody() throws JspException;

@@ -76,6 +76,7 @@ import javax.servlet.http.HttpServletResponse;
  * the CompressionServletResponseWrapper implementation.
  *
  * @author Amy Roh
+ * @author Dmitri Valdin
  * @version $Revision$, $Date$
  */
 
@@ -95,9 +96,9 @@ public class CompressionResponseStream
 
         super();
         closed = false;
-        count = 0;
         this.response = response;
         this.output = response.getOutputStream();
+
     }
 
 
@@ -111,14 +112,14 @@ public class CompressionResponseStream
     protected int compressionThreshold = 0;
 
     /**
+     * Debug level
+     */
+    private int debug = 0;
+
+    /**
      * The buffer through which all of our output bytes are passed.
      */
     protected byte[] buffer = null;
-  
-    /**
-     * Is it big enough to compress?
-     */
-    protected boolean compressionThresholdReached = false; 
 
     /**
      * The number of data bytes currently in the buffer.
@@ -129,17 +130,11 @@ public class CompressionResponseStream
      * The underlying gzip output stream to which we should write data.
      */
     protected GZIPOutputStream gzipstream = null;
-        
+
     /**
      * Has this stream been closed?
      */
     protected boolean closed = false;
-
-    /**
-     * The number of bytes which have already been written to this stream.
-     */
-    protected int count = 0;
-
 
     /**
      * The content length past which we will not write, or -1 if there is
@@ -160,6 +155,13 @@ public class CompressionResponseStream
 
     // --------------------------------------------------------- Public Methods
 
+    /**
+     * Set debug level
+     */
+    public void setDebugLevel(int debug) {
+        this.debug = debug;
+    }
+
 
     /**
      * Set the compressionThreshold number and create buffer for this size
@@ -167,7 +169,9 @@ public class CompressionResponseStream
     protected void setBuffer(int threshold) {
         compressionThreshold = threshold;
         buffer = new byte[compressionThreshold];
-        //System.out.println("buffer is set to "+compressionThreshold);
+        if (debug > 1) {
+            System.out.println("buffer is set to "+compressionThreshold);
+        }
     }
 
     /**
@@ -175,16 +179,24 @@ public class CompressionResponseStream
      * any further output data to throw an IOException.
      */
     public void close() throws IOException {
-        
-        //System.out.println("close() @ CompressionResponseStream");
+
+        if (debug > 1) {
+            System.out.println("close() @ CompressionResponseStream");
+        }
         if (closed)
             throw new IOException("This output stream has already been closed");
 
         if (gzipstream != null) {
             flushToGZip();
             gzipstream.close();
+            gzipstream = null;
         } else {
             if (bufferCount > 0) {
+                if (debug > 2) {
+                    System.out.print("output.write(");
+                    System.out.write(buffer, 0, bufferCount);
+                    System.out.println(")");
+                }
                 output.write(buffer, 0, bufferCount);
                 bufferCount = 0;
             }
@@ -201,12 +213,15 @@ public class CompressionResponseStream
      * response to be committed.
      */
     public void flush() throws IOException {
-        //System.out.println("flush() @ CompressionResponseStream");
+
+        if (debug > 1) {
+            System.out.println("flush() @ CompressionResponseStream");
+        }
         if (closed) {
             throw new IOException("Cannot flush a closed output stream");
         }
 
-        if (gzipstream!=null) {
+        if (gzipstream != null) {
             gzipstream.flush();
         }
 
@@ -214,11 +229,14 @@ public class CompressionResponseStream
 
     public void flushToGZip() throws IOException {
 
-        //System.out.println("flushToGZip() @ CompressionResponseStream");
-
+        if (debug > 1) {
+            System.out.println("flushToGZip() @ CompressionResponseStream");
+        }
         if (bufferCount > 0) {
-            //System.out.println("flushing out to GZipStream");
-            gzipstream.write(buffer, 0, bufferCount);
+            if (debug > 1) {
+                System.out.println("flushing out to GZipStream, bufferCount = " + bufferCount);
+            }
+            writeToGZip(buffer, 0, bufferCount);
             bufferCount = 0;
         }
 
@@ -232,43 +250,21 @@ public class CompressionResponseStream
      * @exception IOException if an input/output error occurs
      */
     public void write(int b) throws IOException {
-        
-        //System.out.print("write "+b+" in CompressionResponseStream ");
+
+        if (debug > 1) {
+            System.out.println("write "+b+" in CompressionResponseStream ");
+        }
         if (closed)
             throw new IOException("Cannot write to a closed output stream");
 
-        if ((bufferCount >= buffer.length) || (count>=compressionThreshold)) {
-            compressionThresholdReached = true;
+        if (bufferCount >= buffer.length) {
+            flushToGZip();
         }
 
-        if (compressionThresholdReached) {
-            writeToGZip(b);
-        } else {
-            buffer[bufferCount++] = (byte) b;
-            count++;
-        }
+        buffer[bufferCount++] = (byte) b;
 
     }
 
-
-    /**
-     * Write the specified byte to our compressed GZip output stream.
-     *
-     * @param b The byte to be written
-     *
-     * @exception IOException if an input/output error occurs
-     */
-
-    public void writeToGZip(int b) throws IOException {
-
-        //System.out.println("writeToGZip (int b) compressing");
-        if (gzipstream == null) {
-            gzipstream = new GZIPOutputStream(output);
-            response.addHeader("Content-Encoding", "gzip");
-        }
-        gzipstream.write(b);
-
-    }
 
     /**
      * Write <code>b.length</code> bytes from the specified byte array
@@ -297,30 +293,56 @@ public class CompressionResponseStream
      */
     public void write(byte b[], int off, int len) throws IOException {
 
-        //System.out.println("second write in CompressionResponseStream");
+        if (debug > 1) {
+            System.out.println("write, bufferCount = " + bufferCount + " len = " + len + " off = " + off);
+        }
+        if (debug > 2) {
+            System.out.print("write(");
+            System.out.write(b, off, len);
+            System.out.println(")");
+        }
+
         if (closed)
             throw new IOException("Cannot write to a closed output stream");
 
         if (len == 0)
             return;
+
+        // Can we write into buffer ?
         if (len <= (buffer.length - bufferCount)) {
             System.arraycopy(b, off, buffer, bufferCount, len);
             bufferCount += len;
-            count += len;
             return;
         }
 
-        // buffer full, start writing to gzipstream
+        // There is not enough space in buffer. Flush it ...
+        flushToGZip();
 
+        // ... and try again. Note, that bufferCount = 0 here !
+        if (len <= (buffer.length - bufferCount)) {
+            System.arraycopy(b, off, buffer, bufferCount, len);
+            bufferCount += len;
+            return;
+        }
+
+        // write direct to gzip
         writeToGZip(b, off, len);
-        count += len;
-
     }
 
     public void writeToGZip(byte b[], int off, int len) throws IOException {
 
-        //System.out.println("writeToGZip 2 compressing");
+        if (debug > 1) {
+            System.out.println("writeToGZip, len = " + len);
+        }
+        if (debug > 2) {
+            System.out.print("writeToGZip(");
+            System.out.write(b, off, len);
+            System.out.println(")");
+        }
         if (gzipstream == null) {
+            if (debug > 1) {
+                System.out.println("new GZIPOutputStream");
+            }
             gzipstream = new GZIPOutputStream(output);
             response.addHeader("Content-Encoding", "gzip");
         }
@@ -338,15 +360,6 @@ public class CompressionResponseStream
     public boolean closed() {
 
         return (this.closed);
-
-    }
-
-
-    /**
-     * Reset the count of bytes written to this stream to zero.
-     */
-    public void reset() {
-        count = 0;
 
     }
 

@@ -62,6 +62,8 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.MalformedURLException;
 
+import java.util.List;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 import javax.servlet.jsp.*;
@@ -79,6 +81,33 @@ public abstract class HttpJspBase
     implements HttpJspPage 
 {
     protected PageContext pageContext;
+    static {
+        if( JspFactory.getDefaultFactory() == null ) {
+            JspFactoryImpl factory = new JspFactoryImpl();
+            if( System.getSecurityManager() != null ) {
+                String basePackage = "org.apache.jasper.";
+                try {
+                    factory.getClass().getClassLoader().loadClass( basePackage +
+                                                                   "runtime.JspFactoryImpl$PrivilegedGetPageContext");
+                    factory.getClass().getClassLoader().loadClass( basePackage +
+                                                                   "runtime.JspFactoryImpl$PrivilegedReleasePageContext");
+                    factory.getClass().getClassLoader().loadClass( basePackage +
+                                                                   "runtime.JspRuntimeLibrary");
+                    factory.getClass().getClassLoader().loadClass( basePackage +
+                                                                   "runtime.JspRuntimeLibrary$PrivilegedIntrospectHelper");
+                    factory.getClass().getClassLoader().loadClass( basePackage +
+                                                                   "runtime.ServletResponseWrapperInclude");
+                    factory.getClass().getClassLoader().loadClass( basePackage +
+                                                                   "servlet.JspServletWrapper");
+                } catch (ClassNotFoundException ex) {
+                    System.out.println(
+                                       "Jasper JspRuntimeContext preload of class failed: " +
+                                       ex.getMessage());
+                }
+            }
+            JspFactory.setDefaultFactory(factory);
+        }
+    }
 
     protected HttpJspBase() {
     }
@@ -112,7 +141,17 @@ public abstract class HttpJspBase
     
     public void jspDestroy() {
     }
-    
+
+    /**
+     * Get the list of compile time included files used
+     * by the JSP file.
+     *
+     * Overridden by generated JSP java source files.
+     *
+     * @return List compile time includes
+     */
+    public abstract List getIncludes();
+
     public abstract void _jspService(HttpServletRequest request, 
 				     HttpServletResponse response) 
 	throws ServletException, IOException;

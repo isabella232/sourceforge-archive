@@ -67,9 +67,7 @@ import java.util.*;
 
 import org.apache.jasper.compiler.JspReader;
 import org.apache.jasper.compiler.ServletWriter;
-import org.apache.jasper.compiler.TagLibraries;
 import org.apache.jasper.compiler.Compiler;
-import org.apache.jasper.compiler.CommandLineCompiler;
 import org.apache.jasper.compiler.TldLocationsCache;
 
 import org.apache.jasper.servlet.JasperLoader;
@@ -83,10 +81,36 @@ import org.apache.jasper.logging.JasperLogger;
  * command line and creates compilation contexts which it then compiles
  * according to the specified options.
  *
+ * This version can process files from a _single_ webapp at once, i.e.
+ * a single docbase can be specified.
+ *
+ * It can be used as a Ant task using:
+ <pre>
+     &lt;taskdef classname="org.apache.jasper.JspC" name="jasper2" &gt;
+        &lt;classpath&gt;
+            &lt;pathelement location="${java.home}/../lib/tools.jar"/&gt;
+            &lt;fileset dir="${ENV.CATALINA_HOME}/server/lib"&gt;
+                &lt;include name="*.jar"/&gt;
+            &lt;/fileset&gt;
+            &lt;fileset dir="${ENV.CATALINA_HOME}/common/lib"&gt;
+                &lt;include name="*.jar"/&gt;
+            &lt;/fileset&gt;
+            &lt;path refid="myjars"/&gt;
+         &lt;/classpath&gt;
+    &lt;/taskdef&gt;
+    
+    &lt;jasper2 verbose="0" 
+             package="my.package"
+             uriroot="${webapps.dir}/${webapp.name}"
+             webXmlFragment="${build.dir}/generated_web.xml" 
+             outputDir="${webapp.dir}/${webapp.name}/WEB-INF/src/my/package" /&gt;
+ </pre>
+ *
  * @author Danno Ferrin
  * @author Pierre Delisle
+ * @author Costin Manolache
  */
-public class JspC implements Options { //, JspCompilationContext {
+public class JspC implements Options {
 
     public static final String DEFAULT_IE_CLASS_ID = 
             "clsid:8AD9C840-044E-11D1-B3E9-00805F499D93";
@@ -99,6 +123,7 @@ public class JspC implements Options { //, JspCompilationContext {
     public static final String SWITCH_PACKAGE_NAME = "-p";
     public static final String SWITCH_CLASS_NAME = "-c";
     public static final String SWITCH_FULL_STOP = "--";
+    public static final String SWITCH_COMPILE = "--compile";
     public static final String SWITCH_URI_BASE = "-uribase";
     public static final String SWITCH_URI_ROOT = "-uriroot";
     public static final String SWITCH_FILE_WEBAPP = "-webapp";
@@ -114,6 +139,10 @@ public class JspC implements Options { //, JspCompilationContext {
     public static final int DEFAULT_DIE_LEVEL = 1;
     public static final int NO_DIE_LEVEL = 0;
 
+
+    String classPath=null;
+    URLClassLoader loader=null;
+
     // future direction
     //public static final String SWITCH_XML_OUTPUT = "-xml";
   
@@ -127,8 +156,6 @@ public class JspC implements Options { //, JspCompilationContext {
 
     String ieClassId = DEFAULT_IE_CLASS_ID;
 
-    //String classPath;
-    
     String targetPackage;
     
     String targetClassName;
@@ -137,19 +164,33 @@ public class JspC implements Options { //, JspCompilationContext {
 
     String uriRoot;
 
-    String webxmlFile;
-
-    int webxmlLevel;
-
     int dieLevel;
     boolean dieOnExit = false;
     static int die; // I realize it is duplication, but this is for
                     // the static main catch
 
+    boolean compile=false;
+    String compiler=null;
+    
     boolean dirset;
-
+    
+    boolean classDebugInfo=true;
+    
     Vector extensions;
 
+    Vector pages = new Vector();
+
+    // Generation of web.xml fragments
+    String webxmlFile;
+    int webxmlLevel;
+    Writer mapout;
+    CharArrayWriter servletout;
+    CharArrayWriter mappingout;
+
+    static PrintStream log;
+
+    JspCServletContext context;
+    
     /**
      * Cache for the TLD locations
      */
@@ -164,12 +205,16 @@ public class JspC implements Options { //, JspCompilationContext {
         return largeFile;
     }
 
+    public boolean isPoolingEnabled() {
+        return true;
+    }
+
     /**
      * Are we supporting HTML mapped servlets?
      */
     public boolean getMappedFile() {
 		return mappedFile;
-	}
+    }
 
     // Off-line compiler, no need for security manager
     public Object getProtectionDomain() {
@@ -180,10 +225,35 @@ public class JspC implements Options { //, JspCompilationContext {
         // implied send to System.err
         return true;
     }
- 
+
+    public void setClassDebugInfo( boolean b ) {
+        classDebugInfo=b;
+    }
+    
     public boolean getClassDebugInfo() {
         // compile with debug info
+        return classDebugInfo;
+    }
+
+    /**
+     * Background compilation check intervals in seconds
+     */
+    public int getCheckInterval() {
+        return 300;
+    }
+
+    /**
+     * Is Jasper being used in development mode?
+     */
+    public boolean getDevelopment() {
         return false;
+    }
+
+    /**
+     * JSP reloading check ?
+     */
+    public boolean getReloading() {
+        return true;
     }
 
     public String getIeClassId() {
@@ -208,6 +278,18 @@ public class JspC implements Options { //, JspCompilationContext {
         return null;
     }
 
+    /**
+     * Compiler to use.
+     */
+    public String getCompiler() {
+        return compiler;
+    }
+
+    public void setCompiler(String c) {
+        compiler=c;
+    }
+
+
     public TldLocationsCache getTldLocationsCache() {
 	return tldLocationsCache;
     }
@@ -217,17 +299,509 @@ public class JspC implements Options { //, JspCompilationContext {
     }
 
     public String getClassPath() {
+        if( classPath != null )
+            return classPath;
         return System.getProperty("java.class.path");
     }
 
+    public JspC() {
+        Constants.jasperLog = new JasperLogger();
+    }
+
+    // -------------------- Options --------------------
+    public void setClassPath(String s) {
+        classPath=s;
+    }
+    
+    /** Base dir for the webapp. Used to generate class names and
+     *  resolve includes
+     */
+    public void setUriroot( String s ) {
+        if( s==null ) {
+            uriRoot=s;
+            return;
+        }
+        try {
+            uriRoot=new File( s ).getCanonicalPath();
+        } catch( Exception ex ) {
+            uriRoot=s;
+        }
+    }
+
+    public void setVerbose( int level ) {
+        Constants.jasperLog.setVerbosityLevel(level);
+    }
+    
+    public void setCompile( boolean b ) {
+        compile=b;
+    }
+
+    public void setValidateXml( boolean b ) {
+        org.apache.jasper.xmlparser.ParserUtils.validating=b;
+    }
+    
+    public void setOutputDir( String s ) {
+        if( s!= null ) {
+            scratchDir=new File(new File(s).getAbsolutePath());
+            dirset=true;
+        } else {
+            scratchDir=null;
+        }
+    }
+
+    public void setPackage( String p ) {
+        targetPackage=p;
+    }
+
+    /** Class name of the generated file ( without package ).
+     *  Can only be used if a single file is converted.
+     *  XXX Do we need this feature ?
+     */
+    public void setClassName( String p ) {
+        targetClassName=p;
+    }
+
+    /** File where we generate a web.xml fragment with the class definitions.
+     */
+    public void setWebXmlFragment( String s ) {
+        webxmlFile=s;
+        webxmlLevel=INC_WEBXML;
+    }
+    
+    /**
+     * Resolve relative path, and create output directories.
+     */
+    void setupContext(JspCompilationContext clctxt) {
+        // set up a scratch/output dir if none is provided
+        if (scratchDir == null) {
+            String temp = System.getProperty("java.io.tempdir");
+            if (temp == null) {
+                temp = "";
+            }
+            scratchDir = new File(new File(temp).getAbsolutePath());
+        }
+
+        String outputDir = scratchDir.getAbsolutePath();
+
+        if (dirset) {
+            int indexOfSlash = clctxt.getJspFile().lastIndexOf('/');
+            
+            String pathName = "";
+            if (indexOfSlash != -1) {
+                pathName = clctxt.getJspFile().substring(0, indexOfSlash);
+            }
+            String tmpDir = outputDir + File.separatorChar + pathName;
+            File f = new File(tmpDir);
+            if (!f.exists()) {
+                f.mkdirs();
+            }
+        }
+        clctxt.setOutputDir( outputDir );
+    }
+
+    void initClassLoader( JspCompilationContext clctxt ) throws IOException {
+        classPath = getClassPath();
+
+        ClassLoader parent=this.getClass().getClassLoader();
+
+        ArrayList urls = new ArrayList();
+        File webappBase=new File(uriRoot);
+
+        if( parent instanceof URLClassLoader ) {
+            URLClassLoader uL=(URLClassLoader) parent;
+            URL path[]=uL.getURLs();
+            for( int i=0; i<path.length; i++ ) {
+                urls.add( path[i] );
+                classPath = classPath + File.pathSeparator +
+                    path[i].getFile();
+            }
+        }
+
+        if( parent instanceof org.apache.tools.ant.AntClassLoader ) {
+            classPath= classPath + File.pathSeparator +
+                ((org.apache.tools.ant.AntClassLoader)parent).getClasspath();
+        }
+        
+        // Turn the classPath in URLs
+        StringTokenizer tokenizer = new StringTokenizer(classPath, File.pathSeparator);
+        while (tokenizer.hasMoreTokens()) {
+            String path = tokenizer.nextToken();
+            try {
+                File libFile = new File(path);
+                urls.add(libFile.toURL());
+            } catch (IOException ioe) {
+                // Failing a toCanonicalPath on a file that
+                // exists() should be a JVM regression test,
+                // therefore we have permission to freak uot
+                throw new RuntimeException(ioe.toString());
+            }
+        }
+
+        if (webappBase.exists()) {
+            File classes = new File(webappBase, "/WEB-INF/classes");
+            try {
+                if (classes.exists()) {
+                    classPath = classPath + File.pathSeparator 
+                        + classes.getCanonicalPath();
+                    urls.add(classes.getCanonicalFile().toURL());
+                }
+            } catch (IOException ioe) {
+                // failing a toCanonicalPath on a file that
+                // exists() should be a JVM regression test,
+                // therefore we have permission to freak out
+                throw new RuntimeException(ioe.toString());
+            }
+            File lib = new File(webappBase, "/WEB-INF/lib");
+            if (lib.exists() && lib.isDirectory()) {
+                String[] libs = lib.list();
+                for (int i = 0; i < libs.length; i++) {
+                    if( libs[i].length() <5 ) continue;
+                    String ext=libs[i].substring( libs[i].length() - 4 );
+                    if( ! ".jar".equalsIgnoreCase( ext )) {
+                        System.out.println("XXX bad jar " + libs[i]);
+                        continue;
+                    }
+                    try {
+                        File libFile = new File(lib, libs[i]);
+                        classPath = classPath + File.pathSeparator 
+                            + libFile.getCanonicalPath();
+                        urls.add(libFile.getCanonicalFile().toURL());
+                    } catch (IOException ioe) {
+                        // failing a toCanonicalPath on a file that
+                        // exists() should be a JVM regression test,
+                        // therefore we have permission to freak out
+                        throw new RuntimeException(ioe.toString());
+                    }
+                }
+            }
+        }
+
+        // What is this ??
+        urls.add(new File(clctxt.getRealPath("/")).getCanonicalFile().toURL());
+
+        URL urlsA[]=new URL[urls.size()];
+        urls.toArray(urlsA);
+        loader = new URLClassLoader(urlsA, this.getClass().getClassLoader());
+    }
+
+    public void generateWebMapping( String file, JspCompilationContext clctxt )
+        throws IOException 
+    {
+        String className = clctxt.getServletClassName();
+        String packageName = clctxt.getServletPackageName();
+        
+        String thisServletName;
+        if  ("".equals(packageName)) {
+            thisServletName = className;
+        } else {
+            thisServletName = packageName + '.' + className;
+        }
+        
+        if (servletout != null) {
+            servletout.write("\n\t<servlet>\n\t\t<servlet-name>");
+            servletout.write(thisServletName);
+            servletout.write("</servlet-name>\n\t\t<servlet-class>");
+            servletout.write(thisServletName);
+            servletout.write("</servlet-class>\n\t</servlet>\n");
+        }
+        if (mappingout != null) {
+            mappingout.write("\n\t<servlet-mapping>\n\t\t<servlet-name>");
+            mappingout.write(thisServletName);
+            mappingout.write("</servlet-name>\n\t\t<url-pattern>");
+            mappingout.write(file.replace('\\', '/'));
+            mappingout.write("</url-pattern>\n\t</servlet-mapping>\n");
+            
+        }
+    }
+    
+    public boolean processFile(String file)
+        throws JasperException
+    {
+        try {
+            String jspUri=file.replace('\\','/');
+            JspCompilationContext clctxt = new JspCompilationContext
+                ( jspUri, false,  this, context, null, null );
+
+            /* Override the defaults */
+            if ((targetClassName != null) && (targetClassName.length() > 0)) {
+                clctxt.setServletClassName(targetClassName);
+                targetClassName = null;
+            }
+            if (targetPackage != null) {
+                clctxt.setServletPackageName(targetPackage);
+            }
+            
+            setupContext(clctxt);
+
+            if( loader==null )
+                initClassLoader( clctxt );
+            
+            clctxt.setClassLoader(loader);
+            clctxt.setClassPath(classPath);
+
+            Compiler clc = clctxt.createCompiler();
+
+            if( compile ) {
+                // Generate both .class and .java
+                if( clc.isOutDated() ) {
+                    clc.compile();
+                }
+            } else {
+                // Only generate .java, compilation is separated 
+                // Don't compile if the .class file is newer than the .jsp file
+                if( clc.isOutDated(false) ) {
+                    clc.generateJava();
+                } 
+            }
+
+            // Generate mapping
+            generateWebMapping( file, clctxt );
+
+            return true;
+        } catch (FileNotFoundException fne) {
+            Constants.message("jspc.error.fileDoesNotExist", 
+                              new Object[] {fne.getMessage()}, Logger.WARNING);
+            throw new JasperException( fne );
+        } catch (Exception e) {
+            Constants.message("jspc.error.generalException", 
+                    new Object[] {file, e}, Logger.ERROR);
+            if (dieLevel != NO_DIE_LEVEL) {
+                dieOnExit = true;
+            }
+            throw new JasperException( e );
+        }
+    }
+
+    /** Find the WEB-INF dir by looking up in the directory tree.
+     *  This is used if no explicit docbase is set, but only files.
+     *  XXX Maybe we should require the docbase.
+     */
+    private void locateUriRoot( File f ) {
+        String tUriBase = uriBase;
+        if (tUriBase == null) {
+            tUriBase = "/";
+        }
+        try {
+            if (f.exists()) {
+                f = new File(f.getCanonicalPath());
+                while (f != null) {
+                    File g = new File(f, "WEB-INF");
+                    if (g.exists() && g.isDirectory()) {
+                        uriRoot = f.getCanonicalPath();
+                        uriBase = tUriBase;
+                        Constants.message("jspc.implicit.uriRoot",
+                                          new Object[] { uriRoot },
+                                              Logger.INFORMATION);
+                        break;
+                    }
+                    if (f.exists() && f.isDirectory()) {
+                        tUriBase = "/" + f.getName() + "/" + tUriBase;
+                    }
+                    
+                    String fParent = f.getParent();
+                    if (fParent == null) {
+                        f = new File(args[argPos]);
+                        fParent = f.getParent();
+                        if (fParent == null) {
+                            fParent = File.separator;
+                        }
+                        uriRoot = new File(fParent).getCanonicalPath();
+                        uriBase = "/";
+                        break;
+                    } else {
+                        f = new File(fParent);
+                    }
+                    
+                    // If there is no acceptible candidate, uriRoot will
+                    // remain null to indicate to the CompilerContext to
+                    // use the current working/user dir.
+                }
+
+                try {
+                    File froot = new File(uriRoot);
+                    uriRoot = froot.getCanonicalPath();
+                } catch (IOException ioe) {
+                    // if we cannot get the base, leave it null
+                }
+            }
+        } catch (IOException ioe) {
+            // since this is an optional default and a null value
+            // for uriRoot has a non-error meaning, we can just
+            // pass straight through
+        }
+    }
+
+    /** Locate all jsp files in the webapp. Used if no explicit
+     *  jsps are specified.
+     */
+    public void scanFiles( File base ) {
+        Stack dirs = new Stack();
+        dirs.push(base);
+        if (extensions == null) {
+            extensions = new Vector();
+            extensions.addElement("jsp");
+        }
+        while (!dirs.isEmpty()) {
+            String s = dirs.pop().toString();
+            //System.out.println("--" + s);
+            File f = new File(s);
+            if (f.exists() && f.isDirectory()) {
+                String[] files = f.list();
+                String ext;
+                for (int i = 0; i < files.length; i++) {
+                    File f2 = new File(s, files[i]);
+                    //System.out.println(":" + f2.getPath());
+                    if (f2.isDirectory()) {
+                        dirs.push(f2.getPath());
+                        //System.out.println("++" + f2.getPath());
+                    } else {
+                        ext = files[i].substring(
+                                                 files[i].lastIndexOf('.') + 1);
+                        if (extensions.contains(ext)) {
+                            //System.out.println(s + "?" + files[i]);
+                            pages.addElement(
+                                             s + File.separatorChar + files[i]);
+                        } else {
+                                    //System.out.println("not done:" + ext);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private void initWebXml() {
+        try {
+            if (webxmlLevel >= INC_WEBXML) {
+                File fmapings = new File(webxmlFile);
+                mapout = new FileWriter(fmapings);
+                servletout = new CharArrayWriter();
+                mappingout = new CharArrayWriter();
+            } else {
+                mapout = null;
+                servletout = null;
+                mappingout = null;
+            }
+            if (webxmlLevel >= ALL_WEBXML) {
+                mapout.write(Constants.getString("jspc.webxml.header"));
+            } else if (webxmlLevel>= INC_WEBXML) {
+                mapout.write(Constants.getString("jspc.webinc.header"));
+            }
+        } catch (IOException ioe) {
+            mapout = null;
+            servletout = null;
+            mappingout = null;
+        }
+    }
+
+    private void completeWebXml() {
+        if (mapout != null) {
+            try {
+                servletout.writeTo(mapout);
+                mappingout.writeTo(mapout);
+                if (webxmlLevel >= ALL_WEBXML) {
+                    mapout.write(Constants.getString("jspc.webxml.footer"));
+                } else if (webxmlLevel >= INC_WEBXML) {
+                    mapout.write(Constants.getString("jspc.webinc.footer"));
+                }
+                mapout.close();
+            } catch (IOException ioe) {
+                // noting to do if it fails since we are done with it
+            }
+        }
+    }
+
+    private void initServletContext() {
+        try {
+            context =new JspCServletContext
+                (new PrintWriter(System.out),
+                 new URL("file:" + uriRoot.replace('\\','/') + '/'));
+            tldLocationsCache = new
+                TldLocationsCache(context);
+        } catch (MalformedURLException me) {
+            System.out.println("**" + me);
+        }
+    }
+    
+
+    public void execute()  throws JasperException {
+
+        if( uriRoot==null ) {
+            if( pages.size() == 0 ) {
+                throw new JasperException( "No uriRoot or files");
+            }
+            String firstJsp=(String)pages.elementAt( 0 );
+            locateUriRoot( new File( firstJsp ) );
+        }
+
+        // No explicit page, we'll process all .jsp in the webapp
+        if( pages.size() == 0 ) {
+            scanFiles( new File( uriRoot ));
+        }
+            
+        File uriRootF = new File(uriRoot);
+        if (!uriRootF.exists() || !uriRootF.isDirectory()) {
+            throw new JasperException(Constants.getString("jsp.error.jspc.uriroot_not_dir"));
+        }
+                
+        if( context==null )
+            initServletContext();
+                                                                       
+        initWebXml();
+
+        Enumeration e = pages.elements();
+        while (e.hasMoreElements()) {
+            String nextjsp = e.nextElement().toString();
+            try {
+                File fjsp = new File(nextjsp);
+                if (!fjsp.exists()) {
+                    Constants.message("jspc.error.fileDoesNotExist", 
+                                      new Object[] {fjsp}, Logger.WARNING);
+                    continue;
+                }
+                String s = fjsp.getCanonicalPath();
+                //System.out.println("**" + s);
+                if (s.startsWith(uriRoot)) {
+                    nextjsp = s.substring(uriRoot.length());
+                }
+            } catch (IOException ioe) {
+                // if we got problems dont change the file name
+            }
+
+            if (nextjsp.startsWith("." + File.separatorChar)) {
+                nextjsp = nextjsp.substring(2);
+            }
+
+            processFile(nextjsp);
+        }
+
+        completeWebXml();
+    }
+
+
+    // ==================== CLI support ==================== 
+    
     int argPos;
     // value set by beutifully obsfucscated java
     boolean fullstop = false;
     String args[];
 
-    private void pushBackArg() {
-        if (!fullstop) {
-            argPos--;
+    public static void main(String arg[]) {
+        if (arg.length == 0) {
+           System.out.println(Constants.getString("jspc.usage"));
+        } else {
+            try {
+                log=System.out;
+                JspC jspc = new JspC();
+                jspc.setArgs(arg);
+                jspc.execute();
+            } catch (JasperException je) {
+                System.err.print("error:");
+                System.err.println(je.getMessage());
+                if (die != NO_DIE_LEVEL) {
+                    System.exit(die);
+                }
+            }
         }
     }
 
@@ -249,7 +823,7 @@ public class JspC implements Options { //, JspCompilationContext {
         }
     }
 
-    public JspC(String[] arg, PrintStream log) {
+    void setArgs(String[] arg) {
         args = arg;
         String tok;
 
@@ -274,16 +848,7 @@ public class JspC implements Options { //, JspCompilationContext {
                 }
             } else if (tok.equals(SWITCH_OUTPUT_DIR)) {
                 tok = nextArg();
-                if (tok != null) {
-                    scratchDir = new File(new File(tok).getAbsolutePath());
-                    dirset = true;
-                } else {
-                    // either an in-java call with an explicit null
-                    // or a "-d --" sequence should cause this,
-                    // which would mean default handling
-                    /* no-op */
-                    scratchDir = null;
-                }
+                setOutputDir( tok );
             } else if (tok.equals(SWITCH_OUTPUT_SIMPLE_DIR)) {
                 tok = nextArg();
                 if (tok != null) {
@@ -298,12 +863,16 @@ public class JspC implements Options { //, JspCompilationContext {
                 }
             } else if (tok.equals(SWITCH_PACKAGE_NAME)) {
                 targetPackage = nextArg();
+            } else if (tok.equals(SWITCH_COMPILE)) {
+                compile=true;
             } else if (tok.equals(SWITCH_CLASS_NAME)) {
                 targetClassName = nextArg();
             } else if (tok.equals(SWITCH_URI_BASE)) {
-                uriBase = nextArg();
+                uriBase=nextArg();
             } else if (tok.equals(SWITCH_URI_ROOT)) {
-                uriRoot = nextArg();
+                setUriroot( nextArg());
+            } else if (tok.equals(SWITCH_FILE_WEBAPP)) {
+                setUriroot( nextArg());
             } else if (tok.equals(SWITCH_WEBAPP_INC)) {
                 webxmlFile = nextArg();
                 if (webxmlFile != null) {
@@ -325,429 +894,23 @@ public class JspC implements Options { //, JspCompilationContext {
                 }
                 die = dieLevel;
             } else {
-                pushBackArg();
+                //pushBackArg();
+                if (!fullstop) {
+                    argPos--;
+                }
                 // Not a recognized Option?  Start treting them as JSP Pages
                 break;
             }
         }
 
-        Constants.jasperLog = new JasperLogger();
+        // Add all extra arguments to the list of files
+        while( true ) {
+            String file = nextFile();
+            if( file==null ) break;
+            pages.addElement( file );
+        }
+        
         Constants.jasperLog.setVerbosityLevel(verbosityLevel);
-
-    }
-    
-    public boolean parseFile(PrintStream log, String file, Writer servletout, Writer mappingout)
-    {
-        try {
-            CommandLineContext clctxt = new CommandLineContext(
-                    getClassPath(), file.replace('\\','/'), uriBase, uriRoot,
-		    false, this);
-            if ((targetClassName != null) && (targetClassName.length() > 0)) {
-                clctxt.setServletClassName(targetClassName);
-            }
-            if (targetPackage != null) {
-                clctxt.setServletPackageName(targetPackage);
-            }
-            if (dirset) {
-                clctxt.setOutputInDirs(true);
-            }
-	    ArrayList urls = new ArrayList();
-
-            if (new File(clctxt.getRealPath("/")).exists()) {
-                File classes = new File(clctxt.getRealPath("/WEB-INF/classes"));
-                try {
-                     if (classes.exists()) {
-                         urls.add(classes.getCanonicalFile().toURL());
-                    }
-                } catch (IOException ioe) {
-                    // failing a toCanonicalPath on a file that
-                    // exists() should be a JVM regression test,
-                    // therefore we have permission to freak out
-                    throw new RuntimeException(ioe.toString());
-                }
-                File lib = new File(clctxt.getRealPath("/WEB-INF/lib"));
-                if (lib.exists() && lib.isDirectory()) {
-                    String[] libs = lib.list();
-                    for (int i = 0; i < libs.length; i++) {
-                        try {
-			    File libFile = new File(lib.toString()
-                                    + File.separator
-                                    + libs[i]);
-			    urls.add(libFile.getCanonicalFile().toURL());
-                        } catch (IOException ioe) {
-                            // failing a toCanonicalPath on a file that
-                            // exists() should be a JVM regression test,
-                            // therefore we have permission to freak out
-                            throw new RuntimeException(ioe.toString());
-                        }
-                    }
-                }
-            }
-            StringTokenizer tokenizer = new StringTokenizer
-                (clctxt.getClassPath(), File.pathSeparator);
-            while (tokenizer.hasMoreTokens()) {
-                String path = tokenizer.nextToken();
-                try {
-                    File libFile = new File(path);
-                    urls.add(libFile.toURL());
-                } catch (IOException ioe) {
-                    // Failing a toCanonicalPath on a file that
-                    // exists() should be a JVM regression test,
-                    // therefore we have permission to freak uot
-                    throw new RuntimeException(ioe.toString());
-                }
-            }
-            urls.add(new File
-                     (clctxt.getRealPath("/")).getCanonicalFile().toURL());
-            URLClassLoader loader = new URLClassLoader
-                ((URL[])(urls.toArray(new URL[urls.size()])));
-            clctxt.setClassLoader(loader);
-            CommandLineCompiler clc = new CommandLineCompiler(clctxt);
-
-            clc.compile();
-
-            targetClassName = null;
-            String thisServletName;
-            if ("".equals(clc.getPackageName())) {
-                thisServletName = clc.getClassName();
-            } else {
-                thisServletName = clc.getPackageName()
-                    + '.' + clc.getClassName();
-            }
-            if (servletout != null) {
-                servletout.write("\n\t<servlet>\n\t\t<servlet-name>");
-                servletout.write(thisServletName);
-                servletout.write("</servlet-name>\n\t\t<servlet-class>");
-                servletout.write(thisServletName);
-                servletout.write("</servlet-class>\n\t</servlet>\n");
-            }
-            if (mappingout != null) {
-                mappingout.write("\n\t<servlet-mapping>\n\t\t<servlet-name>");
-                mappingout.write(thisServletName);
-                mappingout.write("</servlet-name>\n\t\t<url-pattern>");
-                mappingout.write(file.replace('\\', '/'));
-                mappingout.write("</url-pattern>\n\t</servlet-mapping>\n");
-
-            }
-            return true;
-        } catch (JasperException je) {
-            //je.printStackTrace(log);
-            Constants.message("jspc.error.jasperException", 
-                    new Object[] {file, je}, Logger.ERROR);
-            if (dieLevel != NO_DIE_LEVEL) {
-                dieOnExit = true;
-            }
-        } catch (FileNotFoundException fne) {
-                Constants.message("jspc.error.fileDoesNotExist", 
-                        new Object[] {fne.getMessage()}, Logger.WARNING);
-        } catch (Exception e) {
-            Constants.message("jspc.error.generalException", 
-                    new Object[] {file, e}, Logger.ERROR);
-	    e.printStackTrace();
-            if (dieLevel != NO_DIE_LEVEL) {
-                dieOnExit = true;
-            }
-        }
-        return false;
-    }
-
-
-    public void parseFiles(PrintStream log)  throws JasperException {
-
-        boolean scratchDirSet = (scratchDir != null);
-        boolean urirootSet = (uriRoot != null);
-
-        // set up a scratch/output dir if none is provided
-        if (scratchDir == null) {
-            String temp = System.getProperty("java.io.tempdir");
-            if (temp == null) {
-                temp = "";
-            }
-            scratchDir = new File(new File(temp).getAbsolutePath());
-        }
-
- 
-        File f = new File(args[argPos]);
-        while (!f.exists()) {
-            boolean webApp = false;
-            if (SWITCH_FILE_WEBAPP.equals(args[argPos])) {
-                webApp = true;
-                if (args.length > argPos + 1) {
-                    f = new File(args[argPos + 1]);
-                } else {
-                    // end of arguments, nothing left to parse
-                    Constants.message("jspc.error.emptyWebApp", 
-                            Logger.ERROR);
-                    return;
-                }
-            }
-            if (!f.exists()) {
-                Constants.message("jspc.error.fileDoesNotExist", 
-                        new Object[] {f}, Logger.WARNING);
-                argPos++;
-                if (webApp) {
-                    argPos++;
-                }
-                if (argPos >= args.length) {
-                    // end of arguments, nothing left to parse
-                    return;
-                } else {
-                    f = new File(args[argPos]);
-                }
-            }
-        }
-        if (uriRoot == null) {
-            if (SWITCH_FILE_WEBAPP.equals(args[argPos])) {
-                if (args.length > argPos + 1) {
-                    f = new File(args[argPos + 1]);
-                } else {
-                    // end of arguments, nothing left to parse
-                    return;
-                }
-            }
-            // set up the uri root if none is explicitly set
-            String tUriBase = uriBase;
-            if (tUriBase == null) {
-                tUriBase = "/";
-            }
-            try {
-                if (f.exists()) {
-                    f = new File(f.getCanonicalPath());
-                    while (f != null) {
-                        File g = new File(f, "WEB-INF");
-                        if (g.exists() && g.isDirectory()) {
-                            uriRoot = f.getCanonicalPath();
-                            uriBase = tUriBase;
-                            Constants.message("jspc.implicit.uriRoot",
-                                              new Object[] { uriRoot },
-                                              Logger.INFORMATION);
-                            break;
-                        }
-                        if (f.exists() && f.isDirectory()) {
-                            tUriBase = "/" + f.getName() + "/" + tUriBase;
-                        }
-                        
-                        String fParent = f.getParent();
-                        if (fParent == null) {
-                            f = new File(args[argPos]);
-                            fParent = f.getParent();
-                            if (fParent == null) {
-                                fParent = File.separator;
-                            }
-                            uriRoot = new File(fParent).getCanonicalPath();
-                            uriBase = "/";
-                            break;
-                        } else {
-                            f = new File(fParent);
-                        }
-
-                        // If there is no acceptible candidate, uriRoot will
-                        // remain null to indicate to the CompilerContext to
-                        // use the current working/user dir.
-                    }
-                }
-            } catch (IOException ioe) {
-                // since this is an optional default and a null value
-                // for uriRoot has a non-error meaning, we can just
-                // pass straight through
-            }
-        }
-
-
-        String file = nextFile();
-        File froot = new File(uriRoot);
-        String ubase = null;
-        try {
-            ubase = froot.getCanonicalPath();
-        } catch (IOException ioe) {
-            // if we cannot get the base, leave it null
-        }
-
-        while (file != null) {
-            if (SWITCH_FILE_WEBAPP.equals(file)) {
-                String base = nextFile();
-                if (base == null) {
-                    Constants.message("jspc.error.emptyWebApp", 
-                            Logger.ERROR);
-                    return;
-                }// else if (".".equals(base)) {
-                //    base = "";
-                //}
-                String oldRoot = uriRoot;
-                if (!urirootSet) {
-                    uriRoot = base;
-                }
-                Vector pages = new Vector();
-
-                Stack dirs = new Stack();
-                dirs.push(base);
-                if (extensions == null) {
-                    extensions = new Vector();
-                    extensions.addElement("jsp");
-                }
-                while (!dirs.isEmpty()) {
-                    String s = dirs.pop().toString();
-                    //System.out.println("--" + s);
-                    f = new File(s);
-                    if (f.exists() && f.isDirectory()) {
-                        String[] files = f.list();
-                        String ext;
-                        for (int i = 0; i < files.length; i++) {
-                            File f2 = new File(s, files[i]);
-                            //System.out.println(":" + f2.getPath());
-                            if (f2.isDirectory()) {
-                                dirs.push(f2.getPath());
-                                //System.out.println("++" + f2.getPath());
-                            } else {
-                                ext = files[i].substring(
-                                        files[i].lastIndexOf('.') + 1);
-                                if (extensions.contains(ext)) {
-                                    //System.out.println(s + "?" + files[i]);
-                                    pages.addElement(
-                                        s + File.separatorChar + files[i]);
-                                } else {
-                                    //System.out.println("not done:" + ext);
-                                }
-                            }
-                        }
-                    }
-                }
-
-                String ubaseOld = ubase;
-                File frootOld = froot;
-                froot = new File(uriRoot);
-
-                try {
-                    ubase = froot.getCanonicalPath();
-                } catch (IOException ioe) {
-                    // if we cannot get the base, leave it null
-                }
-
-                //System.out.println("==" + ubase);
-
-
-                Writer mapout;
-                CharArrayWriter servletout, mappingout;
-                try {
-                    if (webxmlLevel >= INC_WEBXML) {
-                        File fmapings = new File(webxmlFile);
-                        mapout = new FileWriter(fmapings);
-                        servletout = new CharArrayWriter();
-                        mappingout = new CharArrayWriter();
-                    } else {
-                        mapout = null;
-                        servletout = null;
-                        mappingout = null;
-                    }
-                    if (webxmlLevel >= ALL_WEBXML) {
-                        mapout.write(Constants.getString("jspc.webxml.header"));
-                    } else if (webxmlLevel>= INC_WEBXML) {
-                        mapout.write(Constants.getString("jspc.webinc.header"));
-                    }
-                } catch (IOException ioe) {
-                    mapout = null;
-                    servletout = null;
-                    mappingout = null;
-                }
-
-                try {
-                    JspCServletContext context =
-                        new JspCServletContext
-                        (new PrintWriter(System.out),
-                         new URL("file:" + ubase.replace('\\','/') + "/"));
-                    tldLocationsCache = new TldLocationsCache(context);
-                } catch (MalformedURLException me) {
-                    System.out.println("**" + me);
-                }
-                                                                       
-                Enumeration e = pages.elements();
-                while (e.hasMoreElements())
-                {
-                    String nextjsp = e.nextElement().toString();
-                    try {
-                        if (ubase != null) {
-                            File fjsp = new File(nextjsp);
-                            String s = fjsp.getCanonicalPath();
-                            //System.out.println("**" + s);
-                            if (s.startsWith(ubase)) {
-                                nextjsp = s.substring(ubase.length());
-                            }
-                        }
-                    } catch (IOException ioe) {
-                        // if we got problems dont change the file name
-                    }
-
-                    if (nextjsp.startsWith("." + File.separatorChar)) {
-                        nextjsp = nextjsp.substring(2);
-                    }
-
-                    parseFile(log, nextjsp, servletout, mappingout);
-                }
-                uriRoot = oldRoot;
-                ubase = ubaseOld;
-                froot = frootOld;
-
-                if (mapout != null) {
-                    try {
-                        servletout.writeTo(mapout);
-                        mappingout.writeTo(mapout);
-                        if (webxmlLevel >= ALL_WEBXML) {
-                            mapout.write(Constants.getString("jspc.webxml.footer"));
-                        } else if (webxmlLevel >= INC_WEBXML) {
-                            mapout.write(Constants.getString("jspc.webinc.footer"));
-                        }
-                        mapout.close();
-                    } catch (IOException ioe) {
-                        // noting to do if it fails since we are done with it
-                    }
-                }
-            } else {
-                try {
-                    if (ubase != null) {
-                        try {
-                            JspCServletContext context =
-                                new JspCServletContext
-                                (new PrintWriter(System.out),
-                                 new URL("file:" + ubase.replace('\\','/') + '/'));
-                            tldLocationsCache = new
-                                TldLocationsCache(context);
-                        } catch (MalformedURLException me) {
-                            System.out.println("**" + me);
-                        }
-                        File fjsp = new File(file);
-                        String s = fjsp.getCanonicalPath();
-                        if (s.startsWith(ubase)) {
-                            file = s.substring(ubase.length());
-                        }
-                    }
-                } catch (IOException ioe) {
-                     // if we got problems dont change the file name
-                }
-
-                parseFile(log, file, null, null);
-            }
-            file = nextFile();
-        }
-        if (dieOnExit) {
-            System.exit(die);
-        }
-    }
-
-    public static void main(String arg[]) {
-        if (arg.length == 0) {
-           System.out.println(Constants.getString("jspc.usage"));
-        } else {
-            try {
-                JspC jspc = new JspC(arg, System.out);
-                jspc.parseFiles(System.out);
-            } catch (JasperException je) {
-                System.err.print("error:");
-                System.err.println(je.getMessage());
-                if (die != NO_DIE_LEVEL) {
-                    System.exit(die);
-                }
-            }
-        }
     }
 
 }

@@ -66,7 +66,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletContext;
 
 import org.apache.jasper.util.Queue;
-//import org.apache.jasper.core.JasperException;
 
 /**
  * A real implementation of the Logger abstraction. 

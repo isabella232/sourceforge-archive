@@ -8,7 +8,7 @@
 
 <font color="red">
 
-<%@ page buffer="5" autoFlush="false" %>
+<%@ page buffer="5kb" autoFlush="false" %>
 
 <p>In place evaluation of another JSP which gives you the current time:
 

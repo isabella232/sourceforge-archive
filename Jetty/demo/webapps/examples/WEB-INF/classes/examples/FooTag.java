@@ -41,6 +41,7 @@ public class FooTag
      * @return EVAL_BODY_INCLUDE
      */
     public int doStartTag() throws JspException {
+        i = 0;
 	return EVAL_BODY_TAG;
     }
 

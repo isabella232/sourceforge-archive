@@ -8,7 +8,7 @@ import java.util.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
-
+import util.HTMLFilter;
 
 /**
  * Example servlet showing request headers
@@ -72,7 +72,8 @@ public class SessionExample extends HttpServlet {
         while (names.hasMoreElements()) {
             String name = (String) names.nextElement(); 
             String value = session.getAttribute(name).toString();
-            out.println(name + " = " + value + "<br>");
+            out.println(HTMLFilter.filter(name) + " = " 
+                        + HTMLFilter.filter(value) + "<br>");
         }
 
         out.println("<P>");

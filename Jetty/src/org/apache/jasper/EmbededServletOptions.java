@@ -69,6 +69,9 @@ import javax.servlet.ServletContext;
 import org.apache.jasper.logging.Logger;
 
 import org.apache.jasper.compiler.TldLocationsCache;
+import org.apache.jasper.xmlparser.ParserUtils;
+
+import java.util.*;
 
 /**
  * A class to hold all init parameters specific to the JSP engine. 
@@ -78,34 +81,41 @@ import org.apache.jasper.compiler.TldLocationsCache;
  * @author Pierre Delisle
  */
 public final class EmbededServletOptions implements Options {
+    private Properties settings=new Properties();
+    
+    /**
+     * Is Jasper being used in development mode?
+     */
+    public boolean development = true;
+
     /**
      * Do you want to keep the generated Java files around?
      */
     public boolean keepGenerated = true;
 
     /**
-     * Flag support for "large" files.
-     *
-     * What this essentially means is that we generated code so that
-     * the HTML data in a JSP file is stored separately as opposed
-     * to those constant string data being used literally in the
-     * generated servlet. 
+     * Do you want support for "large" files? What this essentially
+     * means is that we generated code so that the HTML data in a JSP
+     * file is stored separately as opposed to those constant string
+     * data being used literally in the generated servlet. 
      */
     public boolean largeFile = false;
-    
+
     /**
-     * Flag support for "mapped" files.
-     *
-     * This will generate servlet that has a print statement per
-     * line of the JSP file. This seems like a really nice feature
-     * to have for debugging.
+     * Determines whether tag handler pooling is enabled.
+     */
+    public boolean poolingEnabled = true;
+
+    /**
+     * Do you want support for "mapped" files? This will generate
+     * servlet that has a print statement per line of the JSP file.
+     * This seems like a really nice feature to have for debugging.
      */
     public boolean mappedFile = false;
     
     /**
-     * Flag to display stack traces in the client's browser.
-     *
-     * If this is false, such messages go to the standard
+     * Do you want stack traces and such displayed in the client's
+     * browser? If this is false, such messages go to the standard
      * error or a log file if the standard error is redirected. 
      */
     public boolean sendErrorToClient = false;
@@ -113,7 +123,17 @@ public final class EmbededServletOptions implements Options {
     /**
      * Do we want to include debugging information in the class file?
      */
-    public boolean classDebugInfo = false;
+    public boolean classDebugInfo = true;
+
+    /**
+     * Background compile thread check interval in seconds.
+     */
+    public int checkInterval = 300;
+
+    /**
+     * JSP reloading check ?
+     */
+    public boolean reloading = true;
 
     /**
      * I want to see my generated servlets. Which directory are they
@@ -134,14 +154,9 @@ public final class EmbededServletOptions implements Options {
     public String classpath = null;
     
     /**
-     * Plugin class to use to compile JSP pages.
+     * Compiler to use.
      */
-    public Class jspCompilerPlugin = null;
-
-    /**
-     * Path of the compiler to use for compiling JSP pages.
-     */
-    public String jspCompilerPath = null;
+    public String compiler = null;
 
     /**
      * Cache for the TLD locations
@@ -154,6 +169,14 @@ public final class EmbededServletOptions implements Options {
      */
     private String javaEncoding;
 
+    public String getProperty(String name ) {
+        return settings.getProperty( name );
+    }
+
+    public void setProperty(String name, String value ) {
+        settings.setProperty( name, value );
+    }
+    
     /**
      * Are we keeping generated code around?
      */
@@ -166,6 +189,10 @@ public final class EmbededServletOptions implements Options {
      */
     public boolean getLargeFile() {
         return largeFile;
+    }
+
+    public boolean isPoolingEnabled() {
+	return poolingEnabled;
     }
     
     /**
@@ -187,6 +214,27 @@ public final class EmbededServletOptions implements Options {
      */
     public boolean getClassDebugInfo() {
         return classDebugInfo;
+    }
+
+    /**
+     * Background JSP compile thread check intervall
+     */
+    public int getCheckInterval() {
+        return checkInterval;
+    }
+
+    /**
+     * Is Jasper being used in development mode?
+     */
+    public boolean getDevelopment() {
+        return development;
+    }
+
+    /**
+     * JSP reloading check ?
+     */
+    public boolean getReloading() {
+        return reloading;
     }
 
     /**
@@ -212,22 +260,19 @@ public final class EmbededServletOptions implements Options {
     }
 
     /**
-     * What compiler plugin should I use to compile the servlets
-     * generated from JSP files?
+     * Compiler to use.
      */
-    public Class getJspCompilerPlugin() {
-        return jspCompilerPlugin;
+    public String getCompiler() {
+        return compiler;
     }
 
-    /**
-     * Path of the compiler to use for compiling JSP pages.
-     */
-    public String getJspCompilerPath() {
-        return jspCompilerPath;
-    }
 
     public TldLocationsCache getTldLocationsCache() {
 	return tldLocationsCache;
+    }
+
+    public void setTldLocationsCache( TldLocationsCache tldC ) {
+        tldLocationsCache=tldC;
     }
 
     public String getJavaEncoding() {
@@ -238,7 +283,21 @@ public final class EmbededServletOptions implements Options {
      * Create an EmbededServletOptions object using data available from
      * ServletConfig and ServletContext. 
      */
-    public EmbededServletOptions(ServletConfig config, ServletContext context) {
+    public EmbededServletOptions(ServletConfig config,
+				 ServletContext context) {
+
+        Enumeration enum=config.getInitParameterNames();
+        while( enum.hasMoreElements() ) {
+            String k=(String)enum.nextElement();
+            String v=config.getInitParameter( k );
+
+            setProperty( k, v);
+        }
+
+        // quick hack
+        String validating=config.getInitParameter( "validating");
+        if( "false".equals( validating )) ParserUtils.validating=false;
+        
         String keepgen = config.getInitParameter("keepgenerated");
         if (keepgen != null) {
             if (keepgen.equalsIgnoreCase("true"))
@@ -266,6 +325,17 @@ public final class EmbededServletOptions implements Options {
                 this.mappedFile = false;
             else Constants.message ("jsp.warning.mappedFile", Logger.WARNING);
         }
+
+	poolingEnabled = true;
+        String poolingEnabledParam
+	    = config.getInitParameter("enablePooling"); 
+        if (poolingEnabledParam != null
+  	        && !poolingEnabledParam.equalsIgnoreCase("true")) {
+            if (poolingEnabledParam.equalsIgnoreCase("false"))
+                this.poolingEnabled = false;
+            else Constants.message("jsp.warning.enablePooling",
+				   Logger.WARNING);
+        }
 	
         String senderr = config.getInitParameter("sendErrToClient");
         if (senderr != null) {
@@ -283,6 +353,38 @@ public final class EmbededServletOptions implements Options {
             else if (debugInfo.equalsIgnoreCase("false"))
                 this.classDebugInfo  = false;
             else Constants.message ("jsp.warning.classDebugInfo", Logger.WARNING);
+        }
+
+        String checkInterval = config.getInitParameter("checkInterval");
+        if (checkInterval != null) {
+            try {
+                this.checkInterval = new Integer(checkInterval).intValue();
+                if (this.checkInterval == 0) {
+                    this.checkInterval = 300;
+                    Constants.message("jsp.warning.checkInterval",
+                                      Logger.WARNING);
+                }
+            } catch(NumberFormatException ex) {
+                Constants.message ("jsp.warning.checkInterval", Logger.WARNING);
+            }
+        }
+
+        String development = config.getInitParameter("development");
+        if (development != null) {
+            if (development.equalsIgnoreCase("true"))
+                this.development = true;
+            else if (development.equalsIgnoreCase("false"))
+                this.development = false;
+            else Constants.message ("jsp.warning.development", Logger.WARNING);
+        }
+
+        String reloading = config.getInitParameter("reloading");
+        if (reloading != null) {
+            if (reloading.equalsIgnoreCase("true"))
+                this.reloading = true;
+            else if (reloading.equalsIgnoreCase("false"))
+                this.reloading = false;
+            else Constants.message ("jsp.warning.reloading", Logger.WARNING);
         }
 
         String ieClassId = config.getInitParameter("ieClassId");
@@ -321,33 +423,15 @@ public final class EmbededServletOptions implements Options {
                                   scratchDir.getAbsolutePath()
                               }, Logger.FATAL);
                                   
-        String jspCompilerPath = config.getInitParameter("jspCompilerPath");
-        if (jspCompilerPath != null) {
-            if (new File(jspCompilerPath).exists()) {
-                this.jspCompilerPath = jspCompilerPath;
-            } else { 
-                Constants.message("jsp.warning.compiler.path.notfound",
-                                  new Object[] { jspCompilerPath }, 
-                                  Logger.FATAL);
-            }
-        }
-
-        String jspCompilerPlugin = config.getInitParameter("jspCompilerPlugin");
-        if (jspCompilerPlugin != null) {
-            try {
-                this.jspCompilerPlugin = Class.forName(jspCompilerPlugin);
-            } catch (ClassNotFoundException cnfe) {
-                Constants.message("jsp.warning.compiler.class.notfound",
-                                  new Object[] { jspCompilerPlugin },
-                                  Logger.FATAL);
-            }
-        }
+        this.compiler = config.getInitParameter("compiler");
 
         this.javaEncoding = config.getInitParameter("javaEncoding");
 
 	// Setup the global Tag Libraries location cache for this
 	// web-application.
 	tldLocationsCache = new TldLocationsCache(context);
+
     }
+
 }
 

@@ -151,7 +151,7 @@ public interface HttpSession {
      * @return				a string specifying the identifier
      *					assigned to this session
      *
-     * @throws IllegalStateException	if this method is called on an
+     * @exeption IllegalStateException	if this method is called on an
      *					invalidated session
      *
      */
@@ -177,7 +177,7 @@ public interface HttpSession {
      *					with this session, expressed in 
      *					milliseconds since 1/1/1970 GMT
      *
-     * @throws IllegalStateException	if this method is called on an
+     * @exeption IllegalStateException	if this method is called on an
      *					invalidated session
      *
      */

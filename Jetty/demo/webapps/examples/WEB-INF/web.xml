@@ -44,11 +44,11 @@
 
         <init-param>
           <param-name>compressionThreshold</param-name>
-          <param-value>1</param-value>
+          <param-value>10</param-value>
         </init-param>
         <init-param>
           <param-name>debug</param-name>
-          <param-value>1</param-value>
+          <param-value>0</param-value>
         </init-param>
     </filter>
 
@@ -72,10 +72,12 @@
     </filter-mapping>
 -->
 
+<!--
     <filter-mapping>
       <filter-name>Compression Filter</filter-name>
-      <url-pattern>/CompressionTest/*</url-pattern>
+      <url-pattern>/CompressionTest</url-pattern>
     </filter-mapping>
+-->
 
 <!--
     <filter-mapping>
@@ -93,11 +95,6 @@
     </listener>
 
     <!-- Define servlets that are included in the example application -->
-
-    <!--<servlet>
-        <servlet-name>SendMailServlet</servlet-name>
-        <servlet-class>SendMailServlet</servlet-class>
-    </servlet>-->
 
     <servlet>
         <servlet-name>
@@ -144,13 +141,6 @@
             /CompressionTest
         </url-pattern>
     </servlet-mapping>
-
-<!--
-    <servlet-mapping>
-        <servlet-name>SendMailServlet</servlet-name>
-        <url-pattern>/SendMailServlet</url-pattern>
-    </servlet-mapping>
--->
 
     <servlet-mapping>
         <servlet-name>
@@ -221,6 +211,14 @@
         <form-error-page>/jsp/security/protected/error.jsp</form-error-page>
       </form-login-config>
     </login-config>
+
+    <!-- Security roles referenced by this web application -->
+    <security-role>
+      <role-name>role1</role-name>
+    </security-role>
+    <security-role>
+      <role-name>tomcat</role-name>
+    </security-role>
 
     <!-- Environment entry examples -->
     <!--env-entry>

@@ -69,7 +69,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
 import javax.servlet.ServletException;	// for throwableToString()
-import org.apache.jasper.core.JasperException;	// for throwableToString()
 import org.apache.jasper.util.FastDateFormat;
 
 /**
@@ -210,13 +209,6 @@ public abstract class Logger {
 	    t.printStackTrace(w);
 	    if (t instanceof ServletException) {
 		Throwable cause = ((ServletException)t).getRootCause();
-		if (cause != null) {
-		    w.println(rootcause);
-		    printThrowable(w, cause, rootcause);
-		}
-	    }
-	    else if (t instanceof JasperException) {
-		Throwable cause = ((JasperException)t).getRootCause();
 		if (cause != null) {
 		    w.println(rootcause);
 		    printThrowable(w, cause, rootcause);
@@ -510,14 +502,12 @@ public abstract class Logger {
     }
 
     /**
-     * If we are timestamping at all, what format to use when
-     * printing the timestamp.
+     * If we are timestamping at all, what format do we use to print
+     * the timestamp? See java.text.SimpleDateFormat.
      *
      * Default = "yyyy-MM-dd hh:mm:ss". Special case: "msec" => raw
      * number of msec since epoch, very efficient but not
      * user-friendly
-     *
-     * @see java.text.SimpleDateFormat
      **/
     public void setTimestampFormat(String value)
     {

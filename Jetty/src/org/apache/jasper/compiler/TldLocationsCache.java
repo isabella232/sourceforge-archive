@@ -74,8 +74,8 @@ import javax.servlet.jsp.tagext.Tag;
 import org.apache.jasper.Constants;
 import org.apache.jasper.JasperException;
 import org.apache.jasper.logging.Logger;
-import org.apache.jasper.parser.ParserUtils;
-import org.apache.jasper.parser.TreeNode;
+import org.apache.jasper.xmlparser.ParserUtils;
+import org.apache.jasper.xmlparser.TreeNode;
 
 /**
  * A container for all tag libraries that are defined "globally"
@@ -130,20 +130,30 @@ public class TldLocationsCache {
      */
     private Hashtable mappings = new Hashtable();
 
+    private Hashtable tlds = new Hashtable();
+
+    private boolean initialized=false;
+    ServletContext ctxt;
     //*********************************************************************
     // Constructor and Initilizations
-
+    
     public TldLocationsCache(ServletContext ctxt) {
+        this.ctxt=ctxt;
+    }
+
+    private void init() {
+        if( initialized ) return;
         try {
             processWebDotXml(ctxt);
             processJars(ctxt);
+            initialized=true;
         } catch (JasperException ex) {
             Constants.message("jsp.error.internal.tldinit",
                               new Object[] { ex.getMessage() },
                               Logger.ERROR);
         }
     }
-
+    
     private void processWebDotXml(ServletContext ctxt)
         throws JasperException
     {
@@ -200,15 +210,13 @@ public class TldLocationsCache {
     {
 
         Set libSet = ctxt.getResourcePaths("/WEB-INF/lib");
-        if (libSet == null) {
-            System.err.println("processJars: cannot find /WEB-INF/lib");
-            return;
-        }
-        Iterator it = libSet.iterator();
-        while (it.hasNext()) {
-            String resourcePath = (String) it.next();
-            if (resourcePath.endsWith(".jar")) 
-                tldConfigJar(ctxt, resourcePath);
+        if (libSet != null) {
+            Iterator it = libSet.iterator();
+            while (it.hasNext()) {
+                String resourcePath = (String) it.next();
+                if (resourcePath.endsWith(".jar")) 
+                    tldConfigJar(ctxt, resourcePath);
+            }
         }
 
     }
@@ -307,6 +315,7 @@ public class TldLocationsCache {
     public String[] getLocation(String uri) 
         throws JasperException
     {
+        if( ! initialized ) init();
         return (String[])mappings.get(uri);
     }
 
@@ -329,6 +338,18 @@ public class TldLocationsCache {
         }
     }
 
+    public TagLibraryInfo getTagLibraryInfo( String uri ) {
+        if( ! initialized ) init();
+        Object o=tlds.get( uri );
+        if( o==null ) return null;
+        return (TagLibraryInfo)o;
+    }
+
+    public void addTagLibraryInfo( String uri, TagLibraryInfo tld ) {
+        if( ! initialized ) init();
+        tlds.put( uri, tld);
+    }
+    
     private void p(String s) {
         System.out.println("[TldLocationsCache] " + s);
     }

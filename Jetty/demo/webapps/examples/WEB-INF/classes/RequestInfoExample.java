@@ -8,6 +8,7 @@ import java.util.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
+import util.HTMLFilter;
 
 /**
  * Example servlet showing request information.
@@ -58,7 +59,7 @@ public class RequestInfoExample extends HttpServlet {
         out.println("</td></tr><tr><td>");
         out.println(rb.getString("requestinfo.label.requesturi"));
         out.println("</td><td>");        
-        out.println(request.getRequestURI());
+        out.println(HTMLFilter.filter(request.getRequestURI()));
         out.println("</td></tr><tr><td>");        
         out.println(rb.getString("requestinfo.label.protocol"));
         out.println("</td><td>");        
@@ -66,12 +67,25 @@ public class RequestInfoExample extends HttpServlet {
         out.println("</td></tr><tr><td>");
         out.println(rb.getString("requestinfo.label.pathinfo"));
         out.println("</td><td>");        
-        out.println(request.getPathInfo());
+        out.println(HTMLFilter.filter(request.getPathInfo()));
         out.println("</td></tr><tr><td>");
         out.println(rb.getString("requestinfo.label.remoteaddr"));
+
+ 	String cipherSuite=
+ 	    (String)request.getAttribute("javax.servlet.request.cipher_suite");
         out.println("</td><td>");                
         out.println(request.getRemoteAddr());
         out.println("</table>");
+
+ 	if(cipherSuite!=null){
+ 	    out.println("</td></tr><tr><td>");	
+ 	    out.println("SSLCipherSuite:");
+ 	    out.println("</td>");
+ 	    out.println("<td>");	    
+ 	    out.println(request.getAttribute("javax.servlet.request.cipher_suite"));
+	    out.println("</td>");	    
+ 	}
+	
     }
 
     public void doPost(HttpServletRequest request,

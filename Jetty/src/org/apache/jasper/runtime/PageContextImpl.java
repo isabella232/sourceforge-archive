@@ -67,7 +67,6 @@ import java.io.InputStreamReader;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.NoSuchElementException;
-import java.util.Stack;
 
 import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
@@ -85,6 +84,7 @@ import javax.servlet.jsp.PageContext;
 import javax.servlet.jsp.JspFactory;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.BodyContent;
+import javax.servlet.jsp.JspException;
 
 import org.apache.jasper.Constants;
 import org.apache.jasper.logging.Logger;
@@ -138,15 +138,18 @@ public class PageContextImpl extends PageContext {
 	    this.session = ((HttpServletRequest)request).getSession();
 
 	if (needsSession && session == null)
-	    throw new IllegalStateException("Page needs a session and none is available");
+	    throw new IllegalStateException
+                ("Page needs a session and none is available");
 
-	// initialize the initial out ...
-	//	System.out.println("Initialize PageContextImpl " + out );
-	if( out == null ) {
-	    out = _createOut(bufferSize, autoFlush); // throws
-	} else
-	    ((JspWriterImpl)out).init(response, bufferSize, autoFlush );
-	
+        // initialize the initial out ...
+        depth = -1;
+        if (this.baseOut == null) {
+            this.baseOut = _createOut(bufferSize, autoFlush);
+        } else {
+            this.baseOut.init(response, bufferSize, autoFlush);
+        }
+        this.out = baseOut;
+
 	if (this.out == null)
 	    throw new IllegalStateException("failed initialize JspWriter");
 
@@ -169,6 +172,7 @@ public class PageContextImpl extends PageContext {
     }
 
     public void release() {
+        out = baseOut;
 	try {
 	    if (isIncluded) {
 		((JspWriterImpl)out).flushBuffer();
@@ -188,10 +192,8 @@ public class PageContextImpl extends PageContext {
 	autoFlush    = true;
 	request      = null;
 	response     = null;
-	// Reuse // XXX problems - need to fix them first!!
-	out	     = null; // out is closed elsewhere
-	if( out instanceof JspWriterImpl )
-	    ((JspWriterImpl)out).recycle();
+        depth = -1;
+	baseOut.recycle();
 	session      = null;
 
 	attributes.clear();
@@ -347,8 +349,10 @@ public class PageContextImpl extends PageContext {
 	try {
 	    removeAttribute(name, PAGE_SCOPE);
 	    removeAttribute(name, REQUEST_SCOPE);
-	    removeAttribute(name, SESSION_SCOPE);
-	    removeAttribute(name, APPLICATION_SCOPE);
+            if(session != null ) {
+                removeAttribute(name, SESSION_SCOPE);
+            }
+            removeAttribute(name, APPLICATION_SCOPE);
 	} catch (Exception ex) {
 	    // we remove as much as we can, and
 	    // simply ignore possible exceptions
@@ -401,9 +405,18 @@ public class PageContextImpl extends PageContext {
     public void forward(String relativeUrlPath)
         throws ServletException, IOException
     {
+	// JSP.4.5 If the buffer was flushed, throw IllegalStateException
+	try {
+	    out.clear();
+	} catch (IOException ex) {
+	    throw new IllegalStateException(Constants.getString(
+			"jsp.error.attempt_to_clear_flushed_buffer"));
+	}
+
 	// Make sure that the response object is not the wrapper for include
-	while (response instanceof HttpServletResponseWrapper)
-	    response = ((HttpServletResponseWrapper)response).getResponse();
+	while (response instanceof ServletResponseWrapperInclude) {
+	    response = ((ServletResponseWrapperInclude)response).getResponse();
+        }
 
         String path = getAbsolutePathRelativeToContext(relativeUrlPath);
         String includeUri 
@@ -419,17 +432,30 @@ public class PageContextImpl extends PageContext {
         }
     }
 
-    Stack writerStack = new Stack();
+    protected BodyContent[] outs = new BodyContentImpl[0];
+    protected int depth = -1;
 
     public BodyContent pushBody() {
-        JspWriter previous = out;
-        writerStack.push(out);
-        out = new BodyContentImpl(previous);
-        return (BodyContent) out;
+        depth++;
+        if (depth >= outs.length) {
+            BodyContent[] newOuts = new BodyContentImpl[depth + 1];
+            for (int i = 0; i < outs.length; i++) {
+                newOuts[i] = outs[i];
+            }
+            newOuts[depth] = new BodyContentImpl(out);
+            outs = newOuts;
+        }
+        out = outs[depth];
+        return outs[depth];
     }
 
     public JspWriter popBody() {
-        out = (JspWriter) writerStack.pop();
+        depth--;
+        if (depth >= 0) {
+            out = outs[depth];
+        } else {
+            out = baseOut;
+        }
         return out;
     }
 
@@ -466,21 +492,20 @@ public class PageContextImpl extends PageContext {
                     throw new ServletException(t.getMessage(), rootCause);
                 } else {
                     throw new ServletException(t);
-		}
+                }
             }
 	    throw new ServletException(t);
 	}
     }
 
-    protected JspWriter _createOut(int bufferSize, boolean autoFlush)
-        throws IOException, IllegalArgumentException
-    {
-	try {
-	    return new JspWriterImpl(response, bufferSize, autoFlush);
-	} catch( Throwable t ) {
-	    loghelper.log("creating out", t);
-	    return null;
-	}
+    protected JspWriterImpl _createOut(int bufferSize, boolean autoFlush)
+        throws IOException, IllegalArgumentException {
+        try {
+            return new JspWriterImpl(response, bufferSize, autoFlush);
+        } catch( Throwable t ) {
+            loghelper.log("creating out", t);
+            return null;
+        }
     }
 
     /*
@@ -518,5 +543,7 @@ public class PageContextImpl extends PageContext {
 
     // initial output stream
 
-    protected transient JspWriter	out;
+    protected transient JspWriter       out;
+    protected transient JspWriterImpl   baseOut;
+
 }

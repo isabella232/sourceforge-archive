@@ -111,7 +111,7 @@ public class TagSupport implements IterationTag, Serializable {
      *
      * @param from The instance from where to start looking.
      * @param klass The subclass of Tag or interface to be matched
-     * @return the nearest ancestor that implements the interface
+     * @returns the nearest ancestor that implements the interface
      * or is an instance of the class specified
      */
 
@@ -154,7 +154,7 @@ public class TagSupport implements IterationTag, Serializable {
     /**
      * Default processing of the start tag, returning SKIP_BODY.
      *
-     * @return SKIP_BODY
+     * @returns SKIP_BODY
      *
      * @see Tag#doStartTag()
      */
@@ -166,7 +166,7 @@ public class TagSupport implements IterationTag, Serializable {
     /**
      * Default processing of the end tag returning EVAL_PAGE.
      *
-     * @return EVAL_PAGE
+     * @returns EVAL_PAGE
      *
      * @see Tag#doEndTag()
      */
@@ -216,7 +216,7 @@ public class TagSupport implements IterationTag, Serializable {
      * The Tag instance most closely enclosing this tag instance.
      * @see Tag#getParent()
      *
-     * @return the parent tag instance or null
+     * @returns the parent tag instance or null
      */
 
     public Tag getParent() {
@@ -236,7 +236,7 @@ public class TagSupport implements IterationTag, Serializable {
     /**
      * The value of the id attribute of this tag; or null.
      *
-     * @return the value of the id attribute, or null
+     * @returns the value of the id attribute, or null
      */
     
     public String getId() {
@@ -272,7 +272,7 @@ public class TagSupport implements IterationTag, Serializable {
      * Get a the value associated with a key.
      *
      * @param k The string key.
-     * @return The value associated with the key, or null.
+     * @returns The value associated with the key, or null.
      */
 
     public Object getValue(String k) {
@@ -298,7 +298,7 @@ public class TagSupport implements IterationTag, Serializable {
     /**
      * Enumerate the values kept by this tag handler.
      *
-     * @return An enumeration of all the values set.
+     * @returns An enumeration of all the values set.
      */
 
     public Enumeration getValues() {

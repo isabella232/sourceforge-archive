@@ -53,25 +53,14 @@
  *
  */ 
 
-
 package org.apache.jasper.compiler;
 
-import java.io.InputStreamReader;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.CharArrayWriter;
-import java.io.IOException;
-import java.io.FileNotFoundException;
-import java.io.File;
-import java.util.Hashtable;
-import java.util.Vector;
-import java.util.Stack;
-
+import java.io.*;
+import java.util.*;
 import org.apache.jasper.Constants;
+import org.apache.jasper.JasperException;
 import org.apache.jasper.JspCompilationContext;
 import org.apache.jasper.logging.*;
-
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.AttributesImpl;
 
@@ -87,7 +76,9 @@ import org.xml.sax.helpers.AttributesImpl;
  * @author Mandar Raje
  * @author Danno Ferrin
  */
+
 public class JspReader {
+
     protected Mark current  = null;
     String master = null;
 
@@ -96,11 +87,13 @@ public class JspReader {
     int size = 0;
     
     private JspCompilationContext context;
+    private ErrorDispatcher err;
 
     /*
-    * Set to true when using the JspReader on a single file where we read up to the
-    * end and reset to the beginning many times. (as in ParserCtl.figureOutJspDocument().
-    */
+     * Set to true when using the JspReader on a single file where we read up
+     * to the end and reset to the beginning many times.
+     * (as in ParserCtl.figureOutJspDocument().
+     */
     boolean singleFile = false;
 
     Logger.Helper loghelper = new Logger.Helper("JASPER_LOG", "JspReader");
@@ -127,7 +120,8 @@ public class JspReader {
     /**
      * Unregister the source file.
      * This method is used to implement file inclusion. Each included file
-     * gets a uniq identifier (which is the index in the array of source files).
+     * gets a uniq identifier (which is the index in the array of source
+     * files).
      * @return The index of the now registered file.
      */
     protected int unregisterSourceFile(String file) {
@@ -138,150 +132,47 @@ public class JspReader {
 	return sourceFiles.size() - 1;
     }
 
-    /**
-     * Push a new file onto the stack.
-     * The name of the file is resolved to a fully qualified filename.
-     * @param name The name of the file.
-     * @param encoding The optional encoding for the file.
-     */
-    /* NOT COMPILED -- kept temporarily for reference 
-    public void pushFile(String name, String encoding) 
-	throws ParseException, FileNotFoundException
-    {
-        String parent = master == null ?
-            null : master.substring(0, master.lastIndexOf("/") + 1);
-        boolean isAbsolute = name.startsWith("/");
-
-	if (parent == null || isAbsolute) {
-	    master = name;
-	    pushFile(new File(name), encoding);
-	} else {
-	    master = parent + name;
-	    pushFile(new File(master), encoding);
-	}
-    }
-    */
-
-    /**
-     * Push a new file to be parsed onto the stack.
-     * @param inputFile The fully qualified path of the file.
-     * @param encoding Optional encoding to read the file.
-     */
-    /* NOT COMPILED -- kept temporarily for reference 
-    private void pushFile(File file, String encoding) 
-	throws ParseException, FileNotFoundException 
-    {
-        // Default encoding if needed:
-	if (encoding == null) {
-            encoding = "8859_1";
-            // XXX - longer term, this should really be:
-	    //   System.getProperty("file.encoding", "8859_1");
-            // but this doesn't work right now, so we stick with ASCII
-        }
-
-	// Register the file, and read its content:
-	String longName = (context == null)
-	    ? file.getAbsolutePath()
-	    : context.getRealPath(file.toString());
-
-	int fileid = registerSourceFile(longName);
-	
-        if (fileid == -1)
-            throw new ParseException(Constants.getString("jsp.error.file.already.registered",
-                                                         new Object[] { 
-                                                             file 
-                                                         }));
-	currFileId = fileid;
-                                     
-	InputStreamReader reader = null;
-	try {
-            if (context == null)
-                reader = new InputStreamReader(new FileInputStream(file),
-                                               encoding);
-            else {
-	        String fileName = context.getRealPath(file.toString());
-		InputStream in = context.getResourceAsStream(file.toString());
-                if (in == null)
-                    throw new FileNotFoundException(fileName);
-                
-                try {
-                    reader = new InputStreamReader(in, encoding);
-                } catch (Throwable ex) {
-                    throw new FileNotFoundException(fileName + ": "+ ex.getMessage());
-                }
-            }
-            
-	    CharArrayWriter caw   = new CharArrayWriter();
-	    char            buf[] = new char[1024];
-	    for (int i = 0 ; (i = reader.read(buf)) != -1 ; )
-		caw.write(buf, 0, i);
-	    caw.close();
-	    if (current == null) {
-		current = new Mark( this, caw.toCharArray(), fileid, getFile(fileid),
-				    master, encoding );
-	    } else {
-		current.pushStream( caw.toCharArray(), fileid, getFile(fileid),
-				    master, encoding );
-	    }
-
-        } catch (FileNotFoundException fnfe) {
-            throw fnfe;
-	} catch (Throwable ex) {
-	    loghelper.log("Exception parsing file " + file, ex);
-	    // Pop state being constructed:
-	    popFile();
-	    throw new ParseException(Constants.getString("jsp.error.file.cannot.read",
-							new Object[] { file }));
-	} finally {
-	    if ( reader != null ) {
-		try { reader.close(); } catch (Exception any) {}
-	    }
-	}
-    }
-    */
-
     private void pushFile2(String file, String encoding, 
 			   InputStreamReader reader) 
-	throws ParseException, FileNotFoundException 
-    {
+	        throws JasperException, FileNotFoundException {
+
 	// Register the file
 	String longName = file;
 
 	int fileid = registerSourceFile(longName);
 
-        if (fileid == -1)
-            throw new ParseException(
-                Constants.getString("jsp.error.file.already.registered",
-				    new Object[] {file}));
+        if (fileid == -1) {
+            err.jspError("jsp.error.file.already.registered", file);
+	}
+
 	currFileId = fileid;
 
 	try {
-	    CharArrayWriter caw   = new CharArrayWriter();
-	    char            buf[] = new char[1024];
-	    for (int i = 0 ; (i = reader.read(buf)) != -1 ; )
+	    CharArrayWriter caw = new CharArrayWriter();
+	    char buf[] = new char[1024];
+	    for (int i = 0 ; (i = reader.read(buf)) != -1 ;)
 		caw.write(buf, 0, i);
 	    caw.close();
 	    if (current == null) {
 		current = new Mark(this, caw.toCharArray(), fileid, 
-				   getFile(fileid), master, encoding );
+				   getFile(fileid), master, encoding);
 	    } else {
-		current.pushStream( caw.toCharArray(), fileid, getFile(fileid),
-				    longName, encoding );
+		current.pushStream(caw.toCharArray(), fileid, getFile(fileid),
+				   longName, encoding);
 	    }
 	} catch (Throwable ex) {
 	    loghelper.log("Exception parsing file ", ex);
 	    // Pop state being constructed:
 	    popFile();
-	    throw new ParseException(Constants.getString("jsp.error.file.cannot.read",
-							new Object[] { new String("ze file") }));
+	    err.jspError("jsp.error.file.cannot.read", "ze file");
 	} finally {
-	    if ( reader != null ) {
+	    if (reader != null) {
 		try { reader.close(); } catch (Exception any) {}
 	    }
 	}
     }
 
-    public boolean popFile() throws ParseException {
+    public boolean popFile() throws JasperException {
 	// Is stack created ? (will happen if the Jsp file we'r looking at is
 	// missing.
 	if (current == null) 
@@ -290,16 +181,14 @@ public class JspReader {
 	// Restore parser state:
 	//size--;
 	if (currFileId < 0) {
-	    throw new ParseException(
-		          Constants.getString("jsp.error.no.more.content"));
+	    err.jspError("jsp.error.no.more.content");
 	}
 	
 	String fName = getFile(currFileId);
 	currFileId = unregisterSourceFile(fName);
-	if (currFileId < -1)
-	    throw new ParseException
-		(Constants.getString("jsp.error.file.not.registered",
-				     new Object[] {fName}));
+	if (currFileId < -1) {
+	    err.jspError("jsp.error.file.not.registered", fName);
+	}
 
 	boolean result = current.popStream();
 	if (result)
@@ -309,29 +198,16 @@ public class JspReader {
 	
     protected JspReader(JspCompilationContext ctx,
 			String file,
-			String encoding, InputStreamReader reader) 
-	throws ParseException, FileNotFoundException
-    {
+			String encoding,
+			InputStreamReader reader,
+			ErrorDispatcher err) 
+	        throws JasperException, FileNotFoundException {
         this.context = ctx;
+	this.err = err;
 	pushFile2(file, encoding, reader);
     }
 
-    /* NOT COMPILED -- kept temporarily for reference 
-    protected JspReader(String file, JspCompilationContext ctx, String encoding) 
-	throws ParseException, FileNotFoundException
-    {
-        this.context = ctx;
-	pushFile(file, encoding);
-    }
-
-    public static JspReader createJspReader(String file, JspCompilationContext ctx, String encoding) 
-	throws ParseException, FileNotFoundException
-    {
-	return new JspReader(file, ctx, encoding);
-    }
-    */
-
-    public boolean hasMoreInput() throws ParseException {
+    public boolean hasMoreInput() throws JasperException {
 	if (current.cursor >= current.stream.length) {
             if (singleFile) return false; 
 	    while (popFile()) {
@@ -342,7 +218,7 @@ public class JspReader {
 	return true;
     }
     
-    public int nextChar() throws ParseException {
+    public int nextChar() throws JasperException {
 	if (!hasMoreInput())
 	    return -1;
 	
@@ -363,7 +239,7 @@ public class JspReader {
      * Gets Content until the next potential JSP element.  Because all elements
      * begin with a '&lt;' we can just move until we see the next one.
      */
-    String nextContent() {
+    char[] nextContent() {
         int cur_cursor = current.cursor;
 	int len = current.stream.length;
  	char ch;
@@ -386,10 +262,14 @@ public class JspReader {
 	    }
 	}
 
-	return new String(current.stream, cur_cursor, current.cursor-cur_cursor);
+	len = current.cursor - cur_cursor;
+	char[] content = new char[len];
+	System.arraycopy(current.stream, cur_cursor, content, 0, len);
+	
+	return content;
     }
 
-    char[] getChars(Mark start, Mark stop) throws ParseException {
+    char[] getText(Mark start, Mark stop) throws JasperException {
 	Mark oldstart = mark();
 	reset(start);
 	CharArrayWriter caw = new CharArrayWriter();
@@ -412,7 +292,7 @@ public class JspReader {
 	current = new Mark(mark);
     }
 
-    public boolean matchesIgnoreCase(String string) throws ParseException {
+    public boolean matchesIgnoreCase(String string) throws JasperException {
 	Mark mark = mark();
 	int ch = 0;
 	int i = 0;
@@ -427,7 +307,14 @@ public class JspReader {
 	return true;
     }
 
-    public boolean matches(String string) throws ParseException {
+    /**
+     * search the stream for a match to a string
+     * @param string The string to match
+     * @return <stront>true</strong> is one is found, the current position
+     *         in stream is positioned after the search string, <strong>
+     *	       false</strong> otherwise, position in stream unchanged.
+     */
+    public boolean matches(String string) throws JasperException {
 	Mark mark = mark();
 	int ch = 0;
 	int i = 0;
@@ -438,16 +325,28 @@ public class JspReader {
 		return false;
 	    }
 	} while (i < string.length());
-	reset(mark);
 	return true;
     }
+
+    public boolean matchesETag(String tagName) throws JasperException {
+	Mark mark = mark();
+
+	if (!matches("</" + tagName))
+	    return false;
+	skipSpaces();
+	if (nextChar() == '>')
+	    return true;
+
+	reset(mark);
+	return false;
+    }
     
-    public void advance(int n) throws ParseException {
+    public void advance(int n) throws JasperException {
 	while (--n >= 0)
 	    nextChar();
     }
 
-    public int skipSpaces() throws ParseException {
+    public int skipSpaces() throws JasperException {
 	int i = 0;
 	while (isSpace()) {
 	    i++;
@@ -460,21 +359,23 @@ public class JspReader {
      * Skip until the given string is matched in the stream.
      * When returned, the context is positioned past the end of the match.
      * @param s The String to match.
-     * @return A non-null <code>Mark</code> instance if found,
-     * <strong>null</strong> otherwise.
+     * @return A non-null <code>Mark</code> instance (positioned immediately
+     *         before the search string) if found, <strong>null</strong>
+     *         otherwise.
      */
-    public Mark skipUntil(String limit)
-    throws ParseException {
+    public Mark skipUntil(String limit) throws JasperException {
 	Mark ret = null;
 	int limlen = limit.length();
 	int ch;
 	
     skip:
-	for (ret = mark(), ch = nextChar() ; ch != -1 ; ret = mark(), ch = nextChar()) {
-	    
-	    if ( ch == limit.charAt(0) ) {
+	for (ret = mark(), ch = nextChar() ; ch != -1 ;
+	         ret = mark(), ch = nextChar()) {	    
+	    if (ch == limit.charAt(0)) {
 		for (int i = 1 ; i < limlen ; i++) {
-		    if (Character.toLowerCase((char) nextChar()) != limit.charAt(i))
+		    if (peekChar() == limit.charAt(i))
+			nextChar();
+		    else
 			continue skip;
 		}
 		return ret;
@@ -483,6 +384,54 @@ public class JspReader {
 	return null;
     }
     
+    /**
+     * Skip until the given string is matched in the stream, but ignoring
+     * chars initially escaped by a '\'.
+     * When returned, the context is positioned past the end of the match.
+     * @param s The String to match.
+     * @return A non-null <code>Mark</code> instance (positioned immediately
+     *         before the search string) if found, <strong>null</strong>
+     *         otherwise.
+     */
+    public Mark skipUntilIgnoreEsc(String limit) throws JasperException {
+        Mark ret = null;
+        int limlen = limit.length();
+        int ch;
+        int prev = 'x'; // Doesn't matter
+
+    skip:
+        for (ret = mark(), ch = nextChar() ; ch != -1 ;
+                 ret = mark(), prev = ch, ch = nextChar()) {
+            if (ch == limit.charAt(0) && prev != '\\') {
+                for (int i = 1 ; i < limlen ; i++) {
+                    if (peekChar() == limit.charAt(i))
+                        nextChar();
+                    else
+                        continue skip;
+                }
+                return ret;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Skip until the given end tag is matched in the stream.
+     * When returned, the context is positioned past the end of the tag.
+     * @param tag The name of the tag whose ETag (</tag>) to match.
+     * @return A non-null <code>Mark</code> instance (positioned immediately
+     *	       before the ETag) if found, <strong>null</strong> otherwise.
+     */
+    public Mark skipUntilETag(String tag) throws JasperException {
+	Mark ret = skipUntil("</" + tag);
+	if (ret != null) {
+	    skipSpaces();
+	    if (nextChar() != '>')
+		ret = null;
+	}
+	return ret;
+    }
+
     final boolean isSpace() {
 	return peekChar() <= ' ';
     }
@@ -493,10 +442,7 @@ public class JspReader {
      * otherwise, it consumes up to the first delimiter character.
      * @param quoted If <strong>true</strong> accept quoted strings.
      */
-
-    public String parseToken(boolean quoted) 
-	throws ParseException
-    {
+    public String parseToken(boolean quoted) throws JasperException {
 	StringBuffer stringBuffer = new StringBuffer();
 	skipSpaces();
 	stringBuffer.setLength(0);
@@ -504,25 +450,26 @@ public class JspReader {
 	int ch = peekChar();
 	
 	if (quoted) {
-	    if ( ch == '"' || ch == '\'') {
+	    if (ch == '"' || ch == '\'') {
 
 		char endQuote = ch == '"' ? '"' : '\'';
 		// Consume the open quote: 
 		ch = nextChar();
-		for(ch = nextChar(); ch != -1 && ch != endQuote; ch = nextChar()) {
+		for (ch = nextChar(); ch != -1 && ch != endQuote;
+		         ch = nextChar()) {
 		    if (ch == '\\') 
 			ch = nextChar();
 		    stringBuffer.append((char) ch);
 		}
 		// Check end of quote, skip closing quote:
-		if ( ch == -1 ) 
-		    throw new ParseException(mark(), 
-				Constants.getString("jsp.error.quotes.unterminated"));
+		if (ch == -1) {
+		    err.jspError(mark(), "jsp.error.quotes.unterminated");
+		}
+	    } else {
+		err.jspError(mark(), "jsp.error.attr.quoted");
 	    }
-	    else throw new ParseException(mark(),
-				Constants.getString("jsp.error.attr.quoted"));
 	} else {
-	    if (!isDelimiter())
+	    if (!isDelimiter()) {
 		// Read value until delimiter is found:
 		do {
 		    ch = nextChar();
@@ -533,233 +480,11 @@ public class JspReader {
 			    ch = nextChar();
 		    }
 		    stringBuffer.append((char) ch);
-		} while ( !isDelimiter() );
+		} while (!isDelimiter());
+	    }
 	}
+
 	return stringBuffer.toString();
-    }
-
-    /**
-     * Parse an attribute/value pair, and store it in provided hash table.
-     * The attribute/value pair is defined by:
-     * <pre>
-     * av := spaces token spaces '=' spaces token spaces
-     * </pre>
-     * Where <em>token</em> is defined by <code>parseToken</code> and
-     * <em>spaces</em> is defined by <code>skipSpaces</code>.
-     * The name is always considered case insensitive, hence stored in its
-     * lower case version.
-     * @param into The Hashtable instance to save the result to.
-     */
-
-    private void parseAttributeValue(AttributesImpl into)
-	throws ParseException
-    {
-	// Get the attribute name:
-	skipSpaces();
-	String name = parseToken(false);
-	// Check for an equal sign:
-	skipSpaces();
-	if ( peekChar() != '=' ) 
-	    throw new ParseException(mark(), Constants.getString("jsp.error.attr.novalue",
-						new Object[] { name }));
-	char ch = (char) nextChar();
-	// Get the attribute value:
-	skipSpaces();
-	String value = parseToken(true);
-	skipSpaces();
-	// Add the binding to the provided hashtable:
-        //TODO review if the empty namespace works, or if we should get another one
-        //TODO do we want to use typw to indicate rt expression/scripting vlaue?
-	into.addAttribute("", name, name, "CDATA", value);
-	return;
-    }
-
-    /**
-     * Parse some tag attributes for Beans.
-     * The stream is assumed to be positioned right after the tag name. The
-     * syntax recognized is:
-     * <pre>
-     * tag-attrs := empty | attr-list ("&gt;" | "--&gt;" | %&gt;)
-     * attr-list := empty | av spaces attr-list
-     * empty     := spaces 
-     * </pre>
-     * Where <em>av</em> is defined by <code>parseAttributeValue</code>.
-     * @return A Hashtable mapping String instances (variable names) into
-     * String instances (variable values).
-     */
-
-    public Attributes parseTagAttributesBean() 
-	throws ParseException
-    {
-      AttributesImpl values = new AttributesImpl();
-	while ( true ) {
-	    skipSpaces();
-	    int ch = peekChar();
-	    if ( ch == '>' ) {
-		// End of the useBean tag.
-		return values;
-
-	    } else if ( ch == '/' ) {
-		Mark mark = mark();
-		nextChar();
-		// XMLesque Close tags 
-		try {
-		    if ( nextChar() == '>' )
-		      return values;
-		} finally {
-		    reset(mark);
-		}
-	    }
-	    if ( ch == -1 )
-		break;
-	    // Parse as an attribute=value:
-	    parseAttributeValue(values);
-	}
-	// Reached EOF:
-	throw new ParseException(mark(),
-			Constants.getString("jsp.error.tag.attr.unterminated"));
-    }
-
-    /**
-     * Parse some tag attributes.
-     * The stream is assumed to be positioned right after the tag name. The
-     * syntax recognized is:
-     * <pre>
-     * tag-attrs := empty | attr-list ("&gt;" | "--&gt;" | %&gt;)
-     * attr-list := empty | av spaces attr-list
-     * empty     := spaces 
-     * </pre>
-     * Where <em>av</em> is defined by <code>parseAttributeValue</code>.
-     * @return A Hashtable mapping String instances (variable names) into
-     * String instances (variable values).
-     */
-
-    public Attributes parseTagAttributes() 
-	throws ParseException
-    {
-	AttributesImpl values = new AttributesImpl();
-	while ( true ) {
-	    skipSpaces();
-	    int ch = peekChar();
-	    if ( ch == '>' ) {
-		return values;
-	    }
-	    if ( ch == '-' ) {
-		Mark mark = mark();
-		nextChar();
-		// Close NCSA like attributes "->"
-		try {
-		    if ( nextChar() == '-' && nextChar() == '>' )
-			return values;
-		} finally {
-		    reset(mark);
-		}
-	    } else if ( ch == '%' ) {
-		Mark mark = mark();
-		nextChar();
-		// Close variable like attributes "%>"
-		try {
-		    if ( nextChar() == '>' )
-			return values;
-		} finally {
-		    reset(mark);
-		}
-	    } else if ( ch == '/' ) {
-		Mark mark = mark();
-		nextChar();
-		// XMLesque Close tags 
-		try {
-		    if ( nextChar() == '>' )
-			return values;
-		} finally {
-		    reset(mark);
-		}
-	    }
-	    if ( ch == -1 )
-		break;
-	    // Parse as an attribute=value:
-	    parseAttributeValue(values);
-	}
-	// Reached EOF:
-	throw new ParseException(mark(),
-			Constants.getString("jsp.error.tag.attr.unterminated"));
-    }
-
-    /**
-     * Parse PARAM tag attributes into the given hashtable.
-     * Parses the PARAM tag as defined by:
-     * <pre>
-     * &lt;PARAM tag-attributes %gt;
-     * </pre>
-     * Two special tag attributes are recognized here:
-     * <ol>
-     * <li>The <strong>name</strong> attribute,
-     * <li>The <strong>value</strong> attribute.
-     * </ol>
-     * The resulting name, value pair is stored in the provided hash table.
-     * @param into Storage for parameter values.
-     */
-    public void parseParamTag(Hashtable into) 
-	throws ParseException
-    {
-	// Really check for a param tag:
-	if ( matches("param") ) {
-	    advance(6);
-	    parseParams (into);
-	} else {
-	    // False alarm, just skip it
-	}
-    }
-
-    /**
-     * Parse jsp:param tag attributes into the given hashtable.
-     * Parses the jsp:param tag as defined by:
-     * <pre>
-     * &lt;jsp:param tag-attributes %gt;
-     * </pre>
-     * Two special tag attributes are recognized here:
-     * <ol>
-     * <li>The <strong>name</strong> attribute,
-     * <li>The <strong>value</strong> attribute.
-     * </ol>
-     * The resulting name, value pair is stored in the provided hash table.
-     * @param into Storage for parameter values.
-     */
-    public void parsePluginParamTag(Hashtable into) 
-	throws ParseException
-    {
-	// Really check for a param tag:
-	if ( matches("<jsp:param") ) {
-	    advance(11);
-	    parseParams (into);
-	} else {
-	    // False alarm, just skip it
-	}
-    }
-
-    private void parseParams (Hashtable into) 
-        throws ParseException
-    {
-	Attributes attrs = parseTagAttributes();
-	// Check attributes (name and value):
-	String name  = (String) attrs.getValue("name");
-	String value = (String) attrs.getValue("value");
-	if ( name == null )
- 	    throw new ParseException(mark(), Constants.getString("jsp.error.param.noname"));
-	if ( value == null )
- 	    throw new ParseException(mark(), Constants.getString("jsp.error.param.novalue"));
-	// Put that new binding into the params hashatble:
-	String oldval[] = (String[]) into.get(name);
-	if ( oldval == null ) {
-	    String newval[] = new String[1];
-	    newval[0] = value;
-	    into.put(name, newval);
-	} else {
-	    String newval[] = new String[oldval.length+1];
-	    System.arraycopy(oldval, 0, newval, 0, oldval.length);
-	    newval[oldval.length] = value;
-	    into.put(name, newval);
-        }
     }
 
     /**
@@ -768,17 +493,19 @@ public class JspReader {
      * any space character as defined by <code>isSpace</code>.
      * @return A boolean.
      */
-    private boolean isDelimiter() throws ParseException {
-	if ( ! isSpace() ) {
+    private boolean isDelimiter() throws JasperException {
+	if (! isSpace()) {
 	    int ch = peekChar();
 	    // Look for a single-char work delimiter:
-	    if ( ch == '=' || ch == '>' || ch == '"' || ch == '\'' || ch == '/') 
+	    if (ch == '=' || ch == '>' || ch == '"' || ch == '\''
+		    || ch == '/') {
 		return true;
+	    }
 	    // Look for an end-of-comment or end-of-tag:		
-	    if ( ch == '-' ) {
+	    if (ch == '-') {
 		Mark mark = mark();
-		if ( ((ch = nextChar()) == '>')
-		     || ((ch == '-') && (nextChar() == '>')) ) {
+		if (((ch = nextChar()) == '>')
+		        || ((ch == '-') && (nextChar() == '>'))) {
 		    reset(mark);
 		    return true;
 		} else {
@@ -795,6 +522,5 @@ public class JspReader {
     public void setSingleFile(boolean val) {
         singleFile = val;
     }
-
 }
 

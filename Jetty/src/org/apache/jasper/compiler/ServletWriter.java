@@ -69,6 +69,7 @@ import java.io.IOException;
  * This is what is used to generate servlets. 
  *
  * @author Anil K. Vijendran
+ * @author Kin-man Chung
  */
 public class ServletWriter {
     public static int TAB_WIDTH = 2;
@@ -83,7 +84,6 @@ public class ServletWriter {
     
     // servlet line numbers start from 1, but we pre-increment
     private int javaLine = 0;
-    private JspLineMap lineMap = new JspLineMap();
 
 
     public ServletWriter(PrintWriter writer) {
@@ -93,6 +93,7 @@ public class ServletWriter {
     public void close() throws IOException {
 	writer.close();
     }
+
     
     // -------------------- Access informations --------------------
 
@@ -100,13 +101,6 @@ public class ServletWriter {
         return javaLine;
     }
 
-    public void setLineMap(JspLineMap map) {
-        this.lineMap = map;
-    }
-
-    public JspLineMap getLineMap() {
-        return lineMap;
-    }
 
     // -------------------- Formatting --------------------
 
@@ -135,7 +129,7 @@ public class ServletWriter {
         
         if (chars != null)
             for(int i = 0; i < chars.length;) {
-                indent();
+                printin();
                 print("// ");
                 while (chars[i] != '\n' && i < chars.length)
                     writer.print(chars[i++]);
@@ -143,59 +137,71 @@ public class ServletWriter {
     }
 
     /**
-     * Quote the given string to make it appear in a chunk of java code.
-     * @param s The string to quote.
-     * @return The quoted string.
+     * Prints the given string followed by '\n'
      */
-
-    public String quoteString(String s) {
-	// Turn null string into quoted empty strings:
-	if ( s == null )
-	    return "null";
-	// Hard work:
-	if ( s.indexOf('"') < 0 && s.indexOf('\\') < 0 && s.indexOf ('\n') < 0
-	     && s.indexOf ('\r') < 0)
-	    return "\""+s+"\"";
-	StringBuffer sb  = new StringBuffer();
-	int          len = s.length();
-	sb.append('"');
-	for (int i = 0 ; i < len ; i++) {
-	    char ch = s.charAt(i);
-	    if ( ch == '\\' && i+1 < len) {
-		sb.append('\\');
-		sb.append('\\');
-		sb.append(s.charAt(++i));
-	    } else if ( ch == '"' ) {
-		sb.append('\\');
-		sb.append('"');
-	    } else if (ch == '\n') {
-	        sb.append ("\\n");
-	    }else if (ch == '\r') {
-	   	sb.append ("\\r");
-	    }else {
-		sb.append(ch);
-	    }
-	}
-	sb.append('"');
-	return sb.toString();
-    }
-
-    public void println(String line) {
+    public void println(String s) {
         javaLine++;
-	writer.println(SPACES.substring(0, indent)+line);
+	writer.println(s);
     }
 
+    /**
+     * Prints a '\n'
+     */
     public void println() {
         javaLine++;
 	writer.println("");
     }
 
-    public void indent() {
+    /**
+     * Prints the current indention
+     */
+    public void printin() {
 	writer.print(SPACES.substring(0, indent));
     }
-    
 
+    /**
+     * Prints the current indention, followed by the given string
+     */
+    public void printin(String s) {
+	writer.print(SPACES.substring(0, indent));
+	writer.print(s);
+    }
+
+    /**
+     * Prints the current indention, and then the string, and a '\n'.
+     */
+    public void printil(String s) {
+        javaLine++;
+	writer.print(SPACES.substring(0, indent));
+	writer.println(s);
+    }
+
+    /**
+     * Prints the given char.
+     *
+     * Use println() to print a '\n'.
+     */
+    public void print(char c) {
+	writer.print(c);
+    }
+
+    /**
+     * Prints the given string.
+     *
+     * The string must not contain any '\n', otherwise the line count will be
+     * off.
+     */
     public void print(String s) {
+	writer.print(s);
+    }
+
+    /**
+     * Prints the given string.
+     *
+     * If the string spans multiple lines, the line count will be adjusted
+     * accordingly.
+     */
+    public void printMultiLn(String s) {
         int index = 0;
 
         // look for hidden newlines inside strings
@@ -206,20 +212,4 @@ public class ServletWriter {
 
 	writer.print(s);
     }
-
-    public void printMultiLn(String multiline) {
-	// Try to be smart (i.e. indent properly) at generating the code:
-	BufferedReader reader = 
-            new BufferedReader(new StringReader(multiline));
-	try {
-    	    for (String line = null ; (line = reader.readLine()) != null ; ) {
-		//		println(SPACES.substring(0, indent)+line);
-		println(line);
-            }
-	} catch (IOException ex) {
-	    // Unlikely to happen, since we're acting on strings
-	}
-    }
-
-
 }

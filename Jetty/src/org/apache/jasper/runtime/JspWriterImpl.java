@@ -142,23 +142,30 @@ public class JspWriterImpl extends JspWriter {
 	this.bufferSize=sz;
     }
 
+    /** Package-level access
+     */
+    void recycle() {
+	flushed = false;
+        closed = false;
+        out = null;
+	nextChar = 0;
+    }
+
     /**
      * Flush the output buffer to the underlying character stream, without
      * flushing the stream itself.  This method is non-private only so that it
      * may be invoked by PrintStream.
      */
     protected final void flushBuffer() throws IOException {
-	synchronized (lock) {
-            if (bufferSize == 0)
-                return;
-            flushed = true;
-	    ensureOpen();
-	    if (nextChar == 0)
-		return;
-	    initOut();
-            out.write(cb, 0, nextChar);
-	    nextChar = 0;
-	}
+        if (bufferSize == 0)
+            return;
+        flushed = true;
+        ensureOpen();
+        if (nextChar == 0)
+            return;
+        initOut();
+        out.write(cb, 0, nextChar);
+        nextChar = 0;
     }
 
     protected void initOut() throws IOException {
@@ -173,23 +180,19 @@ public class JspWriterImpl extends JspWriter {
      * Discard the output buffer.
      */
     public final void clear() throws IOException {
-	synchronized (lock) {
-            if (bufferSize == 0)
-                throw new IllegalStateException(Constants.getString("jsp.error.ise_on_clear"));
-            if (flushed)
-                throw new IOException(Constants.getString("jsp.error.attempt_to_clear_flushed_buffer"));
-            ensureOpen();
-	    nextChar = 0;
-	}
+        if (bufferSize == 0)
+            throw new IllegalStateException(Constants.getString("jsp.error.ise_on_clear"));
+        if (flushed)
+            throw new IOException(Constants.getString("jsp.error.attempt_to_clear_flushed_buffer"));
+        ensureOpen();
+        nextChar = 0;
     }
 
     public void clearBuffer() throws IOException {
-	synchronized (lock) {
-            if (bufferSize == 0)
-                throw new IllegalStateException(Constants.getString("jsp.error.ise_on_clear"));
-            ensureOpen();
-	    nextChar = 0;
-	}
+        if (bufferSize == 0)
+            throw new IllegalStateException(Constants.getString("jsp.error.ise_on_clear"));
+        ensureOpen();
+        nextChar = 0;
     }
 
     private final void bufferOverflow() throws IOException {
@@ -201,13 +204,11 @@ public class JspWriterImpl extends JspWriter {
      *
      */
     public void flush()  throws IOException {
-        synchronized (lock) {
-            flushBuffer();
-            if (out != null) {
-                out.flush();
-		// Also flush the response buffer.
-		response.flushBuffer();
-	    }
+        flushBuffer();
+        if (out != null) {
+            out.flush();
+            // Also flush the response buffer.
+            response.flushBuffer();
         }
     }
 
@@ -216,17 +217,15 @@ public class JspWriterImpl extends JspWriter {
      *
      */
     public void close() throws IOException {
-        synchronized (lock) {
-            if (response == null || closed)
-		// multiple calls to close is OK
-                return;
-            flush();
-            if (out != null)
-                out.close();
-            out = null;
-	    closed = true;
-	    //            cb = null;
-        }
+        if (response == null || closed)
+            // multiple calls to close is OK
+            return;
+        flush();
+        if (out != null)
+            out.close();
+        out = null;
+        closed = true;
+        //            cb = null;
     }
 
     /**
@@ -248,20 +247,18 @@ public class JspWriterImpl extends JspWriter {
      *
      */
     public void write(int c) throws IOException {
-        synchronized (lock) {
-            ensureOpen();
-            if (bufferSize == 0) {
-                initOut();
-                out.write(c);
-            }
-            else {
-                if (nextChar >= bufferSize)
-                    if (autoFlush)
-                        flushBuffer();
-                    else
-                        bufferOverflow();
-                cb[nextChar++] = (char) c;
-            }
+        ensureOpen();
+        if (bufferSize == 0) {
+            initOut();
+            out.write(c);
+        }
+        else {
+            if (nextChar >= bufferSize)
+                if (autoFlush)
+                    flushBuffer();
+                else
+                    bufferOverflow();
+            cb[nextChar++] = (char) c;
         }
     }
 
@@ -292,48 +289,47 @@ public class JspWriterImpl extends JspWriter {
     public void write(char cbuf[], int off, int len) 
         throws IOException 
     {
-        synchronized (lock) {
-            ensureOpen();
+        ensureOpen();
 
-            if (bufferSize == 0) {
-                initOut();
-                out.write(cbuf, off, len);
-                return;
-            }
+        if (bufferSize == 0) {
+            initOut();
+            out.write(cbuf, off, len);
+            return;
+        }
 
-            if ((off < 0) || (off > cbuf.length) || (len < 0) ||
-                ((off + len) > cbuf.length) || ((off + len) < 0)) {
-                throw new IndexOutOfBoundsException();
-            } else if (len == 0) {
-                return;
-            } 
+        if ((off < 0) || (off > cbuf.length) || (len < 0) ||
+            ((off + len) > cbuf.length) || ((off + len) < 0)) {
+            throw new IndexOutOfBoundsException();
+        } else if (len == 0) {
+            return;
+        } 
 
-            if (len >= bufferSize) {
-                /* If the request length exceeds the size of the output buffer,
-                   flush the buffer and then write the data directly.  In this
-                   way buffered streams will cascade harmlessly. */
+        if (len >= bufferSize) {
+            /* If the request length exceeds the size of the output buffer,
+               flush the buffer and then write the data directly.  In this
+               way buffered streams will cascade harmlessly. */
+            if (autoFlush)
+                flushBuffer();
+            else
+                bufferOverflow();
+            initOut();
+            out.write(cbuf, off, len);
+            return;
+        }
+
+        int b = off, t = off + len;
+        while (b < t) {
+            int d = min(bufferSize - nextChar, t - b);
+            System.arraycopy(cbuf, b, cb, nextChar, d);
+            b += d;
+            nextChar += d;
+            if (nextChar >= bufferSize) 
                 if (autoFlush)
                     flushBuffer();
                 else
                     bufferOverflow();
-		initOut();
-                out.write(cbuf, off, len);
-                return;
-            }
-
-            int b = off, t = off + len;
-            while (b < t) {
-                int d = min(bufferSize - nextChar, t - b);
-                System.arraycopy(cbuf, b, cb, nextChar, d);
-                b += d;
-                nextChar += d;
-                if (nextChar >= bufferSize) 
-                    if (autoFlush)
-                        flushBuffer();
-                    else
-                        bufferOverflow();
-            }
         }
+
     }
 
     /**
@@ -353,25 +349,23 @@ public class JspWriterImpl extends JspWriter {
      *
      */
     public void write(String s, int off, int len) throws IOException {
-        synchronized (lock) {
-            ensureOpen();
-            if (bufferSize == 0) {
-                initOut();
-                out.write(s, off, len);
-                return;
-            }
-            int b = off, t = off + len;
-            while (b < t) {
-                int d = min(bufferSize - nextChar, t - b);
-                s.getChars(b, b + d, cb, nextChar);
-                b += d;
-                nextChar += d;
-                if (nextChar >= bufferSize) 
-                    if (autoFlush)
-                        flushBuffer();
-                    else
-                        bufferOverflow();
-            }
+        ensureOpen();
+        if (bufferSize == 0) {
+            initOut();
+            out.write(s, off, len);
+            return;
+        }
+        int b = off, t = off + len;
+        while (b < t) {
+            int d = min(bufferSize - nextChar, t - b);
+            s.getChars(b, b + d, cb, nextChar);
+            b += d;
+            nextChar += d;
+            if (nextChar >= bufferSize) 
+                if (autoFlush)
+                    flushBuffer();
+                else
+                    bufferOverflow();
         }
     }
 
@@ -395,9 +389,7 @@ public class JspWriterImpl extends JspWriter {
      */
     
     public void newLine() throws IOException {
-	synchronized (lock) {
-	    write(lineSeparator);
-	}
+        write(lineSeparator);
     }
 
 
@@ -545,10 +537,8 @@ public class JspWriterImpl extends JspWriter {
      * <code>{@link #println()}</code>.
      */
     public void println(boolean x) throws IOException {
-	synchronized (lock) {
-	    print(x);
-	    println();
-	}
+        print(x);
+        println();
     }
 
     /**
@@ -557,10 +547,8 @@ public class JspWriterImpl extends JspWriter {
      * #println()}</code>.
      */
     public void println(char x) throws IOException {
-	synchronized (lock) {
-	    print(x);
-	    println();
-	}
+        print(x);
+        println();
     }
 
     /**
@@ -569,10 +557,8 @@ public class JspWriterImpl extends JspWriter {
      * #println()}</code>.
      */
     public void println(int x) throws IOException {
-	synchronized (lock) {
-	    print(x);
-	    println();
-	}
+        print(x);
+        println();
     }
 
     /**
@@ -581,10 +567,8 @@ public class JspWriterImpl extends JspWriter {
      * <code>{@link #println()}</code>.
      */
     public void println(long x) throws IOException {
-	synchronized (lock) {
-	    print(x);
-	    println();
-	}
+        print(x);
+        println();
     }
 
     /**
@@ -593,10 +577,8 @@ public class JspWriterImpl extends JspWriter {
      * <code>{@link #println()}</code>.
      */
     public void println(float x) throws IOException {
-	synchronized (lock) {
-	    print(x);
-	    println();
-	}
+        print(x);
+        println();
     }
 
     /**
@@ -605,10 +587,8 @@ public class JspWriterImpl extends JspWriter {
      * #print(double)}</code> and then <code>{@link #println()}</code>.
      */
     public void println(double x) throws IOException {
-	synchronized (lock) {
-	    print(x);
-	    println();
-	}
+        print(x);
+        println();
     }
 
     /**
@@ -617,10 +597,8 @@ public class JspWriterImpl extends JspWriter {
      * <code>{@link #println()}</code>.
      */
     public void println(char x[]) throws IOException {
-	synchronized (lock) {
-	    print(x);
-	    println();
-	}
+        print(x);
+        println();
     }
 
     /**
@@ -629,10 +607,8 @@ public class JspWriterImpl extends JspWriter {
      * <code>{@link #println()}</code>.
      */
     public void println(String x) throws IOException {
-	synchronized (lock) {
-	    print(x);
-	    println();
-	}
+        print(x);
+        println();
     }
 
     /**
@@ -641,16 +617,8 @@ public class JspWriterImpl extends JspWriter {
      * <code>{@link #println()}</code>.
      */
     public void println(Object x) throws IOException {
-	synchronized (lock) {
-	    print(x);
-	    println();
-	}
+        print(x);
+        println();
     }
 
-    /** Package-level access
-     */
-    void recycle() {
-	flushed = false;
-	nextChar = 0;
-    }
 }

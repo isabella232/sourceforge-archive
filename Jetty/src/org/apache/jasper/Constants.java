@@ -118,7 +118,7 @@ public class Constants {
 
     /**
      * FIXME
-     * ServletContext attribute for classpath. This is tomcat specific. 
+     * ServletContext attribute for class loader. This is tomcat specific. 
      * Other servlet engines can choose to have this attribute if they 
      * want to have this JSP engine running on them. 
      */
@@ -130,6 +130,11 @@ public class Constants {
      */
     public static final int K = 1024;
     public static final int DEFAULT_BUFFER_SIZE = 8*K;
+
+    /**
+     * Default size for the tag buffers.
+     */
+    public static final int DEFAULT_TAG_BUFFER_SIZE = 512;
 
     /**
      * The query parameter that causes the JSP engine to just

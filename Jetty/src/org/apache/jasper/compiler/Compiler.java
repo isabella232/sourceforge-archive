@@ -60,339 +60,267 @@
  */ 
 package org.apache.jasper.compiler;
 
-import java.util.Hashtable;
-import java.io.FileNotFoundException;
-import java.io.File;
-import java.io.PrintWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.BufferedReader;
-import java.io.StringReader;
-import java.io.IOException;
+import java.util.*;
+import java.io.*;
+import java.net.URL;
+import javax.servlet.jsp.tagext.TagInfo;
+import javax.servlet.ServletException;
+import javax.servlet.Servlet;
+
+import org.xml.sax.Attributes;
+
+import org.apache.tools.ant.BuildEvent;
+import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.BuildListener;
+import org.apache.tools.ant.BuildLogger;
+import org.apache.tools.ant.DefaultLogger;
+import org.apache.tools.ant.Project;
+import org.apache.tools.ant.taskdefs.Javac;
+import org.apache.tools.ant.types.Path;
 
 import org.apache.jasper.JspCompilationContext;
 import org.apache.jasper.Constants;
 import org.apache.jasper.JasperException;
-import org.apache.jasper.compiler.ParseException;
-
+import org.apache.jasper.Options;
 import org.apache.jasper.logging.Logger;
-
-import org.xml.sax.Attributes;
+import org.apache.jasper.util.SystemLogHandler;
+import org.apache.jasper.runtime.HttpJspBase;
+import org.apache.jasper.servlet.JspServletWrapper;
 
 /**
- * If you want to customize JSP compilation aspects, this class is
- * something you should take a look at. 
- * 
- * Hope is that people can just extend Compiler and override things
- * like isOutDated() but inherit things like compile(). This might
- * change. 
+ * Main JSP compiler class. This class uses Ant for compiling.
  *
  * @author Anil K. Vijendran
  * @author Mandar Raje
  * @author Pierre Delisle
+ * @author Kin-man Chung
+ * @author Remy Maucherat
  */
 public class Compiler {
-    protected JavaCompiler javac;
-    protected Mangler mangler;
+
+
+    // ----------------------------------------------------------------- Static
+
+
+    static {
+
+        System.setErr(new SystemLogHandler(System.err));
+
+    }
+
+
+    // ----------------------------------------------------- Instance Variables
+
+
     protected JspCompilationContext ctxt;
 
+    private ErrorDispatcher errDispatcher;
+    private PageInfo pageInfo;
+    private JspServletWrapper jsw;
+
+    protected Project project=null;
+
+    protected Options options;
+
+    protected Node.Nodes pageNodes;
+    // ------------------------------------------------------------ Constructor
+
+
     public Compiler(JspCompilationContext ctxt) {
-        this.ctxt = ctxt;
+        this(ctxt, null);
     }
-    
+
+
+    public Compiler(JspCompilationContext ctxt, JspServletWrapper jsw) {
+        this.jsw = jsw;
+        this.ctxt = ctxt;
+	this.errDispatcher = new ErrorDispatcher();
+        this.options = ctxt.getOptions();
+    }
+
+    // Lazy eval - if we don't need to compile we probably don't need the project
+    private Project getProject() {
+        if( project!=null ) return project;
+        // Initializing project
+        project = new Project();
+        // XXX We should use a specialized logger to redirect to jasperlog
+        //        DefaultLogger bl=new JasperAntLogger();
+        DefaultLogger bl=new DefaultLogger();
+        bl.setOutputPrintStream(System.err);
+        bl.setErrorPrintStream(System.err);
+
+        if( Constants.jasperLog.getVerbosityLevel() >= Logger.DEBUG ) {
+            bl.setMessageOutputLevel( Project.MSG_VERBOSE );
+        } else {
+            bl.setMessageOutputLevel( Project.MSG_INFO );
+        }
+        project.addBuildListener( bl );
+        
+        if( options.getCompiler() != null ) {
+            Constants.jasperLog.log("Compiler " + options.getCompiler(), Logger.ERROR );
+            project.setProperty("build.compiler", options.getCompiler() );
+        }
+        project.init();
+//         Vector v=project.getBuildListeners();
+//         if( v.size() > 0 ) {
+//             BuildListener bl=(BuildListener)v.elementAt(0);
+//             System.out.println("XXX " + bl );
+//             ((DefaultLogger)bl).setMessageOutputLevel(Project.MSG_VERBOSE);
+//         }
+        return project;
+    }
+
+    static class JasperAntLogger extends DefaultLogger {
+        protected void printMessage(final String message,
+                                    final PrintStream stream,
+                                    final int priority) {
+            Constants.jasperLog.log( message, Logger.INFORMATION );
+        }
+
+    }
+
+    // --------------------------------------------------------- Public Methods
+
+
     /** 
      * Compile the jsp file from the current engine context
-     *
-     * @return true if the class file was outdated the jsp file
-     *         was recompiled. 
      */
-    public boolean compile()
-        throws FileNotFoundException, JasperException, Exception 
+    public void generateJava()
+        throws FileNotFoundException, JasperException, Exception
     {
-        String classFileName = mangler.getClassFileName();
+	// Setup page info area
+	pageInfo = new PageInfo(new BeanRepository(ctxt.getClassLoader()));
 
-        String className = mangler.getClassName();
-        ctxt.setServletClassName(className);
-        Constants.message("jsp.message.class_name_is",
-                          new Object[] { className },
-                          Logger.DEBUG);
-
-	if (!isOutDated())
-            return false;
-
-        String javaFileName = mangler.getJavaFileName();
-        ctxt.setServletJavaFileName(javaFileName);
-
-        Constants.message("jsp.message.java_file_name_is",
-                          new Object[] { javaFileName },
-                          Logger.DEBUG);
+        String javaFileName = ctxt.getServletJavaFileName();
 
         // Setup the ServletWriter
 	// We try UTF8 by default. If it fails, we use the java encoding 
 	// specified for JspServlet init parameter "javaEncoding".
 
 	String javaEncoding = "UTF8"; 
-	OutputStreamWriter osw; 
+	OutputStreamWriter osw = null; 
 	try {
-	    osw = new OutputStreamWriter(
-		      new FileOutputStream(javaFileName),javaEncoding);
-	} catch (java.io.UnsupportedEncodingException ex) {
+	    osw = new OutputStreamWriter(new FileOutputStream(javaFileName),
+					 javaEncoding);
+	} catch (UnsupportedEncodingException ex) {
 	    // Try to get the java encoding from the "javaEncoding"
 	    // init parameter for JspServlet.
 	    javaEncoding = ctxt.getOptions().getJavaEncoding();
 	    if (javaEncoding != null) {
 		try {
-		    osw = new OutputStreamWriter(
-			      new FileOutputStream(javaFileName),javaEncoding);
-		} catch (java.io.UnsupportedEncodingException ex2) {
+		    osw = new OutputStreamWriter
+                        (new FileOutputStream(javaFileName),javaEncoding);
+		} catch (UnsupportedEncodingException ex2) {
 		    // no luck :-(
-		    throw new JasperException(
-			Constants.getString("jsp.error.invalid.javaEncoding",
-					    new Object[] { 
-						"UTF8", 
-						javaEncoding,
-					    }));
+		    errDispatcher.jspError("jsp.error.invalid.javaEncoding",
+					   "UTF8", javaEncoding);
 		}
 	    } else {
-		throw new JasperException(
-		    Constants.getString("jsp.error.needAlternateJavaEncoding",
-					new Object[] { "UTF8" }));		
+		errDispatcher.jspError("jsp.error.needAlternateJavaEncoding",
+				       "UTF8");
 	    }
 	}
+
 	ServletWriter writer = new ServletWriter(new PrintWriter(osw));
         ctxt.setWriter(writer);
 
-	/* NOT COMPILED -- remove eventually -- kept for temp reference
-	   @@@ ParserController still needs to handle jspEncoding
-	       for JSP syntax files
-        // Need the encoding specified in the JSP 'page' directive for
-        //  - reading the JSP page
-        //  - writing the JSP servlet source
-        //  - compiling the generated servlets (pass -encoding to javac).
-        // XXX - There are really three encodings of interest.
-
-        String jspEncoding = "8859_1";          // default per JSP spec
-
-	// This seems to be a reasonable point to scan the JSP file
-	// for a 'contentType' directive. If it found then the set
-	// the value of 'jspEncoding to reflect the value specified.
-	// Note: if (true) is convenience programming. It can be
-	// taken out once we have a more efficient method.
-
-	if (true) {
-	    JspReader tmpReader = JspReader.createJspReader(
-							    ctxt.getJspFile(),
-							    ctxt,
-							    jspEncoding);
-	    String newEncode = changeEncodingIfNecessary(tmpReader);
-	    if (newEncode != null) jspEncoding = newEncode;
-	}
-
-        JspReader reader = JspReader.createJspReader(
-            ctxt.getJspFile(),
-            ctxt,
-            jspEncoding
-        );
-        ctxt.setReader(reader);
-        ParseEventListener listener = new JspParseEventListener(ctxt);
-	*/
-
-	/* NOT COMPILED
-        Parser p = new Parser(reader, listener);
-        listener.beginPageProcessing();
-        p.parse();
-        listener.endPageProcessing();
-	*/
-
 	// Parse the file
-	ParserController parserCtl = new ParserController(ctxt);
-	parserCtl.parse(ctxt.getJspFile());
+	ParserController parserCtl = new ParserController(ctxt, this);
+	pageNodes = parserCtl.parse(ctxt.getJspFile());
 
-        // Generate the servlet
-	ParseEventListener listener = parserCtl.getParseEventListener();
-        listener.beginPageProcessing();
-        listener.endPageProcessing();
+	// Validate and process attributes
+	Validator.validate(this, pageNodes);
+
+	// Dump out the page (for debugging)
+	// Dumper.dump(pageNodes);
+
+	// Collect page info
+	Collector.collect(this, pageNodes);
+
+	// generate servlet .java file
+	Generator.generate(writer, this, pageNodes);
         writer.close();
-	// An XML input stream has been produced and can be validated
-	// by TagLibraryValidator classes 
-	((JspParseEventListener)listener).validate();
+    }
 
+    /** 
+     * Compile the jsp file from the current engine context
+     */
+    public void generateClass()
+        throws FileNotFoundException, JasperException, Exception
+    {
+	String javaEncoding = "UTF8"; 
+        String javaFileName = ctxt.getServletJavaFileName();
         String classpath = ctxt.getClassPath(); 
 
-        // I'm nuking
-        //          System.getProperty("jsp.class.path", ".") 
-        // business. If anyone badly needs this we can talk. -akv
-
         String sep = System.getProperty("path.separator");
-        String[] argv = new String[] 
-        {
-            "-encoding",
-            javaEncoding,
-            "-classpath",
-            System.getProperty("java.class.path")+ sep + classpath,
-            "-d", ctxt.getOutputDir(),
-            javaFileName
-        };
 
-        StringBuffer b = new StringBuffer();
-        for(int i = 0; i < argv.length; i++) {
-            b.append(argv[i]);
-            b.append(" ");
-        }
+        String errorReport = null;
+        boolean success = true;
 
-        Constants.message("jsp.message.compiling_with",
-                          new Object[] { b.toString() },
-                          Logger.DEBUG);
+        // Start capturing the System.err output for this thread
+        SystemLogHandler.setThread();
 
-        /**
-         * 256 chosen randomly. The default is 32 if you don't pass
-         * anything to the constructor which will be less. 
-         */
-        ByteArrayOutputStream out = new ByteArrayOutputStream (256);
+        // Initializing javac task
+        getProject();
+        Javac javac = (Javac) project.createTask("javac");
 
-        // if no compiler was set we can kick out now
+        // Initializing classpath
+        Path path = new Path(project);
+        path.setPath(System.getProperty("java.class.path") + sep
+                     + classpath);
 
-        if (javac == null) {
-            return true;
-        }
+        // Initializing sourcepath
+        Path srcPath = new Path(project);
+        srcPath.setPath(options.getScratchDir().getAbsolutePath());
 
-        /**
-         * Configure the compiler object
-         */
+        // Configure the compiler object
         javac.setEncoding(javaEncoding);
-        javac.setClasspath( System.getProperty("java.class.path")+ sep + classpath);
-        javac.setOutputDir(ctxt.getJavacOutputDir());
-        javac.setMsgOutput(out);
-        javac.setClassDebugInfo(ctxt.getOptions().getClassDebugInfo());
+        javac.setClasspath(path);
+        //javac.setDestdir(new File(options.getScratchDir().getAbsolutePath()));
+        javac.setDebug(ctxt.getOptions().getClassDebugInfo());
+        javac.setSrcdir(srcPath);
+        javac.setOptimize(! ctxt.getOptions().getClassDebugInfo() );
 
-        /**
-         * Execute the compiler
-         */
-        boolean status = javac.compile(javaFileName);
+        // Set the Java compiler to use
+        if (options.getCompiler() != null) {
+            javac.setCompiler(options.getCompiler());
+        }
 
+        // Build includes path
+        javac.setIncludes(ctxt.getJspPath());
+
+        try {
+            javac.execute();
+        } catch (BuildException e) {
+            //   System.out.println("Javac execption ");
+            //   e.printStackTrace(System.out);
+            success = false;
+        }
+
+        // Stop capturing the System.err output for this thread
+        errorReport = SystemLogHandler.unsetThread();
+        
         if (!ctxt.keepGenerated()) {
             File javaFile = new File(javaFileName);
             javaFile.delete();
         }
-    
-        if (status == false) {
-            String msg = out.toString ();
-            msg = getJspLineErrors(msg, writer.getLineMap());
 
-            //FIXME!!
-            //Using an exception as flow control is not a good idea. Refactor me!
-            throw new JasperException(Constants.getString("jsp.error.unable.compile")
-                                      + msg);
+        if (!success) {
+            Constants.jasperLog.log( "Error compiling file: " + javaFileName + " " + errorReport,
+                                     Logger.ERROR);
+            if(errorReport!=null ) 
+                errDispatcher.javacError(errorReport, javaFileName, pageNodes);
         }
-
-        return true;
     }
 
-    /**
-     * Parse compiler error message. Get line number. Use JspLineMap object to
-     * find the corresponding line in the jsp file. Create new error message with
-     * jsp line information.
+    /** 
+     * Compile the jsp file from the current engine context
      */
-    private String getJspLineErrors(String msg, JspLineMap map) throws IOException {
-
-        if (map == null) return msg;
-
-        //System.out.println(map.toString());
-
-        StringBuffer errorMsg = new StringBuffer();
-        BufferedReader br = new BufferedReader(new StringReader(msg));
-        String line;
-
-        while (true) {
-            line=br.readLine();
-            if (line==null) break;
-
-            // line number is between a set of colons
-            int beginColon=line.indexOf(':', 2); // Drive letter on Windows !!
-            int endColon=line.indexOf(':', beginColon+1);
-
-            if (!(beginColon<0 || endColon<0 ||
-			line.startsWith("Note: "))){ // deprecation warning
-
-                try {
-                    String nr = line.substring(beginColon+1, endColon);
-                    int lineNr = Integer.parseInt( nr );
-                    //System.out.println("lineNr: " + lineNr);
-
-                    // Now do the mapping
-                    String mapping = findMapping(map, lineNr);
-                    if (mapping == null)
-                        errorMsg.append('\n');
-                    else
-                        errorMsg.append(mapping);
-                }
-                catch (NumberFormatException ex) {
-                    // If for some reason our guess at the location of the line
-                    // number failed, time to give up.
-                }
-            }
-            // Replace '<' in line with "&lt;", ">" with "&gt;" in line
-            for (int i = 0; i < line.length(); i++) {
-                char c = line.charAt(i);
-                if (c == '<')
-                    errorMsg.append("&lt;");
-                else if (c == '>')
-                    errorMsg.append("&gt;");
-                else
-                    errorMsg.append(c);
-            }
-            errorMsg.append('\n');
-        }
-        br.close();
-        map.clear();
-
-        return errorMsg.toString();
-    }
-
-    /**
-     * Find map item that corresponds to the specified line number
-     */
-    private String findMapping(JspLineMap map, int lineNr) {
-
-        for (int i=map.size() - 1; i >= 0; i--) {
-            JspLineMapItem mapItem = (JspLineMapItem) map.get(i);
-
-            if (mapItem == null) continue;
-
-            if (mapItem.getBeginServletLnr() <= lineNr &&
-                mapItem.getEndServletLnr() >= lineNr) {
-                return createErrorMsg(map, mapItem);
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Create error message including the jsp line numbers and file name
-     */
-    private String createErrorMsg(JspLineMap map, JspLineMapItem mapping) {
-        StringBuffer msg = new StringBuffer();
-
-        if (mapping.getBeginJspLnr() == mapping.getEndJspLnr()) {
-            msg.append(Constants.getString("jsp.error.single.line.number",
-                       new Object[] {
-                           new Integer(mapping.getBeginJspLnr()), 
-                           map.getFileName(mapping.getStartJspFileNr())
-                       }));
-        }
-        else {
-            msg.append(Constants.getString("jsp.error.multiple.line.number",
-                       new Object[] { 
-                           new Integer(mapping.getBeginJspLnr()), 
-                           new Integer(mapping.getEndJspLnr()), 
-                           map.getFileName(mapping.getStartJspFileNr())
-                       }));
-        }
-
-        msg.append(Constants.getString("jsp.error.corresponding.servlet"));
-
-        return msg.toString();
+    public void compile()
+        throws FileNotFoundException, JasperException, Exception
+    {
+        generateJava();
+        generateClass();
     }
 
     /**
@@ -401,73 +329,146 @@ public class Compiler {
      * to do all the compilation. 
      */
     public boolean isOutDated() {
-	return true;
+        return isOutDated( true );
     }
+
+    /**
+     * This is a protected method intended to be overridden by 
+     * subclasses of Compiler. This is used by the compile method
+     * to do all the compilation.
+     * @param checkClass Verify the class file if true, only the .java file if false.
+     */
+    public boolean isOutDated(boolean checkClass) {
+
+        String jsp = ctxt.getJspFile();
+
+        long jspRealLastModified = 0;
+        try {
+            URL jspUrl = ctxt.getResource(jsp);
+            if (jspUrl == null) {
+                ctxt.incrementRemoved();
+                return false;
+            }
+            jspRealLastModified = jspUrl.openConnection().getLastModified();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return true;
+        }
+
+        long targetLastModified;
+        File targetFile;
+        
+        if( checkClass ) {
+            targetFile = new File(ctxt.getClassFileName());
+        } else {
+            targetFile = new File( ctxt.getServletJavaFileName());
+        }
+        
+        if (!targetFile.exists()) {
+            return true;
+        }
+        targetLastModified = targetFile.lastModified();
+        if (targetLastModified < jspRealLastModified) {
+            //System.out.println("Compiler: outdated, " + targetFile + " " + targetLastModified );
+            return true;
+        }
+
+        // determine if compile time includes have been changed
+        if( jsw==null ) {
+            return false;
+        }
+        Servlet servlet=null;
+        try {
+            servlet = jsw.getServlet();
+        } catch( ServletException ex1 ) {
+        } catch( IOException ex2 ) {
+        }
+        if (servlet == null) {
+            // System.out.println("Compiler: outdated, no servlet " + targetFile );
+            return true;
+        }
+        List includes = null;
+        // If the page contains a page directive with "extends" attribute
+        // it may not be an instance of HttpJspBase.
+        // For now only track dependencies on included files if this is not
+        // the case.  A more complete solution is to generate the servlet
+        // to implement (say) JspInlcudes which contains getIncludes method.
+        if (servlet instanceof HttpJspBase) {
+            includes = ((HttpJspBase)servlet).getIncludes();
+        }
+
+        if (includes == null) {
+            return false;
+        }
+
+        Iterator it = includes.iterator();
+        while (it.hasNext()) {
+            String include = (String)it.next();
+            try {
+                URL includeUrl = ctxt.getResource(include);
+                if (includeUrl == null) {
+                    //System.out.println("Compiler: outdated, no includeUri " + include );
+                    return true;
+                }
+                if (includeUrl.openConnection().getLastModified() >
+                    targetLastModified) {
+                    //System.out.println("Compiler: outdated, include old " + include );
+                    return true;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return true;
+            }
+        }
+        return false;
+
+    }
+
     
     /**
-     * Set java compiler info
+     * Gets the error dispatcher.
      */
-    public void setJavaCompiler(JavaCompiler javac) {
-        this.javac = javac;
+    public ErrorDispatcher getErrorDispatcher() {
+	return errDispatcher;
     }
+
 
     /**
-     * Set Mangler which will be used as part of compile().
+     * Gets the info about the page under compilation
      */
-    public void setMangler(Mangler mangler) {
-        this.mangler = mangler;
+    public PageInfo getPageInfo() {
+	return pageInfo;
     }
 
-    /**
-     * Change the encoding for the reader if specified.
-     */
-    public String changeEncodingIfNecessary(JspReader tmpReader)
-    throws ParseException {
 
-	// A lot of code replicated from Parser.java
-	// Main aim is to "get-it-to-work".
-	while (tmpReader.skipUntil("<%@") != null) {
-
-	    tmpReader.skipSpaces();
-
-	    // check if it is a page directive.
-	    if (tmpReader.matches("page")) {
-
-		tmpReader.advance(4);
-		tmpReader.skipSpaces();
-		
-		try {
-		    Attributes attrs = tmpReader.parseTagAttributes();
-		    String ct = attrs.getValue("contentType");
-		    if (ct != null) {
-			int loc = ct.indexOf("charset=");
-			if (loc > 0) {
-			    String encoding = ct.substring(loc + 8);
-			    return encoding;
-			}
-		    }
-		} catch (ParseException ex) {
-		    // Ignore the exception here, it will be caught later.
-		    return null;
-		}
-	    }
-	}
-	return null;
+    public JspCompilationContext getCompilationContext() {
+	return ctxt;
     }
+
 
     /**
      * Remove generated files
      */
     public void removeGeneratedFiles() {
         try {
-            // XXX Should we delete the generated .java file too?
-            String classFileName = mangler.getClassFileName();
+            String classFileName = ctxt.getServletClassName();
             if (classFileName != null) {
                 File classFile = new File(classFileName);
                 classFile.delete();
             }
         } catch (Exception e) {
-            //Remove as much as possible, ignore possible exceptions
+            // Remove as much as possible, ignore possible exceptions
+        }
+        try {
+            String javaFileName = ctxt.getServletJavaFileName();
+            if (javaFileName != null) {
+                File javaFile = new File(javaFileName);
+                javaFile.delete();
+            }
+        } catch (Exception e) {
+            // Remove as much as possible, ignore possible exceptions
         }
     }
+
+
 }
