@@ -70,6 +70,7 @@ public class WebApplicationHandler extends ServletHandler
     private List _filters= new ArrayList();
     private MultiMap _servletFilterMap= new MultiMap();
     private boolean _acceptRanges= true;
+    private boolean _filterChainsCached=true;
 
     private transient boolean _started= false;
     private transient WebApplicationContext _webApplicationContext;
@@ -80,6 +81,7 @@ public class WebApplicationHandler extends ServletHandler
     protected transient Object _contextAttributeListeners;
     protected transient FilterHolder jsr154FilterHolder;
     protected transient JSR154Filter jsr154Filter;
+    protected transient HashMap _chainCache[];
 
     /* ------------------------------------------------------------ */
     public boolean isAcceptRanges()
@@ -266,6 +268,15 @@ public class WebApplicationHandler extends ServletHandler
         _started= true;
         if (getHttpContext() instanceof WebApplicationContext)
             _webApplicationContext= (WebApplicationContext)getHttpContext();
+        
+        if (_filterChainsCached)
+        {
+            _chainCache=new HashMap[FilterHolder.__ERROR+1];
+            _chainCache[FilterHolder.__REQUEST]=new HashMap();
+            _chainCache[FilterHolder.__FORWARD]=new HashMap();
+            _chainCache[FilterHolder.__INCLUDE]=new HashMap();
+            _chainCache[FilterHolder.__ERROR]=new HashMap();
+        }
 
     }
 
@@ -390,29 +401,29 @@ public class WebApplicationHandler extends ServletHandler
     {
         // Determine request type.
         int requestType= 0;
-
+        
         if (request instanceof ServletHttpRequest)
         {
             // This is NOT a dispatched request.
             ServletHttpRequest servletHttpRequest= (ServletHttpRequest)request;
             ServletHttpResponse servletHttpResponse= (ServletHttpResponse)response;  
-
+            
             // Request
             requestType= FilterHolder.__REQUEST;
             // protect web-inf and meta-inf
             if (StringUtil.startsWithIgnoreCase(pathInContext, "/web-inf")
-                || StringUtil.startsWithIgnoreCase(pathInContext, "/meta-inf"))
+                    || StringUtil.startsWithIgnoreCase(pathInContext, "/meta-inf"))
             {
                 response.sendError(HttpResponse.__404_Not_Found);
                 return;
             }
-
+            
             // Security Check
             if (!getHttpContext()
-                .checkSecurityConstraints(
-                    pathInContext,
-                    servletHttpRequest.getHttpRequest(),
-                    servletHttpResponse.getHttpResponse()))
+                    .checkSecurityConstraints(
+                            pathInContext,
+                            servletHttpRequest.getHttpRequest(),
+                            servletHttpResponse.getHttpResponse()))
                 return;
         }
         else
@@ -422,23 +433,23 @@ public class WebApplicationHandler extends ServletHandler
             // Handle dispatch to j_security_check
             HttpContext context= getHttpContext();
             if (context != null
-                && context instanceof ServletHttpContext
-                && pathInContext != null
-                && pathInContext.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
+                    && context instanceof ServletHttpContext
+                    && pathInContext != null
+                    && pathInContext.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
             {
                 ServletHttpRequest servletHttpRequest=
                     (ServletHttpRequest)context.getHttpConnection().getRequest().getWrapper();
                 ServletHttpResponse servletHttpResponse= servletHttpRequest.getServletHttpResponse();
                 ServletHttpContext servletContext= (ServletHttpContext)context;
-
+                
                 if (!servletContext
-                    .jSecurityCheck(
-                        pathInContext,
-                        servletHttpRequest.getHttpRequest(),
-                        servletHttpResponse.getHttpResponse()))
+                        .jSecurityCheck(
+                                pathInContext,
+                                servletHttpRequest.getHttpRequest(),
+                                servletHttpResponse.getHttpResponse()))
                     return;
             }
-
+            
             // Forward or error
             requestType=-1;
             if (jsr154Filter!=null)
@@ -450,71 +461,81 @@ public class WebApplicationHandler extends ServletHandler
             if (requestType<0)
                 requestType= ((Dispatcher.DispatcherRequest)request).getFilterType();
         }
-
-        // Build list of filters
-        Object filters= null;
-
-        // Path filters
-        if (pathInContext != null)
-        {
-            for (int i= 0; i < _pathFilters.size(); i++)
-            {
-                FilterHolder holder= (FilterHolder)_pathFilters.get(i);
-                if (holder.appliesTo(pathInContext, requestType))
-                    filters= LazyList.add(filters, holder);
-            }
-        } 
-        else if (jsr154Filter!=null)
-        {
-            // Slight hack for Named servlets
-            // TODO query JSR how to apply filter to all dispatches
-            filters=LazyList.add(filters,jsr154FilterHolder);
-        }
         
-
-        // Servlet filters
-        if (servletHolder != null && _servletFilterMap.size() > 0)
+        // Build and/or cache filter chain
+        FilterChain chain=null;
+        if (_filterChainsCached && _chainCache[requestType].containsKey(pathInContext))
         {
-            Object o= _servletFilterMap.get(servletHolder.getName());
-            if (o != null)
+            chain=(FilterChain)_chainCache[requestType].get(pathInContext);
+        }
+        else
+        {
+            // Build list of filters
+            Object filters= null;
+            
+            // Path filters
+            if (pathInContext != null)
             {
-                if (o instanceof List)
+                for (int i= 0; i < _pathFilters.size(); i++)
                 {
-                    List list= (List)o;
-                    for (int i= 0; i < list.size(); i++)
+                    FilterHolder holder= (FilterHolder)_pathFilters.get(i);
+                    if (holder.appliesTo(pathInContext, requestType))
+                        filters= LazyList.add(filters, holder);
+                }
+            } 
+            else if (jsr154Filter!=null)
+            {
+                // Slight hack for Named servlets
+                // TODO query JSR how to apply filter to all dispatches
+                filters=LazyList.add(filters,jsr154FilterHolder);
+            }
+            
+            // Servlet filters
+            if (servletHolder != null && _servletFilterMap.size() > 0)
+            {
+                Object o= _servletFilterMap.get(servletHolder.getName());
+                if (o != null)
+                {
+                    if (o instanceof List)
                     {
-                        FilterHolder holder= (FilterHolder)list.get(i);
+                        List list= (List)o;
+                        for (int i= 0; i < list.size(); i++)
+                        {
+                            FilterHolder holder= (FilterHolder)list.get(i);
+                            if (holder.appliesTo(requestType))
+                                filters= LazyList.add(filters, holder);
+                        }
+                    }
+                    else
+                    {
+                        FilterHolder holder= (FilterHolder)o;
                         if (holder.appliesTo(requestType))
                             filters= LazyList.add(filters, holder);
                     }
                 }
-                else
-                {
-                    FilterHolder holder= (FilterHolder)o;
-                    if (holder.appliesTo(requestType))
-                        filters= LazyList.add(filters, holder);
-                }
             }
-        }
-
-        // Do the handling thang
-        if (LazyList.size(filters) > 0)
-        {
-            Chain chain= new Chain(pathInContext, filters, servletHolder);
-            chain.doFilter(request, response);
-        }
-        else
-        {
-            // Call servlet
-            if (servletHolder != null)
+        
+            if (LazyList.size(filters) > 0)
             {
-                if (log.isTraceEnabled())
-                    log.trace("call servlet " + servletHolder);
-                servletHolder.handle(request, response);
-            }
-            else // Not found
-                notFound(request, response);
+                if (_filterChainsCached)
+                {
+                    chain= new CachedChain(filters, servletHolder);
+                    _chainCache[requestType].put(pathInContext,chain);
+                }
+                else
+                    chain= new Chain(filters, servletHolder);
+            } 
+            else if (_filterChainsCached)
+                _chainCache[requestType].put(pathInContext,null);
         }
+        
+        // Do the handling thang
+        if (chain!=null)
+            chain.doFilter(request, response);
+        else if (servletHolder != null)
+            servletHolder.handle(request, response);    
+        else // Not found
+            notFound(request, response);
     }
     
 
@@ -560,21 +581,40 @@ public class WebApplicationHandler extends ServletHandler
             }
         }
     }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the filterChainsCached.
+     */
+    public boolean isFilterChainsCached()
+    {
+        return _filterChainsCached;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Cache filter chains.
+     * If true, filter chains are cached by the URI path within the
+     * context.  Caching should not be used if the webapp encodes
+     * information in URLs. 
+     * @param filterChainsCached The filterChainsCached to set.
+     */
+    public void setFilterChainsCached(boolean filterChainsCached)
+    {
+        _filterChainsCached = filterChainsCached;
+    }
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     private class Chain implements FilterChain
     {
-        String _pathInContext;
         int _filter= 0;
         Object _filters;
         ServletHolder _servletHolder;
 
         /* ------------------------------------------------------------ */
-        Chain(String pathInContext, Object filters, ServletHolder servletHolder)
+        Chain(Object filters, ServletHolder servletHolder)
         {
-            _pathInContext= pathInContext;
             _filters= filters;
             _servletHolder= servletHolder;
         }
@@ -608,5 +648,52 @@ public class WebApplicationHandler extends ServletHandler
                 notFound((HttpServletRequest)request, (HttpServletResponse)response);
         }
     }
- 
+    
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class CachedChain implements FilterChain
+    {
+        FilterHolder _filterHolder;
+        ServletHolder _servletHolder;
+        CachedChain _next;
+
+        /* ------------------------------------------------------------ */
+        CachedChain(Object filters, ServletHolder servletHolder)
+        {
+            if (LazyList.size(filters)>0)
+            {
+                _filterHolder=(FilterHolder)LazyList.get(filters, 0);
+                filters=LazyList.remove(filters,0);
+                _next=new CachedChain(filters,servletHolder);
+            }
+            else
+                _servletHolder=servletHolder;
+        }
+
+        public void doFilter(ServletRequest request, ServletResponse response) 
+            throws IOException, ServletException
+        {
+            // pass to next filter
+            if (_filterHolder!=null)
+            {
+                if (log.isTraceEnabled())
+                    log.trace("call filter " + _filterHolder);
+                Filter filter= _filterHolder.getFilter();
+                filter.doFilter(request, response, _next);
+                return;
+            }
+
+            // Call servlet
+            if (_servletHolder != null)
+            {
+                if (log.isTraceEnabled())
+                    log.trace("call servlet " + _servletHolder);
+                _servletHolder.handle(request, response);
+            }
+            else // Not found
+                notFound((HttpServletRequest)request, (HttpServletResponse)response);
+        }
+    }
 }

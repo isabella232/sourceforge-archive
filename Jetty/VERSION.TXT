@@ -7,6 +7,7 @@ Jetty-5
  + Fixed many minor issues from J2EE 1.4 TCK testing
    See sf.net bugs 1031520 - 1032205
  + Refactored, simplified and optimized HttpOutputStream
+ + Added filter chain cache
 
 Jetty-4
  + LineInput handles readers with small internal buffer

@@ -50,6 +50,7 @@ public class WebApplicationHandlerMBean extends ServletHandlerMBean
     {
         super.defineManagedResource();
         defineAttribute("acceptRanges"); 
+        defineAttribute("filterChainsCached"); 
         defineAttribute("filters",READ_ONLY,ON_MBEAN);
         _webappHandler=(WebApplicationHandler)getManagedResource();
     }
