@@ -111,6 +111,8 @@ public class HttpContext extends Container
     private List _vhosts=new ArrayList(2);
     private List _hosts=new ArrayList(2);
     private List _handlers=new ArrayList(3);
+    private List _systemClasses;
+    private List _serverClasses;
     private Map _attributes = new HashMap(3);
     private boolean _redirectNullPath=true;
     private boolean _statsOn=false;
@@ -360,6 +362,32 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
+    /** Get the virtual hosts for the context.
+     * Only requests that have a matching host header or fully qualified
+     * URL will be passed to that context with a virtual host name.
+     * A context with no virtual host names or a null virtual host name is
+     * available to all requests that are not served by a context with a
+     * matching virtual host name.
+     * @return Array of virtual hosts that this context responds to. A
+     * null host name or empty array means any hostname is acceptable.
+     * Host names may be String representation of IP addresses.
+     */
+    public String[] getVirtualHosts()
+    {
+        if (_vhostsArray!=null)
+            return _vhostsArray;
+        if (_vhosts==null)
+            _vhostsArray=new String[0];
+        else
+        {
+            _vhostsArray=new String[_vhosts.size()];
+            _vhostsArray=(String[])_vhosts.toArray(_vhostsArray);
+        }
+        return _vhostsArray;
+    }
+
+
+    /* ------------------------------------------------------------ */
     /** Set the hosts for the context.
      * Set the real hosts that this context will accept requests for.
      * If not null or empty, then only requests from HttpListeners for hosts
@@ -401,28 +429,58 @@ public class HttpContext extends Container
 
 
     /* ------------------------------------------------------------ */
-    /** Get the virtual hosts for the context.
-     * Only requests that have a matching host header or fully qualified
-     * URL will be passed to that context with a virtual host name.
-     * A context with no virtual host names or a null virtual host name is
-     * available to all requests that are not served by a context with a
-     * matching virtual host name.
-     * @return Array of virtual hosts that this context responds to. A
-     * null host name or empty array means any hostname is acceptable.
-     * Host names may be String representation of IP addresses.
+    /** Set system classes.
+     * System classes cannot be overriden by context classloaders.
+     * @param classes array of classname Strings.  Names ending with '.' are treated as package names. Names starting with '-' are treated as
+     * negative matches and must be listed before any enclosing packages.
      */
-    public String[] getVirtualHosts()
+    public void setSystemClasses(String[] classes)
     {
-        if (_vhostsArray!=null)
-            return _vhostsArray;
-        if (_vhosts==null)
-            _vhostsArray=new String[0];
+        if (classes==null || classes.length==0)
+            _systemClasses=null;
         else
-        {
-            _vhostsArray=new String[_vhosts.size()];
-            _vhostsArray=(String[])_vhosts.toArray(_vhostsArray);
-        }
-        return _vhostsArray;
+            _systemClasses=Arrays.asList(classes);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get system classes.
+     * System classes cannot be overriden by context classloaders.
+     * @return array of classname Strings.  Names ending with '.' are treated as package names. Names starting with '-' are treated as
+     * negative matches and must be listed before any enclosing packages. Null if not set.
+     */
+    public String[] getSystemClasses()
+    {
+        if (_systemClasses==null || _systemClasses.size()==0)
+            return null;
+        return (String[])_systemClasses.toArray(new String[_systemClasses.size()]);
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    /** Set system classes.
+     * Servers classes cannot be seen by context classloaders.
+     * @param classes array of classname Strings.  Names ending with '.' are treated as package names. Names starting with '-' are treated as
+     * negative matches and must be listed before any enclosing packages.
+     */
+    public void setServerClasses(String[] classes)
+    {
+        if (classes==null || classes.length==0)
+            _serverClasses=null;
+        else
+            _serverClasses=Arrays.asList(classes);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get system classes.
+     * System classes cannot be seen by context classloaders.
+     * @return array of classname Strings.  Names ending with '.' are treated as package names. Names starting with '-' are treated as
+     * negative matches and must be listed before any enclosing packages. Null if not set.
+     */
+    public String[] getServerClasses()
+    {
+        if (_serverClasses==null || _serverClasses.size()==0)
+            return null;
+        return (String[])_serverClasses.toArray(new String[_serverClasses.size()]);
     }
 
 

@@ -53,7 +53,9 @@ public class ContextLoader extends URLClassLoader
     private ClassLoader _parent;
     private PermissionCollection _permissions;
     private String _urlClassPath;
-
+    private String[] _systemClasses;
+    private String[] _serverClasses;
+    
     /* ------------------------------------------------------------ */
     /** Constructor.
      * @param classPath Comma separated path of filenames or URLs
@@ -67,6 +69,13 @@ public class ContextLoader extends URLClassLoader
         super(new URL[0], parent);
         _permissions= permisions;
         _parent= parent;
+        _systemClasses=context.getSystemClasses();
+        if (_systemClasses==null)
+            _systemClasses=context.getHttpServer().getSystemClasses();
+        _serverClasses=context.getServerClasses();
+        if (_serverClasses==null)
+            _serverClasses=context.getHttpServer().getServerClasses();
+        
         if (_parent == null)
             _parent= getSystemClassLoader();
 
@@ -192,7 +201,7 @@ public class ContextLoader extends URLClassLoader
         Class c= findLoadedClass(name);
         ClassNotFoundException ex= null;
         boolean tried_parent= false;
-        if (c == null && (_java2compliant || isSystemPath(name)) && !isHiddenPath(name))
+        if (c == null && (_java2compliant || isSystemPath(name)) && !isServerPath(name))
         {
             if (log.isTraceEnabled())
                 log.trace("try loadClass " + name + " from " + _parent);
@@ -225,7 +234,7 @@ public class ContextLoader extends URLClassLoader
             }
         }
 
-        if (c == null && !tried_parent && !isHiddenPath(name))
+        if (c == null && !tried_parent && !isServerPath(name))
         {
             if (log.isTraceEnabled())
                 log.trace("try loadClass " + name + " from " + _parent);
@@ -285,12 +294,36 @@ public class ContextLoader extends URLClassLoader
     }
 
     /* ------------------------------------------------------------ */
-    public boolean isHiddenPath(String name)
+    public boolean isServerPath(String name)
     {
+        name=name.replace('/','.');
+        while(name.startsWith("."))
+            name=name.substring(1);
+        
+        if (_serverClasses!=null)
+        {
+            for (int i=0;i<_serverClasses.length;i++)
+            {
+                if (_serverClasses[i].startsWith("-"))
+                {
+                    if (name.equals(_serverClasses[i].substring(1)))
+                        return false;
+                }
+                else if (_serverClasses[i].endsWith("."))
+                {
+                    if (name.startsWith(_serverClasses[i]))
+                        return true;
+                }
+                else if (name.equals(_serverClasses[i]))
+                    return true;
+            }
+            return false;
+        }
+        
         // Arbitrary list that covers the worst security problems.
         // If you are worried by this, then use a permissions file!
         return name.equals("org.mortbay.jetty.Server")
-            || name.equals("org.mortbay.http.HttpServer")
+            || name.startsWith("org.mortbay.http.")
             || name.startsWith("org.mortbay.start.")
             || name.startsWith("org.mortbay.stop.");
     }
@@ -298,25 +331,38 @@ public class ContextLoader extends URLClassLoader
     /* ------------------------------------------------------------ */
     public boolean isSystemPath(String name)
     {
+        name=name.replace('/','.');
+        while(name.startsWith("."))
+            name=name.substring(1);
+        
+        if (_systemClasses!=null)
+        {
+            for (int i=0;i<_systemClasses.length;i++)
+            {
+                if (_systemClasses[i].startsWith("-"))
+                {
+                    if (name.equals(_systemClasses[i].substring(1)))
+                        return false;
+                }
+                else if (_systemClasses[i].endsWith("."))
+                {
+                    if (name.startsWith(_systemClasses[i]))
+                        return true;
+                }
+                else if (name.equals(_systemClasses[i]))
+                    return true;
+            }
+            return false;
+        }
+        
+        // guessing a list
         return (
-            name.startsWith("java.")
+                   name.startsWith("java.")
                 || name.startsWith("javax.servlet.")
                 || name.startsWith("javax.xml.")
                 || name.startsWith("org.mortbay.")
                 || name.startsWith("org.xml.")
-                || name.startsWith("org.w3c.")
-                || name.startsWith("java/")
-                || name.startsWith("javax/servlet/")
-                || name.startsWith("javax/xml/")
-                || name.startsWith("org/mortbay/")
-                || name.startsWith("org/xml/")
-                || name.startsWith("org/w3c/")
-                || name.startsWith("/java/")
-                || name.startsWith("/javax/servlet/")
-                || name.startsWith("/javax/xml/")
-                || name.startsWith("/org/mortbay/")
-                || name.startsWith("/org/xml/")
-                || name.startsWith("/org/w3c/"));
+                || name.startsWith("org.w3c."));
     }
 
     /* ------------------------------------------------------------ */

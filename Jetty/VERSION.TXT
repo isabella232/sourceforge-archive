@@ -5,6 +5,7 @@ Jetty-5.1.3rc0
  + Flush filter chain caches on servlet/filter change
  + Fixed rollover filename format bug
  + Fixed JSR154 error dispatch with explicit pass of type.
+ + Allow system and server classes to be configured for context loader.
 
 Jetty-5.1.2 - 18 January 2005
  + Added id and ref support to XmlConfiguration
