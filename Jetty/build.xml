@@ -13,7 +13,7 @@
 
   <!-- ==================================================================== -->
   <property name="RELEASE.MAJOR"  value="4.2" />
-  <property name="RELEASE.MAJOR.MINOR"  value="4.2.5" />
+  <property name="RELEASE.MAJOR.MINOR"  value="4.2.6" />
 
   <!-- ==================================================================== -->
   <property name="build.compiler"            value="modern" />
@@ -433,8 +433,10 @@
 
 
   <!-- ==================================================================== -->
-  <target name="test" depends="jars"
-   description="Build and run the test harnesses">
+  <target name="tests" depends="test"/>
+  <target name="test" 
+          depends="jars"
+          description="Build and run the test harnesses">
     <ant antfile="${test}/build.xml" inheritAll="true" target="test"/>
   </target>
 
