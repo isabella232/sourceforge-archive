@@ -27,6 +27,7 @@ import org.mortbay.http.HttpRequest;
 import org.mortbay.http.UserRealm;
 import org.mortbay.jaas.callback.AbstractCallbackHandler;
 import org.mortbay.jaas.callback.DefaultCallbackHandler;
+import org.mortbay.util.Loader;
 import org.mortbay.util.LogSupport;
 
 
@@ -50,11 +51,11 @@ import org.mortbay.util.LogSupport;
  */
 public class JAASUserRealm implements UserRealm
 {
-	private static Log log = LogFactory.getLog(JAASUserRealm.class);
+    private static Log log = LogFactory.getLog(JAASUserRealm.class);
 	
+    protected String callbackHandlerClass;
     protected String realmName;
     protected String loginModuleName;
-    protected AbstractCallbackHandler callbackHandler;
     protected HashMap userMap;
     protected RoleCheckPolicy roleCheckPolicy;
     
@@ -159,16 +160,9 @@ public class JAASUserRealm implements UserRealm
     }
 
 
-    /* ---------------------------------------------------- */
-    /**
-     * Set up a specifc CallbackHandler. 
-     * If not called, then the DefaultCallbackHandler is used.
-     *
-     * @param handler an <code>AbstractCallbackHandler</code> value
-     */
-    public void setCallbackHandler (AbstractCallbackHandler handler)
+    public void setCallbackHandlerClass (String classname)
     {
-        callbackHandler = handler;
+        callbackHandlerClass = classname;
     }
 
     public void setRoleCheckPolicy (RoleCheckPolicy policy)
@@ -211,13 +205,13 @@ public class JAASUserRealm implements UserRealm
      * @return authenticated JAASUserPrincipal or  null if authenticated failed
      */
     public Principal authenticate(String username,
-                                  Object credentials,
-                                  HttpRequest request)
+            Object credentials,
+            HttpRequest request)
     {
         try
         {
             UserInfo info = (UserInfo)userMap.get(username);
-
+            
             //user has been previously authenticated, but
             //re-authentication has been requested, so flow that 
             //thru all the way to the login module mechanism and
@@ -227,25 +221,31 @@ public class JAASUserRealm implements UserRealm
             {
                 userMap.remove (username);
             }
-
-
+            
+            
+            AbstractCallbackHandler callbackHandler = null;
+            
             //user has not been authenticated
-            if (callbackHandler == null)
+            if (callbackHandlerClass == null)
             {
                 log.warn("No CallbackHandler configured: using DefaultCallbackHandler");
                 callbackHandler = new DefaultCallbackHandler();
             }
-
+            else
+            {
+                callbackHandler = (AbstractCallbackHandler)Loader.loadClass(JAASUserRealm.class, callbackHandlerClass).getConstructors()[0].newInstance(new Object[0]);
+            }
+            
             callbackHandler.setUserName(username);
             callbackHandler.setCredential(credentials);
             
-
+            
             //set up the login context
             LoginContext loginContext = new LoginContext(loginModuleName,
-                                                         callbackHandler);
-
+                    callbackHandler);
+            
             loginContext.login();
-
+            
             //login success
             JAASUserPrincipal userPrincipal = new JAASUserPrincipal(username);
             userPrincipal.setSubject(loginContext.getSubject());
@@ -255,7 +255,7 @@ public class JAASUserRealm implements UserRealm
             
             return userPrincipal;       
         }
-        catch (LoginException e)
+        catch (Exception e)
         {
             log.warn(e);
             return null;
@@ -321,15 +321,15 @@ public class JAASUserRealm implements UserRealm
             if (!(user instanceof JAASUserPrincipal))
                 throw new IllegalArgumentException (user + " is not a JAASUserPrincipal");
             
-	    String key = ((JAASUserPrincipal)user).getName();
+            String key = ((JAASUserPrincipal)user).getName();
             UserInfo info = (UserInfo)userMap.get(key);
             
             if (info == null)
                 log.warn ("Logout called for user="+user+" who is NOT in the authentication cache");
             else 
                 info.getLoginContext().logout();
-
-	    userMap.remove (key);
+            
+            userMap.remove (key);
             log.debug (user+" has been LOGGED OUT");
         }
         catch (LoginException e)
