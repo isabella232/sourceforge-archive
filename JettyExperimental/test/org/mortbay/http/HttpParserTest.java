@@ -111,6 +111,62 @@ public class HttpParserTest extends TestCase implements HttpParser.Handler
 		assertEquals("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",content);
     }
 
+	public void testMultiParse()
+	{
+		String http= "GET / HTTP/1.0\015\012" + 
+		"Header1: value1\015\012" + 
+		"\015\012"+
+		"a;\015\012"+
+		"0123456789\015\012"+
+		"1a\015\012"+
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ\015\012"+
+		"0\015\012" +
+
+		"POST /foo HTTP/1.0\015\012" + 
+		"Header2: value2\015\012" + 
+		"\015\012"+
+		
+		"PUT /doodle HTTP/1.0\015\012" + 
+	    "Header3: value3\015\012" + 
+		"\015\012"+
+		"0123456789\015\012";
+		
+		ByteArrayBuffer buffer = new ByteArrayBuffer(http.getBytes());
+		
+		contentLength=HttpParser.CHUNKED_CONTENT;
+		HttpParser.parse(this,buffer);
+		assertEquals("GET",f0);
+		assertEquals("/",f1);
+		assertEquals("HTTP/1.0",f2);
+		assertEquals(0,h);
+		assertEquals("Header1",hdr[0]);
+		assertEquals("value1",val[0]);
+		assertEquals("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ",content);
+		
+
+		contentLength=HttpParser.NO_CONTENT;
+		HttpParser.parse(this,buffer);
+		assertEquals("POST",f0);
+		assertEquals("/foo",f1);
+		assertEquals("HTTP/1.0",f2);
+		assertEquals(0,h);
+		assertEquals("Header2",hdr[0]);
+		assertEquals("value2",val[0]);
+		assertEquals(null,content);
+		
+
+		contentLength=10;
+		HttpParser.parse(this,buffer);
+		assertEquals("PUT",f0);
+		assertEquals("/doodle",f1);
+		assertEquals("HTTP/1.0",f2);
+		assertEquals(0,h);
+		assertEquals("Header3",hdr[0]);
+		assertEquals("value3",val[0]);
+		assertEquals("0123456789",content);
+	
+	}
+
 
    	String content;
 	String f0;

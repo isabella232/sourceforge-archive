@@ -194,6 +194,7 @@ public abstract class AbstractBuffer implements Buffer
             _subBuffer= new ByteArrayBuffer(array(), offset, length, __MUTABLE);
         else
         {
+        	_subBuffer.offset(0);
 			_subBuffer.limit(offset + length);
             _subBuffer.offset(offset);
         }
