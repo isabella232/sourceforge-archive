@@ -96,7 +96,6 @@ you will have to configure jasper):
    $JDK_HOME/lib/tools.jar
 
 
-
 Running the Demo Server
 =======================
 A Demo server can be run on port 8080 with the commands:
@@ -206,9 +205,20 @@ The mailing lists are the best place to start:
 NOTES
 =====
 
+
+JDK 1.4 Support
+---------------
+Jetty has been developed for JDK 1.2, can be run with 1.2, 1.3 and 1.4.
+
+Furthermore, the new features of JDK1.4 are now being supported in a src1.4
+hierarchy.  If Jetty is built and the 1.4 classes are available, the source
+in $JETTY_HOME/src1.4 is used to replace or enhance the standard classes.
+
+Jetty releases are currently built using 1.3
+
+
 JettyExtra
 -----------
-
 Extra jetty functionality is available via the JettyExtra
 package.  This include JMX and SASL support.
 

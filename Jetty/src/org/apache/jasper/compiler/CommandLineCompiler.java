@@ -175,9 +175,13 @@ public class CommandLineCompiler extends Compiler implements Mangler {
 	
 	// Fix for invalid characters. If you think of more add to the list.
 	StringBuffer modifiedClassName = new StringBuffer();
-	for (int i = 0; i < className.length(); i++) {
-	    if (Character.isLetterOrDigit(className.charAt(i)) == true)
-		modifiedClassName.append(className.substring(i,i+1));
+	if (Character.isJavaIdentifierStart(className.charAt(0)))
+	    modifiedClassName.append(className.charAt(0));
+	else
+	    modifiedClassName.append(mangleChar(className.charAt(0)));
+	for (int i = 1; i < className.length(); i++) {
+	    if (Character.isJavaIdentifierPart(className.charAt(i)))
+		modifiedClassName.append(className.charAt(i));
 	    else
 		modifiedClassName.append(mangleChar(className.charAt(i)));
 	}

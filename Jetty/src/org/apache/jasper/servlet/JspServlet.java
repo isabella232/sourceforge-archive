@@ -475,6 +475,7 @@ public class JspServlet extends HttpServlet {
 	} catch (RuntimeException e) {
 	    throw e;
         } catch (JasperError ex) {
+            response.setContentType("text/html");
             response.getWriter().print(ex.getMessage());
 	} catch (ServletException e) {
 	    throw e;

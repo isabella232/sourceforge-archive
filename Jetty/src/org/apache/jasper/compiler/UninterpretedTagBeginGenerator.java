@@ -96,14 +96,13 @@ public class UninterpretedTagBeginGenerator
         if (attrs == null) {
             sb.append(">");
         } else {
-            sb.append(" ");
             int attrsLength = attrs.getLength();
             for (int i = 0; i < attrsLength; i++) {
 		String quote = doubleQuote;
                 String name = attrs.getQName(i);
                 String value = attrs.getValue(i);
 		if (value.indexOf('"') != -1) quote = singleQuote;
-                sb.append("  ").append(name).append("=").append(quote);
+                sb.append(" ").append(name).append("=").append(quote);
 		sb.append(value).append(quote);
             }
             sb.append(">");
