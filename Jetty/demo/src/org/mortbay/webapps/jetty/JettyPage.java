@@ -236,7 +236,7 @@ public class JettyPage extends Page
         _table.cell().top();
         _table.cell().center();
 
-        _table.add("<A HREF=http://jetty.mortbay.org><IMG SRC=\""+context+"/images/powered.png\" WIDTH=140 HEIGHT=58 BORDER=0 ALT=\"Powered by Jetty\"></A>\n");
+        _table.add("<A HREF=http://jetty.mortbay.org><IMG SRC=\""+context+"/images/powered.gif\" WIDTH=140 HEIGHT=58 BORDER=0 ALT=\"Powered by Jetty\"></A>\n");
 
         boolean para=true;
         // navigation
@@ -297,11 +297,11 @@ public class JettyPage extends Page
         _table.add("&nbsp;<P>");
 
         // home logos
-        _table.add("<A HREF=\"http://www.mortbay.com\"><IMG SRC=\""+context+"/images/mbLogoBar.png\" WIDTH=120 HEIGHT=75 BORDER=0 ALT=\"Mort Bay\"></A><P>\n");
+        _table.add("<A HREF=\"http://www.mortbay.com\"><IMG SRC=\""+context+"/images/mbLogoBar.gif\" WIDTH=120 HEIGHT=75 BORDER=0 ALT=\"Mort Bay\"></A><P>\n");
 
-         _table.add("<A HREF=\"http://www.jboss.org\"><IMG SRC=\""+context+"/images/jboss.png\" WIDTH=134 HEIGHT=60 BORDER=0 ALT=\"JBoss Group\"></A><P>\n");
+         _table.add("<A HREF=\"http://www.jboss.org\"><IMG SRC=\""+context+"/images/jboss.gif\" WIDTH=134 HEIGHT=60 BORDER=0 ALT=\"JBoss Group\"></A><P>\n");
         
-        _table.add("<A HREF=\"http://www.inetu.com\"><IMG SRC=\""+context+"/images/inetu.png\" WIDTH=121 HEIGHT=52 BORDER=0 ALT=\"InetU\"></A><P>\n");
+        _table.add("<A HREF=\"http://www.inetu.com\"><IMG SRC=\""+context+"/images/inetu.gif\" WIDTH=121 HEIGHT=52 BORDER=0 ALT=\"InetU\"></A><P>\n");
 
 
         _table.add("<A HREF=\"http://sourceforge.net/projects/jetty\">");
@@ -309,7 +309,7 @@ public class JettyPage extends Page
         if (__realSite)
             _table.add("<IMG src=\"http://sourceforge.net/sflogo.php?group_id=7322\" width=\"88\" height=\"31\" border=\"0\" alt=\"SourceForge\">");
         else
-            _table.add("<IMG SRC=\""+context+"/images/sourceforge.png\" WIDTH=88 HEIGHT=31 BORDER=\"0\" alt=\"SourceForge\"></A><P>\n");
+            _table.add("<IMG SRC=\""+context+"/images/sourceforge.gif\" WIDTH=88 HEIGHT=31 BORDER=\"0\" alt=\"SourceForge\"></A><P>\n");
         _table.add("</A><P>\n");
 
         _table.add("<A HREF=\""+context+"/freesoftware.html\"><IMG SRC=\""+context+"/images/effbr.png\" WIDTH=88 HEIGHT=32 BORDER=0 ALT=\"EFF\"></A><P>\n");
