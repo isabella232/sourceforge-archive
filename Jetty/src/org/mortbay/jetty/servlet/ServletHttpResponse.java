@@ -378,6 +378,10 @@ public class ServletHttpResponse implements HttpServletResponse
     public void sendError(int status, String message)
         throws IOException
     {
+        ServletHolder holder = _servletHttpRequest.getServletHolder();
+        if (holder!=null)
+            _servletHttpRequest.setAttribute("javax.servlet.error.servlet_name",
+                                             holder.getName());
         _httpResponse.sendError(status,message);
     }
 
@@ -385,6 +389,10 @@ public class ServletHttpResponse implements HttpServletResponse
     public void sendError(int status) 
         throws IOException
     {
+        ServletHolder holder = _servletHttpRequest.getServletHolder();
+        if (holder!=null)
+            _servletHttpRequest.setAttribute("javax.servlet.error.servlet_name",
+                                             holder.getName());
         _httpResponse.sendError(status);
     }
 
@@ -394,7 +402,7 @@ public class ServletHttpResponse implements HttpServletResponse
     {
         if (url==null)
             throw new IllegalArgumentException();
-
+        
         if (url.indexOf(":/")<0)
         {
             StringBuffer buf = _servletHttpRequest.getHttpRequest().getRootURL();
@@ -412,37 +420,44 @@ public class ServletHttpResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void setDateHeader(String name, long value) 
     {
-        _httpResponse.setDateField(name,value);
+        try{_httpResponse.setDateField(name,value);}
+        catch(IllegalStateException e){Code.ignore(e);}
     }
 
     /* ------------------------------------------------------------ */
     public void setHeader(String name, String value) 
     {
-        _httpResponse.setField(name,value);
+        try{_httpResponse.setField(name,value);}
+        catch(IllegalStateException e){Code.ignore(e);}
     }
 
     /* ------------------------------------------------------------ */
     public void setIntHeader(String name, int value) 
     {
-        _httpResponse.setIntField(name,value);
+        try{_httpResponse.setIntField(name,value);}
+        catch(IllegalStateException e){Code.ignore(e);}
     }
     
     /* ------------------------------------------------------------ */
     public void addDateHeader(String name, long value) 
     {
-        _httpResponse.addDateField(name,new Date(value));
+        try{_httpResponse.addDateField(name,new Date(value));}
+        catch(IllegalStateException e){Code.ignore(e);}
     }
 
     /* ------------------------------------------------------------ */
     public void addHeader(String name, String value) 
     {
-        _httpResponse.addField(name,value);
+        try{_httpResponse.addField(name,value);}
+        catch(IllegalStateException e){Code.ignore(e);}
     }
+    
 
     /* ------------------------------------------------------------ */
     public void addIntHeader(String name, int value) 
     {
-        _httpResponse.addIntField(name,value);
+        try{_httpResponse.addIntField(name,value);}
+        catch(IllegalStateException e){Code.ignore(e);}
     }
 
     /* ------------------------------------------------------------ */

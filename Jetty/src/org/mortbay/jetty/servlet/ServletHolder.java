@@ -277,6 +277,7 @@ public class ServletHolder extends Holder
             throw new UnavailableException("Could not construct servlet");
 
         // Service the request
+        boolean servlet_error=true;
         try
         {
             // Handle aliased path
@@ -289,6 +290,7 @@ public class ServletHolder extends Holder
 
             servlet.service(request,response);
             response.flushBuffer();
+            servlet_error=false;
         }
         catch(UnavailableException e)
         {
@@ -299,6 +301,9 @@ public class ServletHolder extends Holder
         }
         finally
         {
+            if (servlet_error)
+                request.setAttribute("javax.servlet.error.servlet_name",getName());
+
             // Return to singleThreaded pool
             synchronized(this)
             {
