@@ -375,9 +375,9 @@
              author="true"
              version="true"
              public="true"
-             windowtitle="${ant.project.name} API"
-             doctitle="${ant.project.name}"
-             bottom="Copyright &#169; 2000 Mortbay Consulting Pty. Ltd. All Rights Reserved.">
+             windowtitle="${ant.project.name} ${RELEASE.MAJOR.MINOR} API"
+             doctitle="${ant.project.name} ${RELEASE.MAJOR.MINOR}"
+             bottom="Copyright &amp;copy; 2004 Mortbay Consulting Pty. Ltd. All Rights Reserved.">
        <classpath>
          <path refid="classpath"/> 
          <fileset dir="${extra}">
