@@ -60,9 +60,7 @@ public class SocketChannelListener
     /* ------------------------------------------------------------------- */
     public SocketChannelListener()
         throws IOException
-    {
-        Code.warning("SocketChannelListener is experimental");
-    }
+    {}
 
     /* ------------------------------------------------------------ */
     public void setHttpServer(HttpServer server)
@@ -615,16 +613,11 @@ public class SocketChannelListener
             }
             catch(Exception e)
             {
-                if (_running)
-                    Code.warning(e.toString());
                 Code.debug(e);
             }
             finally
             {
-                if (_running)
-                    Code.warning("Stopping "+this.getName());
-                else
-                    Log.event("Stopping "+this.getName());
+                Log.event("Stopping "+this.getName());
 
                 try{if (_acceptChannel!=null)_acceptChannel.close();}
                 catch (IOException e) {Code.ignore(e);}
