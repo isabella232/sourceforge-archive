@@ -288,7 +288,7 @@ public class ProxyHandler extends AbstractHttpHandler
             }
             catch (Exception e)
             {
-                log.trace(LogSupport.IGNORED,e);
+                LogSupport.ignore(log,e);
             }
             
             InputStream proxy_in = null;
@@ -309,7 +309,7 @@ public class ProxyHandler extends AbstractHttpHandler
                 try {proxy_in=connection.getInputStream();}
                 catch (Exception e)
                 {
-                    log.trace(LogSupport.IGNORED,e);
+                    LogSupport.ignore(log,e);
                     proxy_in = http.getErrorStream();
                 }
             }
@@ -341,7 +341,7 @@ public class ProxyHandler extends AbstractHttpHandler
         catch (Exception e)
         {
             log.warn(e.toString());
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
             if (!response.isCommitted())
                 response.sendError(HttpResponse.__400_Bad_Request);
         }
@@ -383,7 +383,7 @@ public class ProxyHandler extends AbstractHttpHandler
 		    }
                     catch (Exception e)
                     {
-			log.trace(LogSupport.IGNORED,e);
+			LogSupport.ignore(log,e);
 		    }
 		}
                 
@@ -396,7 +396,7 @@ public class ProxyHandler extends AbstractHttpHandler
         }
         catch (Exception e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
             response.sendError(HttpResponse.__500_Internal_Server_Error);
         }
     }

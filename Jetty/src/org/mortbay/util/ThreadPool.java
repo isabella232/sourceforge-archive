@@ -316,8 +316,7 @@ public class ThreadPool
                 try{if (isStarted() && _pool!=null)_join.wait(30000);}
                 catch (Exception e)
                 {
-                    e.printStackTrace();
-                    log.trace(LogSupport.IGNORED,e);
+                    LogSupport.ignore(log,e);
                 }
             }
         }
@@ -420,7 +419,7 @@ public class ThreadPool
             }
 
             this.start();
-            if(log.isTraceEnabled())log.trace("enterPool "+this+" -> "+pool);
+            if(LogSupport.isTraceEnabled(log))if(LogSupport.isTraceEnabled(log))log.trace("enterPool "+this+" -> "+pool);
         }
 
         /* ------------------------------------------------------------ */
@@ -444,7 +443,7 @@ public class ThreadPool
         /* ------------------------------------------------------------ */
         public void leavePool()
         {
-            if(log.isTraceEnabled())log.trace("leavePool "+this+" <- "+_pool);
+            if(LogSupport.isTraceEnabled(log))log.trace("leavePool "+this+" <- "+_pool);
             synchronized(this)
             {
                 _pool=null;
@@ -493,7 +492,7 @@ public class ThreadPool
                 }
                 catch (InterruptedException e)
                 {
-                    log.trace(LogSupport.IGNORED,e);
+                    LogSupport.ignore(log,e);
                 }
                 finally
                 {
@@ -507,7 +506,7 @@ public class ThreadPool
                             if (got&&_pool!=null)
                                 _pool.put(this);
                         }
-                        catch (InterruptedException e){log.trace(LogSupport.IGNORED,e);}
+                        catch (InterruptedException e){LogSupport.ignore(log,e);}
                     }
                 }
             }

@@ -903,7 +903,7 @@ public class HttpFields
             }
             catch(java.lang.Exception e)
             {
-                log.trace(LogSupport.IGNORED,e);
+                LogSupport.ignore(log,e);
             }
         }
         if (val.endsWith(" GMT"))
@@ -917,7 +917,7 @@ public class HttpFields
                 }
                 catch(java.lang.Exception e)
                 {
-                    log.trace(LogSupport.IGNORED,e);
+                    LogSupport.ignore(log,e);
                 }
             }
         }

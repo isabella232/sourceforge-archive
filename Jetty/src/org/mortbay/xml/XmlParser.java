@@ -110,7 +110,7 @@ public class XmlParser
                 if (validating)
                     log.warn("Schema validation may not be supported: ", e);
                 else
-                    log.trace(LogSupport.IGNORED,e);
+                    LogSupport.ignore(log,e);
             }
 
 
@@ -163,6 +163,8 @@ public class XmlParser
         reader.setContentHandler(handler);
   	reader.setErrorHandler(handler);
   	reader.setEntityResolver(handler);
+        if(log.isDebugEnabled())log.debug("parsing: sid="+source.getSystemId()+
+                                          ",pid="+source.getPublicId());
         _parser.parse(source, handler);
         if (handler._error!=null)
             throw handler._error;
@@ -178,6 +180,7 @@ public class XmlParser
     public synchronized Node parse(String url)
         throws IOException,SAXException
     {
+        if(log.isDebugEnabled())log.debug("parse: "+url);
         return parse(new InputSource(url));
     }
     
@@ -187,6 +190,7 @@ public class XmlParser
     public synchronized Node parse(File file)
         throws IOException,SAXException
     {
+        if(log.isDebugEnabled())log.debug("parse: "+file);
         return parse(new InputSource(file.toURL().toString()));
     }
 
@@ -346,7 +350,7 @@ public class XmlParser
                     is.setSystemId(sid);
                     return is;
                 }
-                catch(IOException e){log.trace(LogSupport.IGNORED,e);}
+                catch(IOException e){LogSupport.ignore(log,e);}
             }
             return null;
         }

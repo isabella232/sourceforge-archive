@@ -37,6 +37,7 @@ import org.mortbay.util.MultiException;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
+import org.mortbay.util.LogSupport;
 
 
 
@@ -461,7 +462,7 @@ public class WebApplicationHandler extends ServletHandler
             // Call servlet
             if (servletHolder!=null)
             {
-                if(log.isTraceEnabled())log.trace("call servlet "+servletHolder);
+                if(LogSupport.isTraceEnabled(log))log.trace("call servlet "+servletHolder);
                 servletHolder.handle(request,response);
             }
             else // Not found
@@ -494,13 +495,13 @@ public class WebApplicationHandler extends ServletHandler
             throws IOException,
                    ServletException
         {
-            if(log.isTraceEnabled())log.trace("doFilter "+_filter);
+            if(LogSupport.isTraceEnabled(log))log.trace("doFilter "+_filter);
             
             // pass to next filter
             if (_filter<LazyList.size(_filters))
             {
                 FilterHolder holder = (FilterHolder)LazyList.get(_filters,_filter++);
-                if(log.isTraceEnabled())log.trace("call filter "+holder);
+                if(LogSupport.isTraceEnabled(log))log.trace("call filter "+holder);
                 Filter filter = holder.getFilter();
                 filter.doFilter(request,response,this);
                 return;
@@ -509,7 +510,7 @@ public class WebApplicationHandler extends ServletHandler
             // Call servlet
             if (_servletHolder!=null)
             {
-                if(log.isTraceEnabled())log.trace("call servlet "+_servletHolder);
+                if(LogSupport.isTraceEnabled(log))log.trace("call servlet "+_servletHolder);
                 _servletHolder.handle(request,response);
             }
             else // Not found

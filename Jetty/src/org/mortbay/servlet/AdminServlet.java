@@ -81,14 +81,14 @@ public class AdminServlet extends HttpServlet
                     public void run()
                     {
                         try{Thread.sleep(1000);}
-                        catch(Exception e){log.trace(LogSupport.IGNORED,e);}
+                        catch(Exception e){LogSupport.ignore(log,e);}
                         log.info("Stopping All servers");
                         Iterator s=_servers.iterator();
                         while(s.hasNext())
                         {
                             HttpServer server=(HttpServer)s.next();
                             try{server.stop();}
-                            catch(Exception e){log.trace(LogSupport.IGNORED,e);}
+                            catch(Exception e){LogSupport.ignore(log,e);}
                         }
                         log.info("Exiting JVM");
                         System.exit(1);

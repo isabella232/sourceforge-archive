@@ -187,7 +187,7 @@ public class Listener extends LifeCycleThread
                     }
                     catch(ClosedChannelException e)
                     {
-                        log.trace(LogSupport.IGNORED,e);
+                        LogSupport.ignore(log,e);
                     }
                 }
             }

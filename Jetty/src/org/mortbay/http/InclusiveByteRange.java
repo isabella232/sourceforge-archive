@@ -125,7 +125,7 @@ public class InclusiveByteRange {
             catch(Exception e)
             {
                 log.warn("Bad range format: "+t);
-                log.trace(LogSupport.IGNORED,e);
+                LogSupport.ignore(log,e);
             }    
         }
         return LazyList.getList(satRanges,true);

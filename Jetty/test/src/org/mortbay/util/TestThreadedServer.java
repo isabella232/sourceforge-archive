@@ -145,11 +145,11 @@ public class TestThreadedServer extends junit.framework.TestCase
             }
             catch(Error e)
             {
-                log.trace(LogSupport.IGNORED,e);
+                LogSupport.ignore(log,e);
             }
             catch(Exception e)
             {
-                log.trace(LogSupport.IGNORED,e);
+                LogSupport.ignore(log,e);
             }
             finally
             {    

@@ -117,7 +117,7 @@ class FileResource extends URLResource
             }
             catch(IOException e)
             {
-                log.trace(LogSupport.IGNORED,e);
+                LogSupport.ignore(log,e);
             }
         }
         return _alias;

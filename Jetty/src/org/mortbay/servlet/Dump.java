@@ -100,7 +100,7 @@ public class Dump extends HttpServlet
             }
             catch(Exception e)
             {
-                log.trace(LogSupport.IGNORED,e);
+                LogSupport.ignore(log,e);
                 response.setLocale(Locale.getDefault());
             }
         }

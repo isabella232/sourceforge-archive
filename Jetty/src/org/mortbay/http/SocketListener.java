@@ -244,7 +244,7 @@ public class SocketListener
         }
         catch(Exception e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
     }
 
@@ -274,7 +274,7 @@ public class SocketListener
         }
         catch(Exception e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
     }
 

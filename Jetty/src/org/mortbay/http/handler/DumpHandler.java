@@ -122,7 +122,7 @@ public class DumpHandler extends AbstractHttpHandler
             {
                 writer.write("</PRE>\n<H3>BAD Set-Cookie:</H3>\n<PRE>");
                 writer.write(e.toString());
-                log.trace(LogSupport.IGNORED,e);
+                LogSupport.ignore(log,e);
             }
         }
         
@@ -164,7 +164,7 @@ public class DumpHandler extends AbstractHttpHandler
         }
         catch(IOException e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
             writer.write(e.toString());
         }
         

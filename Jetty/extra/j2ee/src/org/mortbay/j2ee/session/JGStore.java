@@ -33,9 +33,8 @@ import org.jgroups.blocks.MethodCall;
 import org.jgroups.blocks.RpcDispatcher;
 import org.jgroups.util.Util;
 import org.jboss.logging.Logger;
-import org.jboss.logging.Logger;
-//----------------------------------------
 
+//----------------------------------------
 // what happens if a member drops away for a while then comes back -
 // can we deal with it ?
 

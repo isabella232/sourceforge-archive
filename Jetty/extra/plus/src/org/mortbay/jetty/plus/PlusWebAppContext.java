@@ -13,6 +13,7 @@ import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.jetty.servlet.WebApplicationContext;
 import org.mortbay.jndi.Util;
+import org.mortbay.util.LogSupport;
 import org.mortbay.util.TypeUtil;
 import org.mortbay.xml.XmlParser;
 
@@ -134,7 +135,7 @@ public class PlusWebAppContext extends WebApplicationContext
         //create ENC for this webapp 
         Context compCtx =  (Context)_initialCtx.lookup ("java:comp");
         Context envCtx = compCtx.createSubcontext("env");
-        log.trace(envCtx);
+        if(LogSupport.isTraceEnabled(log))log.trace(envCtx);
 
         //bind UserTransaction
         compCtx.rebind ("UserTransaction", new LinkRef ("javax.transaction.UserTransaction"));

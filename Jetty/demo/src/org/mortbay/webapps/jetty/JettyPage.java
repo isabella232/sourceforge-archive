@@ -39,7 +39,7 @@ public class JettyPage extends Page
                 __realSite=true;
             }
         }
-        catch(Exception e) {log.trace(LogSupport.IGNORED,e);}
+        catch(Exception e) {LogSupport.ignore(log,e);}
     }
     
     /* ------------------------------------------------------------ */
@@ -84,7 +84,7 @@ public class JettyPage extends Page
                                     __linkMap.put(section._pathSpec,new Links(links)); }
                             catch(MissingResourceException e)
                             {
-                                log.trace(LogSupport.IGNORED,e);
+                                LogSupport.ignore(log,e);
                             }
                         }
                         
@@ -97,7 +97,7 @@ public class JettyPage extends Page
                 catch(MissingResourceException e)
                 {
                     
-                        log.trace(LogSupport.IGNORED,e);
+                        LogSupport.ignore(log,e);
                 }
                 finally
                 {
@@ -110,7 +110,7 @@ public class JettyPage extends Page
         }
         catch(MissingResourceException e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
         catch(Throwable th)
         {

@@ -50,8 +50,7 @@ public class URLResource extends Resource
             }
             catch(IOException e)
             {
-                e.printStackTrace();
-                log.trace(LogSupport.IGNORED,e);
+                LogSupport.ignore(log,e);
             }
         }
         return _connection!=null;
@@ -64,7 +63,7 @@ public class URLResource extends Resource
     {
         if (_in!=null)
         {
-            try{_in.close();}catch(IOException e){log.trace(LogSupport.IGNORED,e);}
+            try{_in.close();}catch(IOException e){LogSupport.ignore(log,e);}
             _in=null;
         }
 
@@ -91,7 +90,7 @@ public class URLResource extends Resource
         }
         catch (IOException e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
         return _in!=null;
     }
@@ -158,7 +157,7 @@ public class URLResource extends Resource
 
         // Try the URL file arg
         try {return new File(_url.getFile());}
-        catch(Exception e) {log.trace(LogSupport.IGNORED,e);}
+        catch(Exception e) {LogSupport.ignore(log,e);}
 
         // Don't know the file
         return null;    

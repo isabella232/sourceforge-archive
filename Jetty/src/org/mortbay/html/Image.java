@@ -116,7 +116,7 @@ public class Image extends Tag
                 }
             }
             catch (IOException e){
-                log.trace(LogSupport.IGNORED,e);
+                LogSupport.ignore(log,e);
             }
         }
         

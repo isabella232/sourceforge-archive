@@ -286,9 +286,9 @@ public class NCSARequestLog implements RequestLog
     /* ------------------------------------------------------------ */
     public void stop()
     {
-        try{if (_writer!=null)_writer.flush();} catch (IOException e){log.trace(LogSupport.IGNORED,e);}
+        try{if (_writer!=null)_writer.flush();} catch (IOException e){LogSupport.ignore(log,e);}
         if (_out!=null && _closeOut)
-            try{_out.close();}catch(IOException e){log.trace(LogSupport.IGNORED,e);}
+            try{_out.close();}catch(IOException e){LogSupport.ignore(log,e);}
         _out=null;
         _fileOut=null;
         _closeOut=false;

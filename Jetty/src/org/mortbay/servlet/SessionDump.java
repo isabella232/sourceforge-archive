@@ -75,7 +75,7 @@ public class SessionDump extends HttpServlet
                 }
                 catch(Exception e)
                 {
-                    log.trace(LogSupport.IGNORED,e);
+                    LogSupport.ignore(log,e);
                 }
             }
             else if (action.equals("Remove"))

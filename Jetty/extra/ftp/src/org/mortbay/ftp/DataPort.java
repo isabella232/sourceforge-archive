@@ -189,25 +189,25 @@ public class DataPort extends Thread
         if (connection != null)
         {
             try {connection.close();}
-            catch (IOException ioe) { log.trace(LogSupport.IGNORED,ioe);}
+            catch (IOException ioe) { LogSupport.ignore(log,ioe);}
             connection = null;
         }
         if (listen != null)
         {
             try {listen.close();}
-            catch (IOException ioe) { log.trace(LogSupport.IGNORED,ioe);}
+            catch (IOException ioe) { LogSupport.ignore(log,ioe);}
             listen = null;
         }
         if (in != null)
         {
             try {in.close();}
-            catch (IOException ioe) { log.trace(LogSupport.IGNORED,ioe);}
+            catch (IOException ioe) { LogSupport.ignore(log,ioe);}
             in = null;
         }
         if (out != null)
         {
             try {out.close();}
-            catch (IOException ioe) { log.trace(LogSupport.IGNORED,ioe);}
+            catch (IOException ioe) { LogSupport.ignore(log,ioe);}
             out = null;
         }
         ftp=null;

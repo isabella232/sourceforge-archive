@@ -68,7 +68,7 @@ class FileResource extends URLResource
         }
         catch (Exception e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
             try
             {
                 // Assume that File.toURL produced unencoded chars. So try
@@ -79,7 +79,7 @@ class FileResource extends URLResource
             }
             catch (Exception e2)
             {
-                log.trace(LogSupport.IGNORED,e2);
+                LogSupport.ignore(log,e2);
 
                 // Still can't get the file.  Doh! try good old hack!
                 checkConnection();

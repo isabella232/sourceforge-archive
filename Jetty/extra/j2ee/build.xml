@@ -170,6 +170,7 @@ all         - everything
       <fileset dir="${jetty.ext}">   
         <include name="jasper-*.jar"/>
         <include name="ant*.jar"/>
+        <include name="commons-logging.jar"/>
       </fileset>
       <fileset dir="${jetty.etc}">   
         <include name="webdefault.xml"/>

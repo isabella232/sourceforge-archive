@@ -767,7 +767,7 @@ public class HttpConnection
             }
             else if (e instanceof EOFException)
             {
-                log.trace(LogSupport.IGNORED,e);
+                LogSupport.ignore(log,e);
                 return;
             }
             else
@@ -791,7 +791,7 @@ public class HttpConnection
 	}
         catch(Exception ex)
         {
-            log.trace(LogSupport.IGNORED,ex);
+            LogSupport.ignore(log,ex);
         }
     }
 
@@ -967,7 +967,7 @@ public class HttpConnection
             else if (_dotVersion!=-1)
                 throw new HttpException(HttpResponse.__505_HTTP_Version_Not_Supported);
             
-            if(log.isTraceEnabled())log.trace("IN is "+(_inputStream.isChunking()?"chunked":"not chunked")+" Content-Length="+_inputStream.getContentLength());
+            if(LogSupport.isTraceEnabled(log))log.trace("IN is "+(_inputStream.isChunking()?"chunked":"not chunked")+" Content-Length="+_inputStream.getContentLength());
             
             // service the request
             if (!_request.isHandled())
@@ -980,7 +980,7 @@ public class HttpConnection
             {
                 if (log.isDebugEnabled())
                 {
-                    if (log.isTraceEnabled()) log.trace(LogSupport.EXCEPTION,e);
+                    if (LogSupport.isTraceEnabled(log)) log.trace(LogSupport.EXCEPTION,e);
                     else if(log.isDebugEnabled())log.debug(e.toString());
                 }
                 _response.destroy();
@@ -1009,7 +1009,7 @@ public class HttpConnection
                     if (_inputStream.getContentLength()>0)
                         _inputStream.setContentLength(0);
                     _persistent=false;
-                    log.trace(LogSupport.IGNORED,e);
+                    LogSupport.ignore(log,e);
                     exception(new HttpException(HttpResponse.__400_Bad_Request,
                                                 "Missing Content"));
                 }
@@ -1041,7 +1041,7 @@ public class HttpConnection
                         while(_inputStream.skip(4096)>0 || _inputStream.read()>=0);
                     _inputStream.resetStream();
                 }
-                catch(IOException e){log.trace(LogSupport.IGNORED,e);}
+                catch(IOException e){LogSupport.ignore(log,e);}
                 
                 // commit non persistent
                 try{
@@ -1124,7 +1124,7 @@ public class HttpConnection
     protected void destroy()
     {
         try{close();}
-        catch (IOException e){log.trace(LogSupport.IGNORED,e);}
+        catch (IOException e){LogSupport.ignore(log,e);}
         catch (Exception e){log.warn(LogSupport.EXCEPTION,e);}
         
         // Destroy request and response

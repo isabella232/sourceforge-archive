@@ -281,7 +281,7 @@ public abstract class Element
             return out.toString();
         }
         catch(IOException e){
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
         return null;    
     }

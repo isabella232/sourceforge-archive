@@ -99,7 +99,7 @@ class JarFileResource extends JarResource
         {
             String file_url=_urlString.substring(4,_urlString.length()-2);
             try{return newResource(file_url).exists();}
-            catch(Exception e) {log.trace(LogSupport.IGNORED,e); return false;}
+            catch(Exception e) {LogSupport.ignore(log,e); return false;}
         }
         
         boolean check=checkConnection();
@@ -129,7 +129,7 @@ class JarFileResource extends JarResource
                 }
                 catch(Exception e)
                 {
-                       log.trace(LogSupport.IGNORED,e);
+                       LogSupport.ignore(log,e);
                 }
             }
 
@@ -213,7 +213,7 @@ class JarFileResource extends JarResource
                 }
                 catch(Exception e)
                 {
-                     log.trace(LogSupport.IGNORED,e);
+                     LogSupport.ignore(log,e);
                 }
             }
             

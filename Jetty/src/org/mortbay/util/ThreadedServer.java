@@ -379,7 +379,7 @@ abstract public class ThreadedServer extends ThreadPool
                     else
                         s.setSoLinger(false,0);
                 }
-                catch(Exception e){log.trace(LogSupport.IGNORED,e);}
+                catch(Exception e){LogSupport.ignore(log,e);}
             }
             return s;
         }
@@ -387,11 +387,11 @@ abstract public class ThreadedServer extends ThreadPool
         {
             // TODO - this is caught and ignored due strange
             // exception from linux java1.2.v1a
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
         catch(InterruptedIOException e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
         catch(IOException e)
         {
@@ -510,7 +510,7 @@ abstract public class ThreadedServer extends ThreadPool
          if (job instanceof Socket)
          {
              try{((Socket)job).close();}
-             catch(Exception e){log.trace(LogSupport.IGNORED,e);}
+             catch(Exception e){LogSupport.ignore(log,e);}
          }
          super.stopJob(thread,job);
     }

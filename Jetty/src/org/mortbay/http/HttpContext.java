@@ -788,7 +788,7 @@ public class HttpContext implements LifeCycle,
             CachedResource cached = (CachedResource)_cache.get(pathInContext);
             if (cached!=null)
             {
-                if(log.isTraceEnabled())log.trace("CACHE HIT: "+cached);
+                if(LogSupport.isTraceEnabled(log))log.trace("CACHE HIT: "+cached);
                 CachedMetaData cmd = (CachedMetaData)cached.getAssociate();
                 if (cmd!=null && cmd.isValid())
                     return cached;
@@ -796,7 +796,7 @@ public class HttpContext implements LifeCycle,
 
             // Make the resource
             resource=_resourceBase.addPath(_resourceBase.encode(pathInContext));
-            if(log.isTraceEnabled())log.trace("CACHE MISS: "+resource);
+            if(LogSupport.isTraceEnabled(log))log.trace("CACHE MISS: "+resource);
             if (resource==null)
                 return null;
 
@@ -834,7 +834,7 @@ public class HttpContext implements LifeCycle,
                         _leastRecentlyUsed.invalidate();
 
                     cached=resource.cache();
-                    if(log.isTraceEnabled())log.trace("CACHED: "+resource);
+                    if(LogSupport.isTraceEnabled(log))log.trace("CACHED: "+resource);
                     new CachedMetaData(cached,pathInContext);
                     return cached;
                 }
@@ -998,14 +998,14 @@ public class HttpContext implements LifeCycle,
                     try
                     {
                         Resource path = Resource.newResource(urls[j]);
-                        if (log.isTraceEnabled()) log.trace("path "+path);
+                        if (LogSupport.isTraceEnabled(log)) log.trace("path "+path);
                         File file = path.getFile();
                         if (file!=null)
                             paths.add(file.getAbsolutePath());
                     }
                     catch(Exception e)
                     {
-                        log.trace(LogSupport.IGNORED,e);
+                        LogSupport.ignore(log,e);
                     }
                 }	
             }	
@@ -1021,11 +1021,11 @@ public class HttpContext implements LifeCycle,
                 String path=tok.nextToken();
                 if (!paths.contains(path))
                 {
-                    log.trace("PATH="+path);
+                    if(LogSupport.isTraceEnabled(log))log.trace("PATH="+path);
                     paths.add(path);
                 }
                 else
-                    log.trace("done="+path);			
+                    if(LogSupport.isTraceEnabled(log))log.trace("done="+path);			
             }
         }
         
@@ -1262,7 +1262,7 @@ public class HttpContext implements LifeCycle,
         catch(Exception e)
         {
             _tmpDir=null;
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
 
         if (_tmpDir==null)
@@ -1920,7 +1920,7 @@ public class HttpContext implements LifeCycle,
         while (graceful && _statsOn && _requestsActive>0 && _httpServer!=null)
             try {Thread.sleep(100);}
             catch (InterruptedException e){throw e;}
-            catch (Exception e){log.trace(LogSupport.IGNORED,e);}
+            catch (Exception e){LogSupport.ignore(log,e);}
 
         stop();
     }

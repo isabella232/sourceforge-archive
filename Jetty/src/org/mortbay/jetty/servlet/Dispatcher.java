@@ -605,7 +605,7 @@ public class Dispatcher implements RequestDispatcher
                 try {_out=super.getOutputStream();}
                 catch(IllegalStateException e)
                 {
-                    log.trace(LogSupport.IGNORED,e);
+                    LogSupport.ignore(log,e);
                     _flushNeeded=true;
                     _out=new ServletOut(new WriterOutputStream(super.getWriter()));
                 }

@@ -91,11 +91,11 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
                 }
                 catch(InterruptedException e)
                 {
-                    log.trace(LogSupport.IGNORED,e);
+                    LogSupport.ignore(log,e);
                 }
                 catch(InterruptedIOException e)
                 {
-                    log.trace(LogSupport.IGNORED,e);
+                    LogSupport.ignore(log,e);
                 }
                 catch(Exception e)
                 {

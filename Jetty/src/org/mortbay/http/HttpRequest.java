@@ -469,7 +469,7 @@ public class HttpRequest extends HttpMessage
                         _port=TypeUtil.parseInt(_host,colon+1,-1,10);
                     }
                     catch(Exception e)
-                    {log.trace(LogSupport.IGNORED,e);}
+                    {LogSupport.ignore(log,e);}
                 }
                 _host=_host.substring(0,colon);
             }
@@ -488,7 +488,7 @@ public class HttpRequest extends HttpMessage
 
         // Return the local host
         try {_host=InetAddress.getLocalHost().getHostAddress();}
-        catch(java.net.UnknownHostException e){log.trace(LogSupport.IGNORED,e);}
+        catch(java.net.UnknownHostException e){LogSupport.ignore(log,e);}
         return _host;
     }
     
@@ -698,7 +698,7 @@ public class HttpRequest extends HttpMessage
         }
         catch(IllegalArgumentException e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
             throw new HttpException(HttpResponse.__400_Bad_Request,new String(buf,s3,e3-s3+1));
         }            
     }
@@ -871,7 +871,7 @@ public class HttpRequest extends HttpMessage
                         }
                         catch (EOFException e)
                         {
-                            log.trace(LogSupport.IGNORED,e);
+                            LogSupport.ignore(log,e);
                         }
                         catch (IOException e)
                         {
@@ -1083,7 +1083,7 @@ public class HttpRequest extends HttpMessage
                     }
                     catch(Exception e)
                     {
-                        log.trace(LogSupport.IGNORED,e);
+                        LogSupport.ignore(log,e);
                         log.warn("Bad Cookie received: "+e.toString());
                     }
                 }

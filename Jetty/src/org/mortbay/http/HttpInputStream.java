@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.LogSupport;
 
 
 /* ------------------------------------------------------------ */
@@ -139,7 +140,7 @@ public class HttpInputStream extends FilterInputStream
         if ((_deChunker!=null && _deChunker._chunkSize>0) ||
             _realIn.getByteLimit()>0)
             throw new IllegalStateException("Unread input");
-        log.trace("resetStream()");
+        if(LogSupport.isTraceEnabled(log))log.trace("resetStream()");
         in=_realIn;
         if (_deChunker!=null)
             _deChunker.resetStream();

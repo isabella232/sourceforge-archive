@@ -353,10 +353,10 @@ public class WebApplicationContext
             URL datatypesdtd = WebApplicationContext.class
                 .getResource ("/javax/servlet/resources/datatypes.dtd");
 
-
-            xmlParser.redirectEntity("web.dtd",dtd23);
             xmlParser.redirectEntity("web-app_2_2.dtd",dtd22);
             xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN",dtd22);
+            
+            xmlParser.redirectEntity("web.dtd",dtd23);
             xmlParser.redirectEntity("web-app_2_3.dtd",dtd23);
             xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN",dtd23);
             
@@ -942,7 +942,7 @@ public class WebApplicationContext
                 catch(Exception e)
                 {
                     log.warn("Cannot parse load-on-startup "+s+". Please use integer");
-                    log.trace(LogSupport.IGNORED,e);
+                    LogSupport.ignore(log,e);
                 }
                 holder.setInitOrder(order);
             }
@@ -1015,7 +1015,7 @@ public class WebApplicationContext
         }
         catch(Exception e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
 
         try
@@ -1025,7 +1025,7 @@ public class WebApplicationContext
         }
         catch(Exception e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
         
         if (!known)

@@ -75,7 +75,7 @@ public class HttpTunnel
         }
         catch (Exception e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
         finally
         {
@@ -85,7 +85,7 @@ public class HttpTunnel
                 _socket.shutdownOutput();
                 _socket.close();
             }
-            catch (Exception e){log.trace(LogSupport.IGNORED,e);}
+            catch (Exception e){LogSupport.ignore(log,e);}
             copy.interrupt();
         }
     }
@@ -106,7 +106,7 @@ public class HttpTunnel
 	    }
             catch (java.net.SocketTimeoutException e)
             {
-                log.trace(LogSupport.IGNORED,e);
+                LogSupport.ignore(log,e);
                 if (timestamp==0)
                     timestamp=System.currentTimeMillis();
                 else if (_timeoutMs>0 &&
@@ -131,7 +131,7 @@ public class HttpTunnel
             }
             catch (Exception e)
             {
-                log.trace(LogSupport.IGNORED,e);
+                LogSupport.ignore(log,e);
             }
             finally
             {
@@ -141,7 +141,7 @@ public class HttpTunnel
                     _socket.shutdownInput();
                     _socket.close();
                 }
-                catch (Exception e){log.trace(LogSupport.IGNORED,e);}
+                catch (Exception e){LogSupport.ignore(log,e);}
                 _thread.interrupt();
             }
         }

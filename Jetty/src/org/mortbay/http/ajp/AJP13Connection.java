@@ -168,7 +168,7 @@ public class AJP13Connection extends HttpConnection
             }
             catch (IOException e)
             {
-                log.trace(LogSupport.IGNORED,e);
+                LogSupport.ignore(log,e);
                 return false;
             }
             
@@ -287,7 +287,7 @@ public class AJP13Connection extends HttpConnection
         }
         catch (SocketException e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
             _persistent=false; 
         }
         catch (Exception e)
@@ -298,7 +298,7 @@ public class AJP13Connection extends HttpConnection
                 if (gotRequest)
                     _ajpOut.close();
             }
-            catch (IOException e2){log.trace(LogSupport.IGNORED,e2);}
+            catch (IOException e2){LogSupport.ignore(log,e2);}
         }
         finally
         {

@@ -234,7 +234,7 @@ public class URI
         }
         catch (Exception e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
             throw new IllegalArgumentException("Malformed URI '"+uri+
                                                "' : "+e.toString());
         }        

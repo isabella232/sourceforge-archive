@@ -616,7 +616,7 @@ public class ServletHandler extends AbstractHttpHandler
         }
         catch(Exception e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
         
         return Collections.EMPTY_SET;
@@ -640,7 +640,7 @@ public class ServletHandler extends AbstractHttpHandler
         }
         catch(IllegalArgumentException e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
         catch(MalformedURLException e)
         {
@@ -663,8 +663,8 @@ public class ServletHandler extends AbstractHttpHandler
             if (url!=null)
                 return url.openStream();
         }
-        catch(MalformedURLException e) {log.trace(LogSupport.IGNORED,e);}
-        catch(IOException e) {log.trace(LogSupport.IGNORED,e);}
+        catch(MalformedURLException e) {LogSupport.ignore(log,e);}
+        catch(IOException e) {LogSupport.ignore(log,e);}
         return null;
     }
 
@@ -728,7 +728,7 @@ public class ServletHandler extends AbstractHttpHandler
         }
         catch(Exception e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
         return null;
     }
@@ -745,7 +745,7 @@ public class ServletHandler extends AbstractHttpHandler
             name=__DEFAULT_SERVLET;
 
         try { return new Dispatcher(ServletHandler.this,name); }
-        catch(Exception e) {log.trace(LogSupport.IGNORED,e);}
+        catch(Exception e) {LogSupport.ignore(log,e);}
         
         return null;
     }

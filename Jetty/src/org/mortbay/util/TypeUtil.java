@@ -201,21 +201,21 @@ public class TypeUtil
         }
         catch(NoSuchMethodException e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
         catch(IllegalAccessException e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
         catch(InstantiationException e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
         catch(InvocationTargetException e)
         {
             if (e.getTargetException() instanceof Error)
                 throw (Error)(e.getTargetException());
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
         return null;
     }

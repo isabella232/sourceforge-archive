@@ -21,6 +21,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.IO;
 import org.mortbay.util.Resource;
+import org.mortbay.util.LogSupport;
 
 /* ------------------------------------------------------------ */
 /** ClassLoader for HttpContext.
@@ -185,32 +186,32 @@ public class ContextLoader extends URLClassLoader
         boolean tried_parent=false;
         if (c==null && (_java2compliant||isSystemPath(name)))
         {
-            if(log.isTraceEnabled())log.trace("try loadClass "+name+" from "+_parent);
+            if(LogSupport.isTraceEnabled(log))log.trace("try loadClass "+name+" from "+_parent);
             tried_parent=true;
             try
             {
                 c=_parent.loadClass(name);
-                if(log.isTraceEnabled())log.trace("loaded "+c);
+                if(LogSupport.isTraceEnabled(log))log.trace("loaded "+c);
             }
             catch(ClassNotFoundException e){ex=e;}
         }
         
         if (c==null)    
         {
-            if(log.isTraceEnabled())log.trace("try findClass "+name+" from "+_urlClassPath);
+            if(LogSupport.isTraceEnabled(log))log.trace("try findClass "+name+" from "+_urlClassPath);
             try
             {
                 c=this.findClass(name);
-                if(log.isTraceEnabled())log.trace("loaded "+c);
+                if(LogSupport.isTraceEnabled(log))log.trace("loaded "+c);
             }
             catch(ClassNotFoundException e){ex=e;}
         }
         
         if (c==null && !tried_parent)
         {
-            if(log.isTraceEnabled())log.trace("try loadClass "+name+" from "+_parent);
+            if(LogSupport.isTraceEnabled(log))log.trace("try loadClass "+name+" from "+_parent);
             c=_parent.loadClass(name);
-            if(log.isTraceEnabled())log.trace("loaded "+c);
+            if(LogSupport.isTraceEnabled(log))log.trace("loaded "+c);
         }
         
         if (c==null)
@@ -229,14 +230,14 @@ public class ContextLoader extends URLClassLoader
         boolean tried_parent=false;
         if (_java2compliant||isSystemPath(name) )
         {
-            if(log.isTraceEnabled())log.trace("try getResource "+name+" from "+_parent);
+            if(LogSupport.isTraceEnabled(log))log.trace("try getResource "+name+" from "+_parent);
             tried_parent=true;
             url=_parent.getResource(name);           
         }
         
         if (url==null)    
         {
-            if(log.isTraceEnabled())log.trace("try findResource "+name+" from "+_urlClassPath);
+            if(LogSupport.isTraceEnabled(log))log.trace("try findResource "+name+" from "+_urlClassPath);
             url=this.findResource(name);
 
             if (url==null && name.startsWith("/"))
@@ -248,12 +249,12 @@ public class ContextLoader extends URLClassLoader
         
         if (url==null && !tried_parent)
         {
-            if(log.isTraceEnabled())log.trace("try getResource "+name+" from "+_parent);
+            if(LogSupport.isTraceEnabled(log))log.trace("try getResource "+name+" from "+_parent);
             url=_parent.getResource(name); 
         }
         
         if (url!=null)
-            if(log.isTraceEnabled())log.trace("found "+url);
+            if(LogSupport.isTraceEnabled(log))log.trace("found "+url);
         
         return url;
     }

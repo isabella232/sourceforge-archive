@@ -238,7 +238,7 @@ public class HttpOutputStream
             }
             catch(Exception e)
             {
-                log.trace(LogSupport.IGNORED,e);
+                LogSupport.ignore(log,e);
             }
             finally
             {
@@ -263,7 +263,7 @@ public class HttpOutputStream
         }
         catch(IOException e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
     }
 
@@ -531,7 +531,7 @@ public class HttpOutputStream
         }
         catch (IOException e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
     }
 

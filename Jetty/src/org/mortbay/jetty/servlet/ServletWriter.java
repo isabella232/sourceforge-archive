@@ -115,7 +115,7 @@ class ServletWriter extends PrintWriter
             written=true;
             out.write(c);
         }
-        catch (IOException e){log.trace(LogSupport.IGNORED,e);setError();}
+        catch (IOException e){LogSupport.ignore(log,e);setError();}
     }
     
     public void write(char[] cbuf, int off, int len)
@@ -127,7 +127,7 @@ class ServletWriter extends PrintWriter
             written=true;
             out.write(cbuf,off,len);
         }
-        catch (IOException e){log.trace(LogSupport.IGNORED,e);setError();}
+        catch (IOException e){LogSupport.ignore(log,e);setError();}
     }
     
     public void write(char[] cbuf)
@@ -139,7 +139,7 @@ class ServletWriter extends PrintWriter
             written=true;
             out.write(cbuf,0,cbuf.length);
         }
-        catch (IOException e){log.trace(LogSupport.IGNORED,e);setError();}
+        catch (IOException e){LogSupport.ignore(log,e);setError();}
     }
 
     public void write(String s, int off, int len)
@@ -151,7 +151,7 @@ class ServletWriter extends PrintWriter
             written=true;
             out.write(s,off,len);
         }
-        catch (IOException e){log.trace(LogSupport.IGNORED,e);setError();}
+        catch (IOException e){LogSupport.ignore(log,e);setError();}
     }
 
     public void write(String s)
@@ -163,6 +163,6 @@ class ServletWriter extends PrintWriter
             written=true;
             out.write(s,0,s.length());
         }
-        catch (IOException e){log.trace(LogSupport.IGNORED,e);setError();}
+        catch (IOException e){LogSupport.ignore(log,e);setError();}
     }
 }

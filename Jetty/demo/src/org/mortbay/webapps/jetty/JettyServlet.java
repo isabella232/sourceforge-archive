@@ -91,7 +91,7 @@ public class JettyServlet extends HttpServlet
         }
         catch(Exception e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
         return lm;
     }   

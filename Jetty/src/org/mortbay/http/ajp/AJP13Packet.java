@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.ByteArrayPool;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.LogSupport;
 
 
 /* ------------------------------------------------------------ */
@@ -220,7 +221,7 @@ public abstract class AJP13Packet
         }
         while (_bytes<packetLength);
         
-        if(log.isTraceEnabled())log.trace("AJP13 rcv: "+this.toString(64));
+        if(LogSupport.isTraceEnabled(log))log.trace("AJP13 rcv: "+this.toString(64));
 	//System.err.println(Thread.currentThread()+" AJP13 rcv "+this.toString());
 
         return true;
@@ -230,7 +231,7 @@ public abstract class AJP13Packet
     public void write(OutputStream out)
         throws IOException
     {
-        if(log.isTraceEnabled())log.trace("AJP13 snd: "+this.toString(64));
+        if(LogSupport.isTraceEnabled(log))log.trace("AJP13 snd: "+this.toString(64));
 	//System.err.println(Thread.currentThread()+" AJP13 snd "+this.toString());
         out.write(_buf,0,_bytes);
     }

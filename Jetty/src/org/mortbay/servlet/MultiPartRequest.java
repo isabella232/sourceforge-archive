@@ -21,6 +21,7 @@ import org.mortbay.http.HttpFields;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.LogSupport;
 
 /* ------------------------------------------------------------ */
 /** Multipart Form Data request.
@@ -144,6 +145,7 @@ public class MultiPartRequest
         return new ByteArrayInputStream(((Part)part.get(0))._data);
     }
 
+    /* ------------------------------------------------------------ */
     public InputStream[] getInputStreams(String name) 
     {
         List parts = (List)_partMap.getValues(name);
@@ -169,6 +171,7 @@ public class MultiPartRequest
         return ((Part)part.get(0))._headers;
     }
 
+    /* ------------------------------------------------------------ */
     public Hashtable[] getMultipleParams(String name) 
     {
         List parts = (List)_partMap.getValues(name);
@@ -194,6 +197,7 @@ public class MultiPartRequest
         return ((Part)part.get(0))._filename;
     }
 
+    /* ------------------------------------------------------------ */
     public String[] getFilenames(String name) 
     {
         List parts = (List)_partMap.getValues(name);
@@ -356,7 +360,7 @@ public class MultiPartRequest
             lf=(c==10 || _char==10);
             if (_char==10) _char=-2;  
         }
-        if(log.isTraceEnabled())log.trace(baos.toString());
+        if(LogSupport.isTraceEnabled(log))log.trace(baos.toString());
         return baos.toByteArray();
     }
     

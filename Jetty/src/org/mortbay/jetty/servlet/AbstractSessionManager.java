@@ -406,7 +406,7 @@ public abstract class AbstractSessionManager implements SessionManager
             }
             catch(ConcurrentModificationException e)
             {
-                log.trace(LogSupport.IGNORED,e);
+                LogSupport.ignore(log,e);
                 // Oops something changed while we were looking.
                 // Lock the context and try again.
                 // Set our priority high while we have the sessions locked

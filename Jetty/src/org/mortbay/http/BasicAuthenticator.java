@@ -73,7 +73,7 @@ public class BasicAuthenticator implements Authenticator
             catch (Exception e)
             {
                 log.warn("AUTH FAILURE: "+e.toString());
-                log.trace(LogSupport.IGNORED,e);
+                LogSupport.ignore(log,e);
             }
         }
 

@@ -252,12 +252,12 @@ public class ResourceHandler extends AbstractHttpHandler
                     if (resource.exists())
                         response.sendError(HttpResponse.__501_Not_Implemented);
                 }
-                catch(Exception e) {log.trace(LogSupport.IGNORED,e);}
+                catch(Exception e) {LogSupport.ignore(log,e);}
             }
         }
         catch(IllegalArgumentException e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
         finally
         {

@@ -269,11 +269,11 @@ public class XmlConfiguration
             return;
         }
         catch(IllegalArgumentException e)
-        {log.trace(LogSupport.IGNORED,e);}
+        {LogSupport.ignore(log,e);}
         catch(IllegalAccessException e)
-        {log.trace(LogSupport.IGNORED,e);}
+        {LogSupport.ignore(log,e);}
         catch(NoSuchMethodException e)
-        {log.trace(LogSupport.IGNORED,e);}
+        {LogSupport.ignore(log,e);}
         
         // Try for native match
         try{
@@ -284,13 +284,13 @@ public class XmlConfiguration
             return;
         }
         catch(NoSuchFieldException e)
-        {log.trace(LogSupport.IGNORED,e);}
+        {LogSupport.ignore(log,e);}
         catch(IllegalArgumentException e)
-        {log.trace(LogSupport.IGNORED,e);}
+        {LogSupport.ignore(log,e);}
         catch(IllegalAccessException e)
-        {log.trace(LogSupport.IGNORED,e);}
+        {LogSupport.ignore(log,e);}
         catch(NoSuchMethodException e)
-        {log.trace(LogSupport.IGNORED,e);}
+        {LogSupport.ignore(log,e);}
 
 
         // Try a field
@@ -304,7 +304,7 @@ public class XmlConfiguration
             }
         }
         catch (NoSuchFieldException e)
-        {log.trace(LogSupport.IGNORED,e);}
+        {LogSupport.ignore(log,e);}
 
         // Search for a match by trying all the set methods
         Method[] sets = oClass.getMethods();
@@ -321,8 +321,8 @@ public class XmlConfiguration
                     sets[s].invoke(obj,arg);
                     return;
                 }
-                catch(IllegalArgumentException e){log.trace(LogSupport.IGNORED,e);}
-                catch(IllegalAccessException e){log.trace(LogSupport.IGNORED,e);}
+                catch(IllegalArgumentException e){LogSupport.ignore(log,e);}
+                catch(IllegalAccessException e){LogSupport.ignore(log,e);}
             }
         }
 
@@ -349,11 +349,11 @@ public class XmlConfiguration
                 return;
             }
             catch(NoSuchMethodException e)
-            {log.trace(LogSupport.IGNORED,e);}
+            {LogSupport.ignore(log,e);}
             catch(IllegalAccessException e)
-            {log.trace(LogSupport.IGNORED,e);}
+            {LogSupport.ignore(log,e);}
             catch(InstantiationException e)
-            {log.trace(LogSupport.IGNORED,e);}
+            {LogSupport.ignore(log,e);}
         }
 
         // No Joy
@@ -509,9 +509,9 @@ public class XmlConfiguration
             boolean called=false;
             try{n=methods[c].invoke(obj,arg);called=true;}
             catch(IllegalAccessException e)
-            {log.trace(LogSupport.IGNORED,e);}
+            {LogSupport.ignore(log,e);}
             catch(IllegalArgumentException e)
-            {log.trace(LogSupport.IGNORED,e);}
+            {LogSupport.ignore(log,e);}
             if (called)
             {
                 configure(n,node,argi);
@@ -579,11 +579,11 @@ public class XmlConfiguration
                 called=true;
             }
             catch(IllegalAccessException e)
-            {log.trace(LogSupport.IGNORED,e);}
+            {LogSupport.ignore(log,e);}
             catch(InstantiationException e)
-            {log.trace(LogSupport.IGNORED,e);}
+            {LogSupport.ignore(log,e);}
             catch(IllegalArgumentException e)
-            {log.trace(LogSupport.IGNORED,e);}
+            {LogSupport.ignore(log,e);}
             if(called)
             {
                 configure(n,node,argi);

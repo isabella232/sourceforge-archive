@@ -256,7 +256,7 @@ public class CGI extends HttpServlet
                             IO.copy(inFromReq,outToCgi,inputLength);
                         outToCgi.close();
                     }
-                    catch(IOException e){log.trace(LogSupport.IGNORED,e);}
+                    catch(IOException e){LogSupport.ignore(log,e);}
                 }
             }).start();
 

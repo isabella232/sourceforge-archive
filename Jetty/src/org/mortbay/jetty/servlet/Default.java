@@ -239,12 +239,12 @@ public class Default extends HttpServlet
                     else
                         _servletHandler.notFound(request,response);
                 }
-                catch(Exception e) {log.trace(LogSupport.IGNORED,e);}
+                catch(Exception e) {LogSupport.ignore(log,e);}
             }
         }
         catch(IllegalArgumentException e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
         }
         finally
         {

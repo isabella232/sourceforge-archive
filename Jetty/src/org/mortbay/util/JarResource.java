@@ -48,7 +48,7 @@ public class JarResource extends URLResource
         }
         catch(IOException e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
             _jarConnection=null;
         }
         

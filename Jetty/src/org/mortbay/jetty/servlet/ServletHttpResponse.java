@@ -435,35 +435,35 @@ public class ServletHttpResponse implements HttpServletResponse
     public void setDateHeader(String name, long value) 
     {
         try{_httpResponse.setDateField(name,value);}
-        catch(IllegalStateException e){log.trace(LogSupport.IGNORED,e);}
+        catch(IllegalStateException e){LogSupport.ignore(log,e);}
     }
 
     /* ------------------------------------------------------------ */
     public void setHeader(String name, String value) 
     {
         try{_httpResponse.setField(name,value);}
-        catch(IllegalStateException e){log.trace(LogSupport.IGNORED,e);}
+        catch(IllegalStateException e){LogSupport.ignore(log,e);}
     }
 
     /* ------------------------------------------------------------ */
     public void setIntHeader(String name, int value) 
     {
         try{_httpResponse.setIntField(name,value);}
-        catch(IllegalStateException e){log.trace(LogSupport.IGNORED,e);}
+        catch(IllegalStateException e){LogSupport.ignore(log,e);}
     }
     
     /* ------------------------------------------------------------ */
     public void addDateHeader(String name, long value) 
     {
         try{_httpResponse.addDateField(name,value);}
-        catch(IllegalStateException e){log.trace(LogSupport.IGNORED,e);}
+        catch(IllegalStateException e){LogSupport.ignore(log,e);}
     }
 
     /* ------------------------------------------------------------ */
     public void addHeader(String name, String value) 
     {
         try{_httpResponse.addField(name,value);}
-        catch(IllegalStateException e){log.trace(LogSupport.IGNORED,e);}
+        catch(IllegalStateException e){LogSupport.ignore(log,e);}
     }
     
 
@@ -471,7 +471,7 @@ public class ServletHttpResponse implements HttpServletResponse
     public void addIntHeader(String name, int value) 
     {
         try{_httpResponse.addIntField(name,value);}
-        catch(IllegalStateException e){log.trace(LogSupport.IGNORED,e);}
+        catch(IllegalStateException e){LogSupport.ignore(log,e);}
     }
 
     /* ------------------------------------------------------------ */

@@ -246,7 +246,7 @@ public class IO extends ThreadPool
         }
         catch(IOException e)
         {
-            log.trace(LogSupport.IGNORED,e);
+            LogSupport.ignore(log,e);
             try{
                 if (job.out!=null)
                     job.out.close();
@@ -255,7 +255,7 @@ public class IO extends ThreadPool
             }
             catch(IOException e2)
             {
-                log.trace(LogSupport.IGNORED,e2);
+                LogSupport.ignore(log,e2);
             }
         }
     }

@@ -227,7 +227,7 @@ public class Server extends org.mortbay.jetty.Server
         for (int i=0;i<arg.length;i++)
         {
             try{servers[i].join();}
-            catch (Exception e){log.trace(LogSupport.IGNORED,e);}
+            catch (Exception e){LogSupport.ignore(log,e);}
         }
     }
 

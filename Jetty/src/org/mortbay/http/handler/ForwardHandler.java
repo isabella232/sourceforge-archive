@@ -17,6 +17,7 @@ import org.mortbay.http.HttpResponse;
 import org.mortbay.http.PathMap;
 import org.mortbay.util.URI;
 import org.mortbay.util.UrlEncoded;
+import org.mortbay.util.LogSupport;
 
 
 /* ------------------------------------------------------------ */
@@ -87,7 +88,7 @@ public class ForwardHandler extends AbstractHttpHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
-        if(log.isTraceEnabled())log.trace("Look for "+pathInContext+" in "+_forward);
+        if(LogSupport.isTraceEnabled(log))log.trace("Look for "+pathInContext+" in "+_forward);
         
         String newPath=null;
         String query=null;
