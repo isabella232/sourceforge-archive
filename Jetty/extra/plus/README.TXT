@@ -72,6 +72,6 @@ Demonstration webapps are available for both JAAS and JettyPlus:
       + $jetty.home/extra/resources/carol.properties
          JNDI config file
 
-      + $jetty.home/extra/resources/log4j.xml
+      + $jetty.home/extra/resources/log4j.properties
          Log4j config file
 

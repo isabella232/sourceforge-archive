@@ -32,11 +32,11 @@ To use JettyPlus, you must:
 
   <li> Reference this class on the runline:
 <BR>
-  <code><pre>   java -Djetty.server=org.mortbay.jetty.plus.Server -Dlog4j.configuration=log4j.xml -jar start.jar config.xml
+  <code><pre>   java -DSTART=extra/etc/start.config -Dmain.class=org.mortbay.jetty.plus.Server -jar start.jar config.xml
   </pre></code>
 If you prefer, instead of specifying the class on the runline,
 you can edit the <code>start.config</code> file inside
-<code>start.jar</code> and change the line:
+<code>extra/etc/start.config</code> and change the line:
   <code><pre>
              # The main class to run
              org.mortbay.jetty.Server.class  
@@ -338,8 +338,9 @@ java:/comp/env/mything/
 <H3> Log4J </H3>
 The JettyPlus package provides a Jetty <code>org.mortbay.util.LogSink</code> to
 enable Jetty log messages to appear in Log4J style logs. The
-<code>org.mortbay.jetty.plus.resource.jar</code> file contains a
-<code>log4j.xml</code> configuration file which may be modified
+<code>extra/resources</code> directory is added to the classpath by
+<code>extra/etc/start.config</code> and contains a
+<code>log4j.properties</code> configuration file which may be modified
 as needed.
 <P>
 To use Log4J:
@@ -362,7 +363,7 @@ To use Log4J:
 
 <li><b>Step 2:</b>  enable it on the command line:
 <code><pre>
-  java -Dlog4j.configuration=log4j.xml -jar start.jar config.xml
+  java -Dlog4j.configuration=log4j.properties -jar start.jar config.xml
 </pre></code>
 </ul>
 
