@@ -22,24 +22,13 @@
 
 
   <!-- =============================================================== -->
-  <!-- Set the transaction manager to use                              -->
+  <!-- Add a transaction manager                                       -->
   <!-- =============================================================== -->
-  <Call name="setTransactionManager">
+  <Call name="addService">
     <Arg>
-      <New class="org.mortbay.jetty.plus.JotmService ">
-<!--
-        <Call name="addDataSource">
-           <Arg>dataSourceName</Arg>
-           <Arg>driverName</Arg>
-           <Arg>url</Arg>
-           <Arg>user</Arg>
-           <Arg>password</Arg>
-           <Arg>initial connection count</Arg>
-           <Arg>minimal pool size</Arg>
-           <Arg>maximal pool size</Arg>
-        </Call>
--->
-        <Call name="addDataSource">
+      <New class="org.mortbay.jetty.plus.JotmService">
+        <Set name="Name">TransactionMgr</Set>
+           <Call name="addDataSource">
            <Arg>jdbc/myDB</Arg>
            <Arg>org.hsqldb.jdbcDriver</Arg>
            <Arg>jdbc:hsqldb:extra/etc/tmtest</Arg>
@@ -49,9 +38,36 @@
            <Arg>4</Arg>
            <Arg>15</Arg>
         </Call>
+     </New>
+   </Arg>
+  </Call>
+
+
+  <!-- =============================================================== -->
+  <!-- Add a mail service                                              -->
+  <!--  You must replace all XXX values below with values appropriate  -->
+  <!--  for your installation.                                         -->
+  <!-- =============================================================== -->
+  <Call name="addService">
+    <Arg>
+      <New class="org.mortbay.jetty.plus.MailService">
+        <Set name="Name">MailService</Set>
+        <Set name="JNDI">mail/TestMail</Set>
+	<!-- set up the id of the smtp user                 -->
+        <Set name="User">XXX</Set>
+	<!-- set up the password of the smtp user           -->
+        <Set name="Password">XXX</Set>
+	<!-- set up the hostname/ip addr of the smtp server -->
+        <Put name="mail.smtp.host">XXX</Put>
+	<!-- setup any javax.mail.smtp provider variables   -->
+        <Put name="mail.pop3.user">zzz</Put>
+        <Put name="mail.pop3.host">vvv</Put>
+        <Put name="mail.from">me@me</Put>
+        <Put name="mail.debug">false</Put>
       </New>
     </Arg>
   </Call>
+         
 
   <!-- =============================================================== -->
   <!-- Configure the Request Listeners                                 -->
