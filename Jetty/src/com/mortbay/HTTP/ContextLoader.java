@@ -6,6 +6,7 @@
 package com.mortbay.HTTP;
 
 import com.mortbay.Util.Code;
+import com.mortbay.Util.UrlPolicy;
 import com.mortbay.Util.IO;
 import com.mortbay.Util.Resource;
 import java.io.File;
@@ -15,6 +16,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.StringTokenizer;
 import java.util.HashMap;
+import java.security.Policy;
+import java.security.PermissionCollection;
+import java.security.CodeSource;
 
 /* ------------------------------------------------------------ */
 /** ClassLoader for HandlerContext.
@@ -30,6 +34,7 @@ public class ContextLoader extends URLClassLoader
     private PathInfo _info;
     private String _path;
     private static Class __servletClass = javax.servlet.http.HttpServlet.class;
+    private PermissionCollection _permissions;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -40,14 +45,17 @@ public class ContextLoader extends URLClassLoader
      * @exception IOException
      */
     public ContextLoader(String classPath,
-                         ClassLoader parent)
+                         ClassLoader parent,
+                         PermissionCollection permisions)
     {
         super(decodePath(classPath),parent);
         _info=(PathInfo)__infoMap.get(classPath);
         _path=_info._classPath;
+        _permissions=permisions;
         
         Code.debug("ContextLoader: ",_path,",",parent,
                    " == ",_info._fileClassPath);
+        Code.debug("Permissions=",_permissions);
     }
 
     /* ------------------------------------------------------------ */
@@ -186,6 +194,15 @@ public class ContextLoader extends URLClassLoader
     {
         return "com.mortbay.HTTP.ContextLoader("+
             _path+") / "+getParent();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public PermissionCollection getPermissions(CodeSource cs)
+    {
+        PermissionCollection pc =(_permissions==null)?
+            super.getPermissions(cs):_permissions;
+        Code.debug("loader.getPermissions("+cs+")="+pc);
+        return pc;    
     }
     
     /* ------------------------------------------------------------ */

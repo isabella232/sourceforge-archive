@@ -31,6 +31,9 @@ import java.util.HashMap;
 import java.util.StringTokenizer;
 import java.util.List;
 import java.util.Map;
+import java.security.PermissionCollection;
+import java.security.Permissions;
+import java.security.Permission;
 
 /* ------------------------------------------------------------ */
 /** Context for a collection of HttpHandlers.
@@ -227,6 +230,8 @@ public class HandlerContext implements LifeCycle
     private Map _encodingMap;
     private Map _resourceAliases;
     private Map _errorPages;
+
+    private PermissionCollection _permissions;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -977,6 +982,43 @@ public class HandlerContext implements LifeCycle
         _redirectNullPath=b;
     }
 
+
+    /* ------------------------------------------------------------ */
+    /** Set the permissions to be used for this context.
+     * The collection of permissions set here are used for all classes
+     * loaded by this context.  This is simpler that creating a
+     * security policy file, as not all code sources may be statically
+     * known.
+     * @param permissions 
+     */
+    public void setPermissions(PermissionCollection permissions)
+    {
+        _permissions=permissions;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the permissions to be used for this context.
+     */
+    public PermissionCollection getPermissions()
+    {
+        return _permissions;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Add a permission to this context.
+     * The collection of permissions set here are used for all classes
+     * loaded by this context.  This is simpler that creating a
+     * security policy file, as not all code sources may be statically
+     * known.
+     * @param permission 
+     */
+    public void addPermission(Permission permission)
+    {
+        if (_permissions==null)
+            _permissions=new Permissions();
+        _permissions.add(permission);
+    }
+    
     /* ------------------------------------------------------------ */
     /** 
      * @param request 
@@ -1107,7 +1149,7 @@ public class HandlerContext implements LifeCycle
             if (_classPath==null || _classPath.length()==0)
                 _loader=_parent;
             else
-                _loader=new ContextLoader(_classPath,_parent);
+                _loader=new ContextLoader(_classPath,_parent,_permissions);
         }
         
         // Start the handlers

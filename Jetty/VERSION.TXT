@@ -14,6 +14,8 @@ Jetty-3.0.2 - 13 Jan 2001
  + Allow '+' in path portion of a URL.
  + Try ISO8859_1 encoding if can't find ISO-8859-1
  + Restructured demo site pages.
+ + Context specific security permissions.
+ + Added etc/jetty.policy as example policy file.
 
 Jetty-3.0.1 - 20 Dec 2000
  + Fixed value unbind notification for session invalidation. 
