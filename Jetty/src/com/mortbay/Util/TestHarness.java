@@ -8,7 +8,6 @@ import com.mortbay.Util.DataClassTest.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import com.sun.java.util.collections.*;
 
 public class TestHarness
 {
