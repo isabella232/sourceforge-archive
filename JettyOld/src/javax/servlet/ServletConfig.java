@@ -23,40 +23,85 @@ package javax.servlet;
 
 import java.util.Enumeration;
 
-/**
- * Defines an object that a servlet engine generates to pass
- * configuration information to a servlet when such servlet
- * is initialized. The configuration information that this servlet
- * will have access to is a set of name/value pairs that
- * describe initialization parameters and the <tt>ServletContext</tt>
- * object which describes the context within which the servlet
- * will be running.
- */
 
+
+/**
+ * 
+ * Defines a servlet configuration object, which a servlet engine
+ * uses to pass information
+ * to a servlet in order to initialize the servlet. 
+ *
+ * <p>The configuration information contains initialization parameters,
+ * which are a set of name/value pairs, and a {@link ServletContext} object,
+ * which gives the servlet information about the server.
+ *
+ * @author 	Various
+ * @version 	$Version$
+ *
+ * @see 	ServletContext
+ *
+ */
+ 
 public interface ServletConfig {
 
+
+
+
     /**
-     * Returns the <tt>ServletContext</tt> for this servlet.
+     * Returns the {@link ServletContext} object that the server
+     * has passed to this servlet. The <code>ServletContext</code> 
+     * object is part of the <code>ServletConfig</code> object this 
+     * interface defines.
+     *
+     *
+     * @return		a {@link ServletContext} object, which
+     *			gives the servlet information about how
+     *			to interact with the server
+     * 
+     * @see		ServletContext
+     *
      */
 
     public ServletContext getServletContext();
+    
+    
+    
+    
 
     /**
-     * Returns a string containing the value of the named
-     * initialization parameter of the servlet, or null if the
-     * parameter does not exist.  Init parameters have a single string
-     * value; it is the responsibility of the servlet writer to
-     * interpret the string.
+     * Returns a <code>String</code> containing the value of the 
+     * named initialization parameter, or <code>null</code> if 
+     * the parameter does not exist.
      *
-     * @param name the name of the parameter whose value is requested
+     * <p>The value of an initialization parameter is a single
+     * <code>String</code>, which you must interpret.
+     *
+     *
+     * @param name	a <code>String</code> containing the name
+     *			of the parameter whose value is requested
+     *
+     * @return		a <code>String</code> representing the value 
+     *			of the parameter
+     *
      */
 
     public String getInitParameter(String name);
+    
+    
+    
 
     /**
      * Returns the names of the servlet's initialization parameters
-     * as an enumeration of strings, or an empty enumeration if there
-     * are no initialization parameters.
+     * as an <code>Enumeration</code> of <code>String</code> objects, 
+     * or an empty <code>Enumeration</code> if the servlet has
+     * no initialization parameters.
+     *
+     * @return		an <code>Enumeration</code> of <code>String</code> 
+     *			objects containing the names of the servlet's 
+     *			initialization parameters
+     *
+     *
+     *
      */
 
     public Enumeration getInitParameterNames();

@@ -23,38 +23,70 @@ package javax.servlet;
 
 
 /**
- * This exception is thrown to indicate a servlet problem.
+ * Defines a general exception a servlet throws when it
+ * encounters difficulty.
+ *
+ * @author 	Various
+ * @version 	$Version$
  *
  */
+
 
 public class ServletException extends Exception {
 
     private Throwable rootCause;
 
+
+
+
+
     /**
-     * Constructs a new ServletException.
+     * Constructs a new servlet exception.
+     *
      */
 
     public ServletException() {
 	super();
     }
+    
+   
+
+    
 
     /**
-     * Constructs a new ServletException with the specified message.
+     * Constructs a new servlet exception with the
+     * message you specify. The message can be written 
+     * to the server log file or displayed for the user. 
      *
-     * @param message Message of exception
+     * @param message 		a <code>String</code> 
+     *				specifying the text of 
+     *				the exception message
+     *
      */
 
     public ServletException(String message) {
 	super(message);
     }
+    
+   
+   
+    
 
     /**
-     * Constructs a new ServletException with the specified message
-     * and root cause.
+     * Constructs a new servlet exception when the servlet 
+     * needs to throw an exception and include a message 
+     * about another exception that interfered with its 
+     * normal operation.
      *
-     * @param message Message of exception
-     * @param rootCause Exception that caused this exception to be raised
+     *
+     * @param message 		a <code>String</code> containing 
+     *				the text of the exception message
+     *
+     * @param rootCause		the <code>Throwable</code> exception 
+     *				that interfered with the servlet's
+     *				normal operation, making this servlet
+     *				exception necessary
+     *
      */
     
     public ServletException(String message, Throwable rootCause) {
@@ -62,22 +94,50 @@ public class ServletException extends Exception {
 	this.rootCause = rootCause;
     }
 
+
+
+
+
     /**
-     * Constructs a new ServletException with the specified message
-     * and root cause.
+     * Constructs a new servlet exception as
+     * a result of a system exception and uses the localized
+     * system exception message.
      *
-     * @param rootCause Exception that caused this exception to be raised
+     * <p>The system exception is a <code>Throwable</code> exception.
+     * This method calls the <code>getLocalizedMessage</code> method
+     * on the <code>Throwable</code> exception to get a localized exception
+     * message. If you subclass <code>ServletException</code>, you can
+     * override this method to create an exception message designed for
+     * a specific locale.
+     *
+     * @param rootCause 	the system exception that 
+     * 				makes this servlet exception necessary
+     *
      */
 
     public ServletException(Throwable rootCause) {
 	super(rootCause.getLocalizedMessage());
 	this.rootCause = rootCause;
     }
+  
+  
+ 
+ 
     
     /**
-     * Returns the root cause of this exception.
+     * Returns the <code>Throwable</code> system exception 
+     * that makes this servlet exception necessary. 
      *
-     * @return Throwable
+     * <p>You can use any of the methods defined
+     * in <code>java.lang.Throwable</code> on the <code>Throwable</code> object,
+     * including <code>getMessage</code> to get a text message about the
+     * exception, <code>getLocalizedMessage</code> to get a localized 
+     * exception message, and <code>printStackTrace</code>.
+     *
+     *
+     * @return			the <code>Throwable</code> system exception 
+     *				that makes this servlet exception necessary
+     *
      */
     
     public Throwable getRootCause() {

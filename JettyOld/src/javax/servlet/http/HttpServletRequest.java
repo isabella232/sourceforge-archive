@@ -25,271 +25,501 @@ import javax.servlet.ServletRequest;
 import java.util.Enumeration;
 
 /**
- * An HTTP servlet request.  This interface gets data from the client
- * to the servlet for use in the <code>HttpServlet.service</code>
- * method.  It allows the HTTP-protocol specified header information to
- * be accessed from the <code>service</code> method.  This interface is
- * implemented by network-service developers for use within servlets.
+ *
+ * Extends the {@link javax.servlet.ServletRequest} interface
+ * to provide additional functionality for the request object
+ * that is passed to an HTTP servlet. 
+ *
+ * <p>The servlet engine implements
+ * this interface to create <code>HttpServletRequest</code> objects,
+ * which pass information from the client to the <code>service<code>
+ * method of an <code>HttpServlet</code>.
+ *
+ *
+ * @author 	Various
+ * @version	$Version$
+ *
  *
  */
 
 public interface HttpServletRequest extends ServletRequest {
 
+
+
     /**
-     * Gets the authentication scheme of this request.  Same as the CGI
-     * variable AUTH_TYPE.
+     * Returns the name of the authentication scheme the
+     * server uses, for example, "BASIC" or "SSL," or <code>null</code>
+     * if the server does not have an authentication scheme. 
      *
-     * @return this request's authentication scheme, or null if none.
+     * <p>The authentication scheme provides a challenge-response
+     * model in which the server challenges the client,
+     * and the client provides authentication information.
+     * Same as the value of the CGI variable AUTH_TYPE.
+     *
+     *
+     * @return		a <code>String</code> specifying the name of
+     *			the authentication scheme, or
+     *			<code>null</code> if the server
+     *			does not have an authentication
+     *			scheme
+     *
      */
-
+   
     public String getAuthType();
+    
+   
+    
 
     /**
-     * Gets the array of cookies found in this request.
      *
-     * @return the array of cookies found in this request
+     * Returns an array containing all of the <code>Cookie</code>
+     * objects the browser sent with this request.
+     * This method returns <code>null</code> if the browser did 
+     * not send any cookies.
+     *
+     * @return		an array of all the <code>Cookies</code>
+     *			included with this request, or <code>null</code>
+     *			if the request has no cookies
+     *
+     *
      */
 
     public Cookie[] getCookies();
+    
+    
+    
 
     /**
-     * Gets the value of the requested date header field of this
-     * request.  If the header can't be converted to a date, the method
-     * throws an IllegalArgumentException.  The case of the header
-     * field name is ignored.
-     * 
-     * @param name the String containing the name of the requested
-     * header field
-     * @return the value the requested date header field, or -1 if not
-     * found.
+     *
+     * Returns the value of the specified request header
+     * as a <code>long</code> value that represents a 
+     * <code>Date</code> object. Use this method with
+     * headers that contain dates, such as
+     * <code>If-Modified-Since</code>. 
+     *
+     * <p>The date is returned as
+     * the number of milliseconds since January 1, 1970 GMT.
+     * The header name is case insensitive.
+     *
+     * <p>If the request did not have a header of the
+     * specified name, this method returns -1. If the header
+     * can't be converted to a date, the method returns
+     * an <code>IllegalArgumentException</code>.
+     *
+     * @param name		a <code>String</code> specifying the
+     *				name of the header
+     *
+     * @return			a <code>long</code> value
+     *				representing the date specified
+     *				in the header expressed as
+     *				the number of milliseconds
+     *				since January 1, 1970 GMT,
+     *				or -1 if the named header
+     *				was not included with the
+     *				reqest
+     *
      */
 
     public long getDateHeader(String name);
+    
+    
+    
 
     /**
-     * Gets the value of the requested header field of this request.
-     * The case of the header field name is ignored.
-     * 
-     * @param name the String containing the name of the requested
-     * header field
-     * @return the value of the requested header field, or null if not
-     * known.
-     */
+     *
+     * Returns the value of the specified request header
+     * as a <code>String</code>. If the named header wasn't 
+     * sent with
+     * the request, this method returns <code>null</code>.
+     * The header name is case insensitive. You can use
+     * this method with any request header.
+     *
+     * @param name		a <code>String</code> specifying the
+     *				header name
+     *
+     * @return			a <code>String</code> containing the
+     *				value of the requested
+     *				header, or <code>null</code>
+     *				if the request does not
+     *				have a header of that name
+     *
+     */			
 
     public String getHeader(String name); 
+    
+    
+    
+    
 
     /**
-     * Gets the header names for this request.
      *
-     * @return an enumeration of strings representing the header names
-     * for this request. Some server implementations do not allow
-     * headers to be accessed in this way, in which case this method
-     * will return null.
+     * Returns an enumeration of all the header names
+     * this request contains. If the request has no
+     * headers, this method returns an empty enumeration.
+     *
+     * <p>Some servlet engines do not allow do not allow
+     * servlets to access headers using this method, in
+     * which case this method returns <code>null</code>
+     *
+     * @return			an enumeration of all the
+     *				header names sent with this
+     *				request; if the request has
+     *				no headers, an empty enumeration;
+     *				if the servlet engine does not
+     *				allow servlets to use this method,
+     *				<code>null</code>
+     *
      */
 
     public Enumeration getHeaderNames();
+    
+    
+    
 
     /**
-     * Gets the value of the specified integer header field of this
-     * request.  The case of the header field name is ignored.  If the
-     * header can't be converted to an integer, the method throws a
-     * NumberFormatException.
-     * 
-     * @param name the String containing the name of the requested
-     * header field
-     * @return the value of the requested header field, or -1 if not
-     * found.
+     *
+     * Returns the value of the specified request header
+     * as an integer. If the request does not have a header
+     * of the specified name, this method returns -1. If the
+     * header cannot be converted to an integer, this method
+     * throws a <code>NumberFormatException</code>.
+     *
+     * <p>The header name is case insensitive.
+     *
+     * @param name		a <code>String</code> specifying the name
+     *				of a request header
+     *
+     * @return			an integer expressing the value 
+     * 				of the request header or -1
+     *				if the request doesn't have a
+     *				header of this name
+     *
      */
 
     public int getIntHeader(String name);
+    
+    
+    
 
     /**
-     * Gets the HTTP method (for example, GET, POST, PUT) with which
-     * this request was made. Same as the CGI variable REQUEST_METHOD.
      *
-     * @return the HTTP method with which this request was made
+     * Returns the name of the HTTP method with which this 
+     * request was made, for example, GET, POST, or PUT.
+     * The returned <code>String</code> is the same as
+     * the value of the CGI variable REQUEST_METHOD.
+     *
+     * @return			a <code>String</code> 
+     *				specifying the name
+     *				of the method with which
+     *				this request was made
+     *
      */
-
+ 
     public String getMethod();
+    
+    
+    
 
     /**
-     * Gets any optional extra path information following the servlet
-     * path of this request's URI, but immediately preceding its query
-     * string. Same as the CGI variable PATH_INFO.
      *
-     * @return the optional path information following the servlet
-     * path, but before the query string, in this request's URI; null
-     * if this request's URI contains no extra path information
+     * Returns any extra path information associated with
+     * the URL the client sent when it made this request.
+     * The extra path information follows the servlet path
+     * (the URI of the URL) but precedes the query string.
+     * This method returns <code>null</code> if there
+     * was no extra path information.
+     *
+     * <p>The information this method returns is
+     * the same as the value of the CGI variable PATH_INFO.
+     *
+     *
+     * @return		a <code>String</code> specifying 
+     *			extra path information that comes
+     *			after the servlet path but before
+     *			the query string in the request URL;
+     *			or <code>null</code> if the URL does not have
+     *			any extra path information
+     *
      */
-
+     
     public String getPathInfo();
+    
 
-   /**
-     * Gets any optional extra path information following the servlet
-     * path of this request's URI, but immediately preceding its query
-     * string, and translates it to a real path.  Same as the CGI
-     * variable PATH_TRANSLATED.
+ 
+
+    /**
      *
-     * @return extra path information translated to a real path or null
-     * if no extra path information is in the request's URI
+     * Returns any extra path information after the servlet name
+     * but before the query string, and translates it to a real
+     * path. Same as the value of the CGI variable PATH_TRANSLATED.
+     *
+     * <p>If the URL does not have any extra path information,
+     * this method returns <code>null</code>.
+     *
+     *
+     * @return		a <code>String</code> specifying the
+     *			real path, or <code>null</code> if
+     *			the URL does not have any extra path
+     *			information
+     *
+     *
      */
 
     public String getPathTranslated();
+    
+    
+    
 
     /**
-     * Gets any query string that is part of the HTTP request URI.
-     * Same as the CGI variable QUERY_STRING.
      *
-     * @return query string that is part of this request's URI, or null
-     * if it contains no query string
+     * Returns the query string that is contained in the request
+     * URL after the path. This method returns <code>null</code>
+     * if the URL does not have a query string. Same as the value
+     * of the CGI variable QUERY_STRING.
+     *
+     * @return		a <code>String</code> containing the query
+     *			string or <code>null</code> if the URL 
+     *			contains no query string
+     *
      */
 
     public String getQueryString();
+    
+    
+    
 
     /**
-     * Gets the name of the user making this request.  The user name is
-     * set with HTTP authentication.  Whether the user name will
-     * continue to be sent with each subsequent communication is
-     * browser-dependent.  Same as the CGI variable REMOTE_USER.
      *
-     * @return the name of the user making this request, or null if not
-     * known.
+     * Returns the name of the user making this request, if the
+     * user has logged in using HTTP authentication. This method
+     * returns <code>null</code> if the user login is not authenticated.
+     * Whether the user name is sent with each subsequent request
+     * depends on the browser. Same as the value of the CGI variable
+     * REMOTE_USER.
+     *
+     * @return		a <code>String</code> specifying the name
+     *			of the user making this request, or <code>null</code
+     *			if the user name is not known
+     *
      */
 
     public String getRemoteUser();
+    
+    
+    
 
     /**
-     * Gets the session id specified with this request.  This may
-     * differ from the actual session id.  For example, if the request
-     * specified an id for an invalid session, then this will get a new
-     * session with a new id.
      *
-     * @return the session id specified by this request, or null if the
-     * request did not specify a session id
-     * 
-     * @see #isRequestedSessionIdValid */
+     * Returns the session ID specified by the client. This may
+     * not be the same as the ID of the actual session in use.
+     * For example, if the request specified an old (expired)
+     * session ID and the server has started a new session, this
+     * method gets a new session with a new ID. If the request
+     * did not specify a session ID, this method returns
+     * <code>null</code>.
+     *
+     *
+     * @return		a <code>String</code> specifying the session
+     *			ID, or <code>null</code> if the request did
+     *			not specify a session ID
+     *
+     * @see		#isRequestedSessionIdValid
+     *
+     */
 
     public String getRequestedSessionId ();
     
+    
+    
+    
     /**
-     * Gets, from the first line of the HTTP request, the part of this
-     * request's URI that is to the left of any query string.
-     * For example,
+     *
+     * Returns the part of this request's URL from the protocol
+     * name up to the query string in the first line of the HTTP request.
+     * For example:
      *
      * <blockquote>
      * <table>
      * <tr align=left><th>First line of HTTP request<th>
-     * <th>Return from <code>getRequestURI</code>
+     * <th>Returned Value
      * <tr><td>POST /some/path.html HTTP/1.1<td><td>/some/path.html
      * <tr><td>GET http://foo.bar/a.html HTTP/1.0
      * <td><td>http://foo.bar/a.html
      * <tr><td>HEAD /xyz?a=b HTTP/1.1<td><td>/xyz
      * </table>
      * </blockquote>
-     * 
-     * <p>To reconstruct a URL with a URL scheme and host, use the
-     * method javax.servlet.http.HttpUtils.getRequestURL, which returns
-     * a StringBuffer.
      *
-     * @return this request's URI
-     * @see javax.servlet.http.HttpUtils#getRequestURL
+     * <p>To reconstruct an URL with a scheme and host, use
+     * {@link HttpUtils#getRequestURL}, which
+     * returns a <code>StringBuffer</code>.
+     *
+     * @return		a <code>String</code> containing
+     *			the part of the URL from the 
+     *			protocol name up to the query string
+     *
+     * @see		HttpUtils#getRequestURL
+     *
      */
 
     public String getRequestURI();
+    
+    
+    
 
     /**
-     * Gets the part of this request's URI that refers to the servlet
-     * being invoked. Analogous to the CGI variable SCRIPT_NAME.
      *
-     * @return the servlet being invoked, as contained in this
-     * request's URI
+     * Returns the part of this request's URL that calls
+     * the servlet. This includes either the servlet name or
+     * a path to the servlet, but does not include any extra
+     * path information or a query string. Same as the value 
+     * of the CGI variable SCRIPT_NAME.
+     *
+     *
+     * @return		a <code>String</code> containing
+     *			the name or path of the servlet being
+     *			called, as it is specified in
+     *			the request URL 
+     *
+     *
      */
 
     public String getServletPath();
+    
+    
+    
 
     /**
-     * Gets the current valid session associated with this request, if
-     * create is false or, if necessary, creates a new session for the
-     * request, if create is true.
      *
-     * <p><b>Note</b>: to ensure the session is properly maintained,
-     * the servlet developer must call this method (at least once)
-     * before any output is written to the response.
+     * Returns the current <code>HttpSession</code>
+     * associated with this request or, if necessary, creates
+     * a new session for the request. Use <code>true</code>
+     * for <code>create</code> to create a new session,
+     * or <code>false</code> to return the current
+     * <code>HttpSession</code>. 
      *
-     * <p>Additionally, application-writers need to be aware that newly
-     * created sessions (that is, sessions for which
-     * <code>HttpSession.isNew</code> returns true) do not have any
-     * application-specific state.
+     * <p>If <code>create</code> is <code>false</code>
+     * and the request has no valid <code>HttpSession</code>,
+     * this method returns <code>null</code>.
      *
-     * @return the session associated with this request or null if
-     * create was false and no valid session is associated
-     * with this request.
+     * <p>To make sure the session is properly maintained,
+     * you must call this method at least once before 
+     * you write any output to the response. Newly created 
+     * sessions (that is, sessions for which 
+     * <code>HttpSession.isNew</code> returns <code>true</code>)
+     * do not have any application-specific state.
+     *
+     *
+     *
+     *
+     * @param		<code>true</code> to create
+     *			a new session for this request; 
+     *			<code>false</code> to return the current
+     *			session
+     *			
+     *
+     * @return 		the <code>HttpSession</code> associated 
+     *			with this request or <code>null</code> if
+     * 			<code>create</code> is <code>false</code>
+     *			and the request has no valid session
+     *
+     *
+     *
      */
 
     public HttpSession getSession (boolean create);
+    
+    
+    
    
 
     /**
-     * Gets the current valid session associated with this request, if
-     * create is false or, if necessary, creates a new session for the
-     * request.
+     *
+     * Returns the current session associated with this request,
+     * or if the request does not have a session, creates one.
+     * 
+     * @return		the <code>HttpSession</code> associated
+     *			with this request
+     *
      */
 
     public HttpSession getSession();
+    
+    
+    
+    
+    
 
     /**
-     * Checks whether this request is associated with a session that
-     * is valid in the current session context.  If it is not valid,
-     * the requested session will never be returned from the
-     * <code>getSession</code> method.
-     * 
-     * @return true if this request is assocated with a session that is
-     * valid in the current session context.
      *
-     * @see #getRequestedSessionId
-     * @see javax.servlet.http.HttpSessionContext
-     * @see #getSession
+     * Checks whether this request has a valid session in the
+     * current session context (which is a
+     * {@link HttpSessionContext}). 
+     * If the session is not valid,
+     * the {@link #getSession} method never returns it.
+     *
+     * @return			<code>true</code> if this
+     *				request has a valid session
+     *				in the current session context;
+     *				otherwise, <code>false</code>
+     *
+     * @see			#getRequestedSessionId
+     * @see			#getSession
+     * @see			HttpSessionContext
+     *
      */
 
     public boolean isRequestedSessionIdValid ();
+    
+    
+    
 
     /**
-     * Checks whether the session id specified by this request came in
-     * as a cookie.  (The requested session may not be one returned by
-     * the <code>getSession</code> method.)
-     * 
-     * @return true if the session id specified by this request came in
-     * as a cookie; false otherwise
      *
-     * @see #getSession
-     */
+     * Checks whether the session ID this request submitted
+     * came in as a cookie, rather than from the {@link #getSession}
+     * method.
+     *
+     * @return			<code>true</code> if the session ID
+     *				came in as a
+     *				cookie; otherwise, <code>false</code>
+     *
+     *
+     * @see			#getSession
+     *
+     */ 
 
     public boolean isRequestedSessionIdFromCookie ();
+    
+    
+    
 
     /**
-     * Checks whether the session id specified by this request came in
-     * as part of the URL.  (The requested session may not be the one
-     * returned by the <code>getSession</code> method.)
-     * 
-     * @return true if the session id specified by the request for this
-     * session came in as part of the URL; false otherwise
      *
-     * @see #getSession
+     * Checks whether the session ID this request submitted
+     * came in as part of the request URL, rather than
+     * from the {@link #getSession} method.
+     *
+     * @return			<code>true</code> if the session ID
+     *				came in as part of an URL; otherwise,
+     *				<code>false</code>
+     *
+     *
+     * @see			#getSession
+     *
      */
     
     public boolean isRequestedSessionIdFromURL();
     
+    
+    
+    
+    
     /**
-     * Checks whether the session id specified by this request came in
-     * as part of the URL.  (The requested session may not be the one
-     * returned by the <code>getSession</code> method.)
-     * 
-     * @return true if the session id specified by the request for this
-     * session came in as part of the URL; false otherwise
      *
-     * @see #getSession
+     * @deprecated		As of Version 2.1 of the Java Servlet
+     *				API, use {@link #isRequestedSessionIdFromURL}
+     *				instead.
      *
-     * @deprecated use isRequestSessionIdFromURL() instead
      */
 
     public boolean isRequestedSessionIdFromUrl ();

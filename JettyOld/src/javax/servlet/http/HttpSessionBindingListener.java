@@ -22,17 +22,18 @@ package javax.servlet.http;
 
 import java.util.EventListener;
 
+
+ 
+ 
+
 /**
- * Objects implement this interface so that they can be notified  
- * when
- * they are being bound or unbound from a HttpSession. When a binding occurs 
- * (using HttpSession.putValue) HttpSessionBindingEvent communicates the event 
- * and identifies
- * the session into which the object is bound. 
- * 
- * <p>Similarly, when an unbinding occurs (using HttpSession.removeValue)
- * HttpSessionBindingEvent communicates the event and identifies the
- * session from which the object is unbound. 
+ * Causes an object to be notified when it is bound to
+ * or unbound from a session. The object is notified
+ * by an {@link HttpSessionBindingEvent} object.
+ *
+ *
+ * @author		Various
+ * @version		$Version$
  *
  * @see HttpSession
  * @see HttpSessionBindingEvent
@@ -41,24 +42,38 @@ import java.util.EventListener;
 
 public interface HttpSessionBindingListener extends EventListener {
 
+
+
     /**
-     * Notifies the listener that it is being bound into
-     * a session.
      *
-     * @param event the event identifying the session into
-     * which the listener is being bound.
-     */
+     * Notifies the object that is being bound to
+     * a session and identifies the session.
+     *
+     * @param event		the event that identifies the
+     *				session 
+     *
+     * @see #valueUnbound
+     *
+     */ 
 
     public void valueBound (HttpSessionBindingEvent event);
+    
+    
 
     /**
-     * Notifies the listener that it is being unbound
-     * from a session.
      *
-     * @param event the event identifying the session from
-     * which the listener is being unbound.
+     * Notifies the object that is being unbound
+     * from a session and identifies the session.
+     *
+     * @param event		the event that identifies
+     *				the session 
+     *	
+     * @see #valueBound
+     *
      */
 
     public void valueUnbound (HttpSessionBindingEvent event);
+    
+    
 }
 

@@ -19,6 +19,7 @@
  * CopyrightVersion 1.0
  */
 
+
 package javax.servlet.http;
 
 import javax.servlet.ServletInputStream;
@@ -27,11 +28,16 @@ import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 import java.io.IOException;
 
+
 /**
- * A collection of static utility methods useful to HTTP servlets.
+ * Provides a collection of methods that are useful
+ * in writing HTTP servlets.
  *
- * @version 1.15
+ * @author	Various
+ * @version 	$Version$
+ *
  */
+
 
 public class HttpUtils {
 
@@ -40,38 +46,50 @@ public class HttpUtils {
     private static ResourceBundle lStrings =
 	ResourceBundle.getBundle(LSTRING_FILE);
     
-    static Hashtable nullHashtable = new Hashtable(1);
+    static Hashtable nullHashtable = new Hashtable();
+    
+    
     
     /**
-     * Creates an empty HttpUtils object.
+     * Constructs an empty <code>HttpUtils</code> object.
+     *
      */
 
     public HttpUtils() {}
+    
+    
+    
+    
 
     /**
-     * Parses a query string and builds a hashtable of key-value
-     * pairs, where the values are arrays of strings.  The query string
-     * should have the form of a string packaged by the GET or POST
-     * method.  (For example, it should have its key-value pairs
-     * delimited by ampersands (&) and its keys separated from its
-     * values by equal signs (=).)
+     *
+     * Parses a query string passed from the client to the
+     * server and builds a <code>HashTable</code> object
+     * with key-value pairs. 
+     * The query string should be in the form of a string
+     * packaged by the GET or POST method, that is, it
+     * should have key-value pairs in the form <i>key=value</i>,
+     * with each pair separated from the next by a & character.
+     *
+     * <p>A key can appear more than once in the query string
+     * with different values. However, the key appears only once in 
+     * the hashtable, with its value being
+     * an array of strings containing the multiple values sent
+     * by the query string.
      * 
-     * <p> A key can appear one or more times in the query string.
-     * Each time a key appears, its corresponding value is inserted
-     * into its string array in the hash table.  (So keys that appear
-     * once in the query string have, in the hash table, a string array
-     * of length one as their value, keys that appear twice have a
-     * string array of length two, etc.)
-     * 
-     * <p> When the keys and values are moved into the hashtable, any
-     * plus signs (+) are returned to spaces and characters sent in
-     * hexadecimal notation (%xx) are converted back to characters.
-     * 
-     * @param s query string to be parsed
-     * @return a hashtable built from the parsed key-value pairs; the
-     *.hashtable's values are arrays of strings
-     * @exception IllegalArgumentException if the query string is
-     * invalid.
+     * <p>When the keys and values are moved into the hashtable,
+     * any + characters are converted to spaces, and characters
+     * sent in hexadecimal notation (like <i>%xx</i>) are
+     * converted to ASCII characters.
+     *
+     * @param s		a string containing the query to be parsed
+     *
+     * @return		a <code>HashTable</code> object built
+     * 			from the parsed key-value pairs
+     *
+     * @exception IllegalArgumentException	if the query string 
+     *						is invalid
+     *
      */
 
     static public Hashtable parseQueryString(String s) {
@@ -81,7 +99,7 @@ public class HttpUtils {
 	if (s == null) {
 	    throw new IllegalArgumentException();
 	}
-	Hashtable ht = new Hashtable(10);
+	Hashtable ht = new Hashtable();
 	StringBuffer sb = new StringBuffer();
 	StringTokenizer st = new StringTokenizer(s, "&");
 	while (st.hasMoreTokens()) {
@@ -109,17 +127,48 @@ public class HttpUtils {
 	return ht;
     }
 
+
+
+
     /**
-     * Parses FORM data that is posted to the server using the HTTP
-     * POST method and the application/x-www-form-urlencoded mime
-     * type.
      *
-     * @param len the length of the data in the input stream.
-     * @param in the input stream
-     * @return a hashtable of the parsed key, value pairs.  Keys
-     * with multiple values have their values stored as an array of strings
-     * @exception IllegalArgumentException if the POST data is invalid.
+     * Parses data from an HTML form that the client sends to 
+     * the server using the HTTP POST method and the 
+     * <i>application/x-www-form-urlencoded</i> MIME type.
+     *
+     * <p>The data sent by the POST method contains key-value
+     * pairs. A key can appear more than once in the POST data
+     * with different values. However, the key appears only once in 
+     * the hashtable, with its value being
+     * an array of strings containing the multiple values sent
+     * by the POST method.
+     *
+     * <p>When the keys and values are moved into the hashtable,
+     * any + characters are converted to spaces, and characters
+     * sent in hexadecimal notation (like <i>%xx</i>) are
+     * converted to ASCII characters.
+     *
+     *
+     *
+     * @param len	an integer specifying the length,
+     *			in characters, of the 
+     *			<code>ServletInputStream</code>
+     *			object that is also passed to this
+     *			method
+     *
+     * @param in	the <code>ServletInputStream</code>
+     *			object that contains the data sent
+     *			from the client
+     * 
+     * @return		a <code>HashTable</code> object built
+     *			from the parsed key-value pairs
+     *
+     *
+     * @exception IllegalArgumentException	if the data
+     *			sent by the POST method is invalid
+     *
      */
+     
 
     static public Hashtable parsePostData(int len, 
 					  ServletInputStream in)
@@ -128,9 +177,16 @@ public class HttpUtils {
 	byte[] postedBytes = null;
 	String postedBody;
 
+	// XXX
+	// should a length of 0 be an IllegalArgumentException
+	
 	if (len <=0)
-	    return null;
+	    return new Hashtable(); // cheap hack to return an empty hash
 
+	if (in == null) {
+	    throw new IllegalArgumentException();
+	}
+	
 	try {
 	    //
 	    // Make sure we read the entire POSTed body.
@@ -159,6 +215,9 @@ public class HttpUtils {
 	
 	return parseQueryString(postedBody); 
     }
+
+
+
 
     /*
      * Parse a name in the query string.
@@ -197,24 +256,40 @@ public class HttpUtils {
 	return sb.toString();
     }
 
+
+
+
     /**
-     * Reconstructs the URL used by the client used to make the
-     * request.  This accounts for differences such as addressing
-     * scheme (http, https) and default ports, but does not attempt to
-     * include query parameters.  Since it returns a StringBuffer, not
-     * a String, the URL can be modified efficiently (for example, by
-     * appending query parameters).
      *
-     * <P> This method is useful for creating redirect messages and for
-     * reporting errors.  */
+     * Reconstructs the URL the client used to make the request,
+     * using information in the <code>HttpServletRequest</code> object.
+     * The returned URL contains a protocol, server name, port
+     * number, and server path, but it does not include query
+     * string parameters.
+     * 
+     * <p>Because this method returns a <code>StringBuffer</code>,
+     * not a string, you can modify the URL easily, for example,
+     * to append query parameters.
+     *
+     * <p>This method is useful for creating redirect messages
+     * and for reporting errors.
+     *
+     * @param req	a <code>HttpServletRequest</code> object
+     *			containing the client's request
+     * 
+     * @return		a <code>StringBuffer</code> object containing
+     *			the reconstructed URL
+     *
+     */
 
     public static StringBuffer getRequestURL (HttpServletRequest req) {
-	StringBuffer	url = new StringBuffer ();
-	String		scheme = req.getScheme ();
-	int		port = req.getServerPort ();
-
-	String		servletPath = req.getServletPath ();
-	String		pathInfo = req.getPathInfo ();
+	StringBuffer url = new StringBuffer ();
+	String scheme = req.getScheme ();
+	int port = req.getServerPort ();
+	String urlPath = req.getRequestURI();
+	
+	//String		servletPath = req.getServletPath ();
+	//String		pathInfo = req.getPathInfo ();
 
 	url.append (scheme);		// http, https
 	url.append ("://");
@@ -224,10 +299,11 @@ public class HttpUtils {
 	    url.append (':');
 	    url.append (req.getServerPort ());
 	}
-	if (servletPath != null)
-	    url.append (servletPath);
-	if (pathInfo != null)
-	    url.append (pathInfo);
+	//if (servletPath != null)
+	//    url.append (servletPath);
+	//if (pathInfo != null)
+	//    url.append (pathInfo);
+	url.append(urlPath);
 	return url;
     }
 }

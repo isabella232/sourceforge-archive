@@ -27,306 +27,500 @@ import java.net.URL;
 import java.net.MalformedURLException;
 import java.util.Enumeration;
 
+
 /**
- * A servlet engine generated object that gives servlets information
- * about their environment.
+ * 
+ * Defines a set of methods that a servlet uses to communicate
+ * with a servlet engine, for example, to get the MIME type of a file, 
+ * locate other servlets running on the server, or
+ * write to a servlet log file.
  *
- * <p>In a server that supports the concept of multiple hosts (and even
- * virtual hosts), the context must be at least as unique as the host.
- * Servlet engines may also provide context objects that are unique to
- * a group of servlets and which is tied to a specific portion of the
- * URL path namespace of the host. This grouping may be administratively
- * assigned or defined by deployment information.
+ * <p>The servlet engine talks to the servlet by returning
+ * a <code>ServletContext</code> object (defined by this interface)
+ * that gives servlets information about their environment. Servlets use the
+ * {@link ServletConfig#getServletContext} method to get
+ * the <code>ServletContext</code> object.
  *
- * <p>Servlets get the ServletContext object via the getServletContext
- * method of ServletConfig.  The ServletConfig object is provided to
- * the servlet at initialization, and is accessible via the servlet's
- * getServletConfig method.
+ * <p>If the server supports
+ * multiple or virtual hosts, the <code>ServletContext</code> object
+ * must be at least as unique as the host. Servlet engines can also 
+ * create <code>ServletContext</code> objects
+ * that are unique to a group of servlets
+ * and are tied to a specific part of the host's URL namespace.
+ * You can assign this grouping administratively or define it in
+ * a deployment descriptor file.
  *
- * @see Servlet#getServletConfig
- * @see ServletConfig#getServletContext
+ * <p>The <code>ServletContext</code> object is contained within 
+ * the {@link ServletConfig} object, which the
+ * Web server provides the
+ * servlet when the servlet is initialized. You can access
+ * the <code>ServletConfig</code> object by using the 
+ * {@link Servlet#getServletConfig} method.
+ *
+ * @author 	Various
+ * @version 	$Version$
+ *
+ * @see 	Servlet#getServletConfig
+ * @see 	ServletConfig#getServletContext
+ *
  */
 
 public interface ServletContext {
 
+
     /**
-     * Returns a <tt>ServletContext</tt> object for a particular
-     * URL path. This allows servlets to potentially gain access
-     * to the resources and to obtain <tt>RequestDispatcher</tt>
-     * objects from the target context.
+     * Returns a <code>ServletContext</code> object that 
+     * corresponds to a specified URL on the server.
      *
-     * <p>In security concious environments, the servlet engine
-     * may always return null for any given URL path.
+     * <p>This method allows servlets to gain
+     * access to the resources located at a specified URL and obtain
+     * {@link RequestDispatcher} objects from it.
+     * 
+     * <p>In security conscious environments, the servlet engine can
+     * return <code>null</code> for a given URL.
      *       
-     * @param uripath
+     * @param uripath 	a <code>String</code> specifying the URL for 
+     *			which you are requesting a <code>ServletContext</code>
+     *			object
+     *
+     * @return		the <code>ServletContext</code> object that
+     *			corresponds to the named URL
+     *
+     * @see 		RequestDispatcher
+     *
      */
 
     public ServletContext getContext(String uripath);
+    
+    
 
     /**
-     * Returns the major version of the servlet API that this
-     * servlet engine supports. All 2.1 compliant implementations
-     * must return the integer 2 from this method.
+     * Returns the major version of the Java Servlet API that this
+     * Web server supports. All implementations that comply
+     * with Version 2.1 must have this method
+     * return the integer 2.
      *
-     * @return 2
+     * @return 		2
+     *
      */
     
     public int getMajorVersion();
+    
+    
 
     /**
-     * Returns the mime type of the specified file, or null if not
-     * known. The MIME type is determined according to the
-     * configuration of the servlet engine.
+     * Returns the MIME type of the specified file, or <code>null</code> if 
+     * the MIME type is not known. The MIME type is determined
+     * by the configuration of the servlet engine. Common MIME
+     * types are <code>"text/html"</code> and <code>"image/gif"</code>.
      *
-     * @param file name of the file whose mime type is required
+     *
+     * @param 		a <code>String</code> specifying the name
+     *			of the file whose MIME type you want
+     *			to check 
+     *
+     * @return 		a <code>String</code> specifying the MIME type
+     *
      */
 
     public String getMimeType(String file);
+    
+    
 
     /**
-     * Returns the minor version of the servlet API that this
-     * servlet engine supports. All 2.1 compliant implementations
-     * must return the integer 1 from this method.
+     * Returns the minor version of the Servlet API that this
+     * Web server supports. All implementations that comply
+     * with Version 2.1 must have this method
+     * return the integer 1.
      *
-     * @return 1
+     * @return 		1
+     *
      */
 
     public int getMinorVersion();
+    
+    
 
     /**
-     * Returns a URL object of a resource that is mapped to a
-     * corresponding URL path. The URL path must be of the form
-     * <tt>/dir/dir/file.ext</tt>. This method allows a servlet
-     * to access content to be served from the servlet engines
-     * document space in a system independent manner. Resources
-     * could be located on the local file system, a remote
-     * file system, a database, or a remote network site.
+     * Returns the resource that is mapped to a specified
+     * path. The path must be in the form
+     * <code>/dir/dir/file.ext</code>.
      *
-     * <p>This method may return null if there is no resource
-     * mapped to the given URL path.
+     * <p>This method allows the Web
+     * server to make a resource available to a servlet from
+     * any source. Resources 
+     * can be located on a local or remote
+     * file system, in a database, or on a remote network site.
+     *
+     * <p>This method can return <code>null</code>
+     * if no resource is mapped to the pathname.
+     *
+     * <p>The servlet engine must implement the URL handlers
+     * and <code>URLConnection</code> objects that are necessary
+     * to access the resource.
+     *
+     * <p>This method has a different purpose than
+     * <code>java.lang.Class.getResource</code>,
+     * which looks up resources based on a class loader. This
+     * method does not use class loaders.
      * 
-     * <p>The servlet engine must implement whatever URL handlers
-     * and <tt>URLConnection</tt> objects are necessary to access
-     * the given content.
+     * @param path 				a <code>String</code> specifying
+     *						the path to the resource,
+     * 						in the form <code>/dir/dir/file.ext</code>
      *
-     * <p>This method does not fill the same purpose as the
-     * <tt>getResource</tt> method of <tt>java.lang.Class</tt>.
-     * The method in <tt>java.lang.Class</tt> looks up resources
-     * based on class loader. This method allows servlet engines
-     * to make resources avaialble to a servlet from any source
-     * without regards to class loaders, location, etc.
+     * @return 					the resource located at the named path,
+     * 						or <code>null</code> if there is no resource
+     *						at that path
      *
-     * @param path Path of the content resource
-     * @exception MalformedURLException if the resource path is
-     * not properly formed.
+     * @exception MalformedURLException 	if the pathname is not given in 
+     * 						the correct form
+     *
      */
     
     public URL getResource(String path) throws MalformedURLException;
+    
+
 
 
     /**
-     * Returns an <tt>InputStream</tt> object allowing access to
-     * a resource that is mapped to a corresponding URL path. The
-     * URL path must be of the form <tt>/dir/dir/file.ext</tt>.
+     * Returns the resource located at the named path as
+     * an <code>InputStream</code> object.
      *
-     * <p>Note that meta-information such as content length and
-     * content type that are available when using the
-     * <tt>getResource</tt> method of this class are lost when
-     * using this method.
+     * <p>The data in the <code>InputStream</code> can be 
+     * of any type or length. The path must be of 
+     * the form <code>/dir/dir/file.ext</code>. This method 
+     * returns <code>null</code> if no resource exists at
+     * the specified path. 
+     * 
+     * <p>Metainformation such as content length and content type
+     * that is available when you use the <code>getResource</code>
+     * method is lost when you use this method.
      *
-     * <p>This method may return null if there is no resource
-     * mapped to the given URL path.
-     * <p>The servlet engine must implement whatever URL handlers
-     * and <tt>URLConnection</tt> objects are necessary to access
-     * the given content.
+     * <p>The servlet engine must implement the URL handlers
+     * and <code>URLConnection</code> objects necessary to access
+     * the resource.
      *
-     * <p>This method does not fill the same purpose as the
-     * <tt>getResourceAsStream</tt> method of <tt>java.lang.Class</tt>.
-     * The method in <tt>java.lang.Class</tt> looks up resources
-     * based on class loader. This method allows servlet engines
-     * to make resources avaialble to a servlet from any source
-     * without regards to class loaders, location, etc.     
+     * <p>This method is different from 
+     * <code>java.lang.Class.getResourceAsStream</code>,
+     * which uses a class loader. This method allows servlet engines 
+     * to make a resource available
+     * to a servlet from any location, without using a class loader.
+     * 
      *
-     * @param name
+     * @param name 	a <code>String</code> specifying the path
+     *			to the resource,
+     * 			in the form <code>/dir/dir/file.ext</code>
+     *
+     * @return 		the <code>InputStream</code> returned to the 
+     *			servlet, or <code>null</code> if no resource
+     *			exists at the specified path 
+     *
+     *
      */
 
     public InputStream getResourceAsStream(String path);
+    
+    
+
+
 
     /**
-     * Returns a <tt>RequestDispatcher</tt> object for the specified
-     * URL path if the context knows of an active source (such as
-     * a servlet, JSP page, CGI script, etc) of content for the
-     * particular path. This format of the URL path must be of the
-     * form <tt>/dir/dir/file.ext</tt>. The servlet engine is responsible
-     * for implementing whatever functionality is required to
-     * wrap the target source with an implementation of the
-     * <tt>RequestDispatcher</tt> interface.
+     * 
+     * Returns a {@link RequestDispatcher} object that acts
+     * as a wrapper for the resource located at the named path.
+     * You can use a <code>RequestDispatcher</code> object to forward 
+     * a request to the resource or include a resource in a response.
      *
-     * <p>This method will return null if the context cannot provide
-     * a dispatcher for the path provided.
+     * <p>The pathname must be in the form <code>/dir/dir/file.ext</code>.
+     * This method returns <code>null</code> if the <code>ServletContext</code>
+     * cannot return a <code>RequestDispatcher</code>.
      *
-     * @param urlpath Path to use to look up the target server resource
-     * @see RequestDispatcher
+     * <p>The servlet engine is responsible for wrapping the resource
+     * with a <code>RequestDispatcher</code> object.
+     *
+     * @param urlpath 	a <code>String</code> specifying the pathname
+     *			to the resource
+     *
+     * @return 		a <code>RequestDispatcher</code> object
+     *			that acts as a wrapper for the resource
+     *			at the path you specify
+     *
+     * @see 		RequestDispatcher
+     *
      */
 
     public RequestDispatcher getRequestDispatcher(String urlpath);
     
+    
+    
+    
     /**
-     * Originally defined to return a servlet from the context
-     * with the specified name. This method has been deprecated and
-     * only remains to preserve binary compatibility.
-     * This method will always return null.
      *
-     * @deprecated This method has been deprecated for
-     * servlet lifecycle reasons. This method will be permanently
-     * removed in a future version of the Servlet API.
+     * @deprecated	As of Java Servlet API 2.1, with no replacement.
+     *
+     * <p>This method was originally defined to retrieve a servlet
+     * from a <code>ServletContext</code>. In this version, this method 
+     * always returns <code>null</code> and remains only to preserve 
+     * binary compatibility. This method will be permanently removed 
+     * in a future version of the Java Servlet API.
+     *
      */
 
     public Servlet getServlet(String name) throws ServletException;
+    
+  
+  
+  
+    
 
     /**
-     * Originally defined to return an <tt>Enumeration</tt> of
-     * <tt>Servlet</tt> objects containing all the servlets
-     * known to this context.
-     * This method has been deprecated and only remains to preserve
-     * binary compatibility. This method must always return an empty
-     * enumeration.
      *
-     * @deprecated This method has been deprecated for
-     * servlet lifecycle reasons. This method will be permanently
-     * removed in a future version of the Servlet API.
+     *@deprecated	As of Java Servlet API 2.0, with no replacement.
+     *
+     * <p>This method was originally defined to return an <code>Enumeration</code>
+     * of all the servlets known to this servlet context. In this
+     * version, this method always returns an empty enumeration and
+     * remains only to preserve binary compatibility. This method
+     * will be permanently removed in a future version of the Java
+     * Servlet API.
+     *
      */
-
+    
     public Enumeration getServlets();
+    
+    
+    
+    
+    
 
     /**
-     * Originally defined to return an <tt>Enumeration</tt> of
-     * <tt>String</tt> objects containing all the servlet names
-     * known to this context.       
-     * This method has been deprecated and only remains to preserve
-     * binary compatibility. This methd must always return an
-     * empty enumeration.
+     * @deprecated	As of Java Servlet API 2.1, with no replacement.
      *
-     * @deprecated This method has been deprecated for
-     * servlet lifecycle reasons. This method will be permanently
-     * removed in a future version of the Servlet API.
+     * <p>This method was originally defined to return an 
+     * <code>Enumeration</code>
+     * of all the servlet names known to this context. In this version,
+     * this method always returns an empty <code>Enumeration</code> and 
+     * remains only to preserve binary compatibility. This method will 
+     * be permanently removed in a future version of the Java Servlet API.
+     *
      */
-
+ 
     public Enumeration getServletNames();
     
+  
+  
+    
+    
     /**
-     * Logs the specified message to the context's log. The
-     * name and type of the servlet log is servlet engine specific,
-     * but is normally an event log.
      *
-     * @param msg the message to be written
+     * Writes the specified message to a servlet log file, which is usually
+     * an event log. The message provides explanatory information about
+     * an exception or error or an action the servlet engine takes. The name 
+     * and type of the servlet log file is specific to the servlet engine.
+     *
+     *
+     * @param msg 	a <code>String</code> specifying the explanatory
+     *			message to be written to the log file
+     *
      */
-
+     
     public void log(String msg);
+    
+    
+    
+    
 
     /**
-     * Logs the specified message and a stack trace of the given
-     * exception to the context's log. The
-     * name and type of the servlet log is servlet engine specific,
-     * but is normally an event log.
+     * @deprecated	As of Java Servlet API 2.1, use
+     * 			{@link log(String message, Throwable throwable)} 
+     *			instead.
      *
-     * @param exception the exception to be written
-     * @param msg the message to be written
+     * <p>This method was originally defined to write an 
+     * exception's stack trace and an explanatory error message
+     * to the servlet log file.
      *
-     * @deprecated Use log(String message, Throwable t) instead
      */
 
     public void log(Exception exception, String msg);
+    
+    
+    
+    
 
     /**
-     * Logs the specified message and a stack trace of the given
-     * <tt>Throwable</tt> object to the context's log. The
-     * name and type of the servlet log is servlet engine specific,
-     * but is normally an event log.
+     * Writes the stack trace and an explanatory message
+     * for a given <code>Throwable</code> exception
+     * to the servlet log file. The stack trace is
+     * part of the <code>Throwable</code> object, and
+     * the message is the one you specify in the <code>message</code>
+     * parameter. The name and type of the servlet log file is specific to 
+     * the servlet engine, but it is usually an event log.
      *
-     * @param msg the message to be written
-     * @param throwable the exception to be written
+     *
+     * @param message 		a <code>String</code> that 
+     *				describes the error or exception
+     *
+     * @param throwable 	the <code>Throwable</code> error 
+     *				or exception
+     *
      */
     
     public void log(String message, Throwable throwable);
     
+    
+    
+    
+    
     /**
-     * Applies alias rules to the specified virtual path in URL path
-     * format, that is, <tt>/dir/dir/file.ext</tt>. Returns a
-     * String representing the corresponding real path in the
-     * format that is appropriate for the operating system the
-     * servlet engine is running under (including the proper path
-     * separators).
+     * Returns a <code>String</code> containing the real path 
+     * that corresponds to a virtual path. A virtual path contains 
+     * a servlet name followed by the name of a file the servlet 
+     * should act upon, in the form 
+     * <code><i>/dir/dir/servlet/file.ext</i></code>.
+     * In this form, <i>file.ext</i> is a filename used instead
+     * of the path to the file. The servlet locates the file and 
+     * translates the file name to the path that locates the file.
      *
-     * <p>This method returns null if the translation could not
-     * be performed for any reason.
+     * <p>The real path the servlet returns is in a form
+     * appropriate to the computer and operating system on
+     * which the servlet engine is running, including the
+     * proper path separators. This method returns <code>null</code>
+     * if the servlet engine cannot translate the virtual path
+     * to a real path for any reason.
      *
-     * @param path the virtual path to be translated into a real path
+     *
+     * @param path 	a <code>String</code> specifying a virtual path,
+     *			in the form 
+     *			<code><i>/dir/dir/servlet/file.ext</i></code>
+     *
+     *
+     * @return 		a <code>String</code> specifying the real path,
+     *			with path separators appropriate for the system
+     *			on which the servlet engine is running
+     *			
+     *
      */
 
     public String getRealPath(String path);
+    
+    
+
 
     /**
-     * Returns the name and version of the network service under which
-     * the servlet is running. The form of this string must begin with
-     * <tt>&lt;servername&gt;/&lt;versionnumber&gt;</tt>. For example
-     * the Java Web Server could return a string of the form
-     * <tt>Java Web Server/1.1.3</tt>. Other optional information
-     * can be returned in parenthesis after the primary string. For
-     * example, <tt>Java Web Server/1.1.3 (JDK 1.1.6; Windows NT 4.0 x86)
-     * </tt>.
+     * Returns the name and version of the servlet engine on which
+     * the servlet is running. 
+     *
+     * <p>The form of the returned string is <i>servername</i>/<i>versionnumber</i>.
+     * For example, the Java Web Server can return the string
+     * <code>Java Web Server/1.1.3</code>.
+     *
+     * <p>You can design the servlet engine to have this method return 
+     * other optional information in parentheses after the primary string, 
+     * for example,
+     * <code>Java Web Server/1.1.3 (JDK 1.1.6; Windows NT 4.0 x86)</code>.
+     *
+     *
+     * @return 		a <code>String</code> containing at least the 
+     *			servlet engine name and version number
+     *
      */
 
     public String getServerInfo();
+    
+    
 
     /**
-     * Returns an object that is known to the context by a given name,
-     * or null if there is no such object associated with the name.
-     * This method allwos access to additional information about the
-     * servlet engine not already provided by other methods in this
-     * interface.
+     * Returns the servlet engine attribute with the given name, 
+     * or <code>null</code>
+     * if there is none. An attribute allows a servlet engine to give the
+     * servlet additional information not
+     * already provided by this interface. See your
+     * Web server documentation for information about its attributes.
      *
-     * Attribute names should follow the same convention as package names.
-     * Names matching java.*, javax.*, and sun.* are reserved for
-     * definition by this specification or by the reference implementation.
+     * <p>The attribute is returned as a <code>java.lang.Object</code>.
+     * Attribute names should follow the same convention as package
+     * names. The Java Servlet API specification reserves names
+     * matching <code>java.*</code>, <code>javax.*</code>,
+     * and <code>sun.*</code>.
      *
-     * @param name the name of the attribute whose value is required
-     * @return the value of the attribute, or null if the attribute
-     * does not exist.
+     * @param name 	a <code>String</code> specifying the name 
+     *			of the attribute
+     *
+     * @return 		an <code>Object</code containing the value 
+     *			of the attribute, or <code>null</code>
+     *			if no attribute exists matching the given
+     *			name
+     *
+     *
      */
-
+  
     public Object getAttribute(String name);
+    
+    
+    
 
     /**
-     * Returns an enumeration of the attribute names present in this
-     * context.
+     * Returns an <code>Enumeration</code> containing the 
+     * attribute names available
+     * within this servlet context. You can use the
+     * {@link #getAttribute} method with an attribute name
+     * to get the value of an attribute.
+     *
+     * @return 		an <code>Enumeration</code> of attribute 
+     *			names
+     *
+     * @see		#getAttribute
+     *
      */
 
     public Enumeration getAttributeNames();
     
+    
+    
+    
     /**
-     * Binds an object to a given name in this context. If an object
-     * is allready bound into the context with the given name,
-     * it will be replaced.
      *
-     * Attribute names should follow the same convention as package names.
-     * Names matching java.*, javax.*, and sun.* are reserved for
-     * definition by this specification or by the reference implementation.
+     * Gives an attribute a name in this servlet context. If
+     * the name specified is already used for an attribute, this
+     * method will overwrite the old attribute and bind the name
+     * to the new attribute.
      *
-     * @param name the name of the attribute to store
-     * @param value the value of the attribute
+     * <p>Attribute names should follow the same convention as package
+     * names. The Java Servlet API specification reserves names
+     * matching <code>java.*</code>, <code>javax.*</code>, and
+     * <code>sun.*</code>.
+     *
+     *
+     * @param name 	a <code>String</code> specifying the name 
+     *			of the attribute
+     *
+     *
+     * @param object 	an <code>Object</code> representing the
+     *			attribute to be given the name
+     *
+     *
+     *
      */
     
     public void setAttribute(String name, Object object);
+    
+    
+
 
 
     /**
-     * Removes the attribute from the context that is bound to a particular
-     * name.
+     * Removes the attribute with the given name from 
+     * the servlet context. If you remove an attribute, and 
+     * then use {@link #getAttribute} to retrieve the 
+     * attribute's value, <code>getAttribute</code> returns <code>null</code>.
      *
-     * @param name the name of the attribute to remove from the context
+     *
+     * @param name	a <code>String</code> specifying the name 
+     * 			of the attribute to be removed
+     *
      */
 
     public void removeAttribute(String name);
-    
 }
+
+

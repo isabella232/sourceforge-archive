@@ -9,7 +9,7 @@
 #JAVACOPTIONS :=
 TESTS :=
 ROOTNAME := javax
-SUBDIRS := http
+SUBDIRS := http jsp
 
 CLASSFILES += $(wildcard *.properties *.class)
 

@@ -22,19 +22,25 @@
 package javax.servlet;
 
 /**
- * Defines a "single" thread model for servlet execution.  This empty
- * interface allows servlet implementers to specify how the system
- * should handle concurrent calls to the same servlet.  <p>If the
- * target servlet is flagged with this interface, the servlet
- * programmer is <strong>guaranteed</strong> that no two threads will
- * execute concurrently the <tt>service</tt> method of that
- * servlet. This guarantee is ensured by maintaining a pool of servlet
- * instances for each such servlet, and dispatching each
- * <tt>service</tt> call to a <em>free</em> servlet.  <p>In essence,
- * if the servlet implements this interface, the servlet will be
- * thread safe. Note that this will not prevent synchronization
- * problems associated with accessing shared resources (such as static
- * class variables or classes outside the scope of the servlet).
+ * Ensures that servlets handle
+ * only one request at a time. This interface has no methods.
+ *
+ * <p>If a servlet implements this interface, you are <i>guaranteed</i>
+ * that no two threads will execute concurrently in the
+ * servlet's <code>service</code> method. The servlet engine
+ * can make this guarantee by synchronizing access to a single
+ * instance of the servlet, or by maintaining a pool of servlet
+ * instances and dispatching each new request to a free servlet.
+ *
+ * <p>If a servlet implements this interface, the servlet will
+ * be thread safe. However, this interface does not prevent
+ * synchronization problems that result from servlets accessing shared
+ * resources such as static class variables or classes outside
+ * the scope of the servlet.
+ *
+ *
+ * @author	Various
+ * @version	$Version$
  *
  */
 

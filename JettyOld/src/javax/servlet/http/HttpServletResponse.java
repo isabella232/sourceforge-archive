@@ -26,13 +26,22 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 
 /**
- * An HTTP servlet response.  This interface allows a servlet's
- * <code>service</code> method to manipulate HTTP-protocol specified
- * header information and return data to its client.  It is implemented
- * by network service developers for use within servlets.
+ *
+ * Defines an HTTP servlet response that a servlet running on a
+ * Web server sends to a client using HTTP. This interface
+ * allows the servlet's <code>service</code> method to access
+ * HTTP headers and return data to its client. The servlet engine
+ * implements this interface.
+ *
  * 
+ * @author	Various
+ * @version	$Version$
+ *
+ * @see		javax.servlet.ServletResponse
  *
  */
+
+
 
 public interface HttpServletResponse extends ServletResponse {
 
@@ -41,6 +50,7 @@ public interface HttpServletResponse extends ServletResponse {
      * multiple times to set more than one cookie.
      *
      * @param cookie the Cookie to return to the client
+     *
      */
 
     public void addCookie(Cookie cookie);

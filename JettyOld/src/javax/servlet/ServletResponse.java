@@ -27,106 +27,156 @@ import java.io.UnsupportedEncodingException;
 
 
 /**
- * Interface for sending MIME data from the servlet's service method
- * to the client.  Network service developers implement this interface;
- * its methods are then used by servlets when the service method is
- * run, to return data to clients.  The ServletResponse object is passed
- * as an argument to the service method.
+ * Sends MIME-encoded data from the servlet to the client. The servlet
+ * engine creates a <code>ServletResponse</code> object and passes it 
+ * as an argument to the servlet's <code>service</code> method.
  *
- * <P> To write MIME bodies which consist of binary data, use the
- * output stream returned by <code><em>getOutputStream</em></code>.  To
- * write MIME bodies consisting of text data, use the writer returned
- * by <code><em>getWriter</em></code>.  If you need to mix binary and
- * text data, for example because you're creating a multipart response,
- * use the output stream to write the multipart headers, and use that
- * to build your own text bodies.
- * 
- * <p>If you don't explicitly set the character set in your MIME media
- * type, with <code><em>setContentType</em></code>, one will be
- * selected and the content type will be modified accordingly.  If you
- * will be using a writer, and want to call the
- * <code>setContentType</code> method, you must do so before calling
- * the <code>getWriter</code> method. If you will be using the output
- * stream, and want to call <code>setContentType</code>, you must do so
- * before using the output stream to write the MIME body.
+ * <p>To send binary data in a MIME body response, use
+ * the {@link ServletOutputStream} returned by {@link #getOutputStream}.
+ * Likewise, to send text data, use the <code>PrintWriter</code> object 
+ * returned by {@link #getWriter}. If you need to mix binary and text data,
+ * for example, if you are creating a multipart response, use a
+ * <code>ServletOutputStream</code> to write the multipart headers, and
+ * then use the headers to build your own text bodies.
  *
- * <P> For more information about MIME, see the Internet RFCs such as
- * <a href="http://info.internet.isi.edu/in-notes/rfc/files/rfc2045.txt">
- * RFC 2045</a>, the first in a series which defines MIME.  Note that
- * protocols such SMTP and HTTP define application-specific profiles of
- * MIME, and that standards in this area are evolving.
+ * <p>If you do not specify a character set for the MIME body response
+ * with {@link #setContentType}, the servlet engine will select one
+ * and modify the content accordingly. Call <code>setContentType</code>
+ * before you call <code>getWriter</code> or <code>getOutputStream</code>.
  * 
+ * <p>See the Internet RFCs such as RFC 2045 at 
+ * <a href="http://info.internet.isi.edu/in-notes/rfc/files/rfc2045.txt">RFC 2045</a> 
+ * for more information on MIME. Protocols such as SMTP
+ * and HTTP define profiles of MIME, and those standards
+ * are still evolving.
+ *
+ * @author 	Various
+ * @version 	$Version$
+ *
+ * @see		ServletOutputStream
+ *
  */
-
+ 
 public interface ServletResponse {
+
+
     
     /**
-     * Returns the character set encoding used for this MIME body.
-     * The character encoding is either the one specified in the
-     * assigned content type, or one which the client understands.
-     * If no content type has yet been assigned, it is implicitly
-     * set to <em>text/plain</em>
+     * Returns the name of the character set encoding used for
+     * the MIME body sent by this response.
      *
-     * <p>See RFC 2047 for more infomration about character encoding
-     * and MIME.
+     * <p>The character encoding is either the one specified in
+     * the content itself or another one the client understands.
+     * If no character encoding has been assigned, it is implicitly
+     * set to <i>text/plain</i>.
+     *
+     * <p>See RFC 2047 (http://ds.internic.net/rfc/rfc2045.txt)
+     * for more information about character encoding and MIME.
+     *
+     * @return		a <code>String</code> specifying the
+     *			name of the character set encoding, for
+     *			example, <i>text/plain</i>
+     *
      */
-
+  
     public String getCharacterEncoding ();
+    
+    
 
     /**
-     * Returns an output stream for writing binary response data.
+     * Returns a {@link ServletOutputStream} suitable for writing binary 
+     * data in the response. The servlet engine does not encode the
+     * binary data.
      *
-     * @see getWriter
-     * @exception IllegalStateException if getWriter has been
-     *	called on this same request.
-     * @exception IOException if an I/O exception has occurred
+     * @return				a {@link ServletOutputStream} for writing binary data	
+     *
+     * @exception IllegalStateException if you have already called the <code>getWriter</code> method
+     * 					for the same response
+     *
+     * @exception IOException 		if an input or output exception occurred
+     *
+     * @see 				#getWriter
+     *
      */
 
     public ServletOutputStream getOutputStream() throws IOException;
+    
+    
 
     /**
-     * Returns a print writer for writing formatted text responses.  The
-     * MIME type of the response will be modified, if necessary, to reflect
-     * the character encoding used, through the <em>charset=...</em>
-     * property.  This means that the content type must be set before
-     * calling this method.
+     * Returns a <code>PrintWriter</code> object that you
+     * can use to send character text to the client. 
+     * The character encoding used is the one specified 
+     * in the <code>charset=</code> property of the
+     * {@link #setContentType} method, which you must call
+     * <i>before</i> you call this method. 
      *
-     * @see getOutputStream
-     * @see setContentType
+     * <p>If necessary, the MIME type of the response is 
+     * modified to reflect the character encoding used.
      *
-     * @exception UnsupportedEncodingException if no such encoding can
-     * be provided
-     * @exception IllegalStateException if getOutputStream has been
-     *	called on this same request.
-     * @exception IOException on other errors.
+     * <p> You cannot use this method if you have already
+     * called {@link #getOutputStream} for this 
+     * <code>ServletResponse</code> object.
+     *
+     * 
+     * @return 					a <code>PrintWriter</code> object that 
+     *						can return text to the client 
+     *
+     * @exception UnsupportedEncodingException  if the character encoding specified in
+     *						<code>setContentType</code> cannot be
+     *						used
+     *
+     * @exception IllegalStateException    	if the <code>getOutputStream</code>
+     * 						method has already been called for this 
+     *						response object; in that case, you can't
+     *						use this method
+     *
+     * @exception IOException   		if an input or output exception occurred
+     *
+     * @see 					#getOutputStream
+     * @see 					#setContentType
+     *
      */
 
     public PrintWriter getWriter() throws IOException;
+    
+    
+    
+    
 
     /**
-     * Sets the content length for this response.
+     * Sets the length of the content the server returns
+     * to the client. In HTTP servlets, this method sets the
+     * HTTP Content-Length header.
      *
-     * @param len the content length
+     *
+     * @param len 	an integer specifying the length of the 
+     * 			content being returned to the client; sets
+     *			the Content-Length header
+     *
      */
 
     public void setContentLength(int len);
+    
+    
 
     /**
-     * Sets the content type for this response.  This type may later
-     * be implicitly modified by addition of properties such as the MIME
-     * <em>charset=&lt;value&gt;</em> if the service finds it necessary,
-     * and the appropriate media type property has not been set.
+     * Sets the content type of the response the server sends to
+     * the client. The content type may include the type of character
+     * encoding used, for example, <code>text/html; charset=ISO-8859-4</code>.
      *
-     * <p>This response property may only be assigned one time.  If a
-     * writer is to be used to write a text response, this method must
-     * be called before the method <code>getWriter</code>.  If an
-     * output stream will be used to write a response, this method must
-     * be called before the output stream is used to write response
-     * data.
+     * <p>You can only use this method once, and you should call it
+     * before you obtain a <code>PrintWriter</code> or 
+     * {@link ServletOutputStream} object to return a response.
      *
-     * @param type the content's MIME type
-     * @see getOutputStream
-     * @see getWriter */
+     *
+     * @param type 	a <code>String</code> specifying the MIME 
+     *			type of the content
+     *
+     * @see 		#getOutputStream
+     * @see 		#getWriter
+     *
+     */
 
     public void setContentType(String type);
 

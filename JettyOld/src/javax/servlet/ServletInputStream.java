@@ -1,3 +1,4 @@
+
 /*
  * $Id$
  * 
@@ -26,41 +27,69 @@ import java.io.IOException;
 
 /**
  * 
- * An input stream for reading servlet requests, it provides an
- * efficient readLine method.  This is an abstract class, to be
- * implemented by a network services writer.  For some application
- * protocols, such as the HTTP POST and PUT methods, servlet writers
- * use the input stream to get data from clients.  They access the
- * input stream via the ServletRequest's getInputStream method,
- * available from within the servlet's service method.  Subclasses of
- * ServletInputStream must provide an implementation of the read()
- * method.
+ * Provides an input stream for reading binary data from a client
+ * request, including an efficient <code>readLine</code> method
+ * for reading data one line at a time. With some protocols, such
+ * as HTTP POST and PUT, you use a <code>ServletInputStream</code>
+ * object to read data sent from the client.
  *
- * @see java.io.InputStream#read() 
+ * <p>You usually access a <code>ServletInputStream</code> object
+ * by using the {@link ServletRequest#getInputStream} method.
+ *
+ *
+ * <p>This is an abstract class that a servlet engine implements.
+ * Subclasses of this class
+ * must implement the <code>java.io.InputStream.read</code> method.
+ *
+ *
+ * @author 	Various
+ * @version 	$Version$
+ *
+ * @see		ServletRequest 
  *
  */
 
 public abstract class ServletInputStream extends InputStream {
 
+
+
     /**
-     * The default constructor does no work.
+     * Does nothing, because this is an abstract class.
+     *
      */
 
     protected ServletInputStream () { }
 
+  
+  
     
     /**
-     * Starting at the specified offset, reads into the given array of
-     * bytes until all requested bytes have been read or a '\n' is
-     * encountered, in which case the '\n' is read into the array as well.
-     * @param b the buffer into which the data is read
-     * @param off the start offset of the data
-     * @param len the maximum number of bytes to read
-     * @return the actual number of bytes read, or -1 if the end of the
-     *         stream is reached
-     * @exception IOException if an I/O error has occurred
+     *
+     * Reads the input stream, one line at a time. Starting at an
+     * offset, reads bytes into an array, until it reads a certain number
+     * of bytes or reaches a newline character, which it reads into the
+     * array as well.
+     *
+     * <p>This method returns -1 if it reaches the end of the input
+     * stream before reading the maximum number of bytes.
+     *
+     *
+     *
+     * @param b 		an array of bytes into which data is read
+     *
+     * @param off 		an integer specifying the character at which
+     *				this method begins reading
+     *
+     * @param len		an integer specifying the maximum number of 
+     *				bytes to read
+     *
+     * @return			an integer specifying the actual number of bytes 
+     *				read, or -1 if the end of the stream is reached
+     *
+     * @exception IOException	if an input or output exception has occurred
+     *
      */
-
+     
     public int readLine(byte[] b, int off, int len) throws IOException {
 
 	if (len <= 0) {

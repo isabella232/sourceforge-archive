@@ -1,2 +1,3 @@
 javax.servlet
 javax.servlet.http
+javax.servlet.jsp

@@ -23,36 +23,45 @@ package javax.servlet.http;
 import java.util.Enumeration;
 
 /**
- * A HttpSessionContext is a grouping of HttpSessions associated with a single
- * entity. This interface gives servlets access to  
- * methods for listing the IDs and for retrieving a session based on its ID.
  *
- * <p>Servlets get the HttpSessionContext object by calling the
- * getSessionContext() method of HttpSession.
+ * @author		Various
+ * @version		$Version$
  *
- * @see HttpSession
- * @deprecated The HttpSessionContext class has been deprecated for security
- * reasons. It will be removed in a future version of the Servlet API.
+ * @deprecated		As of Java(tm) Servlet API 2.1
+ *			for security reasons, with no replacement.
+ *			This interface will be removed in a future
+ *			version of this API.
+ *
+ * @see			HttpSession
+ * @see			HttpSessionBindingEvent
+ * @see			HttpSessionBindingListener
+ *
  */
+
 
 public interface HttpSessionContext {
 
     /**
-     * This method is deprecated and retained only for binary compatibility.
-     * It must always return null.
      *
-     * @deprecated This method has been deprecated for security reasons.
-     * It will be removed in a future version of the Servlet API.
+     * @deprecated 	As of Java Servlet API 2.1 with
+     *			no replacement. This method must 
+     *			return null and will be removed in
+     *			a future version of this API.
+     *
      */
 
     public HttpSession getSession (String sessionId);
+    
+    
+    
   
     /**
-     * This method is deprecated and retained only for binary compatibility.
-     * It must always return an empty enumeration.
      *
-     * @deprecated This method has been deprecated for security reasons.
-     * It will be removed in a future version of the Servlet API.
+     * @deprecated	As of Java Servlet API 2.1 with
+     *			no replacement. This method must return 
+     *			an empty enumeration and will be removed
+     *			in a future version of this API.
+     *
      */
 
     public Enumeration getIds ();
