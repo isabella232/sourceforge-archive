@@ -119,10 +119,10 @@ public class Log
 	    catch (Error ex){
 		System.err.println("Exception from getProperty - probably running in applet\nUse Log.initParamsFromApplet or Log.setOptions to control debug output.");
 	    }
-	    catch (RuntimeException ex){
+	    catch (SecurityException ex){
 		System.err.println("Exception from getProperty - probably running in applet\nUse Log.initParamsFromApplet or Log.setOptions to control debug output.");
 	    }
-	    catch (SecurityException ex){
+	    catch (RuntimeException ex){
 		System.err.println("Exception from getProperty - probably running in applet\nUse Log.initParamsFromApplet or Log.setOptions to control debug output.");
 	    }
 		    
