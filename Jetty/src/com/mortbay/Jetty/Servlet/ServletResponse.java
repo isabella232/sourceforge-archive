@@ -12,6 +12,7 @@ import com.mortbay.HTTP.HttpResponse;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.IO;
 import com.mortbay.Util.StringUtil;
+import com.mortbay.Util.URI;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -374,6 +375,25 @@ public class ServletResponse implements HttpServletResponse
     public void sendRedirect(String url) 
         throws IOException
     {
+        if (url==null)
+            throw new IllegalArgumentException();
+
+        if (url.indexOf(":/")<0)
+        {
+            if (url.startsWith("/"))
+                url=_servletRequest.getScheme()+
+                    "://"+_servletRequest.getServerName()+
+                    ":"+_servletRequest.getServerPort()+
+                    // XXX URI.canonicalPath(URI.addPaths(_servletRequest.getContextPath(),url));
+                    URI.canonicalPath(url);
+            else
+                url=_servletRequest.getScheme()+
+                    "://"+_servletRequest.getServerName()+
+                    ":"+_servletRequest.getServerPort()+
+                    URI.canonicalPath(URI.addPaths(URI.parentPath(_servletRequest.getRequestURI()),
+                                 url));
+        }
+        
         _httpResponse.sendRedirect(url);
     }
 

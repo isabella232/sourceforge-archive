@@ -16,6 +16,7 @@ import com.mortbay.Util.FileLogSink;
 import com.mortbay.Util.Resource;
 import com.mortbay.XML.XmlConfiguration;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.OutputStreamWriter;
@@ -26,6 +27,16 @@ import org.xml.sax.SAXException;
 
 /* ------------------------------------------------------------ */
 /** Run Jetty as a Win32 service.
+ *
+ * System.out and System.err output can be controlled with java
+ * properties:  SERVICE_OUT and SERVICE_ERR.
+ * The log file can be controlled with the property SERVICE_LOG_FILE
+ * <h4>Example</h4>
+ * <pre>
+ * jettysvc -c -DSERVICE_OUT="./logs/jettysvc.out" \\
+ *             -DSERVICE_ERR="./logs/jettysvc.err" \\
+ *             Jetty.xml wrkdir=$JETTY_HOME
+ * </pre>
  *
  * @version $Revision$
  * @author Greg Wilkins (gregw)
@@ -170,6 +181,29 @@ public class Service
     /* ------------------------------------------------------------ */
     public static void main(String[] arg)
     {
+        String opt;	
+        opt = System.getProperty("SERVICE_OUT");
+        if (opt != null)
+        {
+            try
+            {
+                PrintStream stdout = new PrintStream(new FileOutputStream(opt));
+                System.setOut(stdout);
+            }
+            catch(Exception e){Code.warning(e);}
+        }
+		
+        opt = System.getProperty("SERVICE_ERR");
+        if (opt != null)
+        {
+            try
+            {
+                PrintStream stderr = new PrintStream(new FileOutputStream(opt));
+                System.setErr(stderr);
+            }
+            catch(Exception e){Code.warning(e);}
+        }
+        
         try
         {
             if (Code.debug())

@@ -646,7 +646,13 @@ public class ServletRequest
     public int getServerPort()
     {
         int port = _httpRequest.getPort();
-        return port==0?80:port;
+        if (port==0)
+        {
+            if (getScheme().equalsIgnoreCase("https"))
+                return 443;
+            return 80;
+        }
+        return port;
     }
     
     /* -------------------------------------------------------------- */

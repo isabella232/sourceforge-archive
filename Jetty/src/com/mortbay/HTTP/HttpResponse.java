@@ -21,7 +21,7 @@ import javax.servlet.http.Cookie;
 
 
 /* ------------------------------------------------------------ */
-/** HTTP Request.
+/** HTTP Response.
  * This class manages the headers, trailers and content streams
  * of a HTTP response. It can be used for receiving or generating
  * requests.
@@ -422,7 +422,6 @@ public class HttpResponse extends HttpMessage
     {
         _header.put(HttpFields.__Location,location);
         setStatus(__302_Moved_Temporarily);
-	
         commitHeader();
     }
 
