@@ -28,7 +28,6 @@ read Y
 [ $Y != "y" ] && exit 1
 
 {
-    cd $HOME
     unset JETTY_HOME
     [ -d Jetty ] && mv Jetty Jetty.cvs
     [ -d JettyExtra ] && mv JettyExtra JettyExtra.cvs
@@ -36,7 +35,7 @@ read Y
     cvs $CVS_ARGS rtag $CVS_BRANCH -r Jetty_$TAG -F JBossJetty_$TAG Jetty JettyExtra/jmx
 
     cvs $CVS_ARGS export -r Jetty_$TAG Jetty JettyExtra
-    cd $HOME/Jetty
+    cd Jetty
     rm -fr FileBase servlets doc docroot src/com webappsrc webapps/default webapps/examples webapps/jetty testdocs
     ant all tidy || exit 1
 
