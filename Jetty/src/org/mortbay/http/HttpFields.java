@@ -1503,6 +1503,9 @@ public class HttpFields
             {
                 buf.append(";Secure");
             }
+            if (cookie instanceof HttpOnlyCookie)
+                buf.append(";HttpOnly");
+            
             name_value_params = buf.toString();
         }
         put(__Expires,__01Jan1970);

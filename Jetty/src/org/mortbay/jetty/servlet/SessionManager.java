@@ -75,6 +75,16 @@ public interface SessionManager extends LifeCycle, Serializable
     public HttpSession newHttpSession(HttpServletRequest request);
 
     /* ------------------------------------------------------------ */
+    /** @return true if session cookies should be secure
+     */
+    public boolean getSecureCookies();
+
+    /* ------------------------------------------------------------ */
+    /** @return true if session cookies should be httponly (microsoft extension)
+     */
+    public boolean getHttpOnly();
+
+    /* ------------------------------------------------------------ */
     public int getMaxInactiveInterval();
 
     /* ------------------------------------------------------------ */

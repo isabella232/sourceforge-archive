@@ -67,6 +67,8 @@ public abstract class AbstractSessionManager implements SessionManager
     protected transient ServletHandler _handler;
     protected int _minSessions = 0;
     protected int _maxSessions = 0;
+    protected boolean _secureCookies=false;
+    protected boolean _httpOnly=false;
 
     private transient SessionScavenger _scavenger = null;
     
@@ -281,6 +283,42 @@ public abstract class AbstractSessionManager implements SessionManager
                     _scavenger.interrupt();
             }
         }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the httpOnly.
+     */
+    public boolean getHttpOnly()
+    {
+        return _httpOnly;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param httpOnly The httpOnly to set.
+     */
+    public void setHttpOnly(boolean httpOnly)
+    {
+        _httpOnly = httpOnly;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the secureCookies.
+     */
+    public boolean getSecureCookies()
+    {
+        return _secureCookies;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param secureCookies The secureCookies to set.
+     */
+    public void setSecureCookies(boolean secureCookies)
+    {
+        _secureCookies = secureCookies;
     }
     
     

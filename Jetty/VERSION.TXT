@@ -1,6 +1,77 @@
 Jetty Versions
 --------------
 
+Jetty-5.1.2pre0
+ + Fixed case of Cookie parameters
+ + Support Secure and HttpOnly in session cookies
+
+Jetty-4.2.23
+ + LineInput handles readers with small internal buffer
+ + Added LogStream to capture stderr and stdout to logging
+ + Support Secure and HttpOnly in session cookies
+ + Build unsealed jars
+
+Jetty-5.1.1 - 1 December 2004
+
+Jetty-5.1.1RC1 
+ + Some minor findbugs code cleanups
+ + Made more WebApplicationHandle configuration methods public.
+ + Fixed ordering of filters with multiple interleaved mappings.
+ + Allow double // within URIs
+ + Applied patch for MD5 hashed credentials for MD5
+
+Jetty-5.1.1RC0 - 17 November 2004
+ + fix for adding recognized EventListeners
+ + fix commons logging imports to IbmJsseListener
+ + added new contributed shell start/stop script
+ + excluded ErrorPageHandler from standard build in extra/jdk1.2 build
+
+Jetty-5.1.0 - 14 November 2004
+
+Jetty-5.1.RC1 - 24 October 2004
+ + Allow JSSE listener to be just confidential or just integral.
+ + Fixed NPE for null contenttype
+ + improved clean targets
+ + when committed setHeader is a noop rather than IllegalStateException 
+ + Partially flush writers on every write so content length can be detected.
+ + Build unsealed jars
+ + default / mapping does not apply to Filters
+ + many minor cleanups suggested from figbug utility
+ + Allow multiple accepting threads
+
+Jetty-5.1.RC0 - 11 October 2004
+ + Fixed many minor issues from J2EE 1.4 TCK testing
+   See sf.net bugs 1031520 - 1032205
+ + Refactored, simplified and optimized HttpOutputStream
+ + LineInput handles readers with small internal buffer
+ + Added LogStream to capture stderr and stdout to logging
+ + Added filter chain cache
+ + Added JSR77 servlet statistic support
+ + Refactored webapp context configurations
+ + Added LifeCycle events and generic container.
+ + Upgraded to ant-1.6 for jasper
+ + Fixed HTAccessHandler
+ + JBoss 4.0.0 support
+
+Jetty-5.0.0 - 10 September 2004
+
+Jetty-5.0.RC4 - 5 September 2004
+ + Fixed configuration of URL alias checking
+ + JettyJBoss: Use realm-name from web.xml if present, otherwise use security-domain from jboss-web.xml
+
+Jetty-5.0.RC3 - 28 August 2004
+ + DIGEST auth handles qop, stale and maxNonceAge.
+ + Less verbose warning for non validating xml parser.
+ + fixed jaas logout for jetty-jboss
+ + fixed deployment of ejb-link elements in web.xml with jboss
+ + Update to jasper 5.0.27
+ + Added parameters for acceptQueueSize and lowResources level.
+ + Changed default URI encoding to UTF-8
+ + Fixes to work with java 1.5
+ + JettyPlus upgrade to XAPool 1.3.3. and HSQLDB 1.7.2
+ + JettyPlus addition of pluggable DataSources
+ + Always say close for HTTP/1.0 non keep alive.
+
 Jetty-4.2.22 - 23 August
  + fixed jaas logout for jetty-jboss integration
  + fixed deployment of ejb-link elements in web.xml for jboss
