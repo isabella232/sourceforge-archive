@@ -27,7 +27,7 @@ public class EmbedUrl extends  Element
     HttpRequest request=null;
     HttpHeader replyHeader=null;
     HttpInputStream replyStream=null;
-    
+
     /* ----------------------------------------------------------------- */
     public EmbedUrl(URL url)
     {
@@ -43,17 +43,17 @@ public class EmbedUrl extends  Element
     }
 
     /* ------------------------------------------------------------ */
-    /* 
+    /*
      * @return content encoding.
-     * @exception IOException 
+     * @exception IOException
      */
     private String skipHeader()
          throws IOException
     {
         Code.debug("Embed "+url);
-        Socket socket=null;     
+        Socket socket=null;
         HttpRequest request=null;
-        
+
         if (proxy==null)
         {
             int port = url.getPort();
@@ -66,18 +66,18 @@ public class EmbedUrl extends  Element
             socket= new Socket(proxy.getInetAddress(),
                                proxy.getPort());
         }
-        
+
         request=new HttpRequest(null,HttpRequest.GET,url.getFile());
-        
-        request.write(socket.getOutputStream());   
+
+        request.write(socket.getOutputStream());
         Code.debug("waiting for forward reply...");
-        
+
         replyHeader = new HttpHeader();
         replyStream = new HttpInputStream(socket.getInputStream());
         String replyLine=replyStream.readLine();
         Code.debug("got "+replyLine);
         replyHeader.read(replyStream);
-        
+
         String s = replyHeader.getHeader(HttpHeader.ContentType);
         try {
             int i1 = s.indexOf("charset=",s.indexOf(';')) + 8;
@@ -86,7 +86,7 @@ public class EmbedUrl extends  Element
         }
         catch (Exception e)
         {
-            return "ISO-8859-1";
+            return "ISO8859_1";
         }
     }
 
@@ -110,14 +110,14 @@ public class EmbedUrl extends  Element
                 replyHeader.destroy();
             if (request!=null)
                 request.destroy();
-            
+
             socket=null;
             replyStream=null;
             replyHeader=null;
             request=null;
         }
     }
-    
+
     /* ----------------------------------------------------------------- */
     public void write(Writer out)
          throws IOException
@@ -130,7 +130,7 @@ public class EmbedUrl extends  Element
             }
             catch(UnsupportedEncodingException e)
             {
-                IO.copy(new InputStreamReader(replyStream,"ISO-8859-1"),out);
+                IO.copy(new InputStreamReader(replyStream,"ISO8859_1"),out);
             }
             out.flush();
         }
@@ -144,7 +144,7 @@ public class EmbedUrl extends  Element
                 replyHeader.destroy();
             if (request!=null)
                 request.destroy();
-            
+
             socket=null;
             replyStream=null;
             replyHeader=null;

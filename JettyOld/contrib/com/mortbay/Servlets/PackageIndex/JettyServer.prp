@@ -89,7 +89,7 @@ main.root.Servlet.PROPERTY.SERVLET.PackageIndex.CLASS	     : com.mortbay.Servlet
 main.root.Servlet.PROPERTY.SERVLET.PackageIndex.PATHS	     : /
 main.root.Servlet.PROPERTY.SERVLET.PackageIndex.CHUNK	     : True
 main.root.Servlet.PROPERTY.SERVLET.PackageIndex.Initialize   : True
-main.root.Servlet.PROPERTY.SERVLET.PackageIndex.PROPERTIES   : ./PackageIndex.prp
+main.root.Servlet.PROPERTY.SERVLET.PackageIndex.PROPERTIES   : %user.dir%/PackageIndex.prp
 
 main.root.NotFound.CLASS		  : com.mortbay.HTTP.Handler.NotFoundHandler
 

@@ -32,9 +32,9 @@ class TestServer extends Thread
             while (port==-1)
                 try{wait(1000);}catch(InterruptedException e){};
         }
-        
+
     }
-    
+
     public void run()
     {
         try{
@@ -47,7 +47,7 @@ class TestServer extends Thread
             connection = listen.accept( );
             Code.debug("Test server connected");
             in = new LineInput(connection.getInputStream());
-            out = new OutputStreamWriter(connection.getOutputStream(),"ISO-8859-1");
+            out = new OutputStreamWriter(connection.getOutputStream(),"ISO8859_1");
             out.write(CmdReply.codeServiceReady+" OK\n");
             out.flush();
 
@@ -57,7 +57,7 @@ class TestServer extends Thread
             test.checkEquals(line,"USER TestUser","Received USER");
             out.write(CmdReply.codeUsernameNeedsPassword+" Need password\n");
             out.flush();
-            
+
             line = in.readLine();
             Code.debug("Test server got: "+line);
             test.checkEquals(line,"PASS TestPass","Received PASS");
@@ -79,7 +79,7 @@ class TestServer extends Thread
             Socket dataConnection = new Socket(InetAddress.getLocalHost(),
                                                dataPort);
             test.check(true,"DataPort Opened");
-            
+
             line = in.readLine();
             Code.debug("Test server got: "+line);
             test.checkEquals(line,"RETR TestFileName","Received RETR");
@@ -87,7 +87,7 @@ class TestServer extends Thread
             out.flush();
 
             Writer dataOut = new
-                OutputStreamWriter(dataConnection.getOutputStream(),"ISO-8859-1");
+                OutputStreamWriter(dataConnection.getOutputStream(),"ISO8859_1");
 
             Thread.sleep(1000);
             dataOut.write("How Now Brown Cow\n");
@@ -112,7 +112,7 @@ class TestServer extends Thread
             dataConnection = new Socket(InetAddress.getLocalHost(),
                                                dataPort);
             test.check(true,"DataPort Opened");
-            
+
             line = in.readLine();
             Code.debug("Test server got: "+line);
             test.checkEquals(line,"STOR TestFileName","Received STOR");
@@ -144,14 +144,14 @@ class TestServer extends Thread
             dataConnection = new Socket(InetAddress.getLocalHost(),
                                                dataPort);
             test.check(true,"DataPort Opened");
-            
+
             line = in.readLine();
             Code.debug("Test server got: "+line);
             test.checkEquals(line,"RETR TestFileName","Received RETR");
             out.write(CmdReply.codeFileStatusOK+" Data port opened\n");
             out.flush();
 
-            dataOut = new OutputStreamWriter(dataConnection.getOutputStream(),"ISO-8859-1");
+            dataOut = new OutputStreamWriter(dataConnection.getOutputStream(),"ISO8859_1");
             dataOut.write("How Now Brown Cow\n");
             dataOut.flush();
             line = in.readLine();
@@ -162,32 +162,32 @@ class TestServer extends Thread
             dataConnection.close();
             out.write(CmdReply.codeClosingData+" File transfer aborted\n");
             out.flush();
-            
+
             line = in.readLine();
             out.write(CmdReply.codeCommandOK+" OK\n");
             out.flush();
             Code.debug("Test server got: "+line);
             test.checkEquals("TYPE I",line,"Received TYPE I");
-            
+
             line = in.readLine();
             out.write(CmdReply.codeCommandOK+" OK\n");
             out.flush();
             Code.debug("Test server got: "+line);
             test.checkEquals("TYPE L 8",line,"Received TYPE L 8");
-            
+
             line = in.readLine();
             out.write(CmdReply.codeCommandOK+" OK\n");
             out.flush();
             Code.debug("Test server got: "+line);
             test.checkEquals("TYPE A C",line,"Received TYPE A C");
-    
+
             Code.debug("Tests completed");
         }
         catch (Exception e){
             test.check(false,"Server failed: "+e);
             Test.report();
             System.exit(1);
-        }       
+        }
     }
 };
 

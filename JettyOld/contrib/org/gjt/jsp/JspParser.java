@@ -24,15 +24,15 @@ import java.net.URL;
 import java.util.*;
 import javax.servlet.*;
 
-class JspParser 
+class JspParser
     implements JspMsg {
     private boolean debug = false;
     private ServletConfig config;
-    // force use of pageBase for some engines 
+    // force use of pageBase for some engines
     private boolean usePageBase = false;
 
     // maximal string length that get written
-    // as a single constant string. 
+    // as a single constant string.
     // (real string may be a few bytes longer)
     private static int MAX_STRING_LENGTH = 32000;
     // Used when we open a new file for inclusion.
@@ -49,7 +49,7 @@ class JspParser
 	this.config = config;
     }
     /**
-     * Enable/disable debugging 
+     * Enable/disable debugging
      */
     public void setDebug(boolean b) { debug = b; }
 
@@ -58,10 +58,10 @@ class JspParser
      */
     public void setUsePageBase(boolean b) { usePageBase = b; }
 
-    /** 
+    /**
      * Parses the JSP page indicated and returns a JspNode with type
      * JSP_BODY.
-     * 
+     *
      * @exception ParseException if a parsing error occurred
      * @exception IOException if there was a problem reading from the reader
      */
@@ -103,7 +103,7 @@ class JspParser
 	    c = (char) in;
 	    switch (state) {
 	    case '>': /* first character after a '>' */
-		if(textChunk == null) 
+		if(textChunk == null)
 		    textChunk = new StringBuffer();
 		else
 		    textChunk.setLength(0);
@@ -111,7 +111,7 @@ class JspParser
 		// remember where textChunk started
 		pos = r.getPos();
 		state = '|';
-	
+
 	    case '|': /* characters between '>' and '<' */
 	    case 'X': /* in HTML comment, after '-' */
 	    case 'Y': /* in HTML comment, after '--' */
@@ -145,7 +145,7 @@ class JspParser
 		    state = '%';
 		    break;
 		} else if (inHtmlComment) {
-		    textChunk.append('<'); 
+		    textChunk.append('<');
 		    textChunk.append(c);
 		    state = '|'; /* <? */
 		} else {
@@ -154,14 +154,14 @@ class JspParser
 		    case '!': state = '!'; break;
 		    case '/': state = '/'; break;
 		    case '\\': state = '\\'; break;
-		    default:  
-			textChunk.append('<'); 
+		    default:
+			textChunk.append('<');
 			textChunk.append(c);
 			state = '|'; /* <? */
 		    }
 		}
 		break;
-		
+
 	    case '!':   /* seen <! */
 		if (c == '-') {
 		    state = '_';
@@ -237,17 +237,17 @@ class JspParser
 		    readToMatch(r, "--%>"); // skip the JSP comment
 		    state = '|';
 		    break;/* saw <%--*/
-		default:  
+		default:
 		    textChunk.append("<%-");
 		    textChunk.append(c);
 		    state = '|'; /* <%-!-*/
 		}
 		break;
-	
+
 	    case 'j':   /* seen <j */
 		switch (c) {
-		case 's': 
-		    state = 's'; 
+		case 's':
+		    state = 's';
 		    break;           /* saw <js */
 		default:
 		    textChunk.append("<j");
@@ -255,7 +255,7 @@ class JspParser
 		    state = '|';  /* saw <j!s */
 		}
 		break;
-	
+
 	    case 's':   /* seen <js */
 		switch (c) {
 		case 'p':                                     /* saw <jsp */
@@ -276,12 +276,12 @@ class JspParser
 			    String id = n.getAttribute("id");
 			    if(id == null) {
 				throw new ParseException
-				    (r.getPos(), 
+				    (r.getPos(),
 				     ERR_sp10_2_13_1_missing_attr_id);
 			    }
 			    if(beanIds.containsKey(id)) {
 				throw new ParseException
-				    (r.getPos(), 
+				    (r.getPos(),
 				     ERR_sp10_2_12_2_duplicate_id);
 			    }
 			    // FIXME: may store JspNode here for error messages?
@@ -296,41 +296,41 @@ class JspParser
 			      of body. setProperty may be inside jsp:useBean tag
 			      and adding of id to beanIds must be moved.
 			      This may be done using setPageObjectAttribute/getPOA.
-			      
+
 			    if(beanIds == null
-			       || name == null 
+			       || name == null
 			       || !beanIds.containsKey(name)) {
-				throw new ParseException(r.getPos(), 
+				throw new ParseException(r.getPos(),
 							 ERR_sp10_2_13_2_undefined_bean_instance);
 			    }
 			    */
 			}
-			
+
 			body.addChild(n);
 		    }
 		    state = '>';
-		    break;  
-		default:  
+		    break;
+		default:
 		    textChunk.append("<js");
 		    textChunk.append(c);
 		    state = '|'; /* <js!p*/
 		}
 		break;
-	   
+
 	    case '/':   /* seen </ */
 		switch (c) {
-		case 'j': 
-		    closeTag = true; 
-		    state = 'j'; 
+		case 'j':
+		    closeTag = true;
+		    state = 'j';
 		    break; /* saw </j */
-		default: 
-		    textChunk.append("</"); 
+		default:
+		    textChunk.append("</");
 		    textChunk.append(c);
 		    state = '|'; /* </!j */
 		}
 	    }
 	}
-	
+
 	if (state == '|') {
 	    addTextNode(body, pos, textChunk);
 	}
@@ -357,7 +357,7 @@ class JspParser
 		ch = readNoEOF(r);
 	    } while (Character.isWhitespace (ch));
 	} else ch = readNoEOF(r);
-	
+
 
 	while (Character.isJavaIdentifierPart (ch)) {
 	    sb.append (ch);
@@ -373,7 +373,7 @@ class JspParser
      * if percent is false, then can be terminated by > or by />
      * @return true if terminated by />
      */
-    boolean readNameAndValues (StackedReader r, Hashtable t, 
+    boolean readNameAndValues (StackedReader r, Hashtable t,
 			       boolean isXMLStyle)
 	throws IOException {
 
@@ -393,7 +393,7 @@ class JspParser
 		    break;
 		else
 		    throw new ParseException
-			(r.getPos(), 
+			(r.getPos(),
 			 ERR_sp10_2_7_1_parse_error_expected_gt_after_percent);
 	    else if (isXMLStyle && c == '>')
 		return false;
@@ -401,12 +401,12 @@ class JspParser
 		if ((c = readNoEOF(r)) == '>')
 		    return true;
 		else
-		    throw new ParseException 
-			(r.getPos(), 
+		    throw new ParseException
+			(r.getPos(),
 			 ERR_sp10_2_7_1_parse_error_expected_gt_after_slash);
-	   
+
 	     /* read name */
-	    while (Character.isJavaIdentifierPart ((char) c)) { 
+	    while (Character.isJavaIdentifierPart ((char) c)) {
 		sb.append ((char) c);
 		c = (char) r.read ();
 	    }
@@ -414,15 +414,15 @@ class JspParser
 	    name = sb.toString ();
 
 	    if (name.length () == 0)
-		throw new ParseException 
-		    (r.getPos(), 
+		throw new ParseException
+		    (r.getPos(),
 		     ERR_gnujsp_parse_attr_unnamed_jsp_directive);
 
 	    sb.setLength (0);
 	    do {
 		c = readNoEOF(r);
  	    } while (Character.isWhitespace(c) || c == '=');    /* skip to first non-whitespace after = */
-	    
+
 	    // if token begins with quote, record which kind.  Otherwise throw exception
 	    // (JSP 1.0 spec requires quotes around directive values)
 	    char quoteType = '"';
@@ -432,17 +432,17 @@ class JspParser
 		throw new ParseException( r.getPos(), ERR_gnujsp_directive_value_missing_quotes );
 	    }
 
-	    /* in attributes: 
-	     *     " as \" resp. ' as \'	
+	    /* in attributes:
+	     *     " as \" resp. ' as \'
 	     *     %> is escaped as %\> (not translated here)
 	     *     <% is escaped as <\% (not translated here)
 	     */
 	    for (;;) { // forever (or up to an end quote)
 		c = readNoEOF(r);
 		if (c == '\\')
-		    if ((c = readNoEOF(r)) == quoteType) { 
+		    if ((c = readNoEOF(r)) == quoteType) {
 			/* remember about possible escaped quotes */
-			sb.append (quoteType);     
+			sb.append (quoteType);
 		    } else {
 			sb.append ('\\').append ((char)c);
 		    }
@@ -459,9 +459,9 @@ class JspParser
 
 	return false;
     }
-   
-    void parseDeclaration (StackedReader r, JspNode body, 
-			   boolean isXMLStyle) 
+
+    void parseDeclaration (StackedReader r, JspNode body,
+			   boolean isXMLStyle)
 	throws IOException {
 
 	Pos pos = r.getPos();
@@ -478,7 +478,7 @@ class JspParser
 			  + pos.toJavaCode() +"\n"
 			  + out);
     }
-   
+
     void parseDirective (StackedReader r, JspNode body, boolean isXMLStyle) throws IOException {
 	StringBuffer buffer = new StringBuffer();
 	char lastChar = readToken (r, buffer, !isXMLStyle);
@@ -508,7 +508,7 @@ class JspParser
 		    String current = (String) body.getPageAttribute("import");
 		    body.setPageAttribute(key, ((current == null) ? "" : current + ",") + table.get(key));
 		} else if ("contentType".equals(key)) {
-		    String charset = "ISO-8859-1";
+		    String charset = "ISO8859_1";
 		    String old = body.getPageAttribute("contentType");
 		    if (old != null) throw new ParseException(r.getPos(), ERR_sp10_2_7_1_duplicate_attribute_contenttype);
 		    String contentType = (String) table.get(key);
@@ -517,10 +517,10 @@ class JspParser
 		    // content-type string exactly as JServ does.
 		    int start = contentType.indexOf("charset=");
 		    int end;
-		    
+
 		    if (start != -1 ) {
 			String encoding = contentType.substring(start + "charset=".length());
-			
+
 			if ((end = encoding.indexOf(";")) > -1) {
 			    charset = encoding.substring(0, end);
 			}
@@ -528,7 +528,7 @@ class JspParser
 		    body.setPageAttribute("charset", charset);
 		} else {
 		    throw new ParseException
-			(r.getPos(), 
+			(r.getPos(),
 			 JspConfig.getLocalizedMsg(ERR_sp10_2_7_1_invalid_attribute)
 			 + ", " + key);
 		}
@@ -536,7 +536,7 @@ class JspParser
 	} else if (directive.equals("include")) {
 	    String file = (String) table.get ("file");
 	    if (file == null)
-		throw new ParseException (r.getPos(), 
+		throw new ParseException (r.getPos(),
 					  ERR_sp10_2_7_6_missing_attr_file);
 	    else {
 		if(debug) {
@@ -547,7 +547,7 @@ class JspParser
 		int p2 = file.indexOf('/');
 		if ((p1 != -1) && (p1 < p2)) {
 		    throw new ParseException
-			(r.getPos(), 
+			(r.getPos(),
 			 ERR_sp10_2_7_6_illegal_attr_file_must_be_relative);
 		}
 
@@ -558,7 +558,7 @@ class JspParser
 		// First calculate path as the URI
 		if (!file.startsWith("/")) {
 		    String current = (String) r.getCurrentInclude();
-		    file = current.substring(0, current.lastIndexOf('/') + 1) 
+		    file = current.substring(0, current.lastIndexOf('/') + 1)
 			+ file;
 		}
 		if(debug) {
@@ -590,7 +590,7 @@ class JspParser
 			    System.err.println("include: realPath="+realPath);
 			}
 			String pagebase = config.getInitParameter("pagebase");
-			realPath = (new File(pagebase,realPath)).getAbsolutePath(); 
+			realPath = (new File(pagebase,realPath)).getAbsolutePath();
 		    }
 		    resource = new URL("file:" + realPath);
 		} else {
@@ -622,15 +622,15 @@ class JspParser
 		r.pushReader(new LineNumberReader(new InputStreamReader(resource.openStream()), BUFFER_SIZE), file);
 	    }
 	} else if (directive.equals("taglib")) {
-	    throw new ParseException (r.getPos(), 
+	    throw new ParseException (r.getPos(),
 				      ERR_gnujsp_taglib_not_supported);
 	} else {
-	    throw new ParseException (r.getPos(), 
+	    throw new ParseException (r.getPos(),
 				      ERR_gnujsp_unrecognized_jsp_directive);
 	}
     }
-    
-    JspNode parseExpression (StackedReader r, JspNode body, 
+
+    JspNode parseExpression (StackedReader r, JspNode body,
 			     boolean isXMLStyle) throws IOException {
 	JspNode expression = new JspNode(JspNode.JSP_EXPRESSION, body);
 
@@ -643,11 +643,11 @@ class JspParser
 	return expression;
     }
 
-    JspNode parseScriptlet (StackedReader r, char firstChar, JspNode body, 
+    JspNode parseScriptlet (StackedReader r, char firstChar, JspNode body,
 			    boolean isXMLStyle) throws IOException {
 	JspNode scriptlet = new JspNode(JspNode.JSP_SCRIPTLET, body);
 
-	String out = firstChar 
+	String out = firstChar
 	    + readToMatch(r, isXMLStyle ? "</jsp:scriptlet>" : "%>");
 	if (!isXMLStyle) out = unescape(out);
 
@@ -656,14 +656,14 @@ class JspParser
 	scriptlet.addChild(textNode);
 	return scriptlet;
     }
-   
+
     /**
      * Reads the next character from the Reader; throws an exception if
      * it gets an EOF.
      */
     private char readNoEOF(StackedReader r) throws IOException {
 	int i = r.read();
-	if (i == -1) throw new ParseException(r.getPos(), 
+	if (i == -1) throw new ParseException(r.getPos(),
 					      ERR_gnujsp_unexpected_eof);
 	return (char) i;
     }
@@ -705,10 +705,10 @@ class JspParser
 	    }
 	} // forever
     }
-	
+
     void parseCloseTag(StackedReader r, JspNode body) throws IOException {
 	char ch = (char) r.read ();
-	if (ch != ':') throw new ParseException(r.getPos(), 
+	if (ch != ':') throw new ParseException(r.getPos(),
 						ERR_gnujsp_bad_jsp_tag_format);
 
 	StringBuffer tagBuffer = new StringBuffer();
@@ -719,19 +719,19 @@ class JspParser
 	if (JspNode.typeFor(tag) != body.getType()) {
 	    throw new ParseException(r.getPos(),
 				     JspConfig.getLocalizedMsg(ERR_gnujsp_parse_close_tag_does_not_match_open_tag)
-				     + ": </jsp:" + tag + ">, <jsp:" 
+				     + ": </jsp:" + tag + ">, <jsp:"
 				     + JspNode.tagNames[body.getType()]
 				     + ">\n"
 				     + JspConfig.getLocalizedMsg(ERR_gnujsp_check_if_you_forgot)
-				     + " <jsp:" 
+				     + " <jsp:"
 				     + JspNode.tagNames[body.getType()] + "/>");
 	}
     }
 
     JspNode parseTag (StackedReader r, JspNode body) throws IOException {
 	char ch = readNoEOF(r);
-	if (ch != ':') 
-	    throw new ParseException(r.getPos(), 
+	if (ch != ':')
+	    throw new ParseException(r.getPos(),
 				     ERR_gnujsp_bad_jsp_tag_format);
 
 	StringBuffer tagBuffer = new StringBuffer();
@@ -777,7 +777,7 @@ class JspParser
 	    node.setAttribute("page", (String) table.get("page"));
 	    node.setAttribute("flush", (String) table.get("flush"));
 	} else if (tag.equals("plugin")) {
-	    throw new ParseException (r.getPos(), 
+	    throw new ParseException (r.getPos(),
 				      ERR_gnujsp_jspplugin_not_supported);
 	} else if (tag.equals("setProperty")) {
 	    node = new JspNode(JspNode.JSP_SETPROPERTY, body);
@@ -801,8 +801,8 @@ class JspParser
 	    return parseScriptlet(r, ' ', body, true);
 	}
 
-	if (node == null) 
-	    throw new ParseException(r.getPos(), 
+	if (node == null)
+	    throw new ParseException(r.getPos(),
 				     ERR_gnujsp_unrecognized_jsp_tag);
 
 	// remember where the tag was defined

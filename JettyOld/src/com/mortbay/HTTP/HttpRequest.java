@@ -56,7 +56,7 @@ public class HttpRequest extends HttpHeader
     public static final String SESSIONID_URL = "url";
     public static final String SESSIONID_COOKIE = "cookie";
     public static final String SESSIONID_NONE = "none";
-    
+
     /* ------------------------------------------------------------ */
 
     private String method=null;
@@ -87,7 +87,7 @@ public class HttpRequest extends HttpHeader
     private String pathInfo=null;
     private String remoteUser=null;
     private String authType=null;
-    
+
     private byte[] byteContent = null;
 
     private String pathTranslated = null;
@@ -98,7 +98,7 @@ public class HttpRequest extends HttpHeader
     private int inputState=0;
 
     private URI redirectParams = null;
-    
+
     /* -------------------------------------------------------------- */
     /** Construct received request.
      * @param httpServer The server for this request.
@@ -123,11 +123,11 @@ public class HttpRequest extends HttpHeader
             cb = in.readCharBufferLine();
         }
         while(cb!=null && cb.size==0);
-        
+
         if (cb==null)
             throw new IOException("EOF");
         decodeRequestLine(cb.chars,cb.size);
-        
+
         // Build URI
         pathInfo=uri.getPath();
 
@@ -141,7 +141,7 @@ public class HttpRequest extends HttpHeader
             out.write(Continue);
             out.flush();
         }
-        
+
         // Read headers
         super.read(in);
 
@@ -150,7 +150,7 @@ public class HttpRequest extends HttpHeader
             setHeader(ContentLength,null);
             this.in.chunking(true);
         }
-        else 
+        else
         {
             int content_length=getContentLength();
             if (content_length>=0)
@@ -174,7 +174,7 @@ public class HttpRequest extends HttpHeader
         protocolHostPort="";
         localRequest=true;
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Construct request to send
      * @param httpServer The server for this request.
@@ -200,24 +200,24 @@ public class HttpRequest extends HttpHeader
     {
         return localRequest;
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** Set associated response 
+    /** Set associated response
      */
     public void setHttpResponse(HttpResponse response)
     {
         this.response=response;
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** Get associated response 
+    /** Get associated response
      * @return response
      */
     public HttpResponse getHttpResponse()
     {
         return response;
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Get the URI path minus any query strings with translations
      * applied.
@@ -231,7 +231,7 @@ public class HttpRequest extends HttpHeader
             return null;
         return uri.getPath();
     }
-    
+
 
     /* -------------------------------------------------------------- */
     /** Set the URI path and redirect params
@@ -241,10 +241,10 @@ public class HttpRequest extends HttpHeader
         if (uri!=null && path!=null)
             uri.setPath(path);
         servletPath=null;
-	
+
         pathInfo=(path!=null)?path:(uri!=null?uri.getPath():null);
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Set the URI path and redirect params
      */
@@ -256,7 +256,7 @@ public class HttpRequest extends HttpHeader
         pathInfo=newuri.getPath();
 	redirectParams=newuri;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get the resource path.
      * If set, the resource path is the path used by Jetty Handlers
@@ -276,7 +276,7 @@ public class HttpRequest extends HttpHeader
             return resourcePath;
         return getRequestPath();
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Set the resource path.
      * The resource path is the path used by Jetty Handlers
@@ -284,14 +284,14 @@ public class HttpRequest extends HttpHeader
      * A resource path is required
      * to implement the RequestDispatcher.include method, which leaves
      * the requestPath unmodified when calling a new resource for content.
-     * @param path 
+     * @param path
      */
     public void setResourcePath(String path)
     {
 	resourcePath=path;
 	redirectParams=null;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Set the resource path.
      * The resource path is the path used by Jetty Handlers
@@ -299,7 +299,7 @@ public class HttpRequest extends HttpHeader
      * A resource path is required
      * to implement the RequestDispatcher.include method, which leaves
      * the requestPath unmodified when calling a new resource for content.
-     * @param path 
+     * @param path
      */
     public void setResourcePath(URI newuri)
     {
@@ -314,7 +314,7 @@ public class HttpRequest extends HttpHeader
 	    redirectParams=newuri;
 	}
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Return the HTTP request line as it was received
      */
@@ -333,7 +333,7 @@ public class HttpRequest extends HttpHeader
     {
         return version;
     }
-    
+
 
     /* ------------------------------------------------------------ */
     /** Set the translated path
@@ -343,7 +343,7 @@ public class HttpRequest extends HttpHeader
     {
         this.pathTranslated=pathTranslated;
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Set the servlet path
      * getServletPath and getPathInfo are not valid until this
@@ -353,7 +353,7 @@ public class HttpRequest extends HttpHeader
          throws MalformedURLException
     {
         String path=getResourcePath();
-        
+
         switch (servletPath.charAt(servletPath.length()-1))
         {
           case '|':
@@ -369,10 +369,10 @@ public class HttpRequest extends HttpHeader
               else if (s>=0)
                   servletPath=servletPath.substring(0,s);
         }
-        
+
         Code.debug("SetServletPath '",servletPath,
                    "' in " , uri );
-                                        
+
         this.servletPath=servletPath;
 
         if (!path.startsWith(servletPath))
@@ -393,14 +393,14 @@ public class HttpRequest extends HttpHeader
     }
 
     /* ------------------------------------------------------------ */
-    /** Set the request version 
-     * @param version 
+    /** Set the request version
+     * @param version
      */
     public void setVersion(String version)
     {
         this.version=version;
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Translate the URI
      * Apply any translation rules to the URI.
@@ -417,14 +417,14 @@ public class HttpRequest extends HttpHeader
     {
         String path=getResourcePath();
         path=PathMap.translate(path,pathSpec,newPath);
-        
+
         servletPath=null;
         pathInfo=path;
         setResourcePath(path);
         if (translateURI)
             uri.setPath(getResourcePath());
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Set the remoteUser from authentication headers
      */
@@ -433,7 +433,7 @@ public class HttpRequest extends HttpHeader
         this.authType=authType;
         remoteUser=name;
     }
-    
+
 
     /* -------------------------------------------------------------- */
     /** decode Form Parameters
@@ -445,7 +445,7 @@ public class HttpRequest extends HttpHeader
     {
          if (formParameters!=null)
              return;
- 
+
          String contentType = getContentType();
          if (contentType!=null &&
              contentType.equals(HttpHeader.WwwFormUrlEncode))
@@ -465,14 +465,14 @@ public class HttpRequest extends HttpHeader
                          throw new EOFException();
                      n += count;
                  }
- 
+
                  // Convert it to a hash table
-                 String content = new String(postBytes,"ISO-8859-1");
+                 String content = new String(postBytes,"ISO8859_1");
                  formParameters = new UrlEncoded(content);
              }
          }
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Decode Cookies
      * If includeAsParameters is true,  cookies may be fetch via the
@@ -487,17 +487,17 @@ public class HttpRequest extends HttpHeader
             cookieParameters.put(cookies[i].getName(),
                                  cookies[i].getValue());
     }
-    
-    
+
+
     /* -------------------------------------------------------------- */
     /** Write the request header to an output stream
-     */ 
+     */
     public void write(OutputStream out)
         throws IOException
     {
         out.write(method.getBytes());
         out.write(' ');
-        
+
         if (resourcePath!=null && resourcePath.length()>0)
         {
             out.write(resourcePath.getBytes());
@@ -523,7 +523,7 @@ public class HttpRequest extends HttpHeader
     {
         uri.put(name,value);
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Put a multi-valued parameter into the request.
      * Placed in uri query parameters for forwarded requests
@@ -532,7 +532,7 @@ public class HttpRequest extends HttpHeader
     {
         uri.put(name,values);
     }
-    
+
     /* ------------------------------------------------------------- */
     /** Get the HttpServer of the request.
      */
@@ -540,7 +540,7 @@ public class HttpRequest extends HttpHeader
     {
         return httpServer;
     }
-    
+
     /* ------------------------------------------------------------- */
     /** Get the HttpInputStream of the request.
      * It is dangerous to use this unless you know what you are doing.
@@ -558,7 +558,7 @@ public class HttpRequest extends HttpHeader
      * This methods dispatches this request to the local server.
      * It is used by the ServletContext.getResourceAsStream method.
      * @return InputStream containing content.
-     * @exception IOException 
+     * @exception IOException
      */
     public InputStream handleRequestLocally()
         throws IOException
@@ -571,7 +571,7 @@ public class HttpRequest extends HttpHeader
         final PipedInputStream in = new PipedInputStream();
         final PipedOutputStream out = new PipedOutputStream(in);
         final HttpResponse response = new HttpResponse(out,this);
-        
+
         // run new request in own thread
         try{
             localThreadPool
@@ -596,22 +596,22 @@ public class HttpRequest extends HttpHeader
             Code.warning(e);
             return null;
         }
-        
+
         // Get response line
         HttpInputStream replyStream = new HttpInputStream(in);
         String replyLine=replyStream.readLine();
         Code.debug("Resource response: ",replyLine);
-        
+
         // Skip header of reply
         HttpHeader replyHeader = new HttpHeader();
         replyHeader.read(replyStream);
-        
+
         // Return content
         return replyStream;
     }
-    
 
-    
+
+
     /* -------------------------------------------------------------- */
     /* - SERVLET METHODS -------------------------------------------- */
     /* -------------------------------------------------------------- */
@@ -639,7 +639,7 @@ public class HttpRequest extends HttpHeader
         return getHeaderNoParams(ContentType);
     }
 
-   
+
     /* -------------------------------------------------------------- */
     /** Get the actual protocol and version.
      * Get protocol and version used in the request as a string of the
@@ -652,7 +652,7 @@ public class HttpRequest extends HttpHeader
     {
         return version;
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Get the host name of the server that received the request.
      * @return For the given example, this would return <PRE>
@@ -660,7 +660,7 @@ public class HttpRequest extends HttpHeader
      * </PRE>
      */
     public String getServerName()
-    {   
+    {
         if (serverName==null)
         {
             serverName=getHeader(Host);
@@ -688,22 +688,22 @@ public class HttpRequest extends HttpHeader
             }
             else if (address!=null && address.getInetAddress()!=null)
                 serverName = address.getInetAddress().getHostName();
-            
+
             if (serverName==null)
             {
                 try {serverName=InetAddress.getLocalHost().getHostName();}
                 catch(java.net.UnknownHostException ignore){
                 }
             }
-            
+
             int slash = serverName.indexOf("/");
             if (slash>=0)
                 serverName=serverName.substring(slash+1);
         }
-        
+
         return serverName;
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Get the port number used in the request
      * @return For the given example, this would return <PRE>
@@ -717,10 +717,10 @@ public class HttpRequest extends HttpHeader
 
         if (address!=null && serverPort==0)
             serverPort=address.getPort();
-        
+
         return serverPort;
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Get the remote IP address of the system that sent the request.
      * @return For the given example, this would return <PRE>
@@ -733,7 +733,7 @@ public class HttpRequest extends HttpHeader
             return connection.getInetAddress().getHostAddress();
         return "localhost";
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Get the hostname of the system that sent the request.
      * @return For the given example, this would return <PRE>
@@ -746,7 +746,7 @@ public class HttpRequest extends HttpHeader
 
         if (connection!=null)
             remoteHost = connection.getInetAddress().getHostName();
-        
+
         return remoteHost;
     }
 
@@ -756,7 +756,7 @@ public class HttpRequest extends HttpHeader
      * It returns null if the translation cannot be performed.
      * @param path the path to be translated
      * @deprecated
-     */  
+     */
     public String getRealPath(String path)
     {
         return httpServer.getRealPath(path);
@@ -799,7 +799,7 @@ public class HttpRequest extends HttpHeader
             return null;
         return value.toString();
     }
-    
+
     /* -------------------------------------------------------------- */
     /**
      * Returns the multi-values of the specified parameter for the request.
@@ -816,14 +816,14 @@ public class HttpRequest extends HttpHeader
             values = formParameters.getValues(name);
         if (values==null && cookieParameters!=null)
             values = cookieParameters.get(name);
-        
+
         if (values!=null && !(values instanceof String[]))
         {
             String[] a = new String[1];
             a[0]=values.toString();
             return a;
         }
-        
+
         return (String[])values;
     }
 
@@ -834,8 +834,8 @@ public class HttpRequest extends HttpHeader
      */
     public Enumeration getParameterNames()
     {
-        if (formParameters==null && 
-            cookieParameters==null && 
+        if (formParameters==null &&
+            cookieParameters==null &&
             redirectParams==null)
             return uri.getParameterNames();
 
@@ -850,7 +850,7 @@ public class HttpRequest extends HttpHeader
             while (e.hasMoreElements())
                 names.addElement(e.nextElement());
         }
-        
+
         if (cookieParameters!=null)
         {
             // XXX - This is probably not correct
@@ -867,10 +867,10 @@ public class HttpRequest extends HttpHeader
                 names.addElement(e.nextElement());
         }
 
-        
+
         return names.elements();
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Returns the scheme of the URL used in this request, for
      * example "http", "https"
@@ -879,7 +879,7 @@ public class HttpRequest extends HttpHeader
     {
         return scheme;
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Sets the scheme of the URL used in this request, for
      * example "http", "https"
@@ -888,7 +888,7 @@ public class HttpRequest extends HttpHeader
     {
         this.scheme = scheme;
     }
-    
+
     /* -------------------------------------------------------------- */
     /**
      * @param name the attribute name
@@ -898,33 +898,33 @@ public class HttpRequest extends HttpHeader
     {
         if (attributes == null)
             return null;
-        
+
         return attributes.get( name );
     }
-    
+
     /* -------------------------------------------------------------- */
     public Enumeration getAttributeNames()
     {
         if (attributes == null)
             return __NoAttributes;
-        
+
         return attributes.keys();
     }
-    
+
     /* -------------------------------------------------------------- */
     public void setAttribute(String name, Object o)
-    {   
+    {
         if (attributes == null)
             attributes = new Hashtable(11);
         attributes.put(name, o);
     }
 
-    
+
     /* -------------------------------------------------------------- */
     /* - HTTPSERVLET METHODS ---------------------------------------- */
     /* -------------------------------------------------------------- */
 
-    
+
     /* -------------------------------------------------------------- */
     /** Returns the character set encoding for the input of this request.
      * Checks the Content-Type header for a charset parameter and return its
@@ -941,10 +941,10 @@ public class HttpRequest extends HttpHeader
         }
         catch (Exception e)
         {
-            return "ISO-8859-1";
+            return "ISO8859_1";
         }
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Get the HTTP method for this request.
      * Returns the method with which the request was made. The returned
@@ -958,12 +958,12 @@ public class HttpRequest extends HttpHeader
     {
         return method;
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Get the full URI.
      * @return For the given example, this would return <PRE>
      * /Servlet/Path/Foo/Bar
-     * </PRE> 
+     * </PRE>
      * If the browser uses the abs_path URI, if it uses absoulteURI it will
      return <PRE>
      * http://localhost:1234/Servlet/Path/Foo/Bar
@@ -986,7 +986,7 @@ public class HttpRequest extends HttpHeader
     {
         return servletPath;
     }
-    
+
 
     /* -------------------------------------------------------------- */
     /**
@@ -1018,7 +1018,7 @@ public class HttpRequest extends HttpHeader
         return pathTranslated;
     }
 
-    
+
     /* -------------------------------------------------------------- */
     /** Get the query string of the request
      * @return For the given example, this would return <PRE>
@@ -1050,7 +1050,7 @@ public class HttpRequest extends HttpHeader
     public  String getAuthType()
     {
         return authType;
-    }   
+    }
 
 
     /* -------------------------------------------------------------- */
@@ -1066,12 +1066,12 @@ public class HttpRequest extends HttpHeader
         }
         return cookies;
     }
-    
+
     /* -------------------------------------------------------------- */
     public String getRequestedSessionId()
     {
         if (sessionIdState == SESSIONID_NOT_CHECKED)
-        {          
+        {
             // Then try cookies
             if (sessionId == null)
             {
@@ -1086,7 +1086,7 @@ public class HttpRequest extends HttpHeader
                     }
                 }
             }
-            
+
             // check if there is a url encoded session param.
             String path = getRequestPath();
             int prefix=path.indexOf(SessionContext.SessionUrlPrefix);
@@ -1100,9 +1100,9 @@ public class HttpRequest extends HttpHeader
                         path.substring(prefix+
                                        SessionContext.SessionUrlPrefix.length(),
                                        suffix);
-                    
+
                     Code.debug("Got Session ",id," from URL");
-                    
+
                     try
                     {
                         Long.parseLong(id,36);
@@ -1113,7 +1113,7 @@ public class HttpRequest extends HttpHeader
                         }
                         else if (!id.equals(sessionId))
                             Code.warning("Mismatched session IDs");
-                        
+
                         // translate our path to drop the prefix off.
                         if (suffix+SessionContext.SessionUrlSuffix.length()
                             <path.length())
@@ -1122,7 +1122,7 @@ public class HttpRequest extends HttpHeader
                                                           SessionContext.SessionUrlSuffix.length()));
                         else
                             setRequestPath(path.substring(0,prefix));
-                        
+
                         Code.debug(getRequestPath());
                     }
                     catch(NumberFormatException e)
@@ -1131,31 +1131,31 @@ public class HttpRequest extends HttpHeader
                     }
                 }
             }
-            
+
             if (sessionId == null)
                 sessionIdState = SESSIONID_NONE;
         }
-        
+
         return sessionId;
     }
-    
+
     /* ------------------------------------------------------------ */
     public HttpSession getSession()
     {
         HttpSession session = getSession(false);
         return (session == null) ? getSession(true) : session;
     }
-    
+
     /* -------------------------------------------------------------- */
     public HttpSession getSession(boolean create)
     {
         Code.debug("getSession(",new Boolean(create),")");
-        
+
         if (session != null && SessionContext.isValid(session))
             return session;
-        
+
         String id = getRequestedSessionId();
-        
+
         if (id != null)
         {
             session=sessions.getSession(id);
@@ -1169,18 +1169,18 @@ public class HttpRequest extends HttpHeader
             Cookie cookie =
                 new Cookie(SessionContext.SessionId,session.getId());
             cookie.setPath("/");
-            response.addCookie(cookie); 
+            response.addCookie(cookie);
         }
 
         return session;
     }
-    
+
     /* -------------------------------------------------------------- */
     public boolean isRequestedSessionIdFromCookie()
     {
         return sessionIdState == SESSIONID_COOKIE;
     }
-    
+
     /* -------------------------------------------------------------- */
     /**
      * @deprecated
@@ -1189,19 +1189,19 @@ public class HttpRequest extends HttpHeader
     {
         return isRequestedSessionIdFromURL();
     }
-    
+
     /* -------------------------------------------------------------- */
     public boolean isRequestedSessionIdFromURL()
     {
         return sessionIdState == SESSIONID_URL;
     }
-    
+
     /* -------------------------------------------------------------- */
     public boolean isRequestedSessionIdValid()
     {
         return sessionId != null && getSession(false) != null;
     }
-    
+
     /* -------------------------------------------------------------- */
     public synchronized BufferedReader getReader()
     {
@@ -1211,7 +1211,7 @@ public class HttpRequest extends HttpHeader
         {
             try
             {
-                reader=new BufferedReader(new InputStreamReader(getInputStream(),"ISO-8859-1"));
+                reader=new BufferedReader(new InputStreamReader(getInputStream(),"ISO8859_1"));
             }
             catch(UnsupportedEncodingException e)
             {
@@ -1241,14 +1241,14 @@ public class HttpRequest extends HttpHeader
                       continue;
                   state=1;
                   s1=i;
-                  
+
               case 1: // reading method
                   if (c==' ')
                       state=2;
                   else
                       s2=i;
                   continue;
-                  
+
               case 2: // skip whitespace after method
                   s3=i;
                   if (c!=' ')
@@ -1270,28 +1270,28 @@ public class HttpRequest extends HttpHeader
                       continue;
                   state=1;
                   e1=i;
-                  
+
               case 1: // reading method
                   if (c==' ')
                       state=2;
                   else
                       e2=i;
                   continue;
-                  
+
               case 2: // skip whitespace after method
                   e3=i;
                   if (c!=' ')
                       break endloop;
             }
         }
-        
+
         // Check sufficient params
         if (s3<0 || e1<0 || e3<s2 )
             throw new IOException("Bad requestline");
 
         // get method
         method=new String(buf,s1,s2-s1+1);
-        
+
         // get version
         if (s2!=e3 || s3!=e2)
         {
@@ -1346,7 +1346,7 @@ public class HttpRequest extends HttpHeader
             protocolHostPort="";
             uris = new String(buf,s3,e3-s3+1);
         }
-        
+
         uri = new URI(uris);
         Code.debug(requestLine);
     }
@@ -1398,8 +1398,8 @@ public class HttpRequest extends HttpHeader
         reader=null;
         super.destroy();
     }
-    
-    
+
+
     /* -------------------------------------------------------------- */
     /** Set the default session timeout.
      *  @param  default The default timeout in seconds
@@ -1410,5 +1410,5 @@ public class HttpRequest extends HttpHeader
     }
 }
 
-           
+
 

@@ -18,7 +18,7 @@ import java.io.*;
 public class DefaultExceptionHandler implements ExceptionHandler
 {
     /* ----------------------------------------------------------------- */
-    /** Base handler of handler Exceptions. 
+    /** Base handler of handler Exceptions.
      * @param request The HTTP request that was handled
      * @param response The HTTP response. The headersWritten() method needs
      * to be checked to determine if headers were sent before the exception.
@@ -47,11 +47,11 @@ public class DefaultExceptionHandler implements ExceptionHandler
                 Code.ignore(ise);
                 pout=new PrintWriter
                     (new OutputStreamWriter
-                        (response.getOutputStream(),"ISO-8859-1"));
+                        (response.getOutputStream(),"ISO8859_1"));
             }
 
             pout.println("<HTML><HEAD><TITLE>Exception</TITLE>");
-            
+
             if ( exception instanceof javax.servlet.ServletException )
             {
                 pout.println("<BODY><H2>");
@@ -60,7 +60,7 @@ public class DefaultExceptionHandler implements ExceptionHandler
                 exception.printStackTrace(pout);
                 exception.printStackTrace(pout);
                 pout.println("</PRE>");
-            
+
                 javax.servlet.ServletException se =
                     (javax.servlet.ServletException)exception;
                 if ( se.getRootCause() != null )
@@ -75,7 +75,7 @@ public class DefaultExceptionHandler implements ExceptionHandler
                 exception.printStackTrace(pout);
                 pout.println("</PRE>");
             }
-            
+
             pout.println("</BODY></HTML>");
             pout.flush();
         }
@@ -83,8 +83,8 @@ public class DefaultExceptionHandler implements ExceptionHandler
         {
             Code.debug("Exception creating error page",exception);
         }
-    }    
+    }
 }
-        
+
 
 

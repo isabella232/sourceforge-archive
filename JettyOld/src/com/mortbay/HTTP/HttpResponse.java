@@ -34,14 +34,14 @@ import java.net.MalformedURLException;
  * @author Greg Wilkins
 */
 public class HttpResponse extends HttpHeader implements HttpServletResponse
-{    
+{
     /* -------------------------------------------------------------- */
     public final static String MIME_Version ="MIME-Version"   ;
     public final static String Server ="Server"   ;
     public final static String Expires ="Expires"   ;
     public final static String Location ="Location"   ;
     public final static String Allow = "Allow"   ;
-    
+
     /* -------------------------------------------------------------- */
     public final static Hashtable __errorCodeMap = new Hashtable();
     static
@@ -73,7 +73,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
             Code.warning(e);
         }
     }
-    
+
     /* -------------------------------------------------------------- */
     private String version;
     private String status;
@@ -81,7 +81,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     private HttpOutputStream httpOut;
     private OutputStream out;
     private PrintWriter writer;
-    private boolean headersWritten=false;   
+    private boolean headersWritten=false;
     private Cookies cookies = null;
     private Vector filters=null;
     private HttpRequest request=null;
@@ -92,7 +92,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     private boolean handled=false;
     private HttpSession session=null;
     private boolean noSession=false;
-    
+
     /* -------------------------------------------------------------- */
     /** Construct a response
      * @param out The output stream that the response will be written to.
@@ -110,7 +110,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
         reason = "OK";
         setHeader(ContentType,"text/html");
         setHeader(MIME_Version,"1.0");
-        
+
         // XXX - need to automate setting this with getServerInfo
         setHeader(Server,Version.__jetty);
         setDateHeader(Date,System.currentTimeMillis());
@@ -119,31 +119,31 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
             HttpHeader.Close.equals(request.getHeader(HttpHeader.Connection)))
             setHeader(HttpHeader.Connection,HttpHeader.Close);
     }
-    
+
     /* -------------------------------------------------------------- */
     public String getVersion()
     {
         return version;
     }
-    
+
     /* -------------------------------------------------------------- */
     public void setVersion(String version)
     {
         this.version=version;
     }
-    
+
     /* -------------------------------------------------------------- */
     public String getStatus()
     {
         return status;
     }
-    
+
     /* -------------------------------------------------------------- */
     public String getReason()
     {
         return reason;
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Get the HttpRequest for this response
      */
@@ -151,7 +151,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     {
         return request;
     }
-    
+
     /* -------------------------------------------------------------- */
     public String getResponseLine()
     {
@@ -163,7 +163,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     {
         chunkByDefault=chunk;
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Add an observer to the response.
      * Observers are notified when the HTTP headers are complete
@@ -178,7 +178,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
         Code.debug("Added Observer ",o);
         observable.addObserver(o);
     }
-    
+
     /* -------------------------------------------------------------- */
     public void deleteObserver(Observer o)
     {
@@ -198,7 +198,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
             httpOut.close();
         doNotClose=false;
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Return true if the headers have already been written for this
      * response
@@ -207,7 +207,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     {
         return headersWritten;
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Return true if the headers have already been written for this
      * response
@@ -216,19 +216,19 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     {
         return handled;
     }
-    
+
     /* -------------------------------------------------------------- */
     /** If the headers have not already been written, write them.
      * If any HttpFilters have been added activate them before writing.
      */
-    public void writeHeaders() 
+    public void writeHeaders()
         throws IOException
     {
         if (headersWritten)
             return;
         Code.debug("Write Headers");
         headersWritten=true;
-        
+
         // Add Date if not already there
         if (getHeader(HttpHeader.Date)==null)
         {
@@ -237,7 +237,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
                 setDateHeader(HttpHeader.Date,new Date().getTime());
         }
 
-            
+
         // Tell anybody who wants to not headers are complete
         // (e.g.. to activate filters by content-type)
         if (observable!=null)
@@ -245,14 +245,14 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
             Code.debug("notify Observers");
             observable.notifyObservers(this);
         }
-            
+
         // Should we chunk or close
         if (HttpHeader.HTTP_1_1.equals(version))
         {
             String encoding = getHeader(HttpHeader.TransferEncoding);
             String connection =getHeader(Connection);
             String length = getHeader(HttpHeader.ContentLength);
-                    
+
             // chunk if we are told to
             if (encoding!=null && encoding.equals(HttpHeader.Chunked))
             {
@@ -291,7 +291,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
             {
                 // Assume we close unless otherwise
                 setHeader(Connection,HttpHeader.Close);
-            
+
                 String length = getHeader(HttpHeader.ContentLength);
                 if (length!=null && length.length()>0 && request!=null)
                 {
@@ -314,11 +314,11 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
         {
             setHeader(Connection,HttpHeader.Close);
         }
-            
-            
+
+
         // Write the headers
         handled=true;
-        OutputStreamWriter writer = new OutputStreamWriter(out,"ISO-8859-1");
+        OutputStreamWriter writer = new OutputStreamWriter(out,"ISO8859_1");
         synchronized(writer)
         {
             writer.write(version);
@@ -327,21 +327,21 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
             writer.write(" ");
             writer.write(reason);
             writer.write(CRLF);
-            
+
             if (cookies!=null)
                 super.write(writer,cookies.toString());
             else
                 super.write(writer);
             writer.flush();
         }
-        
+
         // Handle HEAD
         if (request!=null && request.getMethod().equals("HEAD"))
             // Fake a break in the HttpOutputStream
             throw HeadException.instance;
     }
 
-    
+
     /* ------------------------------------------------------------- */
     /** Copy all data from an input stream to the HttpResponse.
      * This method assumes that the input stream does not include HTTP
@@ -355,7 +355,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     {
         writeInputStream(stream,length,false);
     }
-    
+
     /* ------------------------------------------------------------- */
     /** Copy all data from an input stream to the HttpResponse.
      * @param stream the InputStream to read
@@ -378,12 +378,12 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
             if (observable!=null)
                 observable.notifyObservers(this);
         }
-        
+
         if (stream!=null)
             IO.copy(stream,getOutputStream(),length);
     }
-    
-    
+
+
     /* -------------------------------------------------------------- */
     /** Return the Cookies instance
      * These are the "Set-Cookies" that will be sent with this response.
@@ -396,7 +396,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
             cookies=new Cookies();
         return cookies;
     }
-    
+
 
     /* ------------------------------------------------------------- */
     /** Get the HttpOutputStream of the response.
@@ -416,7 +416,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
             httpOut.flush();
     }
 
-    
+
     /* -------------------------------------------------------------- */
     /* ServletResponse methods -------------------------------------- */
     /* -------------------------------------------------------------- */
@@ -453,11 +453,11 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
         outputState=1;
         return httpOut;
     }
-    
+
     /* -------------------------------------------------------------- */
     /* HttpServletResponse methods ---------------------------------- */
     /* -------------------------------------------------------------- */
-    
+
     /* ------------------------------------------------------------- */
     /**
      * Sets the status code and message for this response.
@@ -486,7 +486,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
         String msg = (String)__errorCodeMap.get(new Integer(code));
         reason=(msg!=null)?msg:status;
     }
-      
+
     /* ------------------------------------------------------------- */
     /**
      * Sends an error response to the client using the specified status
@@ -495,7 +495,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      * @param msg the detail message
      * @exception IOException If an I/O error has occurred.
      */
-    public void sendError(int code,String msg) 
+    public void sendError(int code,String msg)
         throws IOException
     {
         setContentType("text/html");
@@ -505,21 +505,21 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	    ("<HTML><HEAD><TITLE>Error "+code+
 	     "</TITLE><BODY><H2>HTTP ERROR: "+code+
 	     " " + msg +
-	     "</H2></BODY>\n</HTML>\n").getBytes("ISO-8859-1");
-	
+	     "</H2></BODY>\n</HTML>\n").getBytes("ISO8859_1");
+
         if (writer!=null)
             writer.flush();
 	else
 	    setContentLength(buf.length);
         writeHeaders();
-	
+
         outputState=0;
         OutputStream out = getOutputStream();
-	
+
         out.write(buf);
         out.flush();
     }
-      
+
     /* ------------------------------------------------------------- */
     /**
      * Sends an error response to the client using the specified status
@@ -527,7 +527,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      * @param code the status code
      * @exception IOException If an I/O error has occurred.
      */
-    public void sendError(int code) 
+    public void sendError(int code)
         throws IOException
     {
         String msg = (String)__errorCodeMap.get(new Integer(code));
@@ -536,7 +536,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
         else
             sendError(code,msg);
     }
-    
+
     /* ------------------------------------------------------------- */
     /**
      * Sends a redirect response to the client using the specified redirect
@@ -551,7 +551,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
         setStatus(SC_MOVED_TEMPORARILY);
         writeHeaders();
     }
-    
+
     /* -------------------------------------------------------------- */
     public boolean containsHeader(String headerKey)
     {
@@ -574,7 +574,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     {
         return encodeRedirectURL(url);
     }
-    
+
     /* -------------------------------------------------------------- */
     /**
      * @deprecated
@@ -583,14 +583,14 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     {
         return encodeURL(url);
     }
-    
+
     /* -------------------------------------------------------------- */
     public java.lang.String encodeRedirectURL(java.lang.String url)
     {
         //XXX - Don't know what to do different here?
         return encodeURL(url);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Encode session ID in URL if required.
      * The session ID is encoded in the file part of the URL between
@@ -607,7 +607,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
         // should not encode if cookies in evidence
         if (request==null || request.isRequestedSessionIdFromCookie())
             return url;
-        
+
         // get session;
         if (session==null && !noSession)
         {
@@ -628,36 +628,36 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
         int from= url.length()-1;
         if (from<0)
             return SessionContext.SessionUrlPrefix + id +
-                SessionContext.SessionUrlSuffix;            
-        
+                SessionContext.SessionUrlSuffix;
+
         int hook = url.indexOf('?');
         if (hook>=0 && hook<from)
             from=hook;
         int hash = url.indexOf('#');
         if (hash>=0 && hash<from)
             from=hash;
-            
+
         int slash = url.lastIndexOf('/',from);
         if (slash==-1)
         {
             url =
                 SessionContext.SessionUrlPrefix + id +
-                SessionContext.SessionUrlSuffix + url;    
+                SessionContext.SessionUrlSuffix + url;
         }
         else
         {
             url =
                 url.substring(0,slash+1) +
                 SessionContext.SessionUrlPrefix + id +
-                SessionContext.SessionUrlSuffix + 
-                url.substring(slash+1); 
+                SessionContext.SessionUrlSuffix +
+                url.substring(slash+1);
         }
-        
-        
+
+
         // Must be a partial url...
         return url;
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Returns the character set encoding for the input of this request.
      * Checks the Content-Type header for a charset parameter and return its
@@ -668,30 +668,30 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     {
         String encoding = getHeader(ContentType);
         if (encoding==null || encoding.length()==0)
-            return "ISO-8859-1";
-        
+            return "ISO8859_1";
+
         int i=encoding.indexOf(';');
         if (i<0)
-            return "ISO-8859-1";
-        
+            return "ISO8859_1";
+
         i=encoding.indexOf("charset=",i);
         if (i<0 || i+8>=encoding.length())
-            return "ISO-8859-1";
-            
+            return "ISO8859_1";
+
         encoding=encoding.substring(i+8);
         i=encoding.indexOf(' ');
         if (i>0)
             encoding=encoding.substring(0,i);
-        
+
         return encoding;
     }
-    
+
     /* -------------------------------------------------------------- */
     public synchronized java.io.PrintWriter getWriter()
     {
         if (outputState!=0 && outputState!=2)
             throw new IllegalStateException();
-        
+
         if (writer==null)
         {
             try
@@ -706,7 +706,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
         }
         outputState=2;
         return writer;
-    }    
+    }
 
     /* ------------------------------------------------------------ */
     /** Destroy the header.
@@ -731,18 +731,18 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
         observable=null;
         super.destroy();
     }
-    
+
     /* ------------------------------------------------------------ */
     java.util.Stack handledStack = new java.util.Stack();
     void preDispatch()
     {
         handledStack.push(new Boolean(handled));
         handled=false;
-        if (writer!=null)  
+        if (writer!=null)
             writer.flush();
         outputState=0;
     }
-    
+
     /* ------------------------------------------------------------ */
     void postDispatchInclude()
     {
@@ -754,6 +754,6 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     /* ------------------------------------------------------------ */
     void postDispatchForward()
     {
-      handledStack.pop();              
+      handledStack.pop();
     }
 }

@@ -1,4 +1,4 @@
-// =========================================================================== 
+// ===========================================================================
 // $Id$
 package com.mortbay.Util;
 
@@ -23,13 +23,13 @@ public class UrlEncoded extends Hashtable
 {
     /* -------------------------------------------------------------- */
     public static final String noValue="";
-    
+
     /* ----------------------------------------------------------------- */
     public UrlEncoded()
     {
         super(10);
     }
-    
+
     /* ----------------------------------------------------------------- */
     public UrlEncoded(String s)
         throws IOException
@@ -37,7 +37,7 @@ public class UrlEncoded extends Hashtable
         super(10);
         read(s);
     }
-    
+
     /* ----------------------------------------------------------------- */
     public void read(String string_input)
          throws IOException
@@ -45,7 +45,7 @@ public class UrlEncoded extends Hashtable
         addParamsTo(string_input,this);
     }
 
-    
+
     /* ------------------------------------------------------------ */
     /** Get value
      * Converts multiple values into coma separated list
@@ -63,13 +63,13 @@ public class UrlEncoded extends Hashtable
                 if (v.size()>0)
                 {
                     String value=v.elementAt(0).toString();
-                    for (int i=1; i<v.size(); i++)              
+                    for (int i=1; i<v.size(); i++)
                         value += ','+v.elementAt(i).toString();
                     return value;
                 }
                 return null;
             }
-            
+
             if (o instanceof String[])
             {
                 String[] a=(String[])o;
@@ -90,7 +90,7 @@ public class UrlEncoded extends Hashtable
     }
 
     /* ------------------------------------------------------------ */
-    /** Get the value as an object 
+    /** Get the value as an object
      * @param key The parameter name
      * @return Either a String value or Vector of String values
      */
@@ -98,7 +98,7 @@ public class UrlEncoded extends Hashtable
     {
         return super.get(key);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get multiple values as an array.
      * Multiple values must be specified as "N=A&N=B"
@@ -125,11 +125,11 @@ public class UrlEncoded extends Hashtable
         a[0]=o.toString();
         return a;
     }
-    
-    
-    
+
+
+
     /* ------------------------------------------------------------ */
-    /** Set a multi valued parameter 
+    /** Set a multi valued parameter
      * @param key The parameter name
      * @param values Array of string values
      */
@@ -137,8 +137,8 @@ public class UrlEncoded extends Hashtable
     {
         super.put(key,values);
     }
-    
-    
+
+
     /* -------------------------------------------------------------- */
     /* Add encoded parameters to Dictionary.
      * @param content the string containing the encoded parameters
@@ -155,7 +155,7 @@ public class UrlEncoded extends Hashtable
         {
             // take the first token string, which should be an assignment statement
             String substring = tokenizer.nextToken();
-            
+
             // breaking it at the "=" sign
             int i = substring.indexOf('=');
             if (i<0)
@@ -175,7 +175,7 @@ public class UrlEncoded extends Hashtable
                     value = decode(value);
                 }
             }
-            
+
             if (name.length() > 0)
             {
                 Object o = url.getObject(name);
@@ -196,7 +196,7 @@ public class UrlEncoded extends Hashtable
             }
         }
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Encode Hashtable with % encoding
      */
@@ -204,7 +204,7 @@ public class UrlEncoded extends Hashtable
     {
         return encode(false);
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Encode Hashtable with % encoding
      * @param equalsForNullValue if True, then an '=' is always used, even
@@ -224,7 +224,7 @@ public class UrlEncoded extends Hashtable
             {
                 result.append(separator);
                 result.append(encode(key));
-            
+
                 if (values[v].length()>0)
                 {
                     result.append('=');
@@ -232,17 +232,17 @@ public class UrlEncoded extends Hashtable
                 }
                 else if (equalsForNullValue)
                     result.append('=');
-            
+
                 separator="&";
             }
         }
         return result.toString();
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Perform URL encoding.
      * Simply calls URLEncoder.encode
-     * @param string 
+     * @param string
      * @return encoded string.
      */
     public static String encode(String string)
@@ -250,23 +250,23 @@ public class UrlEncoded extends Hashtable
         byte[] bytes=null;
         try
         {
-            bytes=string.getBytes("ISO-8859-1");
+            bytes=string.getBytes("ISO8859_1");
         }
         catch(UnsupportedEncodingException e)
         {
             Code.warning(e);
             bytes=string.getBytes();
         }
-        
+
         int len=bytes.length;
         byte[] encoded= new byte[bytes.length*3];
         int n=0;
         boolean noEncode=true;
-        
+
         for (int i=0;i<len;i++)
         {
             byte b = bytes[i];
-            
+
             if (b==' ')
             {
                 noEncode=false;
@@ -297,10 +297,10 @@ public class UrlEncoded extends Hashtable
 
         if (noEncode)
             return string;
-        
+
         try
-        {    
-            return new String(encoded,0,n,"ISO-8859-1");
+        {
+            return new String(encoded,0,n,"ISO8859_1");
         }
         catch(UnsupportedEncodingException e)
         {
@@ -308,7 +308,7 @@ public class UrlEncoded extends Hashtable
             return new String(encoded,0,n);
         }
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Decode String with % encoding
      */
@@ -319,15 +319,15 @@ public class UrlEncoded extends Hashtable
         byte[] bytes=new byte[len];
         int n=0;
         boolean noDecode=true;
-        
+
         for (int i=0;i<len;i++)
         {
             char c = characters[i];
             if (c<0||c>0x7f)
                 throw new IllegalArgumentException("Not encoded");
-            
+
             byte b = (byte)(0x7f & c);
-            
+
             if (c=='+')
             {
                 noDecode=false;
@@ -339,7 +339,7 @@ public class UrlEncoded extends Hashtable
                 b=(byte)(0xff&Integer.parseInt(encoded.substring(i+1,i+3),16));
                 i+=2;
             }
-            
+
             bytes[n++]=b;
         }
 
@@ -348,14 +348,14 @@ public class UrlEncoded extends Hashtable
 
         try
         {
-            return new String(bytes,0,n,"ISO-8859-1");
+            return new String(bytes,0,n,"ISO8859_1");
         }
         catch(UnsupportedEncodingException e)
         {
             Code.warning(e);
             return new String(bytes,0,n);
         }
-        
+
     }
-    
+
 }

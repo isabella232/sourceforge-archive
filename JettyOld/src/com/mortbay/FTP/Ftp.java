@@ -34,7 +34,7 @@ import java.util.*;
  * ftp.setType(Ftp.IMAGE);
  * ftp.startGet("RemoteFileName","LocalFileName");
  * ftp.waitUntilTransferComplete();
- * 
+ *
  * ftp.startPut("LocalFileName","RemoteFileName");
  * ftp.waitUntilTransferComplete();
  * </pre>
@@ -62,47 +62,47 @@ public class Ftp
     Writer out=null;
     DataPort transferDataPort=null;
     Exception transferException=null;
-    
+
     /* -------------------------------------------------------------------- */
     /** Ftp constructor
      */
     public Ftp()
     {}
-    
+
     /* -------------------------------------------------------------------- */
     /** Ftp constructor
      * Construct an FTP endpoint, open the default command port and
      * authenticate
      * the user.
      * @param hostAddr The IP address of the remote host
-     * @param username User name for authentication, null implies no user 
+     * @param username User name for authentication, null implies no user
      *                 required
      * @param password Password for authentication, null implies no password
      * @exception FtpException For local problems or negative server responses
      */
     public Ftp(InetAddress hostAddr,
-               String username, 
+               String username,
                String password)
          throws FtpException, IOException
     {
         this(hostAddr,defaultPort,username,password);
     }
-    
+
     /* -------------------------------------------------------------------- */
     /** Ftp constructor
      * Construct an FTP endpoint, open the command port and authenticate
      * the user.
      * @param hostAddr The IP address of the remote host
-     * @param port     The port to use for the control connection. The 
+     * @param port     The port to use for the control connection. The
      *                 default value is used if the port is 0.
-     * @param username User name for authentication, null implies no user 
+     * @param username User name for authentication, null implies no user
      *                 required
      * @param password Password for authentication, null implies no password
      * @exception FtpException For local problems or negative server responses
      */
-    public Ftp(InetAddress hostAddr, 
+    public Ftp(InetAddress hostAddr,
                int port,
-               String username, 
+               String username,
                String password)
          throws FtpException, IOException
     {
@@ -110,12 +110,12 @@ public class Ftp
         authenticate(username,password);
     }
 
-    
+
     /* -------------------------------------------------------------------- */
     public InetAddress getLocalAddress() {
         return command.getLocalAddress();
     }
-    
+
     /* -------------------------------------------------------------------- */
     void cmd(String cmd)
          throws IOException
@@ -125,8 +125,8 @@ public class Ftp
         out.write("\015\012");
         out.flush();
     }
-    
-    
+
+
     /* -------------------------------------------------------------------- */
     /** Open connection
      * @param hostAddr The IP address of the remote host
@@ -137,11 +137,11 @@ public class Ftp
     {
         open(hostAddr,defaultPort);
     }
-    
+
     /* -------------------------------------------------------------------- */
     /** Open connection
      * @param hostAddr The IP address of the remote host
-     * @param port     The port to use for the control connection. The 
+     * @param port     The port to use for the control connection. The
      *                 default value is used if the port is 0.
      * @exception FtpException For local problems or negative server responses
      */
@@ -150,24 +150,24 @@ public class Ftp
          throws FtpException, IOException
     {
         Code.assert(command==null,"Ftp already opened");
-        
+
         if (port==0)
             port=defaultPort;
         command = new Socket(hostAddr,port);
         in = new CmdReplyStream(command.getInputStream());
-        out= new OutputStreamWriter(command.getOutputStream(),"ISO-8859-1");
+        out= new OutputStreamWriter(command.getOutputStream(),"ISO8859_1");
         in.waitForCompleteOK();
         Code.debug("Command Port Opened");
     }
-    
+
     /* -------------------------------------------------------------------- */
     /** Authenticate User
-     * @param username User name for authentication, null implies no user 
+     * @param username User name for authentication, null implies no user
      *                 required
      * @param password Password for authentication, null implies no password
      * @exception FtpException For local problems or negative server responses
      */
-     public synchronized void authenticate(String username, 
+     public synchronized void authenticate(String username,
                                            String password)
          throws FtpException,IOException
     {
@@ -186,9 +186,9 @@ public class Ftp
 
         in.waitForCompleteOK();
         Code.debug("Authenticated");
-    }    
-   
-   
+    }
+
+
     /* ------------------------------------------------------------ */
     /** Set the connection data type.
      * The data type is not interpreted by the FTP client.
@@ -204,7 +204,7 @@ public class Ftp
         cmd("TYPE "+type);
         in.waitForCompleteOK();
     }
-   
+
     /* ------------------------------------------------------------ */
     /** Set the connection data type.
      * The data type is not interpreted by the FTP client.
@@ -221,7 +221,7 @@ public class Ftp
         cmd("TYPE "+type+' '+param);
         in.waitForCompleteOK();
     }
-   
+
     /* ------------------------------------------------------------ */
     /** Set the connection data type to Local.
      * The data type is not interpreted by the FTP client.
@@ -237,14 +237,14 @@ public class Ftp
         cmd("TYPE "+Ftp.LOCAL+' '+length);
         in.waitForCompleteOK();
     }
-    
-    
+
+
     /* -------------------------------------------------------------------- */
     /** Command complete query
      * @return    true if the no outstanding command is in progress, false
      *            if there is an outstanding command or data transfer.
      * @exception FtpException For local problems or negative server responses.
-     *            The problem may have been detected before the call to 
+     *            The problem may have been detected before the call to
      *            complete during a data transfer, but is only reported when
      *            the call to complete is made.
      */
@@ -261,8 +261,8 @@ public class Ftp
         }
         return (transferDataPort==null);
     }
-    
-   
+
+
     /* -------------------------------------------------------------------- */
     /** Wait until Transfer is complete.
      * Used to synchronous with an asynchronous transfer.  If any exceptions
@@ -279,7 +279,7 @@ public class Ftp
             Code.debug("waitUntilTransferComplete...");
             try{wait(10000);}catch(InterruptedException e){};
         }
-        
+
         if (transferException!=null)
         {
             if (transferException instanceof FtpException)
@@ -289,7 +289,7 @@ public class Ftp
             Code.fail("Bad exception type",transferException);
         }
     }
-    
+
 
     /* -------------------------------------------------------------------- */
     /** Notification from DataPort that transfer is complete.
@@ -323,12 +323,12 @@ public class Ftp
      */
     protected void transferCompleteNotification()
     {
-    }   
-    
+    }
 
-    
+
+
     /* -------------------------------------------------------------------- */
-    /** Start get file 
+    /** Start get file
      * Start a file transfer remote file to local file.
      * Completion of the transfer can be monitored with the transferComplete() or
      * waitUntilTransferComplete() methods.
@@ -342,9 +342,9 @@ public class Ftp
         FileOutputStream file = new FileOutputStream(localName);
         startGet(remoteName,file);
     }
-    
+
     /* -------------------------------------------------------------------- */
-    /** Start get file 
+    /** Start get file
      * Start a file transfer remote file to local file.
      * Completion of the transfer can be monitored with the transferComplete() or
      * waitUntilTransferComplete() methods.
@@ -352,12 +352,12 @@ public class Ftp
      * @param destination OutputStream to which the received file is written
      * @exception FtpException For local problems or negative server responses
      */
-    public synchronized void startGet(String remoteName, 
+    public synchronized void startGet(String remoteName,
                                       OutputStream destination)
          throws FtpException,IOException
     {
         waitUntilTransferComplete();
-        
+
         transferException=null;
         transferDataPort = new DataPort(this,destination);
         try{
@@ -370,17 +370,17 @@ public class Ftp
             transferDataPort.close();
             transferDataPort=null;
             throw e;
-        }       
+        }
         catch(IOException e){
             transferDataPort.close();
             transferDataPort=null;
             throw e;
-        }       
-    }   
-    
-   
+        }
+    }
+
+
     /* -------------------------------------------------------------------- */
-    /** Start put file 
+    /** Start put file
      * Start a file transfer local file to input remote file.
      * Completion of the transfer can be monitored with the transferComplete() or
      * waitUntilTransferComplete() methods.
@@ -393,11 +393,11 @@ public class Ftp
     {
         FileInputStream file = new FileInputStream(localName);
         startPut(file,remoteName);
-    }     
-    
-   
+    }
+
+
     /* -------------------------------------------------------------------- */
-    /** Start put file 
+    /** Start put file
      * Start a file transfer local file to input remote file.
      * Completion of the transfer can be monitored with the transferComplete() or
      * waitUntilTransferComplete() methods.
@@ -409,7 +409,7 @@ public class Ftp
          throws FtpException, IOException
     {
         waitUntilTransferComplete();
-        
+
         transferException=null;
         transferDataPort = new DataPort(this,source);
         try{
@@ -422,16 +422,16 @@ public class Ftp
             transferDataPort.close();
             transferDataPort=null;
             throw e;
-        }       
+        }
         catch(IOException e){
             transferDataPort.close();
             transferDataPort=null;
             throw e;
-        }       
-    }   
-    
+        }
+    }
+
     /* -------------------------------------------------------------------- */
-    /** Start passive get file 
+    /** Start passive get file
      * Start a file transfer remote file to local file.
      * Completion of the transfer can be monitored with the transferComplete() or
      * waitUntilTransferComplete() methods.
@@ -445,7 +445,7 @@ public class Ftp
         FileOutputStream file = new FileOutputStream(localName);
         startPasvGet(remoteName,file);
     }
-    
+
     /* -------------------------------------------------------------------- */
     public synchronized void startPasvGet(String remoteName,
 					  OutputStream destination)
@@ -453,58 +453,7 @@ public class Ftp
     {
         waitUntilTransferComplete();
         transferException=null;
-        
-        // Put it into passive mode
-        cmd("PASV");
-        CmdReply reply = in.waitForCompleteOK();
-	
-	// Work out the dataport
-	String pasv=reply.text.substring(reply.text.lastIndexOf("(")+1,
-					 reply.text.lastIndexOf(")"));
-	int i1=pasv.indexOf(",");
-	i1=pasv.indexOf(",",i1+1);
-	i1=pasv.indexOf(",",i1+1);
-	i1=pasv.indexOf(",",i1+1);
-	int i2=pasv.indexOf(",",i1+1);
-	int dataPort =
-	    256*Integer.parseInt(pasv.substring(i1+1,i2))+
-	    Integer.parseInt(pasv.substring(i2+1));
-	
-	// Setup the dest server to send the file
-        cmd("RETR "+remoteName);
-	
-	// start the send
-        transferDataPort = new DataPort(this,
-					destination,
-					command.getInetAddress(),
-					dataPort);
-	in.waitForPreliminaryOK();
-    }
-    
-    /* -------------------------------------------------------------------- */
-    /** Start passive put file 
-     * Start a file transfer local file to input remote file.
-     * Completion of the transfer can be monitored with the transferComplete() or
-     * waitUntilTransferComplete() methods.
-     * @param remoteName Remote file name
-     * @param localName Local file name
-     * @exception FtpException For local problems or negative server responses
-     */
-    public synchronized void startPasvPut(String localName, String remoteName)
-         throws FtpException, IOException
-    {
-        FileInputStream file = new FileInputStream(localName);
-        startPasvPut(file,remoteName);
-    }
-   
-    /* -------------------------------------------------------------------- */
-    public synchronized void startPasvPut(InputStream source,
-					  String remoteName)
-	throws FtpException,IOException
-    {
-        waitUntilTransferComplete();
-        transferException=null;
-        
+
         // Put it into passive mode
         cmd("PASV");
         CmdReply reply = in.waitForCompleteOK();
@@ -520,25 +469,76 @@ public class Ftp
 	int dataPort =
 	    256*Integer.parseInt(pasv.substring(i1+1,i2))+
 	    Integer.parseInt(pasv.substring(i2+1));
-	
+
+	// Setup the dest server to send the file
+        cmd("RETR "+remoteName);
+
+	// start the send
+        transferDataPort = new DataPort(this,
+					destination,
+					command.getInetAddress(),
+					dataPort);
+	in.waitForPreliminaryOK();
+    }
+
+    /* -------------------------------------------------------------------- */
+    /** Start passive put file
+     * Start a file transfer local file to input remote file.
+     * Completion of the transfer can be monitored with the transferComplete() or
+     * waitUntilTransferComplete() methods.
+     * @param remoteName Remote file name
+     * @param localName Local file name
+     * @exception FtpException For local problems or negative server responses
+     */
+    public synchronized void startPasvPut(String localName, String remoteName)
+         throws FtpException, IOException
+    {
+        FileInputStream file = new FileInputStream(localName);
+        startPasvPut(file,remoteName);
+    }
+
+    /* -------------------------------------------------------------------- */
+    public synchronized void startPasvPut(InputStream source,
+					  String remoteName)
+	throws FtpException,IOException
+    {
+        waitUntilTransferComplete();
+        transferException=null;
+
+        // Put it into passive mode
+        cmd("PASV");
+        CmdReply reply = in.waitForCompleteOK();
+
+	// Work out the dataport
+	String pasv=reply.text.substring(reply.text.lastIndexOf("(")+1,
+					 reply.text.lastIndexOf(")"));
+	int i1=pasv.indexOf(",");
+	i1=pasv.indexOf(",",i1+1);
+	i1=pasv.indexOf(",",i1+1);
+	i1=pasv.indexOf(",",i1+1);
+	int i2=pasv.indexOf(",",i1+1);
+	int dataPort =
+	    256*Integer.parseInt(pasv.substring(i1+1,i2))+
+	    Integer.parseInt(pasv.substring(i2+1));
+
 	// Setup the dest server to store the file
         cmd("STOR "+remoteName);
-	
+
 	// start the send
         transferDataPort = new DataPort(this,source,command.getInetAddress(),dataPort);
 	in.waitForPreliminaryOK();
-    }   
-    
-   
+    }
+
+
     /* -------------------------------------------------------------------- */
-    /** send file 
+    /** send file
      * Do a file transfer remote file to remote file on another server.
      * This is a synchronous method, unlike startGet and startPut.
      * @param srcName Remote file name on source server
      * @param destAddr The IP address of the destination host
-     * @param port     The port to use for the control connection. The 
+     * @param port     The port to use for the control connection. The
      *                 default value is used if the port is 0.
-     * @param username User name for authentication, null implies no user 
+     * @param username User name for authentication, null implies no user
      *                 required
      * @param password Password for authentication, null implies no password
      * @exception FtpException For local problems or negative server responses
@@ -546,7 +546,7 @@ public class Ftp
     public synchronized void sendFile(String srcName,
                                       InetAddress destAddr,
                                       int destPort,
-                                      String username, 
+                                      String username,
                                       String password,
                                       String destName)
          throws FtpException,IOException
@@ -558,9 +558,9 @@ public class Ftp
                    username+','+
                    password+','+
                    destName+')');
-        
+
         waitUntilTransferComplete();
-        
+
         // Make connection with other server
         Ftp destFtp = new Ftp(destAddr,destPort,username,password);
 
@@ -578,16 +578,16 @@ public class Ftp
 
             // Setup the dest server to store the file
         destFtp.cmd("STOR "+destName);
-            
+
             // start the send
         cmd("RETR "+srcName);
         in.waitForCompleteOK();
         destFtp.in.waitForCompleteOK();
-        
-    }   
-    
-    
-   
+
+    }
+
+
+
     /* -------------------------------------------------------------------- */
     /** Report remote working directory
      * @return The remote working directory
@@ -604,8 +604,8 @@ public class Ftp
 
         return reply.text;
     }
-    
-   
+
+
     /* -------------------------------------------------------------------- */
     /** Set remote working directory
      * @param dir The remote working directory
@@ -620,7 +620,7 @@ public class Ftp
         CmdReply reply =in.waitForCompleteOK();
         Code.debug("CWD="+reply.text);
     }
-    
+
     /* -------------------------------------------------------------------- */
     /** Rename remote file
      * @param oldName The original file name
@@ -631,15 +631,15 @@ public class Ftp
          throws FtpException, IOException
     {
         waitUntilTransferComplete();
-        
+
         cmd("RNFR "+oldName);
         in.waitForIntermediateOK();
         cmd("RNTO "+newName);
         in.waitForCompleteOK();
         Code.debug("Renamed");
     }
-    
-   
+
+
     /* -------------------------------------------------------------------- */
     /** Delete remote file
      * @param remoteName The remote file name
@@ -653,8 +653,8 @@ public class Ftp
         in.waitForCompleteOK();
         Code.debug("Deleted "+remoteName);
     }
-    
-   
+
+
     /* -------------------------------------------------------------------- */
     /** Abort transfer command
      * @exception FtpException For local problems or negative server responses
@@ -668,8 +668,8 @@ public class Ftp
         else
             waitUntilTransferComplete();
     }
-    
-   
+
+
     /* -------------------------------------------------------------------- */
     /** Get list files in remote working directory
      * @return Array of file names
@@ -705,7 +705,7 @@ public class Ftp
             transferDataPort.close();
             transferDataPort=null;
             throw e;
-        }       
+        }
         catch(IOException e)
         {
             transferDataPort.close();
@@ -724,8 +724,8 @@ public class Ftp
         Code.debug("Got list "+listVector.toString());
         return listVector;
     }
-    
-   
+
+
     /* -------------------------------------------------------------------- */
     /** Get remote server status
      * @return String description of server status
@@ -742,7 +742,7 @@ public class Ftp
 
         return reply.text;
     }
-    
+
     /* -------------------------------------------------------------------- */
     /** close the FTP session
      * @exception FtpException For local problems or negative server responses
@@ -761,7 +761,7 @@ public class Ftp
                 out=null;
                 if (transferDataPort!=null)
                     transferDataPort.close();
-            }   
+            }
         }
     }
 
@@ -782,7 +782,7 @@ public class Ftp
         String uri = url.substring(6);
         if (uri.indexOf("?")>=0)
             uri=uri.substring(0,uri.indexOf("?"));
-        
+
         StringTokenizer tok = new StringTokenizer(uri,":@/",true);
 
         String user="anonymous";
@@ -790,12 +790,12 @@ public class Ftp
         String host=null;
         String port=null;
         String path=null;
-        
+
         String s[]=new String[3];
         int i=0;
 
     loop:
-        
+
         while(tok.hasMoreTokens())
         {
             String t = tok.nextToken();
@@ -812,7 +812,7 @@ public class Ftp
                       s[0]=null;
                       s[1]=null;
                       continue;
-                      
+
                   case '/':
                       host=s[0];
                       if (i==2)
@@ -823,7 +823,7 @@ public class Ftp
                       catch(NoSuchElementException e){
                           path="/";
                       }
-                      
+
                       break loop;
                 }
             }
@@ -836,7 +836,7 @@ public class Ftp
                    "@"+host+
                    ((port==null)?"":(":"+port))+
                    ((path.startsWith("/"))?path:("/"+path)));
-        
+
         close();
         if (port!=null)
             open(InetAddress.getByName(host),Integer.parseInt(port));
@@ -847,7 +847,7 @@ public class Ftp
         startGet(path,out);
         waitUntilTransferComplete();
     }
-    
+
     /* -------------------------------------------------------------------- */
     public static void main(String[] args)
     {
@@ -874,14 +874,14 @@ public class Ftp
                 ftp.getUrl(args[0],System.out);
             }
             else
-            {           
+            {
                 Ftp ftp = new Ftp(InetAddress.getByName(args[0]),
                                   args[1],args[2]);
-            
+
                 //try{
                 //    System.out.println("Status: "+ftp.status());
                 //}catch (Exception ignore){}
-                
+
                 if (args.length==3)
                     System.out.println(ftp.list());
                 else
@@ -889,7 +889,7 @@ public class Ftp
                     for (int file=4; file<args.length; file++)
                     {
                         System.out.println(args[3]+" "+args[file]);
-                    
+
                         try{
                             if (args[3].equals("del"))
                                 ftp.delete(args[file]);
@@ -909,9 +909,9 @@ public class Ftp
                                 else
                                     ftp.startPasvGet(args[file],args[++file]);
                             }
-                            else if (args[3].equals("put")) 
+                            else if (args[3].equals("put"))
                                 ftp.startPasvPut(args[file],args[++file]);
-                            else if (args[3].equals("pput")) 
+                            else if (args[3].equals("pput"))
                                 ftp.startPut(args[file],args[++file]);
                             else if (args[3].equals("snd"))
                                 ftp.sendFile(args[file],
@@ -919,10 +919,10 @@ public class Ftp
                                              0,
                                              args[1],args[2],
                                              args[++file]);
-                            else if (args[3].equals("url")) 
+                            else if (args[3].equals("url"))
                                 ftp.getUrl(args[++file],System.err);
-                            
-                            ftp.waitUntilTransferComplete(); 
+
+                            ftp.waitUntilTransferComplete();
                         }
                         catch(Exception e){
                             System.err.println(e.toString());
@@ -945,7 +945,7 @@ public class Ftp
     public static void test()
     {
         Test test = null;
-        
+
         try{
             TestServer server = new TestServer(test);
 
@@ -963,12 +963,12 @@ public class Ftp
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             ftp.startGet("TestFileName",bout);
             test.check(true,"Get started");
-            test.check(!ftp.transferComplete(),"Not yet completed");        
+            test.check(!ftp.transferComplete(),"Not yet completed");
 
             ftp.waitUntilTransferComplete();
             test.check(true,"Get completed");
             test.check(ftp.transferComplete(),"Completed");
-            
+
             test.checkEquals("How Now Brown Cow\n",bout.toString(),
                              "Get file data");
 
@@ -980,13 +980,13 @@ public class Ftp
             writeOut.flush();
             ByteArrayInputStream src =
                 new ByteArrayInputStream(bout.toByteArray());
-            
+
             ftp.startPut(src,"TestFileName");
             test.check(true,"Put started");
 
             Thread.sleep(2000);
             test.check(ftp.transferComplete(),"wait completed");
-            
+
             ftp.waitUntilTransferComplete();
             test.check(true,"put wait completed");
 
@@ -1001,7 +1001,7 @@ public class Ftp
             ftp.setType(Ftp.BINARY);
             ftp.setType(8);
             ftp.setType(Ftp.ASCII,Ftp.CARRIAGE_CONTROL);
-            
+
         }
         catch(Exception e){
             if (test==null)

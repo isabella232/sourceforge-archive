@@ -15,14 +15,14 @@ import java.text.*;
 public class HttpHeader
 {
     public final static String ContentType = "Content-Type";
-    public final static String TransferEncoding="Transfer-Encoding";  
-    public final static String Chunked = "chunked"; 
+    public final static String TransferEncoding="Transfer-Encoding";
+    public final static String Chunked = "chunked";
     public final static String ContentLength = "Content-Length";
     public final static String WwwFormUrlEncode = "application/x-www-form-urlencoded";
-    public final static String WwwAuthenticate = "WWW-Authenticate"; 
-    public final static String Authorization = "Authorization"; 
-    public final static String Host = "Host";  
-    public final static String Date = "Date"; 
+    public final static String WwwAuthenticate = "WWW-Authenticate";
+    public final static String Authorization = "Authorization";
+    public final static String Host = "Host";
+    public final static String Date = "Date";
     public final static String Cookie = "Cookie";
     public final static String SetCookie = "Set-Cookie";
     public final static String Connection = "Connection";
@@ -47,17 +47,17 @@ public class HttpHeader
         for (int i=0;i<SingleValued.length;i++)
             __singleValuedMap.put(SingleValued[i],SingleValued[i]);
     }
-    
+
     public final static String CRLF = "\015\012";
     public final static byte[] __CRLF = {(byte)'\015',(byte)'\012'};
     public final static byte[] __COLON = {(byte)':',(byte)' '};
     public final static String COLON = ": ";
-    
+
     public final static String HTTP_1_0 ="HTTP/1.0"   ;
     public final static String HTTP_1_1 ="HTTP/1.1"   ;
 
     /* -------------------------------------------------------------- */
-    public final static DateCache __dateSend = 
+    public final static DateCache __dateSend =
         new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'",
                       Locale.US);
     private final static String __dateReceiveFmt[] =
@@ -91,7 +91,7 @@ public class HttpHeader
         TimeZone tz = TimeZone.getTimeZone("GMT");
         tz.setID("GMT");
         __dateSend.setTimeZone(tz);
-        
+
         __dateReceive = new SimpleDateFormat[__dateReceiveFmt.length];
         for(int i=0;i<__dateReceive.length;i++)
         {
@@ -100,7 +100,7 @@ public class HttpHeader
             __dateReceive[i].setTimeZone(tz);
         }
     }
-    
+
     /* -------------------------------------------------------------- */
     private Hashtable keyMap= new Hashtable(15);
     private Vector keys= new Vector(15);
@@ -108,13 +108,13 @@ public class HttpHeader
     /* -------------------------------------------------------------- */
     /** Get enumeration of header names.
      * Returns an enumeration of strings representing the header names
-     * for this request. 
+     * for this request.
      */
     public Enumeration getHeaderNames()
     {
         return keys.elements();
     }
-    
+
     /* -------------------------------------------------------------- */
     /**
      * Returns the value of a  header field, or null if not found.
@@ -125,9 +125,9 @@ public class HttpHeader
     {
         return (String)keyMap.get(StringUtil.asciiToLowerCase(key));
     }
-    
+
     /* -------------------------------------------------------------- */
-    /** 
+    /**
      * Returns the value of a  header field, or null if not found.
      * The case of the header field name is ignored. Any parameters
      * found in the header are stripped.
@@ -144,7 +144,7 @@ public class HttpHeader
         }
         return val;
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Set a header field.
      */
@@ -213,7 +213,7 @@ public class HttpHeader
                       if (c==':')
                       {
                           key=new String(buf,i1,i2-i1+1);
-                          lkey=new String(lbuf,i1,i2-i1+1);  
+                          lkey=new String(lbuf,i1,i2-i1+1);
                           state=2;
                           i1=i;i2=i-1;
                           continue;
@@ -244,7 +244,7 @@ public class HttpHeader
                 }
                 continue;
             }
-            
+
             if (lkey==null || lkey.length()==0)
             {
                 if (state>=2 && last!=null)
@@ -259,7 +259,7 @@ public class HttpHeader
                 }
                 continue;
             }
-            
+
             // Handle repeated headers
             String existing=(String)keyMap.get(lkey);
             if (existing!=null)
@@ -268,7 +268,7 @@ public class HttpHeader
                 {
                     Code.warning("Ignored duplicate single value header: "+
                                  key);
-                    
+
                     // XXX Don't throw here as IE4 breaks the rules
                     // throw new IOException("Duplicate single value headers");
                 }
@@ -297,8 +297,8 @@ public class HttpHeader
 	    System.err.println(keys);
 	    System.err.println(getHeader(IfModifiedSince));
     }
-    
-    
+
+
     /* -------------------------------------------------------------- */
     /* Write Extra HTTP headers.
      */
@@ -325,24 +325,24 @@ public class HttpHeader
             writer.write(CRLF);
         }
     }
-    
-    
+
+
     /* -------------------------------------------------------------- */
     protected void write(OutputStream out)
     throws IOException
     {
-        Writer writer=new OutputStreamWriter(out,"ISO-8859-1");
+        Writer writer=new OutputStreamWriter(out,"ISO8859_1");
         write(writer,null);
         writer.flush();
     }
-    
+
     /* -------------------------------------------------------------- */
     protected void write(Writer writer)
     throws IOException
     {
         write(writer,null);
     }
-    
+
     /* -------------------------------------------------------------- */
     public String toString()
     {
@@ -356,7 +356,7 @@ public class HttpHeader
         {}
         return null;
     }
-   
+
     /* -------------------------------------------------------------- */
     /** Get a header as an integer value.
      * Returns the value of an integer header field, or -1 if not found.
@@ -372,7 +372,7 @@ public class HttpHeader
         }
         return -1;
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Get a header as a date value.
      * Returns the value of a date header field, or -1 if not found.
@@ -413,7 +413,7 @@ public class HttpHeader
         }
         return -1;
     }
-    
+
     /* -------------------------------------------------------------- */
    /**
      * Sets the value of an integer header field.

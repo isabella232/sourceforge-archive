@@ -12,26 +12,26 @@ public class UploadServlet extends HttpServlet
     {
         Page page = Page.getPage(Page.getDefaultPageType(),
                                  request,response);
-        
+
         page.title("Upload File Demo");
         page.add(new Heading(1,"Upload File Demo"));
-        
+
         MultiPartRequest mpr = new MultiPartRequest(request);
         if (mpr.contains("TF"))
         {
             String filename = mpr.getFilename("TF");
             LineNumberReader in = new LineNumberReader(
-                new InputStreamReader(mpr.getInputStream("TF"),"ISO-8859-1"));
+                new InputStreamReader(mpr.getInputStream("TF"),"ISO8859_1"));
             int lines=0;
             while (in.readLine()!=null)
                 lines++;
-            
+
             page.add("Filename \"<FONT FACE=courier>"+filename+
                      "</FONT>\" has "+lines+" lines<P>");
         }
         else
             page.add("No file uploaded.");
-        
+
         page.write(response.getWriter());
     }
 };
