@@ -9,7 +9,7 @@
 #JAVACOPTIONS :=
 TESTS :=
 ROOTNAME := javax
-SUBDIRS := 
+SUBDIRS := tagext
 
 CLASSFILES += $(wildcard *.properties *.class)
 
