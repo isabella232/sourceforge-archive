@@ -342,8 +342,8 @@ public class HttpContext implements LifeCycle
      */
     public void setClassPaths(Resource lib, boolean append)
     {
-        if (_loader!=null)
-            throw new IllegalStateException("ClassLoader already initialized");
+        if (isStarted())
+            Code.warning("classpaths set while started");
         
         if (lib.exists() && lib.isDirectory())
         {

@@ -179,6 +179,7 @@ Other targets:
   <!-- ==================================================================== -->
   <target name="classes1.4" depends="prepare" if="jdk1.4.available"
    description="Compile the java 1.4 classes" >
+    <delete file="${classes}/org/mortbay/util/Frame.class" quiet="true"/>
     <copy todir="${classes}">
       <fileset dir="${src1.4}">
         <include name="**/defaultManifest.mf" />

@@ -69,6 +69,10 @@ import org.mortbay.xml.XmlParser;
  * after the servlet handler within the context.
  * </UL>
  *
+ * If a file named web-jetty.xml or jetty-web.xml is found in the
+ * WEB-INF directory it is applied to the context using the
+ * XmlConfiguration format.
+ *
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -174,7 +178,7 @@ public class WebApplicationContext extends ServletHttpContext
         xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN",dtd22);
         xmlParser.redirectEntity("web.dtd",dtd23);
         xmlParser.redirectEntity("web-app_2_3.dtd",dtd23);
-        xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN",dtd22);
+        xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN",dtd23);
 
         // Find the webapp
         resolveWebApp();
@@ -312,6 +316,8 @@ public class WebApplicationContext extends ServletHttpContext
 
             // do jetty.xml file
             Resource jetty = _webInf.addPath("web-jetty.xml");
+            if (!jetty.exists())
+                jetty = _webInf.addPath("jetty-web.xml");
             if (jetty.exists())
             {
                 try
