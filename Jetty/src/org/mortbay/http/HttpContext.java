@@ -899,7 +899,7 @@ public class HttpContext implements LifeCycle
      * @param lib the resource that contains the jar and/or zip files.
      * @param append true if the classpath entries are to be appended to any
      * existing classpath, or false if they replace the existing classpath.
-     * @see setClassPath(String)
+     * @see #setClassPath(String)
      */
     public void setClassPaths(Resource lib, boolean append)
     {
