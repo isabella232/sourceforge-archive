@@ -285,7 +285,7 @@ public class Server extends HttpServer
                 continue;
 
             
-            String app = r.addPath(URI.encodePath(files[f])).toString();
+            String app = r.addPath(r.encode(files[f])).toString();
             if (context.toLowerCase().endsWith(".war") ||
                 context.toLowerCase().endsWith(".jar"))
                 context=context.substring(0,context.length()-4);

@@ -222,6 +222,17 @@ class FileResource extends URLResource
     }
         
     /* ------------------------------------------------------------ */
+    /** Encode according to this resource type.
+     * File URIs are not encoded.
+     * @param uri URI to encode.
+     * @return The uri unchanged.
+     */
+    public String encode(String uri)
+    {
+        return uri;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** 
      * @param o
      * @return 

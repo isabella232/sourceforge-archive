@@ -80,9 +80,9 @@ The ServletHandler can be used with a HttpServer:
 HttpServer server = new HttpServer();
 server.addListener(":8080");
 HttpContext context = server.getContext("/");
-ServletHandler sHandler= new ServletHandler();
-sHandler.context.addServlet("Dump","/dump/*",
-                            "org.mortbay.servlet.Dump");
+ServletHandler handler= new ServletHandler();
+handler.addServlet("Dump","/dump/*",
+                   "org.mortbay.servlet.Dump");
 context.addHandler(handler);
 </pre></small>
 <b>Code Example: &nbsp;Using ServletHandler in HttpServer</b>

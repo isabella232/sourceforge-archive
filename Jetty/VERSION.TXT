@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Don't URL encode FileURLS.
  + Improved HashUserRealm doco
  + FormAuthenticator uses normal redirections now.
  + Encode URLs of Authentication redirections.
