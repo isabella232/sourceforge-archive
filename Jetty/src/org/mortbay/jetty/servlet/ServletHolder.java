@@ -58,8 +58,7 @@ public class ServletHolder extends Holder
                          String name,
                          String className)
     {
-        super(handler.getHandlerContext(),name,className);
-        _servletHandler=handler;
+        super(handler,name,className);
     }
 
     /* ---------------------------------------------------------------- */
@@ -183,8 +182,12 @@ public class ServletHolder extends Holder
         
         if (!javax.servlet.Servlet.class
             .isAssignableFrom(_class))
-            Code.fail("Servlet class "+_class+
-                      " is not a javax.servlet.Servlet");
+        {
+            super.stop();
+            throw new IllegalStateException("Servlet class "+_class+
+                                            " is not a javax.servlet.Servlet");
+        }
+        
 
         if (javax.servlet.SingleThreadModel.class
             .isAssignableFrom(_class))
@@ -218,7 +221,9 @@ public class ServletHolder extends Holder
     /* ---------------------------------------------------------------- */
     public synchronized void destroy()
     {
-        _config=null;
+        stop();
+        if (_roleMap!=null)
+            _roleMap.clear();
         _roleMap=null;
         super.destroy();
     }

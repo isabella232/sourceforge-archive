@@ -18,7 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
-import javax.servlet.Filter;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -37,7 +36,7 @@ public class Holder
     implements LifeCycle                        
 {
     /* ---------------------------------------------------------------- */
-    protected HandlerContext _handlerContext;
+    protected ServletHandler _servletHandler;
     protected String _name;
     protected String _displayName;
     protected String _className;
@@ -45,7 +44,7 @@ public class Holder
     protected Map _initParams;
     
     /* ---------------------------------------------------------------- */
-    public Holder(HandlerContext handlerContext,
+    public Holder(ServletHandler servletHandler,
                   String name,
                   String className)
     {
@@ -55,7 +54,7 @@ public class Holder
         if (className==null || className.length()==0)
             throw new IllegalArgumentException("No classname");
         
-        _handlerContext=handlerContext;
+        _servletHandler=servletHandler;
         _className=className;
         _name=name;
         _displayName=name;
@@ -150,9 +149,9 @@ public class Holder
 
     /* ------------------------------------------------------------ */
     public void start()
-        throws ClassNotFoundException
+        throws Exception
     {
-        _class=_handlerContext.loadClass(_className);
+        _class=_servletHandler.getHandlerContext().loadClass(_className);
         Code.debug("Started holder of ",_class);
     }
     
@@ -182,7 +181,7 @@ public class Holder
     public void destroy()
     {
         _class=null;
-        _handlerContext=null;
+        _servletHandler=null;
         _name=null;
         _displayName=null;
         _className=null;
