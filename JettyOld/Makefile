@@ -28,6 +28,7 @@ jetty-release: jetty-jar javax-jar javadoc cleansrc
 	mkdir -p lib
 
 javax-jar:
+	mkdir -p lib
 	cd $(INSTALLROOT)/classes \
 	&& jar cfv javax.servlet.jar \
 		javax \
@@ -37,6 +38,7 @@ javax-jar:
 	@echo 
 
 jetty-jar:
+	mkdir -p lib
 	make rall 
 	make install
 	cd $(INSTALLROOT)/classes \
