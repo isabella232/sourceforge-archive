@@ -187,10 +187,11 @@ public class CompressionServletResponseWrapper extends HttpServletResponseWrappe
      * @exception IOException if an input/output error occurs
      */
     public void flushBuffer() throws IOException {
-
         //  System.out.println("flush buffer @ CompressionServletResponseWrapper");
-        ((CompressionResponseStream)stream).flush();
-
+        if (writer!=null)
+            writer.flush();
+        else
+            ((CompressionResponseStream)stream).flush();
     }
 
     /**

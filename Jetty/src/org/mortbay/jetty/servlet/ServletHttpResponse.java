@@ -129,6 +129,12 @@ public class ServletHttpResponse implements HttpServletResponse
     {
         return _facade;
     }
+
+    /* ------------------------------------------------------------ */
+    boolean isWrapped()
+    {
+        return _wrapper!=null;
+    }
     
     /* ------------------------------------------------------------ */
     void setWrapper(ServletResponse wrapper)

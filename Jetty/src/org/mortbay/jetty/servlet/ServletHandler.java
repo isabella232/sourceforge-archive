@@ -568,10 +568,14 @@ public class ServletHandler
             {
                 // service request
                 holder.handle(request.getWrapper(),response.getWrapper());
+                
+                // reset output
                 response.setOutputState(0);
                 Code.debug("Handled by ",holder);
+                if (!httpResponse.isCommitted() && response.isWrapped())
+                    response.getWrapper().flushBuffer();
                 if (!httpResponse.isCommitted())
-                    httpResponse.commit();  
+                    httpResponse.commit();
             }
         }
         catch(Exception e)

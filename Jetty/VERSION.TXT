@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
 Jetty-4.0.RC1 - ???????
+ + Call response.flushBuffer after service to flush wrappers.
  + Empty suffix for temp directory.
  + Contributors list as an image to prevent SPAM!
  + Fixed recursive DEBUG loop in Logging.
