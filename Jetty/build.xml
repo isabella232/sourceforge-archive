@@ -262,6 +262,7 @@
          <attribute name="Implementation-Vendor" value="Mort Bay Consulting, Pty. Ltd."/>
          <attribute name="Implementation-URL" value="http://jetty.mortbay.org"/>
          <attribute name="Main-Class" value="org.mortbay.http.HttpServer"/>
+         <attribute name="Class-Path" value="javax.servlet.jar"/>
 
          <section name="org/mortbay/jetty/">
            <attribute name="Specification-Title" value="Servlet/2.3"/>
@@ -515,7 +516,7 @@
     <mkdir dir="${dist}"/>
     
     
-    <tar tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}.tar.gz" 
+    <tar tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-all.tar.gz" 
          compression="gzip"
          longfile="gnu">
       <tarfileset 
@@ -529,7 +530,7 @@
 
 
     <tar 
-     tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-no-ext.tar.gz" 
+     tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-ext.tar.gz" 
      compression="gzip"
      longfile="gnu"
     >
@@ -552,7 +553,8 @@
       <tarfileset 
        dir="${basedir}"
        prefix="Jetty-${RELEASE.MAJOR.MINOR}/">
-        <exclude name="dist/**"/>
+        <include name="src/**"/>
+        <include name="test/**"/>
         <exclude name="**/CVS/**"/>
         <exclude name="**/logs/*.log"/>
         <exclude name="**/ext/**"/>

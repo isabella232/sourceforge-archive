@@ -412,10 +412,10 @@ public class Main
             
             configure(cpcfg,args);
             cpcfg.close();
-
-	     File file = new File (System.getProperty("jetty.home"));
-	     String canonical = file.getCanonicalPath();
-	     System.setProperty("jetty.home", canonical);
+            
+            File file = new File (System.getProperty("jetty.home"));
+            String canonical = file.getCanonicalPath();
+            System.setProperty("jetty.home", canonical);
 	}
         catch (Exception e)
         {
@@ -454,10 +454,16 @@ public class Main
             if (_xml.size()>0)
             {
                 for (int i=0;i<args.length;i++)
-                    _xml.add(args[i]);
+                {
+                    if (args[i]==null)
+                        continue;
+                    if (args[i].startsWith("-"))
+                        System.err.println("Usage: java [-DDEBUG] -jar start.jar [--help] [config ...]");
+                    else
+                        _xml.add(args[i]);
+                }
                 args=(String[])_xml.toArray(args);
             }
-                
 
 	    //check for override of start class
 	    String serverOverride = System.getProperty("jetty.server");
