@@ -6,8 +6,6 @@
 package org.mortbay.webapps.jetty;
 
 import org.mortbay.html.Block;
-import org.mortbay.html.Composite;
-import org.mortbay.html.Element;
 import org.mortbay.html.Font;
 import org.mortbay.html.Link;
 import org.mortbay.html.Page;
