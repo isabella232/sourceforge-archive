@@ -63,7 +63,7 @@ public class TestHarness
             FileInputStream fin=
                 new FileInputStream(__userDir+File.separator+
                                     "TestData"+File.separator+
-                                    "test.chunkIn");
+                                    "chunkIn.bin");
             ChunkableInputStream cin = new ChunkableInputStream(fin);
             cin.setContentLength(10);
             test.checkEquals(cin.read(buf),10,"content length limited");
@@ -71,7 +71,7 @@ public class TestHarness
             
             fin= new FileInputStream(__userDir+File.separator+
                                     "TestData"+File.separator+
-                                    "test.chunkIn");
+                                    "chunkIn.bin");
             cin = new ChunkableInputStream(fin);
             cin.setChunking();
             test.checkEquals(cin.read(),'a',"Read 1st char");
@@ -169,7 +169,7 @@ public class TestHarness
             FileInputStream ftest=
                 new FileInputStream(__userDir+File.separator+
                                     "TestData"+File.separator+
-                                    "test.chunkOut");
+                                    "chunkOut.bin");
             test.checkEquals(ftmp,ftest,"chunked out");
         }
         catch(Exception e)

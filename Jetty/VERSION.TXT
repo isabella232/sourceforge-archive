@@ -14,6 +14,7 @@ Jetty-3.1.3 - 21 Oct 2001
  + Improved FORM auth handling of role failure.
  + Improved Jasper debug output.
  + Improved ThreadedServer timeout defaults
+ + Fixed binary files in CVS
  
 Jetty-3.1.2 - 13 Oct 2001
  + Fixed double entry on PathMap.getMatches
