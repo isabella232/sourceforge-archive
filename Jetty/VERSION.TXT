@@ -8,6 +8,8 @@ Jetty-4.2.8 - 14 February 2004
  + Fixed AdminServlet to handle changed getServletPath better.
  + Default servlet can have own resourceBase.
  + Rolled back SocketChannelListener to 4.2.5 version
+ + Added option to resolve remote hostnames.  Defaults to off.
+ + Added MBeans for Servlets and Filters
 
 Jetty-4.2.7 - 4 February 2003
  + Upgraded to JSSE 1.0.3_01 to fix security problem.
