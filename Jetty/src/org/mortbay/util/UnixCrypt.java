@@ -430,7 +430,7 @@ public class UnixCrypt extends Object
         long keyword = 0L;
         /* invalid parameters! */
         if(key==null||setting==null) 
-            return '*'; // will NOT match under ANY circumstances!
+            return "*"; // will NOT match under ANY circumstances!
         int keylen = key.length();
 
         for (int i=0; i<8 ; i++) {
