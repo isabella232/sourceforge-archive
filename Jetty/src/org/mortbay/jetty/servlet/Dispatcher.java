@@ -8,14 +8,23 @@ package org.mortbay.jetty.servlet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.Enumeration;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.HashSet;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 import org.mortbay.http.ChunkableOutputStream;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpFields;
@@ -30,6 +39,7 @@ import org.mortbay.util.Log;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.Resource;
 import org.mortbay.util.UrlEncoded;
+import org.mortbay.util.URI;
 
 
 /* ------------------------------------------------------------ */
@@ -41,10 +51,10 @@ import org.mortbay.util.UrlEncoded;
 public class Dispatcher implements RequestDispatcher
 {
     public final static String __REQUEST_URI= "javax.servlet.include.request_uri";
-    public final static String __SERVLET_PATH= "javax.servlet.include.servlet_path";
     public final static String __CONTEXT_PATH= "javax.servlet.include.context_path";
-    public final static String __QUERY_STRING= "javax.servlet.include.query_string";
+    public final static String __SERVLET_PATH= "javax.servlet.include.servlet_path";
     public final static String __PATH_INFO= "javax.servlet.include.path_info";
+    public final static String __QUERY_STRING= "javax.servlet.include.query_string";
     
     ServletHandler _servletHandler;
     ServletHolder _holder=null;
@@ -75,24 +85,26 @@ public class Dispatcher implements RequestDispatcher
             _holder = (ServletHolder)entry.getValue();
         }
         else
+        {
             _resourceHandler=(ResourceHandler)
                 _servletHandler.getHttpContext().getHttpHandler(ResourceHandler.class);
-        
-        // If no servlet found
-        if (_holder==null && _resourceHandler!=null)
-        {
-            // Look for a static resource
-            try{
-                Resource resource= _servletHandler.getHttpContext().getBaseResource();
-                if (resource!=null)
-                    resource = resource.addPath(_path);
-                if (resource.exists() && !resource.isDirectory())
-                {
-                    _resource=resource;
-                    Code.debug("Dispatcher for resource ",_resource);
+            
+            // If no servlet found
+            if (_resourceHandler!=null)
+            {
+                // Look for a static resource
+                try{
+                    Resource resource= _resourceHandler.getHttpContext().getBaseResource();
+                    if (resource!=null)
+                        resource = resource.addPath(_path);
+                    if (resource.exists() && !resource.isDirectory())
+                    {
+                        _resource=resource;
+                        Code.debug("Dispatcher for resource ",_resource);
+                    }
                 }
+                catch(IOException e){Code.ignore(e);}
             }
-            catch(IOException e){Code.ignore(e);}
         }
 
         // if no servlet and no resource
@@ -115,6 +127,17 @@ public class Dispatcher implements RequestDispatcher
             throw new IllegalStateException("No named servlet handler in context");
     }
 
+    /* ------------------------------------------------------------ */
+    public boolean isNamed()
+    {
+        return _path==null;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isResource()
+    {
+        return _resource!=null;
+    }
     
     /* ------------------------------------------------------------ */
     /** 
@@ -123,76 +146,14 @@ public class Dispatcher implements RequestDispatcher
      * @exception ServletException 
      * @exception IOException 
      */
-    public void forward(ServletRequest request,
-                        ServletResponse response)
+    public void forward(ServletRequest servletRequest,
+                        ServletResponse servletResponse)
         throws ServletException,IOException
     {
-        ServletHttpRequest servletHttpRequest=(ServletHttpRequest)request;
-        HttpRequest httpRequest=servletHttpRequest.getHttpRequest();
-        ServletHttpResponse servletHttpResponse=(ServletHttpResponse)response;
-        HttpResponse httpResponse=servletHttpResponse.getHttpResponse();
-            
-        if (servletHttpRequest.getHttpRequest().isCommitted())
-            throw new IllegalStateException("Request is committed");
-        servletHttpResponse.resetBuffer();
-        servletHttpResponse.setOutputState(-1);
-        
-        // Remove any evidence of previous include
-        httpRequest.removeAttribute(__REQUEST_URI);
-        httpRequest.removeAttribute(__SERVLET_PATH);
-        httpRequest.removeAttribute(__CONTEXT_PATH);
-        httpRequest.removeAttribute(__QUERY_STRING);
-        httpRequest.removeAttribute(__PATH_INFO);
-        
-        // merge query params
-        if (_query!=null && _query.length()>0)
-        {
-            MultiMap parameters=new MultiMap();
-            UrlEncoded.decodeTo(_query,parameters);
-            servletHttpRequest.pushParameters(parameters);
-            
-            String oldQ=servletHttpRequest.getQueryString();
-            if (oldQ!=null && oldQ.length()>0)
-            {
-                UrlEncoded encoded = new UrlEncoded(oldQ);
-                Iterator iter = parameters.entrySet().iterator();
-                while(iter.hasNext())
-                {
-                    Map.Entry entry = (Map.Entry)iter.next();
-                    encoded.put(entry.getKey(),entry.getValue());
-                }
-                _query=encoded.encode(false);
-            }
-        }
-        
-        if (_path==null)
-        {
-            // go direct to named servlet
-            _holder.handle(servletHttpRequest,servletHttpResponse);
-        }
-        else
-        {
-            // The path of the new request is the forward path
-            // context must be the same, info is recalculate.
-            if (_pathSpec!=null)
-            {
-                Code.debug("Forward request to ",_holder,
-                           " at ",_pathSpec);
-                servletHttpRequest.setForwardPaths(_servletHandler,
-                                               PathMap.pathMatch(_pathSpec,_path),
-                                               PathMap.pathInfo(_pathSpec,_path),
-                                               _query);
-            }
-            
-            // Forward request
-            servletHttpRequest.setServletHolder(_holder);
-
-            // XXX - need to skip security handler and filters!!!!!
-            _servletHandler.getHttpContext().handle(0,_path,null,httpRequest,httpResponse);
-        }
+        dispatch(servletRequest,servletResponse,true);
     }
-        
-        
+    
+    
     /* ------------------------------------------------------------ */
     /** 
      * @param request 
@@ -200,124 +161,456 @@ public class Dispatcher implements RequestDispatcher
      * @exception ServletException 
      * @exception IOException 
      */
-    public void include(ServletRequest request,
-                        ServletResponse response)
+    public void include(ServletRequest servletRequest,
+                        ServletResponse servletResponse)
         throws ServletException, IOException     
     {
-        ServletHttpRequest servletHttpRequest=(ServletHttpRequest)request;
+        dispatch(servletRequest,servletResponse,false);
+    }
+    
+    /* ------------------------------------------------------------ */
+    private void dispatch(ServletRequest servletRequest,
+                         ServletResponse servletResponse,
+                         boolean forward)
+        throws ServletException,IOException
+    {
+        HttpServletRequest httpServletRequest=(HttpServletRequest)servletRequest;
+        HttpServletResponse httpServletResponse=(HttpServletResponse)servletResponse;
+        ServletHttpRequest servletHttpRequest=ServletHttpRequest.unwrap(servletRequest);
+        ServletHttpResponse servletHttpResponse=servletHttpRequest.getServletHttpResponse();
         HttpRequest httpRequest=servletHttpRequest.getHttpRequest();
-        ServletHttpResponse servletHttpResponse=(ServletHttpResponse)response;
-        HttpResponse httpResponse=servletHttpResponse.getHttpResponse();
-           
-        // Need to ensure that there is no change to the
-        // response other than write
-        boolean old_locked = servletHttpResponse.getLocked();
-        servletHttpResponse.setLocked(true);
-        int old_output_state = servletHttpResponse.getOutputState();
-        servletHttpResponse.setOutputState(0);
-
-        // handle static resource
-        if (_resource!=null)
-        {
-            Code.debug("Include resource ",_resource);
-            // just call it with existing request/response
-            InputStream in = _resource.getInputStream();
-            try
-            {
-                int len = (int)_resource.length();
-                httpResponse.getOutputStream().write(in,len);
-                return;
-            }
-            finally
-            {
-                try{in.close();}catch(IOException e){Code.ignore(e);}
-                servletHttpResponse.setLocked(old_locked);
-                servletHttpResponse.setOutputState(old_output_state);
-            }
-        }
+        HttpResponse httpResponse=httpRequest.getHttpResponse();
+        Object oldRequestFacade=httpRequest.getFacade();
+        Object oldResponseFacade=httpResponse.getFacade();
+        int old_output_state=0;
         
-        // handle named servlet
-        if (_pathSpec==null)
-        {
-            Code.debug("Include named ",_holder);
-            // just call it with existing request/response
-            try
-            {
-                _holder.handle(servletHttpRequest,servletHttpResponse);
-                return;
-            }
-            finally
-            {
-                servletHttpResponse.setLocked(old_locked);
-                servletHttpResponse.setOutputState(old_output_state);
-            }
-        }
-        
-        // merge query string
-        if (_query!=null && _query.length()>0)
-        {
-            MultiMap parameters=new MultiMap();
-            UrlEncoded.decodeTo(_query,parameters);
-            servletHttpRequest.pushParameters(parameters);
-        }
-        
-        // Request has all original path and info etc.
-        // New path is in attributes - whose values are
-        // saved to handle chains of includes.
-        
-        // javax.servlet.include.request_uri
-        Object old_request_uri =
-            request.getAttribute(__REQUEST_URI);
-        httpRequest.setAttribute(__REQUEST_URI,
-                                 servletHttpRequest.getRequestURI());
-        
-        // javax.servlet.include.context_path
-        Object old_context_path =
-            request.getAttribute(__CONTEXT_PATH);
-        httpRequest.setAttribute(__CONTEXT_PATH,
-                                 servletHttpRequest.getContextPath());
-        
-        // javax.servlet.include.query_string
-        Object old_query_string =
-            request.getAttribute(__QUERY_STRING);
-        httpRequest.setAttribute(__QUERY_STRING,
-                                 _query);
-        
-        // javax.servlet.include.servlet_path
-        Object old_servlet_path =
-            request.getAttribute(__SERVLET_PATH);
-        
-        // javax.servlet.include.path_info
-        Object old_path_info =
-            request.getAttribute(__PATH_INFO);
-
-        // Try each holder until handled.
         try
         {
-            // The path of the new request is the forward path
-            // context must be the same, info is recalculate.
-            Code.debug("Include request to ",_holder,
-                       " at ",_pathSpec);
-            httpRequest.setAttribute(__SERVLET_PATH,
-                                 PathMap.pathMatch(_pathSpec,_path));
-            httpRequest.setAttribute(__PATH_INFO,
-                                 PathMap.pathInfo(_pathSpec,_path));
+            // wrap the request and response
+            DispatcherRequest request = new DispatcherRequest(httpServletRequest);
+            DispatcherResponse response = new DispatcherResponse(httpServletResponse);
+            httpRequest.setFacade(request);
+            httpResponse.setFacade(response);
+
+            if (forward)
+            {
+                // Reset any output done so far.
+                servletResponse.resetBuffer();
+                servletHttpResponse.setOutputState(-1);
+            }
+            else
+            {
+                response.setLocked(true);
+                old_output_state=servletHttpResponse.getOutputState();
+                servletHttpResponse.setOutputState(0); // XXX ????
+            }
+            
+
+            // Merge parameters
+            String query=_query;
+            MultiMap parameters=null;
+            if (query!=null)
+            {
+                // Add the parametes
+                parameters=new MultiMap();
+                UrlEncoded.decodeTo(query,parameters);
+                request.addParameters(parameters);
+            }
+            
+            if (isNamed())
+            {
+                // No further modifications required.
+                _holder.handle(request,response);
+            }
+            else if (isResource())
+            {
+                if (forward)
+                    _resourceHandler.handle(_path,null,httpRequest,httpResponse);
+                else
+                {
+                    // XXX - need to use ResourceHandler caching!!!!
+                    InputStream in = _resource.getInputStream();
+                    try
+                    {
+                        int len = (int)_resource.length();
+                        httpResponse.getOutputStream().write(in,len);
+                    }
+                    finally
+                    {
+                        try{in.close();}catch(IOException e){Code.ignore(e);}
+                    }
+                }
+            }
+            else
+            {
+                request.setForwarded(forward);
+                request.setIncluded(!forward);
                 
-            // try service request
-            _holder.handle(servletHttpRequest,servletHttpResponse);
+                // merge query string
+                String oldQ=httpServletRequest.getQueryString();
+                if (!isNamed() && !isResource() &&
+                    oldQ!=null && oldQ.length()>0)
+                {
+                    UrlEncoded encoded = new UrlEncoded(oldQ);
+                    Iterator iter = parameters.entrySet().iterator();
+                    while(iter.hasNext())
+                    {
+                        Map.Entry entry = (Map.Entry)iter.next();
+                        encoded.put(entry.getKey(),entry.getValue());
+                    }
+                    query=encoded.encode(false);
+                }
+                
+                // Adjust servlet paths
+                servletHttpRequest.setServletHandler(_servletHandler);
+                request.setContextPath(_servletHandler.getHttpContext().getContextPath());
+                request.setServletPath(PathMap.pathMatch(_pathSpec,_path));
+                request.setPathInfo(PathMap.pathInfo(_pathSpec,_path));
+                request.setQueryString(query);
+                servletHttpRequest.setServletHolder(_holder);
+                _holder.handle(request,response);
+            }
         }
         finally
         {
-            // revert request back to it's old self.
-            servletHttpResponse.setLocked(old_locked);
-            servletHttpResponse.setOutputState(old_output_state);
-            if (_query!=null && _query.length()>0)
-                servletHttpRequest.popParameters();
-            httpRequest.setAttribute(__REQUEST_URI,old_request_uri);
-            httpRequest.setAttribute(__CONTEXT_PATH,old_context_path);
-            httpRequest.setAttribute(__QUERY_STRING,old_query_string);
-            httpRequest.setAttribute(__SERVLET_PATH,old_servlet_path);
-            httpRequest.setAttribute(__PATH_INFO,old_path_info);
+            httpRequest.setFacade(oldRequestFacade);
+            httpResponse.setFacade(oldResponseFacade);
+            if (!forward)
+                servletHttpResponse.setOutputState(old_output_state);
+        }
+    }
+    
+        
+        
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class DispatcherRequest extends HttpServletRequestWrapper
+    {
+        boolean _included;
+        boolean _forwarded;
+        String _contextPath;
+        String _servletPath;
+        String _pathInfo;
+        String _query;
+        MultiMap _parameters;
+        
+        /* ------------------------------------------------------------ */
+        DispatcherRequest(HttpServletRequest request)
+        {
+            super(request);
+        }
+
+        /* ------------------------------------------------------------ */
+        void setIncluded(boolean b)
+        {
+            _included=b;
+        }
+
+        /* ------------------------------------------------------------ */
+        boolean isIncluded()
+        {
+            return _included;
+        }
+        
+        /* ------------------------------------------------------------ */
+        void setForwarded(boolean b)
+        {
+            _forwarded=b;
+        }
+
+        /* ------------------------------------------------------------ */
+        boolean isForwarded()
+        {
+            return _forwarded;
+        }
+        
+        /* ------------------------------------------------------------ */
+        void setContextPath(String s)
+        {
+            _contextPath=s;
+        }
+        
+        /* ------------------------------------------------------------ */
+        public String getContextPath()
+        {
+            return(_forwarded)?_contextPath:super.getContextPath();
+        }
+        
+        /* ------------------------------------------------------------ */
+        void setServletPath(String s)
+        {
+            _servletPath=s;
+        }
+        
+        /* ------------------------------------------------------------ */
+        public String getServletPath()
+        {
+            return(_forwarded)?_servletPath:super.getServletPath();
+        }
+        
+        /* ------------------------------------------------------------ */
+        void setPathInfo(String s)
+        {
+            _pathInfo=s;
+        }
+        
+        /* ------------------------------------------------------------ */
+        public String getPathInfo()
+        {
+            return(_forwarded)?_pathInfo:super.getPathInfo();
+        }
+        
+        /* ------------------------------------------------------------ */
+        void setQueryString(String s)
+        {
+            _query=s;
+        }
+        
+        /* ------------------------------------------------------------ */
+        public String getQueryString()
+        {
+            return(_forwarded)?_query:super.getQueryString();
+        }
+        
+        /* ------------------------------------------------------------ */
+        public String getRequestURI()
+        {
+            return (!_included)
+                ?URI.addPaths(_contextPath,URI.addPaths(_servletPath,_pathInfo))
+                :super.getRequestURI();
+        }
+
+        /* ------------------------------------------------------------ */
+        void addParameters(MultiMap parameters)
+        {
+            _parameters=parameters;
+        }
+        
+        /* -------------------------------------------------------------- */
+        public Enumeration getParameterNames()
+        {
+            if (_parameters==null)
+                return super.getParameterNames();
+            
+            HashSet set = new HashSet(_parameters.keySet());
+            Enumeration e = super.getParameterNames();
+            while (e.hasMoreElements())
+                set.add(e.nextElement());
+
+            return Collections.enumeration(set);
+        }
+        
+        /* -------------------------------------------------------------- */
+        public String getParameter(String name)
+        {
+            if (_parameters==null)
+                return super.getParameter(name);
+            String value=_parameters.getString(name);
+            if (value!=null)
+                return value;
+            return super.getParameter(name);
+        }
+        
+        /* -------------------------------------------------------------- */
+        public String[] getParameterValues(String name)
+        {
+            if (_parameters==null)
+                return super.getParameterValues(name);
+            List values=_parameters.getValues(name);
+            if (values!=null)
+            {
+                String[]a=new String[values.size()];
+                return (String[])values.toArray(a);
+            }
+            return super.getParameterValues(name);
+        }
+        
+        /* -------------------------------------------------------------- */
+        public Map getParameterMap()
+        {
+            // XXX
+            Code.notImplemented();
+            return null;
+        }
+
+        /* ------------------------------------------------------------ */
+        public void setAttribute(String name, Object o)
+        {
+            if (_included)
+            {
+                if (name.equals(__PATH_INFO))
+                    _pathInfo=o.toString();
+                else if (name.equals(__SERVLET_PATH))
+                    _servletPath=o.toString();
+                else if (name.equals(__CONTEXT_PATH))
+                    _contextPath=o.toString();
+                else if (name.equals(__QUERY_STRING))
+                    _query=o.toString();
+                else
+                    super.setAttribute(name,o);
+            }
+            else
+                super.setAttribute(name,o);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public Object getAttribute(String name)
+        {
+            if (name.equals(__PATH_INFO))
+                return _included?_pathInfo:null;
+            if (name.equals(__REQUEST_URI))
+                return _included?URI.addPaths(_contextPath,URI.addPaths(_servletPath,_pathInfo)):null;
+            if (name.equals(__SERVLET_PATH))
+                return _included?_servletPath:null;
+            if (name.equals(__CONTEXT_PATH))
+                return _included?_contextPath:null;
+            if (name.equals(__QUERY_STRING))
+                return _included?_query:null;
+            
+            return super.getAttribute(name);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public Enumeration getAttributeNames()
+        {
+            HashSet set=new HashSet();
+            Enumeration e=super.getAttributeNames();
+            while (e.hasMoreElements())
+                set.add(e.nextElement());
+
+            if (_included)
+            {
+                set.add(__PATH_INFO);
+                set.add(__REQUEST_URI);
+                set.add(__SERVLET_PATH);
+                set.add(__CONTEXT_PATH);
+                set.add(__QUERY_STRING);
+            }
+            else
+            {
+                set.remove(__PATH_INFO);
+                set.remove(__REQUEST_URI);
+                set.remove(__SERVLET_PATH);
+                set.remove(__CONTEXT_PATH);
+                set.remove(__QUERY_STRING);
+            }
+            
+            return Collections.enumeration(set);
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class DispatcherResponse extends HttpServletResponseWrapper
+    {
+        boolean _locked;
+        
+        /* ------------------------------------------------------------ */
+        DispatcherResponse(HttpServletResponse response)
+        {
+            super(response);
+        }
+        
+        /* ------------------------------------------------------------ */
+        void setLocked(boolean locked)
+        {
+            _locked=locked;
+        }
+        
+        /* ------------------------------------------------------------ */
+        boolean getLocked()
+        {
+            return _locked;
+        }
+
+        /* ------------------------------------------------------------ */
+        public void setLocale(Locale locale)
+        {
+            if (!_locked)  super.setLocale(locale);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void sendError(int status, String message)
+            throws IOException
+        {
+            if (!_locked) super.sendError(status,message);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void sendError(int status)
+            throws IOException
+        {
+            if (!_locked) super.sendError(status);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void sendRedirect(String url)
+            throws IOException
+        {
+            if (!_locked) super.sendRedirect(url);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void setDateHeader(String name, long value)
+        {
+            if (!_locked) super.setDateHeader(name,value);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void setHeader(String name, String value)
+        {
+            if (!_locked) super.setHeader(name,value);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void setIntHeader(String name, int value)
+        {
+            if (!_locked) super.setIntHeader(name,value);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void addHeader(String name, String value)
+        {
+            if (!_locked) super.addHeader(name,value);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void addDateHeader(String name, long value)
+        {
+            if (!_locked) super.addDateHeader(name,value);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void addIntHeader(String name, int value)
+        {
+            if (!_locked) super.addIntHeader(name,value);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void setStatus(int status)
+        {
+            if (!_locked) super.setStatus(status);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void setStatus(int status, String message)
+        {
+            if (!_locked) super.setStatus(status,message);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void setContentLength(int len)
+        {
+            if (!_locked) super.setContentLength(len);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void setContentType(String contentType)
+        {
+            if (!_locked) super.setContentType(contentType);
         }
     }
 };

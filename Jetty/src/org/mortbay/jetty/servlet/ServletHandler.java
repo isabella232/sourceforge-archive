@@ -27,6 +27,8 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
@@ -374,31 +376,42 @@ public class ServletHandler
     
     
     /* ------------------------------------------------------------ */
-    /** Get or create a ServletHttpRequest.
+    /** Get or create a ServletRequest.
      * Create a new or retrieve a previously created servlet request
-     * that wraps the http request. Note that the ServletHttpResponse is
-     * also created and can be retrieved from the ServletHttpRequest.
+     * that wraps the http request.
      * @param httpRequest 
-     * @return ServletHttpRequest wrapping the passed HttpRequest.
+     * @return HttpServletRequest wrapping the passed HttpRequest.
      */
-    public ServletHttpRequest getServletHttpRequest(String pathInContext,
+    public HttpServletRequest getHttpServletRequest(String pathInContext,
                                                     String pathParams,
                                                     HttpRequest httpRequest,
                                                     HttpResponse httpResponse)
     {
         // Look for a previously built servlet request.
-        ServletHttpRequest servletHttpRequest = (ServletHttpRequest)
+        HttpServletRequest httpServletRequest = (HttpServletRequest)
             httpRequest.getFacade();
         
-        if (servletHttpRequest==null)
-            servletHttpRequest=newFacades(pathInContext,
+        if (httpServletRequest==null)
+            httpServletRequest=newFacades(pathInContext,
                                           pathParams,
                                           httpRequest,
                                           httpResponse,
                                           getHolderEntry(pathInContext));
-        return servletHttpRequest;
+        return httpServletRequest;
     }
 
+    /* ------------------------------------------------------------ */
+    /** Get Servlet Response.
+     * GetHttpServletRequest must have been called first.
+     * @param httpResponse 
+     * @return HttpServletRespone wrapping the passed HttpResponse.
+     */
+    public HttpServletResponse getHttpServletResponse(HttpResponse httpResponse)
+    {
+        // Look for a previously built servlet request.
+        return (HttpServletResponse)httpResponse.getFacade();
+    }
+    
     /* ------------------------------------------------------------ */
     private ServletHttpRequest newFacades(String pathInContext,
                                           String pathParams,
@@ -660,14 +673,13 @@ public class ServletHandler
                                      HttpResponse httpResponse)
         throws IOException
     {
-        ServletHttpRequest request = getServletHttpRequest(pathInContext,
+        HttpServletRequest request = getHttpServletRequest(pathInContext,
                                                            pathParams,
                                                            httpRequest,
                                                            httpResponse);
-        ServletHttpResponse response = request.getServletHttpResponse();
+        HttpServletResponse response = getHttpServletResponse(httpResponse);
 
         // Handle paths
-        request.setSessionId(pathParams); 
         String uri = pathInContext;
         
         // Setup session 

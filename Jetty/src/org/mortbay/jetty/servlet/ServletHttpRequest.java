@@ -78,7 +78,6 @@ public class ServletHttpRequest
     private HttpRequest _httpRequest;
     private ServletHttpResponse _servletHttpResponse;
 
-    private String _uri=null;
     private String _contextPath=null;
     private String _servletPath=null;
     private String _pathInfo=null;
@@ -90,9 +89,7 @@ public class ServletHttpRequest
     private ServletIn _in =null;
     private BufferedReader _reader=null;
     private int _inputState=0;
-    private ArrayList _mergedParameters;
     private ServletHolder _servletHolder;
-
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -113,6 +110,12 @@ public class ServletHttpRequest
         return _servletHandler;
     }
 
+    /* ------------------------------------------------------------ */
+    void setServletHandler(ServletHandler servletHandler)
+    {
+        _servletHandler=servletHandler;
+    }
+    
     /* ------------------------------------------------------------ */
     ServletHolder getServletHolder()
     {
@@ -136,31 +139,6 @@ public class ServletHttpRequest
     {
         _servletPath=servletPath;
         _pathInfo=pathInfo;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Set the paths for a RequestDispatcher.forward().
-     *
-     * @param context 
-     * @param servletPath 
-     * @param pathInfo 
-     * @param query 
-     */
-    void setForwardPaths(ServletHandler servletHandler,
-                         String servletPath,
-                         String pathInfo,
-                         String query)
-    {
-        _servletHandler=servletHandler;
-        _contextPath=_servletHandler.getHttpContext().getContextPath();
-        if (_contextPath.length()<=1)
-            _contextPath="";
-
-        _servletPath=servletPath;
-        _pathInfo=pathInfo;
-        _query=query;
-
-        _uri=URI.addPaths(_contextPath,URI.addPaths(_servletPath,_pathInfo));
     }
     
     /* ------------------------------------------------------------ */
@@ -455,21 +433,14 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     public String getRequestURI()
     {
-        if (_uri!=null)
-            return _uri;
-        
-        String path=_httpRequest.getPath();
-
-        int prefix=path.indexOf(SessionManager.__SessionUrlPrefix);
-        if (prefix!=-1)
-            path = path.substring(0,prefix);
-        
-        return path;
+        return
+            URI.addPaths(getContextPath(),URI.addPaths(getServletPath(),getPathInfo()));
     }
     
     /* ------------------------------------------------------------ */
     public StringBuffer getRequestURL()
     {
+        // XXX should move impl to here!!!
         return HttpUtils.getRequestURL(this);
     }
     
@@ -618,20 +589,6 @@ public class ServletHttpRequest
     }
     
     /* -------------------------------------------------------------- */
-    void popParameters()
-    {
-        _mergedParameters.remove(_mergedParameters.size()-1);
-    }
-    
-    /* -------------------------------------------------------------- */
-    void pushParameters(MultiMap parameters)
-    {
-        if (_mergedParameters==null)
-            _mergedParameters=new ArrayList(2);
-        _mergedParameters.add(parameters);
-    }
-    
-    /* -------------------------------------------------------------- */
     public Map getParameterMap()
     {
         // XXX
@@ -642,57 +599,21 @@ public class ServletHttpRequest
     /* -------------------------------------------------------------- */
     public String getParameter(String name)
     {
-        if (_mergedParameters!=null)
-        {
-            for (int p=_mergedParameters.size();p-->0;)
-            {
-                MultiMap params=(MultiMap)_mergedParameters.get(p);
-                String param=params.getString(name);
-                if (param!=null)
-                    return param;
-            }
-        }
         return _httpRequest.getParameter(name);
     }
     
     /* -------------------------------------------------------------- */
     public Enumeration getParameterNames()
     {
-        if (_mergedParameters!=null)
-        {
-            HashSet set = new HashSet(_httpRequest.getParameterNames());
-            
-            for (int p=_mergedParameters.size();p-->0;)
-            {
-                MultiMap params=(MultiMap)_mergedParameters.get(p);
-                set.addAll(params.keySet());
-            }
-            return Collections.enumeration(set);
-        }
-        
         return Collections.enumeration(_httpRequest.getParameterNames());
     }
     
     /* -------------------------------------------------------------- */
     public String[] getParameterValues(String name)
     {
-        List v=null;
-        
-        if (_mergedParameters!=null)
-        {
-            for (int p=_mergedParameters.size();v==null && p-->0;)
-            {
-                MultiMap params=(MultiMap)_mergedParameters.get(p);
-                v=params.getValues(name);
-            }
-        }
-        
-        if (v==null)
-            v=_httpRequest.getParameterValues(name);
-        
+        List v=_httpRequest.getParameterValues(name);
         if (v==null)
             return null;
-        
         String[]a=new String[v.size()];
         return (String[])v.toArray(a);
     }

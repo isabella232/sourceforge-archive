@@ -47,7 +47,6 @@ public class ServletHttpResponse implements HttpServletResponse
     private ServletWriter _writer=null;
     private HttpSession _session=null;
     private boolean _noSession=false;
-    private boolean _locked=false;
     private Locale _locale=null;
 
     private static Map __charSetMap = new HashMap();
@@ -102,18 +101,6 @@ public class ServletHttpResponse implements HttpServletResponse
         _servletHttpRequest=request;
         _servletHttpRequest.setServletHttpResponse(this);
         _httpResponse=response;
-    }
-
-    /* ------------------------------------------------------------ */
-    boolean getLocked()
-    {
-        return _locked;
-    }
-    
-    /* ------------------------------------------------------------ */
-    void setLocked(boolean locked)
-    {
-        _locked=locked;
     }
 
     /* ------------------------------------------------------------ */
@@ -407,51 +394,36 @@ public class ServletHttpResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void setDateHeader(String name, long value) 
     {
-        if (_locked)
-            return;
         _httpResponse.setDateField(name,value);
     }
 
     /* ------------------------------------------------------------ */
     public void setHeader(String name, String value) 
     {
-        if (_locked)
-            return;
         _httpResponse.setField(name,value);
     }
 
     /* ------------------------------------------------------------ */
     public void setIntHeader(String name, int value) 
     {
-        if (_locked)
-            return;
         _httpResponse.setIntField(name,value);
     }
     
     /* ------------------------------------------------------------ */
     public void addDateHeader(String name, long value) 
     {
-        if (_locked)
-            return;
-        
         _httpResponse.addDateField(name,new Date(value));
     }
 
     /* ------------------------------------------------------------ */
     public void addHeader(String name, String value) 
     {
-        if (_locked)
-            return;
-        
         _httpResponse.addField(name,value);
     }
 
     /* ------------------------------------------------------------ */
     public void addIntHeader(String name, int value) 
     {
-        if (_locked)
-            return;
-        
         _httpResponse.addIntField(name,value);
     }
 

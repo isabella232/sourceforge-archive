@@ -16,8 +16,11 @@ import javax.servlet.Servlet;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.UnavailableException;
 import org.mortbay.util.Code;
+import org.mortbay.util.URI;
 
 
 /* --------------------------------------------------------------------- */
@@ -257,8 +260,8 @@ public class ServletHolder extends Holder
     /* --------------------------------------------------------------- */
     /** Service a request with this servlet.
      */
-    public void handle(ServletHttpRequest request,
-                       ServletHttpResponse response)
+    public void handle(HttpServletRequest request,
+                       HttpServletResponse response)
         throws ServletException,
                UnavailableException,
                IOException
@@ -279,9 +282,7 @@ public class ServletHolder extends Holder
             if (_path!=null)
             {
                 request.setAttribute("javax.servlet.include.request_uri",
-                                     request.getContextPath()+
-                                     (_path.startsWith("/")?"":"/")+
-                                     _path);
+                                     URI.addPaths(request.getContextPath(),_path));
                 request.setAttribute("javax.servlet.include.servlet_path",_path);
             }
 

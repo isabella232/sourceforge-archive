@@ -18,6 +18,8 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
@@ -183,13 +185,13 @@ public class FilterHandler
             return;
 
         // Get the servlet wrappers
-        ServletHttpRequest servletHttpRequest =
-            _servletHandler.getServletHttpRequest(pathInContext,
-                                                  pathParams,
-                                                  httpRequest,
-                                                  httpResponse);
-        ServletHttpResponse servletHttpResponse =
-             servletHttpRequest.getServletHttpResponse();
+        HttpServletRequest servletRequest = _servletHandler
+            .getHttpServletRequest(pathInContext,
+                                   pathParams,
+                                   httpRequest,
+                                   httpResponse);
+        HttpServletResponse servletResponse = _servletHandler
+            .getHttpServletResponse(httpResponse);
 
         FilterChain chain=null;
         
@@ -200,7 +202,7 @@ public class FilterHandler
         if (chain==null)
             chain = new Chain(_handlerIndex+1,pathInContext);
         
-        try {chain.doFilter(servletHttpRequest,servletHttpResponse);}
+        try {chain.doFilter(servletRequest,servletResponse);}
         catch(ServletException e)
         {
             Throwable th=e.getRootCause();
@@ -318,18 +320,30 @@ public class FilterHandler
                 _chainMap.put(_pathInContext,_cacheChain);
                 Code.debug("Cached chain for ",_pathInContext);
             }
+
             
             // Goto the original resource
-            HttpRequest httpRequest =
-                ServletHttpRequest.unwrap(request).getHttpRequest();
+            ServletHttpRequest servletHttpRequest=
+                ServletHttpRequest.unwrap(request);
+            HttpRequest httpRequest =servletHttpRequest.getHttpRequest();
             HttpResponse httpResponse = httpRequest.getHttpResponse();
-            _httpContext.handle(_nextHandler,
-                                _pathInContext,
-                                null, // Assume path params have
-                                      // already been processed.
-                                httpRequest,
-                                httpResponse);
-            
+            try
+            {
+                httpRequest.setFacade(request);
+                httpResponse.setFacade(response);
+                
+                _httpContext.handle(_nextHandler,
+                                    _pathInContext,
+                                    null, // Assume path params have
+                                          // already been processed.
+                                    httpRequest,
+                                    httpResponse);
+            }
+            finally
+            {
+                httpRequest.setFacade(servletHttpRequest);
+                httpResponse.setFacade(servletHttpRequest.getServletHttpResponse());
+            }
         }   
     }
     
