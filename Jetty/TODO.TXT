@@ -1,0 +1,11 @@
+
++ Complete Servlet 2.1 handling (request dispatchers, real paths etc.)
+
++ Define a config file format similar to jakarta's xml
+
++ Integrate jakartas tomcat 2.2 servlet container (or possibly implement
+  the 2.2 ourselves if tomcat still lacking key featues).
+
++ Read Jetty 3 config files
+
++ Better demo
