@@ -56,9 +56,6 @@ are supplied with the release:
     An old version of Server that works with configuration files 
     for versions prior to 2.2.x
 
-  com.mortbay.Jetty.JRun
-    A server that reads JRUN configuration files for servlets
-
   com.mortbay.HTTP.Configure.ServletServer
     A server that dynamically loads servlets from the current
     directory.
@@ -236,18 +233,20 @@ PATHS does not work in config file
 For URL path lists, ';' or ',' should be used as a separator.
 
 
+
+
+
 FREQUENTLY ASKED QUESTIONS
 ==========================
 
 Does Jetty support SSL?
 -----------------------
-There is no Open Source java SSL implementation currently available 
-(if there is, please tell me about it). As from Jetty-2.2, server
-configuration can now specify the class to use for the HttpListener,
-so integration of SSL should be fairly straight forward.  
-Forge (www.forge.com.au) have donated a license for their Protekt
-SSL implementation (a commercial product) and I may integrate that
-at some stage.
+This is a high priority task for Jetty. The recent 2.2.x developments
+have included restructuring to allow for easier integration of SSL.
+The intention is to use the standard crypto API to make an 
+SslHttpListener class that will work with most SSL implementations.
+This effort will probably start in August 1999 and we'd appreciate 
+contributions to this effort.
 
 
 Does Jetty support "standard" server side includes?
@@ -266,6 +265,38 @@ to modify the output of a servlet/file/forward/proxy request.
 Jetty also supports the standard resource API that allows a servlet to
 request the content from a URL. This works OK for accessing other
 servlets and files.
+
+
+
+Can I use Jetty Commercially?
+-----------------------------
+Yes. To paraphrase the Jetty Open Source license, you can commercially
+use and distribute Jetty so long as you:
+  + Only use it internally
+  + Give Jetty increased distribution by including a full release.
+  + Give Jetty increased publicity by including a reference to the
+    full release in a public/visible area of the product.
+  + Make other arrangements with the copyright holder(s). ie buy a 
+    source license. 
+
+
+
+Why is Jetty Open Source?
+-------------------------
+Mort Bay Consulting originally wrote Jetty as a java learning excercise
+and as a demonstration platform for WWW based office automation. Since
+that time it has proved it usefulness in many of the projects that 
+Mort Bay has provided consulting for and to date there is no other
+server that serves the embedded server niche as well.   
+
+Mort Bay is primarily a consulting company and do not have the resources 
+to provide a quality commercial software product. Thus we prefer that
+Jetty is openly used and developed, rather than be an "also ran" commercial
+product.  The quality of contributions, refinements and bug fixes that
+we have received from the Jetty user base has allowed Jetty to increase
+in quality of functionality, thus allowing us all to get on with using
+it to develop better and more intersting WWW applications for our clients.
+
 
 
 
@@ -318,9 +349,9 @@ HTTP/1.1
 Servlets by default will only use persistent connections if
 the content length is set or the chunked transfer encoding has
 been set in the response header.  However, chunking can be used
-by default if the java property CHUNK_BY_DEFAULT is set or 
-ServletHolder.setChunkByDefault(true) is called, which allows
-persistent connections to be used in more situations.
+by default, which allows persistent connections to be used in more 
+situations. Please see the ServletHandler class for information
+on turning Chunking on by default.
 
 
 Running the Jetty Demo under MacOS
@@ -344,14 +375,35 @@ folder (the same folder that contains the etc and FileBase folders).
 
 CONTACTS
 ========
-    jetty-support@mortbay.com     - for problems with Jetty
-    mortbay@mortbay.com           - for general contact
-    jetty-announce@mortbay.com    - for the Jetty mailing list
-                                    This is for announcements of interest
-                                    to all Jetty users. It is not for
-                                    support questions.
+We are experimenting with the public mail list service www.egroups.com
+to maintain the Jetty mailing lists and archives. Please report any
+problems you have with this service to the general mortbay contact listed
+below.
+
+    mortbay@mortbay.com        - for general contact
+
+    jetty-support@egroups.com  - For problems with Jetty
+                               - Archives at
+                                 http://www.egroups.com/group/jetty-support
+    jetty@mortbay.com          - For jetty support questions that are
+                                 not stored in the public archive.
+
+    jetty-announce@mortbay.com - For Jetty related announcements
+                                 This is for announcements of interest
+                                 to all Jetty users. It is not for
+                                 support questions.
+		               - Archives at
+                                 http://www.egroups.com/group/jetty-announce
     subscribe-jetty-announce@mortbay.com   
-                                  - join the mailing list
+                               - join the announce mailing list
+
+    jetty-discuss@mortbay.com  - For Jetty related discussions
+                                 This is for announcements of interest
+                                 to Jetty developers. 
+		               - Archives at
+                                 http://www.egroups.com/group/jetty-discuss
+    subscribe-jetty-discuss@mortbay.com   
+                               - join the discuss mailing list
 
 
 
@@ -406,4 +458,3 @@ licensing conditions.
 
 
 And remember, it's spelt J-e-t-t-y, but it's pronounced "Jetty".
-

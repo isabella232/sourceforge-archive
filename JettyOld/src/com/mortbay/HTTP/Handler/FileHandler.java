@@ -31,6 +31,7 @@ public class FileHandler extends NullHandler
     Vector indexFiles=new Vector(2);
     boolean putAllowed;
     boolean deleteAllowed;
+    boolean dirAllowed;
     String allowHeader = null;
 
     
@@ -112,7 +113,7 @@ public class FileHandler extends NullHandler
 		read+=len;
 	    }
 	    in.close();
-	    encoding=httpServer.getMimeType(filename);
+	    encoding=httpServer.getMimeType(file.getName());
 	}
 	
 	/* ------------------------------------------------------------ */
@@ -179,6 +180,7 @@ public class FileHandler extends NullHandler
      * Indexes              : index.html,index.htm
      * AllowPut             : False
      * AllowDelete          : False
+     * AllowDir             : True
      * MaxCachedFiles       : 100
      * MaxCachedFileSize    : 8192
      * FILES.name.PATHS     : /pathSpec;/list%
@@ -196,8 +198,10 @@ public class FileHandler extends NullHandler
 	    tree = new PropertyTree(properties);
 	Code.debug(tree);
 
-	putAllowed=tree.getBoolean("AllowPut");
-	deleteAllowed=tree.getBoolean("AllowDelete");
+	putAllowed=tree.getBoolean("AllowPut",false);
+	deleteAllowed=tree.getBoolean("AllowDelete",false);
+	dirAllowed=tree.getBoolean("AllowDir", true);
+	
 	indexFiles=tree.getVector("Indexes",";,");
 	if (indexFiles==null || indexFiles.size()==0)
 	{
@@ -244,6 +248,7 @@ public class FileHandler extends NullHandler
 	putAllowed = putAllowed_;
 	allowHeader = null;
     }
+    
     /* ------------------------------------------------------------ */
     public boolean isDeleteAllowed()
     {
@@ -255,6 +260,18 @@ public class FileHandler extends NullHandler
     {
 	deleteAllowed = deleteAllowed_;
 	allowHeader = null;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isDirAllowed()
+    {
+	return dirAllowed;
+    }
+    
+    /* ----------------------------------------------------------------- */
+    public void setDirAllowed(boolean dirAllowed_)
+    {
+	dirAllowed = dirAllowed_;
     }
 
     /* ----------------------------------------------------------------- */
@@ -504,12 +521,14 @@ public class FileHandler extends NullHandler
 	    Code.warning(ex);
 	}
     }
+
     /* ------------------------------------------------------------ */
     void handleDelete(HttpRequest request, HttpResponse response,
 		      String uri, String filename)
 	throws Exception
     {
-	Code.debug("DELETEting "+uri+" from "+filename);
+	Code.debug("DELETE "+uri+" from "+filename);
+	
 	if (!deleteAllowed)
 	{
 	    response.setHeader(HttpResponse.Allow,
@@ -520,12 +539,23 @@ public class FileHandler extends NullHandler
 	}
 	File file = new File(filename);
 	if (!file.exists())
-	    response.sendError(response.SC_METHOD_NOT_ALLOWED);
+	    response.sendError(response.SC_NOT_FOUND);
 	else
 	{
 	    try
 	    {
+		// delete the file
 		file.delete();
+
+		// flush the cache
+		if (cacheMap!=null)
+		{
+		    CachedFile cachedFile=(CachedFile)cacheMap.get(filename);
+		    if (cachedFile!=null)
+			cachedFile.flush();
+		}
+		
+		// Send response
 		response.setStatus(response.SC_NO_CONTENT);
 		response.writeHeaders();
 	    }
@@ -575,6 +605,7 @@ public class FileHandler extends NullHandler
 	    return;
 	}
     }
+    
     /* ------------------------------------------------------------ */
     void handleOptions(HttpResponse response)
 	throws Exception
@@ -582,6 +613,7 @@ public class FileHandler extends NullHandler
 	setAllowHeader(response);
 	response.writeHeaders();
     }
+    
     /* ------------------------------------------------------------ */
     void setAllowHeader(HttpResponse response){
 	if (allowHeader == null){
@@ -670,59 +702,67 @@ public class FileHandler extends NullHandler
 		       boolean parent)
 	 throws Exception
     {
-	Code.debug("sendDirectory: "+file);
-	String base = request.getRequestURI();
-	if (!base.endsWith("/"))
-	    base+="/";
-	
-	response.setContentType("text/html");
-	if (request.getMethod().equals(HttpRequest.HEAD)){
-	    // Bail out here otherwise we build the page fruitlessly and get
-	    // hit with a HeadException when we try to write the page...
-	    response.writeHeaders();
-	    return;
-	}
-	
-	String title = "Directory: "+base;
-
-	PrintWriter out=response.getWriter();
-
-	out.print("<HTML><HEAD><TITLE>");
-	out.print(title);
-	out.print("</TITLE></HEAD><BODY>\n<H1>");
-	out.print(title);
-	out.print("</H1><TABLE BORDER=0>");
-	
-	if (parent)
+	if (dirAllowed)
 	{
-	    out.print("<TR><TD><A HREF=");
-	    out.print(base);
-	    out.print("../>Parent Directory</A></TD><TD></TD><TD></TD></TR>\n");
+	    Code.debug("sendDirectory: "+file);
+	    String base = request.getRequestURI();
+	    if (!base.endsWith("/"))
+		base+="/";
+	
+	    response.setContentType("text/html");
+	    if (request.getMethod().equals(HttpRequest.HEAD)){
+		// Bail out here otherwise we build the page fruitlessly and get
+		// hit with a HeadException when we try to write the page...
+		response.writeHeaders();
+		return;
+	    }
+	
+	    String title = "Directory: "+base;
+
+	    PrintWriter out=response.getWriter();
+
+	    out.print("<HTML><HEAD><TITLE>");
+	    out.print(title);
+	    out.print("</TITLE></HEAD><BODY>\n<H1>");
+	    out.print(title);
+	    out.print("</H1><TABLE BORDER=0>");
+	
+	    if (parent)
+	    {
+		out.print("<TR><TD><A HREF=");
+		out.print(base);
+		out.print("../>Parent Directory</A></TD><TD></TD><TD></TD></TR>\n");
 	    
-	}
+	    }
 	
-	DateFormat dfmt=DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
-						       DateFormat.MEDIUM);
-	String[] ls = file.list();
-	for (int i=0 ; i< ls.length ; i++)
-	{
-	    File item = new File(file.getPath()+File.separator+ls[i]);
-	    out.print("<TR><TD><A HREF=");
-	    String uri=base+ls[i];
-	    if (item.isDirectory())
-		uri+="/";
-	    out.print(uri);
-	    out.print(">");
-	    out.print(ls[i]);
-	    out.print("&nbsp;");
-	    out.print("</TD><TD ALIGN=right>");
-	    out.print(item.length());
-	    out.print(" bytes&nbsp;</TD><TD>");
-	    out.print(dfmt.format(new Date(item.lastModified())));
-	    out.print("</TD></TR>\n");
+	    DateFormat dfmt=DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
+							   DateFormat.MEDIUM);
+	    String[] ls = file.list();
+	    for (int i=0 ; i< ls.length ; i++)
+	    {
+		File item = new File(file.getPath()+File.separator+ls[i]);
+		out.print("<TR><TD><A HREF=");
+		String uri=base+ls[i];
+		if (item.isDirectory())
+		    uri+="/";
+		out.print(uri);
+		out.print(">");
+		out.print(ls[i]);
+		out.print("&nbsp;");
+		out.print("</TD><TD ALIGN=right>");
+		out.print(item.length());
+		out.print(" bytes&nbsp;</TD><TD>");
+		out.print(dfmt.format(new Date(item.lastModified())));
+		out.print("</TD></TR>\n");
+	    }
+	    out.println("</TABLE>");
+	    out.flush();
 	}
-	out.println("</TABLE>");
-	out.flush();
+	else
+	{
+	    // directory request not allowed
+	    response.sendError(HttpServletResponse.SC_FORBIDDEN, "Directory access not allowed");
+	}
     }
 }
 

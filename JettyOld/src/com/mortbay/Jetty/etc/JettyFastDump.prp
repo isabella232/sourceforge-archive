@@ -1,7 +1,5 @@
 # ========================================================================
-# Configuration file for com.mortbay.Jetty Server
-# This is a full featured configuration for the Dump and dynamically
-# loaded servlets.
+# Configuration file for com.mortbay.Jetty.Server
 # ------------------------------------------------------------------------
 
 # ========================================================================
@@ -19,7 +17,6 @@ main.LISTENER.all.CLASS                   : com.mortbay.HTTP.HttpListener
 main.LISTENER.all.ADDRS                   : 0.0.0.0:8080
 
 # ------------------------------------------------------------------------
-main.root.HOSTS				  :
 main.root.PATHS                           : /
 main.root.HANDLERS			  : Log;Auth;Alias;Filter;File;Param;Session;Dynamic;Servlet;NotFound
 main.root.EXCEPTIONS			  : Default

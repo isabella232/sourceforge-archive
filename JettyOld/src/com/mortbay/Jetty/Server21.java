@@ -532,11 +532,11 @@ public class Server21 extends BaseConfiguration
     public static void main(String args[])
     {
 	try{
-	    String filename = "JettyServer.prp";
+	    String filename = "JettyServer21.prp";
 	    if (args.length==1)
 		filename = args[0];
 	    else if ( ! new File(filename).exists())
-		filename = "etc/JettyServer.prp";
+		filename = "etc/JettyServer21.prp";
 
 	    // load property file
 	    Properties props = new Properties();

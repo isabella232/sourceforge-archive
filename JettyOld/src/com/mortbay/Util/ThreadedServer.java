@@ -299,16 +299,38 @@ abstract public class ThreadedServer
 	    Thread thread=(Thread)enum.nextElement();
 	    thread.interrupt();
 	}
-	Thread.yield();
 
-	// Stop any still running
-	enum=_threadSet.keys();
-	while(enum.hasMoreElements())
-	{
-	    Thread thread=(Thread)enum.nextElement();
-	    if (thread.isAlive())
-		thread.stop( );
+	
+	// wait a while for all threads to die
+	try{
+	    long end_wait=System.currentTimeMillis()+5000;
+	    while (_threadSet.size()>0 && end_wait>System.currentTimeMillis())
+		wait(5000);
+
+	    // Stop any still running
+	    if (_threadSet.size()>0)
+	    {
+		enum=_threadSet.keys();
+		while(enum.hasMoreElements())
+		{
+		    Thread thread=(Thread)enum.nextElement();
+		    if (thread.isAlive())
+			thread.stop( );
+		}
+		
+		// wait until all threads are dead.
+		while(_threadSet.size()>0)
+		{
+		    Code.debug("waiting for threads to stop...");
+		    wait(5000);
+		}
+	    }
 	}
+	catch(InterruptedException e)
+	{
+	    Code.warning(e);
+	}
+	
 	_threadSet.clear();
 	_threadSet=null;
 
@@ -372,18 +394,20 @@ abstract public class ThreadedServer
 		{
 		    synchronized(this)
 		    {
-			if (_threadSet.size()>_minThreads)
+			// If we are still running, interrupt was due to accept timeout
+			if (_running && _threadSet.size()>_minThreads)
 			{
+			    // Kill thread if it is in excess of the minimum.
 			    Code.debug("Idle death: "+thread);
-			    if (_threadSet!=null)
-				_threadSet.remove(thread);
+			    _threadSet.remove(thread);
 			    break;
 			}
 		    }
 		}
 		catch ( java.net.SocketException e )
 		{
-		    // XXX - this is ignored due strange exception from linux java1.2.v1a
+		    // XXX - this is caught and ignored due strange
+		    // exception from linux java1.2.v1a
 		    Code.ignore(e);
 		}
 		catch ( IOException e )
@@ -396,11 +420,9 @@ abstract public class ThreadedServer
 		    synchronized(this)
 		    {
 			if (--_accepting==0 &&
-			    _threadSet.size()<_maxThreads &&
-			    _running)
-			{
+			    _running &&
+			    _threadSet.size()<_maxThreads)
 			    newThread();
-			}
 		    }
 		}
 
@@ -435,6 +457,7 @@ abstract public class ThreadedServer
 	    {
 		if (_threadSet!=null)
 		    _threadSet.remove(Thread.currentThread());
+		notify();
 	    }
 	    Code.debug("Stopped listening on " + listen);
 	}

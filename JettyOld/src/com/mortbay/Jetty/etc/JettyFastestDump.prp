@@ -20,7 +20,6 @@ main.LISTENER.all.ADDRS                   : 0.0.0.0:8080
 
 
 # ------------------------------------------------------------------------
-main.root.HOSTS				             :
 main.root.PATHS					     : /
 main.root.HANDLERS				     : File;Param;Dynamic;Servlet;NotFound
 main.root.EXCEPTIONS				     : Default

@@ -1,3 +1,30 @@
+# ========================================================================
+# Configuration file for demo of com.mortbay.HTTP.Handler.ServletHandler
+# PATHS                   - List of PathMap path specs of URLs from which
+#                           servlets are dynamically loaded.
+# CLASSPATH               - List of directories and/or jar files from which
+#                           servlets are dynamically loaded.
+# AutoReloadDynamicServlets
+#                         - Allow dynamically loaded servers to be reloaded
+#                           automatically if they are updated.
+# Loader                  - The class name of the ClassLoader to use to load
+#                           dynamic servlets. Must be an implementation of
+#                           com.mortbay.HTTP.Handler.ServletLoader
+# SERVLET.name.CLASS      - The class of servlet "name".
+# SERVLET.name.PATHS      - List of PathMap path specs to server the servlet 
+#                           "name" from.
+# SERVLET.name.CHECK      - Should the servlet "name" set HTTP/1.1 chunking for
+#                           the response stream by default.
+# SERVLET.name.PROPERTY.* - Properties for the servlet "name".
+# SERVLET.name.PROPERTIES - File of properties for the servlet "name".
+# SERVLET.name.Iniitalize - Should the "name" servlet be initialized at load
+#                           time.
+# SERVLET.name.CLASSPATH  - List of directories and/or jar files from which
+#                           the "name" servlet is loaded.
+# SERVLET.name.Loader     - The implmentation of ServletLoader to use to load
+#                           the "name" servlet.
+# ------------------------------------------------------------------------
+
 PATHS				    : /servlet/;/SERVLET/;/Servlet/
 CLASSPATH			    : ./servlets
 AutoReloadDynamicServlets	    : True

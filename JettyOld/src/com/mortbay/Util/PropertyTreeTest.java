@@ -86,12 +86,23 @@ public class PropertyTreeTest
 			 "SubTree get");
 	
 	sub=props.getTree("a");
+	sub.getRealNodes("b");
+	
 	test.checkEquals(sub.get("*.b"),new Integer(9),"subtree get");
+	
 	
 	sub=sub.getTree("b");	
 	test.checkEquals(sub.toString(),
 			 "{c=8, b=9, *.b.c=1, *.B=10, B=10, b.*=4, *=3, *.b.*=4, b.c=1, *.c=2, *.b=9}",
 			 "SubTree");
+
+	Enumeration e=sub.getRealNodes();
+	test.check(e.hasMoreElements(),"getRealNodes");
+	test.checkEquals(e.nextElement(),"*","getRealNodes");
+	test.check(e.hasMoreElements(),"getRealNodes");
+	test.checkEquals(e.nextElement(),"c","getRealNodes");
+	test.check(!e.hasMoreElements(),"getRealNodes");
+	
 	
 	Properties clone = (Properties)sub.clone();
 	test.checkEquals(clone.toString(),
@@ -106,7 +117,7 @@ public class PropertyTreeTest
 	test.checkContains(props.toString(),"a.b.*.B=B","Subtree changed");
 	test.checkContains(props.toString(),"a.*.B=10","Subtree changed");
 
-	Enumeration e=sub.elements();
+	e=sub.elements();
 	String v=sub.toString();
 	while(e.hasMoreElements())
 	{

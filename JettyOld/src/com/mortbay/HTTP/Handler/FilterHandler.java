@@ -100,10 +100,12 @@ public class FilterHandler extends NullHandler
 	
 	filterMap = new PathMap();
 
-	Enumeration names = tree.getNodes();
+	Enumeration names = tree.getRealNodes();
 	while (names.hasMoreElements())
 	{
 	    String filterName = names.nextElement().toString();
+	    if ("*".equals(filterName))
+		continue;
 	    Code.debug("Configuring filter "+filterName);
 	    Vector paths = tree.getVector(filterName+".PATHS",",;");
 	    for (int r=paths.size();r-->0;)

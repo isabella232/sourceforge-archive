@@ -19,15 +19,16 @@ import javax.servlet.*;
 import java.util.*;
 
 
-/* ------------------------------------------------------------------------ */
-/** Demo 
- * @see com.mortbay.Jetty.Server
- * @version $Id$
- * @author Greg Wilkins
-*/
+/* ------------------------------------------------------------ */
+/** Demo Jetty Server
+ *
+ *
+ * @version 1.0 Sun Jun 27 1999
+ * @author Greg Wilkins (gregw)
+ */
 public class Demo 
 {
-    /* -------------------------------------------------------------------- */
+    /* -------------------------------------------------------- */
     /** Main
      * Configures the Dump servlet and starts the server
      */
@@ -36,9 +37,7 @@ public class Demo
 	if (args.length==1)
 	    Code.warning("Port argument no longer supported. See etc/JettyDemo.prp");
 	File filebase = new File("./FileBase");
-	Code.assert(filebase.isDirectory(),"Demo must be run in $JETTY_HOME");
-	
-	Page.setDefaultPageType("com.mortbay.Jetty.JettyLaF");
+	Code.assert(filebase.isDirectory(),"Demo must be run in $JETTY_HOME");	
 	
 	String demoArgs[] = {"./etc/JettyDemo.prp"};
 	Server.main(demoArgs);

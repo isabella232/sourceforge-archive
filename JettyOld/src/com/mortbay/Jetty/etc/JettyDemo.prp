@@ -1,24 +1,68 @@
 # ========================================================================
 # Configuration file for com.mortbay.Jetty.Demo
+#
+# The format of this file is parsed by the com.mortbay.Util.PropertyTree
+# class and interpreted by the com.mortbay.Jetty.Server class to 
+# construct, configure and start 1 or more HttpServer instances.
+#
+# This configuration file is verbosely constructed. the same configuration
+# can be seen in abbreviated form in JettyMinimalDemo.prp
 # ------------------------------------------------------------------------
 
-# ========================================================================
+# ======================================================================== 
+# Define the server instances to be configured by this file:
+# SERVERS           - list if defined server names
+# PROPERTY.*        - Definition of global properties
+# PROPERTIES        - File of globl properties 
+# servername.*      - PropertyTree describing server "servername".
+#
+# Defined global properties are:
+# DefaultPageType   - The class name of the default com.mortbay.HTML.Page 
+#                     type.
+# ------------------------------------------------------------------------
 SERVERS                                   : main;proxy
+PROPERTY.DefaultPageType		  : com.mortbay.Jetty.JettyLaF
 
+
+# ======================================================================== 
+# Define the server instance named "main"
+# CLASS               - The class name of the server. Must either be 
+#                       com.mortbay.HTTP.HttpServer or a decendant.
+# LISTENER.name.CLASS - HttpListener classname or decendant
+# LISTENER.name.ADDRS - List of addresses and ports to listen on
+# STACKS              - List of handler stack names.
+# PROPERTY.*          - Properties for this server
+# PROPERTIES          - File of properties for this server.
+#
+# Defined server properties are:
+# SessionMaxInactiveInterval - Max idle time Ms before session death
+# MinListenerThreads	     - Min listener threads per listener
+# MaxListenerThreads	     - Max listener threads per listener
+# MaxListenerThreadIdleMs    - Max idle time Ms before listen thread
+#                              death
+# MimeMap		     - Property file of MIME mappings
+# 
 # ------------------------------------------------------------------------
 main.CLASS				  : com.mortbay.HTTP.HttpServer
+main.LISTENER.all.CLASS                   : com.mortbay.HTTP.HttpListener
+main.LISTENER.all.ADDRS                   : 0.0.0.0:8080;127.0.0.1:8888
 main.STACKS				  : root;files
 main.PROPERTY.SessionMaxInactiveInterval  : 3600
 main.PROPERTY.MinListenerThreads	  : 3
 main.PROPERTY.MaxListenerThreads	  : 20
 main.PROPERTY.MaxListenerThreadIdleMs	  : 60000
 main.PROPERTY.MimeMap			  : ./etc/Mime.prp
-main.LISTENER.all.CLASS                   : com.mortbay.HTTP.HttpListener
-main.LISTENER.all.ADDRS                   : 0.0.0.0:8080;127.0.0.1:8888
 
 
+# ======================================================================== 
+# Define the handler instances handler stack "root" in server "main"
+# PATHS           - List of PathMap path specifiactions for this stack
+# HANDLERS        - List of handler names for this stack.
+# EXCEPTIONS      - List of exception handler names for this stack.
+# name.CLASS      - The classname for the handler "name"
+# name.PROPERTY.* - Properties defined for handler "name"
+# name.PROPERTIES - file of properties defined for handler "name"
 # ------------------------------------------------------------------------
-main.root.HOSTS				  :
 main.root.PATHS                           : /
 main.root.HANDLERS			  : Log;Auth;Alias;Filter;Param;Session;Servlet;File;Forward;NotFound
 main.root.EXCEPTIONS			  : Default
@@ -62,6 +106,8 @@ main.root.NotFound.CLASS		  : com.mortbay.HTTP.Handler.NotFoundHandler
 
 main.root.Default.CLASS			  : com.mortbay.HTTP.Handler.DefaultExceptionHandler
 
+# ======================================================================== 
+# Define the  handler stack "files" in server "main"
 # ------------------------------------------------------------------------
 main.files.HOSTS			         :
 main.files.PATHS                                 : /javadoc%;/laf%
@@ -78,12 +124,20 @@ main.files.File.PROPERTY.FILES.Servlet.PATHS     : /javadoc/javax/servlet
 main.files.File.PROPERTY.FILES.Servlet.DIRECTORY : ./src/javax/servlet/javadoc
 main.files.NotFound.CLASS		         : com.mortbay.HTTP.Handler.NotFoundHandler
 
+
+
+# ======================================================================== 
+# Define the server instance named "proxy"
 # ------------------------------------------------------------------------
 proxy.CLASS				  : com.mortbay.HTTP.HttpServer
 proxy.STACKS				  : root
 proxy.LISTENER.all.CLASS                  : com.mortbay.HTTP.HttpListener
 proxy.LISTENER.all.ADDRS                  : 0.0.0.0:8081
 
+
+# ======================================================================== 
+# Define the  handler stack "root" in server "proxy"
+# ------------------------------------------------------------------------
 proxy.root.HANDLERS			  : Log;Proxy;NotFound
 proxy.root.PATHS			  : /
 proxy.root.Log.CLASS			  : com.mortbay.HTTP.Handler.LogHandler

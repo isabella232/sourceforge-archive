@@ -1,106 +1,119 @@
 # ========================================================================
-# Sample configuration file for com.mortbay.Jetty.Server21
+# Configuration file for com.mortbay.Jetty.Server
 #
-# THIS IS AN OLD FILE FORMAT AND IS ONLY HERE FOR HISTORICAL REASONS
-#
-# Server21 has been deprecated.
-#
+# The format of this file is parsed by the com.mortbay.Util.PropertyTree
+# class and interpreted by the com.mortbay.Jetty.Server class to 
+# construct, configure and start 1 or more HttpServer instances.
 # ------------------------------------------------------------------------
-# All configurations lines are of the general format:
-#   <server>.<stack>.<option>[.<path>] : value
-# where
-#   <server> - The name of the server being configured (multiple servers
-#              can be configured in the same file).
-#   <stack>  - The path that the option is activated on.
-#              Within each server, options are handled by a stack of 
-#              handlers at a path specification. This allows the
-#              handling of each request to be optimized.  If you don't
-#              know what stack to use, just use "/".
-#   <option> - InetAddrPort | Servlet | Directory | Translate | Forward |
-#              Auth | Log | Filter | Proxy
-#   <path>   - The path that the options value applies to.
-#               
-# ------------------------------------------------------------------------
-# Define the ports the server will listen on:
-#   <server>.<stack>.InetAddrPort: <host>:<port>[,<host>:<port> ...]
-# where
-#   <host> - Host name of server
-#          | IP address of server
-#          | "0.0.0.0" Fore all local interfaces
-#   <port> - Port of server
+
+# ======================================================================== 
+# Define the server instances to be configured by this file:
+# SERVERS           - list if defined server names
+# PROPERTY.*        - Definition of global properties
+# PROPERTIES        - File of globl properties 
+# servername.*      - PropertyTree describing server "servername".
 #
+# Defined global properties are:
+# DefaultPageType   - The class name of the default com.mortbay.HTML.Page 
+#                     type.
 # ------------------------------------------------------------------------
-# Declare a servlet:
-#   <server>.<stack>.Servlet.<path>:  <class>
-# where
-#   <class> - The class name of the servlet
+SERVERS                                   : main
+PROPERTY.DefaultPageType		  : com.mortbay.Jetty.JettyLaF
+
+
+# ======================================================================== 
+# Define the server instance named "main"
+# CLASS               - The class name of the server. Must either be 
+#                       com.mortbay.HTTP.HttpServer or a decendant.
+# LISTENER.name.CLASS - HttpListener classname or decendant
+# LISTENER.name.ADDRS - List of addresses and ports to listen on
+# STACKS              - List of handler stack names.
+# PROPERTY.*          - Properties for this server
+# PROPERTIES          - File of properties for this server.
 #
+# Defined server properties are:
+# SessionMaxInactiveInterval - Max idle time Ms before session death
+# MinListenerThreads	     - Min listener threads per listener
+# MaxListenerThreads	     - Max listener threads per listener
+# MaxListenerThreadIdleMs    - Max idle time Ms before listen thread
+#                              death
+# MimeMap		     - Property file of MIME mappings
+# 
 # ------------------------------------------------------------------------
-# Declare a file server directory:
-#   <server>.<stack>.Directory.<path>: <filename>
-# where
-#   <filename> - The absolute or relative filename of the real directory
-#
-# ------------------------------------------------------------------------
-# Declare a log file
-#   <server>.<stack>.Log.<path>:  <filename>
-# where
-#   <filename> - Name of log file
-#              | 'out' for standard output
-#              | 'err' for standard error
-#
-# ------------------------------------------------------------------------
-# Declare a authentication realm 
-#   <server>.<stack>.Auth.<path>: <realmname>=<realmfile>
-# where
-#   <realmname> - Name of the realm
-#   <realmfile> - Name of the realm file
-#
-# ------------------------------------------------------------------------
-# Declare a Translation
-#   <server>.<stack>.Translate.<path>:  <newpath>
-# where
-#   <newpath> - The new path
-#
-# ------------------------------------------------------------------------
-# Declare a Filter
-#   <server>.<stack>.Filter.<path>:  <filterclass>
-# where
-#   <filterclass> - The class name of the filter
-#
-# ------------------------------------------------------------------------
-# Declare a Forward
-#   <server>.<stack>.Forward.<path>:  <URL>
-# where
-#   <URL> - The URL to forward to
-#
-# ------------------------------------------------------------------------
-# Declare a Proxy
-#   <server>.<stack>.Proxy
-#
-# ------------------------------------------------------------------------
+main.CLASS				  : com.mortbay.HTTP.HttpServer
+main.STACKS				  : root
+main.PROPERTY.SessionMaxInactiveInterval  : 3600
+main.PROPERTY.MinListenerThreads	  : 1
+main.PROPERTY.MaxListenerThreads	  : 20
+main.PROPERTY.MaxListenerThreadIdleMs	  : 60000
+main.PROPERTY.MimeMap			  : ./etc/Mime.prp
+main.LISTENER.all.CLASS                   : com.mortbay.HTTP.HttpListener
+main.LISTENER.all.ADDRS                   : 0.0.0.0:8080
 
 
 
-# ========================================================================
-# This is a full featured configuration
+# ======================================================================== 
+# Define the handler instances handler stack "root" in server "main"
+# PATHS           - List of PathMap path specifiactions for this stack
+# HANDLERS        - List of handler names for this stack.
+# EXCEPTIONS      - List of exception handler names for this stack.
+# name.CLASS      - The classname for the handler "name"
+# name.PROPERTY.* - Properties defined for handler "name"
+# name.PROPERTIES - file of properties defined for handler "name"
 # ------------------------------------------------------------------------
-ServerA./.InetAddrPort	   : 0.0.0.0:8080,localhost:8081
-ServerA./.Servlet./Dump%   : Dump=com.mortbay.Servlets.Dump?./etc/ParamDemo.prp
-ServerA./.Servlet./Debug$  : Debug=com.mortbay.Servlets.DebugServlet
-ServerA./.Directory./      : ./FileBase
-ServerA./.Log./		   : err
-ServerA./.Auth./Auth	   : Demo=./etc/RealmDemo.prp
-ServerA./.Translate./Auth% : /
-ServerA./.Filter./	   : com.mortbay.HTTP.Filter.HtmlFilter
-ServerA./.Forward./Forward%: http://localhost:8080
+main.root.PATHS                           : /
+main.root.HANDLERS			  : Log;Auth;Alias;Filter;File;Param;Session;Dynamic;Servlet;NotFound
+main.root.EXCEPTIONS			  : Default
 
-# ========================================================================
-# This is a minimal configuration and should be quiet fast
-# ------------------------------------------------------------------------
-ServerB./.InetAddrPort	   : 0.0.0.0:8082
-ServerB./.Servlet./Dump%   : Dump=com.mortbay.Servlets.Dump
-ServerB./.Directory./Files : ./FileBase
+main.root.Log.CLASS			  : com.mortbay.HTTP.Handler.LogHandler
+main.root.Log.PROPERTY.File               : ./log/demo.log
+main.root.Log.PROPERTY.Append		  : False
+main.root.Log.PROPERTY.LongForm           : True
+main.root.Log.PROPERTY.CountContentLength : True
+
+main.root.Auth.CLASS			  : com.mortbay.HTTP.Handler.BasicAuthHandler
+main.root.Auth.PROPERTY.demo.LABEL	  : Demo Realm 
+main.root.Auth.PROPERTY.demo.PATHS	  : /Auth
+main.root.Auth.PROPERTY.demo.PROPERTY.jetty : jetty 
+
+main.root.Alias.CLASS			  : com.mortbay.HTTP.Handler.TranslateHandler
+main.root.Alias.PROPERTY./Translate%	  : /
+
+main.root.Filter.CLASS			  : com.mortbay.HTTP.Handler.FilterHandler
+main.root.Filter.PROPERTY.Html.CLASS      : com.mortbay.HTTP.Filter.HtmlFilter
+main.root.Filter.PROPERTY.Html.PATHS      : /
+
+main.root.File.CLASS				     : com.mortbay.HTTP.Handler.FileHandler
+main.root.File.PROPERTY.AllowPut		     : False
+main.root.File.PROPERTY.AllowDelete		     : False
+main.root.File.PROPERTY.Indexes			     : index.html;index.htm
+main.root.File.PROPERTY.FILES.FileBase.PATHS	     : /File%
+main.root.File.PROPERTY.FILES.FileBase.DIRECTORY     : ./FileBase
+
+main.root.Param.CLASS				     : com.mortbay.HTTP.Handler.ParamHandler
+main.root.Param.PROPERTY.Cookies		     : True
+
+main.root.Session.CLASS				     : com.mortbay.HTTP.Handler.SessionHandler
+
+main.root.Dynamic.CLASS			             : com.mortbay.HTTP.Handler.ServletHandler
+main.root.Dynamic.PROPERTY.PATHS		     : /servlet/
+main.root.Dynamic.PROPERTY.CLASSPATH		     : ./servlets
+main.root.Dynamic.PROPERTY.AutoReloadDynamicServlets : True
+
+main.root.Servlet.CLASS			             : com.mortbay.HTTP.Handler.ServletHandler
+main.root.Servlet.PROPERTY.AutoReloadDynamicServlets : True
+main.root.Servlet.PROPERTY.SERVLET.Dump.CLASS	     : com.mortbay.Servlets.Dump
+main.root.Servlet.PROPERTY.SERVLET.Dump.PATHS	     : /
+main.root.Servlet.PROPERTY.SERVLET.Dump.CHUNK	     : True
+
+main.root.NotFound.CLASS		  : com.mortbay.HTTP.Handler.NotFoundHandler
+
+main.root.Default.CLASS			  : com.mortbay.HTTP.Handler.DefaultExceptionHandler
+
+
+
+
+
 
 
 

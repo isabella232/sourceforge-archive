@@ -67,13 +67,16 @@ public class BasicAuthHandler extends NullHandler
 	else
 	    tree = new PropertyTree(properties);
 	Code.debug(tree);
-	
+
 	realms = new PathMap();
 
-	Enumeration names = tree.getNodes();
+	Enumeration names = tree.getRealNodes();
 	while (names.hasMoreElements())
 	{
 	    String realmName = names.nextElement().toString();
+	    if ("*".equals(realmName))
+		continue;
+
 	    Code.debug("Configuring realm "+realmName);
 	    PropertyTree realmTree = tree.getTree(realmName);
 	    Properties realmMap = getProperties(realmTree);
