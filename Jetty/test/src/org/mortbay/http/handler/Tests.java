@@ -11,7 +11,7 @@ import junit.framework.*;
 /* ------------------------------------------------------------ */
 /** Util meta JUnitTestHarness.
  * @version $Id$
- * @author Juancarlo A&ntilde;ez (juanco)
+ * @author Juancarlo Añez <juancarlo@modelistica.com>
  */
 public class Tests extends junit.framework.TestCase
 {
