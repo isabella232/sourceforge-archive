@@ -4,6 +4,7 @@ Jetty Versions
  + Fixed setDate thread safety
  + Improved low thread handling
  + FileResource better handles non sun JVM
+ + Fixed HttpTunnel for JDK 1.2
 
 Jetty-4.2.15 - 24 Dec 2003
  + SecurityConstraints not reset by stop() on custom context
