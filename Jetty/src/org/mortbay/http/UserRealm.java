@@ -20,5 +20,5 @@ public interface UserRealm
     
     public String getName();
 
-    public UserPrincipal getUser(String username, HttpRequest request);
+    public UserPrincipal getUser(String username);
 }

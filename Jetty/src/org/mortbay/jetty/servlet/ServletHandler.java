@@ -630,7 +630,7 @@ public class ServletHandler
             String password = request.getParameter(__J_PASSWORD);
             
             UserPrincipal user =
-                shandler.getUserRealm().getUser(username,httpRequest);
+                shandler.getUserRealm().getUser(username);
             if (user!=null && user.authenticate(password))
             {
                 Code.debug("Form authentication OK for ",username);
@@ -661,7 +661,7 @@ public class ServletHandler
         {
             String username=(String)session.getAttribute(__J_AUTHENTICATED);
             UserPrincipal user =
-                shandler.getUserRealm().getUser(username,httpRequest);
+                shandler.getUserRealm().getUser(username);
             Code.debug("FORM Authenticated for ",username);
             httpRequest.setAttribute(HttpRequest.__AuthType,"FORM");
             httpRequest.setAttribute(HttpRequest.__AuthUser,username);

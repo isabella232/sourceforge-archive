@@ -33,9 +33,10 @@ public class SecurityConstraint
     /* ------------------------------------------------------------ */
     private String _name;
     private List _methods;
+    private List _umMethods;
     private List _roles;
+    private List _umRoles;
     private int _dataConstraint=DC_NONE;
-
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -75,6 +76,14 @@ public class SecurityConstraint
     }
 
     /* ------------------------------------------------------------ */
+    public List getMethods()
+    {
+        if (_umMethods==null)
+            _umMethods=Collections.unmodifiableList(_methods);
+        return _umMethods;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** 
      * @param method 
      * @return True if this constraint applies to the method. 
@@ -109,6 +118,17 @@ public class SecurityConstraint
         return _roles.iterator();
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return 
+     */
+    public List getRoles()
+    {
+        if (_umRoles==null)
+            _umRoles=Collections.unmodifiableList(_roles);
+        return _umRoles;
+    }
+    
     /* ------------------------------------------------------------ */
     /** 
      * @param role 

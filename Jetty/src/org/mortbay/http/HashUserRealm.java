@@ -103,10 +103,9 @@ public class HashUserRealm extends HashMap
     }
 
     /* ------------------------------------------------------------ */
-    public synchronized UserPrincipal getUser(String username,
-                                              HttpRequest request)
+    public synchronized UserPrincipal getUser(String username)
     {
-        return (UserPrincipal)get(username);
+        return (UserPrincipal)super.get(username);
     }
 
     /* ------------------------------------------------------------ */
@@ -219,7 +218,7 @@ public class HashUserRealm extends HashMap
         /* ------------------------------------------------------------ */
         public String toString()
         {
-            return _name+"["+_pw+"]";
+            return _name;
         }
     }
 }
