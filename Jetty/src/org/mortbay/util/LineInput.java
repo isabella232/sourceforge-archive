@@ -423,16 +423,27 @@ public class LineInput extends FilterInputStream
 
             n=in.read(_buf,_contents,space);
 
-            // If no bytes - we could be NBIO, so lets yield and give
-            // the bytes a chance to turn up without a busy loop.
             if (n<=0)
             {
+                // If no bytes - we could be NBIO, so we want to avoid
+                // a busy loop.
                 if (n==0)
                 {
+                    // Yield to give a chance for some bytes to turn up
                     Thread.yield();
-                    continue;
+
+                    // Do a byte read as that is blocking
+                    int b = in.read();
+                    if (b>=0)
+                    {
+                        n=1;
+                        _buf[_contents++]=(byte)b;
+                    }
+                    else
+                        _eof=true;
                 }
-                _eof=true;
+                else
+                    _eof=true;
             }
             else
                 _contents+=n;
