@@ -472,6 +472,45 @@ abstract public class ThreadedServer extends ThreadPool
 
 
     /* ------------------------------------------------------------ */
+    /** Kill a job.
+     * This method closes IDLE and socket associated with a job
+     * @param thread 
+     * @param job 
+     */
+    protected void stopJob(Thread thread,Object job)
+    {
+        if ((job instanceof Socket) && (thread instanceof PoolThread))
+        {
+            PoolThread poolThread = (PoolThread)thread;
+            if (!poolThread.isActive())
+            {
+                Log.event("close "+job);
+                try{((Socket)job).close();}
+                catch(Exception e){Code.ignore(e);}
+            }
+        }
+        
+        super.stopJob(thread,job);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Kill a job.
+     * This method closes the socket associated with a job
+     * @param thread 
+     * @param job 
+     */
+    protected void killJob(Thread thread,Object job)
+    {
+        if (job instanceof Socket)
+        {
+            Log.event("close "+job);
+            try{((Socket)job).close();}
+            catch(Exception e){Code.ignore(e);}
+        }
+        super.killJob(thread,job);
+    }
+    
+    /* ------------------------------------------------------------ */
     public String toString()
     {
         if (_address==null)    
