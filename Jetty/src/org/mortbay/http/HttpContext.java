@@ -38,9 +38,11 @@ import org.mortbay.util.StringUtil;
  * Servlet API, except that it may contain other types of handler
  * other than servlets.
  * <p>
- * Convenience methods are provided for adding common handlers. See
- * org.mortbay.jetty.JettyContext for conveniance methods for
- * servlets.
+ * A ClassLoader is created for the context and it uses 
+ * Thread.currentThread().getContextClassLoader(); as it's parent loader.
+ * The class loader is initialized during start(), when a derived
+ * context calls initClassLoader() or on the first call to loadClass()
+ * <p>
  *
  * <B>Note. that order is important when configuring a HttpContext.
  * For example, if resource serving is enabled before servlets, then resources
@@ -48,6 +50,7 @@ import org.mortbay.util.StringUtil;
  *
  * @see HttpServer
  * @see HttpHandler
+ * @see org.mortbay.jetty.servlet.ServletHttpContext
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

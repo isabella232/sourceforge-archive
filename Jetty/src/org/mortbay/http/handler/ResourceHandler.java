@@ -628,7 +628,7 @@ public class ResourceHandler extends NullHandler
         if ( reqRanges == null || !reqRanges.hasMoreElements())
         {
             //  if there were no ranges, send entire entity
-            data.writeHeaders(response, resLength);
+            data.writeHeaders(request,response, resLength);
             data.writeBytes(response.getOutputStream(), 0, resLength);
             request.setHandled(true);
             return;
@@ -661,7 +661,7 @@ public class ResourceHandler extends NullHandler
         if (singleSatisfiableRange == null )
         {
             Code.debug("no satisfiable ranges");
-            data.writeHeaders(response, resLength);
+            data.writeHeaders(request,response, resLength);
             response.setStatus(response.__416_Requested_Range_Not_Satisfiable);
             response.setReason((String)response.__statusMsg
                                .get(new Integer(response.__416_Requested_Range_Not_Satisfiable)));
@@ -681,7 +681,7 @@ public class ResourceHandler extends NullHandler
         {
             Code.debug("single satisfiable range: " + singleSatisfiableRange);
             long singleLength = singleSatisfiableRange.getSize(resLength);
-            data.writeHeaders(response, singleLength);
+            data.writeHeaders(request,response, singleLength);
             response.setStatus(response.__206_Partial_Content);
             response.setReason((String)response.__statusMsg
                                .get(new Integer(response.__206_Partial_Content)));
@@ -866,7 +866,7 @@ public class ResourceHandler extends NullHandler
     {
         long getLength();
         String getEncoding();
-        void writeHeaders(HttpResponse response, long count)
+        void writeHeaders(HttpRequest request,HttpResponse response, long count)
                                 throws IOException; 
         void writeBytes(OutputStream os, long startByte, long count) 
                                 throws IOException; 
@@ -926,13 +926,13 @@ public class ResourceHandler extends NullHandler
             pos+=count;
         }
 
-        public void writeHeaders(HttpResponse response, long count)
+        public void writeHeaders(HttpRequest request, HttpResponse response, long count)
         {
             response.setField(HttpFields.__ContentType,encoding);
             if (length != -1) 
                 response.setIntField(HttpFields.__ContentLength, (int) count);
             response.setDateField(HttpFields.__LastModified,resource.lastModified());
-            if (_acceptRanges)
+            if (_acceptRanges && request.getDotVersion()>0)
                 response.setField(HttpFields.__AcceptRanges,"bytes");
         }
 
@@ -1078,7 +1078,7 @@ public class ResourceHandler extends NullHandler
         }
   
         /* ------------------------------------------------------------ */
-        public void writeHeaders(HttpResponse response, long count)
+        public void writeHeaders(HttpRequest request, HttpResponse response, long count)
             throws IOException
         {
             Code.debug("HIT: ",resource);
@@ -1092,7 +1092,7 @@ public class ResourceHandler extends NullHandler
             }
             response.setField(HttpFields.__LastModified,lastModifiedString);
 
-            if (_acceptRanges)
+            if (_acceptRanges && request.getDotVersion()>0)
                 response.setField(HttpFields.__AcceptRanges,"bytes");
         }
 

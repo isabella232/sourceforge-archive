@@ -312,64 +312,112 @@ public class ThreadPool
 
     /* ------------------------------------------------------------ */
     /** Stop the ThreadPool.
-     * New jobs are no longer accepted, idle threads are interrupted
+     * New jobs are no longer accepted,idle threads are interrupted
+     * and stopJob is called on active threads.
+     * The method then waits 
+     * min(getMaxStopTimeMs(),getMaxIdleTimeMs()), for all jobs to
+     * stop, at which time killJob is called.
      */
     public void stop()
         throws InterruptedException
     {
         Code.debug("Stop ThreadPool ",_name);
         _running=false;
-
-        long stop_at = System.currentTimeMillis();
-        long now=stop_at;
+        
+        // setup timing for stop
+        long now = System.currentTimeMillis();
+        long stopped_at = now;
         int wait_time = getMaxStopTimeMs();
         if (wait_time<0)
             wait_time = getMaxIdleTimeMs();
-        
-        int sleep_time=500;
-        
-        while (_threadSet!=null && !_threadSet.isEmpty() && now-stop_at<=wait_time)
+        int sleep_time=wait_time/16;
+        if (sleep_time<=0)
+            sleep_time=100;
+
+
+        // If we have threads, interrupt or stop them.
+        if (_threadSet!=null && !_threadSet.isEmpty())
         {
-            if (stop_at!=now)
-            {
-                Thread.sleep(sleep_time);
-                sleep_time*=2;
-            }
-            
             synchronized(this)
             {
+                // for all threads
                 Iterator iter = _threadSet.iterator();
                 while(iter.hasNext())
                 {
                     Thread thread=(Thread)iter.next();
+
                     if (_idleSet.contains(thread))
                     {
+                        // interrupt idle thread
                         Code.debug("Interrupt idle ",thread);
                         thread.interrupt();
                     }
-                    else if (now-stop_at>=wait_time)
+                    else 
                     {
-                        Log.event("Interrupt "+thread);
+                        // request the job is stopped;
+                        if (thread instanceof PoolThread)
+                            stopJob(thread,((PoolThread)thread).getJob());
+                        else
+                            stopJob(thread,null);
+                    }
+                    Thread.yield();
+                }
+            }
+        }
+        
+        // While we still have some threads and have not exceeded our
+        // wait time.
+        while (_threadSet!=null && !_threadSet.isEmpty() && now-stopped_at<=wait_time)
+        {
+            // wait for jobs to end, with backing off timer
+            if (sleep_time>2000)
+                Log.event("Stop waiting "+(sleep_time+999)/1000+"s ");
+            Thread.sleep(sleep_time);
+            now=System.currentTimeMillis();
+            sleep_time*=2;
+            if (now-stopped_at<sleep_time)
+                sleep_time=(int)(now-stopped_at);
+        }
+
+            
+        // If we STILL have threads, interrupt or kill them.
+        if (_threadSet!=null && !_threadSet.isEmpty())
+        {
+            synchronized(this)
+            {
+                // for all threads
+                Iterator iter = _threadSet.iterator();
+                while(iter.hasNext())
+                {
+                    Thread thread=(Thread)iter.next();
+
+                    if (_idleSet.contains(thread))
+                    {
+                        // interrupt idle thread
+                        Code.debug("Interrupt idle ",thread);
                         thread.interrupt();
                     }
                     else
                     {
-                        boolean stopped=(thread instanceof PoolThread)
-                            ?stopJob(thread,((PoolThread)thread).getJob())
-                            :stopJob(thread,null);
-                        if (stopped)
-                            iter.remove();
+                        // request the job is killed;
+                        if (thread instanceof PoolThread)
+                            killJob(thread,((PoolThread)thread).getJob());
+                        else
+                            killJob(thread,null);
                     }
                 }
             }
             Thread.yield();
-            now=System.currentTimeMillis();
         }
         
         Thread.yield();
         
         if (_threadSet!=null && !_threadSet.isEmpty())
-            Code.warning("All threads could not be stopped");
+        {
+            _threadSet.clear();
+            _threadSet=null;
+            Code.warning("All threads could not be stopped or killed");
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -378,13 +426,11 @@ public class ThreadPool
      * Implementations of this method are under no obligation to
      * interrupt active work and the default implementation waits for
      * the job to complete.
-     * The default implementation will return true only if the job is
-     * being handled by an inactive PoolThread.
+     * The default implementation interrupts inactive PoolThreads.
      * @param thread The Thread running the job
      * @param job The job, or null if it cannot be determined
-     * @return True if the job can be considered stopped.  
      */
-    protected boolean stopJob(Thread thread,Object job)
+    protected void stopJob(Thread thread, Object job)
     {
         if (thread instanceof PoolThread)
         {
@@ -393,12 +439,25 @@ public class ThreadPool
             {
                 Log.event("Interrupt inactive "+thread);
                 thread.interrupt();
-                return true;
+                return;
             }
         }
-        
         Log.event("Wait for "+thread);
-        return false;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Kill a job.
+     * Called by stop() to finally discard a job that has not stopped.
+     * Implementations of this method should make all reasonable
+     * attempts to interrupt the job and free any resources held.
+     * The default implementation interrupts all threads.
+     * @param thread The Thread running the job
+     * @param job The job, or null if it cannot be determined
+     */
+    protected void killJob(Thread thread,Object job)
+    {
+        Log.event("Interrupt "+thread);
+        thread.interrupt();
     }
     
     /* ------------------------------------------------------------ */

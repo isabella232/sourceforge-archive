@@ -8,8 +8,9 @@
         <Set name="Port"><SystemProperty name="jetty.port" default="8080"/></Set>
         <Set name="MinThreads">5</Set>
         <Set name="MaxThreads">255</Set>
-        <Set name="MaxIdleTimeMs">60000</Set>
-        <Set name="MaxReadTimeMs">60000</Set>
+        <Set name="MaxIdleTimeMs">30000</Set>
+        <Set name="MaxReadTimeMs">10000</Set>
+        <Set name="MaxStopTimeMs">5000</Set>
         <Set name="LowResourcePersistTimeMs">5000</Set>
       </New>
     </Arg>
