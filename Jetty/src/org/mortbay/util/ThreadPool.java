@@ -336,6 +336,9 @@ public class ThreadPool
     public void run(Object job)
         throws InterruptedException
     {
+        if (job==null)
+            return;
+        
         try
         {
             PoolThread thread = null;
@@ -434,6 +437,7 @@ public class ThreadPool
             this.setName(_name);
             this.setDaemon(pool.getAttribute(__DAEMON)!=null);
             this.start();
+            if (Code.verbose())Code.debug("enterPool ",this," -> ",pool);
         }
 
         /* ------------------------------------------------------------ */
@@ -457,6 +461,7 @@ public class ThreadPool
         /* ------------------------------------------------------------ */
         public void leavePool()
         {
+            if (Code.verbose())Code.debug("leavePool ",this," <- ",_pool);
             synchronized(this)
             {
                 _pool=null;
@@ -511,11 +516,12 @@ public class ThreadPool
                 {
                     synchronized(this)
                     {
+                        boolean got=_job!=null;
                         _job=null;
                         _threadPool=null;
                         try
                         {
-                            if (_pool!=null)
+                            if (got&&_pool!=null)
                                 _pool.put(this);
                         }
                         catch (InterruptedException e){Code.ignore(e);}
