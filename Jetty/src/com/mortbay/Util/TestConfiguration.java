@@ -7,6 +7,12 @@ package com.mortbay.Util;
 import java.net.URL;
 import java.util.HashMap;
 
+/* ------------------------------------------------------------ */
+/** Test XmlConfiguration. 
+ *
+ * @version $Revision$
+ * @author Greg Wilkins (gregw)
+ */
 public class TestConfiguration extends HashMap
 {
     public TestConfiguration nested;

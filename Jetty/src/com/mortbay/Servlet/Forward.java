@@ -24,8 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 
 
 /* ------------------------------------------------------------ */
-/** 
- * <p>
+/** Forward Servlet Request.
  *
  * 
  * @version $Id$

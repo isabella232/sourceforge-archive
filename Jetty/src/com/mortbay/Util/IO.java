@@ -12,7 +12,7 @@ import java.io.Writer;
 import java.io.ByteArrayOutputStream;
 
 /* ======================================================================== */
-/** IO Utilities
+/** IO Utilities.
  * Provides stream handling utilities in
  * singleton Threadpool implementation accessed by static members.
  */

@@ -21,7 +21,11 @@ import javax.servlet.UnavailableException;
 
 
 /* ------------------------------------------------------------ */
-/**
+/** Standard web.xml configured HandlerContext.
+ *
+ * This specialization of HandlerContext uses the standardized web.xml
+ * to describe a web application and configure the handlers for the
+ * HandlerContext.
  *
  * @version $Id$
  * @author Greg Wilkins (gregw)

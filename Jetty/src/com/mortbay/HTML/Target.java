@@ -7,7 +7,7 @@ package com.mortbay.HTML;
 
 
 /* -------------------------------------------------------------------- */
-/** HTML Link Block
+/** HTML Link Target.
  * This is a HTML reference (not a CSS Link).
  * @see StyleLink
  */

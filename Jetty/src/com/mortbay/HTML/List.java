@@ -7,7 +7,7 @@ package com.mortbay.HTML;
 
 
 /* -------------------------------------------------------------------- */
-/** HTML List Block
+/** HTML List Block.
  * Each Element added to the List (which is a Composite) is treated
  * as a new List Item.
  * @see  com.mortbay.HTML.Block

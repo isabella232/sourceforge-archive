@@ -39,10 +39,9 @@ import javax.servlet.UnavailableException;
 
 
 /* --------------------------------------------------------------------- */
-/** ServletHandler<p>
+/** Servlet HttpHandler.
  * This handler maps requests to servlets that implement the
  * javax.servlet.http.HttpServlet API.
- * It is configured with a PathMap of paths to ServletHolder instances.
  *
  * @version $Id$
  * @author Greg Wilkins

@@ -21,11 +21,10 @@ import org.xml.sax.helpers.ParserFactory;
 
 
 /*--------------------------------------------------------------*/
-/** XML Parser
- * This class wraps a sax parser with convieniant error and
+/** XML Parser wrapper.
+ * This class wraps any standard sax parser with convieniant error and
  * entity handlers and a mini dom-like document tree.
  *
- * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

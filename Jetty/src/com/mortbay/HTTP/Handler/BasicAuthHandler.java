@@ -19,10 +19,7 @@ import java.util.Map;
 
 /* ------------------------------------------------------------ */
 /** Basic Authentication Handler.
- * The usernames and passwords are passed to the handler in a Map.
- * Authenticated requests have the username set as the
- * com.mortbay.HTTP.Handler.BasicAuthHandler.User request attribute.
- *
+ * @deprecated Use SecurityHandler.
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -34,6 +31,7 @@ public class BasicAuthHandler extends NullHandler
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
+     * @deprecated Use SecurityHandler.
      * @param name 
      * @param user2password 
      */

@@ -18,7 +18,7 @@ import com.mortbay.Util.Password;
 import com.mortbay.Util.Resource;
 
 /* ------------------------------------------------------------ */
-/** Hased User Realm.
+/** HashMapped User Realm.
  *
  * @see Password
  * @version $Id$

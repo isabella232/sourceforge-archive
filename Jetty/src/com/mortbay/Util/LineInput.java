@@ -15,7 +15,7 @@ import java.io.UnsupportedEncodingException;
 
 
 /* ------------------------------------------------------------ */
-/** LineInput InputStream.
+/** Fast LineInput InputStream.
  * This buffered InputStream provides methods for reading lines
  * of bytes. The lines can be converted to String or character
  * arrays either using the default encoding or a user supplied
@@ -603,6 +603,9 @@ public class LineInput extends FilterInputStream
     }
     
     /* ------------------------------------------------------------ */
+    /** Reusable LineBuffer.
+     * Externalized LineBuffer for fast line parsing.
+     */
     public static class LineBuffer
     {
         public char[] buffer;

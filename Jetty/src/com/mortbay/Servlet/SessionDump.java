@@ -19,8 +19,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 
-/**
- * This is an example of a simple Servlet
+/* ------------------------------------------------------------ */
+/** Test Servlet Sessions.
+ *
+ * @version $Revision$
+ * @author Greg Wilkins (gregw)
  */
 public class SessionDump extends HttpServlet
 {

@@ -28,7 +28,8 @@ import java.util.Map;
 
 
 /* ------------------------------------------------------------ */
-/** 
+/** Handler to enforce SecurityConstraints.
+ *
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

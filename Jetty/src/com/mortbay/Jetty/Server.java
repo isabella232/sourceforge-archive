@@ -11,6 +11,17 @@ import java.net.URL;
 import org.xml.sax.SAXException;
 
 
+/* ------------------------------------------------------------ */
+/** Config file driven HttpServer.
+ *
+ * This class initializes HttpServer instances from xml config files
+ * that follow the XmlConfiguration dtd.
+ *
+ * @see HttpServer
+ * @see XmlConfiguration
+ * @version $Revision$
+ * @author Greg Wilkins (gregw)
+ */
 public class Server extends HttpServer
 {
 

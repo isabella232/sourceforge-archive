@@ -9,7 +9,7 @@ import java.io.Writer;
 import com.mortbay.HTTP.HttpFields;
 
 /* -------------------------------------------------------------------- */
-/** HTML Form
+/** HTML Form.
  * The specialized Block can contain HTML Form elements as well as
  * any other HTML elements
  */

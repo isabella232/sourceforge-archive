@@ -6,6 +6,12 @@
 package com.mortbay.Util;
 import java.io.UnsupportedEncodingException;
 
+/* ------------------------------------------------------------ */
+/** Fast B64 Encoder/Decoder.
+ *
+ * @version $Revision$
+ * @author Greg Wilkins (gregw)
+ */
 public class B64Code
 {
     // ------------------------------------------------------------------

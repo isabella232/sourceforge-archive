@@ -18,7 +18,7 @@ import java.util.List;
 
 
 /* ------------------------------------------------------------ */
-/** A HTTP Connection
+/** A HTTP Connection.
  * This class provides the generic HTTP handling for
  * a connection to a HTTP server. An instance of HttpConnection
  * is normally created by a HttpListener and then given control

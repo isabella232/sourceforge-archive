@@ -20,9 +20,7 @@ import javax.servlet.http.HttpServletResponse;
 
 
 /* ------------------------------------------------------------ */
-/** 
- * <p>
- *
+/** Test Servlet RequestDispatcher.
  * 
  * @version $Id$
  * @author Greg Wilkins (gregw)

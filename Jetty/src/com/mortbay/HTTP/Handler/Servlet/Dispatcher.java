@@ -26,7 +26,7 @@ import javax.servlet.ServletException;
 
 
 /* ------------------------------------------------------------ */
-/**
+/** Servlet RequestDispatcher.
  * 
  * @version $Id$
  * @author Greg Wilkins (gregw)

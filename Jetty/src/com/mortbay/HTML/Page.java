@@ -11,7 +11,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 /* --------------------------------------------------------------------- */
-/** HTML Page
+/** HTML Page.
  * A HTML Page extends composite with the addition of the HTML Header
  * tags, fields and elements.
  * Furthermore, individual parts of the page may be written or the

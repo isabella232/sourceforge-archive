@@ -9,7 +9,7 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
 /* ------------------------------------------------------------ */
-/** StringTokenizer with Quoting 
+/** StringTokenizer with Quoting support.
  *
  * This class is a copy of the java.util.StringTokenizer API and
  * the behaviour is the same, except that single and doulbe quoted

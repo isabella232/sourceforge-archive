@@ -25,7 +25,7 @@ import javax.servlet.UnavailableException;
 
 
 /* --------------------------------------------------------------------- */
-/** Servlet Holder
+/** Servlet Instance and Context Holder.
  * Holds the name, params and some state of a javax.servlet.Servlet
  * instance. It implements the ServletConfig interface.
  * This class will organise the loading of the servlet when needed or

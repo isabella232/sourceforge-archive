@@ -37,10 +37,12 @@ import javax.servlet.http.HttpSession;
 
 
 /* ------------------------------------------------------------ */
-/** 
+/** Jetty Administration Servlet.
  *
- * @see
- * @version 1.0 Sat Oct 21 2000
+ * This is a minimal start to a administration servlet that allows
+ * start/stop of server components and control of debug parameters.
+ *
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class AdminServlet extends HttpServlet

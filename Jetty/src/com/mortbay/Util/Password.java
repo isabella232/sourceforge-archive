@@ -14,7 +14,7 @@ import java.util.zip.Adler32;
 import java.util.zip.CRC32;
 
 /* ------------------------------------------------------------ */
-/** Get a password 
+/** Password utility class.
  *
  * This utility class gets a password or pass phrase either by:<PRE>
  *  + Password is set as a system property.

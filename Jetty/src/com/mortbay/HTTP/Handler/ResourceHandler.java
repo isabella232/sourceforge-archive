@@ -23,8 +23,7 @@ import java.util.List;
 import java.util.Map;
 
 /* ------------------------------------------------------------ */
-/** Resource Handler
- *
+/** Handler to serve files and resources.
  * Serves files from a given resource URL base and implements
  * the GET, HEAD, DELETE, OPTIONS, MOVE methods and the
  * IfModifiedSince and IfUnmodifiedSince header fields.

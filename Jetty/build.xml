@@ -198,8 +198,9 @@ release     - Cleanup for release
              destdir="${javadoc}"
              author="true"
              version="true"
-             windowtitle="${Name} API"
-             doctitle="${Name}"
+             public="true"
+             windowtitle="${app.name} API"
+             doctitle="${app.name}"
              bottom="Copyright &#169; 2000 Mortbay Consulting Pty. Ltd. All Rights Reserved.">
     </javadoc>
   </target>

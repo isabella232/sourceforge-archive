@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.io.Writer;
 
 /* -------------------------------------------------------------------- */
-/** HTML Tag Element
- * A Tag element is of the generic form &ltTAG attributes... &gt
+/** HTML Tag Element.
+ * A Tag element is of the generic form &lt;TAG attributes... &gt;
  * @see  com.mortbay.HTML.Element
  */
 public class Tag extends Element

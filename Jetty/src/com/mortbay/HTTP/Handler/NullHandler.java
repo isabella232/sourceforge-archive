@@ -15,7 +15,7 @@ import com.mortbay.Util.Log;
 import java.io.IOException;
 
 /* ------------------------------------------------------------ */
-/** Null HTTP Handler
+/** Base HTTP Handler.
  * This No-op handler is a good base for other handlers
  *
  * @version $Id$

@@ -6,6 +6,11 @@
 package com.mortbay.Util;
 
 // ====================================================================
+/** Fast String Utilities.
+ *
+ * @version $Revision$
+ * @author Greg Wilkins (gregw)
+ */
 public class StringUtil
 {
     public static String __ISO_8859_1 =

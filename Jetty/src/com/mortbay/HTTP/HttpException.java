@@ -8,6 +8,12 @@ import java.io.IOException;
 import java.util.HashMap;
 
 
+/* ------------------------------------------------------------ */
+/** Exception for known HTTP error status. 
+ *
+ * @version $Revision$
+ * @author Greg Wilkins (gregw)
+ */
 public class HttpException extends IOException
 {
     private int _code;

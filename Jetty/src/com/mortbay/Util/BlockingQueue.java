@@ -6,9 +6,9 @@
 package com.mortbay.Util;
 
 /* ------------------------------------------------------------ */
-/** Blocking queue
+/** Blocking queue.
  *
- * XXX temp implementation while waiting for java2 containers.
+ * XXX temp implementation. Should use java2 containers.
  * Implemented as circular buffer in a Vector. Synchronization is on the
  * vector to avoid double synchronization.
  *

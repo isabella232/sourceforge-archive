@@ -26,7 +26,7 @@ import javax.net.ssl.SSLServerSocketFactory;
 
 
 /* ------------------------------------------------------------ */
-/** JSSE Socket Listener.
+/** SSL Socket Listener for Sun's JSSE.
  *
  * This specialization of JsseListener is an specific listener
  * using the Sun reference implementation.

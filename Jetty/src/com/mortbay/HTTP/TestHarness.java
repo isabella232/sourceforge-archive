@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /* ------------------------------------------------------------ */
-/** 
+/** Top level test harness.
  *
  * @version $Id$
  * @author Greg Wilkins (gregw)

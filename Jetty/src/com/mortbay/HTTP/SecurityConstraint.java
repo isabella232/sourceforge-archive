@@ -13,6 +13,12 @@ import java.util.List;
 
 
 
+/* ------------------------------------------------------------ */
+/** Describe an auth and/or data constraint. 
+ *
+ * @version $Revision$
+ * @author Greg Wilkins (gregw)
+ */
 public class SecurityConstraint
     implements Cloneable
 {

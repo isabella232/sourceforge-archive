@@ -17,7 +17,10 @@ import java.util.StringTokenizer;
 import java.util.HashMap;
 
 /* ------------------------------------------------------------ */
-/**
+/** ClassLoader for HandlerContext.
+ * Specializes URLClassLoader with some utility and file mapping
+ * methods.
+ *
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

@@ -31,6 +31,10 @@ import java.util.Set;
  * a collection of HttpListeners which generate requests and
  * HttpContexts which contain collections of HttpHandlers.
  *
+ * This class is configured by API calls.  The
+ * com.mortbay.Jetty.Server class uses XML configuration files to
+ * configure instances of this class.
+ *
  * @see HttpContext
  * @see HttpHandler
  * @see HttpConnection

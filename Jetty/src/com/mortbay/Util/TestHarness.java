@@ -27,7 +27,7 @@ import java.util.zip.ZipEntry;
 
 
 /* ------------------------------------------------------------ */
-/** 
+/** Util meta TestHarness.
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

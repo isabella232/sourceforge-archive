@@ -42,7 +42,7 @@ import javax.servlet.http.HttpSession;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-class ServletRequest
+public class ServletRequest
     implements HttpServletRequest
 {
     /* -------------------------------------------------------------- */

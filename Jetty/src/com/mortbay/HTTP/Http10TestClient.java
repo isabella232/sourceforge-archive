@@ -12,6 +12,12 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.Socket;
 
+/* ------------------------------------------------------------ */
+/** HTTP 1.0 Test Client.
+ *
+ * @version $Revision$
+ * @author Greg Wilkins (gregw)
+ */
 public class Http10TestClient extends Thread
 {
 

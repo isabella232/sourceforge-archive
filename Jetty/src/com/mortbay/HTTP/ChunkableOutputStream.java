@@ -20,7 +20,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 /* ---------------------------------------------------------------- */
-/** HTTP Chunkable OutputStream
+/** HTTP Chunkable OutputStream.
  * Acts as a BufferedOutputStream until setChunking(true) is called.
  * Once chunking is enabled, the raw stream is chunk encoded as per RFC2616.
  *

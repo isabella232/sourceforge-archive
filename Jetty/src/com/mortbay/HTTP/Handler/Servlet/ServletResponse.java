@@ -24,7 +24,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 /* ------------------------------------------------------------ */
-/** Wrapper of Jetty request for Servlet API.
+/** Servlet Response Wrapper.
+ * This class wraps a Jetty HTTP response as a 2.2 Servlet
+ * response.
  *
  * @version $Id$
  * @author Greg Wilkins (gregw)

@@ -14,6 +14,7 @@ Jetty-3.0.0.rc5 - 11 Nov 2000
  + Implemented servlet load ordering.
  + Moved JSP classpath hack to ServletHolder
  + Removed Makefile build system.
+ + Many javadoc cleanups.
 
 Jetty-3.0.0.rc4 - 6 Nov 2000
  + Provide default JettyIndex.properties

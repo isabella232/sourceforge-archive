@@ -2,6 +2,12 @@ package com.mortbay.Util;
 
 import java.io.InterruptedIOException;
 
+/* ------------------------------------------------------------ */
+/** Base Thread class implementing LifeCycle.
+ *
+ * @version $Revision$
+ * @author Greg Wilkins (gregw)
+ */
 public abstract class LifeCycleThread implements LifeCycle, Runnable
 {
     private boolean _running;

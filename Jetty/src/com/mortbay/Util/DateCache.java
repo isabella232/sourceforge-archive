@@ -12,7 +12,7 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 /* ------------------------------------------------------------ */
-/**  DateCache.
+/**  Date Format Cache.
  * Computes String representations of Dates and caches
  * the results
  * so that subsequent requests within the same minute will be fast.

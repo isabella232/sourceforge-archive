@@ -34,6 +34,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 //-----------------------------------------------------------------------------
+/** CGI Servlet.
+ *
+ * @version $Revision$
+ * @author Julian Gosnell
+ */
 public class CGI extends HttpServlet
 {
   protected File _docRoot;
