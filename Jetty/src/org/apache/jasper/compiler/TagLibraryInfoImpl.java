@@ -82,7 +82,7 @@ import javax.servlet.jsp.tagext.TagAttributeInfo;
 import javax.servlet.jsp.tagext.TagExtraInfo;
 
 import org.xml.sax.*;
-import com.mortbay.Util.XmlParser;
+import com.mortbay.XML.XmlParser;
 import com.mortbay.Util.Resource;
 
 import org.apache.jasper.JspCompilationContext;

@@ -3,21 +3,28 @@
 // $Id$
 // ========================================================================
 
-package com.mortbay.HTTP;
+package com.mortbay.Jetty.Servlet;
 
+import com.mortbay.HTTP.HttpServer;
+import com.mortbay.HTTP.HandlerContext;
+import com.mortbay.HTTP.HttpHandler;
+import com.mortbay.HTTP.HttpRequest;
+import com.mortbay.HTTP.HttpResponse;
+import com.mortbay.HTTP.HttpException;
+import com.mortbay.HTTP.SecurityConstraint;
 import com.mortbay.HTTP.Handler.ResourceHandler;
 import com.mortbay.HTTP.Handler.SecurityHandler;
 import com.mortbay.HTTP.Handler.NotFoundHandler;
 import com.mortbay.HTTP.Handler.NullHandler;
-import com.mortbay.HTTP.Handler.Servlet.Context;
-import com.mortbay.HTTP.Handler.Servlet.ServletHandler;
-import com.mortbay.HTTP.Handler.Servlet.ServletHolder;
+import com.mortbay.Jetty.Servlet.Context;
+import com.mortbay.Jetty.Servlet.ServletHandler;
+import com.mortbay.Jetty.Servlet.ServletHolder;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.Log;
 import com.mortbay.Util.Resource;
 import com.mortbay.Util.JarResource;
-import com.mortbay.Util.XmlParser;
 import com.mortbay.Util.StringUtil;
+import com.mortbay.XML.XmlParser;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.File;
@@ -38,12 +45,11 @@ import javax.servlet.UnavailableException;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class WebApplicationContext extends HandlerContext
+public class WebApplicationContext extends ServletHandlerContext
 {
     /* ------------------------------------------------------------ */
     private String _name;
     private Resource _webApp;
-    private String _webAppName;
     private ServletHandler _servletHandler;
     private SecurityHandler _securityHandler;
     private Context _context;
@@ -52,6 +58,7 @@ public class WebApplicationContext extends HandlerContext
     private String _deploymentDescriptor;
     private String _defaultsDescriptor;
     private String _war;
+    private boolean _extract;
     private XmlParser _xmlParser;
 
     
@@ -90,6 +97,7 @@ public class WebApplicationContext extends HandlerContext
         throws IOException
     {
         super(httpServer,contextPathSpec);
+        _xmlParser= new XmlParser();
         initialize(webApp,defaults,false);
     }
     
@@ -114,6 +122,7 @@ public class WebApplicationContext extends HandlerContext
         throws IOException
     {
         super(httpServer,contextPathSpec);
+        _xmlParser= new XmlParser();
         initialize(webApp,defaults,extractWar);
     }
     
@@ -135,39 +144,49 @@ public class WebApplicationContext extends HandlerContext
                            boolean extractWar)
         throws IOException
     {
+        _war=webApp;
+        _defaultsDescriptor=defaults;
+        _extract=extractWar;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Start the Web Application.
+     * @exception IOException 
+     */
+    public void start()
+        throws Exception
+    {
         // Get parser
         XmlParser xmlParser=_xmlParser==null?(new XmlParser()):_xmlParser;
-        _xmlParser=null;
-        Resource dtd=Resource.newSystemResource("com/mortbay/HTTP/web.dtd");
+        Resource dtd=Resource.newSystemResource("com/mortbay/Jetty/Servlet/web.dtd");
         xmlParser.redirectEntity("web.dtd",dtd);
         xmlParser.redirectEntity("web-app_2_2.dtd",dtd);
         xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN",dtd);
 
         // Set dir or WAR
-        Resource _webApp = Resource.newResource(webApp);
+        Resource _webApp = Resource.newResource(_war);
         if (_webApp.exists() && !_webApp.isDirectory())
         {
             _webApp = Resource.newResource("jar:"+_webApp+"!/");
-            _war=_webApp.toString();
+            if (_webApp.exists())
+                _war=_webApp.toString();
         }
-        _webAppName=_webApp.toString();
         if (!_webApp.exists()) {
-            Code.warning("Web application not found "+webApp);
-            throw new java.io.FileNotFoundException(webApp);
+            Code.warning("Web application not found "+_war);
+            throw new java.io.FileNotFoundException(_war);
         }
 
         // Expand
-        if (extractWar && _webApp instanceof JarResource)
+        if (_extract && _webApp instanceof JarResource)
         {
             File tempDir=File.createTempFile("Jetty-",".war");
             if (tempDir.exists())
                 tempDir.delete();
             tempDir.mkdir();
             tempDir.deleteOnExit();
-            Log.event("Extract "+_webAppName+" to "+tempDir);
+            Log.event("Extract "+_war+" to "+tempDir);
             ((JarResource)_webApp).extract(tempDir,true);
             _webApp=Resource.newResource(tempDir.getCanonicalPath());
-            _webAppName+="("+tempDir+")";
         }
 
         // add security handler first
@@ -175,7 +194,13 @@ public class WebApplicationContext extends HandlerContext
         addHandler(_securityHandler);
             
         // Add servlet Handler
-        _servletHandler = getServletHandler();
+        _servletHandler = (ServletHandler)
+            getHandler(com.mortbay.Jetty.Servlet.ServletHandler.class);
+        if (_servletHandler==null)
+        {
+            _servletHandler=new ServletHandler();
+            addHandler(_servletHandler);
+        }
         _servletHandler.setDynamicServletPathSpec("/servlet/*");
         _context=_servletHandler.getContext();
             
@@ -188,16 +213,15 @@ public class WebApplicationContext extends HandlerContext
         // Resource Handler
         setServingResources(true);
         ResourceHandler rh = getResourceHandler();
-        rh.setDirAllowed(true);
         rh.setPutAllowed(false);
         rh.setDelAllowed(false);
 
         // Do the default configuration
         try
         {
-            if (defaults!=null && defaults.length()>0)
+            if (_defaultsDescriptor!=null && _defaultsDescriptor.length()>0)
             {
-                Resource dftResource= Resource.newResource(defaults);
+                Resource dftResource= Resource.newResource(_defaultsDescriptor);
                 _defaultsDescriptor=dftResource.toString();
                 XmlParser.Node defaultConfig =
                     xmlParser.parse(dftResource.getURL().toString());
@@ -206,13 +230,13 @@ public class WebApplicationContext extends HandlerContext
         }
         catch(IOException e)
         {
-            Code.warning("Parse error on "+_webAppName,e);
+            Code.warning("Parse error on "+_war,e);
             throw e;
         }	
         catch(Exception e)
         {
-            Code.warning("Configuration error "+_webAppName,e);
-            throw new IOException("Parse error on "+_webAppName+
+            Code.warning("Configuration error "+_war,e);
+            throw new IOException("Parse error on "+_war+
                                   ": "+e.toString());
         }
         
@@ -220,7 +244,7 @@ public class WebApplicationContext extends HandlerContext
         Resource _webInf = _webApp.addPath("WEB-INF/");
         if (!_webInf.exists() || !_webInf.isDirectory())
         {
-            Code.warning("No WEB-INF in "+_webAppName+". Serving files only.");
+            Code.warning("No WEB-INF in "+_war+". Serving files only.");
         }
         else
         {
@@ -255,7 +279,7 @@ public class WebApplicationContext extends HandlerContext
             Resource web = _webApp.addPath("WEB-INF/web.xml");
             if (!web.exists())
             {
-                Code.warning("No WEB-INF/web.xml in "+_webAppName+". Serving files and default/dynamic servlets only");
+                Code.warning("No WEB-INF/web.xml in "+_war+". Serving files and default/dynamic servlets only");
             }
             else
             {
@@ -264,7 +288,7 @@ public class WebApplicationContext extends HandlerContext
                     _deploymentDescriptor=web.toString();
                     XmlParser.Node config = xmlParser.parse(web.getURL().toString());
                     initialize(config);
-                    if (defaults!=null && defaults.length()>0)
+                    if (_defaultsDescriptor!=null && _defaultsDescriptor.length()>0)
                     {
                         rh.setPutAllowed(true);
                         rh.setDelAllowed(true);
@@ -272,17 +296,18 @@ public class WebApplicationContext extends HandlerContext
                 }
                 catch(IOException e)
                 {
-                    Code.warning("Parse error on "+_webAppName,e);
+                    Code.warning("Parse error on "+_war,e);
                     throw e;
                 }	
                 catch(Exception e)
                 {
-                    Code.warning("Configuration error "+_webAppName,e);
-                    throw new IOException("Parse error on "+_webAppName+
+                    Code.warning("Configuration error "+_war,e);
+                    throw new IOException("Parse error on "+_war+
                                           ": "+e.toString());
                 }
             }
         }
+        super.start();
     }
 
     /* ------------------------------------------------------------ */
@@ -303,6 +328,15 @@ public class WebApplicationContext extends HandlerContext
         return _deploymentDescriptor;
     }
     
+    
+    /* ------------------------------------------------------------ */
+    public void setDefaultsDescriptor(String defaults)
+    {
+        if (isStarted())
+            throw new IllegalStateException();
+        _defaultsDescriptor=defaults;
+    }
+    
     /* ------------------------------------------------------------ */
     public String getDefaultsDescriptor()
     {
@@ -310,9 +344,31 @@ public class WebApplicationContext extends HandlerContext
     }
     
     /* ------------------------------------------------------------ */
+    public void setWAR(String war)
+    {
+        if (isStarted())
+            throw new IllegalStateException();
+        _war=war;
+    }
+    
+    /* ------------------------------------------------------------ */
     public String getWAR()
     {
         return _war;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setExtractWAR(boolean extract)
+    {
+        if (isStarted())
+            throw new IllegalStateException();
+        _extract=extract;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean getExtractWAR()
+    {
+        return _extract;
     }
 
     /* ------------------------------------------------------------ */
@@ -647,9 +703,8 @@ public class WebApplicationContext extends HandlerContext
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        if (_name!=null)
-            return "WebApp:"+_name+"@"+_webAppName;
-        return _webAppName;
+        return "WebApplicationContext["+getHandlerContextName()+","+
+            (_name==null?_war:_name)+"]";
     }
     
     /* ------------------------------------------------------------ */
@@ -707,6 +762,7 @@ public class WebApplicationContext extends HandlerContext
             return "WebInfProtect";
         }
     }
-
-
 }
+
+
+

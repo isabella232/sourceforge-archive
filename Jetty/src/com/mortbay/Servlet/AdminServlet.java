@@ -3,8 +3,9 @@
 // $Id$
 // ---------------------------------------------------------------------------
 
-package com.mortbay.HTTP;
+package com.mortbay.Servlet;
 
+import com.mortbay.HTTP.*;
 import com.mortbay.HTML.Break;
 import com.mortbay.HTML.Composite;
 import com.mortbay.HTML.Heading;
@@ -18,7 +19,7 @@ import com.mortbay.HTML.List;
 import com.mortbay.HTML.Page;
 import com.mortbay.HTML.TableForm;
 import com.mortbay.HTML.Target;
-import com.mortbay.HTTP.Handler.Servlet.ServletHandler;
+import com.mortbay.Jetty.Servlet.ServletHandler;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.Log;
 import com.mortbay.Util.LogSink;

@@ -3,7 +3,7 @@
 // $Id$
 // ========================================================================
 
-package com.mortbay.HTTP.Handler.Servlet;
+package com.mortbay.Jetty.Servlet;
 
 import java.io.IOException;
 import java.io.OutputStream;

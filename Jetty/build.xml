@@ -24,7 +24,7 @@ webapp      - Builds the demo web application.
 demo        - Runs the demo web application.
 test        - Runs the Jetty test harnesses.
 release     - Cleanup for release
-
+mini.jetty.jar - Build a minimal HTTP server jar.
 -->
 <project name="Jetty3 HTTP Server" default="webapp" basedir=".">
   <property environment="env"/>
@@ -46,6 +46,7 @@ release     - Cleanup for release
   <property name="jetty.webapp.classes"   value="${jetty.webapp.webinf}/classes"/>
 
   <property name="jetty.jar"      value="${lib}/com.mortbay.jetty.jar"/>
+  <property name="mini.jetty.jar" value="${basedir}/com.mortbay.http.jar"/>
   <property name="servlet.jar"    value="${lib}/javax.servlet.jar"/>
   <property name="jasper.jar"     value="${lib}/org.apache.jasper.jar"/>
   <property name="jaxp.jar"       value="${lib}/javax.xml.jaxp.jar"/>
@@ -61,25 +62,26 @@ release     - Cleanup for release
     <mkdir dir="${classes}" />
     <mkdir dir="${logs}" />
     <mkdir dir="${etc}/dtd" />
-    <copy file="${src}/com/mortbay/Util/configure.dtd" tofile="${etc}/dtd/configure.dtd" />
-    <copy file="${src}/com/mortbay/Util/configure_1_0.dtd" tofile="${etc}/dtd/configure_1_0.dtd" />
-    <copy file="${src}/com/mortbay/Util/configure_1_1.dtd" tofile="${etc}/dtd/configure_1_1.dtd" />
-    <copy file="${src}/com/mortbay/HTTP/web.dtd" tofile="${etc}/dtd/web.dtd" />
+    <copy file="${src}/com/mortbay/XML/configure.dtd" tofile="${etc}/dtd/configure.dtd" />
+    <copy file="${src}/com/mortbay/XML/configure_1_0.dtd" tofile="${etc}/dtd/configure_1_0.dtd" />
+    <copy file="${src}/com/mortbay/XML/configure_1_1.dtd" tofile="${etc}/dtd/configure_1_1.dtd" />
+    <copy file="${src}/com/mortbay/Jetty/Servlet/web.dtd" tofile="${etc}/dtd/web.dtd" />
   </target>
 
 
   <target name="tidy">
-    <delete dir="${classes}"/>
+    <delete dir="${classes}" quiet="true"/>
+    <delete file="${mini.jetty.jar}" quiet="true"/>
   </target>
 
 
   <target name="clean" depends="tidy">
-    <delete dir="${jetty.webapp.classes}"/>
-    <delete dir="${javadoc}"/>
-    <delete dir="${etc}/dtd" />
-    <delete file="${jetty.jar}"/>
-    <delete file="${servlet.jar}"/>
-    <delete file="${jasper.jar}"/>
+    <delete dir="${jetty.webapp.classes}" quiet="true"/>
+    <delete dir="${javadoc}" quiet="true"/>
+    <delete dir="${etc}/dtd"  quiet="true"/>
+    <delete file="${jetty.jar}" quiet="true"/>
+    <delete file="${servlet.jar}" quiet="true"/>
+    <delete file="${jasper.jar}" quiet="true"/>
   </target>
 
 
@@ -109,8 +111,8 @@ release     - Cleanup for release
     </jar>
   </target>
 
-
   <target name="jetty.jar" depends="classes,servlet.jar">
+    <delete file="${mini.jetty.jar}" quiet="true"/>
     <jar jarfile="${jetty.jar}" basedir="${classes}" manifest="${src}/com/mortbay/MANIFEST.MF" >
        <include name="com/mortbay/**"  />
        <exclude name="com/mortbay/**/TestHarness*.class" />
@@ -122,6 +124,24 @@ release     - Cleanup for release
        <exclude name="com/mortbay/HTTP/Http10TestClient.class" />
        <exclude name="com/mortbay/HTML/Test*.class" />
        <exclude name="com/mortbay/Jetty/**/Test*.class" />
+    </jar>
+  </target>
+
+  <target name="mini.jetty.jar" depends="classes,servlet.jar">
+    <delete file="${jetty.jar}" quiet="true"/>
+    <delete file="${servlet.jar}" quiet="true"/>
+    <delete file="${jasper.jar}" quiet="true"/>
+    <jar jarfile="${mini.jetty.jar}" basedir="${classes}" manifest="${src}/com/mortbay/MANIFEST.MF" compress="true">
+       <include name="com/mortbay/Util/**" />
+       <include name="com/mortbay/HTTP/**" />
+       <include name="javax/servlet/http/Cookie.class" />
+       <include name="javax/servlet/http/LocalStrings*.properties" />
+       <exclude name="com/mortbay/**/*Test*" />
+       <exclude name="com/mortbay/Util/DataClass/*" />
+       <exclude name="com/mortbay/HTTP/JsseListener.class" />
+       <exclude name="com/mortbay/HTTP/SunJsseListener.class" />
+       <exclude name="com/mortbay/Util/Converter" />
+       <exclude name="com/mortbay/Util/KeyPairTool.class" />
     </jar>
   </target>
 
@@ -179,6 +199,15 @@ release     - Cleanup for release
   <target name="testUtil" depends="jars">
     <property name="classpath" value="${jetty.jar};${servlet.jar}" />
     <java classname="com.mortbay.Util.TestHarness"
+          classpath="${classes}"
+          fork="yes"
+          failonerror="yes"
+          />
+  </target>
+
+  <target name="testXML" depends="jars">
+    <property name="classpath" value="${jetty.jar};${servlet.jar}" />
+    <java classname="com.mortbay.XML.TestHarness"
           classpath="${classes};${xml.jar};${jaxp.jar}"
           fork="yes"
           failonerror="yes"
@@ -188,13 +217,13 @@ release     - Cleanup for release
   <target name="testHTTP" depends="jars">
     <property name="classpath" value="${jetty.jar};${servlet.jar}" />
     <java classname="com.mortbay.HTTP.TestHarness"
-          classpath="${classes};${xml.jar}"
+          classpath="${classes};${xml.jar};${jaxp.jar}"
           fork="yes"
           failonerror="yes"
           />
   </target>
 
-  <target name="test" depends="testUtil,testHTTP" />
+  <target name="test" depends="testUtil,testXML,testHTTP" />
 
   <target name="all" depends="prepare,jars,webapp,javadoc,test"/>
 

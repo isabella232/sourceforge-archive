@@ -1,7 +1,7 @@
 <?xml version="1.0"  encoding="ISO-8859-1"?> 
 <!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure 1.1//EN" "http://jetty.mortbay.com/configure_1_1.dtd">
 
-<Configure class="com.mortbay.Util.TestConfiguration">
+<Configure class="com.mortbay.XML.TestConfiguration">
 
   <Set name="Test">SetValue</Set>
   <Set name="Test" type="int">2</Set>

@@ -32,7 +32,6 @@ public class ContextLoader extends URLClassLoader
     private static HashMap __infoMap = new HashMap(3);
     private PathInfo _info;
     private String _path;
-    private static Class __servletClass = javax.servlet.http.HttpServlet.class;
     private PermissionCollection _permissions;
     private boolean _jspWarned=false;
     
@@ -179,28 +178,6 @@ public class ContextLoader extends URLClassLoader
         return _info._fileClassPath;
     }
     
-    /* ------------------------------------------------------------ */
-    /** Return number of servlets this classloader has loaded.
-     * Any class which is a subclass of javax.servlet.http.HttpServlet
-     * will count. Does not include javax.servlet.http.HttpServlet
-     * itself.
-     * @deprecated. Removed due to bizarre class loading bug
-     * associated with classes as local variables.
-     */
-    public int getLoadedServletsCount()
-    {
-        return 0;
-    }
-    
-     /* ------------------------------------------------------------ */
-    /** Return total number of classes this classloader has loaded.
-     * @deprecated. Removed due to bizarre class loading bug
-     * associated with classes as local variables.
-     */
-    public int getLoadedClassesCount()
-    {
-        return 0;
-    }
     
     /* ------------------------------------------------------------ */
     public String toString()

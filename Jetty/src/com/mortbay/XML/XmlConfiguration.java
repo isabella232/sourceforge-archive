@@ -3,8 +3,12 @@
 // $Id$
 // ========================================================================
 
-package com.mortbay.Util;
+package com.mortbay.XML;
 
+import com.mortbay.Util.Code;
+import com.mortbay.Util.Resource;
+import com.mortbay.Util.Primitive;
+import com.mortbay.Util.InetAddrPort;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -61,7 +65,7 @@ public class XmlConfiguration
             {
                 __parser = new XmlParser();
                 Resource config11Resource=Resource.newSystemResource
-                    ("com/mortbay/Util/configure_1_1.dtd");    
+                    ("com/mortbay/XML/configure_1_1.dtd");    
 
                 __parser.redirectEntity
                     ("configure.dtd",config11Resource);   
@@ -77,7 +81,7 @@ public class XmlConfiguration
                      config11Resource);
 
                 Resource config10Resource=Resource.newSystemResource
-                    ("com/mortbay/Util/configure_1_1.dtd");    
+                    ("com/mortbay/XML/configure_1_1.dtd");    
                 __parser.redirectEntity
                     ("configure_1_0.dtd",
                      config10Resource);

@@ -3,7 +3,7 @@
 // $Id$
 // ---------------------------------------------------------------------------
 
-package com.mortbay.HTTP.Handler.Servlet;
+package com.mortbay.Jetty.Servlet;
 
 import com.mortbay.Util.Code;
 import com.mortbay.Util.Log;
@@ -33,7 +33,7 @@ import javax.servlet.UnavailableException;
  * This class will organise the loading of the servlet when needed or
  * requested.
  *
- * @see com.mortbay.HTTP.Handler.ServletHandler
+ * @see com.mortbay.Jetty.ServletHandler
  * @version $Id$
  * @author Greg Wilkins
  */

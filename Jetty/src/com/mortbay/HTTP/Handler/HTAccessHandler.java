@@ -145,6 +145,13 @@ public class HTAccessHandler extends NullHandler
                 return;
             }
 
+            // set user
+            if (user!=null)
+            {
+                request.setAttribute(HttpRequest.__AuthType,"BASIC");
+                request.setAttribute(HttpRequest.__AuthUser,user);
+            }
+
             // prevent access to htaccess files
             if (reqResource.equals(resource) ||
                 reqResource.equals(ht.getUserResource()) ||

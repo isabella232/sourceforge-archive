@@ -99,7 +99,6 @@ an /etc/init.d script and also looks for xml config files in
 
 Configuring the Server
 ======================
-
 The class com.mortbay.Jetty.Server reads an xml configuration
 file and configures one or more instances of com.mortbay.HTTP.HttpServer:
 
@@ -407,4 +406,21 @@ not force chunking and the ResourceHandler to not accept ranges:
   </Call>
   ...
 </Configure>
+
+
+Minimal Jetty Jar
+-----------------
+The ant target mini.jetty.jar builds an all-in-one minimal(ish) jar that
+contains Util and HTTP packages.   This gives a full HTTP/1.1 server with
+the HttpHandler extension mechanism (but no servlets) in about 220K.
+
+OK so there has been a bit of code bloat from the old Jetty2 100K days,
+but then there has been specification bloat as well.  This jar could be
+trimmed significantly if all HTTP/1.1 features are not used (eg Ranges or
+security).
+
+The minimal server can be run from the command line with 
+
+ java -cp lib/com.mortbay.http.jar com.mortbay.HTTP.HttpServer
+
 

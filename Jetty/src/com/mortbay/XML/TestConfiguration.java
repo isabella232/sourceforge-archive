@@ -3,7 +3,7 @@
 // $Id$
 // ========================================================================
 
-package com.mortbay.Util;
+package com.mortbay.XML;
 import java.net.URL;
 import java.util.HashMap;
 

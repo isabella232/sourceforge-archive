@@ -4,7 +4,7 @@
 // ========================================================================
 
 
-package com.mortbay.HTTP.Handler.Servlet;
+package com.mortbay.Jetty.Servlet;
 
 import com.mortbay.HTTP.HandlerContext;
 import com.mortbay.HTTP.HttpConnection;

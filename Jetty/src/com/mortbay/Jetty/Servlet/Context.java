@@ -3,7 +3,7 @@
 // $Id$
 // ---------------------------------------------------------------------------
 
-package com.mortbay.HTTP.Handler.Servlet;
+package com.mortbay.Jetty.Servlet;
 
 import com.mortbay.HTTP.HandlerContext;
 import com.mortbay.HTTP.Version;
@@ -44,7 +44,7 @@ public class Context implements ServletContext, HttpSessionContext
 {
     /* ------------------------------------------------------------ */
     private static final String
-        CONTEXT_LOG="com.mortbay.HTTP.Handler.Servlet.Context.LogSink";
+        CONTEXT_LOG="com.mortbay.Jetty.Servlet.Context.LogSink";
     
     /* ------------------------------------------------------------ */
     private ServletHandler _handler;
@@ -93,7 +93,7 @@ public class Context implements ServletContext, HttpSessionContext
 
         ServletHandler handler= (ServletHandler)
             context.getHttpServer()
-            .findHandler(com.mortbay.HTTP.Handler.Servlet.ServletHandler.class,
+            .findHandler(com.mortbay.Jetty.Servlet.ServletHandler.class,
                          uri,context.getHosts());
         
         if (handler!=null)
@@ -249,7 +249,7 @@ public class Context implements ServletContext, HttpSessionContext
     /** Servlet Log.
      * Log message to servlet log. Use either the system log or a
      * LogSinkset via the context attribute
-     * com.mortbay.HTTP.Handler.Servlet.Context.LogSink
+     * com.mortbay.Jetty.Servlet.Context.LogSink
      * @param msg 
      */
     public void log(String msg)
@@ -600,7 +600,7 @@ public class Context implements ServletContext, HttpSessionContext
         /* ------------------------------------------------------------- */
         Session()
         {
-            synchronized(com.mortbay.HTTP.Handler.Servlet.Context.class)
+            synchronized(com.mortbay.Jetty.Servlet.Context.class)
             {
                 do
                 {

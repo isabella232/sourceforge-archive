@@ -1,5 +1,12 @@
-package com.mortbay.Util;
+// ========================================================================
+// Copyright (c) 1999 Mort Bay Consulting (Australia) Pty. Ltd.
+// $Id$
+// ========================================================================
 
+package com.mortbay.XML;
+
+import com.mortbay.Util.Code;
+import com.mortbay.Util.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;

@@ -13,7 +13,7 @@ import com.mortbay.Util.Log;
 import com.mortbay.Util.WriterLogSink;
 import com.mortbay.Util.FileLogSink;
 import com.mortbay.Util.Resource;
-import com.mortbay.Util.XmlConfiguration;
+import com.mortbay.XML.XmlConfiguration;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;

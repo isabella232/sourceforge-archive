@@ -12,6 +12,7 @@ import com.mortbay.HTTP.HashUserRealm;
 import com.mortbay.HTTP.HttpServer;
 import com.mortbay.HTTP.SecurityConstraint;
 import com.mortbay.HTTP.SocketListener;
+import com.mortbay.Jetty.Servlet.ServletHandlerContext;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.InetAddrPort;
 import com.mortbay.Util.WriterLogSink;
@@ -30,7 +31,7 @@ public class Demo
     {
         try
         {
-            HandlerContext context;
+            ServletHandlerContext context;
 
             // Realm
             HashUserRealm realm=
@@ -38,7 +39,7 @@ public class Demo
                                   "etc/demoRealm.properties");
             
             // Make server
-            HttpServer server = new HttpServer();
+            Server server = new Server();
             server.addRealm(realm);
             
             SocketListener listener=null;
@@ -67,7 +68,7 @@ public class Demo
                                      "etc/webdefault.xml",
                                      false);
             
-            context=server.getContext(null,"/demo/*");
+            context=(ServletHandlerContext)server.getContext(null,"/demo/*");
             context.setResourceBase("docroot/");
 
             context.addServlet("Dump",
@@ -88,16 +89,16 @@ public class Demo
             fh.addForward("/forward/*","/dump/forwarded");
             context.addHandler(0,fh);
             
-            context=server.addContext(null,"/javadoc/*");
+            context=(ServletHandlerContext)server.addContext(null,"/javadoc/*");
             context.setResourceBase("javadoc/");
             context.setServingResources(true);
 
-            context=server.addContext(null,"/cgi-bin/*");
+            context=(ServletHandlerContext)server.addContext(null,"/cgi-bin/*");
             context.setResourceBase("cgi-bin/");
             context.addServlet("CGI","/","com.mortbay.Servlet.CGI")
                 .put("Path","/bin:/usr/bin:/usr/local/bin");
             
-            context=server.addContext(null,"/");
+            context=(ServletHandlerContext)server.addContext(null,"/");
             context.addHandler(new ForwardHandler("/jetty/index.html"));
             context.setRealm("Jetty Demo Realm");
             context.addAuthConstraint("/admin/*","content-administrator");
@@ -123,10 +124,10 @@ public class Demo
                 admin.addListener(new InetAddrPort("127.0.0.1:8888"));
             listener.setMaxIdleTimeMs(60000);
             listener.setMaxReadTimeMs(60000);
-            context=admin.addContext(null,"/");
+            context=(ServletHandlerContext)admin.addContext(null,"/");
             context.setRealm("Jetty Demo Realm");
             context.addAuthConstraint("/","server-administrator");
-            context.addServlet("Admin","/","com.mortbay.HTTP.AdminServlet");
+            context.addServlet("Admin","/","com.mortbay.Servlet.AdminServlet");
             context.addServlet("Debug","/Debug/*","com.mortbay.Servlet.Debug");
             admin.start();
         }

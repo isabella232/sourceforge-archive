@@ -1,4 +1,3 @@
-
 // ========================================================================
 // Copyright (c) 2000 Mort Bay Consulting (Australia) Pty. Ltd.
 // $Id$
@@ -9,9 +8,6 @@ package com.mortbay.HTTP;
 import com.mortbay.HTTP.Handler.ResourceHandler;
 import com.mortbay.HTTP.Handler.SecurityHandler;
 import com.mortbay.HTTP.Handler.ForwardHandler;
-import com.mortbay.HTTP.Handler.Servlet.DynamicHandler;
-import com.mortbay.HTTP.Handler.Servlet.ServletHandler;
-import com.mortbay.HTTP.Handler.Servlet.ServletHolder;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.IO;
 import com.mortbay.Util.Resource;
@@ -46,8 +42,10 @@ import java.security.Permission;
  * Servlet API, except that it may contain other types of handler
  * other than servlets.
  * <p>
- * Convenience methods are provided for adding file and servlet
- * handlers.
+ * Convenience methods are provided for adding common handlers. See
+ * com.mortbay.Jetty.JettyContext for conveniance methods for
+ * servlets.
+ *
  * <B>Note. that order is important when configuring a HandlerContext.
  * For example, if resource serving is enabled before servlets, then resources
  * take priority.</B>
@@ -246,7 +244,7 @@ public class HandlerContext implements LifeCycle
      * @param httpServer 
      * @param contextPathSpec 
      */
-    HandlerContext(HttpServer httpServer,String contextPathSpec)
+    protected HandlerContext(HttpServer httpServer,String contextPathSpec)
     {
         // check context path
         if (contextPathSpec==null ||
@@ -274,7 +272,7 @@ public class HandlerContext implements LifeCycle
             _contextPath="/";
 
         _httpServer=httpServer;
-        _name=_contextPath;
+        _name=null;
     }
     
     /* ------------------------------------------------------------ */
@@ -355,11 +353,7 @@ public class HandlerContext implements LifeCycle
     {
         // Note that null hosts are also added.
         _hosts.add(host);
-
-        _name = ((host!=null ||_hosts.size()>1)
-                 ?(_hosts.toString()+":")
-                 :"")+
-            _contextPath;
+        _name=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -699,67 +693,18 @@ public class HandlerContext implements LifeCycle
         return (HttpHandler)_handlers.remove(i);
     }
     
-
     /* ------------------------------------------------------------ */
-    /** Add a servlet to the context.
-     * Conveniance method.
-     * If no ServletHandler is found in the context, a new one is added.
-     * @param name The name of the servlet.
-     * @param pathSpec The pathspec within the context
-     * @param className The classname of the servlet.
-     * @return The ServletHolder.
-     * @exception ClassNotFoundException 
-     * @exception InstantiationException 
-     * @exception IllegalAccessException 
+    /** Remove a handler.
+     * The handler must be stopped before being removed.
      */
-    public synchronized ServletHolder addServlet(String pathSpec,
-                                                 String className)
-        throws ClassNotFoundException,
-               InstantiationException,
-               IllegalAccessException
+    public synchronized void removeHandler(HttpHandler handler)
     {
-        return addServlet(className,pathSpec,className);
+        if (handler.isStarted())
+            throw new IllegalStateException("Handler is started");
+        _handlers.remove(handler);
     }
     
-    /* ------------------------------------------------------------ */
-    /** Add a servlet to the context.
-     * If no ServletHandler is found in the context, a new one is added.
-     * @param name The name of the servlet.
-     * @param pathSpec The pathspec within the context
-     * @param className The classname of the servlet.
-     * @return The ServletHolder.
-     * @exception ClassNotFoundException 
-     * @exception InstantiationException 
-     * @exception IllegalAccessException 
-     */
-    public synchronized ServletHolder addServlet(String name,
-                                                 String pathSpec,
-                                                 String className)
-        throws ClassNotFoundException,
-               InstantiationException,
-               IllegalAccessException
-    {
-        return getServletHandler().addServlet(name,pathSpec,className);
-    }
 
-    /* ------------------------------------------------------------ */
-    /** Get the context ServletHandler.
-     * Conveniance method. If no ServletHandler exists, a new one is added to
-     * the context.
-     * @return ServletHandler
-     */
-    public synchronized ServletHandler getServletHandler()
-    {
-        ServletHandler servletHandler= (ServletHandler)
-            getHandler(com.mortbay.HTTP.Handler.Servlet.ServletHandler.class);
-        if (servletHandler==null)
-        {
-            servletHandler=new ServletHandler();
-            addHandler(servletHandler);
-        }
-        return servletHandler;
-    }
-    
     /* ------------------------------------------------------------ */
     /** Get the context ResourceHandler.
      * Conveniance method. If no ResourceHandler exists, a new one is added to
@@ -796,48 +741,6 @@ public class HandlerContext implements LifeCycle
         return securityHandler;
     }
     
-    /* ------------------------------------------------------------ */
-    /** Setup context for serving dynamic servlets.
-     * @deprecated Use setDynamicServletPathSpec
-     */
-    public synchronized void setServingDynamicServlets(boolean serve)
-    {
-        Code.warning("Using deprecated setServingDynamicServlets(boolean)");
-        setDynamicServletPathSpec(serve?"/":null);
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Setup context for serving dynamic servlets.
-     * Conveniance method.  A Dynamic servlet is one which is mapped from a
-     * URL containing the class name of the servlet - which is dynamcially
-     * loaded when the first request is received.
-     * @param pathSpecInContext The path within the context at which
-     * dynamic servlets are launched. eg /servlet/*
-     */
-    public synchronized void setDynamicServletPathSpec(String pathSpecInContext)
-    {
-        ServletHandler handler = (ServletHandler)
-            getHandler(com.mortbay.HTTP.Handler.Servlet.ServletHandler.class);
-        if (pathSpecInContext!=null)
-        {
-            if (handler==null)
-                handler=getServletHandler();
-            handler.setDynamicServletPathSpec(pathSpecInContext);
-        }
-        else if (handler!=null)
-            _handlers.remove(handler);
-    }
-
-    /* ------------------------------------------------------------ */
-    public String getDynamicServletPathSpec()
-    {
-        ServletHandler handler = (ServletHandler)
-            getHandler(com.mortbay.HTTP.Handler.Servlet.ServletHandler.class);
-        if (handler!=null)
-            return handler.getDynamicServletPathSpec();
-        return null;
-    }
-
     /* ------------------------------------------------------------ */
     /** Setup context for serving Resources as files.
      * Conveniance method.
@@ -1172,17 +1075,24 @@ public class HandlerContext implements LifeCycle
         }
     }
     
+    /* ------------------------------------------------------------ */
+    protected String getHandlerContextName()
+    {
+        if (_name==null)
+            _name = (_hosts.size()>1?(_hosts.toString()+":"):"")+_contextPath;
+        return _name;
+    }
     
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "HandlerContext["+_name+"]"; 
+        return "HandlerContext["+getHandlerContextName()+"]"; 
     }
     
     /* ------------------------------------------------------------ */
     public String toString(boolean detail)
     {
-        return "HandlerContext["+_name+"]" +
+        return "HandlerContext["+getHandlerContextName()+"]" +
             (detail?("="+_handlers):""); 
     }
     

@@ -3,7 +3,7 @@
 // $Id$
 // ---------------------------------------------------------------------------
 
-package com.mortbay.HTTP.Handler.Servlet;
+package com.mortbay.Jetty.Servlet;
 
 import com.mortbay.HTTP.ContextLoader;
 import com.mortbay.HTTP.Handler.NullHandler;

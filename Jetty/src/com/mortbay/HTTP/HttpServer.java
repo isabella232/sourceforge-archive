@@ -6,6 +6,7 @@
 package com.mortbay.HTTP;
 
 import com.mortbay.HTTP.Handler.NotFoundHandler;
+import com.mortbay.HTTP.Handler.DumpHandler;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.DateCache;
 import com.mortbay.Util.InetAddrPort;
@@ -363,6 +364,16 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     {
         return addContext(null,contextPath);
     }
+
+    /* ------------------------------------------------------------ */
+    /** Create a new HandlerContext
+     * @param contextPathSpec 
+     * @return 
+     */
+    protected HandlerContext newHandlerContext(String contextPathSpec)
+    {
+        return new HandlerContext(this,contextPathSpec);
+    }
     
     /* ------------------------------------------------------------ */
     /** Create and add a new context.
@@ -377,7 +388,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     {
         if (host!=null && host.length()==0)
             host=null;
-        HandlerContext hc = new HandlerContext(this,contextPathSpec);
+        HandlerContext hc = newHandlerContext(contextPathSpec);
         addContext(host,hc);
         return hc;
     }
@@ -524,86 +535,6 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     }
     
     
-    /* ------------------------------------------------------------ */
-    /** Add Web Application.
-     * @param contextPathSpec The context path spec. Which must be of
-     * the form / or /path/*
-     * @param webApp The Web application directory or WAR file.
-     * @param defaults The defaults xml filename or URL which is
-     * loaded before any in the web app. Must respect the web.dtd.
-     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
-     * @return The WebApplicationContext
-     * @exception IOException 
-     */
-    public WebApplicationContext addWebApplication(String contextPathSpec,
-                                                   String webApp,
-                                                   String defaults)
-        throws IOException
-    {
-        return addWebApplication(null,
-                                 contextPathSpec,
-                                 webApp,
-                                 defaults,
-                                 false);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Add Web Application.
-     * @param contextPathSpec The context path spec. Which must be of
-     * the form / or /path/*
-     * @param webApp The Web application directory or WAR file.
-     * @param defaults The defaults xml filename or URL which is
-     * loaded before any in the web app. Must respect the web.dtd.
-     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
-     * @param extractWar If true, WAR files are extracted to a
-     * temporary directory.
-     * @return The WebApplicationContext
-     * @exception IOException 
-     */
-    public WebApplicationContext addWebApplication(String contextPathSpec,
-                                                   String webApp,
-                                                   String defaults,
-                                                   boolean extractWar)
-        throws IOException
-    {
-        return addWebApplication(null,
-                                 contextPathSpec,
-                                 webApp,
-                                 defaults,
-                                 extractWar);
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**  Add Web Application.
-     * @param host Virtual host name or null
-     * @param contextPathSpec The context path spec. Which must be of
-     * the form / or /path/*
-     * @param webApp The Web application directory or WAR file.
-     * @param defaults The defaults xml filename or URL which is
-     * loaded before any in the web app. Must respect the web.dtd.
-     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
-     * @param extractWar If true, WAR files are extracted to a
-     * temporary directory.
-     * @return The WebApplicationContext
-     * @exception IOException 
-     */
-    public WebApplicationContext addWebApplication(String host,
-                                                   String contextPathSpec,
-                                                   String webApp,
-                                                   String defaults,
-                                                   boolean extractWar)
-        throws IOException
-    {
-        WebApplicationContext appContext =
-            new WebApplicationContext(this,
-                                      contextPathSpec,
-                                      webApp,
-                                      defaults,
-                                      extractWar);
-        addContext(host,appContext);
-        Log.event("Web Application "+appContext+" added");
-        return appContext;
-    }
  
     /* ------------------------------------------------------------ */
     /** 
@@ -918,69 +849,6 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     }    
     
     /* ------------------------------------------------------------ */
-    /** Construct server from command line arguments.
-     * @param args 
-     */
-    public static void main(String[] args)
-    {
-        if (args.length==0)
-        {
-            args= new String[] {"8080"};
-        }
-        else if (args.length==1 && args[0].startsWith("-"))
-        {
-            System.err.println
-                ("\nUsage - java com.mortbay.HTTP.HttpServer [[<addr>:]<port> .. ]");
-            System.err.println
-                ("\n  Serves servlets from 'servlets' directory");
-            System.err.println
-                ("\n  Serves files from 'docroot' directory");
-            System.err.println
-                ("\n  Default port is 8080");
-            System.exit(1);
-        }
-        
-        try{
-            // Create the server
-            HttpServer server = new HttpServer();
-
-            // Default is no virtual host
-            String host=null;
-            HandlerContext context = server.getContext(host,"/");
-            context.setClassPath("./servlets/");
-            context.setDynamicServletPathSpec("/servlet/*");
-            context.setResourceBase("./docroot/");
-            context.setServingResources(true);
-            
-            // Parse arguments
-            for (int i=0;i<args.length;i++)
-            {
-                InetAddrPort address = new InetAddrPort(args[i]);
-                server.addListener(address);
-            }
-            
-            server.start();
-        }
-        catch (Exception e)
-        {
-            Code.warning(e);
-        }
-    }
-
-    
-    /* ------------------------------------------------------------ */
-    static List getHttpServerList()
-    {
-        return __roServers;
-    }
-
-    /* ------------------------------------------------------------ */
-    Map getHostMap()
-    {
-        return _hostMap;
-    }
-
-    /* ------------------------------------------------------------ */
     public boolean isChunkingForced()
     {
         return _chunkingForced;
@@ -995,6 +863,65 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     public void setChunkingForced(boolean forced)
     {
          _chunkingForced=forced;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public static List getHttpServerList()
+    {
+        return __roServers;
+    }
+
+    /* ------------------------------------------------------------ */
+    public Map getHostMap()
+    {
+        return _hostMap;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Construct server from command line arguments.
+     * @param args 
+     */
+    public static void main(String[] args)
+    {
+        if (args.length==0)
+        {
+            args= new String[] {"8080"};
+        }
+        else if (args.length==1 && args[0].startsWith("-"))
+        {
+            System.err.println
+                ("\nUsage - java com.mortbay.HTTP.HttpServer [[<addr>:]<port> .. ]");
+            System.err.println
+                ("\n  Serves files from 'docroot' directory");
+            System.err.println
+                ("\n  Default port is 8080");
+            System.exit(1);
+        }
+        
+        try{
+            // Create the server
+            HttpServer server = new HttpServer();
+
+            // Default is no virtual host
+            String host=null;
+            HandlerContext context = server.getContext(host,"/");
+            context.setResourceBase("docroot/");
+            context.setServingResources(true);
+            context.addHandler(new DumpHandler());
+            
+            // Parse arguments
+            for (int i=0;i<args.length;i++)
+            {
+                InetAddrPort address = new InetAddrPort(args[i]);
+                server.addListener(address);
+            }
+            
+            server.start();
+        }
+        catch (Exception e)
+        {
+            Code.warning(e);
+        }
     }
     
 }

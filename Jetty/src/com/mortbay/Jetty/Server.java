@@ -1,14 +1,20 @@
 package com.mortbay.Jetty;
 
 import com.mortbay.HTTP.HttpServer;
+import com.mortbay.HTTP.HandlerContext;
 import com.mortbay.Util.Code;
+import com.mortbay.Util.Log;
 import com.mortbay.Util.Resource;
-import com.mortbay.Util.XmlConfiguration;
+import com.mortbay.XML.XmlConfiguration;
+import com.mortbay.Jetty.Servlet.ServletHandlerContext;
+import com.mortbay.Jetty.Servlet.WebApplicationContext;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import org.xml.sax.SAXException;
+import java.util.List;
+import java.util.Map;
 
 
 /* ------------------------------------------------------------ */
@@ -75,7 +81,7 @@ public class Server extends HttpServer
             throw new IOException("Jetty configuration problem: "+e);
         }
     }
-
+    
     /* ------------------------------------------------------------ */
     /** 
      * @param configuration 
@@ -109,6 +115,96 @@ public class Server extends HttpServer
         return _configuration;
     }
     
+    /* ------------------------------------------------------------ */
+    /** Create a new ServletHandlerContext
+     * @param contextPathSpec 
+     * @return 
+     */
+    protected HandlerContext newHandlerContext(String contextPathSpec)
+    {
+        return new ServletHandlerContext(this,contextPathSpec);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Add Web Application.
+     * @param contextPathSpec The context path spec. Which must be of
+     * the form / or /path/*
+     * @param webApp The Web application directory or WAR file.
+     * @param defaults The defaults xml filename or URL which is
+     * loaded before any in the web app. Must respect the web.dtd.
+     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
+     * @return The WebApplicationContext
+     * @exception IOException 
+     */
+    public WebApplicationContext addWebApplication(String contextPathSpec,
+                                                   String webApp,
+                                                   String defaults)
+        throws IOException
+    {
+        return addWebApplication(null,
+                                 contextPathSpec,
+                                 webApp,
+                                 defaults,
+                                 false);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Add Web Application.
+     * @param contextPathSpec The context path spec. Which must be of
+     * the form / or /path/*
+     * @param webApp The Web application directory or WAR file.
+     * @param defaults The defaults xml filename or URL which is
+     * loaded before any in the web app. Must respect the web.dtd.
+     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
+     * @param extractWar If true, WAR files are extracted to a
+     * temporary directory.
+     * @return The WebApplicationContext
+     * @exception IOException 
+     */
+    public WebApplicationContext addWebApplication(String contextPathSpec,
+                                                   String webApp,
+                                                   String defaults,
+                                                   boolean extractWar)
+        throws IOException
+    {
+        return addWebApplication(null,
+                                 contextPathSpec,
+                                 webApp,
+                                 defaults,
+                                 extractWar);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**  Add Web Application.
+     * @param host Virtual host name or null
+     * @param contextPathSpec The context path spec. Which must be of
+     * the form / or /path/*
+     * @param webApp The Web application directory or WAR file.
+     * @param defaults The defaults xml filename or URL which is
+     * loaded before any in the web app. Must respect the web.dtd.
+     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
+     * @param extractWar If true, WAR files are extracted to a
+     * temporary directory.
+     * @return The WebApplicationContext
+     * @exception IOException 
+     */
+    public WebApplicationContext addWebApplication(String host,
+                                                   String contextPathSpec,
+                                                   String webApp,
+                                                   String defaults,
+                                                   boolean extractWar)
+        throws IOException
+    {
+        WebApplicationContext appContext =
+            new WebApplicationContext(this,
+                                      contextPathSpec,
+                                      webApp,
+                                      defaults,
+                                      extractWar);
+        addContext(host,appContext);
+        Log.event("Web Application "+appContext+" added");
+        return appContext;
+    }
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */

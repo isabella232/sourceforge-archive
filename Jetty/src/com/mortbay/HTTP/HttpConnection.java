@@ -485,7 +485,6 @@ public class HttpConnection
         }
     }
     
-    
     /* ------------------------------------------------------------ */
     /** Service a Request.
      * This implementation passes the request and response to the

@@ -5,7 +5,7 @@
 
 package com.mortbay.Servlet;
 import com.mortbay.Util.Code;
-import com.mortbay.HTTP.Handler.Servlet.Context;
+import com.mortbay.Jetty.Servlet.Context;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;

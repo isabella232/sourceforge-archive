@@ -60,7 +60,7 @@
  */ 
 package org.apache.jasper.compiler;
 
-import com.mortbay.Util.XmlParser;
+import com.mortbay.XML.XmlParser;
 import com.mortbay.Util.Resource;
 
 import java.net.URL;

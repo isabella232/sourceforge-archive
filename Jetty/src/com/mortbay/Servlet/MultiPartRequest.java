@@ -3,8 +3,9 @@
 // $Id$
 // ------------------------------------------------------------------------
 
-package com.mortbay.HTTP;
+package com.mortbay.Servlet;
 
+import com.mortbay.HTTP.HttpFields;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.LineInput;
 import javax.servlet.http.HttpServletRequest;

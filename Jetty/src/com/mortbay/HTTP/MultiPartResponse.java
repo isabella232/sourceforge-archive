@@ -5,21 +5,14 @@
 
 package com.mortbay.HTTP;
 
-
 import com.mortbay.Util.Code;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletResponse;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
 
-
-
 /* ================================================================ */
 /** Handle a multipart MIME response.
- *
  *
  * @version $Id$
  * @author Greg Wilkins
@@ -46,16 +39,10 @@ public class MultiPartResponse
     private boolean inPart=false;
     
     /* ------------------------------------------------------------ */
-    /** MultiPartResponse constructor.
-     * @param response The ServletResponse to which this multipart
-     *                 response will be sent.
-     */
-    public MultiPartResponse(HttpServletRequest request,
-                             HttpServletResponse response)
+    protected MultiPartResponse(OutputStream out)
          throws IOException
     {
-        response.setContentType("multipart/mixed;boundary="+boundary);
-        out=response.getOutputStream();
+        this.out=out;
         inPart=false;
     }
     

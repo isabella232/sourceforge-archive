@@ -2,6 +2,13 @@ Jetty Versions
 --------------
 
 Jetty-3.1.rc5 - 29 April 2001
+
+ + Added build target for mini.jetty.jar - see README.
+ + Major restructing of packages to separate servlet dependancies.
+     c.m.XML  - moved XML dependant classes from c.m.Util
+     c.m.HTTP - No servlet or XML dependant classes:
+     c.m.Jetty.Servlet - moved from c.m.HTTP.Handler.Servlet
+     c.m.Servlet - received some servlet dependant classes from HTTP.           
  + Added UnixCrypt support to c.m.U.Password
  + Added HTaccessHandler to authenitcate against apache .htaccess files.
  + Added query param handling to ForwardHandler
