@@ -150,35 +150,12 @@ public class Context implements ServletContext, HttpSessionContext
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     * 
-     * Returns a {@link RequestDispatcher} object that acts
-     * as a wrapper for the resource located at the given path.
-     * A <code>RequestDispatcher</code> object can be used to forward 
-     * a request to the resource or to include the resource in a response.
-     * The resource can be dynamic or static.
-     *
-     * <p>The pathname must begin with a "/" and is interpreted as relative
-     * to the current context root.  Use <code>getContext</code> to obtain
-     * a <code>RequestDispatcher</code> for resources in foreign contexts.
-     * This method returns <code>null</code> if the <code>ServletContext</code>
-     * cannot return a <code>RequestDispatcher</code>.
-     *
-     * @param path 	a <code>String</code> specifying the pathname
-     *			to the resource
-     *
-     * @return 		a <code>RequestDispatcher</code> object
-     *			that acts as a wrapper for the resource
-     *			at the specified path
-     *
-     * @see 		RequestDispatcher
-     * @see 		ServletContext#getContext
-     *
-     */
-    public RequestDispatcher getRequestDispatcher(String uri)
+    public RequestDispatcher getRequestDispatcher(String path)
     {
-	Code.notImplemented();
-	return null;
+	if (path == null || !path.startsWith("/"))
+            return null;
+
+	return new PathDispatcher(path);
     }
     
     /* ------------------------------------------------------------ */
@@ -682,7 +659,81 @@ public class Context implements ServletContext, HttpSessionContext
                     .valueUnbound(new HttpSessionBindingEvent(this,name));
         }
 	
-    }   
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class PathDispatcher implements RequestDispatcher
+    {
+	String _path;
+	String _query;
+	
+	/* ------------------------------------------------------------ */
+	/** Constructor. 
+	 * @param server 
+	 * @param URL 
+	 */
+	PathDispatcher(String path)
+	{
+	    _path = path;
+	}
+
+    
+	/* ------------------------------------------------------------ */
+	/** 
+	 * @param request 
+	 * @param response 
+	 * @exception ServletException 
+	 * @exception IOException 
+	 */
+	public void forward(javax.servlet.ServletRequest request,
+			    javax.servlet.ServletResponse response)
+	    throws ServletException,IOException
+	{
+	    ServletRequest servletRequest=(ServletRequest)request;
+	    ServletResponse servletResponse=(ServletResponse)response;
+	    
+	    if (servletRequest.getHttpRequest().isCommitted())
+		throw new IllegalStateException("Request is committed");
+	    
+	    Code.notImplemented();
+	    
+//  	    HttpRequest req = (HttpRequest) request;
+//  	    HttpResponse res = (HttpResponse) response;
+//  	    req.getHttpResponse().preDispatch();
+//  	    req.setResourcePath(_uri);
+//  	    _server.handle(req,res);
+//  	    req.getHttpResponse().postDispatchForward();  
+	}
+	
+	
+	/* ------------------------------------------------------------ */
+	/** 
+	 * @param request 
+	 * @param response 
+	 * @exception ServletException 
+	 * @exception IOException 
+	 */
+	public void include(javax.servlet.ServletRequest request,
+			    javax.servlet.ServletResponse response)
+	    throws ServletException, IOException     
+	{
+	    ServletRequest servletRequest=(ServletRequest)request;
+	    ServletResponse servletResponse=(ServletResponse)response;
+	    
+	    Code.notImplemented();
+	    
+//  	    HttpRequest req = (HttpRequest) request;
+//  	    HttpResponse res = (HttpResponse) response;
+//  	    Code.debug("Include ",_uri.getPath());
+//  	    req.getHttpResponse().preDispatch();
+//  	    req.setResourcePath(_uri);
+//  	    _server.handle(req,res);
+//  	    req.getHttpResponse().postDispatchInclude();
+//  	    req.setResourcePath((URI)null);
+	}
+    };
 }
 
 

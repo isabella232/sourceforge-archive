@@ -1,4 +1,6 @@
-Jetty-3.0.A97 -
+Jetty-3.0.A97 - in progress
+   + Added WML mapping
+   + Fixed makefiles for BSD ls
    + Fixed persistent commits with no content (eg redirect+keep-alive). 
    + Implemented servlet isSecure().
    + Implemented servlet getLocale(s).

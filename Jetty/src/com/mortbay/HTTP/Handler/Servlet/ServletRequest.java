@@ -189,35 +189,12 @@ class ServletRequest
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     *
-     * Returns all the values of the specified request header
-     * as an <code>Enumeration</code> of <code>String</code> objects.
-     *
-     * <p>Some headers, such as <code>Accept-Language</code> can be sent
-     * by clients as several headers each with a different value rather than
-     * sending the header as a comma separated list.
-     *
-     * <p>If the request did not include any headers
-     * of the specified name, this method returns an empty
-     * <code>Enumeration</code>.
-     * The header name is case insensitive. You can use
-     * this method with any request header.
-     *
-     * @param name		a <code>String</code> specifying the
-     *				header name
-     *
-     * @return			a <code>Enumeration</code> containing the
-     *				values of the requested
-     *				header, or <code>null</code>
-     *				if the request does not
-     *				have any headers of that name
-     *
-     */			
     public Enumeration getHeaders(String s)
     {
-	Code.notImplemented();
-	return null;
+	List list=_httpRequest.getFieldValues(s);
+	if (list==null)
+	    return null;
+	return Collections.enumeration(list);
     }
     
     /* ------------------------------------------------------------ */
@@ -233,21 +210,6 @@ class ServletRequest
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     *
-     * Returns the portion of the request URI that indicates the context
-     * of the request.  The context path always comes first in a request
-     * URI.  The path starts with a "/" character but does not end with a "/"
-     * character.  For servlets in the default (root) context, this method
-     * returns "".
-     *
-     *
-     * @return		a <code>String</code> specifying the
-     *			portion of the request URI that indicates the context
-     *			of the request
-     *
-     *
-     */
     public String getContextPath()
     {
 	return _contextPath;
@@ -651,41 +613,37 @@ class ServletRequest
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     *
-     * Returns a {@link RequestDispatcher} object that acts as a wrapper for
-     * the resource located at the given path.  
-     * A <code>RequestDispatcher</code> object can be used to forward
-     * a request to the resource or to include the resource in a response.
-     * The resource can be dynamic or static.
-     *
-     * <p>The pathname specified may be relative, although it cannot extend
-     * outside the current servlet context.  If the path begins with 
-     * a "/" it is interpreted as relative to the current context root.  
-     * This method returns <code>null</code> if the servlet container
-     * cannot return a <code>RequestDispatcher</code>.
-     *
-     * <p>The difference between this method and {@link
-     * ServletContext#getRequestDispatcher} is that this method can take a
-     * relative path.
-     *
-     * @param path      a <code>String</code> specifying the pathname
-     *                  to the resource
-     *
-     * @return          a <code>RequestDispatcher</code> object
-     *                  that acts as a wrapper for the resource
-     *                  at the specified path
-     *
-     * @see             RequestDispatcher
-     * @see             ServletContext#getRequestDispatcher
-     *
-     */
     public RequestDispatcher getRequestDispatcher(String url)
     {
-	Code.notImplemented();
-	return null;
-    }    
+	if (url == null)
+            return null;
+
+        if (!url.startsWith("/"))
+	{
+	    String relTo=_servletPath+_pathInfo;
+	    
+	    int slash=relTo.lastIndexOf("/");
+	    relTo=relTo.substring(0,slash);
+	    
+	    while(url.startsWith("../"))
+	    {
+		if (relTo.length()==0)
+		    return null;
+		url=url.substring(3);
+		slash=relTo.lastIndexOf("/");
+		relTo=relTo.substring(0,slash);
+	    }
+
+	    url=relTo+url;
+	    
+	}
+    
+	return _context.getRequestDispatcher(url);
+    }
+
 }
+
+
 
 
 
