@@ -156,22 +156,23 @@ public class HttpFields
                 _singleValued=single;
                 _inlineValues=inline;
                 
-                if (__info.size()<__maxCacheSize)
+                _hashCode=__hashCode++;
+                if (__hashCode<__maxCacheSize)
                 {
                     __info.put(name,this);
                     if (!name.equals(_lname))
                         __info.put(_lname,this);
-                    
-                    _hashCode=__hashCode++;
                 }
                 else
-                    _hashCode=_name.hashCode();
+                {
+                    Code.debug(this," not cached");
+                }
             }
         }
 
         public String toString()
         {
-            return "["+_name+","+_singleValued+","+_inlineValues+"]";
+            return "["+_name+","+_hashCode+","+_singleValued+","+_inlineValues+"]";
         }
 
         public int hashCode()
@@ -181,16 +182,20 @@ public class HttpFields
 
         public boolean equals(Object o)
         {
-            return (o instanceof FieldInfo) &&
-                (((FieldInfo)o)._hashCode==_hashCode);
+            if (o==null || !(o instanceof FieldInfo))
+                return false;
+            FieldInfo fi = (FieldInfo)o;
+            return
+                fi==this ||
+                fi._hashCode==_hashCode ||
+                fi._name.equals(_name);
         }
-        
     }
 
     /* ------------------------------------------------------------ */
     private static final StringMap __info = new StringMap(true);
     private static final StringMap __values = new StringMap(true);
-    private static final int __maxCacheSize=100;
+    private static final int __maxCacheSize=128;
     
     /* ------------------------------------------------------------ */
     static
@@ -211,7 +216,6 @@ public class HttpFields
         new FieldInfo(__CacheControl,false,false);
         new FieldInfo(__SetCookie,false,false);
         new FieldInfo(__SetCookie2,false,false);
-        
         
         new FieldInfo(__Date,true,false);
         new FieldInfo(__TransferEncoding,false,true);
@@ -366,7 +370,7 @@ public class HttpFields
         /* ------------------------------------------------------------ */
         public boolean equals(Object o)
         {
-            return (o instanceof Field) && ((Field)o)._info==_info;
+            return (o instanceof Field) && o==this;
         }
 
         /* ------------------------------------------------------------ */
@@ -451,7 +455,7 @@ public class HttpFields
     
     /* -------------------------------------------------------------- */
     private ArrayList _fields=new ArrayList(15);
-    private int[] _index=new int[2*FieldInfo.__hashCode];
+    private int[] _index=new int[__maxCacheSize];
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -510,10 +514,49 @@ public class HttpFields
     }
     
     /* ------------------------------------------------------------ */
+    Field getField(String name)
+    {       
+        FieldInfo info=getFieldInfo(name);
+        return getField(info);
+    }
+        
+    /* ------------------------------------------------------------ */
+    Field getField(FieldInfo info)
+    {
+        int hi=info.hashCode();
+        
+        if (hi<_index.length)
+        {
+            if (_index[hi]>=0)
+                return (Field)(_fields.get(_index[hi]));
+        }
+        else
+        {    
+            for (int i=0;i<_fields.size();i++)
+            {
+                Field f=(Field)_fields.get(i);
+                if (info.equals(f._info))
+                    return f;
+            }
+        }
+        return null;
+    }
+    
+    /* ------------------------------------------------------------ */
     public boolean containsKey(String name)
     {
         FieldInfo info=getFieldInfo(name);
-        return _index[info.hashCode()]>=0;        
+        int hi=info.hashCode();
+        if (hi<_index.length)
+            return _index[hi]>=0;
+
+        for (int i=0;i<_fields.size();i++)
+        {
+            Field f=(Field)_fields.get(i);
+            if (info.equals(f._info))
+                return true;
+        }
+        return false;
     }
     
     /* -------------------------------------------------------------- */
@@ -525,12 +568,9 @@ public class HttpFields
     public String get(String name)
     {
         FieldInfo info=getFieldInfo(name);
-        
-        if (_index[info.hashCode()]>=0)
-        {   
-            Field field=(Field)_fields.get(_index[info.hashCode()]);
+        Field field=getField(info);
+        if (field!=null)
             return field._value;
-        }
         return null;
     }
     
@@ -542,10 +582,10 @@ public class HttpFields
     public Enumeration getValues(String name)
     {
         FieldInfo info=getFieldInfo(name);
-        if (_index[info.hashCode()]>=0)
-        {
-            final Field field=(Field)_fields.get(_index[info.hashCode()]);
-            
+        final Field field=getField(info);
+
+        if (field!=null)
+        {            
             return new Enumeration()
                 {
                     Field f=field;
@@ -625,11 +665,10 @@ public class HttpFields
             return remove(name);
         
         FieldInfo info=getFieldInfo(name);
-        
+        Field field=getField(info);
         // Look for value to replace.
-        if (_index[info.hashCode()]>=0)
+        if (field!=null)
         {
-            Field field=(Field)_fields.get(_index[info.hashCode()]);
             String old=field._value;
             field._value=value;
 
@@ -644,13 +683,18 @@ public class HttpFields
             }
             return old;    
         }
-        
-        // new value;
-        Field field=new Field(info,value);
-        _index[info.hashCode()]=_fields.size();
-        _fields.add(field);
-        return null;
+        else
+        {
+            // new value;
+            field=new Field(info,value);
+            int hi=info.hashCode();
+            if (hi<_index.length)
+                _index[hi]=_fields.size();
+            _fields.add(field);
+            return null;
+        }
     }
+    
 
     /* -------------------------------------------------------------- */
     /** Set a multi value field.
@@ -663,10 +707,9 @@ public class HttpFields
         FieldInfo info=getFieldInfo(name);
         if (info._singleValued)
             throw new IllegalArgumentException("Field "+name+" must be single valued");
-
-        if (_index[info.hashCode()]>=0)
+        Field field = getField(info);        
+        if (field!=null)
         {
-            Field field=(Field)_fields.get(_index[info.hashCode()]);
             while(field!=null)
             {
                 Field last=field;
@@ -679,9 +722,13 @@ public class HttpFields
         Iterator iter = value.iterator();
         while (iter.hasNext())
         {
-            Field field=new Field(info,iter.next().toString());
+            field=new Field(info,iter.next().toString());
             if (last==null)
-                _index[info.hashCode()]=_fields.size();
+            {
+                int hi = info.hashCode();
+                if (hi<_index.length)
+                    _index[hi]=_fields.size();
+            }
             else
             {
                 field._prev=last;
@@ -735,17 +782,15 @@ public class HttpFields
             throw new IllegalArgumentException("null value");
         
         FieldInfo info=getFieldInfo(name);
-        Field last=null;
-        if (_index[info.hashCode()]>=0)
+        Field last=getField(info);
+        if (last!=null)
         {
             if (info._singleValued)
-                throw new IllegalArgumentException("Field "+name+" must be single valued");
-            
-            last=(Field)_fields.get(_index[info.hashCode()]);
+                throw new IllegalArgumentException("Field "+name+" must be single valued");            
             while(last._next!=null)
                 last=last._next;
         }
-        else
+        else if (info.hashCode()<_index.length)
             _index[info.hashCode()]=_fields.size();
             
         // create the field
@@ -768,19 +813,24 @@ public class HttpFields
     {
         String old=null;
         FieldInfo info=getFieldInfo(name);
-
-        if (_index[info.hashCode()]>=0)
+        int hi=info.hashCode();
+        for (int i=0;i<_fields.size();i++)
         {
-            Field field=(Field)_fields.get(_index[info.hashCode()]);
-            _fields.set(_index[info.hashCode()],null);
-            old=field._value;
-            while(field!=null)
+            Field field=(Field)_fields.get(i);
+            if (info.equals(field._info))
             {
-                Field last=field;
-                field=field._next;
-                last.clear();
+                old=field._value;
+                _fields.set(i,null);
+                if (hi<_index.length)
+                    _index[hi]=-1;
+                
+                while(field!=null)
+                {
+                    Field last=field;
+                    field=field._next;
+                    last.clear();
+                }
             }
-            _index[info.hashCode()]=-1;
         }
         
         return old;
@@ -1009,22 +1059,32 @@ public class HttpFields
                 
                 
                 Field field=new Field(info,value);
-                
-                if (_index[info.hashCode()]<0)
-                    _index[info.hashCode()]=_fields.size();
-                else if (info._singleValued)
+                Field link=getField(info);
+                if (link==null)
                 {
-                    Code.debug("Ignored duplicate single value header: ",field);
-                    continue;
+                    // new field so index if we can
+                    int hi =info.hashCode();
+                    if (hi<_index.length)
+                        _index[hi]=_fields.size();                        
                 }
                 else
                 {
-                    Field link=(Field)_fields.get(_index[info.hashCode()]);
-                    while(link._next!=null)
-                        link=link._next;
-                    field._prev=link;
-                    link._next=field;
+                    // existing field, check if we handle duplicates
+                    if (info._singleValued)
+                    {
+                        Code.debug("Ignored duplicate single value header: ",field);
+                        continue;
+                    }
+                    else
+                    {
+                        // yes so link it in
+                        while(link._next!=null)
+                            link=link._next;
+                        field._prev=link;
+                        link._next=field;
+                    }
                 }
+                
                 _fields.add(field);
                 last=field;
             }

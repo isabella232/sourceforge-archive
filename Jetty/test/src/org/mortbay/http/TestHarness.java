@@ -97,6 +97,7 @@ public class TestHarness
             test.checkEquals(cin.read(buf),-1,"Read EOF");
             test.checkEquals(cin.read(buf),-1,"Read EOF again");
 
+            System.err.println("\n\nTrailer:\n"+cin.getTrailer());
             test.checkEquals(cin.getTrailer().get("some-trailer"),
                              "some-value","Trailer fields");
 
