@@ -1,0 +1,36 @@
+<H2>Where are Jetty's temporary directories?</H2>
+Jetty itself has no temporary directories, but each web application can be assigned
+a temporary directory. If the web application is a WAR file, it may be unpacked to the 
+webapp directory within the web applications temporary directory.
+<p>
+When assigning a temporary directory to a webapplication the following
+locations are considered: <ul>
+
+<li>The javax.servlet.context.tempdir attribute of the web application is check
+to see if a directory name or a File has already been set.</li>
+
+<li>If a WEB-INF/work directory exists, it is used directly.</li>
+
+<li>If a ${jetty.home}/work directory exists, then a temp directory 
+is created within that directory.</li>
+
+<li>If no other location has been found, a temporary directory
+is created within the ${java.io.tempdir} directory.
+
+</ul>
+<p>
+If a temporary directory is created, it is given a name based on
+the first HttpListener within the HttpServer as follows:
+"jetty_" + listener.getHost() + "_" + listener.getPort() + "_" + virtualHost + "_" + contextPath
+<p>
+Directories created within the java.io.tempdir are marked as deleteOnExit and
+are not reused between invocations of the web application context.
+<p>
+Once a tempory directory has been allocated, a File instance for it
+is set as the javax.servlet.context.tempdir attribute of the web
+application.
+<p>
+
+<A HREF="index.html" TITLE="Back to JettyFAQ"><IMG SRC="/jetty/images/info_sm.gif" BORDER="0"><BR
+CLEAR="bottom"> JettyFaq</A>
+<BR><BR>
