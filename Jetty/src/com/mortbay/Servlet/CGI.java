@@ -5,9 +5,6 @@
 // Copyright 2000 Julian Gosnell <jules_gosnell@yahoo.com> Released
 // under the terms of the Jetty Licence.
 //
-// For all problems with this servlet please email jules_gosnell@yahoo.com,
-// NOT the Jetty support lists
-//
 // ========================================================================
 
 // TODO
@@ -115,19 +112,35 @@ public class CGI extends HttpServlet
       Code.debug("CGI: Header - "+name+" : "+req.getHeader(name));
     }
 
-    String exe = req.getPathInfo();
-    if (exe==null)
+    // pathInfo() actually comprises scriptName/pathInfo...We will
+    // walk backwards up it until we find the script - the rest must
+    // be the pathInfo;
+
+    // what about dos - '\'...should we use pathSeparator ?
+
+    String both=req.getPathInfo();
+    String first=both;
+    String last="";
+    File exe=new File(_docRoot, first);
+
+    while ((first.endsWith("/") || !exe.exists()) && first.length()>=0)
     {
-      Code.fail("CGI: no executable specified");
+      int index=first.lastIndexOf('/'); 
+      
+      first=first.substring(0, index);
+      last =both.substring(index, both.length());
+      exe=new File(_docRoot, first);
     }
+    
+    if (first.length()==0 || !exe.exists())
+      res.sendError(404);
 
-    File script = new File(_docRoot, exe).getCanonicalFile();
-    Code.debug("CGI: script is "+script);
+    exe = exe.getCanonicalFile();
 
-    if (script.exists())
-        exec(script.toString(), req, res);
-    else
-        res.sendError(404);
+    Code.debug("CGI: script is "+exe);
+    Code.debug("CGI: pathInfo is "+last);
+
+    exec(exe.toString(), last, req, res);
   }
     
   /* ------------------------------------------------------------ */
@@ -139,6 +152,7 @@ public class CGI extends HttpServlet
    * @exception IOException 
    */
   private void exec(String path,
+                    String pathInfo,
                     HttpServletRequest req,
                     HttpServletResponse res)
     throws IOException
@@ -152,7 +166,7 @@ public class CGI extends HttpServlet
         "CONTENT_LENGTH="           + req.getContentLength(),
         "CONTENT_TYPE="             + req.getContentType(),
         "GATEWAY_INTERFACE="        + "CGI/1.1",
-        "PATH_INFO="                + req.getPathInfo(),
+        "PATH_INFO="                + pathInfo,
         "PATH_TRANSLATED="          + req.getPathTranslated(),
         "QUERY_STRING="             + req.getQueryString(),
         "REMOTE_ADDR="              + req.getRemoteAddr(),
@@ -166,7 +180,7 @@ public class CGI extends HttpServlet
 
         "REMOTE_USER="              + req.getRemoteUser(),
         "REQUEST_METHOD="           + req.getMethod(),
-        "SCRIPT_NAME="              + req.getRequestURI(),
+        "SCRIPT_NAME="              + req.getRequestURI().substring(0, req.getRequestURI().length() - pathInfo.length()),
         "SERVER_NAME="              + req.getServerName(),
         "SERVER_PORT="              + req.getServerPort(),
         "SERVER_PROTOCOL="          + req.getProtocol(),
@@ -186,8 +200,8 @@ public class CGI extends HttpServlet
         "HTTP_COOKIE="              + req.getHeader("Cookie"),
 
         // these extra ones were from printenv on www.dev.nomura.co.uk
-	"HTTPS="                    + (req.isSecure()?"ON":"OFF"),
-	"PATH="                     + _path,
+        "HTTPS="                    + (req.isSecure()?"ON":"OFF"),
+        "PATH="                     + _path,
         //       "DOCUMENT_ROOT="            + root + "/docs",
         //       "SERVER_URL="               + "NYI - http://us0245",
         //       "TZ="                       + System.getProperty("user.timezone"),
@@ -214,7 +228,7 @@ public class CGI extends HttpServlet
           }
           catch(IOException e){Code.ignore(e);}
         }
-      }).start();	
+      }).start();       
     
 
     // hook processes output to browser's input (sync)
