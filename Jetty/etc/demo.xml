@@ -169,6 +169,13 @@
   <Call name="addWebApplication">
     <Arg>/examples/*</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/examples</Arg>
+    <Call name="getServletHandler">
+      <Call name="getSessionManager">
+        <Call name="setUseRequestedId">
+          <Arg type="boolean">true</Arg>
+        </Call>
+      </Call>
+    </Call>
   </Call>
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
