@@ -175,6 +175,7 @@
         <include name="**/*.properties" />
         <include name="**/*.dtd" />
         <include name="**/*.xml" />
+        <include name="**/*.config" />
       </fileset>
     </copy>
 

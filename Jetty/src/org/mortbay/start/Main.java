@@ -11,6 +11,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.FileInputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.Policy;
@@ -28,8 +29,10 @@ import java.util.StringTokenizer;
  * command "java -jar start.jar".
  *
  * The behaviour of Main is controlled by the "org/mortbay/start/start.config"
- * file obtained as a resource.  The format of each line in this file
- * is:<PRE>
+ * file obtained as a resource or file. This can be overridden with the START
+ * system property.
+ *
+ * The format of each line in this file is:<PRE>
  *  SUBJECT [ [!] CONDITION [AND|OR] ]*
  * </PRE>
  * where SUBJECT:<PRE> 
@@ -68,6 +71,7 @@ public class Main
     private String _classname = null;
     private Classpath _classpath = new Classpath();
     private boolean _debug = System.getProperty("DEBUG",null)!=null;
+    private String _config = System.getProperty("START","org/mortbay/start/start.config");
     private ArrayList _xml = new ArrayList();
        
     public static void main(String[] args)
@@ -393,8 +397,11 @@ public class Main
         // set up classpath:
         try
         {
-            InputStream cpcfg =getClass().getClassLoader()
-                .getResourceAsStream("org/mortbay/start/start.config");
+            InputStream cpcfg =getClass().getClassLoader().getResourceAsStream(_config);
+            if (_debug) System.err.println("config="+_config);
+            if (cpcfg==null)
+                cpcfg=new FileInputStream(_config);
+            
             configure(cpcfg,args);
             cpcfg.close();
 
@@ -405,6 +412,7 @@ public class Main
         catch (Exception e)
         {
             e.printStackTrace();
+            System.exit(1);
         }
         
         // okay, classpath complete.
