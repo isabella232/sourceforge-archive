@@ -54,7 +54,15 @@ public class ThreadPool implements LifeCycle,Serializable
      */
     public ThreadPool()
     {
-        _name=this.getClass().getName().substring(this.getClass().getPackage().getName().length()+1)+__pool++;
+        _name=this.getClass().getName();
+        int ld = _name.lastIndexOf('.');
+        if (ld>=0)
+            _name=_name.substring(ld+1);
+        synchronized(ThreadPool.class)
+        {
+            _name+=__pool++;
+        }
+        
         _pool=new Pool();
         _pool.setPoolName(_name);
         _pool.setPoolClass(ThreadPool.PoolThread.class);
