@@ -25,8 +25,7 @@ $Id$
         <Set name="Port">8081</Set>
         <Set name="MinThreads">1</Set>
         <Set name="MaxThreads">5</Set>
-        <Set name="MaxIdleTimeMs">10000</Set>      
-        <Set name="MaxReadTimeMs">60000</Set>
+        <Set name="MaxIdleTimeMs">30000</Set>      
       </New>
     </Arg>
   </Call>
