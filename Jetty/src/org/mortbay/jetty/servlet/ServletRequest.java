@@ -209,8 +209,6 @@ public class ServletRequest
         
         // sort the list in quality order
         List acceptLanguage = HttpFields.qualityList(enum);
-
-        System.err.println("AC1="+acceptLanguage);
         
         if (acceptLanguage.size()==0)
             return
