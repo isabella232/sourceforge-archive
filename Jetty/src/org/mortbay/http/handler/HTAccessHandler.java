@@ -37,8 +37,8 @@ import org.mortbay.util.UnixCrypt;
  * @author Van den Broeke Iris
  * @author Deville Daniel
  * @author Dubois Roger
- * @author  Greg Wilkins
- * @author  Konstantin Metlov
+ * @author Greg Wilkins
+ * @author Konstantin Metlov
  *
  */
 public class HTAccessHandler extends AbstractHttpHandler
@@ -443,7 +443,6 @@ public class HTAccessHandler extends AbstractHttpHandler
                         (!code.equals(UnixCrypt.crypt(pass,code))))
                     return false;
             }
-            ;
 
             if (_requireName.equals(USER))
             {
