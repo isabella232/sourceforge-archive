@@ -1,5 +1,5 @@
-Stable 2.4.7
-Dev    3.0.B05
+Jetty Versions
+--------------
 
 Jetty-3.0.0.rc1 - 22 Oct 2000
  + Added simple admin servlet.

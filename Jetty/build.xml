@@ -31,7 +31,7 @@ release     - Cleanup for release
   basedir=".">
   
   <property name="app.name"       value="Jetty3" />
-  <property name="version"        value="3.0.B05" />
+  <property name="version"        value="3.0.0" />
   
   <property name="src.dir"        value="${basedir}/src" />
   <property name="webapps"        value="${basedir}/webapps"/>
@@ -172,6 +172,7 @@ release     - Cleanup for release
     </javac>
     <copyfile src="LICENSE.html" dest="${jetty.webapp}/LICENSE.html" />
     <copyfile src="VERSION.TXT" dest="${jetty.webapp}/versions.txt" />
+    <copyfile src="doc/JsseSSL.html" dest="${jetty.webapp}/JsseSSL.html" />
     <jar jarfile="${jetty.war}"
          basedir="${jetty.webapp}" 
          >

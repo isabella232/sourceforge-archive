@@ -32,7 +32,7 @@ To use SSL you will also need to add the the jar below, which is
 a merge of the jsse, jnet and jcert jars from the JSSE package
 (see $JETTY_HOME/doc/JsseSSL.html for more details):
 
-    $JETTY_HOME/com.sun.net.ssl.jar
+    $JETTY_HOME/lib/com.sun.net.ssl.jar
 
 To run JSP with the JDK compiler, you will also need to add the
 jar containing the JDK compiler (if you wish to use another compiler
@@ -43,8 +43,9 @@ you will have to configure jasper):
 
 Running the Demo Server
 =======================
-A Demo server can be run on port 8080 with the command:
+A Demo server can be run on port 8080 with the commands:
 
+  cd $JETTY_HOME
   java com.mortbay.Jetty.Demo
 
 You can access this demo with at http://localhost:8080
@@ -146,6 +147,13 @@ For details see:
 How to Contribute
 =================
 Comments, contributions, feedback, bugs, testing, etc. please....
+
+The mailing lists are the best place to start:
+
+  http://www.egroups.com/group/jetty-announce/
+  http://www.egroups.com/group/jetty-discuss/
+  http://www.egroups.com/group/jetty-support/
+  http://sourceforge.net/mail/?group_id=7322
 
 
 NOTES

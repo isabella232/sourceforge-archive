@@ -20,8 +20,11 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/**
- * This is an example of a simple Servlet
+/* ------------------------------------------------------------ */
+/** Jetty Demo site servlet.
+ *
+ * @version $Id$
+ * @author Greg Wilkins (gregw)
  */
 public class JettyServlet extends HttpServlet
 {
@@ -46,13 +49,11 @@ public class JettyServlet extends HttpServlet
         }
         
         Code.debug("Resource=",resource);
-        String encoding=getServletContext().getMimeType(resource.getName());
-        if (encoding!=null)
-            response.setContentType(encoding);
 
         JettyPage page = new JettyPage(request.getContextPath(),path);
         if (page.getSection()!=null)
         {
+            response.setContentType("text/html");
             page.add(new Include(resource.getInputStream()));
             PrintWriter pout = response.getWriter();
             page.write(pout);
@@ -60,6 +61,9 @@ public class JettyServlet extends HttpServlet
         }
         else
         {
+            String type=getServletContext().getMimeType(resource.getName());
+            if (type!=null)
+                response.setContentType(type);
             if(resource.length()>0)
                 response.setContentLength((int)resource.length());
             IO.copy(resource.getInputStream(),

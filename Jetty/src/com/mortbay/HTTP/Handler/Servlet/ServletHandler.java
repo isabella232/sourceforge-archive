@@ -107,6 +107,20 @@ public class ServletHandler extends NullHandler
             ServletHolder holder = (ServletHolder)i.next();
             if (holder.isInitOnStartup())
                 holder.initialize();
+            
+            // XXX - This is horrible - got to find a better way.
+            if (holder.getClassName().equals("org.apache.jasper.servlet.JspServlet"))
+            {
+                ClassLoader jettyLoader=getHandlerContext().getClassLoader();
+                ClassLoader jasperLoader=(ClassLoader)
+                    _context.getAttribute("org.apache.tomcat.classloader");
+                if (jettyLoader!=null && jasperLoader==null)
+                {
+                    Code.debug("Fiddle classloader for Jasper: "+jettyLoader);
+                    _context.setAttribute("org.apache.tomcat.classloader",
+                                          jettyLoader);
+                }
+            }
         }
         
         super.start();

@@ -66,15 +66,6 @@ public class ServletHolder
         setServletName(className);
         _className=className;
         _config=new Config();
-
-        // XXX - This is horrible - got to find a better way.
-        if (className.equals("org.apache.jasper.servlet.JspServlet"))
-        {
-            Code.debug("Fiddle classloader for Jasper");
-            _context.setAttribute("org.apache.tomcat.classloader",
-                                  _handler.getHandlerContext()
-                                  .getClassLoader());
-        }
     }
 
     

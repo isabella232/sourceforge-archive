@@ -283,7 +283,6 @@ public class HandlerContext implements LifeCycle
      */
     public synchronized ClassLoader getClassLoader()
     {
-        
         return _loader;
     }
     
