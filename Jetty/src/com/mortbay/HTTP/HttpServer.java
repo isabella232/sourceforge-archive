@@ -532,8 +532,8 @@ public class HttpServer implements LifeCycle
 		"-context","/",
 		"-classPath","./servlets",
 		"-dynamic",
-		"-fileBase","./FileBase/",
-		"-files",
+		"-resourceBase","./FileBase/",
+		"-resources",
 		"8080",
 	    };
             args=newArgs;
@@ -556,7 +556,7 @@ public class HttpServer implements LifeCycle
             System.err.println
                 ("  -classPath <paths>            - Set contexts classpath.");	
             System.err.println
-                ("  -fileBase <dir>               - Set contexts File Base");    
+                ("  -resourceBase <dir>           - Set contexts File Base");    
 
             System.err.println
                 ("  -handler <class>              - Add a hander to the context");
@@ -566,7 +566,7 @@ public class HttpServer implements LifeCycle
             System.err.println
                 ("  -dynamic                      - Context serves dynamic servlets");
             System.err.println
-                ("  -files                        - Context serves files");
+                ("  -resources                    - Context serves resources as files");
             System.err.println
                 ("  -dump                         - Add a Dump handler to context");
             
@@ -577,8 +577,8 @@ public class HttpServer implements LifeCycle
 		 "  -content /\n"+
 		 "  -classPath ./servlets\n"+
 		 "  -dynamic\n"+
-		 "  -fileBase ./FileBase/\n"+
-		 "  -files\n"+
+		 "  -resourceBase ./FileBase/\n"+
+		 "  -resources\n"+
 		 "  8080");
             System.exit(1);
         }
@@ -640,9 +640,9 @@ public class HttpServer implements LifeCycle
                     {
 			context.setClassPath(args[++i]);
 		    }
-		    else if ("-fileBase".equals(args[i]))
+		    else if ("-resourceBase".equals(args[i]))
                     {
-			context.setFileBase(args[++i]);
+			context.setResourceBase(args[++i]);
 		    }
 		    else if ("-handler".equals(args[i]))
 		    {
@@ -666,9 +666,9 @@ public class HttpServer implements LifeCycle
 		    {
 			context.setServingDynamicServlets(true);
 		    }
-		    else if ("-files".equals(args[i]))
+		    else if ("-resources".equals(args[i]))
                     {
-			context.setServingFiles(true);
+			context.setServingResources(true);
 		    }
 		    else if ("-dump".equals(args[i]))
 		    {

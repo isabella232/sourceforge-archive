@@ -37,9 +37,8 @@ public class HandlerContext
     private HttpServer _httpServer;
     private List _handlers=new ArrayList(3);
     private ServletHandler _servletHandler;
-    private String _fileBase;
     private String _classPath;
-    private String _resourceBase;
+    private Resource _resourceBase;
     private Map _attributes = new HashMap(11);
     private Map _mimeMap ;
 
@@ -59,22 +58,6 @@ public class HandlerContext
 	return _httpServer;
     }
 
-    /* ------------------------------------------------------------ */
-    public String getFileBase()
-    {
-	return _fileBase;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Sets the file base for the context.
-     * Also sets the com.mortbay.HTTP.fileBase context attribute
-     * @param fileBase A directory name.
-     */
-    public void setFileBase(String fileBase)
-    {
-	_fileBase = fileBase;
-	_attributes.put("com.mortbay.HTTP.fileBase",fileBase);
-    }
 
     /* ------------------------------------------------------------ */
     public String getClassPath()
@@ -94,9 +77,28 @@ public class HandlerContext
     }
 
     /* ------------------------------------------------------------ */
-    public String getResourceBase()
+    public Resource getResourceBase()
     {
 	return _resourceBase;
+    }
+
+    /* ------------------------------------------------------------ */
+    public String getResourceFileBase()
+    {
+	if(_resourceBase==null)
+	    return null;
+	File fileBase = _resourceBase.getFile();
+	if (fileBase==null)
+	    return null;
+	return fileBase.getAbsolutePath();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setResourceBase(Resource resourceBase)
+    {
+	_resourceBase=resourceBase;
+	_attributes.put("com.mortbay.HTTP.resourceBase",
+			_resourceBase.toString());
     }
     
     /* ------------------------------------------------------------ */
@@ -106,23 +108,18 @@ public class HandlerContext
      * Also sets the com.mortbay.HTTP.resouceBase context attribute
      * @param resourceBase A URL prefix or directory name.
      */
-    public void setResourceBase(String resourceBaseUrl)
+    public void setResourceBase(String resourceBase)
     {
-	if (resourceBaseUrl!=null)
-	{
-	    if( resourceBaseUrl.startsWith("./"))
-		_resourceBase =
-		    "file:"+
-		    System.getProperty("user.dir")+
-		    resourceBaseUrl.substring(1);
-	    else if (resourceBaseUrl.startsWith("/"))
-		_resourceBase = "file:"+resourceBaseUrl;
-	    else
-		_resourceBase = resourceBaseUrl;
+	try{
+	    _resourceBase=Resource.newResource(resourceBase);
+	    _attributes.put("com.mortbay.HTTP.resourceBase",
+			    _resourceBase.toString());
 	}
-	else
-	    _resourceBase = resourceBaseUrl;
-	_attributes.put("com.mortbay.HTTP.resourceBase",_resourceBase);
+	catch(IOException e)
+	{
+	    Code.debug(e);
+	    throw new IllegalArgumentException(resourceBase+":"+e.toString());
+	}
     }
     
     /* ------------------------------------------------------------ */
@@ -280,13 +277,15 @@ public class HandlerContext
     }
     
     /* ------------------------------------------------------------ */
-    /** Setup context for serving files.
+    /** Setup context for serving Resources as files.
      * @param serve If true and there is no FileHandler instance in the
      * context, a FileHandler is added. If false, all FileHandler instances
      * are removed from the context.
      */
-    public synchronized void setServingFiles(boolean serve)
+    public synchronized void setServingResources(boolean serve)
     {
+	// XXX - may have to use a ResourceHandler here....
+	
 	FileHandler handler = (FileHandler)
 	    getHandler(com.mortbay.HTTP.Handler.FileHandler.class);
 	if (serve)
@@ -304,7 +303,7 @@ public class HandlerContext
     
 
     /* ------------------------------------------------------------ */
-    public boolean isServingFiles()
+    public boolean isServingResources()
     {
 	return getFileHandler()!=null;
     }
@@ -314,6 +313,13 @@ public class HandlerContext
     {
 	return (FileHandler)
 	    getHandler(com.mortbay.HTTP.Handler.FileHandler.class);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public FileHandler getResourceHandler()
+    {
+	return (FileHandler)
+	    getHandler(com.mortbay.HTTP.Handler.ResourceHandler.class);
     }
     
     /* ------------------------------------------------------------ */
@@ -344,11 +350,9 @@ public class HandlerContext
     {
 	_attributes.put(name,value);
 	if ("com.mortbay.HTTP.resourceBase".equals(name))
-	    _resourceBase=value.toString();
+	    setResourceBase(value.toString());
 	else if ("com.mortbay.HTTP.classPath".equals(name))
 	    _classPath=value.toString();
-	else if ("com.mortbay.HTTP.fileBase".equals(name))
-	    _fileBase=value.toString();
 	else if ("com.mortbay.HTTP.mimeMap".equals(name))
 	    _mimeMap=(Map)value;
     }
@@ -364,8 +368,6 @@ public class HandlerContext
 	    _resourceBase=null;
 	else if ("com.mortbay.HTTP.classPath".equals(name))
 	    _classPath=null;
-	else if ("com.mortbay.HTTP.fileBase".equals(name))
-	    _fileBase=null;
 	else if ("com.mortbay.HTTP.mimeMap".equals(name))
 	    _mimeMap=null;
     }

@@ -62,10 +62,9 @@ public class Context implements ServletContext, HttpSessionContext
     /* ------------------------------------------------------------ */
     String getRealPathInfo(String pathInfo)
     {
-	String fileBase=_handler.getHandlerContext().getFileBase();
+	String fileBase=_handler.getHandlerContext().getResourceFileBase();
 	if (fileBase==null)
 	    return null;
-	
 	return
 	    (fileBase+pathInfo).replace('/',File.separatorChar);
     }
@@ -121,12 +120,19 @@ public class Context implements ServletContext, HttpSessionContext
     public URL getResource(String uri)
 	throws MalformedURLException
     {
-	String resourceBase=_handler.getHandlerContext().getResourceBase();
+	Resource resourceBase=_handler.getHandlerContext().getResourceBase();
 	if (resourceBase==null)
 	    return null;
 
-	String url=resourceBase+uri;
-	return new URL(url);
+	try{
+	    Resource resource = resourceBase.relative(uri);
+	    return resource.getURL();
+	}
+	catch(IOException e)
+	{
+	    Code.warning(e);
+	    return null;
+	}
     }
     
     /* ------------------------------------------------------------ */

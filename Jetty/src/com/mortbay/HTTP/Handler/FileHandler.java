@@ -132,7 +132,8 @@ public class FileHandler extends NullHandler
     /* ----------------------------------------------------------------- */
     public void start()
     {
-        Log.event("FileHandler started in "+getHandlerContext().getFileBase());
+        Log.event("FileHandler started in "+
+		  getHandlerContext().getResourceBase());
         if (_maxCachedFiles>0 && _maxCachedFileSize>0 && _cache==null)
         {
             _cache=new CachedFile[_maxCachedFiles];
@@ -165,19 +166,22 @@ public class FileHandler extends NullHandler
     public String realPath(String pathSpec, String path)
         throws IllegalArgumentException
     {
-        String realpath=getHandlerContext().getFileBase();;
+	String fileBase=getHandlerContext().getResourceFileBase();
+	if(fileBase==null)
+	    return null;
+	
         if (pathSpec.startsWith("*."))
         {
-            realpath+=path;
+            fileBase+=path;
         }
         else
         {
             String info=PathMap.pathInfo(pathSpec,path);
             if (info!=null)
-                realpath+=info;
+                fileBase+=info;
         }
         
-        return realpath;
+        return fileBase;
     }
     
     /* ------------------------------------------------------------ */

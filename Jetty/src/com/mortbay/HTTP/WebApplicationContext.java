@@ -90,9 +90,8 @@ public class WebApplicationContext extends HandlerContext
 	    _servletHandler = getServletHandler();
 
 	    // FileBase and ResourcePath
-	    setFileBase(_directoryName);
-	    setResourceBase("file:"+_directoryName);
-	    setServingFiles(true);
+	    setResourceBase(_directoryName);
+	    setServingResources(true);
 	    
 	    _web = __xmlParser.parse(web);
 	    _web.getDocumentElement ().normalize();

@@ -179,10 +179,7 @@ public class Dump extends HttpServlet
         }
         catch (Exception e)
         {
-	    if (Code.debug())
-		Code.warning(e);
-	    else
-		Code.warning(e.toString());
+	    Code.warning(e);
         }
     
         page.write(pout);

@@ -44,10 +44,10 @@ public class Demo
 				     "/",
 				     "./webapps/jetty");
 	    context=server.getContext(null,"/handler/*");
-	    context.setFileBase("./FileBase/");
+	    context.setResourceBase("./FileBase/");
 	    context.addServlet("/dump,/dump/*","com.mortbay.Servlet.Dump");
 	    context.addServlet("/session","com.mortbay.Servlet.SessionDump");
-	    context.setServingFiles(true);
+	    context.setServingResources(true);
 	    context.addHandler(new DumpHandler());
 	    context.addHandler(new NotFoundHandler());
 	    
@@ -57,8 +57,8 @@ public class Demo
 	    context.addHandler(new NotFoundHandler());
 	    
 	    context=server.getContext(null,"/javadoc/*");
-	    context.setFileBase("./javadoc/");
-	    context.setServingFiles(true);
+	    context.setResourceBase("./javadoc/");
+	    context.setServingResources(true);
 
 	    // Start handlers and listener
 	    server.start();

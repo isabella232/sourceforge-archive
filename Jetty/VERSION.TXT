@@ -1,6 +1,11 @@
 Stable 2.4.5
 Dev    3.0.A98
 
+
+Jetty-3.0.A99 - ????????????
+
+   + Removed FileBase. Now use ResourceBase instead
+   + Added Resource abstraction
    + Make it compile cleanly with jikes.
    + Re-added commented out imports for JDK-1.1 compile
   

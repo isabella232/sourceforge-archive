@@ -58,6 +58,7 @@ public class StringUtil
     }
 
 
+    /* ------------------------------------------------------------ */
     /**
      * replace substrings within string.
      */
