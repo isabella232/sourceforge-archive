@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Fixed UrlEncoding for % + combination.
  + Generalized temp file handling
  + Fixed ContextLoader lib handling.
  + DateCache handles misses better.

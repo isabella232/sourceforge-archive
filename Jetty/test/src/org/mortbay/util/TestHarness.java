@@ -370,6 +370,7 @@ public class TestHarness
             test.checkEquals(code.size(),1,"encoded param size");
             test.checkEquals(code.encode(),"Name4=Value+4%21+%214","encoded encode");
             test.checkEquals(code.getString("Name4"),"Value 4! !4","encoded get");
+
             
             code.clear();
             code.decode("Name5=aaa&Name6=bbb");
@@ -389,7 +390,13 @@ public class TestHarness
             test.checkEquals(code.getValues("Name7").get(0),"aaa","list get");
             test.checkEquals(code.getValues("Name7").get(1),"b,b","list get");
             test.checkEquals(code.getValues("Name7").get(2),"ccc","list get");
-        }
+
+            code.clear();
+            code.decode("Name8=xx%2C++yy++%2Czz");
+            test.checkEquals(code.size(),1,"encoded param size");
+            test.checkEquals(code.encode(),"Name8=xx%2C++yy++%2Czz","encoded encode");
+            test.checkEquals(code.getString("Name8"),"xx,  yy  ,zz","encoded get");
+       }
         catch(Exception e){
             Code.warning(e);
             test.check(false,e.toString());

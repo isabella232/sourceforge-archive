@@ -168,7 +168,7 @@ public class UrlEncoded extends MultiMap
             while ((tokenizer.hasMoreTokens()))
             {
                 token = tokenizer.nextToken();
-            
+                
                 // breaking it at the "=" sign
                 int i = token.indexOf('=');
                 if (i<0)
@@ -232,6 +232,13 @@ public class UrlEncoded extends MultiMap
                     for (int j=0;j<i;j++)
                         buf.append(encoded.charAt(j));
                 }
+                if (n>0)
+                {
+                    try {buf.append(new String(bytes,0,n,charset));}
+                    catch(UnsupportedEncodingException e)
+                    {buf.append(new String(bytes,0,n));}
+                    n=0;
+                }        
                 buf.append(' ');
             }
             else if (c=='%' && (i+2)<len)
