@@ -561,6 +561,7 @@ public class Context implements ServletContext, HttpSessionContext
         /* ------------------------------------------------------------- */
         public int getMaxInactiveInterval()
         {
+            if (invalid) throw new IllegalStateException();
             return (int)(maxIdleTime / 1000);
         }
 

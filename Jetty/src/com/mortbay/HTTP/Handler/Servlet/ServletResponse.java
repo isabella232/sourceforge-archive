@@ -129,6 +129,7 @@ public class ServletResponse implements HttpServletResponse
             _writer.flush();
         else
             _httpResponse.getOutputStream().flush();
+        _httpResponse.commit();
     }
     
     /* ------------------------------------------------------------ */

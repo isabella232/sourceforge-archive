@@ -490,9 +490,10 @@ public class ChunkableOutputStream extends FilterOutputStream
             {
                 _buffer.reset();
                 notify(OutputObserver.__COMMITED);
-                _committed=true;
             }
         }
+        _written=true;
+        _committed=true;
     }
 
     /* ------------------------------------------------------------ */

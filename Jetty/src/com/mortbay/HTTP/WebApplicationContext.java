@@ -312,12 +312,19 @@ public class WebApplicationContext extends HandlerContext
             holder.setUserRoleLink(roleName,roleLink);
         }
 
-        // add default mapping
-        String defaultPath="/servlet/"+holder.getServletName()+"/*";
-        
+        // add default mappings
+        String defaultPath="/servlet/"+name+"/*";
         Code.debug("ServletMapping: ",holder.getServletName(),"=",defaultPath);
         _servletHandler.addHolder(defaultPath,holder);
+        if (!className.equals(name))
+        {
+            defaultPath="/servlet/"+className+"/*";
+            Code.debug("ServletMapping: ",holder.getServletName(),
+                       "=",defaultPath);
+            _servletHandler.addHolder(defaultPath,holder);
+        }
     }
+    
 
     /* ------------------------------------------------------------ */
     private void initServletMapping(XmlParser.Node node)
