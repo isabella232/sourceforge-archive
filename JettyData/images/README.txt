@@ -1,3 +1,0 @@
-
-Jetty images source files
-
