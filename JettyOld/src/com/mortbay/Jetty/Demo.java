@@ -36,7 +36,7 @@ public class Demo
 	if (args.length==1)
 	    Code.warning("Port argument no longer supported. See etc/JettyDemo.prp");
 	File filebase = new File("./FileBase");
-	Code.assert(filebase.isDirectory(),"Demo must be run in $MORTBAY_HOME");
+	Code.assert(filebase.isDirectory(),"Demo must be run in $JETTY_HOME");
 	
 	Page.setDefaultPageType("com.mortbay.Jetty.JettyLaF");
 	
