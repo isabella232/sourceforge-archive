@@ -276,7 +276,7 @@ public abstract class AbstractSessionManager implements SessionManager
         
         if (period!=old_period)
         {
-            synchronized(this)
+            synchronized(_sessions)
             {
                 _scavengePeriodMs=period;
                 if (_scavenger!=null)
@@ -425,7 +425,7 @@ public abstract class AbstractSessionManager implements SessionManager
             Object stale=null;
             
             // For each session
-            try
+            synchronized(_sessions)
             {
                 for (Iterator i = _sessions.values().iterator(); i.hasNext(); )
                 {
@@ -436,24 +436,6 @@ public abstract class AbstractSessionManager implements SessionManager
                         stale=LazyList.add(stale,session);
                     }
                 }
-            }
-            catch(ConcurrentModificationException e)
-            {
-                Code.ignore(e);
-                // Oops something changed while we were looking.
-                // Lock the context and try again.
-                // Set our priority high while we have the sessions locked
-                int oldPriority = Thread.currentThread().getPriority();
-                Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-                try
-                {
-                    synchronized(this)
-                    {
-                        stale=null;
-                        scavenge();
-                    }
-                }
-                finally {Thread.currentThread().setPriority(oldPriority);}
             }
 
             // Remove the stale sessions
@@ -653,19 +635,19 @@ public abstract class AbstractSessionManager implements SessionManager
                 }
             }
             
-            synchronized (AbstractSessionManager.this)
+            synchronized (AbstractSessionManager.this._sessions)
             {
                 _invalid=true;
                 _sessions.remove(_id);
-                
-                if(!__24SessionDestroyed && _sessionListeners != null)
-                {
-                    HttpSessionEvent event = new HttpSessionEvent(this);
-                    for(int i=0;i<_sessionListeners.size();i++)
-                        ((HttpSessionListener)_sessionListeners.get(i)).
-                            sessionDestroyed(event);       
-                }
-            } 
+            }
+            
+            if(!__24SessionDestroyed && _sessionListeners != null)
+            {
+                HttpSessionEvent event = new HttpSessionEvent(this);
+                for(int i=0;i<_sessionListeners.size();i++)
+                    ((HttpSessionListener)_sessionListeners.get(i)).
+                    sessionDestroyed(event);       
+            }
         }
 
         /* ------------------------------------------------------------- */
