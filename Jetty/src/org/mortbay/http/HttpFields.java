@@ -434,23 +434,22 @@ public class HttpFields
         "EEE dd-MMM-yy HH:mm:ss zzz",
         "EEE dd-MMM-yy HH:mm:ss",
     };
-    public static SimpleDateFormat __dateReceive[];
+    public static SimpleDateFormat __dateReceiveSource[];
+    public static ThreadLocal __dateReceiveCache=new ThreadLocal();
     static
     {
         __GMT.setID("GMT");
         __dateCache.setTimeZone(__GMT);
-        
-        __dateReceive = new SimpleDateFormat[__dateReceiveFmt.length];
-        for(int i=0;i<__dateReceive.length;i++)
+        __dateReceiveSource = new SimpleDateFormat[__dateReceiveFmt.length];
+        for(int i=0;i<__dateReceiveSource.length;i++)
         {
-            __dateReceive[i] =
+            __dateReceiveSource[i] =
                 new SimpleDateFormat(__dateReceiveFmt[i],Locale.US);
-            __dateReceive[i].setTimeZone(__GMT);
+            __dateReceiveSource[i].setTimeZone(__GMT);
         }
     }
                     
-    public final static String __01Jan1970=
-        HttpFields.formatDate(0,false);
+    public final static String __01Jan1970=HttpFields.formatDate(0,false);
 
 
     /* ------------------------------------------------------------ */
@@ -621,9 +620,9 @@ public class HttpFields
     private ArrayList _fields=new ArrayList(15);
     private int[] _index=new int[__maxCacheSize];
     private int _version;
-    private SimpleDateFormat _dateReceive[]=
-        new SimpleDateFormat[__dateReceive.length]; 
-
+    private SimpleDateFormat _dateReceive[]; 
+    private StringBuffer _dateBuffer;
+    private Calendar _calendar;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -988,11 +987,21 @@ public class HttpFields
         if (val==null)
             return -1;
 
+        if (_dateReceive==null)
+       {
+               _dateReceive=(SimpleDateFormat[])__dateReceiveCache.get();
+               if (_dateReceive==null)
+               {
+                    _dateReceive=(SimpleDateFormat[]) new SimpleDateFormat[__dateReceiveSource.length];
+                    __dateReceiveCache.set(_dateReceive);
+               }
+       }
+
         for (int i=0;i<_dateReceive.length;i++)
         {
             // clone formatter for thread safety
             if (_dateReceive[i]==null)
-                _dateReceive[i]=(SimpleDateFormat)__dateReceive[i].clone();
+                _dateReceive[i]=(SimpleDateFormat)__dateReceiveSource[i].clone();
             
             try{
                 Date date=(Date)_dateReceive[i].parseObject(val);
@@ -1041,7 +1050,7 @@ public class HttpFields
      */
     public void putDateField(String name, Date date)
     {
-        put(name, formatDate(date.getTime(),false));
+        putDateField(name,date.getTime());
     }
     
     /* -------------------------------------------------------------- */
@@ -1052,7 +1061,7 @@ public class HttpFields
      */
     public void addDateField(String name, Date date)
     {
-        add(name, formatDate(date.getTime(),false));
+        addDateField(name,date.getTime());
     }
     
     /* -------------------------------------------------------------- */
@@ -1063,7 +1072,15 @@ public class HttpFields
      */
     public void addDateField(String name, long date)
     {
-        add(name, formatDate(date,false));
+        if (_dateBuffer==null)
+        {
+            _dateBuffer=new StringBuffer(32);
+            _calendar=new GregorianCalendar(__GMT);
+        }
+        _dateBuffer.setLength(0);
+        _calendar.setTimeInMillis(date);
+        formatDate(_dateBuffer, _calendar, false);
+        add(name, _dateBuffer.toString());
     }
     
     /* -------------------------------------------------------------- */
@@ -1074,7 +1091,15 @@ public class HttpFields
      */
     public void putDateField(String name, long date)
     {
-        put(name, formatDate(date,false));
+        if (_dateBuffer==null)
+        {
+            _dateBuffer=new StringBuffer(32);
+            _calendar=new GregorianCalendar(__GMT);
+        }
+        _dateBuffer.setLength(0);
+        _calendar.setTimeInMillis(date);
+        formatDate(_dateBuffer, _calendar, false);
+        put(name, _dateBuffer.toString());
     }
 
     /* -------------------------------------------------------------- */
@@ -1265,6 +1290,10 @@ public class HttpFields
                 field.destroy();
         }
         _fields=null;
+        _index=null;
+        _dateBuffer=null;
+        _calendar=null;
+        _dateReceive=null;
     }
     
     /* ------------------------------------------------------------ */
