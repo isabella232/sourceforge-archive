@@ -37,6 +37,7 @@
         <Set name="MaxReadTimeMs">10000</Set>
         <Set name="MaxStopTimeMs">5000</Set>
         <Set name="LowResourcePersistTimeMs">2000</Set>
+        <Set name="confidentialPort">8443</Set>
       </New>
     </Arg>
   </Call>

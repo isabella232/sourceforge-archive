@@ -39,7 +39,11 @@ public class SocketListener
     private boolean _lastLow=false;
     private boolean _lastOut=false;
     private String _scheme=HttpMessage.__SCHEME;
-    
+    private String _integralScheme=HttpMessage.__SSL_SCHEME;
+    private String _confidentialScheme=HttpMessage.__SSL_SCHEME;
+    private int _integralPort =0;
+    private int _confidentialPort =0;
+
     /* ------------------------------------------------------------------- */
     public SocketListener()
     {}
@@ -253,6 +257,66 @@ public class SocketListener
             
         _lastOut=out;
         return out;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean isIntegral(HttpConnection connection)
+    {
+        return false;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean isConfifidential(HttpConnection connection)
+    {
+        return false;
+    }
+
+    /* ------------------------------------------------------------ */
+    public String getIntegralScheme()
+    {
+        return _integralScheme;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setIntegralScheme(String integralScheme)
+    {
+        _integralScheme = integralScheme;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public int getIntegralPort()
+    {
+        return _integralPort;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setIntegralPort(int integralPort)
+    {
+        _integralPort = integralPort;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getConfidentialScheme()
+    {
+        return _confidentialScheme;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setConfidentialScheme(String confidentialScheme)
+    {
+        _confidentialScheme = confidentialScheme;
+    }
+
+    /* ------------------------------------------------------------ */
+    public int getConfidentialPort()
+    {
+        return _confidentialPort;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setConfidentialPort(int confientialPort)
+    {
+        _confidentialPort = confientialPort;
     }
     
 }

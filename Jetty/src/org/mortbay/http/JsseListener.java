@@ -109,6 +109,18 @@ public abstract class JsseListener extends SocketListener
     {
         _needClientAuth = needClientAuth;
     }
+
+    /* ------------------------------------------------------------ */
+    public boolean isIntegral(HttpConnection connection)
+    {
+        return true;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean isConfifidential(HttpConnection connection)
+    {
+        return true;
+    }
     
     /* ------------------------------------------------------------ */
     protected abstract SSLServerSocketFactory createFactory()

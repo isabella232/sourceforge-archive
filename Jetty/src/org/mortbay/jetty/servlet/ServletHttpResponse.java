@@ -248,6 +248,7 @@ public class ServletHttpResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void reset()
     {
+        resetBuffer();
         _httpResponse.reset();
     }
     

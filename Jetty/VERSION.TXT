@@ -1,6 +1,10 @@
 Jetty Versions
 --------------
 
+Jetty-4.0.1 - 
+ + Added confidential and integral redirections to HttpListener
+ + Fixed ServletResponse.reset() to resetBuffer.
+
 Jetty-4.0.1RC1 - 29 April 2002
  + Improved flushing of chunked responses
  + Better handling if no realm configured.

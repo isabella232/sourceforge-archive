@@ -34,6 +34,15 @@ public interface HttpListener extends LifeCycle
     
     public abstract boolean isLowOnResources();
     public abstract boolean isOutOfResources();
+
+    public abstract boolean isIntegral(HttpConnection connection);
+    public abstract String getIntegralScheme();
+    public abstract int getIntegralPort();
+    
+    public abstract boolean isConfifidential(HttpConnection connection);
+    public abstract String getConfidentialScheme();
+    public abstract int getConfidentialPort();
+    
 }
 
 

@@ -326,12 +326,43 @@ public class SecurityConstraint
             }
                 
             // Does it fail a data constraint
-            if (sc.hasDataConstraint() &&
-                sc.getDataConstraint() > SecurityConstraint.DC_NONE &&
-                !"https".equalsIgnoreCase(request.getScheme()))   
+            if (sc.hasDataConstraint())
             {
-                response.sendError(HttpResponse.__403_Forbidden);
-                return -1;
+                HttpConnection connection=request.getHttpConnection();
+                HttpListener listener = connection.getListener();
+                
+                switch(sc.getDataConstraint())
+                {
+                  case SecurityConstraint.DC_INTEGRAL:
+                      if (listener.isIntegral(connection))
+                          break;
+
+                      if (listener.getIntegralPort()>0)
+                          response.sendRedirect(listener.getIntegralScheme()+
+                                                "://"+request.getHost()+
+                                                ":"+listener.getIntegralPort()+
+                                                request.getPath());
+                      else
+                          response.sendError(HttpResponse.__403_Forbidden);                   
+                      return -1;
+
+                  case SecurityConstraint.DC_CONFIDENTIAL:
+                      if (listener.isConfifidential(connection))
+                          break;
+
+                      if (listener.getConfidentialPort()>0)
+                          response.sendRedirect(listener.getConfidentialScheme()+
+                                                "://"+request.getHost()+
+                                                ":"+listener.getConfidentialPort()+
+                                                request.getPath());
+                      else
+                          response.sendError(HttpResponse.__403_Forbidden);
+                      return -1;
+                      
+                  default:
+                      response.sendError(HttpResponse.__403_Forbidden);
+                      return -1;
+                }
             }
             
             // Matches a constraint that does not fail
