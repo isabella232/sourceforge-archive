@@ -115,28 +115,64 @@ The relevant sections of the jetty xml configuration file are:
     &lt;/Call&gt;
   &lt;/Call&gt;
 
+
+
 <font color="blue">
   &lt;!-- =============================================================== --&gt;
-  &lt;!-- Add a transaction manager                                       --&gt;
+  &lt;!-- Add a transaction manager and datasources                       --&gt;
   &lt;!-- =============================================================== --&gt;
 </font>
   &lt;Call name="addService"&gt;
     &lt;Arg&gt;
       &lt;New class="org.mortbay.jetty.plus.JotmService"&gt;
         &lt;Set name="Name"&gt;TransactionMgr&lt;/Set&gt;
-           &lt;Call name="addDataSource"&gt;
-           &lt;Arg&gt;jdbc/myDB&lt;/Arg&gt;              <font color="blue"> &lt;!-- jndi name </font>
-           &lt;Arg&gt;org.hsqldb.jdbcDriver&lt;/Arg&gt;  <font color="blue"> &lt;!-- driver class  --&gt;</font>
-           &lt;Arg&gt;jdbc:hsqldb:extra/etc/tmtest&lt;/Arg&gt; <font color="blue"> &lt;!-- url --&gt; </font>
-           &lt;Arg&gt;sa&lt;/Arg&gt;                     <font color="blue"> &lt;!-- username --&gt;</font>
-           &lt;Arg&gt;&lt;/Arg&gt;                       <font color="blue"> &lt;!-- password --&gt;</font>
-           &lt;Arg&gt;8&lt;/Arg&gt;                      <font color="blue"> &lt;!-- inital connection pool size --&gt;</font>  
-           &lt;Arg&gt;4&lt;/Arg&gt;                      <font color="blue"> &lt;!-- min connection pool size --&gt;</font> 
-           &lt;Arg&gt;15&lt;/Arg&gt;                     <font color="blue"> &lt;!-- max connection pool size --&gt;</font> 
+        <font color="blue"> &lt;!-- set up a pooled DataSource --&gt;</font>
+         &lt;Call name="addPooledDataSource"&gt;
+             &lt;Arg&gt;jdbc/myDB&lt;/Arg&gt;   <font color="blue"&lt;!-- client lookup jndi name of datasource  --&gt;</font>
+             <font color="blue">&lt;!-- set up the datasource --&gt;</font>
+             &lt;Arg&gt;
+               <font color="blue">
+               &lt;!-- Uncomment one of the following types of XADataSource        --&gt;
+               &lt;!-- according to your type of database:                         --&gt;
+               &lt;!-- New class="org.enhydra.jdbc.sybase.SybaseXADataSource"      --&gt;
+               &lt;!-- New class="org.enhydra.jdbc.informix.InformixXADataSource"  --&gt;
+               &lt;!-- New class="org.enhydra.jdbc.oracle.OracleXADataSource"      --&gt;
+               </font>
+               &lt;New class="org.enhydra.jdbc.standard.StandardXADataSource"&gt;
+                 &lt;Set name="DriverName"&gt;org.hsqldb.jdbcDriver&lt;/Set&gt;
+                 &lt;Set name="Url"&gt;jdbc:hsqldb:extra/etc/tmtest&lt;/Set&gt;
+                 &lt;Set name="User"&gt;sa&lt;/Set&gt;
+                 &lt;Set name="Password"&gt;&lt;/Set&gt;
+                 <font color="blue">
+                 &lt;!-- Uncomment to setup isolation level as required            --&gt;
+                 </font>
+                 &lt;!--
+                 &lt;Set name="TransactionIsolation"&gt;&lt;Get class="java.sql.Connection" name="TRANSACTION_SERIALIZABLE"/&gt;&lt;/Set&gt; 
+                 --&gt;
+               &lt;/New&gt;
+             &lt;/Arg&gt;
+             <font color="blue">&lt;!-- set up a pool for the datasource --&gt;</font>
+             &lt;Arg&gt;
+               &lt;New class="org.enhydra.jdbc.pool.StandardXAPoolDataSource"&gt;
+                 &lt;Arg type="Integer"&gt;4&lt;/Arg&gt;          <font color="blue">&lt;!-- initial size of pool --&gt;</font>     
+                 &lt;Set name="MinSize"&gt;4&lt;/Set&gt;                
+                 &lt;Set name="MaxSize"&gt;15&lt;/Set&gt; 
+                 <font color="blue">&lt;!-- Uncomment to setup other pool params as required          --&gt;</font>
+                 &lt;!--
+                 &lt;Set name="SleepTime"&gt;10&lt;/Set&gt;
+                 &lt;Set name="LifeTime"&gt;10&lt;/Set&gt;
+                 &lt;Set name="DeadLockMaxWait"&gt;10&lt;/Set&gt;
+                 &lt;Set name="DeadLockRetryWait"&gt;10&lt;/Set&gt;
+                 &lt;Set name="LoginTimeout"&gt;10&lt;/Set&gt;
+                 &lt;Set name="Debug" type="boolean"&gt;true&lt;/Set&gt;
+                 --&gt;
+               &lt;/New&gt;
+             &lt;/Arg&gt;               
         &lt;/Call&gt;
      &lt;/New&gt;
    &lt;/Arg&gt;
   &lt;/Call&gt;
+
 
 
  
