@@ -6,6 +6,7 @@ Jetty Versions
  + fixed jaas logout for jetty-jboss
  + fixed deployment of ejb-link elements in web.xml with jboss
  + Update to jasper 5.0.27
+ + Added parameters for acceptQueueSize and lowResources level.
 
 Jetty-5.0.RC2 - 2 July 2004
  + Fixed DIGEST challenge delimiters

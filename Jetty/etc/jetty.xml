@@ -52,13 +52,15 @@
     <Arg>
       <New class="org.mortbay.http.SocketListener">
         <Set name="Port"><SystemProperty name="jetty.port" default="8080"/></Set>
-        <Set name="MinThreads">20</Set>
-        <Set name="MaxThreads">100</Set>
+	<Set name="PoolName">P1</Set>
+        <Set name="MinThreads">10</Set>
+        <Set name="MaxThreads">200</Set>
         <Set name="MaxIdleTimeMs">30000</Set>
-        <Set name="LowResourcePersistTimeMs">5000</Set>
+        <Set name="lowResources">50</Set>
+        <Set name="LowResourcePersistTimeMs">2000</Set>
+        <Set name="acceptQueueSize">0</Set>
         <Set name="ConfidentialPort">8443</Set>
         <Set name="IntegralPort">8443</Set>
-	<Set name="PoolName">P1</Set>
       </New>
     </Arg>
   </Call>
@@ -75,6 +77,7 @@
         <Set name="Port">8443</Set>
 	<Set name="PoolName">P1</Set>
         <Set name="MaxIdleTimeMs">30000</Set>
+        <Set name="lowResources">30</Set>
         <Set name="LowResourcePersistTimeMs">2000</Set>
         <Set name="Keystore"><SystemProperty name="jetty.home" default="."/>/etc/demokeystore</Set>
 	<Set name="Password">OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4</Set>

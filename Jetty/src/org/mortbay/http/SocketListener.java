@@ -55,11 +55,13 @@ public class SocketListener
     private int _bufferSize=8192;
     private int _bufferReserve=512;
     private HttpHandler _handler;
+    private int _lowResources;
 
     private transient HttpServer _server;
     private transient boolean _isLow=false;
     private transient boolean _isOut=false;
     private transient long _warned=0;
+
     
     /* ------------------------------------------------------------------- */
     public SocketListener()
@@ -314,12 +316,14 @@ public class SocketListener
     /* ------------------------------------------------------------ */
     /** Get the lowOnResource state of the listener.
      * A SocketListener is considered low on resources if the total number of
-     * threads is maxThreads and the number of idle threads is less than minThreads.
+     * the number of idle threads is less than the lowResource value (or minThreads if not set)
      * @return True if low on idle threads. 
      */
     public boolean isLowOnResources()
     {
-        boolean low = (getMaxThreads()-getThreads()+getIdleThreads())<getMinThreads();
+        int spare=getMaxThreads()-getThreads();
+        int lr = _lowResources>0?_lowResources:getMinThreads();
+        boolean low = (spare+getIdleThreads())<lr;
         
         if (low && !_isLow)
         {
@@ -424,5 +428,23 @@ public class SocketListener
     {
         _confidentialPort = confidentialPort;
     }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the lowResources threshold
+     */
+    public int getLowResources()
+    {
+        return _lowResources;
+    }
     
+    /* ------------------------------------------------------------ */
+    /**
+     * @param lowResources The number of idle threads needed to not be in
+     * low resources state.
+     */
+    public void setLowResources(int lowResources)
+    {
+        _lowResources = lowResources;
+    }
 }

@@ -39,6 +39,7 @@ public class SocketListenerMBean extends HttpListenerMBean
     protected void defineManagedResource()
     {
         super.defineManagedResource();
+        defineAttribute("lowResources");
         defineAttribute("lowResourcePersistTimeMs");
         defineAttribute("identifyListener");
     }

@@ -21,11 +21,13 @@
     <Arg>
       <New class="org.mortbay.http.SocketListener">
         <Set name="port"><SystemProperty name="jetty.port" default="8080"/></Set>
-        <Set name="minThreads">10</Set>
-        <Set name="maxThreads">50</Set>
-        <Set name="maxIdleTimeMs">5000</Set>
-        <Set name="lowResourcePersistTimeMs">1000</Set>
         <Set name="poolName">StressTest</Set>
+        <Set name="minThreads">10</Set>
+        <Set name="maxThreads">100</Set>
+        <Set name="maxIdleTimeMs">5000</Set>
+        <Set name="lowResources">5</Set>
+        <Set name="lowResourcePersistTimeMs">1000</Set>
+        <Set name="acceptQueueSize">100</Set>
       </New>
     </Arg>
   </Call>
@@ -34,6 +36,7 @@
   <!-- Add and configure a NIO HTTP listener to port 8888              -->
   <!-- The default port can be changed using: java -Djetty.port=80     -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!--
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.nio.SocketChannelListener">
@@ -44,11 +47,13 @@
       </New>
     </Arg>
   </Call>
+  -->
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Add a AJP13 listener on port 8009                               -->
   <!-- This protocol can be used with mod_jk in apache, IIS etc.       -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!--
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.ajp.AJP13Listener">
@@ -58,6 +63,7 @@
       </New>
     </Arg>
   </Call>
+  -->
 
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
