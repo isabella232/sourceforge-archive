@@ -1,5 +1,5 @@
 /*
- * @(#)HttpSessionBindingListener.java	1.6 97/10/15
+ * $Id$
  * 
  * Copyright (c) 1997 Sun Microsystems, Inc. All Rights Reserved.
  * 
@@ -37,12 +37,10 @@ import java.util.EventListener;
  * @see HttpSession
  * @see HttpSessionBindingEvent
  *
- * @version	1.6, 10/15/97
  */
-public
-interface HttpSessionBindingListener
-extends EventListener
-{
+
+public interface HttpSessionBindingListener extends EventListener {
+
     /**
      * Notifies the listener that it is being bound into
      * a session.
@@ -50,6 +48,7 @@ extends EventListener
      * @param event the event identifying the session into
      * which the listener is being bound.
      */
+
     public void valueBound (HttpSessionBindingEvent event);
 
     /**
@@ -59,6 +58,7 @@ extends EventListener
      * @param event the event identifying the session from
      * which the listener is being unbound.
      */
+
     public void valueUnbound (HttpSessionBindingEvent event);
 }
 

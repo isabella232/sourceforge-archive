@@ -1,5 +1,5 @@
 /*
- * @(#)HttpServlet.java	1.32 97/11/21
+ * $Id$
  * 
  * Copyright (c) 1996-1997 Sun Microsystems, Inc. All Rights Reserved.
  * 
@@ -26,7 +26,9 @@ import java.io.PrintWriter;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
+import java.text.MessageFormat;
 import java.util.Enumeration;
+import java.util.ResourceBundle;
 
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletException;
@@ -85,15 +87,21 @@ import javax.servlet.ServletResponse;
  * href="http://java.sun.com/Series/Tutorial/java/threads/multithreaded.html">
  * Java Tutorial on Multithreaded Programming</a>.
  *
- * @version 1.32, 11/21/97
  */
 
-public abstract class HttpServlet extends GenericServlet 
-    implements java.io.Serializable {
+public abstract class HttpServlet extends GenericServlet
+    implements java.io.Serializable
+{
 
+    private static final String LSTRING_FILE =
+	"javax.servlet.http.LocalStrings";
+    private static ResourceBundle lStrings =
+	ResourceBundle.getBundle(LSTRING_FILE);
+    
     /**
      * The default constructor does nothing.
      */
+
     public HttpServlet () { }
 
 
@@ -149,12 +157,13 @@ public abstract class HttpServlet extends GenericServlet
      * 
      * @see javax.servlet.ServletResponse#setContentType
      */
+
     protected void doGet (HttpServletRequest req, HttpServletResponse resp)
-      throws ServletException, IOException
-      {
-	  resp.sendError (HttpServletResponse.SC_BAD_REQUEST,
-			  "GET is not supported by this URL");
-      }
+	throws ServletException, IOException
+    {
+	String msg = lStrings.getString("http.method_get_not_supported");
+	resp.sendError (HttpServletResponse.SC_BAD_REQUEST, msg);
+    }
 
 
     /**
@@ -176,10 +185,10 @@ public abstract class HttpServlet extends GenericServlet
      * time and midnight, January 1, 1970 UTC.  Negative numbers
      * indicate this time is unknown.
      */
-    protected long getLastModified (HttpServletRequest req)
-      {
-	  return -1;
-      }
+
+    protected long getLastModified (HttpServletRequest req) {
+	return -1;
+    }
 
 
     /*
@@ -200,15 +209,16 @@ public abstract class HttpServlet extends GenericServlet
      * @exception IOException if detected when handling the request
      * @exception ServletException if the request could not be handled
      */
+
     private void doHead (HttpServletRequest req, HttpServletResponse resp)
-      throws ServletException, IOException
-      {
-	  NoBodyResponse response = new NoBodyResponse(resp);
-
-	  doGet (req, response);
-	  response.setContentLength ();
-      }
-
+	throws ServletException, IOException
+    {
+	NoBodyResponse response = new NoBodyResponse(resp);
+	
+	doGet (req, response);
+	response.setContentLength ();
+    }
+    
 
     /**
      *
@@ -250,12 +260,13 @@ public abstract class HttpServlet extends GenericServlet
      *
      * @see javax.servlet.ServletResponse#setContentType
      */
+
     protected void doPost (HttpServletRequest req, HttpServletResponse resp)
-      throws ServletException, IOException
-      {
-	  resp.sendError (HttpServletResponse.SC_BAD_REQUEST,
-			  "POST is not supported by this URL");
-      }
+	throws ServletException, IOException
+    {
+	String msg = lStrings.getString("http.method_post_not_supported");
+	resp.sendError (HttpServletResponse.SC_BAD_REQUEST, msg);	
+    }
 
     /**
      * Performs the HTTP PUT operation; the default implementation
@@ -286,12 +297,13 @@ public abstract class HttpServlet extends GenericServlet
      * @exception IOException if detected when handling the request
      * @exception ServletException if the request could not be handled
      */
+
     protected void doPut (HttpServletRequest req, HttpServletResponse resp)
-      throws ServletException, IOException
-      {
-	  resp.sendError (HttpServletResponse.SC_BAD_REQUEST,
-			  "PUT is not supported by this URL");
-      }
+	throws ServletException, IOException
+    {
+	String msg = lStrings.getString("http.method_put_not_supported");
+	resp.sendError (HttpServletResponse.SC_BAD_REQUEST, msg);	
+    }
 
     /**
      * Performs the HTTP DELETE operation; the default implementation
@@ -311,23 +323,25 @@ public abstract class HttpServlet extends GenericServlet
      * @exception IOException if detected when handling the request
      * @exception ServletException if the request could not be handled
      */
+
     protected void doDelete (HttpServletRequest req,
 			     HttpServletResponse resp)
-      throws ServletException, IOException
-      {
-	  resp.sendError (HttpServletResponse.SC_BAD_REQUEST,
-			  "DELETE is not supported by this URL");
-      }
+	throws ServletException, IOException
+    {
 
+	String msg = lStrings.getString("http.method_delete_not_supported");
+	resp.sendError (HttpServletResponse.SC_BAD_REQUEST, msg);
+    }
+    
 
     private Method [] getAllDeclaredMethods (Class c) {
 	if (c.getName().equals("javax.servlet.http.HttpServlet"))
-	  return null;
+	    return null;
 	
 	int j=0;
 	Method [] parentMethods = getAllDeclaredMethods(c.getSuperclass());
 	Method [] thisMethods = c.getDeclaredMethods();
-
+	
 	if (parentMethods!=null) {
 	    Method [] allMethods = new Method [parentMethods.length + thisMethods.length];
 	    for (int i=0; i<parentMethods.length; i++) {
@@ -362,60 +376,61 @@ public abstract class HttpServlet extends GenericServlet
      * @exception IOException if detected when handling the request
      * @exception ServletException if the request could not be handled
      */
+
     protected void doOptions (HttpServletRequest req, HttpServletResponse resp)
-      throws ServletException, IOException
-      {
-	  Method [] methods = getAllDeclaredMethods(this.getClass());
-	  
-	  boolean ALLOW_GET = false;
-	  boolean ALLOW_HEAD = false;
-	  boolean ALLOW_POST = false;
-	  boolean ALLOW_PUT = false;
-	  boolean ALLOW_DELETE = false;
-	  boolean ALLOW_TRACE = true;
-	  boolean ALLOW_OPTIONS = true;
-	  
-	  for (int i=0; i<methods.length; i++) {
-	      Method m = methods[i];
-	      
-	      if (m.getName().equals("doGet")) {
-		  ALLOW_GET = true;
-		  ALLOW_HEAD = true;
-	      }
-	      if (m.getName().equals("doPost")) 
-		ALLOW_POST = true;
-	      if (m.getName().equals("doPut"))
-		ALLOW_PUT = true;
-	      if (m.getName().equals("doDelete"))
-		ALLOW_DELETE = true;
-	      
-	  }
+	throws ServletException, IOException
+    {
+	Method [] methods = getAllDeclaredMethods(this.getClass());
+	
+	boolean ALLOW_GET = false;
+	boolean ALLOW_HEAD = false;
+	boolean ALLOW_POST = false;
+	boolean ALLOW_PUT = false;
+	boolean ALLOW_DELETE = false;
+	boolean ALLOW_TRACE = true;
+	boolean ALLOW_OPTIONS = true;
+	
+	for (int i=0; i<methods.length; i++) {
+	    Method m = methods[i];
 	    
-	  String allow = null;
-	  if (ALLOW_GET)
+	    if (m.getName().equals("doGet")) {
+		ALLOW_GET = true;
+		ALLOW_HEAD = true;
+	    }
+	    if (m.getName().equals("doPost")) 
+		ALLOW_POST = true;
+	    if (m.getName().equals("doPut"))
+		ALLOW_PUT = true;
+	    if (m.getName().equals("doDelete"))
+		ALLOW_DELETE = true;
+	    
+	}
+	
+	String allow = null;
+	if (ALLOW_GET)
 	    if (allow==null) allow="GET";
-	  if (ALLOW_HEAD)
+	if (ALLOW_HEAD)
 	    if (allow==null) allow="HEAD";
 	    else allow += ", " + "HEAD";
-	  if (ALLOW_POST)
+	if (ALLOW_POST)
 	    if (allow==null) allow="POST";
 	    else allow += ", " + "POST";
-	  if (ALLOW_PUT)
+	if (ALLOW_PUT)
 	    if (allow==null) allow="PUT";
 	    else allow += ", " + "PUT";
-	  if (ALLOW_DELETE)
+	if (ALLOW_DELETE)
 	    if (allow==null) allow="DELETE";
 	    else allow += ", " + "DELETE";
-	  if (ALLOW_TRACE)
+	if (ALLOW_TRACE)
 	    if (allow==null) allow="TRACE";
 	    else allow += ", " + "TRACE";
-	  if (ALLOW_OPTIONS)
+	if (ALLOW_OPTIONS)
 	    if (allow==null) allow="OPTIONS";
 	    else allow += ", " + "OPTIONS";
-
-	  resp.setHeader("Allow", allow);
-      }
-
+	
+	resp.setHeader("Allow", allow);
+    }
+    
     /**
      * Performs the HTTP TRACE operation; the default implementation of
      * this method causes a response with a message containing all of
@@ -429,9 +444,11 @@ public abstract class HttpServlet extends GenericServlet
      * @exception IOException if detected when handling the request
      * @exception ServletException if the request could not be handled
      */
-    protected void doTrace (HttpServletRequest req, HttpServletResponse resp) 
-      throws ServletException, IOException {
 
+    protected void doTrace (HttpServletRequest req, HttpServletResponse resp) 
+	throws ServletException, IOException
+    {
+	
 	int responseLength;
 	
 	String CRLF = "\r\n";
@@ -439,11 +456,10 @@ public abstract class HttpServlet extends GenericServlet
 	
 	Enumeration reqHeaderEnum = req.getHeaderNames();
 	
-	while( reqHeaderEnum.hasMoreElements() )
-	  {
-	      String headerName = (String)reqHeaderEnum.nextElement();
-	      responseString += CRLF + headerName + ": " + req.getHeader(headerName); 
-	  }
+	while( reqHeaderEnum.hasMoreElements() ) {
+	    String headerName = (String)reqHeaderEnum.nextElement();
+	    responseString += CRLF + headerName + ": " + req.getHeader(headerName); 
+	}
 	
 	responseString += CRLF;
 	
@@ -474,74 +490,80 @@ public abstract class HttpServlet extends GenericServlet
      * 
      * @see javax.servlet.Servlet#service
      */
+
     protected void service (HttpServletRequest req, HttpServletResponse resp)
-      throws ServletException, IOException
-      {
-	  String			method = req.getMethod ();
-
-	  if (method.equals ("GET")) {
-	      long		ifModifiedSince;
-	      long		lastModified;
-	      long		now;
-
-	      //
-	      // HTTP 1.0 conditional GET just uses If-Modified-Since fields
-	      // in the header.  HTTP 1.1 has more conditional GET options.
-	      //
-	      // We call getLastModified() only once; it won't be cheap.
-	      //
-	      ifModifiedSince = req.getDateHeader ("If-Modified-Since");
-	      lastModified = getLastModified (req);
-	      maybeSetLastModified (resp, lastModified);
-
-
-	      if (ifModifiedSince == -1 || lastModified == -1)
-		doGet (req, resp);
-	      else {
-		  now = System.currentTimeMillis ();
-
-		  //
-		  // Times in the future are invalid ... but we can't treat
-		  // them as "hard errors", so for now we accept extra load.
-		  //
-		  if (now < ifModifiedSince || ifModifiedSince < lastModified)
-		    doGet (req, resp);
-		  else
-		    resp.sendError (HttpServletResponse.SC_NOT_MODIFIED);
-	      }
-
-	  } else if (method.equals ("HEAD")) {
-	      long		lastModified;
-
-	      lastModified = getLastModified (req);
-	      maybeSetLastModified (resp, lastModified);
-	      doHead (req, resp);
-
-	  } else if (method.equals ("POST")) {
-	      doPost (req, resp);
-
-	  } else if (method.equals ("PUT")) {
-	      doPut(req, resp);	
-
-	  } else if (method.equals ("DELETE")) {
-	      doDelete(req, resp);
-
-	  } else if (method.equals ("OPTIONS")) {
-	      doOptions(req,resp);
-
-	  } else if (method.equals ("TRACE")) {
-	      doTrace(req,resp);
+	throws ServletException, IOException
+    {
+	String			method = req.getMethod ();
 	
-	  } else {
-	      //
-	      // Note that this means NO servlet supports whatever
-	      // method was requested, anywhere on this server.
-	      //
-	      resp.sendError (HttpServletResponse.SC_NOT_IMPLEMENTED,
-			      "Method '" + method + "' is not defined in RFC 2068");
-	  }
-      }
+	if (method.equals ("GET")) {
+	    long		ifModifiedSince;
+	    long		lastModified;
+	    long		now;
+	    
+	    //
+	    // HTTP 1.0 conditional GET just uses If-Modified-Since fields
+	    // in the header.  HTTP 1.1 has more conditional GET options.
+	    //
+	    // We call getLastModified() only once; it won't be cheap.
+	    //
+	    ifModifiedSince = req.getDateHeader ("If-Modified-Since");
+	    lastModified = getLastModified (req);
+	    maybeSetLastModified (resp, lastModified);
+	    
+	    
+	    if (ifModifiedSince == -1 || lastModified == -1)
+		doGet (req, resp);
+	    else {
+		now = System.currentTimeMillis ();
+		
+		//
+		// Times in the future are invalid ... but we can't treat
+		// them as "hard errors", so for now we accept extra load.
+		//
+		if (now < ifModifiedSince || ifModifiedSince < lastModified)
+		    doGet (req, resp);
+		else
+		    resp.sendError (HttpServletResponse.SC_NOT_MODIFIED);
+	    }
+	    
+	} else if (method.equals ("HEAD")) {
+	    long		lastModified;
+	    
+	    lastModified = getLastModified (req);
+	    maybeSetLastModified (resp, lastModified);
+	    doHead (req, resp);
+	    
+	} else if (method.equals ("POST")) {
+	    doPost (req, resp);
+	    
+	} else if (method.equals ("PUT")) {
+	    doPut(req, resp);	
+	    
+	} else if (method.equals ("DELETE")) {
+	    doDelete(req, resp);
+	    
+	} else if (method.equals ("OPTIONS")) {
+	    doOptions(req,resp);
+	    
+	} else if (method.equals ("TRACE")) {
+	    doTrace(req,resp);
+	    
+	} else {
+	    //
+	    // Note that this means NO servlet supports whatever
+	    // method was requested, anywhere on this server.
+	    //
 
+	    String errMsg = lStrings.getString("http.method_not_implemented");
+	    Object[] errArgs = new Object[1];
+	    errArgs[0] = method;
+	    errMsg = MessageFormat.format(errMsg, errArgs);
+	    
+	    resp.sendError (HttpServletResponse.SC_NOT_IMPLEMENTED, errMsg);
+	}
+    }
+    
 
     /*
      * Sets the Last-Modified entity header field, if it has not
@@ -550,15 +572,15 @@ public abstract class HttpServlet extends GenericServlet
      * written.  A subclass might have set this header already, so we
      * check.
      */
-    private void maybeSetLastModified (
-	HttpServletResponse	resp,
-	long			lastModified) {
-	if (resp.containsHeader ("Last-Modified"))
-	  return;
-	if (lastModified >= 0)
-	  resp.setDateHeader ("Last-Modified", lastModified);
-    }
 
+    private void maybeSetLastModified (HttpServletResponse resp,
+				       long lastModified) {
+	if (resp.containsHeader ("Last-Modified"))
+	    return;
+	if (lastModified >= 0)
+	    resp.setDateHeader ("Last-Modified", lastModified);
+    }
+    
     /**
      * Implements the high level <code>Servlet.service</code> method by
      * delegating to the HTTP-specific service method.  This method is
@@ -573,20 +595,21 @@ public abstract class HttpServlet extends GenericServlet
      * 
      * @see javax.servlet.Servlet#service
      */
-    public void service(ServletRequest req, ServletResponse res)
-      throws ServletException, IOException
-      {
-	  HttpServletRequest	request;
-	  HttpServletResponse	response;
 
-	  try {
-	      request = (HttpServletRequest) req;
-	      response = (HttpServletResponse) res;
-	  } catch (ClassCastException e) {
-	      throw new ServletException ("non-HTTP request or response");
-	  }
-	  service (request, response);
-      }
+    public void service(ServletRequest req, ServletResponse res)
+	throws ServletException, IOException
+    {
+	HttpServletRequest	request;
+	HttpServletResponse	response;
+	
+	try {
+	    request = (HttpServletRequest) req;
+	    response = (HttpServletResponse) res;
+	} catch (ClassCastException e) {
+	    throw new ServletException ("non-HTTP request or response");
+	}
+	service (request, response);
+    }
 }
 
 
@@ -675,12 +698,25 @@ class NoBodyResponse implements HttpServletResponse {
 
     public void sendRedirect (String location) throws IOException
       { resp.sendRedirect (location); }
+    
+    public String encodeURL (String url) 
+      { return resp.encodeURL(url); }
 
+    public String encodeRedirectURL (String url)
+      { return resp.encodeRedirectURL(url); }
+
+    /**
+     * @deprecated
+     */
     public String encodeUrl (String url) 
-      { return resp.encodeUrl(url); }
+      { return this.encodeURL(url); }
 
+    /**
+     * @deprecated
+     */
     public String encodeRedirectUrl (String url)
-      { return resp.encodeRedirectUrl(url); }
+      { return this.encodeRedirectURL(url); }
+
 }
 
 
@@ -689,6 +725,12 @@ class NoBodyResponse implements HttpServletResponse {
  */
 // file private
 class NoBodyOutputStream extends ServletOutputStream {
+
+    private static final String LSTRING_FILE =
+	"javax.servlet.http.LocalStrings";
+    private static ResourceBundle lStrings =
+	ResourceBundle.getBundle(LSTRING_FILE);
+
     private int		contentLength = 0;
 
     // file private
@@ -704,10 +746,16 @@ class NoBodyOutputStream extends ServletOutputStream {
     }
 
     public void write (byte buf [], int offset, int len)
-      throws IOException {
-	  if (len >= 0)
+	throws IOException
+    {
+	if (len >= 0) {
 	    contentLength += len;
-	  else
+	} else {
+	    // XXX
+	    // isn't this really and IllegalArgumentException?
+	    
+	    String msg = lStrings.getString("err.io.negativelength");
 	    throw new IOException ("negative length");
+	}
     }
 }

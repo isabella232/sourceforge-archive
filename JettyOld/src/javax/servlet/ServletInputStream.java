@@ -1,7 +1,7 @@
 /*
- * @(#)ServletInputStream.java	1.12 97/07/15
+ * $Id$
  * 
- * Copyright (c) 1995-1997 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1995-1998 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -38,17 +38,17 @@ import java.io.IOException;
  *
  * @see java.io.InputStream#read() 
  *
- * @version	1.12, 07/15/97
  */
-public abstract
-class ServletInputStream extends InputStream {
+
+public abstract class ServletInputStream extends InputStream {
 
     /**
      * The default constructor does no work.
      */
+
     protected ServletInputStream () { }
 
-
+    
     /**
      * Starting at the specified offset, reads into the given array of
      * bytes until all requested bytes have been read or a '\n' is
@@ -60,7 +60,9 @@ class ServletInputStream extends InputStream {
      *         stream is reached
      * @exception IOException if an I/O error has occurred
      */
+
     public int readLine(byte[] b, int off, int len) throws IOException {
+
 	if (len <= 0) {
 	    return 0;
 	}
@@ -68,10 +70,13 @@ class ServletInputStream extends InputStream {
 	while ((c = read()) != -1) {
 	    b[off++] = (byte)c;
 	    count++;
-	    if (c == '\n') {
+	    if (c == '\n' || count == len) {
 		break;
 	    }
 	}
 	return count > 0 ? count : -1;
     }
 }
+
+
+

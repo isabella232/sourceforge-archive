@@ -1,5 +1,5 @@
 /*
- * @(#)Cookie.java	1.31 97/10/08
+ * $Id$
  * 
  * Copyright (c) 1996-1997 Sun Microsystems, Inc. All Rights Reserved.
  * 
@@ -25,7 +25,9 @@ import java.io.IOException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.text.MessageFormat;
 import java.util.Enumeration;
+import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -75,23 +77,30 @@ import java.util.Vector;
  * interoperability; an updated RFC will provide better interoperability
  * by defining a new HTTP header field for setting cookies.
  *
- * @version	1.31, 10/08/97
  */
-public class Cookie implements Cloneable
-    // XXX would implement java.io.Serializable too, but can't do that
-    // so long as sun.servlet.* must run on older JDK 1.02 JVMs which
-    // don't include that support.
-{
 
+// XXX would implement java.io.Serializable too, but can't do that
+// so long as sun.servlet.* must run on older JDK 1.02 JVMs which
+// don't include that support.
+
+public class Cookie implements Cloneable {
+
+    private static final String LSTRING_FILE =
+	"javax.servlet.http.LocalStrings";
+    private static ResourceBundle lStrings =
+	ResourceBundle.getBundle(LSTRING_FILE);
+    
     //
     // The value of the cookie itself.
     //
+    
     private String name;	// NAME= ... "$Name" style is reserved
     private String value;	// value of NAME
 
     //
     // Attributes encoded in the header's cookie fields.
     //
+    
     private String comment;	// ;Comment=VALUE ... describes cookie's use
 				// ;Discard ... implied by maxAge < 0
     private String domain;	// ;Domain=VALUE ... domain that sees cookie
@@ -102,16 +111,20 @@ public class Cookie implements Cloneable
 
 
     /**
-     * Defines a cookie with an initial name/value pair.  The name must
-     * be an HTTP/1.1 "token" value; alphanumeric ASCII strings work.
-     * Names starting with a "$" character are reserved by RFC 2109.
+     * Defines a cookie with an initial name/value pair. Names must not
+     * contain whitespace, comma, or semicolons and should only contain ASCII
+     * alphanumeric characters.
+     *
+     * <p>Names starting with a "$" character are reserved by RFC 2109.
      *
      * @param name name of the cookie
      * @param value value of the cookie
-     * @throws IllegalArgumentException if the cookie name is not
-     *	an HTTP/1.1 "token", or if it is one of the tokens reserved
-     *	for use by the cookie protocol
+     * @throws IllegalArgumentException if the cookie name contains characters
+     * restricted by the cookie protocol (for example, a comma, space, or
+     * semicolon), or if it is one of the tokens reserved for use by the
+     * cookie protocol
      */
+
     public Cookie (String name, String value) {
 	if (!isToken (name)
 		|| name.equalsIgnoreCase ("Comment")	// rfc2019
@@ -122,8 +135,14 @@ public class Cookie implements Cloneable
 		|| name.equalsIgnoreCase ("Path")
 		|| name.equalsIgnoreCase ("Secure")
 		|| name.equalsIgnoreCase ("Version")
-		)
-	    throw new IllegalArgumentException ("cookie name: " + name);
+	    ) {
+	    String errMsg = lStrings.getString("err.cookie_name_is_token");
+	    Object[] errArgs = new Object[1];
+	    errArgs[0] = name;
+	    errMsg = MessageFormat.format(errMsg, errArgs);
+	    throw new IllegalArgumentException (errMsg);
+	}
+
 	this.name = name;
 	this.value = value;
     }
@@ -137,6 +156,7 @@ public class Cookie implements Cloneable
      *
      * @see getComment
      */
+
     public void setComment (String purpose) {
 	comment = purpose;
     }
@@ -147,6 +167,7 @@ public class Cookie implements Cloneable
      *
      * @see setComment
      */ 
+
     public String getComment () {
 	return comment;
     }
@@ -162,6 +183,7 @@ public class Cookie implements Cloneable
      *
      * @see getDomain
      */
+
     public void setDomain (String pattern) {
 	domain = pattern.toLowerCase ();	// IE allegedly needs this
     }
@@ -171,6 +193,7 @@ public class Cookie implements Cloneable
      *
      * @see setDomain
      */ 
+
     public String getDomain () {
 	return domain;
     }
@@ -185,6 +208,7 @@ public class Cookie implements Cloneable
      *
      * @see getMaxAge
      */
+
     public void setMaxAge (int expiry) {
 	maxAge = expiry;
     }
@@ -196,6 +220,7 @@ public class Cookie implements Cloneable
      *
      * @see setMaxAge
      */
+
     public int getMaxAge () {
 	return maxAge;
     }
@@ -210,6 +235,7 @@ public class Cookie implements Cloneable
      *
      * @see getPath
      */
+
     public void setPath (String uri) {
 	path = uri;
     }
@@ -219,6 +245,7 @@ public class Cookie implements Cloneable
      *
      * @see setPath
      */ 
+
     public String getPath () {
 	return path;
     }
@@ -232,6 +259,7 @@ public class Cookie implements Cloneable
      *
      * @see getSecure
      */
+
     public void setSecure (boolean flag) {
 	secure = flag;
     }
@@ -241,6 +269,7 @@ public class Cookie implements Cloneable
      *
      * @see setSecure
      */
+
     public boolean getSecure () {
 	return secure;
     }
@@ -250,6 +279,7 @@ public class Cookie implements Cloneable
      * Returns the name of the cookie.  This name may not be changed
      * after the cookie is created.
      */
+
     public String getName () {
 	return name;
     }
@@ -268,6 +298,7 @@ public class Cookie implements Cloneable
      *
      * @see getValue
      */
+
     public void setValue (String newValue) {
 	value = newValue;
     }
@@ -277,6 +308,7 @@ public class Cookie implements Cloneable
      *
      * @see setValue
      */
+
     public String getValue () {
 	return value;
     }
@@ -291,6 +323,7 @@ public class Cookie implements Cloneable
      *
      * @see setVersion
      */
+
     public int getVersion () {
 	return version;
     }
@@ -302,20 +335,23 @@ public class Cookie implements Cloneable
      *
      * @see getVersion
      */
+
     public void setVersion (int v) {
 	version = v;
     }
 
 
-    //
+    // Note -- disabled for now to allow full Netscape compatibility
     // from RFC 2068, token special case characters
-    //
-    private static final String tspecials = "()<>@,;:\\\"/[]?={} \t";
+    // 
+    //private static final String tspecials = "()<>@,;:\\\"/[]?={} \t";
 
+    private static final String tspecials = ",;";
 
     /*
-     * Return true iff the string counts as an HTTP/1.1 "token".
+     * Return true if the string counts as a reserved token.
      */
+
     private boolean isToken (String value) {
 	int len = value.length ();
 
@@ -332,6 +368,7 @@ public class Cookie implements Cloneable
     /**
      * Returns a copy of this object.
      */
+
     public Object clone () {
 	try {
 	    return super.clone ();

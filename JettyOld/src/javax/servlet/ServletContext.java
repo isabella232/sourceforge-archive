@@ -1,7 +1,7 @@
 /*
- * @(#)ServletContext.java	1.20 97/10/09
+ * $Id$
  * 
- * Copyright (c) 1995-1997 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1995-1998 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -21,15 +21,24 @@
 
 package javax.servlet;
 
+import java.io.InputStream;
 import java.io.IOException;
+import java.net.URL;
+import java.net.MalformedURLException;
 import java.util.Enumeration;
 
 /**
  * The ServletContext interface gives servlets access to information about
  * their environment, and allows them to log significant events.  Servlet
  * writers decide what data to log.  The interface is implemented by
- * services, and used by servlets.  Different virtual hosts should have
- * different servlet contexts.
+ * services, and used by servlets.
+ *
+ * <p>In a server that supports the concept of multiple hosts (and even
+ * virtual hosts), the context must be at least as unique as the host.
+ * Servlet engines may also provide context objects that are unique to
+ * a group of servlets and which is tied to a specific portion of the
+ * URL path namespace of the host. This grouping may be administratively
+ * assigned or defined by deployment information.
  *
  * <p>Servlets get the ServletContext object via the getServletContext
  * method of ServletConfig.  The ServletConfig object is provided to
@@ -38,109 +47,187 @@ import java.util.Enumeration;
  *
  * @see Servlet#getServletConfig
  * @see ServletConfig#getServletContext
- * @version     1.20, 10/09/97
  */
-public
-interface ServletContext {
+
+public interface ServletContext {
+
     /**
-     * Returns the servlet of the specified name, or null if not
-     * found.  When the servlet is returned it is initialized and
-     * ready to accept service requests.
-     * <p>
-     * <i>Note:</i> This is a <b>dangerous</b> method to call for the
-     * following reasons.
-     * <p>
-     * <UL><LI> When this method is called the state of the servlet may not
-     *      be known, and this could cause problems with the server's
-     *      servlet state machine.
-     * <LI> It is a security risk to allow any servlet to be able to
-     *      access the methods of another servlet.
-     * </UL>
+     * Returns the ServletContext object for a particular uripath,
+     * or null if there is not a ServletContext for the particular
+     * path available or visible to this servlet.  This allows one
+     * content to get RequestDispatchers and resources from another
+     * context if so permitted. In more restricted environments, this
+     * call may return null.
      *
-     * @param name the name of the desired servlet
-     * @exception ServletException if the servlet could not be initialized
+     * @param uripath
      */
+
+    public ServletContext getContext(String uripath);
+
+    /**
+     * Returns the major version of the servlet API that this
+     * context supports.
+     *
+     * @return 2
+     */
+    
+    public int getMajorVersion();
+
+    /**
+     * Returns the mime type of the specified file, or null if not
+     * known.
+     *
+     * @param file name of the file whose mime type is required
+     */
+
+    public String getMimeType(String file);
+
+    /**
+     * Returns the minor version of the servlet API that this context
+     * supports.
+     *
+     * @return 1
+     */
+
+    public int getMinorVersion();
+
+    /**
+     * Returns a URL object allowing access to any content resource
+     * requested. This method allows a servlet to access items in the
+     * host servlet engine's document space in a system independent
+     * way whether they reside on the local file system, a remote
+     * file system, a database, or a remote network site without
+     * knowing the specific details of how to obtain the resources.
+     * The servlet engine must implement all of the specifics about
+     * how to access the resource.
+     *
+     * <p>Only content resources known to this context object can
+     * be accessed via this call.
+     *
+     * <p>The path parameter of this call must be a URL path.  To
+     * access the file index.html in the server's document root, the
+     * call to this method would have the parameter "/index.html".
+     *
+     * @param path Path of the content resource
+     * @exception MalformedURLException if the resource path is
+     * not properly formed.
+     */
+    
+    public URL getResource(String path) throws MalformedURLException;
+
+
+    /**
+     * Returns an input stream to the given content resource path, or
+     * null if not found.
+     *
+     * @param name */
+
+    public InputStream getResourceAsStream(String path);
+
+    /**
+     * Returns a request dispatcher to a server component accessible
+     * via a URL path. This method is typically used to obtain a
+     * reference to another servlet. After obtaining a RequestDispatcher,
+     * the servlet programmer forward a request to the target
+     * component or include content from it.
+     *
+     * <p>This method will return null if the context cannot provide
+     * a dispatcher for the path provided.
+     *
+     * @param urlpath Path to use to look up the target server resource
+     * @see RequestDispatcher
+     */
+
+    public RequestDispatcher getRequestDispatcher(String urlpath);
+    
+    /**
+     * This method has been deprecated and only remains to preserve
+     * binary compatibility. This method will always return null.
+     *
+     * @deprecated This method has been deprecated for security and
+     * servlet lifecycle reasons. This method will be permanently
+     * removed in a future version of the Servlet API.
+     */
+
     public Servlet getServlet(String name) throws ServletException;
 
     /**
-     * Returns an enumeration of the Servlet objects in this server.
-     * Only servlets that are accessible (i.e., from the same namespace)
-     * will be returned.  The enumeration always includes the servlet
-     * itself.
-     * <p>
-     * <i>Note:</i> This is a <b>dangerous</b> method to call for the
-     * following reasons.
-     * <p>
-     * <UL><LI> When this method is called the state of the servlet may not
-     *      be known, and this could cause problems with the server's
-     *      servlet state machine.
-     * <LI> It is a security risk to allow any servlet to be able to
-     *      access the methods of another servlet.
-     * </UL>
-     * @deprecated
-     * Please use getServletNames in conjunction with getServlet
-     * @see #getServletNames 
-     * @see #getServlet
+     * This method has been deprecated and only remains to preserve
+     * binary compatibility. This method must always return an empty
+     * enumeration.
+     *
+     * @deprecated This method has been deprecated for security and
+     * servlet lifecycle reasons. This method will be permanently
+     * removed in a future version of the Servlet API.
      */
+
     public Enumeration getServlets();
 
     /**
-     * Returns an enumeration of the Servlet object names in this server.
-     * Only servlets that are accessible (i.e., from the same namespace)
-     * will be returned.  The enumeration always includes the servlet
-     * itself.
-     * <p>
-     * <i>Note:</i> This is a <b>dangerous</b> method to call for the
-     * following reasons.
-     * <p>
-     * <UL><LI> When this method is called the state of the servlet may not
-     *      be known, and this could cause problems with the server's
-     *      servlet state machine.
-     * <LI> It is a security risk to allow any servlet to be able to
-     *      access the methods of another servlet.
-     * </UL>
+     * This method has been deprecated and only remains to preserve
+     * binary compatibility. This methd must always return an
+     * empty enumeration.
+     *
+     * @deprecated This method has been deprecated for security and
+     * servlet lifecycle reasons. This method will be permanently
+     * removed in a future version of the Servlet API.
      */
+
     public Enumeration getServletNames();
     
     /**
      * Writes the given message string to the servlet log file.
-     * The name of the servlet log file is server specific; it
+     * The name and type of the servlet log file is server specific; it
      * is normally an event log.
+     *
      * @param msg the message to be written
      */
+
     public void log(String msg);
 
-	/**
-	 * Write the stacktrace and the given message string to the 
-	 * servlet log file. The name of the servlet log file is 
-	 * server specific; it is normally an event log.
-	 * @param exception the exception to be written
-	 * @param msg the message to be written
-	 */
+    /**
+     * Write the stacktrace and the given message string to the 
+     * servlet log file. The name of the servlet log file is 
+     * server specific; it is normally an event log.
+     *
+     * @param exception the exception to be written
+     * @param msg the message to be written
+     *
+     * @deprecated Use log(String message, Throwable t) instead
+     */
+
     public void log(Exception exception, String msg);
 
+    /**
+     * Write the given message and stacktrace to the servlet log. The
+     * name of the log is network service specific; it is typically
+     * the event log.
+     *
+     * @param msg the message to be written
+     * @param throwable the exception to be written
+     */
+    
+    public void log(String message, Throwable throwable);
+    
     /**
      * Applies alias rules to the specified virtual path and returns the
      * corresponding real path.  For example, in an HTTP servlet,
      * this method would resolve the path against the HTTP service's
      * docroot.  Returns null if virtual paths are not supported, or if the
      * translation could not be performed for any reason.
+     *
      * @param path the virtual path to be translated into a real path
      */
-    public String getRealPath(String path);
 
-    /**
-     * Returns the mime type of the specified file, or null if not known.
-     * @param file name of the file whose mime type is required
-     */
-    public String getMimeType(String file);
+    public String getRealPath(String path);
 
     /**
      * Returns the name and version of the network service under which
      * the servlet is running. For example, if the network service was
-     * an HTTP service, then this would be the same as the CGI variable 
-     * SERVER_SOFTWARE.
+     * an HTTP service, then this would be the same as the CGI
+     * variable SERVER_SOFTWARE.
      */
+
     public String getServerInfo();
 
     /**
@@ -156,5 +243,33 @@ interface ServletContext {
      * @return the value of the attribute, or null if the attribute
      * does not exist.
      */
+
     public Object getAttribute(String name);
+
+    /**
+     * Returns an enumeration of the attribute names present in the
+     * network service.
+     */
+
+    public Enumeration getAttributeNames();
+    
+    /**
+     * This method stores an attribute in the servlet context.
+     *
+     * @param name the name of the attribute to store
+     * @param value the value of the attribute
+     */
+    
+    public void setAttribute(String name, Object object);
+
+
+    /**
+     * Removes the attribute from the context that is bound to a particular
+     * name.
+     *
+     * @param name the name of the attribute to remove from the context
+     */
+
+    public void removeAttribute(String name);
+    
 }

@@ -1,7 +1,7 @@
 /*
- * @(#)ServletException.java	1.6 97/10/08
+ * $Id$
  * 
- * Copyright (c) 1995-1997 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1995-1998 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -25,27 +25,67 @@ package javax.servlet;
 /**
  * This exception is thrown to indicate a servlet problem.
  *
- * @version	1.6, 10/08/97
  */
-public 
-class ServletException extends Exception {
 
-    /**
-     * Constructs a new ServletException with the specified
-     * descriptive message.
-     * 
-     * @param msg the string describing the exception
-     */
-    public ServletException(String msg) {
-	super(msg);
-    }
+public class ServletException extends Exception {
+
+    private Throwable rootCause;
 
     /**
      * Constructs a new ServletException.
-     * 
      */
+
     public ServletException() {
 	super();
     }
+
+    /**
+     * Constructs a new ServletException with the specified message.
+     *
+     * @param message Message of exception
+     */
+
+    public ServletException(String message) {
+	super(message);
+    }
+
+    /**
+     * Constructs a new ServletException with the specified message
+     * and root cause.
+     *
+     * @param message Message of exception
+     * @param rootCause Exception that caused this exception to be raised
+     */
+    
+    public ServletException(String message, Throwable rootCause) {
+	super(message);
+	this.rootCause = rootCause;
+    }
+
+    /**
+     * Constructs a new ServletException with the specified message
+     * and root cause.
+     *
+     * @param rootCause Exception that caused this exception to be raised
+     */
+
+    public ServletException(Throwable rootCause) {
+	super(rootCause.getLocalizedMessage());
+	this.rootCause = rootCause;
+    }
+    
+    /**
+     * Returns the root cause of this exception.
+     *
+     * @return Throwable
+     */
+    
+    public Throwable getRootCause() {
+	return rootCause;
+    }
 }
+
+
+
+
 

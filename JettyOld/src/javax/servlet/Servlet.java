@@ -1,7 +1,7 @@
 /*
- * @(#)Servlet.java	1.25 97/10/08
+ * $Id$
  * 
- * Copyright (c) 1995-1997 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1995-1998 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -25,7 +25,7 @@ import java.io.IOException;
 
 /**
  * This interface is for developing servlets.  A servlet is a body of
- * Java code that is loaded into and runs inside a network service,
+ * Java code that is loaded into and runs inside a servlet engine,
  * such as a web server.  It receives and responds to requests from
  * clients.  For example, a client may need information from a
  * database; a servlet can be written that receives the request, gets
@@ -67,33 +67,28 @@ import java.io.IOException;
  *
  * @see GenericServlet
  * @see javax.servlet.http.HttpServlet
- * 
- * @version     1.25, 10/08/97
  */
 
-public
-interface Servlet {
+public interface Servlet {
 
     /**
      * Initializes the servlet. The method is called once,
-     * automatically, by the network service when it loads the servlet.
+     * automatically, by the servlet engine when it loads the servlet.
      * It is guaranteed to finish before any service requests are
-     * accepted.  After initialization, the network service does not
-     * call the init method again unless it reloads the servlet after
-     * it has unloaded and destroyed it.
+     * accepted.
      * 
      * <p>The init method should save the ServletConfig object so that
      * it can be returned by the getServletConfig method.  If a fatal
      * initialization error occurs, the init method should throw an
-     * appropriate "UnavailableException" exception.  It should never
-     * call the method System.exit.
+     * appropriate "UnavailableException" exception.
      *
      * @see UnavailableException
      * @see javax.servlet.Servlet#getServletConfig()
-     * @param config object containing the servlet's startup
+     * @param config object containing the servlet's startup-
      * configuration and initialization parameters
      * @exception ServletException if a servlet exception has occurred
      */
+
     public void init(ServletConfig config) throws ServletException;
 
     /**
@@ -105,6 +100,7 @@ interface Servlet {
      *
      * @see javax.servlet.Servlet#init
      */
+
     public ServletConfig getServletConfig();
 
     /**
@@ -134,22 +130,30 @@ interface Servlet {
      * @exception ServletException if a servlet exception has occurred
      * @exception IOException if an I/O exception has occurred
      */
+
     public void service(ServletRequest req, ServletResponse res)
-      throws ServletException, IOException;
+	throws ServletException, IOException;
 
     /**
-     * Returns a string containing information about the servlet, such as
-     * its author, version, and copyright.
+     * Returns a string containing information about the servlet,
+     * such as its author, version, and copyright. As this method may
+     * be called to display such information in an administrative tool
+     * that is servlet engine specfic, the string that this method
+     * returns should be plain text and not contain markup.
+     *
+     * @return String containing servlet information
      */
+
     public String getServletInfo();
 
     /**
-     * Cleans up whatever resources are being held (e.g., memory, file
-     * handles, threads) and makes sure that any persistent state is
-     * synchronized with the servlet's current in-memory state.  The
-     * method is called once, automatically, by the network service
-     * when it unloads the servlet. After destroy is run, it cannot be
-     * called again until the network service reloads the servlet.
+     * Cleans up whatever resources are being held (e.g., memory,
+     * file handles, threads) and makes sure that any persistent state
+     * is synchronized with the servlet's current in-memory state.
+     * The method is called once, automatically, by the network
+     * service when it unloads the servlet. After destroy is run, it
+     * cannot be called again until the network service reloads the
+     * servlet.
      *
      * <p>When the network service removes a servlet, it calls destroy
      * after all service calls have been completed, or a
@@ -159,5 +163,6 @@ interface Servlet {
      * The servlet writer is responsible for making sure that any
      * threads still in the service method complete.
      */
+
     public void destroy();
 }

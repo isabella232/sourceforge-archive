@@ -1,7 +1,7 @@
 /*
- * @(#)HttpServletRequest.java	1.26 98/04/16
+ * $Id$
  * 
- * Copyright (c) 1995-1997 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1995-1998 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -31,17 +31,77 @@ import java.util.Enumeration;
  * be accessed from the <code>service</code> method.  This interface is
  * implemented by network-service developers for use within servlets.
  *
- * @version 1.26, 04/16/98
  */
-public
-interface HttpServletRequest extends ServletRequest {
+
+public interface HttpServletRequest extends ServletRequest {
+
+    /**
+     * Gets the authentication scheme of this request.  Same as the CGI
+     * variable AUTH_TYPE.
+     *
+     * @return this request's authentication scheme, or null if none.
+     */
+
+    public String getAuthType();
 
     /**
      * Gets the array of cookies found in this request.
      *
      * @return the array of cookies found in this request
      */
+
     public Cookie[] getCookies();
+
+    /**
+     * Gets the value of the requested date header field of this
+     * request.  If the header can't be converted to a date, the method
+     * throws an IllegalArgumentException.  The case of the header
+     * field name is ignored.
+     * 
+     * @param name the String containing the name of the requested
+     * header field
+     * @return the value the requested date header field, or -1 if not
+     * found.
+     */
+
+    public long getDateHeader(String name);
+
+    /**
+     * Gets the value of the requested header field of this request.
+     * The case of the header field name is ignored.
+     * 
+     * @param name the String containing the name of the requested
+     * header field
+     * @return the value of the requested header field, or null if not
+     * known.
+     */
+
+    public String getHeader(String name); 
+
+    /**
+     * Gets the header names for this request.
+     *
+     * @return an enumeration of strings representing the header names
+     * for this request. Some server implementations do not allow
+     * headers to be accessed in this way, in which case this method
+     * will return null.
+     */
+
+    public Enumeration getHeaderNames();
+
+    /**
+     * Gets the value of the specified integer header field of this
+     * request.  The case of the header field name is ignored.  If the
+     * header can't be converted to an integer, the method throws a
+     * NumberFormatException.
+     * 
+     * @param name the String containing the name of the requested
+     * header field
+     * @return the value of the requested header field, or -1 if not
+     * found.
+     */
+
+    public int getIntHeader(String name);
 
     /**
      * Gets the HTTP method (for example, GET, POST, PUT) with which
@@ -49,8 +109,68 @@ interface HttpServletRequest extends ServletRequest {
      *
      * @return the HTTP method with which this request was made
      */
+
     public String getMethod();
 
+    /**
+     * Gets any optional extra path information following the servlet
+     * path of this request's URI, but immediately preceding its query
+     * string. Same as the CGI variable PATH_INFO.
+     *
+     * @return the optional path information following the servlet
+     * path, but before the query string, in this request's URI; null
+     * if this request's URI contains no extra path information
+     */
+
+    public String getPathInfo();
+
+   /**
+     * Gets any optional extra path information following the servlet
+     * path of this request's URI, but immediately preceding its query
+     * string, and translates it to a real path.  Same as the CGI
+     * variable PATH_TRANSLATED.
+     *
+     * @return extra path information translated to a real path or null
+     * if no extra path information is in the request's URI
+     */
+
+    public String getPathTranslated();
+
+    /**
+     * Gets any query string that is part of the HTTP request URI.
+     * Same as the CGI variable QUERY_STRING.
+     *
+     * @return query string that is part of this request's URI, or null
+     * if it contains no query string
+     */
+
+    public String getQueryString();
+
+    /**
+     * Gets the name of the user making this request.  The user name is
+     * set with HTTP authentication.  Whether the user name will
+     * continue to be sent with each subsequent communication is
+     * browser-dependent.  Same as the CGI variable REMOTE_USER.
+     *
+     * @return the name of the user making this request, or null if not
+     * known.
+     */
+
+    public String getRemoteUser();
+
+    /**
+     * Gets the session id specified with this request.  This may
+     * differ from the actual session id.  For example, if the request
+     * specified an id for an invalid session, then this will get a new
+     * session with a new id.
+     *
+     * @return the session id specified by this request, or null if the
+     * request did not specify a session id
+     * 
+     * @see #isRequestedSessionIdValid */
+
+    public String getRequestedSessionId ();
+    
     /**
      * Gets, from the first line of the HTTP request, the part of this
      * request's URI that is to the left of any query string.
@@ -74,6 +194,7 @@ interface HttpServletRequest extends ServletRequest {
      * @return this request's URI
      * @see javax.servlet.http.HttpUtils#getRequestURL
      */
+
     public String getRequestURI();
 
     /**
@@ -83,104 +204,8 @@ interface HttpServletRequest extends ServletRequest {
      * @return the servlet being invoked, as contained in this
      * request's URI
      */
+
     public String getServletPath();
-
-    /**
-     * Gets any optional extra path information following the servlet
-     * path of this request's URI, but immediately preceding its query
-     * string. Same as the CGI variable PATH_INFO.
-     *
-     * @return the optional path information following the servlet
-     * path, but before the query string, in this request's URI; null
-     * if this request's URI contains no extra path information
-     */
-    public String getPathInfo();
-
-    /**
-     * Gets any optional extra path information following the servlet
-     * path of this request's URI, but immediately preceding its query
-     * string, and translates it to a real path.  Similar to the CGI
-     * variable PATH_TRANSLATED
-     *
-     * @return extra path information translated to a real path or null
-     * if no extra path information is in the request's URI
-     */
-    public String getPathTranslated();
-
-    /**
-     * Gets any query string that is part of the HTTP request URI.
-     * Same as the CGI variable QUERY_STRING.
-     *
-     * @return query string that is part of this request's URI, or null
-     * if it contains no query string
-     */
-    public String getQueryString();
-
-    /**
-     * Gets the name of the user making this request.  The user name is
-     * set with HTTP authentication.  Whether the user name will
-     * continue to be sent with each subsequent communication is
-     * browser-dependent.  Same as the CGI variable REMOTE_USER.
-     *
-     * @return the name of the user making this request, or null if not
-     * known.
-     */
-    public String getRemoteUser();
-
-    /**
-     * Gets the authentication scheme of this request.  Same as the CGI
-     * variable AUTH_TYPE.
-     *
-     * @return this request's authentication scheme, or null if none.
-     */
-    public String getAuthType();
-
-    /**
-     * Gets the value of the requested header field of this request.
-     * The case of the header field name is ignored.
-     * 
-     * @param name the String containing the name of the requested
-     * header field
-     * @return the value of the requested header field, or null if not
-     * known.
-     */
-    public String getHeader(String name); 
-
-    /**
-     * Gets the value of the specified integer header field of this
-     * request.  The case of the header field name is ignored.  If the
-     * header can't be converted to an integer, the method throws a
-     * NumberFormatException.
-     * 
-     * @param name the String containing the name of the requested
-     * header field
-     * @return the value of the requested header field, or -1 if not
-     * found.
-     */
-    public int getIntHeader(String name);
-
-    /**
-     * Gets the value of the requested date header field of this
-     * request.  If the header can't be converted to a date, the method
-     * throws an IllegalArgumentException.  The case of the header
-     * field name is ignored.
-     * 
-     * @param name the String containing the name of the requested
-     * header field
-     * @return the value the requested date header field, or -1 if not
-     * found.
-     */
-    public long getDateHeader(String name);
-
-    /**
-     * Gets the header names for this request.
-     *
-     * @return an enumeration of strings representing the header names
-     * for this request. Some server implementations do not allow
-     * headers to be accessed in this way, in which case this method
-     * will return null.
-     */
-    public Enumeration getHeaderNames();
 
     /**
      * Gets the current valid session associated with this request, if
@@ -200,19 +225,17 @@ interface HttpServletRequest extends ServletRequest {
      * create was false and no valid session is associated
      * with this request.
      */
+
     public HttpSession getSession (boolean create);
    
+
     /**
-     * Gets the session id specified with this request.  This may
-     * differ from the actual session id.  For example, if the request
-     * specified an id for an invalid session, then this will get a new
-     * session with a new id.
-     *
-     * @return the session id specified by this request, or null if the
-     * request did not specify a session id
-     * 
-     * @see #isRequestedSessionIdValid */
-    public String getRequestedSessionId ();
+     * Gets the current valid session associated with this request, if
+     * create is false or, if necessary, creates a new session for the
+     * request.
+     */
+
+    public HttpSession getSession();
 
     /**
      * Checks whether this request is associated with a session that
@@ -227,6 +250,7 @@ interface HttpServletRequest extends ServletRequest {
      * @see javax.servlet.http.HttpSessionContext
      * @see #getSession
      */
+
     public boolean isRequestedSessionIdValid ();
 
     /**
@@ -239,6 +263,7 @@ interface HttpServletRequest extends ServletRequest {
      *
      * @see #getSession
      */
+
     public boolean isRequestedSessionIdFromCookie ();
 
     /**
@@ -251,6 +276,24 @@ interface HttpServletRequest extends ServletRequest {
      *
      * @see #getSession
      */
+    
+    public boolean isRequestedSessionIdFromURL();
+    
+    /**
+     * Checks whether the session id specified by this request came in
+     * as part of the URL.  (The requested session may not be the one
+     * returned by the <code>getSession</code> method.)
+     * 
+     * @return true if the session id specified by the request for this
+     * session came in as part of the URL; false otherwise
+     *
+     * @see #getSession
+     *
+     * @deprecated use isRequestSessionIdFromURL() instead
+     */
+
     public boolean isRequestedSessionIdFromUrl ();
 
+
+    
 }

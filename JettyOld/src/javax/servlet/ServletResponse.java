@@ -1,7 +1,7 @@
 /*
- * @(#)ServletResponse.java	1.25 97/11/21
+ * $Id$
  * 
- * Copyright (c) 1995-1997 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1995-1998 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -56,34 +56,19 @@ import java.io.UnsupportedEncodingException;
  * protocols such SMTP and HTTP define application-specific profiles of
  * MIME, and that standards in this area are evolving.
  * 
- * @version 1.25, 11/21/97 */
+ */
 
-public
-interface ServletResponse {
+public interface ServletResponse {
+    
     /**
-     * Sets the content length for this response.
-     *
-     * @param len the content length
+     * Returns the character set encoding used for this MIME body.
+     * The character encoding is either the one specified in the
+     * assigned content type, or one which the client understands.
+     * If no content type has yet been assigned, it is implicitly
+     * set to <em>text/plain</em>
      */
-    public void setContentLength(int len);
 
-    /**
-     * Sets the content type for this response.  This type may later
-     * be implicitly modified by addition of properties such as the MIME
-     * <em>charset=&lt;value&gt;</em> if the service finds it necessary,
-     * and the appropriate media type property has not been set.
-     *
-     * <p>This response property may only be assigned one time.  If a
-     * writer is to be used to write a text response, this method must
-     * be called before the method <code>getWriter</code>.  If an
-     * output stream will be used to write a response, this method must
-     * be called before the output stream is used to write response
-     * data.
-     *
-     * @param type the content's MIME type
-     * @see getOutputStream
-     * @see getWriter */
-    public void setContentType(String type);
+    public String getCharacterEncoding ();
 
     /**
      * Returns an output stream for writing binary response data.
@@ -93,6 +78,7 @@ interface ServletResponse {
      *	called on this same request.
      * @exception IOException if an I/O exception has occurred
      */
+
     public ServletOutputStream getOutputStream() throws IOException;
 
     /**
@@ -111,14 +97,35 @@ interface ServletResponse {
      *	called on this same request.
      * @exception IOException on other errors.
      */
-    public PrintWriter getWriter () throws IOException;
+
+    public PrintWriter getWriter() throws IOException;
 
     /**
-     * Returns the character set encoding used for this MIME body.
-     * The character encoding is either the one specified in the
-     * assigned content type, or one which the client understands.
-     * If no content type has yet been assigned, it is implicitly
-     * set to <em>text/plain</em>
+     * Sets the content length for this response.
+     *
+     * @param len the content length
      */
-    public String getCharacterEncoding ();
+
+    public void setContentLength(int len);
+
+    /**
+     * Sets the content type for this response.  This type may later
+     * be implicitly modified by addition of properties such as the MIME
+     * <em>charset=&lt;value&gt;</em> if the service finds it necessary,
+     * and the appropriate media type property has not been set.
+     *
+     * <p>This response property may only be assigned one time.  If a
+     * writer is to be used to write a text response, this method must
+     * be called before the method <code>getWriter</code>.  If an
+     * output stream will be used to write a response, this method must
+     * be called before the output stream is used to write response
+     * data.
+     *
+     * @param type the content's MIME type
+     * @see getOutputStream
+     * @see getWriter */
+
+    public void setContentType(String type);
+
+
 }

@@ -1,7 +1,7 @@
 /*
- * @(#)ServletRequest.java	1.49 98/04/15
+ * $Id$
  * 
- * Copyright (c) 1995-1997 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1995-1998 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -47,124 +47,9 @@ import java.util.Enumeration;
  * 
  * @see javax.servlet.http.HttpServletRequest
  *
- * @version	1.49,04/15/98
  */
 
-public
-interface ServletRequest {
-    /**
-     * Returns the size of the request entity data, or -1 if not known.
-     * Same as the CGI variable CONTENT_LENGTH.
-     */
-    public int getContentLength();
-
-    /**
-     * Returns the Internet Media Type of the request entity data, or
-     * null if not known. Same as the CGI variable CONTENT_TYPE.
-     */
-    public String getContentType();
-
-    /**
-     * Returns the protocol and version of the request as a string of
-     * the form <code>&lt;protocol&gt;/&lt;major version&gt;.&lt;minor
-     * version&gt</code>.  Same as the CGI variable SERVER_PROTOCOL.
-     */
-    public String getProtocol();
-
-    /**
-     * Returns the scheme of the URL used in this request, for example
-     * "http", "https", or "ftp".  Different schemes have different
-     * rules for constructing URLs, as noted in RFC 1738.  The URL used
-     * to create a request may be reconstructed using this scheme, the
-     * server name and port, and additional information such as URIs.
-     */
-    public String getScheme();
-
-    /**
-     * Returns the host name of the server that received the request.
-     * Same as the CGI variable SERVER_NAME.
-     */
-    public String getServerName();
-
-    /**
-     * Returns the port number on which this request was received.
-     * Same as the CGI variable SERVER_PORT.
-     */
-    public int getServerPort();
-
-    /**
-     * Returns the IP address of the agent that sent the request.
-     * Same as the CGI variable REMOTE_ADDR.
-     */
-    public String getRemoteAddr();
-
-    /**
-     * Returns the fully qualified host name of the agent that sent the
-     * request. Same as the CGI variable REMOTE_HOST.
-     */
-    public String getRemoteHost();
-
-    /**
-     * Applies alias rules to the specified virtual path and returns
-     * the corresponding real path, or null if the translation can not
-     * be performed for any reason.  For example, an HTTP servlet would
-     * resolve the path using the virtual docroot, if virtual hosting
-     * is enabled, and with the default docroot otherwise.  Calling
-     * this method with the string "/" as an argument returns the
-     * document root.
-     *
-     * @param path the virtual path to be translated to a real path
-     */
-    public String getRealPath(String path);
-
-    /**
-     * Returns an input stream for reading binary data in the request body.
-     *
-     * @see getReader
-     * @exception IllegalStateException if getReader has been
-     *	called on this same request.
-     * @exception IOException on other I/O related errors.
-     */
-    public ServletInputStream getInputStream() throws IOException;  
-
-    /**
-     * Returns a string containing the lone value of the specified
-     * parameter, or null if the parameter does not exist. For example,
-     * in an HTTP servlet this method would return the value of the
-     * specified query string parameter. Servlet writers should use
-     * this method only when they are sure that there is only one value
-     * for the parameter.  If the parameter has (or could have)
-     * multiple values, servlet writers should use
-     * getParameterValues. If a multiple valued parameter name is
-     * passed as an argument, the return value is implementation
-     * dependent.
-     *
-     * @see #getParameterValues
-     *
-     * @param name the name of the parameter whose value is required.
-     */
-    public String getParameter(String name);
-
-    /**
-     * Returns the values of the specified parameter for the request as
-     * an array of strings, or null if the named parameter does not
-     * exist. For example, in an HTTP servlet this method would return
-     * the values of the specified query string or posted form as an
-     * array of strings.
-     *
-     * @param name the name of the parameter whose value is required.
-     * @see javax.servlet.ServletRequest#getParameter
-     */
-    public String[] getParameterValues(String name);
-
-    /**
-     * Returns the parameter names for this request as an enumeration
-     * of strings, or an empty enumeration if there are no parameters
-     * or the input stream is empty.  The input stream would be empty
-     * if all the data had been read from the stream returned by the
-     * method getInputStream.
-     */
-    public Enumeration getParameterNames();
+public interface ServletRequest {
 
     /**
      * Returns the value of the named attribute of the request, or
@@ -211,7 +96,119 @@ interface ServletRequest {
      *
      * @param name the name of the attribute whose value is required
      */
+
     public Object getAttribute(String name);
+
+    /**
+     * Returns an enumeration of attribute names contained in this request.
+     */
+
+    public Enumeration getAttributeNames();
+    
+    /**
+     * Returns the character set encoding for the input of this request.
+     */
+
+    public String getCharacterEncoding ();
+    
+    /**
+     * Returns the size of the request entity data, or -1 if not known.
+     * Same as the CGI variable CONTENT_LENGTH.
+     */
+
+    public int getContentLength();
+
+    /**
+     * Returns the Internet Media Type of the request entity data, or
+     * null if not known. Same as the CGI variable CONTENT_TYPE.
+     */
+
+    public String getContentType();
+
+    /**
+     * Returns an input stream for reading binary data in the request body.
+     *
+     * @see getReader
+     * @exception IllegalStateException if getReader has been
+     *	called on this same request.
+     * @exception IOException on other I/O related errors.
+     */
+
+    public ServletInputStream getInputStream() throws IOException;  
+
+    /**
+     * Returns a string containing the lone value of the specified
+     * parameter, or null if the parameter does not exist. For example,
+     * in an HTTP servlet this method would return the value of the
+     * specified query string parameter. Servlet writers should use
+     * this method only when they are sure that there is only one value
+     * for the parameter.  If the parameter has (or could have)
+     * multiple values, servlet writers should use
+     * getParameterValues. If a multiple valued parameter name is
+     * passed as an argument, the return value is implementation
+     * dependent.
+     *
+     * @see #getParameterValues
+     *
+     * @param name the name of the parameter whose value is required.
+     */
+
+    public String getParameter(String name);
+
+    /**
+     * Returns the parameter names for this request as an enumeration
+     * of strings, or an empty enumeration if there are no parameters
+     * or the input stream is empty.  The input stream would be empty
+     * if all the data had been read from the stream returned by the
+     * method getInputStream.
+     */
+
+    public Enumeration getParameterNames();
+
+    /**
+     * Returns the values of the specified parameter for the request as
+     * an array of strings, or null if the named parameter does not
+     * exist. For example, in an HTTP servlet this method would return
+     * the values of the specified query string or posted form as an
+     * array of strings.
+     *
+     * @param name the name of the parameter whose value is required.
+     * @see javax.servlet.ServletRequest#getParameter
+     */
+
+    public String[] getParameterValues(String name);
+
+    /**
+     * Returns the protocol and version of the request as a string of
+     * the form <code>&lt;protocol&gt;/&lt;major version&gt;.&lt;minor
+     * version&gt</code>.  Same as the CGI variable SERVER_PROTOCOL.
+     */
+
+    public String getProtocol();
+
+    /**
+     * Returns the scheme of the URL used in this request, for example
+     * "http", "https", or "ftp".  Different schemes have different
+     * rules for constructing URLs, as noted in RFC 1738.  The URL used
+     * to create a request may be reconstructed using this scheme, the
+     * server name and port, and additional information such as URIs.
+     */
+
+    public String getScheme();
+
+    /**
+     * Returns the host name of the server that received the request.
+     * Same as the CGI variable SERVER_NAME.
+     */
+
+    public String getServerName();
+
+    /**
+     * Returns the port number on which this request was received.
+     * Same as the CGI variable SERVER_PORT.
+     */
+
+    public int getServerPort();
 
     /**
      * Returns a buffered reader for reading text in the request body.
@@ -225,10 +222,55 @@ interface ServletRequest {
      *	called on this same request.
      * @exception IOException on other I/O related errors.
      */
+
     public BufferedReader getReader () throws IOException;
 
     /**
-     * Returns the character set encoding for the input of this request.
+     * Returns the IP address of the agent that sent the request.
+     * Same as the CGI variable REMOTE_ADDR.
      */
-    public String getCharacterEncoding ();
+    
+    public String getRemoteAddr();
+
+    /**
+     * Returns the fully qualified host name of the agent that sent the
+     * request. Same as the CGI variable REMOTE_HOST.
+     */
+
+    public String getRemoteHost();
+
+    /**
+     * This method stores an attribute in the request context;
+     * these attributes will be reset between requests.  Attribute names
+     * should follow the same convention as package names.
+     *
+     * <P>The package (and hence attribute) names beginning with java.*,
+     * and javax.* are reserved for use by Javasoft. Similarly, com.sun.*
+     * is reserved for use by Sun Microsystems.
+     *
+     * @param key a String specifying the name of the attribute
+     * @param o a context object stored with the key.
+     * @exception IllegalStateException if the named attribute
+     *	already has a value.
+     */
+
+    public void setAttribute(String key, Object o);
+
+    /**
+     * Applies alias rules to the specified virtual path and returns
+     * the corresponding real path, or null if the translation can not
+     * be performed for any reason.  For example, an HTTP servlet would
+     * resolve the path using the virtual docroot, if virtual hosting
+     * is enabled, and with the default docroot otherwise.  Calling
+     * this method with the string "/" as an argument returns the
+     * document root.
+     *
+     * @param path the virtual path to be translated to a real path
+     *
+     * @deprecated This method has been deprecated in preference to the
+     * same method found in the ServletContext interface.
+     */
+
+    public String getRealPath(String path);
 }
+

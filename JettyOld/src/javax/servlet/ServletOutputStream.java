@@ -1,7 +1,7 @@
 /*
- * @(#)ServletOutputStream.java	1.12 98/04/15
+ * $Id$
  * 
- * Copyright (c) 1995-1997 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1995-1998 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -24,7 +24,8 @@ package javax.servlet;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.io.CharConversionException;
-
+import java.text.MessageFormat;
+import java.util.ResourceBundle;
 
 /**
  * An output stream for writing servlet responses.  This is an
@@ -37,15 +38,18 @@ import java.io.CharConversionException;
  * 
  * @see java.io.OutputStream#write(int)
  *
- * @version	1.12, 04/15/98
  */
 
-public abstract
-class ServletOutputStream extends OutputStream {
+public abstract class ServletOutputStream extends OutputStream {
 
+    private static final String LSTRING_FILE = "javax.servlet.LocalStrings";
+    private static ResourceBundle lStrings =
+	ResourceBundle.getBundle(LSTRING_FILE);
+    
     /**
      * The default constructor does no work.
      */
+
     protected ServletOutputStream () { }
 
 
@@ -53,7 +57,9 @@ class ServletOutputStream extends OutputStream {
      * Prints the string provided.
      * @exception IOException if an I/O error has occurred
      */
+
     public void print(String s) throws IOException {
+	if (s==null) s="null";
 	int len = s.length();
 	for (int i = 0; i < len; i++) {
 	    char c = s.charAt (i);
@@ -64,9 +70,13 @@ class ServletOutputStream extends OutputStream {
 	    // servlet framework.  It must suffice until servlet output
 	    // streams properly encode their output.
 	    //
-	    if ((c & 0xff00) != 0)	// high order byte must be zero
-		throw new CharConversionException (
-		    "Not an ISO 8859/1 character:  " + c);
+	    if ((c & 0xff00) != 0) {	// high order byte must be zero
+		String errMsg = lStrings.getString("err.not_iso8859_1");
+		Object[] errArgs = new Object[1];
+		errArgs[0] = new Character(c);
+		errMsg = MessageFormat.format(errMsg, errArgs);
+		throw new CharConversionException(errMsg);
+	    }
 	    write (c);
 	}
     }
@@ -75,14 +85,22 @@ class ServletOutputStream extends OutputStream {
      * Prints the boolean provided.
      * @exception IOException if an I/O error has occurred.
      */
+
     public void print(boolean b) throws IOException {
-	print(b ? "true" : "false");
+	String msg;
+	if (b) {
+	    msg = lStrings.getString("value.true");
+	} else {
+	    msg = lStrings.getString("value.false");
+	}
+	print(msg);
     }
 
     /**
      * Prints the character provided.
      * @exception IOException if an I/O error has occurred
      */
+
     public void print(char c) throws IOException {
 	print(String.valueOf(c));
     }
@@ -91,6 +109,7 @@ class ServletOutputStream extends OutputStream {
      * Prints the integer provided.
      * @exception IOException if an I/O error has occurred
      */  
+
     public void print(int i) throws IOException {
 	print(String.valueOf(i));
     }
@@ -99,6 +118,7 @@ class ServletOutputStream extends OutputStream {
      * Prints the long provided.
      * @exception IOException if an I/O error has occurred
      */
+
     public void print(long l) throws IOException {
 	print(String.valueOf(l));
     }
@@ -107,6 +127,7 @@ class ServletOutputStream extends OutputStream {
      * Prints the float provided.
      * @exception IOException if an I/O error has occurred
      */
+
     public void print(float f) throws IOException {
 	print(String.valueOf(f));
     }
@@ -115,6 +136,7 @@ class ServletOutputStream extends OutputStream {
      * Prints the double provided.
      * @exception IOException if an I/O error has occurred
      */
+
     public void print(double d) throws IOException {
 	print(String.valueOf(d));
     }
@@ -123,6 +145,7 @@ class ServletOutputStream extends OutputStream {
      * Prints a CRLF.
      * @exception IOException if an I/O error has occurred
      */
+
     public void println() throws IOException {
 	print("\r\n");
     }
@@ -131,6 +154,7 @@ class ServletOutputStream extends OutputStream {
      * Prints the string provided, followed by a CRLF.
      * @exception IOException if an I/O error has occurred
      */
+
     public void println(String s) throws IOException {
 	print(s);
 	println();
@@ -140,6 +164,7 @@ class ServletOutputStream extends OutputStream {
      * Prints the boolean provided, followed by a CRLF.
      * @exception IOException if an I/O error has occurred.
      */
+
     public void println(boolean b) throws IOException {
 	print(b);
 	println();
@@ -149,6 +174,7 @@ class ServletOutputStream extends OutputStream {
      * Prints the character provided, followed by a CRLF.
      * @exception IOException if an I/O error has occurred
      */
+
     public void println(char c) throws IOException {
 	print(c);
 	println();
@@ -158,6 +184,7 @@ class ServletOutputStream extends OutputStream {
      * Prints the integer provided, followed by a CRLF.
      * @exception IOException if an I/O error has occurred
      */
+
     public void println(int i) throws IOException {
 	print(i);
 	println();
@@ -167,6 +194,7 @@ class ServletOutputStream extends OutputStream {
      * Prints the long provided, followed by a CRLF.
      * @exception IOException if an I/O error has occurred
      */  
+
     public void println(long l) throws IOException {
 	print(l);
 	println();
@@ -176,6 +204,7 @@ class ServletOutputStream extends OutputStream {
      * Prints the float provided, followed by a CRLF.
      * @exception IOException if an I/O error has occurred
      */
+
     public void println(float f) throws IOException {
 	print(f);
 	println();
@@ -185,6 +214,7 @@ class ServletOutputStream extends OutputStream {
      * Prints the double provided, followed by a CRLF.
      * @exception IOException if an I/O error has occurred
      */
+
     public void println(double d) throws IOException {
 	print(d);
 	println();

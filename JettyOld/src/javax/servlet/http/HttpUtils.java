@@ -1,7 +1,7 @@
 /*
- * @(#)HttpUtils.java	1.14 98/04/15
+ * $Id$
  * 
- * Copyright (c) 1995-1997 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1995-1998 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -23,21 +23,29 @@ package javax.servlet.http;
 
 import javax.servlet.ServletInputStream;
 import java.util.Hashtable;
+import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 import java.io.IOException;
 
 /**
  * A collection of static utility methods useful to HTTP servlets.
  *
- * @version 1.14
+ * @version 1.15
  */
+
 public class HttpUtils {
 
+    private static final String LSTRING_FILE =
+	"javax.servlet.http.LocalStrings";
+    private static ResourceBundle lStrings =
+	ResourceBundle.getBundle(LSTRING_FILE);
+    
     static Hashtable nullHashtable = new Hashtable();
     
     /**
      * Creates an empty HttpUtils object.
      */
+
     public HttpUtils() {}
 
     /**
@@ -65,6 +73,7 @@ public class HttpUtils {
      * @exception IllegalArgumentException if the query string is
      * invalid.
      */
+
     static public Hashtable parseQueryString(String s) {
 
 	String valArray[] = null;
@@ -79,6 +88,8 @@ public class HttpUtils {
 	    String pair = (String)st.nextToken();
 	    int pos = pair.indexOf('=');
 	    if (pos == -1) {
+		// XXX
+		// should give more detail about the illegal argument
 		throw new IllegalArgumentException();
 	    }
 	    String key = parseName(pair.substring(0, pos), sb);
@@ -99,7 +110,6 @@ public class HttpUtils {
     }
 
     /**
-     * 
      * Parses FORM data that is posted to the server using the HTTP
      * POST method and the application/x-www-form-urlencoded mime
      * type.
@@ -110,10 +120,11 @@ public class HttpUtils {
      * with multiple values have their values stored as an array of strings
      * @exception IllegalArgumentException if the POST data is invalid.
      */
-    static public Hashtable parsePostData(int len, 
-					  ServletInputStream in) {
 
-	int	inputLen, offset;
+    static public Hashtable parsePostData(int len, 
+					  ServletInputStream in)
+    {
+	int inputLen, offset;
 	byte[] postedBytes = null;
 	String postedBody;
 
@@ -128,8 +139,10 @@ public class HttpUtils {
 	    offset = 0;
 	    do {
 		inputLen = in.read (postedBytes, offset, len - offset);
-		if (inputLen <= 0)
-		    throw new IOException ("short read");
+		if (inputLen <= 0) {
+		    String msg = lStrings.getString("err.io.short_read");
+		    throw new IOException (msg);
+		}
 		offset += inputLen;
 	    } while ((len - offset) > 0);
 
@@ -137,40 +150,46 @@ public class HttpUtils {
 	    return nullHashtable;
 	}
 
-	//
 	// XXX we shouldn't assume that the only kind of POST body
 	// is FORM data encoded using ASCII or ISO Latin/1 ... or
 	// that the body should always be treated as FORM data.
 	//
-	postedBody = new String (postedBytes, 0, 0, len);
 
+	postedBody = new String(postedBytes, 0, len);
+	
 	return parseQueryString(postedBody); 
     }
-
-
-
 
     /*
      * Parse a name in the query string.
      */
+
     static private String parseName(String s, StringBuffer sb) {
 	sb.setLength(0);
 	for (int i = 0; i < s.length(); i++) {
-	    char c = s.charAt(i);
+	    char c = s.charAt(i); 
 	    switch (c) {
-	      case '+':
+	    case '+':
 		sb.append(' ');
 		break;
-	      case '%':
+	    case '%':
 		try {
 		    sb.append((char) Integer.parseInt(s.substring(i+1, i+3), 
-                        16));
+						      16));
+		    i += 2;
 		} catch (NumberFormatException e) {
+		    // XXX
+		    // need to be more specific about illegal arg
 		    throw new IllegalArgumentException();
+		} catch (StringIndexOutOfBoundsException e) {
+		    String rest  = s.substring(i);
+		    sb.append(rest);
+		    if (rest.length()==2)
+			i++;
 		}
-		i += 2;
+		
 		break;
-	      default:
+	    default:
 		sb.append(c);
 		break;
 	    }
@@ -188,6 +207,7 @@ public class HttpUtils {
      *
      * <P> This method is useful for creating redirect messages and for
      * reporting errors.  */
+
     public static StringBuffer getRequestURL (HttpServletRequest req) {
 	StringBuffer	url = new StringBuffer ();
 	String		scheme = req.getScheme ();
@@ -211,3 +231,6 @@ public class HttpUtils {
 	return url;
     }
 }
+
+
+

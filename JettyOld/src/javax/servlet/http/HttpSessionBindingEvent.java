@@ -1,5 +1,5 @@
 /*
- * @(#)HttpSessionBindingEvent.java	1.6 97/10/15
+ * $Id$
  * 
  * Copyright (c) 1997 Sun Microsystems, Inc. All Rights Reserved.
  * 
@@ -34,34 +34,33 @@ import java.util.EventObject;
  * @see HttpSession
  * @see HttpSessionBindingListener
  *
- * @version	1.6, 10/15/97
  */
-public
-class HttpSessionBindingEvent
-extends EventObject
-{
+
+public class HttpSessionBindingEvent extends EventObject {
+
     /* The name to which the object is being bound or unbound */
+
     private String name;
 
     /**
      * Constructs a new HttpSessionBindingEvent
-	 *
+     *
      * @param session the session acting as the source of the event
-	 * @param name the name to which the object is being bound or 
-	 * the name from which the object is being unbound 
+     * @param name the name to which the object is being bound or 
+     * the name from which the object is being unbound 
      */
-    public HttpSessionBindingEvent (HttpSession session, String name)
-    {
+
+    public HttpSessionBindingEvent (HttpSession session, String name) {
 	super (session);
 	this.name = name;
     }
-
+    
     /**
      * Returns the name to which the object is being bound or the name
      * from which the object is being unbound.
      */
-    public String getName ()
-    {
+
+    public String getName () {
 	return name;
     }
 
@@ -69,8 +68,8 @@ extends EventObject
      * Returns the session into which the listener is being bound or
      * from which the listener is being unbound.
      */
-    public HttpSession getSession ()
-    {
+    
+    public HttpSession getSession () {
 	return (HttpSession) getSource ();
     }
 }

@@ -1,7 +1,7 @@
 /*
- * @(#)GenericServlet.java	1.23 97/11/05
+ * $Id$
  * 
- * Copyright (c) 1996-1997 Sun Microsystems, Inc. All Rights Reserved.
+ * Copyright (c) 1996-1998 Sun Microsystems, Inc. All Rights Reserved.
  * 
  * This software is the confidential and proprietary information of Sun
  * Microsystems, Inc. ("Confidential Information").  You shall not
@@ -34,7 +34,7 @@ import java.util.Enumeration;
  * example, RMI or CORBA objects act as servlets.)
  *
  * <p>The GenericServlet class was created to make writing servlets
- * easier.  It provides simple versions of the lifecycle methods init
+ * easier.  It provides simple versions of the life-cycle methods init
  * and destroy, and of the methods in the ServletConfig interface.  It
  * also provides a log method, from the ServletContext interface.  The
  * servlet writer must override only the service method, which is
@@ -43,30 +43,42 @@ import java.util.Enumeration;
  * init and destroy methods if expensive servlet-wide resources are to
  * be managed.
  *
- * @version     1.23, 11/05/97
  */
 
 public abstract class GenericServlet 
-    implements Servlet, ServletConfig, java.io.Serializable { 
+    implements Servlet, ServletConfig, java.io.Serializable
+{
 
     private transient ServletConfig config;
 
     /**
      * The default constructor does no work.
      */
+
     public GenericServlet () { }
-
-    /**
-     * Returns a ServletContext object, which contains information
-     * about the network service in which the servlet is running.  This
-     * is a convenience method; it gets the ServletContext object from
-     * the ServletConfig object.  (The ServletConfig object was passed
-     * into and stored by the init method.)
+    
+   /**
+     *
+     * Destroys the servlet, cleaning up whatever resources are being
+     * held, and logs the destruction in the servlet log file.  This
+     * method is called, once, automatically, by the network service
+     * each time it removes the servlet.  After destroy is run, it
+     * cannot be called again until the network service reloads the
+     * servlet.
+     *
+     * <p>When the network service removes a servlet, it calls destroy
+     * after all service calls have been completed, or a
+     * service-specific number of seconds have passed, whichever comes
+     * first.  In the case of long-running operations, there could be
+     * other threads running service requests when destroy is called.
+     * The servlet writer is responsible for making sure that any
+     * threads still in the service method complete. 
      */
-    public ServletContext getServletContext() {
-	return getServletConfig().getServletContext();
-    }
 
+    public void destroy() {
+
+    }
+    
     /**
      * Returns a string containing the value of the named
      * initialization parameter, or null if the requested parameter
@@ -80,41 +92,48 @@ public abstract class GenericServlet
      *
      * @param name the name of the parameter whose value is requested
      */
+
     public String getInitParameter(String name) {
 	return getServletConfig().getInitParameter(name);
     }
 
+   /**
+    * Returns the names of the initialization parameters for this
+    * servlet as an enumeration of Strings, or an empty enumeration if
+    * there are no initialization parameters.
+    *
+    * <p>This method is supplied for convenience. It gets the parameter
+    * names from the ServletConfig object. (The ServletConfig object was
+    * passed into and stored by the init method.)
+    */
+
+    public Enumeration getInitParameterNames() {
+	return getServletConfig().getInitParameterNames();
+    }    
+
     /**
-     * Returns the names of the servlet's initialization parameters as
-     * an enumeration of strings, or an empty enumeration if there are
-     * no initialization parameters.  The getInitParameterNames method
-     * is supplied for convenience; it gets the parameter names from
+     * Returns a servletConfig object containing any startup
+     * configuration information for this servlet.
+     */
+
+    public ServletConfig getServletConfig() {
+	return config;
+    }
+    
+    /**
+     * Returns a ServletContext object, which contains information
+     * about the network service in which the servlet is running.  This
+     * is a convenience method; it gets the ServletContext object from
      * the ServletConfig object.  (The ServletConfig object was passed
      * into and stored by the init method.)
      */
-    public Enumeration getInitParameterNames() {
-	return getServletConfig().getInitParameterNames();
+
+    public ServletContext getServletContext() {
+	return getServletConfig().getServletContext();
     }
 
-    /**
-     * 
-     * Writes the class name of the servlet and the given message to
-     * the servlet log file.  The name of the servlet log file is
-     * server specific; it is normally an event log.
-     *
-     * <p>If a servlet will have multiple instances (for example, if
-     * the network service runs the servlet for multiple virtual
-     * hosts), the servlet writer should override this method.  The
-     * specialized method should log an instance identifier, along with
-     * the requested message.  The default message prefix, the class
-     * name of the servlet, does not allow the log entries of the
-     * instances to be distinguished from one another.
-     *
-     * @param msg the message string to be logged
-     */
-    public void log(String msg) {
-	getServletContext().log(getClass().getName() + ": "+ msg);
-    }
+
+ 
 
     /**
      * Returns a string that contains information about the servlet,
@@ -122,6 +141,7 @@ public abstract class GenericServlet
      * must be overridden in order to return this information.
      * If it is not overridden, null is returned.
      */
+
     public String getServletInfo() {
 	return null;
     }
@@ -146,19 +166,56 @@ public abstract class GenericServlet
      * @param config servlet configuration information
      * @exception ServletException if a servlet exception has occurred
      */
+
     public void init(ServletConfig config) throws ServletException {
 	this.config = config;
+	this.init();
 	log("init");
     }
 
     /**
-     * Returns a servletConfig object containing any startup
-     * configuration information for this servlet.
+     * This method is provided as a convenience so that servlet
+     * writers do not have to worry about storing the ServletConfig
+     * object. When extending this class, simply override this method
+     * and it will be called by GenericServlet.init(ServletConfig
+     * config);
      */
-    public ServletConfig getServletConfig() {
-	return config;
-    }
+    
+    public void init() throws ServletException {
 
+    }
+    
+
+    /**
+     * 
+     * Writes the class name of the servlet and the given message to
+     * the servlet log file.  The name of the servlet log file is
+     * server specific; it is normally an event log.
+     *
+     * <p>If a servlet will have multiple instances (for example, if
+     * the network service runs the servlet for multiple virtual
+     * hosts), the servlet writer should override this method.  The
+     * specialized method should log an instance identifier and possibly a
+     * thread identifier, along with
+     * the requested message.  The default message prefix, the class
+     * name of the servlet, does not allow the log entries of the
+     * instances to be distinguished from one another.
+     *
+     * @param msg the message string to be logged
+     */
+
+    public void log(String msg) {
+	getServletContext().log(getClass().getName() + ": "+ msg);
+    }
+   
+    /**
+     * Logs the message with the root cause
+     */
+   
+    public void log(String message, Throwable t) {
+	getServletContext().log(getClass().getName() + ": " + message, t);
+    }
+    
     /**
      * 
      * Carries out a single request from the client.  The request
@@ -189,28 +246,9 @@ public abstract class GenericServlet
      * @exception ServletException if a servlet exception has occurred
      * @exception IOException if an I/O exception has occurred
      */
+
     public abstract void service(ServletRequest req, ServletResponse res)
 	throws ServletException, IOException;
-
-    /**
-     *
-     * Destroys the servlet, cleaning up whatever resources are being
-     * held, and logs the destruction in the servlet log file.  This
-     * method is called, once, automatically, by the network service
-     * each time it removes the servlet.  After destroy is run, it
-     * cannot be called again until the network service reloads the
-     * servlet.
-     *
-     * <p>When the network service removes a servlet, it calls destroy
-     * after all service calls have been completed, or a
-     * service-specific number of seconds have passed, whichever comes
-     * first.  In the case of long-running operations, there could be
-     * other threads running service requests when destroy is called.
-     * The servlet writer is responsible for making sure that any
-     * threads still in the service method complete. 
-     */
-    public void destroy() {
-	log("destroy");
-    }
-
+    
+ 
 }

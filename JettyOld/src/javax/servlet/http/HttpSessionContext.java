@@ -1,5 +1,5 @@
 /*
- * @(#)HttpSessionContext.java	1.9 97/10/15
+ * $Id$
  * 
  * Copyright (c) 1997 Sun Microsystems, Inc. All Rights Reserved.
  * 
@@ -27,32 +27,38 @@ import java.util.Enumeration;
  * entity. This interface gives servlets access to  
  * methods for listing the IDs and for retrieving a session based on its ID.
  *
- * <p>Servlets get the HttpSessionContext object by calling the getSessionContext() 
- * method of HttpSession. 
+ * <p>Servlets get the HttpSessionContext object by calling the
+ * getSessionContext() method of HttpSession.
  *
  * @see HttpSession
- *
- * @version	1.9, 10/15/97
+ * @deprecated The HttpSessionContext class has been deprecated for security
+ * reasons. It will be removed in a future version of the Servlet API.
  */
-public
-interface HttpSessionContext
-{
+
+public interface HttpSessionContext {
+
     /**
-     * Returns the session bound to the specified session ID. 
-	 *
-	 * @param sessionID the ID of a particular session object
-	 * @return the session name. Returns null if the session ID does not refer
-	 * to a valid session.
+     * This method is deprecated and retained only for binary compatibility.
+     * It must always return null.
+     *
+     * @deprecated This method has been deprecated for security reasons.
+     * It will be removed in a future version of the Servlet API.
      */
+
     public HttpSession getSession (String sessionId);
   
     /**
-     * Returns an enumeration of all of the session IDs in this context.
-	 *
-	 * @return an enumeration of all session IDs in this context
+     * This method is deprecated and retained only for binary compatibility.
+     * It must always return an empty enumeration.
+     *
+     * @deprecated This method has been deprecated for security reasons.
+     * It will be removed in a future version of the Servlet API.
      */
+
     public Enumeration getIds ();
 }
+
+
 
 
 

@@ -1,5 +1,5 @@
 /*
- * @(#)HttpSession.java	1.15 97/10/28
+ * $Id$
  * 
  * Copyright (c) 1997 Sun Microsystems, Inc. All Rights Reserved.
  * 
@@ -17,7 +17,7 @@
  * THIS SOFTWARE OR ITS DERIVATIVES.
  */
 
-   package javax.servlet.http;
+package javax.servlet.http;
 
 /**
  * The HttpSession interface is implemented by services to provide an 
@@ -105,142 +105,168 @@
  *
  * @see HttpSessionBindingListener
  * @see HttpSessionContext
- *
- * @version	1.15, 10/28/97
  */
-   public
-   interface HttpSession
-{
-/**
- * Returns the identifier assigned to this session. An HttpSession's 
- * identifier is a unique string that is created and maintained by 
- * HttpSessionContext.
- *
- * @return the identifier assigned to this session
- * @exception IllegalStateException if an attempt is made to access  
- * session data after the session has been invalidated
- */
-   public String getId ();
 
-/**
- * Returns the context in which this session is bound. 
- *
- * @return the name of the context in which this session is bound  
- * @exception IllegalStateException if an attempt is made to access 
- * session data after the session has been invalidated
- */
-   public HttpSessionContext getSessionContext ();
+public interface HttpSession {
 
-/**
- * Returns the time at which this session representation was created,
- * in milliseconds since midnight, January 1, 1970 UTC.
- * 
- * @return the time when the session was created
- * @exception IllegalStateException if an attempt is made to access  
- * session data after the session has been invalidated
- */
-   public long getCreationTime ();
+    /**
+     * Returns the time at which this session representation was created,
+     * in milliseconds since midnight, January 1, 1970 UTC.
+     * 
+     * @return the time when the session was created
+     * @exception IllegalStateException if an attempt is made to access  
+     * session data after the session has been invalidated
+     */
 
-/**
- * Returns the last time the client sent a request carrying the identifier
- * assigned to the session. Time is expressed
- * as milliseconds since midnight, January 1, 
- * 1970 UTC. 
- * Application level operations, such as getting or setting a value
- * associated with the session, does not affect the access time.
- *
- * <P> This information is particularly useful in session management
- * policies.  For example,
- * <UL>
- * <LI>a session manager could leave all sessions
- * which have not been used in a long time 
- * in a given context.
- * <LI>the sessions can be sorted according to age to optimize some task.
- * </UL>
- *
- * @return the last time the client sent a request carrying the identifier 
- * assigned to the session
- * @exception IllegalStateException if an attempt is made to access 
- * session data after the session has been invalidated
- */
-   public long getLastAccessedTime ();
+    public long getCreationTime ();
+    
+    /**
+     * Returns the identifier assigned to this session. An HttpSession's 
+     * identifier is a unique string that is created and maintained by 
+     * HttpSessionContext.
+     *
+     * @return the identifier assigned to this session
+     * @exception IllegalStateException if an attempt is made to access  
+     * session data after the session has been invalidated
+     */
 
-/**
- * Causes this representation of the session to be invalidated and removed 
- * from its context.  
- *
- * @exception IllegalStateException if an attempt is made to access  
- * session data after the session has been invalidated
- */
-   public void invalidate ();
+    public String getId ();
 
-/**
- * Binds the specified object into the session's application layer data
- * with the given name.  Any existing binding with the same name is
- * replaced.  New (or existing) values that implement the
- * HttpSessionBindingListener interface will call its  
- * valueBound() method.
- *
- * @param name the name to which the data object will be bound.  This
- * parameter cannot be null.
- * @param value the data object to be bound.  This parameter cannot be null. 
- * @exception IllegalStateException if an attempt is made to access  
- * session data after the session has been invalidated
- */
-   public void putValue (String name, Object value);
+    /**
+     * Returns the last time the client sent a request carrying the identifier
+     * assigned to the session. Time is expressed
+     * as milliseconds since midnight, January 1, 
+     * 1970 UTC. 
+     * Application level operations, such as getting or setting a value
+     * associated with the session, does not affect the access time.
+     *
+     * <P> This information is particularly useful in session management
+     * policies.  For example,
+     * <UL>
+     * <LI>a session manager could leave all sessions
+     * which have not been used in a long time 
+     * in a given context.
+     * <LI>the sessions can be sorted according to age to optimize some task.
+     * </UL>
+     *
+     * @return the last time the client sent a request carrying the identifier 
+     * assigned to the session
+     * @exception IllegalStateException if an attempt is made to access 
+     * session data after the session has been invalidated
+     */
 
-/**
- * Returns the object bound to the given name in the session's
- * application layer data.  Returns null if there is no such binding.
- *
- * @param name the name of the binding to find
- * @return the value bound to that name, or null if the binding does
- * not exist.
- * @exception IllegalStateException if an attempt is made to access 
- * HttpSession's session data after it has been invalidated
- */
-   public Object getValue (String name);
+    public long getLastAccessedTime ();
 
-/**
- * Removes the object bound to the given name in the session's
- * application layer data.  Does nothing if there is no object
- * bound to the given name.  The value that implements the
- * HttpSessionBindingListener interface will call its
- * valueUnbound() method.
- *
- * @param name the name of the object to remove
- * @exception IllegalStateException if an attempt is made to access 
- * session data after the session has been invalidated
- */
-   public void removeValue (String name);
 
-/**
- * Returns an array of the names of all the application layer
- * data objects bound into the session. For example, if you want to delete
- * all of the data objects bound into the session, use this method to 
- * obtain their names. 
- * 
- * @return an array containing the names of all of the application layer 
- * data objects bound into the session
- * @exception IllegalStateException if an attempt is made to access  
- * session data after the session has been invalidated
- */
-   public String [] getValueNames ();
+    public int getMaxInactiveInterval();
 
-/**
- * A session is considered to be "new" if it has been created by the server, 
- * but the client has not yet acknowledged joining the session. For example,
- * if the server supported only cookie-based sessions and the client had 
- * completely disabled the use of cookies, then calls to
- * HttpServletRequest.getSession() would 
- * always return "new" sessions. 
- *
- * @return true if the session has been created by the server but the 
- * client has not yet acknowledged joining the session; false otherwise
- * @exception IllegalStateException if an attempt is made to access  
- * session data after the session has been invalidated
- */
-   public boolean isNew ();
+   /**
+     * Returns the context in which this session is bound. 
+     *
+     * @return the name of the context in which this session is bound  
+     * @exception IllegalStateException if an attempt is made to access 
+     * session data after the session has been invalidated
+     *
+     * @deprecated
+     */
+
+    public HttpSessionContext getSessionContext ();
+    
+    /**
+     * Returns the object bound to the given name in the session's
+     * application layer data.  Returns null if there is no such binding.
+     *
+     * @param name the name of the binding to find
+     * @return the value bound to that name, or null if the binding does
+     * not exist.
+     * @exception IllegalStateException if an attempt is made to access 
+     * HttpSession's session data after it has been invalidated
+     */
+
+    public Object getValue (String name);
+
+    /**
+     * Returns an array of the names of all the application layer
+     * data objects bound into the session. For example, if you want to delete
+     * all of the data objects bound into the session, use this method to 
+     * obtain their names. 
+     * 
+     * @return an array containing the names of all of the application layer 
+     * data objects bound into the session
+     * @exception IllegalStateException if an attempt is made to access  
+     * session data after the session has been invalidated
+     */
+    
+    public String [] getValueNames();
+
+    /**
+     * Causes this representation of the session to be invalidated and removed 
+     * from its context.  
+     *
+     * @exception IllegalStateException if an attempt is made to access  
+     * session data after the session has been invalidated
+     */
+
+    public void invalidate ();
+    
+    /**
+     * A session is considered to be "new" if it has been created by the server, 
+     * but the client has not yet acknowledged joining the session. For example,
+     * if the server supported only cookie-based sessions and the client had 
+     * completely disabled the use of cookies, then calls to
+     * HttpServletRequest.getSession() would 
+     * always return "new" sessions. 
+     *
+     * @return true if the session has been created by the server but the 
+     * client has not yet acknowledged joining the session; false otherwise
+     * @exception IllegalStateException if an attempt is made to access  
+     * session data after the session has been invalidated
+     */
+
+    public boolean isNew ();
+    
+
+
+
+    
+    /**
+     * Binds the specified object into the session's application layer data
+     * with the given name.  Any existing binding with the same name is
+     * replaced.  New (or existing) values that implement the
+     * HttpSessionBindingListener interface will call its  
+     * valueBound() method.
+     *
+     * @param name the name to which the data object will be bound.  This
+     * parameter cannot be null.
+     * @param value the data object to be bound.  This parameter cannot be null. 
+     * @exception IllegalStateException if an attempt is made to access  
+     * session data after the session has been invalidated
+     */
+
+    public void putValue (String name, Object value);
+
+
+
+    /**
+     * Removes the object bound to the given name in the session's
+     * application layer data.  Does nothing if there is no object
+     * bound to the given name.  The value that implements the
+     * HttpSessionBindingListener interface will call its
+     * valueUnbound() method.
+     *
+     * @param name the name of the object to remove
+     * @exception IllegalStateException if an attempt is made to access 
+     * session data after the session has been invalidated
+     */
+
+    public void removeValue (String name);
+
+    /**
+     * Sets the maximum interval between requests that this session
+     * will be kept by the host server.
+     */
+    
+    public void setMaxInactiveInterval(int interval);
 
 }
 

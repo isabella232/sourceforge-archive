@@ -1,5 +1,5 @@
 /*
- * @(#)UnavailableException.java	1.5 97/07/15
+ * $Id$
  * 
  * Copyright (c) 1997 Sun Microsystems, Inc. All Rights Reserved.
  * 
@@ -54,10 +54,10 @@ package javax.servlet;
  * servlet-suggested amount of time, rather than being rejected until
  * the service itself restarts.
  *
- * @version	1.5
  */
-public 
-class UnavailableException extends ServletException {
+
+public  class UnavailableException extends ServletException {
+
     private Servlet	servlet;		// what's unavailable
     private boolean	permanent;		// needs admin action?
     private int		seconds;		// unavailability estimate
@@ -72,6 +72,7 @@ class UnavailableException extends ServletException {
      * @param servlet the servlet which is unavailable
      * @param msg the descriptive message
      */
+
     public UnavailableException (Servlet servlet, String msg) {
 	super (msg);
 	this.servlet = servlet;
@@ -93,6 +94,7 @@ class UnavailableException extends ServletException {
      * @param servlet the servlet which is unavailable
      * @param msg the descriptive message
      */
+
     public UnavailableException (int seconds, Servlet servlet, String msg) {
 	super (msg);
 	this.servlet = servlet;
