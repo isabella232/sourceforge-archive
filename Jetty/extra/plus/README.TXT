@@ -65,14 +65,15 @@ Demonstration webapps are available for both JAAS and JettyPlus:
 
 + ant run.jettyplus.demo
 
-  This target builds and runs a webapp which demonstrates the use of JNDI for environment lookups, database
-  connectivity using DataSources and UserTransactions.
+  This target builds and runs a webapp which demonstrates the use of JNDI for
+  environment lookups, database connectivity using DataSources and
+  UserTransactions and a Mail service.
 
   The URL is http://localhost:8080/jettyplus/index.html. Output is logged to $jetty.home/logs.
 
   Related files:
 
-     + $jetty.home/extra/etc/jaas.xml
+     + $jetty.home/extra/etc/jettyplus.xml
        The Jetty server configuration file
 
      + $jetty.home/extra/etc/login.conf
