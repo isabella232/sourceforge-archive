@@ -831,7 +831,7 @@ public class ServletHandler extends AbstractHttpHandler
     
     /* ------------------------------------------------------------ */
     void notFound(HttpServletRequest request,
-                  HttpServletResponse response)
+                           HttpServletResponse response)
         throws IOException
     {
         Code.debug("Not Found ",request.getRequestURI());
@@ -842,7 +842,7 @@ public class ServletHandler extends AbstractHttpHandler
             method.equals(HttpRequest.__HEAD)   ||
             method.equals(HttpRequest.__POST))
         {
-            response.sendError(HttpResponse.__404_Not_Found,request.getRequestURI()+" Not Found");
+            response.sendError(HttpResponse.__404_Not_Found);
         }
         else if (method.equals(HttpRequest.__TRACE))
             handleTrace(request,response);
@@ -1101,6 +1101,10 @@ public class ServletHandler extends AbstractHttpHandler
          */
         public void setAttribute(String name, Object value)
         {
+            if (name.startsWith("org.mortbay.http.") ||
+                name.startsWith("org.mortbay.jetty.") ||
+                name.startsWith("javax.servlet."))
+                return;
             getHttpContext().setAttribute(name,value);
         }
 
@@ -1111,6 +1115,10 @@ public class ServletHandler extends AbstractHttpHandler
          */
         public void removeAttribute(String name)
         {
+            if (name.startsWith("org.mortbay.http.") ||
+                name.startsWith("org.mortbay.jetty.") ||
+                name.startsWith("javax.servlet."))
+                return;
             getHttpContext().removeAttribute(name);
         }
     
