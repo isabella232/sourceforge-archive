@@ -426,17 +426,17 @@ case "$ACTION" in
 
         echo "STARTED Jetty `date`" >> $JETTY_CONSOLE
 
-        nohup sh -c "$RUN_CMD >>$JETTY_CONSOLE 2>&1" >/dev/null &
+        nohup sh -c "exec $RUN_CMD >>$JETTY_CONSOLE 2>&1" >/dev/null &
         echo $! > $JETTY_RUN/jetty.pid
         echo "Jetty running pid="`cat $JETTY_RUN/jetty.pid`
         ;;
 
   stop)
-        echo "Shutting down Jetty: "
-        kill `cat $JETTY_RUN/jetty.pid 2>/dev/null` 2>/dev/null
+        PID=`cat $JETTY_RUN/jetty.pid 2>/dev/null`
+        echo "Shutting down Jetty: $PID"
+        kill $PID 2>/dev/null
         sleep 2
-        kill -9 `cat $JETTY_RUN/jetty.pid 2>/dev/null` 2>/dev/null
-        echo `cat $JETTY_RUN/jetty.pid 2>/dev/null`
+        kill -9 $PID 2>/dev/null
         rm -f $JETTY_RUN/jetty.pid
         echo "STOPPED `date`" >>$JETTY_CONSOLE
         ;;

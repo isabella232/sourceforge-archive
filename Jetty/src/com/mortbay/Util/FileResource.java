@@ -35,13 +35,19 @@ import java.security.Permission;
  */
 class FileResource extends Resource
 {
-    private static boolean __checkAliases =
-        "true".equalsIgnoreCase(System.getProperty("com.mortbay.Util.FileResource.checkAliases",
-                                                   File.pathSeparatorChar=='/'?"false":"true"));
+    private static boolean __checkAliases;
+    static
+    {
+        __checkAliases=
+            "true".equalsIgnoreCase(System.getProperty("com.mortbay.Util.FileResource.checkAliases",
+                                                       File.separatorChar=='/'?"false":"true"));
+        if (__checkAliases)
+            Log.event("Checking Resource aliases");
+    }
     
     /* ------------------------------------------------------------ */
     private File _file;
-    private boolean _isAlias;
+    private String _alias=null;
         
     /* -------------------------------------------------------- */
     FileResource(URL url, URLConnection connection, File file)
@@ -55,8 +61,10 @@ class FileResource extends Resource
                 String abs=_file.getAbsolutePath();
                 String can=_file.getCanonicalPath();
 
-                _isAlias=!abs.equals(can);
-                if (_isAlias && Code.debug())
+                if (!abs.equals(can))
+                    _alias=abs+" is alias of "+can;
+                
+                if (_alias!=null && Code.debug())
                 {
                     Code.debug("ALIAS abs=",abs);
                     Code.debug("ALIAS can=",can);
@@ -76,7 +84,7 @@ class FileResource extends Resource
      */
     public boolean exists()
     {
-        return _file.exists() && !_isAlias;
+        return _file.exists() && _alias==null;
     }
         
     /* -------------------------------------------------------- */
@@ -94,7 +102,7 @@ class FileResource extends Resource
      */
     public boolean isDirectory()
     {
-        return _file.isDirectory() && !_isAlias;
+        return _file.isDirectory() && _alias==null;
     }
 
     /* --------------------------------------------------------- */
@@ -123,7 +131,7 @@ class FileResource extends Resource
      */
     public File getFile()
     {
-        if (_isAlias)
+        if (_alias!=null)
             return null;
         return _file;
     }
@@ -134,8 +142,8 @@ class FileResource extends Resource
      */
     public InputStream getInputStream() throws IOException
     {
-        if (_isAlias)
-            throw new FileNotFoundException("File is alias:"+getName());
+        if (_alias!=null)
+            throw new FileNotFoundException(_alias);
         return new FileInputStream(_file);
     }
         
@@ -146,8 +154,8 @@ class FileResource extends Resource
     public OutputStream getOutputStream()
         throws java.io.IOException, SecurityException
     {
-        if (_isAlias)
-            throw new FileNotFoundException("File is alias:"+getName());
+        if (_alias!=null)
+            throw new FileNotFoundException(_alias);
         return new FileOutputStream(_file);
     }
         
@@ -158,8 +166,8 @@ class FileResource extends Resource
     public boolean delete()
         throws SecurityException
     {
-        if (_isAlias)
-            throw new SecurityException("File is alias:"+getName());
+        if (_alias!=null)
+            throw new SecurityException(_alias);
         return _file.delete();
     }
 
@@ -170,8 +178,8 @@ class FileResource extends Resource
     public boolean renameTo( Resource dest)
         throws SecurityException
     {
-        if (_isAlias)
-            throw new SecurityException("File is alias:"+getName());
+        if (_alias!=null)
+            throw new SecurityException(_alias);
         if( dest instanceof FileResource)
             return _file.renameTo( ((FileResource)dest)._file);
         else
