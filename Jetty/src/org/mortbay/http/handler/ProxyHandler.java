@@ -16,8 +16,10 @@ import java.net.MalformedURLException;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
+import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
+import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
@@ -25,6 +27,8 @@ import org.mortbay.http.HttpTunnel;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.InetAddrPort;
+import org.mortbay.http.handler.AbstractHttpHandler;
+import org.mortbay.util.Resource;
 import org.mortbay.util.StringMap;
 import org.mortbay.util.URI;
 
@@ -33,7 +37,6 @@ import org.mortbay.util.URI;
  * A HTTP/1.1 Proxy.  This implementation uses the JVMs URL implementation to
  * make proxy requests.
  * <P>The HttpTunnel mechanism is also used to implement the CONNECT method.
- *
  * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
@@ -41,7 +44,8 @@ import org.mortbay.util.URI;
 public class ProxyHandler extends AbstractHttpHandler
 {
     protected Set _proxyHostsWhiteList;
-    protected Set _proxyHostsBlackList;    
+    protected Set _proxyHostsBlackList;
+    protected int _tunnelTimeoutMs=250;
     
     /* ------------------------------------------------------------ */
     /** Map of leg by leg headers (not end to end).
@@ -152,6 +156,24 @@ public class ProxyHandler extends AbstractHttpHandler
         }
     }
 
+
+    
+    /* ------------------------------------------------------------ */
+    public int getTunnelTimeoutMs()
+    {
+        return _tunnelTimeoutMs;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Tunnel timeout.
+     * IE on win2000 has connections issues with normal timeout handling.
+     * This timeout should be set to a low value that will expire to allow IE to
+     * see the end of the tunnel connection.
+     * /
+    public void setTunnelTimeoutMs(int ms)
+    {
+        _tunnelTimeoutMs = ms;
+    }
     
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,
@@ -165,6 +187,7 @@ public class ProxyHandler extends AbstractHttpHandler
         // Is this a CONNECT request?
         if (HttpRequest.__CONNECT.equalsIgnoreCase(request.getMethod()))
         {
+            response.setField(HttpFields.__Connection,"close"); // XXX Needed for IE????
             handleConnect(pathInContext,pathParams,request,response);
             return;
         }
@@ -336,19 +359,35 @@ public class ProxyHandler extends AbstractHttpHandler
         {
             Code.debug("CONNECT: ",uri);
             InetAddrPort addrPort=new InetAddrPort(uri.toString());
-            
-            Integer port = new Integer(addrPort.getPort());
-            String host=addrPort.getHost();
-            if (!_allowedConnectPorts.contains(port) ||
-                _proxyHostsWhiteList!=null && !_proxyHostsWhiteList.contains(host) ||
-                _proxyHostsBlackList!=null && _proxyHostsBlackList.contains(host))
+
+            if (isForbidden(HttpMessage.__SSL_SCHEME,addrPort.getHost(),addrPort.getPort(),false))
             {
                 sendForbid(request,response,uri);
             }
             else
             {
                 Socket socket = new Socket(addrPort.getInetAddress(),addrPort.getPort());
-                request.getHttpConnection().setHttpTunnel(new HttpTunnel(socket));
+
+                // XXX - need to setup semi-busy loop for IE.
+                int timeoutMs=30000;
+		if (_tunnelTimeoutMs > 0)
+                {
+                    socket.setSoTimeout(_tunnelTimeoutMs);
+		    Object maybesocket = request.getHttpConnection().getConnection();
+		    try
+                    {
+			Socket s = (Socket) maybesocket;
+                        timeoutMs=s.getSoTimeout();
+			s.setSoTimeout(_tunnelTimeoutMs);
+		    }
+                    catch (Exception e)
+                    {
+			Code.ignore(e);
+		    }
+		}
+                
+                customizeConnection(pathInContext,pathParams,request,socket);
+                request.getHttpConnection().setHttpTunnel(new HttpTunnel(socket,timeoutMs));
                 response.setStatus(HttpResponse.__200_OK);
                 response.setContentLength(0);
                 request.setHandled(true);
@@ -361,9 +400,22 @@ public class ProxyHandler extends AbstractHttpHandler
         }
     }
     
+    /* ------------------------------------------------------------ */
+    /** Customize proxy Socket connection for CONNECT.
+     * Method to allow derived handlers to customize the tunnel sockets.
+     *
+     */
+    protected void customizeConnection(String pathInContext,
+                                       String pathParams,
+                                       HttpRequest request,
+                                       Socket socket)
+        throws IOException
+    {
+    }
+    
         
     /* ------------------------------------------------------------ */
-    /** Customize proxy connection.
+    /** Customize proxy URL connection.
      * Method to allow derived handlers to customize the connection.
      */
     protected void customizeConnection(String pathInContext,
@@ -398,29 +450,40 @@ public class ProxyHandler extends AbstractHttpHandler
     /* ------------------------------------------------------------ */
     /** Is URL Forbidden.
      * 
-     * @return True if the URL is not forbidden: if it has a schema
-     * that is in the _ProxySchemes map. If a proxy host black list is set,
-     * the URI host must not be in the list. If aproxy host white list is
-     * set, then the URI host must be in the list.
-     * The port is also checked that it is either 80, 443, >1024 or one of the 
-     * allowed CONNECT ports.
+     * @return True if the URL is not forbidden. Calls isForbidden(scheme,host,port,true);
      */
     protected boolean isForbidden(URI uri)
     {
-        // Is this a proxy request?
+        String scheme=uri.getScheme();
         String host=uri.getHost();
-
-        // check port
         int port = uri.getPort();
-        if (port>0 && port <=1024 && port!=80 && port!=443)
+        return isForbidden(scheme,host,port,true);
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    /** Is scheme,host & port Forbidden.
+     *
+     * @param scheme A scheme that mast be in the proxySchemes StringMap.
+     * @param host A host that must pass the white and black lists
+     * @param port A port that must in the allowedConnectPorts Set
+     * @param openNonPrivPorts If true ports greater than 1024 are allowed.
+     * @return  True if the request to the scheme,host and port is not forbidden.
+     */
+    protected boolean isForbidden(String scheme,
+                                  String host,
+                                  int port,
+                                  boolean openNonPrivPorts)
+    {
+        // Check port
+        Integer p = new Integer(port);
+        if (port >0 && !_allowedConnectPorts.contains(p))
         {
-            Integer p = new Integer(port);
-            if (!_allowedConnectPorts.contains(p))
+            if (!openNonPrivPorts || port<=1024)
                 return true;
         }
 
         // Must be a scheme that can be proxied.
-        String scheme=uri.getScheme();
         if (scheme==null || !_ProxySchemes.containsKey(scheme))
             return true;
 
