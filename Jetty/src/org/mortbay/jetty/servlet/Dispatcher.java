@@ -47,7 +47,6 @@ import org.mortbay.util.URI;
 import org.mortbay.util.UrlEncoded;
 import org.mortbay.util.WriterOutputStream;
 
-
 /* ------------------------------------------------------------ */
 /** Servlet RequestDispatcher.
  * 
@@ -179,6 +178,8 @@ public class Dispatcher implements RequestDispatcher
         ServletHttpRequest servletHttpRequest=
             (ServletHttpRequest)httpConnection.getRequest().getWrapper();
         
+        
+        
         // wrap the request and response
         DispatcherRequest request = new DispatcherRequest(httpServletRequest,
                                                           servletHttpRequest,
@@ -234,7 +235,24 @@ public class Dispatcher implements RequestDispatcher
                                  PathMap.pathMatch(_pathSpec,_pathInContext),
                                  PathMap.pathInfo(_pathSpec,_pathInContext),
                                  query);
-                _servletHandler.dispatch(_pathInContext,request,response,_holder);
+        
+
+                // are we wrap over or wrap under
+                if (_servletHandler instanceof WebApplicationHandler)
+                {
+                    JSR154Filter filter = ((WebApplicationHandler)_servletHandler).getJsr154Filter();
+                    if (filter!=null && filter.isUnwrappedDispatchSupported())
+                    {
+                        filter.setDispatch(request, response);
+                        _servletHandler.dispatch(_pathInContext,httpServletRequest,httpServletResponse,_holder);
+                    }
+                    else
+                        _servletHandler.dispatch(_pathInContext,request,response,_holder);
+                }
+                else
+                    _servletHandler.dispatch(_pathInContext,request,response,_holder);
+                
+                
                 
                 if (filterType!=FilterHolder.__INCLUDE)
                     response.close();
@@ -707,7 +725,7 @@ public class Dispatcher implements RequestDispatcher
                 try{_writer=super.getWriter();}
                 catch(IllegalStateException e)
                 {
-                    if (log.isDebugEnabled()) log.warn(LogSupport.EXCEPTION,e);
+                    LogSupport.ignore(log, e);
                     _flushNeeded=true;
                     _writer = new ServletWriter(super.getOutputStream(),
                                                 getCharacterEncoding());

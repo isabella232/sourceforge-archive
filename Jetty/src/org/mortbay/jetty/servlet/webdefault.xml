@@ -354,5 +354,35 @@
     <locale-encoding-mapping><locale>zh_TW</locale><encoding>Big5</encoding></locale-encoding-mapping>   
   </locale-encoding-mapping-list>
 
+  
+  <!-- ==================================================================== -->
+  <!-- JSR154 Stupidness                                                    -->
+  <!-- This filter implements some of the JSR154 (servlet 2.4) "features",  -->
+  <!-- which are rather stupid and expensive to implement. Thus they are    -->
+  <!-- not included in the core Jetty architecture.   It is HIGHLY          -->
+  <!-- RECOMMENDED that this filter NOT be used, unless you need:           -->
+  <!--    RequestAttributeListeners - If you actually have a real use for   -->
+  <!--       these, please tell the jetty lists what they are and why you   -->
+  <!--       can't use a normal filter/wrapper for this?                    -->
+  <!--    SRV.6.2.2 Dispatachers  - where the container cannot wrap the     -->
+  <!--       request or response. See                                       -->
+  <!--       http://jetty.mortbay.org/jetty/doc/servlet24.html#d0e711       -->
+  <!--       to find out why this is stupid.                                -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
+  <!-- COMMENT OUT TO RUN FAST 
+  -->
+  <filter>
+    <filter-name>jsr154</filter-name>
+    <filter-class>org.mortbay.jetty.servlet.JSR154Filter</filter-class>
+    <init-param><param-name>unwrappedDispatch</param-name><param-value>true</param-value></init-param>
+  </filter>
+  <filter-mapping>
+      <filter-name>jsr154</filter-name>
+      <url-pattern>/</url-pattern>
+      <dispatcher>REQUEST</dispatcher>
+      <dispatcher>FORWARD</dispatcher>
+      <dispatcher>INCLUDE</dispatcher>
+  </filter-mapping>
+  
 </web-app>
 

@@ -78,6 +78,7 @@ public class WebApplicationHandler extends ServletHandler
     protected transient Object _requestAttributeListeners;
     protected transient Object _sessionListeners;
     protected transient Object _contextAttributeListeners;
+    protected transient JSR154Filter jsr154Filter;
 
     /* ------------------------------------------------------------ */
     public boolean isAcceptRanges()
@@ -95,6 +96,15 @@ public class WebApplicationHandler extends ServletHandler
         _acceptRanges= ar;
     }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the jsr154Filter.
+     */
+    public JSR154Filter getJsr154Filter()
+    {
+        return jsr154Filter;
+    }
+    
     /* ------------------------------------------------------------ */
     public FilterHolder defineFilter(String name, String className)
     {
@@ -256,21 +266,6 @@ public class WebApplicationHandler extends ServletHandler
         if (getHttpContext() instanceof WebApplicationContext)
             _webApplicationContext= (WebApplicationContext)getHttpContext();
 
-        if (LazyList.size(_requestAttributeListeners) > 0 || LazyList.size(_requestListeners) > 0)
-        {
-            FilterHolder holder=
-                new FilterHolder(
-                    this,
-                    "RequestAttributeListener",
-                    "org.mortbay.jetty.servlet.RequestListenerFilter");
-            holder.addAppliesTo(FilterHolder.__ALL);
-            holder.addPathSpec("/");
-            holder.start();
-            RequestListenerFilter filter= (RequestListenerFilter)holder.getFilter();
-            filter.setRequestAttributeListeners(_requestAttributeListeners);
-            filter.setRequestListeners(_requestListeners);
-            _pathFilters.add(0, holder);
-        }
     }
 
     /* ------------------------------------------------------------ */
@@ -300,6 +295,22 @@ public class WebApplicationHandler extends ServletHandler
         catch (Exception e)
         {
             mex.add(e);
+        }
+
+        FilterHolder holder=getFilter("jsr154");
+        if (holder!=null)
+            jsr154Filter= (JSR154Filter)holder.getFilter();
+        log.debug("jsr154filter="+jsr154Filter);
+        
+        if (LazyList.size(_requestAttributeListeners) > 0 || LazyList.size(_requestListeners) > 0)
+        {
+            if (jsr154Filter==null)
+                log.warn("Filter jsr154 not defined for RequestAttributeListeners");
+            else
+            {
+                jsr154Filter.setRequestAttributeListeners(_requestAttributeListeners);
+                jsr154Filter.setRequestListeners(_requestListeners);
+            }
         }
 
         mex.ifExceptionThrow();
@@ -379,8 +390,34 @@ public class WebApplicationHandler extends ServletHandler
         // Determine request type.
         int requestType= 0;
 
-        if (request instanceof Dispatcher.DispatcherRequest)
+        if (request instanceof ServletHttpRequest)
         {
+            // This is NOT a dispatched request.
+            ServletHttpRequest servletHttpRequest= (ServletHttpRequest)request;
+            ServletHttpResponse servletHttpResponse= (ServletHttpResponse)response;  
+
+            // Request
+            requestType= FilterHolder.__REQUEST;
+            // protect web-inf and meta-inf
+            if (StringUtil.startsWithIgnoreCase(pathInContext, "/web-inf")
+                || StringUtil.startsWithIgnoreCase(pathInContext, "/meta-inf"))
+            {
+                response.sendError(HttpResponse.__404_Not_Found);
+                return;
+            }
+
+            // Security Check
+            if (!getHttpContext()
+                .checkSecurityConstraints(
+                    pathInContext,
+                    servletHttpRequest.getHttpRequest(),
+                    servletHttpResponse.getHttpResponse()))
+                return;
+        }
+        else
+        {
+            // This is a dispatched request.
+            
             // Handle dispatch to j_security_check
             HttpContext context= getHttpContext();
             if (context != null
@@ -402,30 +439,15 @@ public class WebApplicationHandler extends ServletHandler
             }
 
             // Forward or error
-            requestType= ((Dispatcher.DispatcherRequest)request).getFilterType();
-        }
-        else
-        {
-            ServletHttpRequest servletHttpRequest= (ServletHttpRequest)request;
-            ServletHttpResponse servletHttpResponse= (ServletHttpResponse)response;  
-
-            // Request
-            requestType= FilterHolder.__REQUEST;
-            // protect web-inf and meta-inf
-            if (StringUtil.startsWithIgnoreCase(pathInContext, "/web-inf")
-                || StringUtil.startsWithIgnoreCase(pathInContext, "/meta-inf"))
+            requestType=-1;
+            if (jsr154Filter!=null)
             {
-                response.sendError(HttpResponse.__404_Not_Found);
-                return;
+                Dispatcher.DispatcherRequest dr=jsr154Filter.getDispatchRequest();
+                if (dr!=null)
+                    requestType=dr.getFilterType();
             }
-
-            // Security Check
-            if (!getHttpContext()
-                .checkSecurityConstraints(
-                    pathInContext,
-                    servletHttpRequest.getHttpRequest(),
-                    servletHttpResponse.getHttpResponse()))
-                return;
+            if (requestType<0)
+                requestType= ((Dispatcher.DispatcherRequest)request).getFilterType();
         }
 
         // Build list of filters
@@ -578,4 +600,5 @@ public class WebApplicationHandler extends ServletHandler
                 notFound((HttpServletRequest)request, (HttpServletResponse)response);
         }
     }
+ 
 }
