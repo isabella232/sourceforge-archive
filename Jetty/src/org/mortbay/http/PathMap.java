@@ -42,8 +42,6 @@ import java.util.StringTokenizer;
  * Note that this is a very different mapping to that provided by PathMap
  * in Jetty2.
  * <P>
- * Note that exact matches can be terminated my the ; character as
- * used in servlet session rewriting.
  *
  * @version $Id$
  * @author Greg Wilkins (gregw)
@@ -51,7 +49,20 @@ import java.util.StringTokenizer;
 public class PathMap extends HashMap
 {
     /* ------------------------------------------------------------ */
-    public static final String __pathSpecSeparators = System.getProperty("org.mortbay.http.PathMap.separators",":");
+    private static String __pathSpecSeparators = System.getProperty("org.mortbay.http.PathMap.separators",":,");
+
+    /* ------------------------------------------------------------ */
+    /** Set the path spec separator.
+     * Multiple path specification may be included in a single string
+     * if they are separated by the characters set in this string.
+     * The default value is ":," or whatever has been set by the
+     * system property org.mortbay.http.PathMap.separators
+     * @param s separators
+     */
+    public static void setPathSpecSeparators(String s)
+    {
+        __pathSpecSeparators=s;
+    }
     
     /* --------------------------------------------------------------- */
     StringMap _prefixMap=new StringMap();
@@ -165,13 +176,21 @@ public class PathMap extends HashMap
     {
         Map.Entry entry;
 
+        int l=path.indexOf(';');
+        if (l<0)
+        {
+            l=path.indexOf('?');
+            if (l<0)
+                l=path.length();
+        }
+
         // try exact match
-        entry=_exactMap.getEntry(path,0,path.length());
+        entry=_exactMap.getEntry(path,0,l);
         if (entry!=null)
             return (Map.Entry) entry.getValue();
         
         // prefix search
-        int i=path.length();
+        int i=l;
         while((i=path.lastIndexOf('/',i-1))>=0)
         {
             entry=_prefixMap.getEntry(path,0,i);
@@ -187,7 +206,7 @@ public class PathMap extends HashMap
         i=0;
         while ((i=path.indexOf('.',i+1))>0)
         {
-            entry=_suffixMap.getEntry(path,i+1,path.length()-i-1);
+            entry=_suffixMap.getEntry(path,i+1,l-i-1);
             if (entry!=null)
                 return (Map.Entry) entry.getValue();
         }        
@@ -207,13 +226,21 @@ public class PathMap extends HashMap
         Map.Entry entry;
         LazyList entries=null;
         
+        int l=path.indexOf(';');
+        if (l<0)
+        {
+            l=path.indexOf('?');
+            if (l<0)
+                l=path.length();
+        }
+
         // try exact match
-        entry=_exactMap.getEntry(path,0,path.length());
+        entry=_exactMap.getEntry(path,0,l);
         if (entry!=null)
             entries=LazyList.add(entries,entry.getValue());
         
         // prefix search
-        int i=path.length()-1;
+        int i=l-1;
         while((i=path.lastIndexOf('/',i-1))>=0)
         {
             entry=_prefixMap.getEntry(path,0,i);
@@ -229,7 +256,7 @@ public class PathMap extends HashMap
         i=0;
         while ((i=path.indexOf('.',i+1))>0)
         {
-            entry=_suffixMap.getEntry(path,i+1,path.length()-i-1);
+            entry=_suffixMap.getEntry(path,i+1,l-i-1);
             if (entry!=null)
                 entries=LazyList.add(entries,entry.getValue());
         }

@@ -526,7 +526,7 @@ public class ServletHandler
                             holder.destroy();
                             String msg = "Dynamic servlet "+
                                 servletClass+
-                                " is loaded from context: "+
+                                " is not loaded from context: "+
                                 getContext().getHandlerContext().getContextPath();
                         
                             Code.warning(msg);

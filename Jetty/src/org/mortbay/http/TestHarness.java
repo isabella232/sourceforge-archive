@@ -360,44 +360,39 @@ public class TestHarness
             p.put("*.gz","7");
             p.put("/","8");
             p.put("/XXX:/YYY","9");
+
+
+            String[][] tests =
+            {
+                {"/abs/path","1"},
+                {"/abs/path/xxx","8"},
+                {"/abs/pith","8"},
+                {"/abs/path/longer","2"},
+                {"/abs/path/","8"},
+                {"/abs/path/xxx","8"},
+                {"/animal/bird/eagle/bald","3"},
+                {"/animal/fish/shark/grey","4"},
+                {"/animal/insect/bug","5"},
+                {"/animal","5"},
+                {"/animal/","5"},
+                {"/suffix/path.tar.gz","6"},
+                {"/suffix/path.gz","7"},
+                {"/animal/path.gz","5"},
+                {"/Other/path","8"},
+            };    
+
+            for (int i=0;i<tests.length;i++)
+            {
+                t.checkEquals(p.getMatch(tests[i][0]).getValue(),tests[i][1],tests[i][0]);
+                t.checkEquals(p.getMatch(tests[i][0]+"?a=1").getValue(),tests[i][1],tests[i][0]+"?a=1");
+                t.checkEquals(p.getMatch(tests[i][0]+";a=1").getValue(),tests[i][1],tests[i][0]+";a=1");
+                t.checkEquals(p.getMatch(tests[i][0]+";a=1?a=1").getValue(),tests[i][1],tests[i][0]+";a=1?a=1");
+            }
             
             t.checkEquals(p.get("/abs/path"),"1","Get absolute path");
             t.checkEquals(p.getMatch("/abs/path").getKey(),"/abs/path",
                           "Match absolute path");
-            t.checkEquals(p.getMatch("/abs/path").getValue(),"1",
-                          "Match absolute path");
-            t.checkEquals(p.getMatch("/abs/path/xxx").getValue(),"8",
-                          "Mismatch absolute path");
-            t.checkEquals(p.getMatch("/abs/pith").getValue(),"8",
-                          "Mismatch absolute path");
-            t.checkEquals(p.getMatch("/abs/path/longer").getValue(),"2",
-                          "Match longer absolute path");
-            t.checkEquals(p.getMatch("/abs/path/").getValue(),"8",
-                          "Not exact absolute path");
-            t.checkEquals(p.getMatch("/abs/path/xxx").getValue(),"8",
-                          "Not exact absolute path");
             
-            t.checkEquals(p.getMatch("/animal/bird/eagle/bald").getValue(),"3",
-                          "Match longest prefix");
-            t.checkEquals(p.getMatch("/animal/fish/shark/grey").getValue(),"4",
-                          "Match longest prefix");
-            t.checkEquals(p.getMatch("/animal/insect/bug").getValue(),"5",
-                          "Match longest prefix");
-            t.checkEquals(p.getMatch("/animal").getValue(),"5",
-                          "mismatch exact prefix");
-            t.checkEquals(p.getMatch("/animal/").getValue(),"5",
-                          "mismatch exact prefix");
-            
-            t.checkEquals(p.getMatch("/suffix/path.tar.gz").getValue(),"6",
-                          "Match longest suffix");
-            t.checkEquals(p.getMatch("/suffix/path.gz").getValue(),"7",
-                          "Match longest suffix");
-            t.checkEquals(p.getMatch("/animal/path.gz").getValue(),"5",
-                          "prefix rather than suffix");
-            
-            t.checkEquals(p.getMatch("/Other/path").getValue(),"8",
-                          "default");
-
             t.checkEquals(p.getMatches("/animal/bird/path.tar.gz").toString(),
                           "[/animal/bird/*=3, /animal/*=5, *.tar.gz=6, *.gz=7, /=8]",
                           "all matches");
