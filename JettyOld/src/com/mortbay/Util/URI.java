@@ -259,7 +259,7 @@ public class URI
      */
     public String toString()
     {
-        String result = path;
+        String result = encodePath( path );
         if (modified)
             query();
         if (query!=null && query.length()>0)
@@ -267,6 +267,58 @@ public class URI
         return result;
     }
 
+    /* ------------------------------------------------------------ */
+    /* Encode a URI path.
+     * This is the same encoding offered by URLEncoder, except that
+     * the '/' character is not encoded.
+     * @param path The path the encode
+     * @return The encoded path
+     */
+    private String encodePath(String path)
+    {
+        if (path==null || path.length()==0)
+            return path;
+        
+        StringBuffer buf = new StringBuffer(path.length()<<1);
+        encodePath(buf,path);
+        return buf.toString();
+    }
+        
+    /* ------------------------------------------------------------ */
+    /* Encode a URI path.
+     * This is the same encoding offered by URLEncoder, except that
+     * the '/' character is not encoded.
+     * @param path The path the encode
+     * @param buf StringBuffer to encode path into
+     */
+    private void encodePath(StringBuffer buf, String path)
+    {
+        synchronized(buf)
+        {
+            for (int i=0;i<path.length();i++)
+            {
+                char c=path.charAt(i);
+                switch(c)
+                {
+                  case '%':
+                      buf.append("%25");
+                      continue;
+                  case '?':
+                      buf.append("%3F");
+                      continue;
+                  case '&':
+                      buf.append("%26");
+                      continue;
+                  case ' ':
+                      buf.append("%20");
+                      continue;
+                  default:
+                      buf.append(c);
+                      continue;
+                }
+            }
+        }
+    }
 }
 
 
