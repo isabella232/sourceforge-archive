@@ -190,6 +190,8 @@ public class UrlEncoded extends MultiMap
                       }
                       break;
                   case '=':
+                      if (key!=null)
+                          break;
                       key = encoded
                           ?decodeString(content,mark+1,i-mark-1,charset)
                           :content.substring(mark+1,i);
@@ -258,6 +260,8 @@ public class UrlEncoded extends MultiMap
                           ox = 0;
                           break;
                       case '=':
+                          if (key!=null)
+                              break;
                           key = new String(data, 0, ox, charset);
                           ox = 0;
                           break;
