@@ -157,7 +157,7 @@ public class HttpFields
                 _inlineValues=inline;
                 
                 _hashCode=__hashCode++;
-                if (__hashCode<__maxCacheSize)
+                if (__hashCode<__maxCacheSize && !__info.containsKey(name))
                 {
                     __info.put(name,this);
                     if (!name.equals(_lname))
