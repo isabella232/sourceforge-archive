@@ -25,6 +25,8 @@ import java.util.Map;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
+import javax.servlet.ServletContextAttributeEvent;
+import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestAttributeListener;
@@ -75,6 +77,7 @@ public class WebApplicationHandler extends ServletHandler
     protected transient Object _requestListeners;
     protected transient Object _requestAttributeListeners;
     protected transient Object _sessionListeners;
+    protected transient Object _contextAttributeListeners;
 
     /* ------------------------------------------------------------ */
     public boolean isAcceptRanges()
@@ -172,6 +175,12 @@ public class WebApplicationHandler extends ServletHandler
             _requestAttributeListeners= LazyList.add(_requestAttributeListeners, listener);
         }
 
+        if (listener instanceof ServletContextAttributeListener)
+        {
+            known= true;
+            _contextAttributeListeners= LazyList.add(_contextAttributeListeners, listener);
+        }
+
         if (!known)
             throw new IllegalArgumentException(listener.toString());
     }
@@ -185,6 +194,7 @@ public class WebApplicationHandler extends ServletHandler
         _sessionListeners= LazyList.remove(_sessionListeners, listener);
         _requestListeners= LazyList.remove(_requestListeners, listener);
         _requestAttributeListeners= LazyList.remove(_requestAttributeListeners, listener);
+        _contextAttributeListeners= LazyList.remove(_contextAttributeListeners, listener);
     }
 
     /* ------------------------------------------------------------ */
@@ -317,6 +327,7 @@ public class WebApplicationHandler extends ServletHandler
             _sessionListeners= null;
             _requestListeners= null;
             _requestAttributeListeners= null;
+            _contextAttributeListeners= null;
         }
     }
 
@@ -473,6 +484,50 @@ public class WebApplicationHandler extends ServletHandler
             }
             else // Not found
                 notFound(request, response);
+        }
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    public synchronized void setContextAttribute(String name, Object value)
+    {
+        Object old= super.getContextAttribute(name);
+        super.setContextAttribute(name, value);
+
+        if (_contextAttributeListeners != null)
+        {
+            ServletContextAttributeEvent event=
+                new ServletContextAttributeEvent(getServletContext(), name, old != null ? old : value);
+            for (int i= 0; i < LazyList.size(_contextAttributeListeners); i++)
+            {
+                ServletContextAttributeListener l=
+                    (ServletContextAttributeListener)LazyList.get(_contextAttributeListeners, i);
+                if (old == null)
+                    l.attributeAdded(event);
+                else
+                    if (value == null)
+                        l.attributeRemoved(event);
+                    else
+                        l.attributeReplaced(event);
+            }
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    public synchronized void removeContextAttribute(String name)
+    {
+        Object old= super.getContextAttribute(name);
+        super.removeContextAttribute(name);
+
+        if (old != null && _contextAttributeListeners != null)
+        {
+            ServletContextAttributeEvent event= new ServletContextAttributeEvent(getServletContext(), name, old);
+            for (int i= 0; i < LazyList.size(_contextAttributeListeners); i++)
+            {
+                ServletContextAttributeListener l=
+                    (ServletContextAttributeListener)LazyList.get(_contextAttributeListeners, i);
+                l.attributeRemoved(event);
+            }
         }
     }
 

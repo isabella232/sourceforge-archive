@@ -865,6 +865,63 @@ public class ServletHandler extends AbstractHttpHandler
         return null;
     }
     
+    /* ------------------------------------------------------------ */
+    /** Get context attribute.
+     * Tries ServletHandler attributes and then delegated to HttpContext.
+     * @param name attribute name.
+     * @return attribute
+     */
+    protected Object getContextAttribute(String name)
+    {
+        if (ServletHandler.__J_S_CONTEXT_TEMPDIR.equals(name))
+        {
+            // Initialize temporary directory
+            Object t = getHttpContext().getAttribute(ServletHandler.__J_S_CONTEXT_TEMPDIR);
+
+            if (t instanceof File)
+                return (File)t;
+            
+            return getHttpContext().getTempDirectory();
+        }
+
+        if (_attributes.containsKey(name))
+            return _attributes.get(name);
+        return getHttpContext().getAttribute(name);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get context attribute names.
+     * Combines ServletHandler and HttpContext attributes.
+     */
+    protected Enumeration getContextAttributeNames()
+    {
+        if (_attributes.size()==0)
+            return getHttpContext().getAttributeNames();
+        HashSet set=new HashSet(_attributes.keySet());
+        Enumeration e=getHttpContext().getAttributeNames();
+        while(e.hasMoreElements())
+            set.add(e.nextElement());
+        return Collections.enumeration(set);
+    }
+
+    /* ------------------------------------------------------------ */
+    /* Set a Servlet context attribute.
+     * Servlet Context attributes may hide HttpContext attributes.
+     */
+    protected void setContextAttribute(String name, Object value)
+    {
+        _attributes.put(name,value);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* Remove a Servlet context attribute.
+     * Servlet Context attributes may hide HttpContext attributes.
+     */
+    protected void removeContextAttribute(String name)
+    {
+        _attributes.remove(name);
+    }
+    
     
     
     /* ------------------------------------------------------------ */
@@ -1040,20 +1097,7 @@ public class ServletHandler extends AbstractHttpHandler
          */
         public Object getAttribute(String name)
         {
-            if (ServletHandler.__J_S_CONTEXT_TEMPDIR.equals(name))
-            {
-                // Initialize temporary directory
-                Object t = getHttpContext().getAttribute(ServletHandler.__J_S_CONTEXT_TEMPDIR);
-
-                if (t instanceof File)
-                    return (File)t;
-                
-                return getHttpContext().getTempDirectory();
-            }
-
-            if (_attributes.containsKey(name))
-                return _attributes.get(name);
-            return getHttpContext().getAttribute(name);
+            return getContextAttribute(name);
         }
 
         /* ------------------------------------------------------------ */
@@ -1062,13 +1106,7 @@ public class ServletHandler extends AbstractHttpHandler
          */
         public Enumeration getAttributeNames()
         {
-            if (_attributes.size()==0)
-                return getHttpContext().getAttributeNames();
-            HashSet set=new HashSet(_attributes.keySet());
-            Enumeration e=getHttpContext().getAttributeNames();
-            while(e.hasMoreElements())
-                set.add(e.nextElement());
-            return Collections.enumeration(set);
+            return getContextAttributeNames();
         }
 
         /* ------------------------------------------------------------ */
@@ -1079,7 +1117,7 @@ public class ServletHandler extends AbstractHttpHandler
          */
         public void setAttribute(String name, Object value)
         {
-            _attributes.put(name,value);
+            setContextAttribute(name, value);
         }
 
         /* ------------------------------------------------------------ */
@@ -1089,7 +1127,7 @@ public class ServletHandler extends AbstractHttpHandler
          */
         public void removeAttribute(String name)
         {
-            _attributes.put(name, null);
+            removeContextAttribute(name);
         }
     
         /* ------------------------------------------------------------ */

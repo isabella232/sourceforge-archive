@@ -77,7 +77,6 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
     private transient Resource _webInf;
     private transient WebApplicationHandler _webAppHandler;
     private transient Object _contextListeners;
-    private transient Object _contextAttributeListeners;
     private transient Map _errorPages;
 
     /* ------------------------------------------------------------ */
@@ -484,7 +483,6 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
         }
 
         _contextListeners= null;
-        _contextAttributeListeners= null;
 
         // Stop the context
         super.stop();
@@ -536,12 +534,6 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
             _contextListeners= LazyList.add(_contextListeners, listener);
         }
 
-        if (listener instanceof ServletContextAttributeListener)
-        {
-            known= true;
-            _contextAttributeListeners= LazyList.add(_contextAttributeListeners, listener);
-        }
-
         if (!known)
             throw new IllegalArgumentException("Unknown " + listener);
     }
@@ -550,50 +542,6 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
     public synchronized void removeEventListener(EventListener listener)
     {
         _contextListeners= LazyList.remove(_contextListeners, listener);
-        _contextAttributeListeners= LazyList.remove(_contextAttributeListeners, listener);
-    }
-
-    /* ------------------------------------------------------------ */
-    public synchronized void setAttribute(String name, Object value)
-    {
-        Object old= super.getAttribute(name);
-        super.setAttribute(name, value);
-
-        if (_contextAttributeListeners != null && _webAppHandler != null)
-        {
-            ServletContextAttributeEvent event=
-                new ServletContextAttributeEvent(getServletContext(), name, old != null ? old : value);
-            for (int i= 0; i < LazyList.size(_contextAttributeListeners); i++)
-            {
-                ServletContextAttributeListener l=
-                    (ServletContextAttributeListener)LazyList.get(_contextAttributeListeners, i);
-                if (old == null)
-                    l.attributeAdded(event);
-                else
-                    if (value == null)
-                        l.attributeRemoved(event);
-                    else
-                        l.attributeReplaced(event);
-            }
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    public synchronized void removeAttribute(String name)
-    {
-        Object old= super.getAttribute(name);
-        super.removeAttribute(name);
-
-        if (old != null && _contextAttributeListeners != null && _webAppHandler != null)
-        {
-            ServletContextAttributeEvent event= new ServletContextAttributeEvent(getServletContext(), name, old);
-            for (int i= 0; i < LazyList.size(_contextAttributeListeners); i++)
-            {
-                ServletContextAttributeListener l=
-                    (ServletContextAttributeListener)LazyList.get(_contextAttributeListeners, i);
-                l.attributeRemoved(event);
-            }
-        }
     }
 
     /* ------------------------------------------------------------ */
