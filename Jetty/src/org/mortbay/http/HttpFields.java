@@ -412,6 +412,7 @@ public class HttpFields
         Arrays.fill(_index,-1);
     }
 
+
     /* ------------------------------------------------------------ */
     public int size()
     {
@@ -639,6 +640,29 @@ public class HttpFields
             _fields.add(field);
             last=field;
         }        
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void add(HttpFields fields)
+        throws IllegalArgumentException
+    {
+        if (fields==null)
+            return;
+
+        Enumeration enum = fields.getFieldNames();
+        while( enum.hasMoreElements() )
+        {
+            String name = (String)enum.nextElement();
+            FieldInfo info=getFieldInfo(name);
+            if( info._singleValued ) 
+                add(name,fields.get(name));
+            else
+            {
+                Enumeration values = fields.getValues(name);
+                while(values.hasMoreElements())
+                    add(name,(String)values.nextElement());
+            }
+        }
     }
     
     /* -------------------------------------------------------------- */
