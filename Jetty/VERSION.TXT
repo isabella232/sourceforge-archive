@@ -1,6 +1,10 @@
 Jetty Versions
 --------------
 
+ + CGI Servlet, pass all HTTP headers through.
+ + CGI Servlet, catch and report program invocation failure status.
+ + CGI Servlet, fixed suffix mapping problem.
+
 Jetty-4.1.B0 - 13 July 2002
  + Added work around of JDK1.4 bug with NIO listener
  + Moved 3rd party jars to $JETTY_HOME/ext
