@@ -1,5 +1,6 @@
 Release 2.3.0A - 22 Sep 1999  -  LATEST
   + Added GNUJSP 1.0 for the JSP 1.0 API.
+  + Use javax.servlet classes from JWSDK1.0
   + Added "Powered by Jetty" button.
   + ServerContext available to HtmlFilters via context param
   + Made session IDs less predictable and removed race.
