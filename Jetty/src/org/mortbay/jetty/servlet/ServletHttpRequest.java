@@ -736,6 +736,10 @@ public class ServletHttpRequest
     }
 
     /* -------------------------------------------------------------- */
+    /**
+     * @deprecated  As of Version 2.1 of the Java Servlet API,
+     * 			use {@link ServletContext#getRealPath} instead.
+     */
     public String getRealPath(String path)
     {
         return _servletHandler.getServletContext().getRealPath(path);
