@@ -517,7 +517,6 @@ public class HttpFields
     
     /* -------------------------------------------------------------- */
     private ArrayList _fields=new ArrayList(15);
-    private int _size;
     private int[] _index=new int[__maxCacheSize];
     private int _version;
 
@@ -533,7 +532,7 @@ public class HttpFields
     /* ------------------------------------------------------------ */
     public int size()
     {
-        return _size;
+        return _fields.size();
     }
     
     /* -------------------------------------------------------------- */
@@ -756,7 +755,7 @@ public class HttpFields
     /* -------------------------------------------------------------- */
     /** Set a field.
      * @param name the name of the field
-     * @param value the value of the field. If null the field is cleared.
+     * @param list the List value of the field. If null the field is cleared.
      */
     public void put(String name,List list)
     {
@@ -933,7 +932,7 @@ public class HttpFields
     /**
      * Sets the value of a date field.
      * @param name the field name
-     * @param value the field date value
+     * @param date the field date value
      */
     public void putDateField(String name, Date date)
     {
@@ -944,7 +943,7 @@ public class HttpFields
     /**
      * Adds the value of a date field.
      * @param name the field name
-     * @param value the field date value
+     * @param date the field date value
      */
     public void addDateField(String name, Date date)
     {
@@ -955,7 +954,7 @@ public class HttpFields
     /**
      * Adds the value of a date field.
      * @param name the field name
-     * @param value the field date value
+     * @param date the field date value
      */
     public void addDateField(String name, long date)
     {
@@ -966,7 +965,7 @@ public class HttpFields
     /**
      * Sets the value of a date field.
      * @param name the field name
-     * @param value the field date value
+     * @param date the field date value
      */
     public void putDateField(String name, long date)
     {
