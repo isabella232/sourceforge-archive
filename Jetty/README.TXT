@@ -108,7 +108,6 @@ If you are using jdk1.4, you should use the path:
 
   CLASSPATH=\
     $JETTY_HOME/lib/org.mortbay.jetty-jdk1.4.jar:\
-    $JETTY_HOME/lib/org.mortbay.jetty.jar:\
     $JETTY_HOME/lib/javax.servlet.jar:\
     $JETTY_HOME/lib/javax.xml.jaxp.jar:\
     $JETTY_HOME/lib/org.apache.jasper.jar:\
@@ -248,13 +247,11 @@ Jetty has been developed for JDK 1.2, can be run with 1.2, 1.3 and 1.4.
 Furthermore, the new features of JDK1.4 are now being supported in a src1.4
 hierarchy.  If Jetty is built and the 1.4 classes are available, the source
 in $JETTY_HOME/src1.4 is used to replace or enhance the standard classes.
+
 These extra or enhanced classes are placed in the
-org.mortbay.jetty-jdk1.4.jar file, which must be in your path before
+org.mortbay.jetty-jdk1.4.jar file, which must be in your path instead of 
 org.mortbay.jetty.jar for the enhanced classes to replace the standard
 classes.
-
-You can also use the ant target "merge.jetty.jar" to create a 
-org.mortbay.jetty.jar file containing the 1.4 classes.
 
 The SocketChannelListener class uses non blocking IO for idle connections to
 greatly reduce the threads needed by Jetty.

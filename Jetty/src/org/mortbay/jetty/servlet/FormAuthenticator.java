@@ -97,8 +97,8 @@ public class FormAuthenticator implements Authenticator
             if (user!=null)
             {
                 Code.debug("Form authentication OK for ",username);
-                httpRequest.setAttribute(HttpRequest.__AuthType,"FORM");
-                httpRequest.setAttribute(HttpRequest.__AuthUser,username);
+                httpRequest.setAuthType(SecurityConstraint.__FORM_AUTH);
+                httpRequest.setAuthUser(username);
                 httpRequest.setUserPrincipal(user);
                 session.setAttribute(__J_AUTHENTICATED,user);
                 String nuri=(String)session.getAttribute(__J_URI);
@@ -126,8 +126,8 @@ public class FormAuthenticator implements Authenticator
             if (user.isAuthenticated())
             {
                 Code.debug("FORM Authenticated for ",user.getName());
-                httpRequest.setAttribute(HttpRequest.__AuthType,"FORM");
-                httpRequest.setAttribute(HttpRequest.__AuthUser,user.getName());
+                httpRequest.setAuthType(SecurityConstraint.__FORM_AUTH);
+                httpRequest.setAuthUser(user.getName());
                 httpRequest.setUserPrincipal(user);
                 return user;
             }

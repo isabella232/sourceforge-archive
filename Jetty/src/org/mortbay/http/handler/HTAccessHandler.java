@@ -22,6 +22,7 @@ import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
+import org.mortbay.http.SecurityConstraint;
 import org.mortbay.util.B64Code;
 import org.mortbay.util.Code;
 import org.mortbay.util.Resource;
@@ -174,8 +175,8 @@ public class HTAccessHandler extends NullHandler
             // set user
             if (user!=null)
             {
-                request.setAttribute(HttpRequest.__AuthType,"BASIC");
-                request.setAttribute(HttpRequest.__AuthUser,user);
+                request.setAuthType(SecurityConstraint.__BASIC_AUTH);
+                request.setAuthUser(user);
             }
 
         }

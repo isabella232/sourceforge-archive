@@ -83,17 +83,29 @@ Other targets:
     <pathelement location="${jmxtools.jar}" />
   </path>
 
-  <path id="classpath">
-    <pathelement location="${jetty1.4.jar}" />
-    <pathelement location="${jetty.jar}" />
-    <pathelement location="${jasper.jar}" />
-    <pathelement location="${servlet.jar}" />
-    <path refid="libpath" />
-  </path>
-
+  <!-- ==================================================================== -->
+  <target name="classpath">
+    <available property="jdk1.4.available" classname="java.util.logging.Handler" />
+    <path id="classpath">
+      <pathelement location="${jetty.jar}" />
+      <pathelement location="${jasper.jar}" />
+      <pathelement location="${servlet.jar}" />
+      <path refid="libpath" />
+    </path>
+  </target>
 
   <!-- ==================================================================== -->
-  <target name="prepare">
+  <target name="classpath1.4" if="jdk1.4.available">
+    <path id="classpath">
+      <pathelement location="${jetty1.4.jar}" />
+      <pathelement location="${jasper.jar}" />
+      <pathelement location="${servlet.jar}" />
+      <path refid="libpath" />
+    </path>
+  </target>
+  
+  <!-- ==================================================================== -->
+  <target name="prepare" depends="classpath,classpath1.4">
     <mkdir dir="${jetty.webapp.classes}"/>
     <mkdir dir="${javadoc}" />
     <mkdir dir="${classes}" />
@@ -111,7 +123,7 @@ Other targets:
         <include name="*.dtd"/>
       </fileset>
     </copy>
-    <available property="jdk1.4.available" classname="java.util.logging.Handler" />
+
   </target>
   
 
@@ -223,20 +235,6 @@ Other targets:
   <!-- ==================================================================== -->
   <target name="jetty1.4.jar" depends="classes1.4,servlet.jar" if="jdk1.4.available">
     <jar jarfile="${jetty1.4.jar}" manifest="${src}/org/mortbay/MANIFEST.MF">
-       <fileset dir="${classes1.4}">
-         <include name="org/mortbay/**"/>
-         <exclude name="**/jmx/**" />
-       </fileset>
-    </jar>
-  </target>
-
-  <!-- ==================================================================== -->
-  <target name="merge.jetty.jar" depends="classes1.4,servlet.jar" 
-    description="Merge standard and jdk1.4 jetty jars into org.mortbay.jetty.jar"
-    if="jdk1.4.available">
-    <delete file="${jetty.jar}" quiet="true"/>
-    <delete file="${jetty1.4.jar}" quiet="true"/>
-    <jar jarfile="${jetty.jar}" manifest="${src}/org/mortbay/MANIFEST.MF">
        <fileset dir="${classes}">
          <include name="org/mortbay/**"/>
          <exclude name="**/jmx/**" />
@@ -247,6 +245,7 @@ Other targets:
        </fileset>
     </jar>
   </target>
+
 
   <!-- ==================================================================== -->
   <target name="mortbay.jmx.jar" depends="classes">

@@ -270,7 +270,7 @@ public class SecurityConstraint
                             HttpRequest request,
                             HttpResponse response)
         throws HttpException, IOException
-    {
+    {   
         // for each constraint
         for (int c=0;c<constraints.size();c++)
         {
@@ -291,16 +291,36 @@ public class SecurityConstraint
             if (sc.isAuthenticate())
             {
                 UserPrincipal user = null;
-                if (authenticator==null)
+                
+                // Handle pre-authenticated request
+                if (request.getAuthType()!=null &&
+                    request.getAuthUser()!=null)
                 {
-                    Code.warning("Mis-configured Authenticator for "+request.getPath());
-                    response.sendError(HttpResponse.__500_Internal_Server_Error);
+                    user=request.getUserPrincipal();
+                    if (user==null)
+                        user=realm.authenticate(request.getAuthUser(),
+                                                null,
+                                                request);
+                    if (user==null)
+                        response.sendError(HttpResponse.__403_Forbidden,
+                                           "Preauthenticated user not trusted");
                 }
-                else
+                else if (authenticator!=null)
+                {
+                    // User authenticator.
                     user=authenticator.authenticated(realm,
                                                      pathInContext,
                                                      request,
                                                      response);
+                }
+                else
+                {
+                    // don't know how authenticate
+                    Code.warning("Mis-configured Authenticator for "+request.getPath());
+                    response.sendError(HttpResponse.__500_Internal_Server_Error);
+                }
+                
+                // If we still did not get a user
                 if (user==null)
                     return -1; // Auth challenge or redirection already sent
                 

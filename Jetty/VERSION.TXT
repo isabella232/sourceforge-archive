@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+Jetty-4.1.D2
+ + Support trusted external authenticators.
  + Moved jmx classes from JettyExtra to here.
  + Set contextloader during webapplicationcontext.start
  + Added AJP13 listener for apache integration.

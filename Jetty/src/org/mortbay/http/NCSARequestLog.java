@@ -170,7 +170,7 @@ public class NCSARequestLog implements RequestLog
                 
                 _buf.write(request.getRemoteAddr());
                 _buf.write(" - ");
-                String user = (String)request.getAttribute(HttpRequest.__AuthUser);
+                String user = request.getAuthUser();
                 _buf.write((user==null)?"-":user);
                 _buf.write(" [");
                 _buf.write(_logDateCache.format(request.getTimeStamp()));

@@ -84,9 +84,6 @@ public class HttpRequest extends HttpMessage
         __versionCache.put(__HTTP_0_9,null);
     }
     
-    public static final String
-        __AuthType = "org.mortbay.http.HttpRequest.AuthType",
-        __AuthUser = "org.mortbay.http.HttpRequest.AuthUser";
     
     private static Cookie[] __noCookies = new Cookie[0];
     
@@ -104,6 +101,8 @@ public class HttpRequest extends HttpMessage
     private long _timeStamp;
     private String _timeStampStr;
     private UserPrincipal _userPrincipal;
+    private String _authUser;
+    private String _authType;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -989,6 +988,30 @@ public class HttpRequest extends HttpMessage
     }
     
     /* ------------------------------------------------------------ */
+    public String getAuthType()
+    {
+        return _authType;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setAuthType(String a)
+    {
+        _authType=a;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getAuthUser()
+    {
+        return _authUser;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setAuthUser(String user)
+    {
+        _authUser=user;
+    }
+    
+    /* ------------------------------------------------------------ */
     public UserPrincipal getUserPrincipal()
     {
         return _userPrincipal;
@@ -1077,8 +1100,8 @@ public class HttpRequest extends HttpMessage
             UserPrincipal user = realm.authenticate(username,password,this);
             if (user!=null)
             {
-                setAttribute(__AuthType,"BASIC");
-                setAttribute(__AuthUser,username);
+                setAuthType(SecurityConstraint.__BASIC_AUTH);
+                setAuthUser(username);
                 setUserPrincipal(user);                
                 return user;
             }

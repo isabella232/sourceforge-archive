@@ -51,5 +51,6 @@ public class AJP13ListenerMBean extends HttpListenerMBean
     {
         super.defineManagedResource();
         defineAttribute("identifyListener");
+        defineAttribute("remoteServers");
     }
 }

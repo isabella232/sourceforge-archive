@@ -143,13 +143,6 @@ public abstract class AbstractSessionManager implements SessionManager
         if (period<1000)
             period=1000;
         
-        // Start the session scavenger if we haven't already
-        if (_scavenger == null && period>0)
-        {
-            _scavenger = new SessionScavenger();
-            _scavenger.start();
-        }
-        
         if (period!=old_period)
         {
             _scavengePeriodMs=period;
@@ -248,6 +241,9 @@ public abstract class AbstractSessionManager implements SessionManager
         ClassLoader old_loader = thread.getContextClassLoader();
         try
         {
+	    if (_handler==null)
+		return;
+
             ClassLoader loader = _handler.getClassLoader();
             if (loader!=null)
                 thread.setContextClassLoader(loader);

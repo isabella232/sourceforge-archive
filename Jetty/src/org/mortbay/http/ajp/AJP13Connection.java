@@ -185,10 +185,10 @@ public class AJP13Connection extends HttpConnection
                             request.setQuery(value);
                             break;
                         case 4: // AuthType
-                            Code.warning("not implemented: auth="+value); 
+                            request.setAuthType(value);
                             break;
                         case 3: // Remote User
-                            Code.warning("not implemented: user="+value); 
+                            request.setAuthUser(value);
                             break;
                             
                         case 2:  // servlet path not implemented

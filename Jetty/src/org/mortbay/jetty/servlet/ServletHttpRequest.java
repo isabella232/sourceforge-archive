@@ -278,15 +278,6 @@ public class ServletHttpRequest
     }
     
     /* ------------------------------------------------------------ */
-    public String getAuthType()
-    {
-        Object o=_httpRequest.getAttribute(HttpRequest.__AuthType);
-        if (o!=null)
-            return o.toString();
-        return null;
-    }
-
-    /* ------------------------------------------------------------ */
     public boolean isSecure()
     {
         return "https".equalsIgnoreCase(_httpRequest.getScheme());
@@ -394,12 +385,15 @@ public class ServletHttpRequest
     }
     
     /* ------------------------------------------------------------ */
+    public String getAuthType()
+    {
+        return _httpRequest.getAuthType();
+    }
+
+    /* ------------------------------------------------------------ */
     public String getRemoteUser()
     {
-        Object o=_httpRequest.getAttribute(HttpRequest.__AuthUser);
-        if (o!=null)
-            return o.toString();
-        return null;
+        return _httpRequest.getAuthUser();
     }
 
     /* ------------------------------------------------------------ */

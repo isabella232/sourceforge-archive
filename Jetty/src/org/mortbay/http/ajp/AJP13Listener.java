@@ -7,6 +7,7 @@ package org.mortbay.http.ajp;
 
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpListener;
@@ -43,7 +44,8 @@ public class AJP13Listener
     private int _confidentialPort=0;
     private boolean _identifyListener=false;
     private int _bufferSize=8192;
-
+    private String[] _remoteServers;
+    
     /* ------------------------------------------------------------------- */
     public AJP13Listener()
     {}
@@ -122,6 +124,28 @@ public class AJP13Listener
     }
 
     /* ------------------------------------------------------------ */
+    /** 
+     * @return Array of accepted remote server hostnames or IPs.
+     */
+    public String[] getRemoteServers()
+    {
+        return _remoteServers;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set accepted remote servers.
+     * The AJP13 protocol is not secure and contains no authentication. If
+     * remote servers are set, then this listener will only accept
+     * connections from hosts with matching addresses or hostnames.
+     * @param servers Array of accepted remote server hostnames or IPs
+     */
+    public void setRemoteServers(String[] servers)
+    {
+        _remoteServers=servers;
+    }
+    
+    
+    /* ------------------------------------------------------------ */
     /** Handle Job.
      * Implementation of ThreadPool.handle(), calls handleConnection.
      * @param job A Connection.
@@ -129,9 +153,32 @@ public class AJP13Listener
     public void handleConnection(Socket socket)
         throws IOException
     {
+        // Check acceptable remote servers
+        if (_remoteServers!=null && _remoteServers.length>0)
+        {
+            boolean match=false;
+            InetAddress inetAddress=socket.getInetAddress();
+            String hostAddr=inetAddress.getHostAddress();
+            String hostName=inetAddress.getHostName();
+            for (int i=0;i<_remoteServers.length;i++)
+            {
+                if (hostName.equals(_remoteServers[i]) ||
+                    hostAddr.equals(_remoteServers[i]))
+                {
+                    match=true;
+                    break;
+                }                    
+            }
+            if (!match)
+            {
+                Code.warning("AJP13 Connection from un-approved host: "+inetAddress);
+                return;
+            }
+        }
+
+        // Handle the connection
         socket.setTcpNoDelay(true);
         socket.setSoTimeout(getMaxIdleTimeMs());
-
         new AJP13Connection(this,
                             new AJP13InputStream(socket.getInputStream(),
                                                  socket.getOutputStream(),
