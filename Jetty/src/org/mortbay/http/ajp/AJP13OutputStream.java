@@ -41,6 +41,15 @@ public class AJP13OutputStream extends OutputStream
     }
     
     /* ------------------------------------------------------------ */
+    public void destroy()
+    {
+        if (_packet!=null)_packet.destroy();
+        _packet=null;
+        _byte=null;
+        _out=null;
+    }
+    
+    /* ------------------------------------------------------------ */
     public void write(AJP13Packet packet)
         throws IOException
     {
@@ -69,7 +78,8 @@ public class AJP13OutputStream extends OutputStream
     {
         if (_closed)
             return;
-
+        
+        // Dissasemble and send.
         int l=_packet.addBytes(b,off,len);
         while(l<len)
         {

@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.Enumeration;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpFields;
@@ -71,6 +72,21 @@ public class AJP13Connection extends HttpConnection
     }
 
     /* ------------------------------------------------------------ */
+    public void destroy()
+    {
+        if (_ajpIn!=null)_ajpIn.destroy();
+        _ajpIn=null;
+        if (_ajpOut!=null)_ajpOut.destroy();
+        _ajpOut=null;
+        if (_ajpResponse!=null)_ajpResponse.destroy();
+        _ajpResponse=null;
+        _remoteHost=null;
+        _remoteAddr=null;
+        _serverName=null;
+        
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Get the Remote address.
      * @return the remote host name
      */
@@ -122,6 +138,7 @@ public class AJP13Connection extends HttpConnection
         HttpRequest request = getRequest();
         HttpResponse response = getResponse();
         HttpContext context = null;
+        boolean gotRequest=false;
         boolean persistent=false;
         
         try
@@ -130,6 +147,8 @@ public class AJP13Connection extends HttpConnection
             {
                 packet = null;
                 packet = _ajpIn.nextPacket();
+                if (packet==null)
+                    return false;
             }
             catch (IOException e)
             {
@@ -202,7 +221,7 @@ public class AJP13Connection extends HttpConnection
                       
                       attr=packet.getByte();
                   }
-                  
+                  gotRequest=true;
                   request.setState(HttpMessage.__MSG_RECEIVED);
                   
                   // Complete response
@@ -231,15 +250,23 @@ public class AJP13Connection extends HttpConnection
 
             persistent=true;   
         }
+        catch (SocketException e)
+        {
+            Code.ignore(e);
+        }
         catch (Exception e)
         {
             Code.warning(e);
-            try{_ajpOut.end(false);}catch (IOException e2){Code.ignore(e2);}
+            try{
+                if (gotRequest)
+                    _ajpOut.end(false);
+            }
+            catch (IOException e2){Code.ignore(e2);}
         }
         finally
         {
             // abort if nothing received.
-            if (packet==null)
+            if (packet==null || !gotRequest)
                 return false;
             
             // flush and end the output

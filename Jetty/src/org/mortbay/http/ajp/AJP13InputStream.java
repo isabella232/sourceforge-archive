@@ -43,6 +43,16 @@ public class AJP13InputStream extends InputStream
         _packet.reset();
     }
     
+    /* ------------------------------------------------------------ */
+    public void destroy()
+    {
+        if (_packet!=null)_packet.destroy();
+        _packet=null;
+        if (_getBodyChunk!=null)_getBodyChunk.destroy();
+        _getBodyChunk=null;
+        _in=null;
+        _out=null;
+    }
 
     /* ------------------------------------------------------------ */
     public int available()
@@ -127,8 +137,9 @@ public class AJP13InputStream extends InputStream
     public AJP13Packet nextPacket()
         throws IOException
     {
-        _packet.read(_in);
-        return _packet;
+        if (_packet.read(_in))
+            return _packet;
+        return null;
     }
     
     /* ------------------------------------------------------------ */
@@ -143,7 +154,8 @@ public class AJP13InputStream extends InputStream
         _gotFirst=true;
 
         // read packet
-        _packet.read(_in);
+        if (!_packet.read(_in))
+            throw new IOException("EOF");
 
         if (_packet.unconsumedData()<=0)
             _closed=true;

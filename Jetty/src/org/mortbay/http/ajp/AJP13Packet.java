@@ -15,6 +15,7 @@ import java.util.HashMap;
 import org.mortbay.util.Code;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.ByteArrayISO8859Writer;
+import org.mortbay.util.ByteArrayPool;
 
 
 /* ------------------------------------------------------------ */
@@ -98,7 +99,15 @@ public class AJP13Packet
     /* ------------------------------------------------------------ */
     public AJP13Packet(int size)
     {
-        _buf=new byte[size];
+        _buf=ByteArrayPool.getByteArray(size);
+    }
+
+    /* ------------------------------------------------------------ */
+    public void destroy()
+    {
+        ByteArrayPool.returnByteArray(_buf);
+        _buf=null;
+        _byteWriter=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -106,6 +115,12 @@ public class AJP13Packet
     {
         _bytes=0;
         _pos=0;
+    }
+
+    /* ------------------------------------------------------------ */
+    public byte[] getBuffer()
+    {
+        return _buf;
     }
 
     /* ------------------------------------------------------------ */
@@ -146,7 +161,7 @@ public class AJP13Packet
     }
     
     /* ------------------------------------------------------------ */
-    public void read(InputStream in)
+    public boolean read(InputStream in)
         throws IOException
     {
         _bytes=0;
@@ -157,7 +172,7 @@ public class AJP13Packet
         {
             int l=in.read(_buf,_bytes,__HDR_SIZE-_bytes);
             if (l<0)
-                throw new IOException("EOF");
+                return false;
             _bytes+=l;
         }
         while (_bytes<__HDR_SIZE);
@@ -173,15 +188,16 @@ public class AJP13Packet
         {
             int l=in.read(_buf,_bytes,len+__HDR_SIZE-_bytes);
             if (l<0)
-                throw new IOException("EOF");
+                return false;
             _bytes+=l;
         }
         while (_bytes<len);
         
         if (Code.verbose(99))
             Code.debug("AJP13 rcv: "+this.toString(64));
+	// System.out.println(Thread.currentThread()+" AJP13 rcv "+this.toString(10));
 
-	// System.err.println(Thread.currentThread()+" AJP13 rcv>>>> "+this.toString(32));
+        return true;
     }
 
     /* ------------------------------------------------------------ */
@@ -190,7 +206,7 @@ public class AJP13Packet
     {
         if (Code.verbose(99))
             Code.debug("AJP13 snd: "+this.toString(64));
-	// System.err.println(Thread.currentThread()+" AJP13 snd<<<< "+this.toString(32));
+	// System.out.println(Thread.currentThread()+" AJP13 snd "+this.toString(10));
         out.write(_buf,0,_bytes);
     }
     
@@ -339,7 +355,12 @@ public class AJP13Packet
     /* ------------------------------------------------------------ */
     public void setDataSize()
     {
-        int s = _bytes-__HDR_SIZE;
+        setDataSize(_bytes-__HDR_SIZE);
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setDataSize(int s)
+    {
         _buf[2]=(byte)((s>>8) & 0xFF);
         _buf[3]=(byte)(s & 0xFF);
         if (_buf[4]==__SEND_BODY_CHUNK)
@@ -371,14 +392,14 @@ public class AJP13Packet
 
         switch(_buf[__HDR_SIZE])
         {
-          case __FORWARD_REQUEST: b.append("FORWARD_REQUEST:");break;
-          case __SHUTDOWN: b.append("SHUTDOWN:");break;
-          case __SEND_BODY_CHUNK: b.append("SEND_BODY_CHUNK:");break;
-          case __SEND_HEADERS: b.append("SEND_HEADERS:");break;
-          case __END_RESPONSE: b.append("END_RESPONSE:");break;
-          case __GET_BODY_CHUNK: b.append("GET_BODY_CHUNK:");break;
+          case __FORWARD_REQUEST: b.append("FORWARD_REQUEST{:");break;
+          case __SHUTDOWN:        b.append("SHUTDOWN        :");break;
+          case __SEND_BODY_CHUNK: b.append("SEND_BODY_CHUNK :");break;
+          case __SEND_HEADERS:    b.append("SEND_HEADERS  ( :");break;
+          case __END_RESPONSE:    b.append("END_RESPONSE  )}:");break;
+          case __GET_BODY_CHUNK:  b.append("GET_BODY_CHUNK  :");break;
         }
-        b.append("\n");
+        b.append(" ");
         
         for (int i=0;i<_bytes;i++)
         {
@@ -392,13 +413,13 @@ public class AJP13Packet
             else
                 a.append('.');
             
-            if (i%32==31 || i==(_bytes-1))
+            if (i%16==15 || i==(_bytes-1))
             {
                 b.append(" : ");
                 b.append(a.toString());
                 a.setLength(0);
                 b.append("\n");
-                if (max>0 && max<i)
+                if (max>0 && (i+1)>=max)
                     break;
             }
             else

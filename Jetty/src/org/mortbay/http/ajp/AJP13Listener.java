@@ -47,7 +47,7 @@ public class AJP13Listener
     private int _integralPort=0;
     private int _confidentialPort=0;
     private boolean _identifyListener=false;
-    private int _bufferSize=8192;
+    private int _bufferSize=8185; // == 8192 - hdr - type - len
     private int _bufferReserve=512;
     private String[] _remoteServers;
     
@@ -86,6 +86,8 @@ public class AJP13Listener
     public void setBufferSize(int size)
     {
         _bufferSize=size;
+        if (_bufferSize>8185)
+            Code.warning("AJP Data buffer > 8185: "+size);
     }
         
     /* ------------------------------------------------------------ */
@@ -196,13 +198,16 @@ public class AJP13Listener
         // Handle the connection
         socket.setTcpNoDelay(true);
         socket.setSoTimeout(getMaxIdleTimeMs());
-        new AJP13Connection(this,
-                            new AJP13InputStream(socket.getInputStream(),
-                                                 socket.getOutputStream(),
-                                                 getBufferSize()),
-                            new AJP13OutputStream(socket.getOutputStream(),
-                                                  getBufferSize()),
-                            socket).handle();
+        AJP13Connection connection=
+            new AJP13Connection(this,
+                                new AJP13InputStream(socket.getInputStream(),
+                                                     socket.getOutputStream(),
+                                                     getBufferSize()+7),
+                                new AJP13OutputStream(socket.getOutputStream(),
+                                                      getBufferSize()+7),
+                                socket);
+        try{connection.handle();}
+        finally{connection.destroy();}
     }
 
     /* ------------------------------------------------------------ */
