@@ -304,7 +304,7 @@ public class HandlerContext implements LifeCycle
 
             if (classPath.length()>0)
             {
-                if (append && this.getClassPath()!=nully)
+                if (append && this.getClassPath()!=null)
                        classPath.append(",").append(this.getClassPath());
                 this.setClassPath(classPath.toString());
             }
