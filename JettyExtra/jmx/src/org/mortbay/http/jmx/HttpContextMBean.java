@@ -74,6 +74,8 @@ public class HttpContextMBean extends LifeCycleMBean
         defineAttribute("responses4xx");
         defineAttribute("responses5xx");
         
+        defineOperation("destroy",
+                        IMPACT_ACTION);
         
         defineOperation("setInitParameter",
                         new String[] {STRING,STRING},
@@ -120,7 +122,10 @@ public class HttpContextMBean extends LifeCycleMBean
     protected ObjectName newObjectName(MBeanServer server)
     {
         ObjectName oName=super.newObjectName(server);
-        try{oName=new ObjectName(oName+",context="+_httpContext.getContextPath());}
+        String context=_httpContext.getContextPath();
+        if (context.length()==0)
+            context="/";
+        try{oName=new ObjectName(oName+",context="+context);}
         catch(Exception e){Code.warning(e);}
         return oName;
     }
