@@ -187,7 +187,8 @@ public abstract class AbstractSessionManager implements SessionManager
         if (period!=old_period)
         {
             _scavengePeriodMs=period;
-            _scavenger.interrupt();
+            if (_scavenger!=null)
+                _scavenger.interrupt();
         }
     }
     
