@@ -174,8 +174,8 @@ rem pause
 rem ===========================================================
 rem == clean up our toys
 rem ===========================================================
-#%x_DRIVE%
-#cd "%x_PWD%"
+::%x_DRIVE%
+::cd "%x_PWD%"
 set PATH=%x_PATH%
 set CP=%x_CP%
 set ARGS=
