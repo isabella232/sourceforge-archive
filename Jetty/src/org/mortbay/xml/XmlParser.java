@@ -24,21 +24,22 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Stack;
+import java.util.StringTokenizer;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
 import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
+
 /*--------------------------------------------------------------*/
 /**
  * XML Parser wrapper. This class wraps any standard JAXP1.1 parser with convieniant error and
@@ -55,8 +56,8 @@ public class XmlParser
     private static Log log=LogFactory.getLog(XmlParser.class);
     private Map _redirectMap=new HashMap();
     private SAXParser _parser;
-    private Map _observerMap;
-    private Stack _observers=new Stack();
+    private String _xpath;
+    private Object _xpaths;
 
     /* ------------------------------------------------------------ */
     /**
@@ -135,23 +136,32 @@ public class XmlParser
         if(entity!=null)
             _redirectMap.put(name,entity);
     }
-
+    
     /* ------------------------------------------------------------ */
-    /**
-     * Add a ContentHandler. Add an additional content handler that is triggered on a tag name. SAX
-     * events are passed to the ContentHandler provided from a matching start element to the
-     * corresponding end element. Only a single content handler can be registered against each tag.
-     * 
-     * @param trigger Tag local or q name.
-     * @param observer SAX ContentHandler
+    /** 
+     *
+     * @return Returns the xpath.
      */
-    public synchronized void addContentHandler(String trigger,ContentHandler observer)
+    public String getXpath()
     {
-        if(_observerMap==null)
-            _observerMap=new HashMap();
-        _observerMap.put(trigger,observer);
+        return _xpath;
     }
-
+    
+    /* ------------------------------------------------------------ */
+    /** Set an XPath
+     * A very simple subset of xpath is supported to select a partial
+     * tree.  Currently only path like "/node1/nodeA | /node1/nodeB" 
+     * are supported.
+     * @param xpath The xpath to set.
+     */
+    public void setXpath(String xpath)
+    {
+        _xpath = xpath;
+        StringTokenizer tok = new StringTokenizer(xpath,"| ");
+        while(tok.hasMoreTokens())
+            _xpaths=LazyList.add(_xpaths, tok.nextToken());
+    }
+    
     /* ------------------------------------------------------------ */
     public synchronized Node parse(InputSource source) throws IOException,SAXException
     {
@@ -243,12 +253,46 @@ public class XmlParser
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
+    private class NoopHandler extends DefaultHandler
+    {
+        Handler _next;
+        int _depth;
+        
+        NoopHandler(Handler next)
+        {
+            this._next=next;
+        }
+
+        /* ------------------------------------------------------------ */
+        public void startElement(String uri,String localName,String qName,Attributes attrs) throws SAXException
+        {
+            _depth++;
+        }
+
+        /* ------------------------------------------------------------ */
+        public void endElement(String uri,String localName,String qName) throws SAXException
+        {
+            if (_depth==0)
+                _parser.getXMLReader().setContentHandler(_next);
+            else
+                _depth--;
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     private class Handler extends DefaultHandler
     {
         Node _top=new Node(null,null,null);
         SAXParseException _error;
         private Node _context=_top;
+        private NoopHandler _noop;
 
+        Handler()
+        {
+            _noop = new NoopHandler(this);
+        }
+        
         /* ------------------------------------------------------------ */
         void clear()
         {
@@ -262,42 +306,52 @@ public class XmlParser
         {
             String name=(uri==null||uri.equals(""))?qName:localName;
             Node node=new Node(_context,name,attrs);
-            _context.add(node);
-            _context=node;
-            ContentHandler observer=null;
-            if(_observerMap!=null)
-                observer=(ContentHandler)_observerMap.get(name);
-            _observers.push(observer);
-            for(int i=0;i<_observers.size();i++)
-                if(_observers.get(i)!=null)
-                    ((ContentHandler)_observers.get(i)).startElement(uri,localName,qName,attrs);
+            
+            // check if the node matches any xpaths set?
+            if (_xpaths!=null)
+            {
+                String path=node.getPath();
+                boolean match=false;
+                for (int i=LazyList.size(_xpaths);!match&&i-->0;)
+                {
+                    String xpath=(String)LazyList.get(_xpaths,i);
+                    
+                    match=path.equals(xpath) ||
+                          xpath.startsWith(path) && xpath.length()>path.length() && xpath.charAt(path.length())=='/';
+                }
+                
+                if (match)
+                {                    
+                    _context.add(node);
+                    _context=node;
+                }
+                else
+                {
+                    _parser.getXMLReader().setContentHandler(_noop);
+                }
+            }
+            else
+            {
+                _context.add(node);
+                _context=node;
+            }
         }
 
         /* ------------------------------------------------------------ */
         public void endElement(String uri,String localName,String qName) throws SAXException
         {
             _context=_context._parent;
-            for(int i=0;i<_observers.size();i++)
-                if(_observers.get(i)!=null)
-                    ((ContentHandler)_observers.get(i)).endElement(uri,localName,qName);
-            _observers.pop();
         }
 
         /* ------------------------------------------------------------ */
         public void ignorableWhitespace(char buf[],int offset,int len) throws SAXException
         {
-            for(int i=0;i<_observers.size();i++)
-                if(_observers.get(i)!=null)
-                    ((ContentHandler)_observers.get(i)).ignorableWhitespace(buf,offset,len);
         }
 
         /* ------------------------------------------------------------ */
         public void characters(char buf[],int offset,int len) throws SAXException
         {
             _context.add(new String(buf,offset,len));
-            for(int i=0;i<_observers.size();i++)
-                if(_observers.get(i)!=null)
-                    ((ContentHandler)_observers.get(i)).characters(buf,offset,len);
         }
 
         /* ------------------------------------------------------------ */
@@ -414,6 +468,7 @@ public class XmlParser
         private String _tag;
         private Attribute[] _attrs;
         private boolean _lastString=false;
+        private String _path;
 
         /* ------------------------------------------------------------ */
         Node(Node parent,String tag,Attributes attrs)
@@ -443,6 +498,19 @@ public class XmlParser
         public String getTag()
         {
             return _tag;
+        }
+
+        /* ------------------------------------------------------------ */
+        public String getPath()
+        {
+            if (_path==null)
+            {
+                if (getParent()!=null && getParent().getTag()!=null)
+                    _path= getParent().getPath()+"/"+_tag;
+                else
+                    _path ="/"+_tag;
+            }
+            return _path;
         }
 
         /* ------------------------------------------------------------ */

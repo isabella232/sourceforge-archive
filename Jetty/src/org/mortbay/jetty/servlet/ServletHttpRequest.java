@@ -153,7 +153,7 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     /** Set servletpath and pathInfo.
      * Called by the Handler before passing a request to a particular
-     * holder to split the context path into a servlet path and path info.
+     * holder to split the _context path into a servlet path and path info.
      * @param servletPath 
      * @param pathInfo 
      */

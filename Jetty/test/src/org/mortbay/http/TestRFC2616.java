@@ -61,7 +61,7 @@ public class TestRFC2616
     //
     // this inner class creates some files needed for testing of code 
     // involving the ResourceHandler.  instead, it may be cleaner to 
-    // subclass the handler or resource context to fetch data from 
+    // subclass the handler or resource _context to fetch data from 
     // this code instead of going to disk, but that would involve 
     // hacking up the production code to a much larger degree than
     // is necessary to implement certain desired features (Ranges)

@@ -257,7 +257,7 @@ public class AJP13Connection extends HttpConnection
                             break;
                             
                         case 2:  // servlet path not implemented
-                        case 1:  // context not implemented
+                        case 1:  // _context not implemented
                         default:
                             log.warn("Unknown attr: "+attr+"="+value);  
                       }

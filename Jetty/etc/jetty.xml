@@ -121,6 +121,8 @@
   <!-- Order of these classes is significant. The defaults set here    -->
   <!-- can be overridden by calling setConfigurationClassNames() on    -->
   <!-- the webapp context.                                             -->
+  <!-- The TagLibconfiguration scans any tld files found for           -->
+  <!-- additional j2ee listener classes - needed for JSF               -->
   <!-- The jsr77 configuration requires additional jars on the         -->
   <!-- on the classpath and it needs jmx enabled.  To do this start    -->
   <!-- with a command like:                                            -->
@@ -131,6 +133,7 @@
     <Array type="java.lang.String">
       <Item>org.mortbay.jetty.servlet.XMLConfiguration</Item>
       <Item>org.mortbay.jetty.servlet.JettyWebConfiguration</Item>
+      <Item>org.mortbay.jetty.servlet.TagLibConfiguration</Item>
       <!--
       <Item>org.mortbay.jetty.servlet.jsr77.Configuration</Item>
       -->

@@ -49,7 +49,7 @@ import org.mortbay.util.WriterOutputStream;
 /* ------------------------------------------------------------ */
 /** The default servlet.                                                 
  * This servlet, normally mapped to /, provides the handling for static 
- * content, OPTION and TRACE methods for the context.                   
+ * content, OPTION and TRACE methods for the _context.                   
  * The following initParameters are supported:                          
  * <PRE>                                                                      
  *   acceptRanges     If true, range requests and responses are         
@@ -69,11 +69,11 @@ import org.mortbay.util.WriterOutputStream;
  *                    larger than this will be served as gzip content encoded
  *                    if a matching resource is found ending with ".gz"
  *
- *  resourceBase      Set to replace the context resource base
+ *  resourceBase      Set to replace the _context resource base
  *
  *  relativeResourceBase    
  *                    Set with a pathname relative to the base of the
- *                    servlet context root. Useful for only serving static content out
+ *                    servlet _context root. Useful for only serving static content out
  *                    of only specific subdirectories.
  * </PRE>
  *                                                               
@@ -438,7 +438,7 @@ public class Default extends HttpServlet
         String contextPath = _httpContext.getContextPath();
         if (contextPath!=null && !newPath.startsWith(contextPath))
         {
-            response.sendError(HttpResponse.__405_Method_Not_Allowed,"Not in context");
+            response.sendError(HttpResponse.__405_Method_Not_Allowed,"Not in _context");
             return;
         }
 

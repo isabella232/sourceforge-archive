@@ -58,7 +58,7 @@ public interface HttpHandler extends LifeCycle, Serializable
      * In broad terms this means, either a response has been commited
      * or request.setHandled(true) has been called.
      *
-     * @param pathInContext The context path
+     * @param pathInContext The _context path
      * @param pathParams Path parameters such as encoded Session ID
      * @param request The HttpRequest request
      * @param response The HttpResponse response

@@ -119,7 +119,7 @@ public abstract class GenericServlet implements Servlet, ServletConfig, java.io.
      * is running.  See {@link ServletConfig#getServletContext}.
      *
      * <p>This method is supplied for convenience. It gets the
-     * context from the servlet's <code>ServletConfig</code> object.
+     * _context from the servlet's <code>ServletConfig</code> object.
      *
      *
      * @return ServletContext the <code>ServletContext</code> object

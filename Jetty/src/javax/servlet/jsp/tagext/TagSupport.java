@@ -217,7 +217,7 @@ public class TagSupport implements IterationTag, Serializable {
     }
 
     /**
-     * Set the page context.
+     * Set the page _context.
      *
      * @param pageContext The PageContext.
      * @see Tag#setPageContext

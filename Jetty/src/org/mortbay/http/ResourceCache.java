@@ -111,12 +111,12 @@ public class ResourceCache implements LifeCycle,
     /* ------------------------------------------------------------ */
     /** Set the Resource Base.
      * The base resource is the Resource to use as a relative base
-     * for all context resources. The ResourceBase attribute is a
+     * for all _context resources. The ResourceBase attribute is a
      * string version of the baseResource.
      * If a relative file is passed, it is converted to a file
      * URL based on the current working directory.
      * @return The file or URL to use as the base for all resources
-     * within the context.
+     * within the _context.
      */
     public String getResourceBase()
     {
@@ -128,7 +128,7 @@ public class ResourceCache implements LifeCycle,
     /* ------------------------------------------------------------ */
     /** Set the Resource Base.
      * The base resource is the Resource to use as a relative base
-     * for all context resources. The ResourceBase attribute is a
+     * for all _context resources. The ResourceBase attribute is a
      * string version of the baseResource.
      * If a relative file is passed, it is converted to a file
      * URL based on the current working directory.
@@ -151,7 +151,7 @@ public class ResourceCache implements LifeCycle,
     /* ------------------------------------------------------------ */
     /** Get the base resource.
      * The base resource is the Resource to use as a relative base
-     * for all context resources. The ResourceBase attribute is a
+     * for all _context resources. The ResourceBase attribute is a
      * string version of the baseResource.
      * @return The resourceBase as a Resource instance
      */
@@ -163,7 +163,7 @@ public class ResourceCache implements LifeCycle,
     /* ------------------------------------------------------------ */
     /** Set the base resource.
      * The base resource is the Resource to use as a relative base
-     * for all context resources. The ResourceBase attribute is a
+     * for all _context resources. The ResourceBase attribute is a
      * string version of the baseResource.
      * @param base The resourceBase as a Resource instance
      */
@@ -207,7 +207,7 @@ public class ResourceCache implements LifeCycle,
     }
 
     /* ------------------------------------------------------------ */
-    /** Get a resource from the context.
+    /** Get a resource from the _context.
      * Cached Resources are returned if the resource fits within the LRU
      * cache.  Directories may have CachedResources returned, but the
      * caller must use the CachedResource.setCachedData method to set the
@@ -300,7 +300,7 @@ public class ResourceCache implements LifeCycle,
 
     /* ------------------------------------------------------------ */
     /**
-     * Also sets the org.mortbay.http.mimeMap context attribute
+     * Also sets the org.mortbay.http.mimeMap _context attribute
      * @param mimeMap
      */
     public void setMimeMap(Map mimeMap)
@@ -373,7 +373,7 @@ public class ResourceCache implements LifeCycle,
 
     /* ------------------------------------------------------------ */
     /** Set the map of mime type to char encoding.
-     * Also sets the org.mortbay.http.encodingMap context attribute
+     * Also sets the org.mortbay.http.encodingMap _context attribute
      * @param encodingMap Map of mime type to character encodings.
      */
     public void setEncodingMap(Map encodingMap)
@@ -424,7 +424,7 @@ public class ResourceCache implements LifeCycle,
     }
 
     /* ------------------------------------------------------------ */
-    /** Stop the context.
+    /** Stop the _context.
      */
     public void stop()
         throws InterruptedException
@@ -435,8 +435,8 @@ public class ResourceCache implements LifeCycle,
 
 
     /* ------------------------------------------------------------ */
-    /** Destroy a context.
-     * Destroy a context and remove it from the HttpServer. The
+    /** Destroy a _context.
+     * Destroy a _context and remove it from the HttpServer. The
      * HttpContext must be stopped before it can be destroyed.
      */
     public void destroy()
@@ -464,7 +464,7 @@ public class ResourceCache implements LifeCycle,
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    /** MetaData associated with a context Resource.
+    /** MetaData associated with a _context Resource.
      */
     public class ResourceMetaData
     {

@@ -71,7 +71,7 @@ public class JettyWebConfiguration implements Configuration
      */
     public void configureWebApp () throws Exception
     {
-        //cannot configure if the context is already started
+        //cannot configure if the _context is already started
         if (_context.isStarted())
         {
             if (log.isDebugEnabled()){log.debug("Cannot configure webapp after it is started");};

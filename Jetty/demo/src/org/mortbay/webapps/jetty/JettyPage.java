@@ -44,14 +44,14 @@ public class JettyPage extends Page
     
     /* ------------------------------------------------------------ */
     /** 
-     * @param context 
+     * @param _context 
      */
     static synchronized void initialize(String context)  
     {
         if (__section!=null)
 	    return;
 
-        // This only works for 1 context.
+        // This only works for 1 _context.
         log.debug("Loading JettyPage Index");
         int i=0;
         int j=0;

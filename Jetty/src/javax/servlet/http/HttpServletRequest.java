@@ -236,14 +236,14 @@ public interface HttpServletRequest extends ServletRequest {
     public String getPathTranslated();
 
     /**
-     * Returns the portion of the request URI that indicates the context
-     * of the request.  The context path always comes first in a request
+     * Returns the portion of the request URI that indicates the _context
+     * of the request.  The _context path always comes first in a request
      * URI.  The path starts with a "/" character but does not end with a "/"
-     * character.  For servlets in the default (root) context, this method
+     * character.  For servlets in the default (root) _context, this method
      * returns "". The container does not decode this string.
      *
      * @return a <code>String</code> specifying the portion of the request
-     * URI that indicates the context of the request
+     * URI that indicates the _context of the request
      */
     public String getContextPath();
 
@@ -404,7 +404,7 @@ public interface HttpServletRequest extends ServletRequest {
      * Checks whether the requested session ID is still valid.
      *
      * @return <code>true</code> if this request has an id for a valid session
-     * in the current session context; <code>false</code> otherwise
+     * in the current session _context; <code>false</code> otherwise
      *
      * @see #getRequestedSessionId
      * @see #getSession

@@ -7,6 +7,7 @@ Jetty-5.1.3rc0
  + Fixed JSR154 error dispatch with explicit pass of type.
  + Allow system and server classes to be configured for context loader.
  + IOException if EOF read during chunk.
+ + Fixed HTAccess crypt salt handling.
 
 Jetty-5.1.2 - 18 January 2005
  + Added id and ref support to XmlConfiguration

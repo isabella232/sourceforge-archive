@@ -112,7 +112,7 @@ public abstract class JspFactory {
      * @param autoflush	should the buffer autoflush to the output stream on buffer
      *			overflow, or throw an IOException?
      *
-     * @return the page context
+     * @return the page _context
      *
      * @see javax.servlet.jsp.PageContext
      */

@@ -30,7 +30,7 @@ import org.mortbay.http.HttpResponse;
 /* ------------------------------------------------------------ */
 /** ServletHttpContext.
  * Extends HttpContext with conveniance methods for adding servlets.
- * Enforces a single ServletHandler per context.
+ * Enforces a single ServletHandler per _context.
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -59,9 +59,9 @@ public class ServletHttpContext extends HttpContext
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the context ServletHandler.
+    /** Get the _context ServletHandler.
      * Conveniance method. If no ServletHandler exists, a new one is added to
-     * the context.
+     * the _context.
      * @return ServletHandler
      */
     public synchronized ServletHandler getServletHandler()
@@ -76,10 +76,10 @@ public class ServletHttpContext extends HttpContext
     }
     
     /* ------------------------------------------------------------ */
-    /** Add a servlet to the context.
+    /** Add a servlet to the _context.
      * Conveniance method.
-     * If no ServletHandler is found in the context, a new one is added.
-     * @param pathSpec The pathspec within the context
+     * If no ServletHandler is found in the _context, a new one is added.
+     * @param pathSpec The pathspec within the _context
      * @param className The classname of the servlet.
      * @return The ServletHolder.
      * @exception ClassNotFoundException 
@@ -96,10 +96,10 @@ public class ServletHttpContext extends HttpContext
     }
     
     /* ------------------------------------------------------------ */
-    /** Add a servlet to the context.
-     * If no ServletHandler is found in the context, a new one is added.
+    /** Add a servlet to the _context.
+     * If no ServletHandler is found in the _context, a new one is added.
      * @param name The name of the servlet.
-     * @param pathSpec The pathspec within the context
+     * @param pathSpec The pathspec within the _context
      * @param className The classname of the servlet.
      * @return The ServletHolder.
      * @exception ClassNotFoundException 

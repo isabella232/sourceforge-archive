@@ -380,8 +380,8 @@ public interface ServletRequest {
      * The resource can be dynamic or static.
      *
      * <p>The pathname specified may be relative, although it cannot extend
-     * outside the current servlet context.  If the path begins with
-     * a "/" it is interpreted as relative to the current context root.
+     * outside the current servlet _context.  If the path begins with
+     * a "/" it is interpreted as relative to the current _context root.
      * This method returns <code>null</code> if the servlet container
      * cannot return a <code>RequestDispatcher</code>.
      *

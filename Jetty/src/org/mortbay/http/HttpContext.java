@@ -66,10 +66,10 @@ import org.mortbay.util.URI;
  * Servlet API, except that it may contain other types of handler
  * other than servlets.
  * <p>
- * A ClassLoader is created for the context and it uses
+ * A ClassLoader is created for the _context and it uses
  * Thread.currentThread().getContextClassLoader(); as it's parent loader.
  * The class loader is initialized during start(), when a derived
- * context calls initClassLoader() or on the first call to loadClass()
+ * _context calls initClassLoader() or on the first call to loadClass()
  * <p>
  *
  * <B>Note. that order is important when configuring a HttpContext.
@@ -92,9 +92,9 @@ public class HttpContext extends Container
 
     /* ------------------------------------------------------------ */
     /** File class path attribute.
-     * If this name is set as a context init parameter, then the attribute
-     * name given will be used to set the file classpath for the context as a
-     * context attribute.
+     * If this name is set as a _context init parameter, then the attribute
+     * name given will be used to set the file classpath for the _context as a
+     * _context attribute.
      */
     public final static String __fileClassPathAttr=
         "org.mortbay.http.HttpContext.FileClassPathAttribute";
@@ -236,11 +236,11 @@ public class HttpContext extends Container
     /* ------------------------------------------------------------ */
     public static String canonicalContextPathSpec(String contextPathSpec)
     {
-        // check context path
+        // check _context path
         if (contextPathSpec==null ||
             contextPathSpec.indexOf(',')>=0 ||
             contextPathSpec.startsWith("*"))
-            throw new IllegalArgumentException ("Illegal context spec:"+contextPathSpec);
+            throw new IllegalArgumentException ("Illegal _context spec:"+contextPathSpec);
 
         if(!contextPathSpec.startsWith("/"))
 	    contextPathSpec='/'+contextPathSpec;
@@ -278,7 +278,7 @@ public class HttpContext extends Container
 
     /* ------------------------------------------------------------ */
     /**
-     * @return The context prefix
+     * @return The _context prefix
      */
     public String getContextPath()
     {
@@ -287,7 +287,7 @@ public class HttpContext extends Container
 
 
     /* ------------------------------------------------------------ */
-    /** Add a virtual host alias to this context.
+    /** Add a virtual host alias to this _context.
      * @see #setVirtualHosts
      * @param hostname A hostname. A null host name means any hostname is
      * acceptable. Host names may String representation of IP addresses.
@@ -311,7 +311,7 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** remove a virtual host alias to this context.
+    /** remove a virtual host alias to this _context.
      * @see #setVirtualHosts
      * @param hostname A hostname. A null host name means any hostname is
      * acceptable. Host names may String representation of IP addresses.
@@ -333,13 +333,13 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Set the virtual hosts for the context.
+    /** Set the virtual hosts for the _context.
      * Only requests that have a matching host header or fully qualified
-     * URL will be passed to that context with a virtual host name.
-     * A context with no virtual host names or a null virtual host name is
-     * available to all requests that are not served by a context with a
+     * URL will be passed to that _context with a virtual host name.
+     * A _context with no virtual host names or a null virtual host name is
+     * available to all requests that are not served by a _context with a
      * matching virtual host name.
-     * @param hosts Array of virtual hosts that this context responds to. A
+     * @param hosts Array of virtual hosts that this _context responds to. A
      * null host name or null/empty array means any hostname is acceptable.
      * Host names may String representation of IP addresses.
      */
@@ -362,13 +362,13 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Get the virtual hosts for the context.
+    /** Get the virtual hosts for the _context.
      * Only requests that have a matching host header or fully qualified
-     * URL will be passed to that context with a virtual host name.
-     * A context with no virtual host names or a null virtual host name is
-     * available to all requests that are not served by a context with a
+     * URL will be passed to that _context with a virtual host name.
+     * A _context with no virtual host names or a null virtual host name is
+     * available to all requests that are not served by a _context with a
      * matching virtual host name.
-     * @return Array of virtual hosts that this context responds to. A
+     * @return Array of virtual hosts that this _context responds to. A
      * null host name or empty array means any hostname is acceptable.
      * Host names may be String representation of IP addresses.
      */
@@ -388,12 +388,12 @@ public class HttpContext extends Container
 
 
     /* ------------------------------------------------------------ */
-    /** Set the hosts for the context.
-     * Set the real hosts that this context will accept requests for.
+    /** Set the hosts for the _context.
+     * Set the real hosts that this _context will accept requests for.
      * If not null or empty, then only requests from HttpListeners for hosts
-     * in this array are accepted by this context. 
+     * in this array are accepted by this _context. 
      * Unlike virutal hosts, this value is not used by HttpServer for
-     * matching a request to a context.
+     * matching a request to a _context.
      */
     public void setHosts(String[] hosts)
         throws UnknownHostException
@@ -411,7 +411,7 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Get the hosts for the context.
+    /** Get the hosts for the _context.
      */
     public String[] getHosts()
     {
@@ -430,7 +430,7 @@ public class HttpContext extends Container
 
     /* ------------------------------------------------------------ */
     /** Set system classes.
-     * System classes cannot be overriden by context classloaders.
+     * System classes cannot be overriden by _context classloaders.
      * @param classes array of classname Strings.  Names ending with '.' are treated as package names. Names starting with '-' are treated as
      * negative matches and must be listed before any enclosing packages.
      */
@@ -444,7 +444,7 @@ public class HttpContext extends Container
 
     /* ------------------------------------------------------------ */
     /** Get system classes.
-     * System classes cannot be overriden by context classloaders.
+     * System classes cannot be overriden by _context classloaders.
      * @return array of classname Strings.  Names ending with '.' are treated as package names. Names starting with '-' are treated as
      * negative matches and must be listed before any enclosing packages. Null if not set.
      */
@@ -458,7 +458,7 @@ public class HttpContext extends Container
 
     /* ------------------------------------------------------------ */
     /** Set system classes.
-     * Servers classes cannot be seen by context classloaders.
+     * Servers classes cannot be seen by _context classloaders.
      * @param classes array of classname Strings.  Names ending with '.' are treated as package names. Names starting with '-' are treated as
      * negative matches and must be listed before any enclosing packages.
      */
@@ -472,7 +472,7 @@ public class HttpContext extends Container
 
     /* ------------------------------------------------------------ */
     /** Get system classes.
-     * System classes cannot be seen by context classloaders.
+     * System classes cannot be seen by _context classloaders.
      * @return array of classname Strings.  Names ending with '.' are treated as package names. Names starting with '-' are treated as
      * negative matches and must be listed before any enclosing packages. Null if not set.
      */
@@ -541,7 +541,7 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Add a HttpHandler to the context.
+    /** Add a HttpHandler to the _context.
      * @param handler
      */
     public synchronized void addHandler(HttpHandler handler)
@@ -552,7 +552,7 @@ public class HttpContext extends Container
     /* ------------------------------------------------------------ */
     /** Get handler index.
      * @param handler instance
-     * @return Index of handler in context or -1 if not found.
+     * @return Index of handler in _context or -1 if not found.
      */
     public int getHandlerIndex(HttpHandler handler)
     {
@@ -611,7 +611,7 @@ public class HttpContext extends Container
 
 
     /* ------------------------------------------------------------ */
-    /** Set context init parameter.
+    /** Set _context init parameter.
      * Init Parameters differ from attributes as they can only
      * have string values, servlets cannot set them and they do
      * not have a package scoped name space.
@@ -624,7 +624,7 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Get context init parameter.
+    /** Get _context init parameter.
      * @param param param name
      * @return param value or null
      */
@@ -634,7 +634,7 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Get context init parameter.
+    /** Get _context init parameter.
      * @return Enumeration of names
      */
     public Enumeration getInitParameterNames()
@@ -643,7 +643,7 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Set a context attribute.
+    /** Set a _context attribute.
      * @param name attribute name
      * @param value attribute value
      */
@@ -758,9 +758,9 @@ public class HttpContext extends Container
 
 
     /* ------------------------------------------------------------ */
-    /** Get the context classpath.
+    /** Get the _context classpath.
      * This method only returns the paths that have been set for this
-     * context and does not include any paths from a parent or the
+     * _context and does not include any paths from a parent or the
      * system classloader.
      * Note that this may not be a legal javac classpath.
      * @return a comma or ';' separated list of class
@@ -774,9 +774,9 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Get the file classpath of the context.
+    /** Get the file classpath of the _context.
      * This method makes a best effort to return a complete file
-     * classpath for the context.
+     * classpath for the _context.
      * It is obtained by walking the classloader hierarchy and looking for
      * URLClassLoaders.  The system property java.class.path is also checked for
      * file elements not already found in the loader hierarchy.
@@ -868,8 +868,8 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Sets the class path for the context.
-     * A class path is only required for a context if it uses classes
+    /** Sets the class path for the _context.
+     * A class path is only required for a _context if it uses classes
      * that are not in the system class path.
      * @param classPath a comma or ';' separated list of class
      * resources. These may be jar files, directories or URLs to jars
@@ -883,8 +883,8 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Add the class path element  to the context.
-     * A class path is only required for a context if it uses classes
+    /** Add the class path element  to the _context.
+     * A class path is only required for a _context if it uses classes
      * that are not in the system class path.
      * @param classPath a comma or ';' separated list of class
      * resources. These may be jar files, directories or URLs to jars
@@ -902,7 +902,7 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Add elements to the class path for the context from the jar and zip files found
+    /** Add elements to the class path for the _context from the jar and zip files found
      *  in the specified resource.
      * @param lib the resource that contains the jar and/or zip files.
      * @param append true if the classpath entries are to be appended to any
@@ -939,7 +939,7 @@ public class HttpContext extends Container
     /** Get Java2 compliant classloading.
      * @return If true, the class loader will conform to the java 2
      * specification and delegate all loads to the parent classloader. If
-     * false, the context classloader only delegate loads for system classes
+     * false, the _context classloader only delegate loads for system classes
      * or classes that it can't find itself.
      */
     public boolean isClassLoaderJava2Compliant()
@@ -951,7 +951,7 @@ public class HttpContext extends Container
     /** Set Java2 compliant classloading.
      * @param compliant If true, the class loader will conform to the java 2
      * specification and delegate all loads to the parent classloader. If
-     * false, the context classloader only delegate loads for system classes
+     * false, the _context classloader only delegate loads for system classes
      * or classes that it can't find itself.
      */
     public void setClassLoaderJava2Compliant(boolean compliant)
@@ -962,8 +962,8 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Set temporary directory for context.
-     * The javax.servlet.context.tempdir attribute is also set.
+    /** Set temporary directory for _context.
+     * The javax.servlet._context.tempdir attribute is also set.
      * @param dir Writable temporary directory.
      */
     public void setTempDirectory(File dir)
@@ -987,14 +987,14 @@ public class HttpContext extends Container
             throw new IllegalArgumentException("Bad temp directory: "+dir);
 
         _tmpDir=dir;
-        setAttribute("javax.servlet.context.tempdir",_tmpDir);
+        setAttribute("javax.servlet._context.tempdir",_tmpDir);
     }
 
     /* ------------------------------------------------------------ */
     /** Get Context temporary directory.
      * A tempory directory is generated if it has not been set.  The
-     * "javax.servlet.context.tempdir" attribute is consulted and if
-     * not set, the host, port and context are used to generate a
+     * "javax.servlet._context.tempdir" attribute is consulted and if
+     * not set, the host, port and _context are used to generate a
      * directory within the JVMs temporary directory.
      * @return Temporary directory as a File.
      */
@@ -1007,7 +1007,7 @@ public class HttpContext extends Container
         //
         // I'm afraid that this is very much black magic.
         // but if you can think of better....
-        Object t = getAttribute("javax.servlet.context.tempdir");
+        Object t = getAttribute("javax.servlet._context.tempdir");
 
         if (t!=null && (t instanceof File))
         {
@@ -1025,7 +1025,7 @@ public class HttpContext extends Container
                 if (_tmpDir.isDirectory() && _tmpDir.canWrite())
                 {
                     if(log.isDebugEnabled())log.debug("Converted to File "+_tmpDir+" for "+this);
-                    setAttribute("javax.servlet.context.tempdir",_tmpDir);
+                    setAttribute("javax.servlet._context.tempdir",_tmpDir);
                     return _tmpDir;
                 }
             }
@@ -1124,7 +1124,7 @@ public class HttpContext extends Container
             }
         }
 
-        setAttribute("javax.servlet.context.tempdir",_tmpDir);
+        setAttribute("javax.servlet._context.tempdir",_tmpDir);
         return _tmpDir;
     }
 
@@ -1132,7 +1132,7 @@ public class HttpContext extends Container
 
     /* ------------------------------------------------------------ */
     /** Set ClassLoader.
-     * @param loader The loader to be used by this context.
+     * @param loader The loader to be used by this _context.
      */
     public synchronized void setClassLoader(ClassLoader loader)
     {
@@ -1144,9 +1144,9 @@ public class HttpContext extends Container
 
     /* ------------------------------------------------------------ */
     /** Get the classloader.
-     * If no classloader has been set and the context has been loaded
+     * If no classloader has been set and the _context has been loaded
      * normally, then null is returned.
-     * If no classloader has been set and the context was loaded from
+     * If no classloader has been set and the _context was loaded from
      * a classloader, that loader is returned.
      * If a classloader has been set and no classpath has been set then
      * the set classloader is returned.
@@ -1162,11 +1162,11 @@ public class HttpContext extends Container
 
     /* ------------------------------------------------------------ */
     /** Set Parent ClassLoader.
-     * By default the parent loader is the thread context classloader
+     * By default the parent loader is the thread _context classloader
      * of the thread that calls initClassLoader.  If setClassLoader is
      * called, then the parent is ignored.
      * @param loader The class loader to use for the parent loader of
-     * the context classloader.
+     * the _context classloader.
      */
     public synchronized void setParentClassLoader(ClassLoader loader)
     {
@@ -1182,8 +1182,8 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Initialize the context classloader.
-     * Initialize the context classloader with the current parameters.
+    /** Initialize the _context classloader.
+     * Initialize the _context classloader with the current parameters.
      * Any attempts to change the classpath after this call will
      * result in a IllegalStateException
      * @param forceContextLoader If true, a ContextLoader is always if
@@ -1347,8 +1347,8 @@ public class HttpContext extends Container
 
     /* ------------------------------------------------------------ */
     /** Set null path redirection.
-     * @param b if true a /context request will be redirected to
-     * /context/ if there is not path in the context.
+     * @param b if true a /_context request will be redirected to
+     * /_context/ if there is not path in the _context.
      */
     public void setRedirectNullPath(boolean b)
     {
@@ -1357,8 +1357,8 @@ public class HttpContext extends Container
 
     /* ------------------------------------------------------------ */
     /**
-     * @return True if a /context request is redirected to /context/ if
-     * there is not path in the context.
+     * @return True if a /_context request is redirected to /_context/ if
+     * there is not path in the _context.
      */
     public boolean isRedirectNullPath()
     {
@@ -1368,9 +1368,9 @@ public class HttpContext extends Container
 
 
     /* ------------------------------------------------------------ */
-    /** Set the permissions to be used for this context.
+    /** Set the permissions to be used for this _context.
      * The collection of permissions set here are used for all classes
-     * loaded by this context.  This is simpler that creating a
+     * loaded by this _context.  This is simpler that creating a
      * security policy file, as not all code sources may be statically
      * known.
      * @param permissions
@@ -1381,7 +1381,7 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Get the permissions to be used for this context.
+    /** Get the permissions to be used for this _context.
      */
     public PermissionCollection getPermissions()
     {
@@ -1389,9 +1389,9 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Add a permission to this context.
+    /** Add a permission to this _context.
      * The collection of permissions set here are used for all classes
-     * loaded by this context.  This is simpler that creating a
+     * loaded by this _context.  This is simpler that creating a
      * security policy file, as not all code sources may be statically
      * known.
      * @param permission
@@ -1405,7 +1405,7 @@ public class HttpContext extends Container
 
     /* ------------------------------------------------------------ */
     /** Handler request.
-     * Determine the path within the context and then call
+     * Determine the path within the _context and then call
      * handle(pathInContext,request,response).
      * @param request
      * @param response
@@ -1501,7 +1501,7 @@ public class HttpContext extends Container
     /* ------------------------------------------------------------ */
     /** Handler request.
      * Call each HttpHandler until request is handled.
-     * @param pathInContext Path in context
+     * @param pathInContext Path in _context
      * @param pathParams Path parameters such as encoded Session ID
      * @param request
      * @param response
@@ -1554,14 +1554,14 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Enter the context scope.
+    /** Enter the _context scope.
      * This method is called (by handle or servlet dispatchers) to indicate that
-     * request handling is entering the scope of this context.  The opaque scope object
+     * request handling is entering the scope of this _context.  The opaque scope object
      * returned, should be passed to the leaveContextScope method.
      */
     public Object enterContextScope(HttpRequest request, HttpResponse response)
     {
-        // Save the thread context loader
+        // Save the thread _context loader
         Thread thread = Thread.currentThread();
         ClassLoader cl=thread.getContextClassLoader();
         HttpContext c=response.getHttpContext();
@@ -1582,9 +1582,9 @@ public class HttpContext extends Container
     }
     
     /* ------------------------------------------------------------ */
-    /** Leave the context scope.
+    /** Leave the _context scope.
      * This method is called (by handle or servlet dispatchers) to indicate that
-     * request handling is leaveing the scope of this context.  The opaque scope object
+     * request handling is leaveing the scope of this _context.  The opaque scope object
      * returned by enterContextScope should be passed in.
      */
     public void leaveContextScope(HttpRequest request, HttpResponse response,Object oldScope)
@@ -1646,7 +1646,7 @@ public class HttpContext extends Container
         if (_httpServer==null)
             throw new IllegalStateException("No server for "+this);
 
-        // start the context itself
+        // start the _context itself
         _resources.getMimeMap();
         _resources.getEncodingMap();
 
@@ -1658,7 +1658,7 @@ public class HttpContext extends Container
                 log.warn("No Realm: "+_realmName);
         }
 
-        // setup the context loader
+        // setup the _context loader
         initClassLoader(false);
 
         // Set attribute if needed
@@ -1690,7 +1690,7 @@ public class HttpContext extends Container
     /* ------------------------------------------------------------ */
     /** Start the handlers.
      * This is called by start after the classloader has been
-     * initialized and set as the thread context loader.
+     * initialized and set as the thread _context loader.
      * It may be specialized to provide custom handling
      * before any handlers are started.
      * @exception Exception
@@ -1712,7 +1712,7 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Stop the context.
+    /** Stop the _context.
      * @param graceful If true and statistics are on, then this method will wait
      * for requestsActive to go to zero before calling stop()
      */
@@ -1739,7 +1739,7 @@ public class HttpContext extends Container
     }
 
     /* ------------------------------------------------------------ */
-    /** Stop the context.
+    /** Stop the _context.
      */
     protected void doStop()
         throws Exception
@@ -1784,8 +1784,8 @@ public class HttpContext extends Container
 
 
     /* ------------------------------------------------------------ */
-    /** Destroy a context.
-     * Destroy a context and remove it from the HttpServer. The
+    /** Destroy a _context.
+     * Destroy a _context and remove it from the HttpServer. The
      * HttpContext must be stopped before it can be destroyed.
      */
     public void destroy()
@@ -1861,7 +1861,7 @@ public class HttpContext extends Container
     
     /* ------------------------------------------------------------ */
     /** Send an error response.
-     * This method obtains the responses context and call sendError for context specific
+     * This method obtains the responses _context and call sendError for _context specific
      * error handling.
      * @param response the response to send
      * @param code The error code
@@ -1879,8 +1879,8 @@ public class HttpContext extends Container
     }
     
     /* ------------------------------------------------------------ */
-    /** True set statistics recording on for this context.
-     * @param on If true, statistics will be recorded for this context.
+    /** True set statistics recording on for this _context.
+     * @param on If true, statistics will be recorded for this _context.
      */
     public void setStatsOn(boolean on)
     {
@@ -1915,7 +1915,7 @@ public class HttpContext extends Container
 
     /* ------------------------------------------------------------ */
     /**
-     * @return Get the number of requests handled by this context
+     * @return Get the number of requests handled by this _context
      * since last call of statsReset(). If setStatsOn(false) then this
      * is undefined.
      */
@@ -1938,7 +1938,7 @@ public class HttpContext extends Container
     /* ------------------------------------------------------------ */
     /**
      * @return Get the number of responses with a 2xx status returned
-     * by this context since last call of statsReset(). Undefined if
+     * by this _context since last call of statsReset(). Undefined if
      * if setStatsOn(false).
      */
     public int getResponses1xx() {return _responses1xx;}
@@ -1946,7 +1946,7 @@ public class HttpContext extends Container
     /* ------------------------------------------------------------ */
     /**
      * @return Get the number of responses with a 100 status returned
-     * by this context since last call of statsReset(). Undefined if
+     * by this _context since last call of statsReset(). Undefined if
      * if setStatsOn(false).
      */
     public int getResponses2xx() {return _responses2xx;}
@@ -1954,7 +1954,7 @@ public class HttpContext extends Container
     /* ------------------------------------------------------------ */
     /**
      * @return Get the number of responses with a 3xx status returned
-     * by this context since last call of statsReset(). Undefined if
+     * by this _context since last call of statsReset(). Undefined if
      * if setStatsOn(false).
      */
     public int getResponses3xx() {return _responses3xx;}
@@ -1962,7 +1962,7 @@ public class HttpContext extends Container
     /* ------------------------------------------------------------ */
     /**
      * @return Get the number of responses with a 4xx status returned
-     * by this context since last call of statsReset(). Undefined if
+     * by this _context since last call of statsReset(). Undefined if
      * if setStatsOn(false).
      */
     public int getResponses4xx() {return _responses4xx;}
@@ -1970,7 +1970,7 @@ public class HttpContext extends Container
     /* ------------------------------------------------------------ */
     /**
      * @return Get the number of responses with a 5xx status returned
-     * by this context since last call of statsReset(). Undefined if
+     * by this _context since last call of statsReset(). Undefined if
      * if setStatsOn(false).
      */
     public int getResponses5xx() {return _responses5xx;}
@@ -2018,7 +2018,7 @@ public class HttpContext extends Container
     
 
     /* ------------------------------------------------------------ */
-    /* Class to save scope of nested context calls
+    /* Class to save scope of nested _context calls
      */
     private static class Scope 
     {

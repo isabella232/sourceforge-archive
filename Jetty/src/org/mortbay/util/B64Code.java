@@ -22,7 +22,7 @@ import java.io.UnsupportedEncodingException;
 /** Fast B64 Encoder/Decoder as described in RFC 1421.
  * <p>Does not insert or interpret whitespace as described in RFC
  * 1521. If you require this you must pre/post process your data.
- * <p> Note that in a web context the usual case is to not want
+ * <p> Note that in a web _context the usual case is to not want
  * linebreaks or other white space in the encoded output.
  *
  * @version $Revision$

@@ -27,7 +27,7 @@ import org.mortbay.util.LifeCycle;
     
 /* --------------------------------------------------------------------- */
 /** Session Manager.
- * The API required to manage sessions for a servlet context.
+ * The API required to manage sessions for a servlet _context.
  *
  * @version $Id$
  * @author Greg Wilkins
@@ -65,7 +65,7 @@ public interface SessionManager extends LifeCycle, Serializable
     /** Session Path.
      * If this property is set as a ServletContext InitParam, then it is
      * used as the path for the session cookie.  If it is not set, then
-     * the context path is used as the path for the cookie.
+     * the _context path is used as the path for the cookie.
      */
     public final static String __SessionPath=
         "org.mortbay.jetty.servlet.SessionPath";

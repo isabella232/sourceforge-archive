@@ -44,7 +44,7 @@ public class SimpleTagSupport
     /** Reference to the enclosing tag. */
     private JspTag parentTag;
     
-    /** The JSP context for the upcoming tag invocation. */
+    /** The JSP _context for the upcoming tag invocation. */
     private JspContext jspContext;
     
     /** The body of the tag. */
@@ -100,11 +100,11 @@ public class SimpleTagSupport
     }
     
     /**
-     * Stores the provided JSP context in the private jspContext field.
+     * Stores the provided JSP _context in the private jspContext field.
      * Subclasses can access the <code>JspContext</code> via 
      * <code>getJspContext()</code>.
      * 
-     * @param pc the page context for this invocation
+     * @param pc the page _context for this invocation
      * @see SimpleTag#setJspContext
      */
     public void setJspContext( JspContext pc ) {
@@ -112,10 +112,10 @@ public class SimpleTagSupport
     }
     
     /**
-     * Returns the page context passed in by the container via 
+     * Returns the page _context passed in by the container via 
      * setJspContext.
      *
-     * @return the page context for this invocation
+     * @return the page _context for this invocation
      */
     protected JspContext getJspContext() {
         return this.jspContext;

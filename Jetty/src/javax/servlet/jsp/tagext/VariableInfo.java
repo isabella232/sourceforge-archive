@@ -53,7 +53,7 @@ package javax.servlet.jsp.tagext;
  *
  * <p>
  * If a short class name is given in the VariableInfo objects, then
- * the class name must be that of a public class in the context of the
+ * the class name must be that of a public class in the _context of the
  * import directives of the page where the custom action appears. 
  * The class must also be in the CLASSPATH for the Web Application 
  * (see Servlet 2.4 specification - essentially it is WEB-INF/lib and

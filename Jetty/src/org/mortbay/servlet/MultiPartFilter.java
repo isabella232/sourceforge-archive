@@ -66,7 +66,7 @@ public class MultiPartFilter implements Filter
      */
     public void init(FilterConfig filterConfig) throws ServletException
     {
-        tempdir=(File)filterConfig.getServletContext().getAttribute("javax.servlet.context.tempdir");
+        tempdir=(File)filterConfig.getServletContext().getAttribute("javax.servlet._context.tempdir");
     }
 
     /* ------------------------------------------------------------------------------- */

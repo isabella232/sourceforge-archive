@@ -141,7 +141,7 @@ public class JSR154Filter implements Filter
             }
         }
         
-        // Is this the first time this request has been in this context?
+        // Is this the first time this request has been in this _context?
         boolean first_in_context=root_filter ||
         	requestWrapper!=null && 
         	requestWrapper.getRequest()!=null && requestWrapper.getRequest() instanceof Dispatcher.DispatcherRequest &&

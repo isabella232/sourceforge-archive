@@ -47,9 +47,13 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
 
     public XMLConfiguration()
     {
-        
         // Get parser
-        xmlParser=new XmlParser();
+        xmlParser=webXmlParser();
+    }
+    
+    public static XmlParser webXmlParser()
+    {
+        XmlParser xmlParser=new XmlParser();
         //set up cache of DTDs and schemas locally
         URL dtd22=WebApplicationContext.class.getResource("/javax/servlet/resources/web-app_2_2.dtd");
         URL dtd23=WebApplicationContext.class.getResource("/javax/servlet/resources/web-app_2_3.dtd");
@@ -81,6 +85,7 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
         xmlParser.redirectEntity("http://www.w3.org/2001/datatypes.dtd",datatypesdtd);
         xmlParser.redirectEntity("j2ee_web_services_client_1_1.xsd",webservice11xsd);
         xmlParser.redirectEntity("http://www.ibm.com/webservices/xsd/j2ee_web_services_client_1_1.xsd",webservice11xsd);
+        return xmlParser;
     }
     
     
@@ -102,8 +107,8 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
     
     /* ------------------------------------------------------------------------------- */
     /** Configure ClassPath.
-     * This method is called before the context ClassLoader is created.  
-     * Paths and libraries should be added to the context using the setClassPath,
+     * This method is called before the _context ClassLoader is created.  
+     * Paths and libraries should be added to the _context using the setClassPath,
      * addClassPath and addClassPaths methods.  The default implementation looks
      * for WEB-INF/classes, WEB-INF/lib/*.zip and WEB-INF/lib/*.jar
      * @throws Exception
@@ -111,7 +116,7 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
     public  void configureClassPath()
     throws Exception
     {
-        //cannot configure if the context is already started
+        //cannot configure if the _context is already started
         if (_context.isStarted())
         {
             if (log.isDebugEnabled()){log.debug("Cannot configure webapp after it is started");};
@@ -136,9 +141,10 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
         }
      }
 
+    /* ------------------------------------------------------------------------------- */
     public void configureDefaults() throws Exception
     {
-        //cannot configure if the context is already started
+        //cannot configure if the _context is already started
         if (_context.isStarted())
         {
             if (log.isDebugEnabled()){log.debug("Cannot configure webapp after it is started");};
@@ -156,9 +162,10 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
         }
     }
 
+    /* ------------------------------------------------------------------------------- */
     public void configureWebApp() throws Exception
     {
-        //cannot configure if the context is already started
+        //cannot configure if the _context is already started
         if (_context.isStarted())
         {
             if (log.isDebugEnabled()){log.debug("Cannot configure webapp after it is started");};
@@ -184,9 +191,7 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
             }
         }
     }
-    
- 
-    
+     
 
     /* ------------------------------------------------------------ */
     protected void initialize(XmlParser.Node config) throws ClassNotFoundException,UnavailableException
@@ -231,7 +236,7 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
             initDisplayName(node);
         else if("description".equals(element))
         {}
-        else if("context-param".equals(element))
+        else if("_context-param".equals(element))
             initContextParam(node);
         else if("servlet".equals(element))
             initServlet(node);
@@ -249,6 +254,8 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
             initErrorPage(node);
         else if("taglib".equals(element))
             initTagLib(node);
+        else if("jsp-config".equals(element))
+            initJspConfig(node);
         else if("resource-ref".equals(element))
         {
             if(log.isDebugEnabled())
@@ -549,6 +556,17 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
         String uri=node.getString("taglib-uri",false,true);
         String location=node.getString("taglib-location",false,true);
         getWebApplicationContext().setResourceAlias(uri,location);
+    }
+    
+    /* ------------------------------------------------------------ */
+    protected void initJspConfig(XmlParser.Node node)
+    {
+        for (int i=0;i<node.size();i++)
+        {
+            Object o=node.get(i);
+            if (o instanceof XmlParser.Node && "taglib".equals(((XmlParser.Node)o).getTag()))
+                initTagLib((XmlParser.Node)o);
+        }
     }
 
     /* ------------------------------------------------------------ */

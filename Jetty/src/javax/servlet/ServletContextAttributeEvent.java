@@ -25,7 +25,7 @@ package javax.servlet;
 
 /**
  * This is the event class for notifications about changes to the attributes of the
- * servlet context of a web application.
+ * servlet _context of a web application.
  * @see ServletContextAttributeListener
  * @since Servlet 2.3
  *
@@ -36,7 +36,7 @@ public class ServletContextAttributeEvent extends ServletContextEvent {
     private Object value;
 
     /**
-     * Construct a ServletContextAttributeEvent from the given context for the
+     * Construct a ServletContextAttributeEvent from the given _context for the
      * given attribute name and attribute value.
      */
     public ServletContextAttributeEvent(ServletContext source, String name, Object value) {

@@ -38,7 +38,7 @@ public class ServletRequestAttributeEvent extends ServletRequestEvent {
     private Object value;
 
     /**
-     * Construct a ServletRequestAttributeEvent from the given context for the
+     * Construct a ServletRequestAttributeEvent from the given _context for the
      * given attribute name and attribute value.
      *
      * @param sc the ServletContext that is sending the event.

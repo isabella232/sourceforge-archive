@@ -38,7 +38,7 @@ import javax.servlet.jsp.tagext.BodyContent;
 
 /**
  * <p>
- * PageContext extends JspContext to provide useful context information for
+ * PageContext extends JspContext to provide useful _context information for
  * when JSP technology is used in a Servlet environment.
  * <p>
  * A PageContext instance provides access to all the namespaces associated

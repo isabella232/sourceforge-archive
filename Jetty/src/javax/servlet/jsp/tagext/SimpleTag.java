@@ -126,7 +126,7 @@ public interface SimpleTag extends JspTag {
      * the <code>JspContext</code> for this invocation.
      * An implementation should save this value.
      * 
-     * @param pc the page context for this invocation
+     * @param pc the page _context for this invocation
      * @see Tag#setPageContext
      */
     public void setJspContext( JspContext pc );

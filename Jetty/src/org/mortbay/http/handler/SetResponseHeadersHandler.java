@@ -76,7 +76,7 @@ public class SetResponseHeadersHandler extends AbstractHttpHandler
      * Settings made here can be overridden by subsequent handling of the
      * request.
      *
-     * @param pathInContext The context path. Ignored.
+     * @param pathInContext The _context path. Ignored.
      * @param pathParams Path parameters such as encoded Session ID. Ignored.
      * @param request The HttpRequest request. Ignored.
      * @param response The HttpResponse response. Updated with new Headers.

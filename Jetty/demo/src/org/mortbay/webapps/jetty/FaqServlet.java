@@ -368,7 +368,7 @@ public class FaqServlet extends HttpServlet
     /**
      * Generate the index page for the FAQ
      *
-     *@param contextPath the servlet context path
+     *@param contextPath the servlet _context path
      *@param servletPath the servlet path
      */
     private  Page generateFaqIndex (String contextPath, String servletPath)
@@ -411,7 +411,7 @@ public class FaqServlet extends HttpServlet
 
    /**
     * Generate the page for a particular faq entry
-    * @param contextPath  the servlet context path
+    * @param contextPath  the servlet _context path
     * @param servletPath the servlet servlet path
     * @param entry the FaqEntry requested
     *

@@ -33,7 +33,7 @@ import javax.servlet.jsp.el.VariableResolver;
  * <code>JspContext</code> serves as the base class for the 
  * PageContext class and abstracts all information that is not specific
  * to servlets.  This allows for Simple Tag Extensions to be used
- * outside of the context of a request/response Servlet.
+ * outside of the _context of a request/response Servlet.
  * <p>
  * The JspContext provides a number of facilities to the 
  * page/component author and page implementor, including:
@@ -234,7 +234,7 @@ public abstract class JspContext {
     /**
      * Returns an instance of a VariableResolver that provides access to the
      * implicit objects specified in the JSP specification using this JspContext
-     * as the context object.
+     * as the _context object.
      *
      * @return A valid instance of a VariableResolver.
      * @since 2.0

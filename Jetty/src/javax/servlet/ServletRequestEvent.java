@@ -38,7 +38,7 @@ public class ServletRequestEvent extends java.util.EventObject {
     private ServletRequest request;
 
     /**
-     * Construct a ServletRequestEvent from the given context.
+     * Construct a ServletRequestEvent from the given _context.
      *
      * @param sc the ServletContext of the web application.
      * @param request the ServletRequest that is sending the event.

@@ -181,9 +181,9 @@ public class Invoker extends HttpServlet
                         {
                             holder.stop();
                             log.warn("Dynamic servlet "+s+
-                                         " not loaded from context "+
+                                         " not loaded from _context "+
                                          request.getContextPath());
-                            throw new UnavailableException("Not in context");
+                            throw new UnavailableException("Not in _context");
                         }
                     }
 

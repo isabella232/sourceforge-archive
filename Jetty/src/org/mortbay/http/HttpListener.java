@@ -208,7 +208,7 @@ public interface HttpListener extends LifeCycle, Serializable
     /* ------------------------------------------------------------ */
     /** Get an optional HttpHandler for the listener.
      * If Set, then HttpConnection will pass requests from this listener
-     * to this handler with an empty context path, before passing the
+     * to this handler with an empty _context path, before passing the
      * request to the HttpServer.  This allows listener specific handling
      * to be added or even a HttpContext (which is a HttpHandler) to be
      * bound directly to HttpListener. 

@@ -69,7 +69,7 @@ public class RootNotFoundHandler extends NotFoundHandler
         
         writer.write("<HTML>\n<HEAD>\n<TITLE>Error 404 - Not Found");
         writer.write("</TITLE>\n<BODY>\n<H2>Error 404 - Not Found.</H2>\n");
-        writer.write("No context on this server matched or handled this request.<BR>");
+        writer.write("No _context on this server matched or handled this request.<BR>");
         writer.write("Contexts known to this server are: <ul>");
 
         HttpContext[] contexts = getHttpContext().getHttpServer().getContexts();

@@ -144,7 +144,7 @@ public class Dispatcher implements RequestDispatcher
         _servletHandler=servletHandler;
         _holder=_servletHandler.getServletHolder(name);
         if (_holder==null)
-            throw new IllegalStateException("No named servlet handler in context");
+            throw new IllegalStateException("No named servlet handler in _context");
     }
 
     /* ------------------------------------------------------------ */
@@ -219,7 +219,7 @@ public class Dispatcher implements RequestDispatcher
         {
             if (request.crossContext())
             {
-                // Setup new context
+                // Setup new _context
                 old_scope=
                     _servletHandler.getHttpContext()
                     .enterContextScope(httpConnection.getRequest(),httpConnection.getResponse());
@@ -286,7 +286,7 @@ public class Dispatcher implements RequestDispatcher
         }
         finally
         {
-            // restore context
+            // restore _context
             if (request.crossContext())
                 _servletHandler.getHttpContext()
                     .leaveContextScope(httpConnection.getRequest(),
@@ -345,7 +345,7 @@ public class Dispatcher implements RequestDispatcher
             _servletHttpRequest=servletHttpRequest;
             _filterType=filterType;
             
-            // Is this being dispatched to a different context?
+            // Is this being dispatched to a different _context?
             _xContext=
                 servletHttpRequest.getServletHandler()!=_servletHandler;
             if (_xContext)
@@ -356,7 +356,7 @@ public class Dispatcher implements RequestDispatcher
                     ?httpServletRequest.getRequestedSessionId()
                     :session.getId();
 
-                // Look for that session in new context to access it.
+                // Look for that session in new _context to access it.
                 if (session_id!=null)
                 {
                     _xSession=_servletHandler.getHttpSession(session_id);

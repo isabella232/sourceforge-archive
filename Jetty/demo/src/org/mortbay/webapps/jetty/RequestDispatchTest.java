@@ -252,9 +252,9 @@ public class RequestDispatchTest extends HttpServlet
                     + prefix
                     + "/includeN/name\n"
                     + prefix
-                    + "/forwardC/context/path\n"
+                    + "/forwardC/_context/path\n"
                     + prefix
-                    + "/forwardSC/context/path</PRE>");
+                    + "/forwardSC/_context/path</PRE>");
             pout.flush();
         }
     }

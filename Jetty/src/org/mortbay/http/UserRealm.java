@@ -41,9 +41,9 @@ public interface UserRealm
     
     /* ------------------------------------------------------------ */
     /** Authenticate a users credentials.
-     * Implementations of this method may adorn the calling context to
+     * Implementations of this method may adorn the calling _context to
      * assoicate it with the authenticated principal (eg ThreadLocals). If
-     * such context associations are made, they should be considered valid
+     * such _context associations are made, they should be considered valid
      * until a UserRealm.deAuthenticate(UserPrincipal) call is made for this
      * UserPrincipal.
      * @param username The username. 
@@ -62,9 +62,9 @@ public interface UserRealm
     /** Re Authenticate a Principal.
      * Authenicate a principal that has previously been return from the authenticate method.
      * 
-     * Implementations of this method may adorn the calling context to
+     * Implementations of this method may adorn the calling _context to
      * assoicate it with the authenticated principal (eg ThreadLocals). If
-     * such context associations are made, they should be considered valid
+     * such _context associations are made, they should be considered valid
      * until a UserRealm.deAuthenticate(UserPrincipal) call is made for this
      * UserPrincipal.
      *
@@ -80,10 +80,10 @@ public interface UserRealm
     public boolean isUserInRole(Principal user, String role);
     
     /* ------------------------------------------------------------ */
-    /** Dissassociate the calling context with a Principal.
-     * This method is called when the calling context is not longer
+    /** Dissassociate the calling _context with a Principal.
+     * This method is called when the calling _context is not longer
      * associated with the Principal.  It should be used by an implementation
-     * to remove context associations such as ThreadLocals.
+     * to remove _context associations such as ThreadLocals.
      * The UserPrincipal object remains authenticated, as it may be
      * associated with other contexts.
      * @param user A UserPrincipal allocated from this realm.

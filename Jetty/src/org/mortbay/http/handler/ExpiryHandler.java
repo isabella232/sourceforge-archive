@@ -60,7 +60,7 @@ public class ExpiryHandler extends AbstractHttpHandler
      * Settings made here can be overridden by subsequent handling of the
      * request.
      *
-     * @param pathInContext The context path
+     * @param pathInContext The _context path
      * @param pathParams Path parameters such as encoded Session ID
      * @param request The HttpRequest request
      * @param response The HttpResponse response

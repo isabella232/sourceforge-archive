@@ -67,7 +67,7 @@ import javax.servlet.ServletContext;
  * <code>true</code>.
  *
  * <p>Session information is scoped only to the current web application
- * (<code>ServletContext</code>), so information stored in one context
+ * (<code>ServletContext</code>), so information stored in one _context
  * will not be directly visible in another.
  *
  * @see HttpSessionBindingListener
