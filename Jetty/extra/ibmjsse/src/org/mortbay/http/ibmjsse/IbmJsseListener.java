@@ -2,7 +2,7 @@
 // Copyright (c) 2000 Mort Bay Consulting (Australia) Pty. Ltd.
 // $Id$
 // ========================================================================
-package org.mortbay.http;
+package org.mortbay.http.ibmjsse;
 
 import com.ibm.jsse.IBMJSSEProvider;
 
@@ -24,6 +24,8 @@ import javax.net.ssl.TrustManagerFactory;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.Log;
 import org.mortbay.util.Password;
+
+import org.mortbay.http.*;
 
 /* ------------------------------------------------------------ */
 
