@@ -92,6 +92,9 @@ public class Dump extends HttpServlet
             table.addHeading("getProtocol:&nbsp;").cell().right();
             table.addCell(sreq.getProtocol());
             table.newRow();
+            table.addHeading("getScheme:&nbsp;").cell().right();
+            table.addCell(sreq.getScheme());
+            table.newRow();
             table.addHeading("getServerName:&nbsp;").cell().right();
             table.addCell(sreq.getServerName());
             table.newRow();
@@ -116,16 +119,31 @@ public class Dump extends HttpServlet
             table.newRow();
             table.newHeading()
                 .cell().nest(new Font(2,true))
-                .add("<BR>Other HTTP Headers")
+                .add("<BR>Interface javax.servlet.* Attributes")
                 .attribute("COLSPAN","2")
                 .left();
             String name;
+            Enumeration a = sreq.getAttributeNames();
+            while (a.hasMoreElements())
+            {
+                name=(String)a.nextElement();
+                table.newRow();
+                table.addHeading(name+":&nbsp;").cell().right();
+                table.addCell(sreq.getAttribute(name));
+            }
+            
+            table.newRow();
+            table.newHeading()
+                .cell().nest(new Font(2,true))
+                .add("<BR>Other HTTP Headers")
+                .attribute("COLSPAN","2")
+                .left();
             Enumeration h = sreq.getHeaderNames();
             while (h.hasMoreElements())
             {
                 name=(String)h.nextElement();
                 table.newRow();
-                table.addHeading(name+":&nbsp;").cell().right();
+                table.addHeading(name+":&nbsp;").cell().right().top();
                 table.addCell(sreq.getHeader(name));
             }
             

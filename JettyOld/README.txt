@@ -208,12 +208,15 @@ FREQUENTLY ASKED QUESTIONS
 
 Does Jetty support SSL?
 -----------------------
-The recent 2.2.0 developments have included restructuring to allow 
-for easier integration of SSL libraries by specialization of the
-HttpListener class.  The 2.2.+ release contains an SSL listener
-class for the Protekt SSL commercial product from www.forge.com.au.
-and a listener for Sun's JSSE javax classes from kiwiconsulting.com.
-Both these listeners are in the contrib directory.
+Jetty contains serveral listeners extensions that support SSL.
+In the contrib directories there is a listener for the Protekt SSL 
+commercial product from www.forge.com.au and a prototype JSSE
+listener from kiwiconsulting.com.
+
+These contributed SSL listeners were used as the basis for the 
+supported SSL listeners  com.mortbay.HTTP.JsseListener and
+com.mortbay.HTTP.SunJsseListener.   Instructions for SSL are
+in $JETTY_HOME/doc/JsseSSL.html
 
 
 Does Jetty support "standard" server side includes?

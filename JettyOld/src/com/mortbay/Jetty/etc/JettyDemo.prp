@@ -48,8 +48,12 @@ PROPERTY.DefaultPageType		  : com.mortbay.Jetty.JettyLaF
 # 
 # ------------------------------------------------------------------------
 main.CLASS				  : com.mortbay.HTTP.HttpServer
-main.LISTENER.all.CLASS                   : com.mortbay.HTTP.HttpListener
-main.LISTENER.all.ADDRS                   : 0.0.0.0:8080;127.0.0.1:8888
+
+main.LISTENER.http.CLASS                  : com.mortbay.HTTP.HttpListener
+main.LISTENER.http.ADDRS                  : 0.0.0.0:8080;127.0.0.1:8888
+#main.LISTENER.https.CLASS                 : com.mortbay.HTTP.SunJsseListener
+#main.LISTENER.https.ADDRS                 : 0.0.0.0:8443
+
 main.STACKS				  : root;files
 main.EXCEPTIONS                           : defaultEx;terseEx;
 main.PROPERTY.SessionMaxInactiveInterval  : 3600

@@ -399,16 +399,12 @@ public class FileHandler extends NullHandler
                 {
                     Code.debug("Redirect to directory/");
                         
-                    int port=request.getServerPort();
                     String q=request.getQueryString();
-                    if (q!=null&&q.length()==0)
-                        q=null;
-                    response.setHeader(HttpResponse.Location,
-                                       "http://"+
-                                       request.getServerName()+
-                                       (port==80?"":(":"+port))+
-                                       request.getResourcePath()+"/"+
-                                       (q==null?"":("?"+q)));
+		    StringBuffer buf=HttpUtils.getRequestURL(request);
+		    buf.append("/");
+                    if (q!=null&&q.length()!=0)
+			buf.append("?"+q);
+                    response.setHeader(HttpResponse.Location, buf.toString());
                     response.sendError(301,"Moved Permanently");
                     return;
                 }

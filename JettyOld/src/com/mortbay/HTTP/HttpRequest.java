@@ -79,6 +79,7 @@ public class HttpRequest extends HttpHeader
     private HttpSession session=null;
     private String sessionIdState=SESSIONID_NOT_CHECKED;
 
+    private String scheme="http";
     private String requestLine=null;
     private String protocolHostPort=null;
     private String resourcePath=null;
@@ -876,7 +877,16 @@ public class HttpRequest extends HttpHeader
      */
     public String getScheme()
     {
-        return "http";
+        return scheme;
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Sets the scheme of the URL used in this request, for
+     * example "http", "https"
+     */
+    public void setScheme(String scheme)
+    {
+        this.scheme = scheme;
     }
     
     /* -------------------------------------------------------------- */

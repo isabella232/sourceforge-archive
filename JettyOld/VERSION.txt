@@ -1,4 +1,6 @@
+  + JsseListener added and documented
   + Minor changes to compile with jikes.
+  + Added passive mode methods to FTP
 
 Release 2.4.5 - 9th July 2000 
   + Don't mark a session invalid until after values unbound.

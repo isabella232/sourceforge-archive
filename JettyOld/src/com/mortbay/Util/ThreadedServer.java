@@ -284,6 +284,12 @@ abstract public class ThreadedServer
         return _maxThreads;
     }
     
+    /* ------------------------------------------------------------ */
+    public int getMaxIdleTimeMs()
+    {
+        return _maxIdleTimeMs;
+    }
+    
     /* ------------------------------------------------------------------- */
     public synchronized void setAddress(InetAddress address,
                                         int port) 

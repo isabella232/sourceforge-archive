@@ -90,14 +90,30 @@ public class HttpListener extends ThreadedServer
         
         this.address=address;
         this.server=server;
-
-        Log.event("HttpListener started on "+this.address);
     }
     
     /* ------------------------------------------------------------ */
+    public void start()
+	throws IOException
+    {
+	super.start();
+	Log.event(this.getClass().getName()+
+		  " started on " +getAddress() );
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Allow the Listener a chance to customise the request
+     * before the server does its stuff.
+     * <br> This allows extra attributes to be set for SSL connections.
+     */
+    protected void customiseRequest(Socket connection,
+				    HttpRequest request)
+    {}
+
+    /* ------------------------------------------------------------ */
     /** Handle a connection to the server by trying to read a HttpRequest
      *  and finding the right type of handler for that request, which
-     *  provides the HttpResponse
+     *  provides the HttpResponse.
      */
     public void handleConnection(Socket connection)
     {
@@ -124,6 +140,8 @@ public class HttpListener extends ThreadedServer
             
                     response=new HttpResponse(connection.getOutputStream(),
                                               request);
+
+		    customiseRequest(connection, request);
 
                     server.handle(request,response);
 
