@@ -2,6 +2,7 @@ Jetty-3.0.A4 - 16 Oct 1999
    + Request attributes
    + Basic Authentication Handler.
    + Added LF wait after CR to LineInput.
+   + UTF8 in UrlDecoded.decodeString.
 
 Jetty-3.0.A3 - 14 Oct 1999
    + Added LifeCycle interface to Utils implemented by

@@ -170,53 +170,46 @@ public class UrlEncoded extends MultiMap
      */
     public static String decodeString(String encoded)
     {
-         encoded = encoded.replace('+',' ');
-         int index = 0;
-         int marker = encoded.indexOf('%', 0);
+        int len=encoded.length();
+        byte[] bytes=new byte[len];
+        int n=0;
+        boolean noDecode=true;
+        
+        for (int i=0;i<len;i++)
+        {
+            char c = encoded.charAt(i);
+            if (c<0||c>0x7f)
+                throw new IllegalArgumentException("Not encoded");
+            
+            byte b = (byte)(0x7f & c);
+            
+            if (c=='+')
+            {
+                noDecode=false;
+                b=(byte)' ';
+            }
+            else if (c=='%' && (i+2)<len)
+            {
+                noDecode=false;
+                b=(byte)(0xff&Integer.parseInt(encoded.substring(i+1,i+3),16));
+                i+=2;
+            }
+            
+            bytes[n++]=b;
+        }
 
-         // if no encoded characters return the original
-         if (marker == -1)
-             return encoded;
+        if (noDecode)
+            return encoded;
 
-         String result = encoded;
-         try {
-             int encodedLength = encoded.length();
-             ByteArrayOutputStream out=new ByteArrayOutputStream(encodedLength);
-             synchronized(out)
-             {
-                 do
-                 {
-                     // Write the part before the %
-                     out.write(encoded.substring(index,marker).getBytes("UTF8"));
-                     
-                     try
-                     {
-                         // convert the 2 hex chars following the % into a byte
-                         out.write((byte)(Integer.parseInt(encoded.substring(marker+1,marker+3),16)));
-                         index = marker+3;
-                     }
-                     catch (NumberFormatException e)
-                     {
-                         //conversion failed so pass through this %
-                         if (Code.verbose()) Code.warning(e);
-                         out.write('%');
-                         index = marker+1;
-                     }
-                 }
-                 while (((marker = encoded.indexOf('%', index)) != -1));
-
-                 // if there is some at the end then copy it in
-                 if (index < encodedLength)
-                     out.write(encoded.substring(index,encodedLength).getBytes("UTF8"));
-                 
-                 result = out.toString();
-             }
-         }
-         catch (Exception e) {
-             Code.warning(e);
-         }
-         
-         return result;
+        try
+        {    
+            return new String(bytes,0,n,"UTF8");
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            return new String(bytes,0,n);
+        }
     }
     
     /* ------------------------------------------------------------ */

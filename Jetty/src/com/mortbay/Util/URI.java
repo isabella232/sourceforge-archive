@@ -179,7 +179,8 @@ public class URI
         catch (Exception e)
         {
             Code.ignore(e);
-            throw new IllegalArgumentException("Malformed URI: "+uri);
+            throw new IllegalArgumentException("Malformed URI '"+uri+
+                                               "' : "+e.toString());
         }        
     }
 
