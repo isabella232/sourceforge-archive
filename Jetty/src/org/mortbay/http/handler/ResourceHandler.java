@@ -179,7 +179,22 @@ public class ResourceHandler extends AbstractHttpHandler
     {
         _minGzipLength = minGzipLength;
     }
- 
+
+    
+    /* ------------------------------------------------------------ */
+    /** get Resource to serve.
+     * Map a path to a resource. The default implementation calls
+     * HttpContext.getResource but derived handers may provide
+     * their own mapping.
+     * @param pathInContext The path to find a resource for.
+     * @return The resource to serve.
+     */
+    protected Resource getResource(String pathInContext)
+        throws IOException
+    {
+        return getHttpContext().getResource(pathInContext);
+    }
+    
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,
                        String pathParams,
@@ -187,7 +202,7 @@ public class ResourceHandler extends AbstractHttpHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
-        Resource resource = getHttpContext().getResource(pathInContext);
+        Resource resource = getResource(pathInContext);
 
         if (resource==null)
             return;

@@ -530,14 +530,14 @@ public class TestHarness
             t.checkEquals(p.pathMatch("/Foo/*","/Foo/"),"/Foo","pathMatch prefix");
             t.checkEquals(p.pathMatch("/Foo/*","/Foo"),"/Foo","pathMatch prefix");
             t.checkEquals(p.pathMatch("*.ext","/Foo/bar.ext"),"/Foo/bar.ext","pathMatch suffix");
-            t.checkEquals(p.pathMatch("/","/Foo/bar.ext"),"","pathMatch default");
+            t.checkEquals(p.pathMatch("/","/Foo/bar.ext"),"/Foo/bar.ext","pathMatch default");
             
             t.checkEquals(p.pathInfo("/Foo/bar","/Foo/bar"),null,"pathInfo exact");
             t.checkEquals(p.pathInfo("/Foo/*","/Foo/bar"),"/bar","pathInfo prefix");
             t.checkEquals(p.pathInfo("/Foo/*","/Foo/"),"/","pathInfo prefix");
             t.checkEquals(p.pathInfo("/Foo/*","/Foo"),null,"pathInfo prefix");
             t.checkEquals(p.pathInfo("*.ext","/Foo/bar.ext"),null,"pathInfo suffix");
-            t.checkEquals(p.pathInfo("/","/Foo/bar.ext"),"/Foo/bar.ext","pathInfo default");
+            t.checkEquals(p.pathInfo("/","/Foo/bar.ext"),null,"pathInfo default");
             t.checkEquals(p.getMatch("/XXX").getValue(),"9",
                           "multi paths");
             t.checkEquals(p.getMatch("/YYY").getValue(),"9",

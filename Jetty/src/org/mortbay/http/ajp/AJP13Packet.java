@@ -255,7 +255,7 @@ public class AJP13Packet
     
     /* ------------------------------------------------------------ */
     public int getBytes(byte[] buf,int offset,int length)
-    {
+    {   
         if (length>unconsumedData())
             length=unconsumedData();
         System.arraycopy(_buf,_pos,buf,offset,length);

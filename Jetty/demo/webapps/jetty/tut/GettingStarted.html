@@ -340,9 +340,10 @@ don't   forget to kill  it first):<br>
           &nbsp;<font face="Courier New, Courier, monospace"> CLASSPATH=\<br>
           &nbsp;&nbsp;&nbsp; $JETTY_HOME/lib/org.mortbay.jetty.jar:\<br>
           &nbsp;&nbsp;&nbsp; $JETTY_HOME/lib/javax.servlet.jar:\<br>
-          &nbsp;&nbsp;&nbsp; $JETTY_HOME/lib/javax.xml.jaxp.jar:\<br>
-          &nbsp;&nbsp;&nbsp; $JETTY_HOME/lib/org.apache.jasper.jar:\<br>
-          &nbsp;&nbsp;&nbsp; $JETTY_HOME/lib/org.apache.crimson.jar</font><br>
+          &nbsp;&nbsp;&nbsp; $JETTY_HOME/ext/javax.xml.jaxp.jar:\<br>
+          &nbsp;&nbsp;&nbsp; $JETTY_HOME/ext/jasper-runtime.jar:\<br>
+          &nbsp;&nbsp;&nbsp; $JETTY_HOME/ext/jasper-compiler.jar:\<br>
+          &nbsp;&nbsp;&nbsp; $JETTY_HOME/ext/crimson.jar</font><br>
           <br>
           To use SSL you will also need to add the the jar below, which is
  a  merge   of the jsse, jnet and jcert jars from the JSSE package 
@@ -354,7 +355,10 @@ don't   forget to kill  it first):<br>
                                                                         
                                                 
                                             <blockquote><font face="Courier New, Courier, monospace">
-         $JETTY_HOME/lib/com.sun.net.ssl.jar</font><br>
+         $JETTY_HOME/ext/jnet.jar<br>
+         $JETTY_HOME/ext/jcert.jar<br>
+         $JETTY_HOME/ext/jsse.jar<br>
+</font>
                                                        </blockquote>
           <br>
          To run JSP with the JDK compiler, you will also need to add the

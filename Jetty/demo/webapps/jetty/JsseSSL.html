@@ -4,7 +4,7 @@
 The Jetty demo can be run with a packaged keystore by following these steps:
 <ol>
   <li>Edit the etc/demo.xml file to uncomment the SSL listener.
-  <li>Make sure that lib/com.sun.net.ssl.jar is in your CLASSPATH.
+  <li>Make sure that your CLASSPATH contains jnet.jar, jcert.jar and jsse.jar
   <li>Run the demo with:<PRE>
       java org.mortbay.jetty.Server etc/demo.xml
       </PRE>

@@ -114,6 +114,21 @@ public class Default extends HttpServlet
             return Integer.parseInt(value);
         return -1;
     }
+
+    /* ------------------------------------------------------------ */
+    /** get Resource to serve.
+     * Map a path to a resource. The default implementation calls
+     * HttpContext.getResource but derived servlets may provide
+     * their own mapping.
+     * @param pathInContext The path to find a resource for.
+     * @return The resource to serve.
+     */
+    protected Resource getResource(String pathInContext)
+        throws IOException
+    {
+        return _httpContext.getResource(pathInContext);
+    }
+    
     
     /* ------------------------------------------------------------ */
     protected void service(HttpServletRequest request, HttpServletResponse response)
@@ -121,10 +136,12 @@ public class Default extends HttpServlet
     {
         String pathInContext=(String)request.getAttribute(Dispatcher.__PATH_INFO);
         if (pathInContext==null)
+            pathInContext=request.getServletPath();
+        if (pathInContext==null || pathInContext.length()==0)
             pathInContext=request.getPathInfo();
         
         boolean endsWithSlash= pathInContext.endsWith("/");
-        Resource resource=_httpContext.getResource(pathInContext);
+        Resource resource=getResource(pathInContext);
         String method=request.getMethod();
 
         // Is the method allowed?        

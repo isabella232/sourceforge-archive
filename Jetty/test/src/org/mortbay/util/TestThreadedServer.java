@@ -108,7 +108,6 @@ public class TestThreadedServer extends junit.framework.TestCase
             setMinThreads(2);
             setMaxThreads(4);
             setMaxIdleTimeMs(5000);
-            setMaxReadTimeMs(60000);
         }
         
         /* -------------------------------------------------------- */
