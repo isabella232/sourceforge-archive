@@ -45,6 +45,7 @@ import org.mortbay.http.HttpOnlyCookie;
 import org.mortbay.http.UserRealm;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
+import org.mortbay.util.TypeUtil;
 
 
 /* ------------------------------------------------------------ */
@@ -86,7 +87,7 @@ public abstract class AbstractSessionManager implements SessionManager
     protected int _maxSessions = 0;
     protected boolean _secureCookies=false;
     protected boolean _httpOnly=false;
-    protected Set _allIDs;
+    protected static Map _allIDs=new HashMap();  // Map of ID to session count
     
     private transient SessionScavenger _scavenger = null;
     
@@ -126,10 +127,6 @@ public abstract class AbstractSessionManager implements SessionManager
     public void setUseRequestedId(boolean useRequestedId)
     {   
         _useRequestedId = useRequestedId;
-        if (_useRequestedId)
-            _allIDs=new HashSet();
-        else
-            _allIDs=null;
     }
     
     /* ------------------------------------------------------------ */
@@ -184,9 +181,20 @@ public abstract class AbstractSessionManager implements SessionManager
     {
         synchronized(_sessions)
         {
-            String id=_useRequestedId?request.getRequestedSessionId():null;
+            // A requested session ID can only be used if it is in the global map of
+            // ID but not in this contexts map.  Ie it is an ID in use by another context
+            // in this server and thus we are doing a cross context dispatch.
+            if (_useRequestedId)
+            {
+                String requested_id=request.getRequestedSessionId();
+                if (requested_id !=null && 
+                    requested_id!=null && _allIDs.containsKey(requested_id) && !_sessions.containsKey(requested_id))
+                return requested_id;
+            }
             
-            while (id==null || id.length()==0 || _sessions.containsKey(id) || (_allIDs!=null && _allIDs.contains(id)))
+            // pick a new unique ID!
+            String id=null;
+            while (id==null || id.length()==0 || _allIDs.containsKey(id))
             {
                 long r = _random.nextLong();
                 if (r<0)r=-r;
@@ -218,9 +226,10 @@ public abstract class AbstractSessionManager implements SessionManager
         synchronized(_sessions)
         {
             _sessions.put(session.getId(),session);
-            if (_allIDs!=null)
-                _allIDs.add(session.getId());
-            if (_sessions.size () > this._maxSessions)
+            Integer count=(Integer)_allIDs.get(session.getId());
+            count=TypeUtil.newInteger(count==null?1:count.intValue()+1);
+            _allIDs.put(session.getId(), count);
+            if (_sessions.size() > this._maxSessions)
                 this._maxSessions = _sessions.size ();
         }
         
@@ -667,50 +676,57 @@ public abstract class AbstractSessionManager implements SessionManager
         }
         
         /* ------------------------------------------------------------- */
-        public synchronized void invalidate()
-        throws IllegalStateException
+        public synchronized void invalidate() throws IllegalStateException
         {
-            if (_invalid) throw new IllegalStateException();
-            
-            
-            if(_sessionListeners != null)
-            {        
-                HttpSessionEvent event = new HttpSessionEvent(this);
-                for(int i=0;i<_sessionListeners.size();i++)
-                    ((HttpSessionListener)_sessionListeners.get(i)).
-                    sessionDestroyed(event);
-            }
-            
-            if (_values!=null)
+            if (_invalid)
+                throw new IllegalStateException();
+
+            try
             {
-                Iterator iter = _values.keySet().iterator();
-                while (iter.hasNext())
+
+                if (_sessionListeners!=null)
                 {
-                    String key = (String)iter.next();
-                    Object value = _values.get(key);
-                    iter.remove();
-                    unbindValue(key, value);
-                    
-                    if (_sessionAttributeListeners.size()>0)
+                    HttpSessionEvent event=new HttpSessionEvent(this);
+                    for (int i=0; i<_sessionListeners.size(); i++)
+                        ((HttpSessionListener)_sessionListeners.get(i)).sessionDestroyed(event);
+                }
+
+                if (_values!=null)
+                {
+                    Iterator iter=_values.keySet().iterator();
+                    while (iter.hasNext())
                     {
-                        HttpSessionBindingEvent event =
-                            new HttpSessionBindingEvent(this,key,value);
-                        
-                        for(int i=0;i<_sessionAttributeListeners.size();i++)
+                        String key=(String)iter.next();
+                        Object value=_values.get(key);
+                        iter.remove();
+                        unbindValue(key,value);
+
+                        if (_sessionAttributeListeners.size()>0)
                         {
-                            ((HttpSessionAttributeListener)
-                                    _sessionAttributeListeners.get(i))
-                                    .attributeRemoved(event);
+                            HttpSessionBindingEvent event=new HttpSessionBindingEvent(this,key,value);
+
+                            for (int i=0; i<_sessionAttributeListeners.size(); i++)
+                            {
+                                ((HttpSessionAttributeListener)_sessionAttributeListeners.get(i)).attributeRemoved(event);
+                            }
                         }
                     }
                 }
             }
-            
-            synchronized (AbstractSessionManager.this)
+            finally
             {
-                _invalid=true;
-                _sessions.remove(getId());
-            } 
+                synchronized (AbstractSessionManager.this._sessions)
+                {
+                    _invalid=true;
+                    _sessions.remove(getId());
+                    
+                    Integer count=(Integer)_allIDs.get(getId());
+                    if (count.intValue()<=1)
+                        _allIDs.remove(getId());
+                    else
+                        _allIDs.put(getId(),TypeUtil.newInteger(count.intValue()-1));
+                }
+            }
         }
         
         /* ------------------------------------------------------------- */

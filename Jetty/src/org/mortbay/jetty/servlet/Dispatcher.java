@@ -615,16 +615,21 @@ public class Dispatcher implements RequestDispatcher
                 if (_xSession==null)
                 {
                     log.debug("Ctx dispatch session");
-                    
+
+                    getRequestedSessionId();
                     if (_requestedSessionId==null)
-                        _requestedSessionId=super.getSession(true).getId();
+                    {
+                        HttpSession session=super.getSession(false);
+                        if (session!=null)
+                            _requestedSessionId=session.getId();
+                    }
                     _xSession=_servletHandler.getHttpSession(_requestedSessionId);
                     if (create && _xSession==null)
                     {
                         _xSession=_servletHandler.newHttpSession(this);
                         Cookie cookie = _servletHandler.getSessionManager().getSessionCookie(_xSession, isSecure());
                         if (cookie!=null)
-                            _response.addCookie(cookie);
+                            _servletHttpRequest.getHttpRequest().getHttpResponse().addSetCookie(cookie);
                     }
                     
                 }
@@ -633,7 +638,29 @@ public class Dispatcher implements RequestDispatcher
             else
                 return super.getSession(create);
         }
-    
+
+        /* ------------------------------------------------------------ */
+        public boolean isRequestedSessionIdValid()
+        {
+            if (_xContext)
+            {
+                String requestedSessionid = super.getRequestedSessionId();
+                if (requestedSessionid != null)
+                {
+                    HttpSession session = getSession(false);
+                    if (session != null)
+                    {
+                        return ((AbstractSessionManager.Session)session).isValid() && requestedSessionid.equals(session.getId());
+                    }
+            }
+            return false;
+            }
+            else
+            {
+                return super.isRequestedSessionIdValid();
+            }
+        }
+
         /* ------------------------------------------------------------ */
         public HttpSession getSession()
         {
@@ -893,6 +920,12 @@ public class Dispatcher implements RequestDispatcher
         public void setContentType(String contentType)
         {
             if (!_include) super.setContentType(contentType);
+        }
+
+        /* ------------------------------------------------------------ */
+        public void addCookie(Cookie cookie)
+        {
+            if (!_include) super.addCookie(cookie);
         }
     }
 
