@@ -766,8 +766,13 @@ public class WebApplicationContext extends ServletHttpContext
             // There is no class, so look for a jsp file
             jspFile=node.getString("jsp-file",false,true);
             if (jspFile!=null)
-                className="org.apache.jasper.servlet.JspServlet";
-            else
+            {
+                Map.Entry entry = _webAppHandler.getHolderEntry(jspFile);
+                if (entry!=null)
+                    className=((ServletHolder)entry.getValue()).getClassName();
+            }
+
+            if (className==null)
             {
                 Code.warning("Missing servlet-class|jsp-file in "+node);
                 return;

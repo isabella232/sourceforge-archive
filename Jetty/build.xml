@@ -402,7 +402,7 @@ Other targets:
   <target name="javadoc" depends="jars"
    description="Build the javadoc">
     <mkdir dir="${javadoc}"/>
-    <javadoc packagenames="org.mortbay.*,javax.servlet.*,org.apache.jasper.*"
+    <javadoc packagenames="org.mortbay.*,javax.servlet.*"
              sourcepath="${src};${src1.4}"
              destdir="${javadoc}"
              author="true"
