@@ -11,6 +11,7 @@ import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 
 import com.mortbay.Util.Code;
+import com.mortbay.Util.ThreadPool;
 import com.mortbay.Util.LifeCycle;
 
 
@@ -20,32 +21,35 @@ import com.mortbay.Util.LifeCycle;
  * @version $Revision$
  * @author Greg Wilkins (gregw)
  */
-public class LifeCycleMBean extends ModelMBeanImpl
+public class ThreadPoolMBean extends LifeCycleMBean
 {
     /* ------------------------------------------------------------ */
-    public LifeCycleMBean()
+    public ThreadPoolMBean()
         throws MBeanException
     {
         super();
     }
     
     /* ------------------------------------------------------------ */
-    public LifeCycleMBean(LifeCycle object)
+    public ThreadPoolMBean(LifeCycle object)
         throws MBeanException
     {
         super(object);
     }
     
+    
     /* ------------------------------------------------------------ */
     protected void defineManagedResource()
     {
         super.defineManagedResource();
-        defineAttribute("started");
-        defineOperation("start",MBeanOperationInfo.ACTION);
-        defineOperation("stop",MBeanOperationInfo.ACTION);
-        defineOperation("destroy",MBeanOperationInfo.ACTION);
+        if (getManagedResource() instanceof ThreadPool)
+        {
+            defineAttribute("name");
+            defineAttribute("threadClass");
+            defineAttribute("threads");
+            defineAttribute("minThreads");
+            defineAttribute("maxThreads");
+            defineAttribute("maxIdleTimeMs");
+        }
     }    
 }
-
-
-

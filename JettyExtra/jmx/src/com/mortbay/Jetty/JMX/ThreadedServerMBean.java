@@ -11,8 +11,9 @@ import javax.management.modelmbean.ModelMBeanAttributeInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 
 import com.mortbay.Util.Code;
+import com.mortbay.Util.ThreadPool;
+import com.mortbay.Util.ThreadedServer;
 import com.mortbay.Util.LifeCycle;
-
 
 /* ------------------------------------------------------------ */
 /** 
@@ -20,17 +21,17 @@ import com.mortbay.Util.LifeCycle;
  * @version $Revision$
  * @author Greg Wilkins (gregw)
  */
-public class LifeCycleMBean extends ModelMBeanImpl
+public class ThreadedServerMBean extends ThreadPoolMBean
 {
     /* ------------------------------------------------------------ */
-    public LifeCycleMBean()
+    public ThreadedServerMBean()
         throws MBeanException
     {
         super();
     }
     
     /* ------------------------------------------------------------ */
-    public LifeCycleMBean(LifeCycle object)
+    public ThreadedServerMBean(LifeCycle object)
         throws MBeanException
     {
         super(object);
@@ -40,12 +41,13 @@ public class LifeCycleMBean extends ModelMBeanImpl
     protected void defineManagedResource()
     {
         super.defineManagedResource();
-        defineAttribute("started");
-        defineOperation("start",MBeanOperationInfo.ACTION);
-        defineOperation("stop",MBeanOperationInfo.ACTION);
-        defineOperation("destroy",MBeanOperationInfo.ACTION);
+
+        if (getManagedResource() instanceof ThreadedServer)
+        {
+            defineAttribute("host");
+            defineAttribute("port");
+            defineAttribute("maxReadTimeMs");
+            defineAttribute("lingerTimeSecs");
+        }
     }    
 }
-
-
-

@@ -37,13 +37,14 @@ all         - everything
   <property name="jetty.jar"      value="${jetty.lib}/com.mortbay.jetty.jar"/>
   <property name="servlet.jar"    value="${jetty.lib}/javax.servlet.jar"/>
   <property name="jasper.jar"     value="${jetty.lib}/org.apache.jasper.jar"/>
-  <property name="xml.jar"        value="${jetty.lib}/com.microstar.xml.jar"/>
+  <property name="jaxp.jar"       value="${jetty.lib}/javax.xml.jaxp.jar"/>
+  <property name="xml.jar"        value="${jetty.lib}/org.apache.crimson.jar"/>
   <property name="jsse.jar"       value="${jetty.lib}/com.sun.net.ssl.jar"/>
 
   <property name="jmxri.jar"      value="${lib}/jmxri.jar"/>
   <property name="jmxtools.jar"   value="${lib}/jmxtools.jar"/>
 
-  <property name="classpath"      value="${jasper.jar};${jetty.jar};${xml.jar};${jsse.jar};${servlet.jar};${jmxri.jar};${jmxtools.jar}"/>
+  <property name="classpath"      value="${jasper.jar};${jetty.jar};${xml.jar};${jaxp.jar};${jsse.jar};${servlet.jar};${jmxri.jar};${jmxtools.jar}"/>
 
   <target name="prepare">
     <mkdir dir="${javadoc}" />

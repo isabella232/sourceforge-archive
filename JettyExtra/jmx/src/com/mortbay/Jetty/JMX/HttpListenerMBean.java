@@ -23,6 +23,7 @@ import java.beans.beancontext.BeanContextMembershipListener;
 import java.beans.beancontext.BeanContextMembershipEvent;
 
 import java.util.Iterator;
+import com.mortbay.Util.ThreadPool;
 
 /* ------------------------------------------------------------ */
 /** 
@@ -30,7 +31,7 @@ import java.util.Iterator;
  * @version $Revision$
  * @author Greg Wilkins (gregw)
  */
-public class HttpListenerMBean extends LifeCycleMBean
+public class HttpListenerMBean extends ThreadedServerMBean
 {
     private HttpListener _httpListener;
     private HttpServerMBean _httpServerMBean;
@@ -43,7 +44,7 @@ public class HttpListenerMBean extends LifeCycleMBean
     public HttpListenerMBean(HttpServerMBean server,HttpListener listener)
         throws MBeanException, InstanceNotFoundException
     {
-        super(listener);
+        super((ThreadPool)listener);
         _httpServerMBean=server;
         _httpListener=listener;
     }
@@ -52,8 +53,6 @@ public class HttpListenerMBean extends LifeCycleMBean
     protected void defineManagedResource()
     {
         super.defineManagedResource();
-        defineAttribute("host");
-        defineAttribute("port");
         defineAttribute("defaultScheme");
     }
     
