@@ -19,8 +19,8 @@ import org.mortbay.http.HttpVersions;
 import org.mortbay.http.handler.DumpHandler;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.Portable;
-import org.mortbay.io.stream.InputStreamBuffer;
-import org.mortbay.io.stream.OutputStreamBuffer;
+import org.mortbay.io.bio.InputStreamBuffer;
+import org.mortbay.io.bio.OutputStreamBuffer;
 
 /* ------------------------------------------------------------------------------- */
 /**

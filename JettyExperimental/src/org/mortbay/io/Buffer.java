@@ -278,4 +278,6 @@ public interface Buffer
     
     public final static boolean READONLY= true;   
     public final static boolean READWRITE= false;
+    public final static boolean VOLATILE= true;   
+    public final static boolean NONVOLATILE= false;
 }

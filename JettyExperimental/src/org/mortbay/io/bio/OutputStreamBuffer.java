@@ -5,7 +5,7 @@
  * $Id$
  * ============================================== */
 
-package org.mortbay.io.stream;
+package org.mortbay.io.bio;
 
 import java.io.IOException;
 import java.io.OutputStream;

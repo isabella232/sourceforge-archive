@@ -8,7 +8,7 @@ import junit.framework.TestCase;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.stream.InputStreamBuffer;
+import org.mortbay.io.bio.InputStreamBuffer;
 
 /**
  * @author gregw
