@@ -364,4 +364,4 @@ public class InetGateway extends ThreadedServer
             Code.fail(e);
         }
     }
-};
+}

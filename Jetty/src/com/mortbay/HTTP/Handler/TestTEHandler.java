@@ -46,4 +46,4 @@ public class TestTEHandler extends NullHandler
             }
         }
     }
-};
+}

@@ -4,7 +4,7 @@ find . -name '*.java' -print | while read FILE
 do
     printf "%s - " "$FILE"
 
-    sed -e '/^import.*com.sun.java.util.collections/d' \
+    sed -e 's/^import.*com.sun.java.util.collections/import java.util/' \
         -e 's/com.sun.java.util.collections.//g' \
         -e 's/Map\$Entry/Map.Entry/g' \
         $FILE > /tmp/u2c$$

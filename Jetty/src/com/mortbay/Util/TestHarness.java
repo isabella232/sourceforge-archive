@@ -1114,7 +1114,7 @@ public class TestHarness
             Code.debug("Socket ",s);
             return new PrintWriter(new OutputStreamWriter(s.getOutputStream()));
         }    
-    };
+    }
     
     /* ------------------------------------------------------------ */
     static void testThreadedServer()

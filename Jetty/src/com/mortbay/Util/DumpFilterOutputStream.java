@@ -35,7 +35,7 @@ public class DumpFilterOutputStream extends SummaryFilterOutputStream
         super(out,name,0);
     }
 
-};
+}
 
 
 

@@ -206,14 +206,15 @@ public class PropertyTree extends Properties
     public Enumeration elements()
     {
         final Enumeration keys=keys();
-        return new Enumeration(){
+        return new Enumeration()
+	{
             public boolean hasMoreElements(){
                 return keys.hasMoreElements();
             }
             public Object nextElement(){
                 return get(keys.nextElement());
             }
-        };      
+	};
     }
     
     

@@ -111,7 +111,7 @@ public class SummaryFilterOutputStream extends FilterOutputStream
             System.err.println(buf.toString());
         }
     }
-};
+}
 
 
 

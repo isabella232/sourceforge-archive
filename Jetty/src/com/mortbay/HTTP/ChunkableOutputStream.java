@@ -130,6 +130,7 @@ public class ChunkableOutputStream extends FilterOutputStream
         
         _rawWriter.flush();
         _rawWriterBuffer.writeTo(_realOut);
+	
         if (Code.verbose(100))
             Code.debug("RAW WRITE:\n",_rawWriterBuffer.toString());
         _rawWriterBuffer.reset();
@@ -296,11 +297,13 @@ public class ChunkableOutputStream extends FilterOutputStream
         // send last chunk and revert to normal output
         Writer writer = getRawWriter();
         writer.write(__CHUNK_EOF);
+	
         if (_trailer!=null)
             _trailer.write(writer);
         else
             writer.write(__CRLF);
         writeRawWriter();
+	_realOut.flush();
         _chunking=false;
         resetStream();
         notify(OutputObserver.__CLOSED);
