@@ -210,9 +210,18 @@ public abstract class Element
 	if (value!=null)
 	{
 	    if (value instanceof String && ((String)value).indexOf('"')!=-1)
-		attributeMap.put(attribute,value);
-	    else
-		attributeMap.put(attribute,"\""+value+'"');
+	    {
+		String s=(String)value;
+		int q=0;
+		while((q=s.indexOf('"',q))>=0)
+		{
+		    s=s.substring(0,q)+"&quot;"+s.substring(++q);
+		    q+=6;
+		}
+		value=s;
+	    }
+	    
+	    attributeMap.put(attribute,"\""+value+'"');
 	}
 	return this;
     }

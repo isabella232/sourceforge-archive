@@ -4,6 +4,7 @@ Release 2.2.8 - 15 Sep 1999
   + Removed recursion from TranslationHandler
   + Added disableLog() to turn off logging.
   + Allow default table attributes to be overriden.
+  + Improved quoting in HTML element values
 
 Release 2.2.7 - 9 Sep 1999
   + Reverted semantics of getRequestURI() to return untranslated URI.
