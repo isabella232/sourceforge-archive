@@ -20,7 +20,7 @@ on all Java supported platforms. &nbsp;</font></p>
       <table cellpadding="5" cellspacing="10" align="center" border="0">
 <tbody><tr>
             <td valign="top" width="50%" align="left">
-            <p><img src="file:///home/janb/tmp/open.gif" alt="Open Source://" width="133" height="14" hspace="8" vspace="5"><small><font face="Helvetica, Arial, sans-serif">
+            <p><img src="/jetty/images/open.gif" alt="Open Source://" width="133" height="14" hspace="8" vspace="5"><small><font face="Helvetica, Arial, sans-serif">
 Jetty is released under an <a href="http://www.opensource.org">Open Source</a>
             License, derived from the Artistic License. Full source code is included in
 the release.<b><a
@@ -36,7 +36,49 @@ Source and Free Software</a>.
             </td>
 
             <td valign="top" width="50%" align="left">
-            <p><font face="Helvetica, Arial, sans-serif"><img src="file:///home/janb/tmp/production.gif" alt="Production Proven://" width="190" height="13" hspace="8" vspace="5"></font>
+            <font size="-1"><font face="Helvetica, Arial, sans-serif"><img src="/jetty/images/modular.gif" alt="Modular://" width="94" height="13" hspace="8" vspace="5">
+Jetty request handling is based on collections of abstracted request listeners
+and handlers. All Jetty features are provided by specializations of these
+abstract components.   This allows Jetty's behaviour to be extended and/or
+enhanced by the addition of extra listeners and handlers.
+The associated <a href="http://sourceforge.net/project/showfiles.php?group_id=7322">JettyExtra</a> module contains extensions such as JMX configuration and SASL authentication.</font> 
+</font>
+            </td>
+
+          </tr>
+          <tr>
+
+
+            <td valign="top">
+            <p>
+<a name="EJB"></a><font face="Helvetica, Arial, sans-serif"><img src="/jetty/images/j2ee.gif" alt="J2EE Integration://" width="172" height="14" hspace="8" vspace="5"></font><font face="Helvetica, Arial, sans-serif">
+            </font><font size="-1" face="Helvetica, Arial,
+            sans-serif">
+
+Jetty has been integrated as the web container for the <a href="http://www.jboss.org/">JBoss</a> and <a href="http://www.objectweb.org/jonas/index.html">JOnAS</a> J2EE application servers. Jetty is the default webapp
+container for JBoss, resulting in a complete J2EE solution with
+HTTP, Servlets, JSPs and EJBs all within a single JVM.
+
+
+</font>
+            </p>
+            </td>
+
+            <td valign="top"><font face="Helvetica, Arial, sans-serif"><img src="/jetty/images/small.gif" alt="Efficient://" width="192" height="13" hspace="8" vspace="5"></font>
+            <font size="-1" face="Helvetica, Arial, sans-serif">
+Jetty has been optimized by commercial and experimental use since 1995 and
+a small and efficient server is the result: <ul><li>A HTTP/1.1 server can be configured in a jar file under 300KB.
+  </li><li>Jetty consistently benchmarks as one of the fastest servlet servers.
+  </li><li>Jetty servers scale well to thousands of simultaneous connections
+  </li><li>Server performance degrades gracefully under stress.</li></ul>
+            </font>
+
+
+            </td>
+          </tr>
+          <tr>
+            <td valign="top">
+            <p><font face="Helvetica, Arial, sans-serif"><img src="/jetty/images/production.gif" alt="Production Proven://" width="190" height="13" hspace="8" vspace="5"></font>
 <font size="-1" face="Helvetica, Arial, sans-serif">
 Jetty has been widely used in commercial and open source
 projects and applications, ranging across the full spectrum of runtime environments
@@ -59,53 +101,11 @@ and
 Cisco SESM.</font>
 </font></li>
             </ul>
-            </td>
-
-          </tr>
-          <tr>
-
-
-            <td valign="top">
-            <p>
-<a name="EJB"></a><font face="Helvetica, Arial, sans-serif"><img src="file:///home/janb/tmp/j2ee.gif" alt="J2EE Integration://" width="172" height="14" hspace="8" vspace="5"></font><font face="Helvetica, Arial, sans-serif">
-            </font><font size="-1" face="Helvetica, Arial,
-            sans-serif">
-
-Jetty has been integrated as the web container for the <a href="http://www.jboss.org/">JBoss</a> and <a href="http://www.objectweb.org/jonas/index.html">JOnAS</a> J2EE application servers. Jetty is the default webapp
-container for JBoss, resulting in a complete J2EE solution with
-HTTP, Servlets, JSPs and EJBs all within a single JVM.
-
-
-</font>
-            </p>
-            </td>
-
-            <td valign="top"><font face="Helvetica, Arial, sans-serif"><img src="file:///home/janb/tmp/small.gif" alt="Efficient://" width="192" height="13" hspace="8" vspace="5"></font>
-            <font size="-1" face="Helvetica, Arial, sans-serif">
-Jetty has been optimized by commercial and experimental use since 1995 and
-a small and efficient server is the result: <ul><li>A HTTP/1.1 server can be configured in a jar file under 300KB.
-  </li><li>Jetty consistently benchmarks as one of the fastest servlet servers.
-  </li><li>Jetty servers scale well to thousands of simultaneous connections
-  </li><li>Server performance degrades gracefully under stress.</li></ul>
-            </font>
-
-
-            </td>
-          </tr>
-          <tr>
-            <td valign="top">
-            <font size="-1"><font face="Helvetica, Arial, sans-serif"><img src="file:///home/janb/tmp/modular.gif" alt="Modular://" width="94" height="13" hspace="8" vspace="5">
-Jetty request handling is based on collections of abstracted request listeners
-and handlers. All Jetty features are provided by specializations of these
-abstract components.   This allows Jetty's behaviour to be extended and/or
-enhanced by the addition of extra listeners and handlers.
-The associated <a href="http://sourceforge.net/project/showfiles.php?group_id=7322">JettyExtra</a> module contains extensions such as JMX configuration and SASL authentication.</font> 
-</font>
             
 </td>
             <td valign="top">
             <p>
-            <font face="Helvetica, Arial, sans-serif"><img src="file:///home/janb/tmp/embeddable.gif" alt="Embeddable://" width="132" height="13" hspace="8" vspace="5"></font>
+            <font face="Helvetica, Arial, sans-serif"><img src="/jetty/images/embeddable.gif" alt="Embeddable://" width="132" height="13" hspace="8" vspace="5"></font>
 <font size="-1"><font face="Helvetica, Arial, sans-serif">
 For many applications, HTTP is just another interface protocol. Jetty can
 easily be embedded in such applications and products without adopting a 
@@ -127,7 +127,7 @@ Cisco SESM.
 
             <td valign="top" align="left"><a name="Config"></a>
             
-            <font face="Helvetica, Arial, sans-serif"><img src="file:///home/janb/tmp/configurable.gif" alt="Configurable://" width="137" height="14" hspace="8" vspace="5"></font>  
+            <font face="Helvetica, Arial, sans-serif"><img src="/jetty/images/configurable.gif" alt="Configurable://" width="137" height="14" hspace="8" vspace="5"></font>  
 <font size="-1" face="Helvetica, Arial, sans-serif"> </font><font size="-1" face="Helvetica, Arial, sans-serif">   
 Jetty has been designed to highly configurable and flexible. It can be used
 as a stand-alone server running application servlets or it can be embedded
@@ -143,7 +143,7 @@ provide.  The configuration of a server is controlled by:</font><ul><li><font si
             <td valign="top" width="50%" align="left">
          
             <p>
-            <font face="Helvetica, Arial, sans-serif"><img src="file:///home/janb/tmp/ssl.gif" alt="SSL://" width="50" height="13" hspace="8" vspace="5"></font>
+            <font face="Helvetica, Arial, sans-serif"><img src="/jetty/images/ssl.gif" alt="SSL://" width="50" height="13" hspace="8" vspace="5"></font>
 <font size="-1"><font face="Helvetica, Arial, sans-serif">
 Jetty has a <a href="http://jetty.mortbay.org/jetty/JsseSSL.html">SunJsseListener</a>
 which uses Sun's JSSE reference implementation to provide support for HTTPS.
@@ -163,7 +163,7 @@ implementations.</font>
             <td valign="top" width="50%" align="left">
             
             <p>
-<font size="-1"><font face="Helvetica, Arial, sans-serif"><img src="file:///home/janb/tmp/servlets.gif" alt="Servlets://" width="94" height="13" hspace="8" vspace="5">
+<font size="-1"><font face="Helvetica, Arial, sans-serif"><img src="/jetty/images/servlets.gif" alt="Servlets://" width="94" height="13" hspace="8" vspace="5">
 Jetty supports the javax.servlet. API defined by
             <a href="http://www.javasoft.com/">JavaSoft</a>:
             </font><blockquote><font face="Helvetica, Arial, sans-serif"><i>
@@ -182,7 +182,7 @@ There are versions of Jetty for all versions of the servlet spec.  The latest
 
             <td valign="top" width="50%" align="left">
             <p>
-<font size="-1"><img src="file:///home/janb/tmp/http.gif" alt="http://" width="100" height="13" hspace="8" vspace="5"><font face="Helvetica, Arial, sans-serif">
+<font size="-1"><img src="/jetty/images/http.gif" alt="http://" width="100" height="13" hspace="8" vspace="5"><font face="Helvetica, Arial, sans-serif">
 Jetty supports the HTTP/1.0 and HTTP/1.1 protocols. The 1.1 protocol offers
 much greater network performance.  Furthermore, as the HTTP server and the
 Servlet container and in the same JVM, this gives simpler configuration, 
@@ -192,7 +192,8 @@ within servlets.</font>
             <br>
             </p>
             <p>
-<font size="-1"><font face="Helvetica, Arial, sans-serif"><img vspace="5" hspace="8" height="13" width="50" alt="JSP://" src="file:///home/janb/tmp/jsp.gif">
+<font size="-1"><font face="Helvetica, Arial, sans-serif"><img vspace="5" hspace="8" height="13" width="50" alt="JSP://"
+src="/jetty/images/jsp.gif">
 Jetty includes a JSP package, which implements Java Server Pages, a method
 for adding dynamic content to HTML pages. Currently this is the Jasper JSP
 engine from Apache.</font>
