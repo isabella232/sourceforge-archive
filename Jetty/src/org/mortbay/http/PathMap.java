@@ -50,9 +50,15 @@ import org.mortbay.util.StringMap;
  */
 public class PathMap extends HashMap implements Externalizable
 {
+    
     /* ------------------------------------------------------------ */
-    private static String __pathSpecSeparators = System.getProperty("org.mortbay.http.PathMap.separators",":,");
+    private static String __pathSpecSeparators =
+        System.getProperty("org.mortbay.http.PathMap.separators",":,");
 
+    /* ------------------------------------------------------------ */
+    public static boolean __oldDefaultPath = 
+        Boolean.getBoolean("org.mortbay.http.PathMap.oldDefaultPath");
+    
     /* ------------------------------------------------------------ */
     /** Set the path spec separator.
      * Multiple path specification may be included in a single string
@@ -378,7 +384,7 @@ public class PathMap extends HashMap implements Externalizable
         if (c=='/')
         {
             if (pathSpec.length()==1)
-                return "";
+                return __oldDefaultPath?"":path;
         
             if (pathSpec.equals(path))
                 return path;
@@ -410,7 +416,7 @@ public class PathMap extends HashMap implements Externalizable
         if (c=='/')
         {
             if (pathSpec.length()==1)
-                return path;
+                return __oldDefaultPath?path:null;
             
             if (pathSpec.equals(path))
                 return null;
