@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Updated mini.http.jar target
  + CGI Servlet, pass all HTTP headers through.
  + CGI Servlet, catch and report program invocation failure status.
  + CGI Servlet, fixed suffix mapping problem.

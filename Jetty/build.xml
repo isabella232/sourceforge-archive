@@ -30,6 +30,10 @@ Other targets:
 
 -->
 <project name="Jetty HTTP Server" default="webapps" basedir=".">
+
+  <property name="RELEASE.MAJOR"  value="4.1" />
+  <property name="RELEASE.MAJOR.MINOR"  value="4.1.B1" />
+
   <property environment="env"/>
   <property name="src"            value="${basedir}/src" />
   <property name="src1.4"         value="${basedir}/src1.4" />
@@ -63,7 +67,7 @@ Other targets:
   <property name="jetty.jar"       value="${lib}/org.mortbay.jetty-jdk1.2.jar"/>
   <property name="jetty1.4.jar"    value="${lib}/org.mortbay.jetty.jar"/>
   <property name="mortbay.jmx.jar" value="${lib}/org.mortbay.jmx.jar"/>
-  <property name="mini.http.jar"   value="${basedir}/org.mortbay.http.jar"/>
+  <property name="mini.http.jar"   value="${lib}/org.mortbay.http.jar"/>
   <property name="servlet.jar"     value="${lib}/javax.servlet.jar"/>
   <property name="jasper.jar"      value="${lib}/org.apache.jasper.jar"/>
 
@@ -183,7 +187,6 @@ Other targets:
    description="Compile the java classes" >
     <copy todir="${classes}">
       <fileset dir="${src}">
-        <include name="**/defaultManifest.mf" />
         <include name="**/*.properties" />
         <include name="**/*.dtd" />
         <include name="**/*.xml" />
@@ -227,6 +230,20 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
+  <target name="manifest" depends="classes">
+    <copy todir="${classes}">
+      <fileset dir="${src}">
+        <include name="**/MANIFEST.MF" />
+      </fileset>
+    </copy>
+    <replace dir="${classes}">
+      <include name="**/MANIFEST.MF" />
+      <replacefilter token="RELEASE_MAJOR_MINOR" value="${RELEASE.MAJOR.MINOR}" />
+      <replacefilter token="RELEASE_MAJOR" value="${RELEASE.MAJOR}" />
+    </replace>
+  </target>
+
+  <!-- ==================================================================== -->
   <target name="servlet.jar" depends="classes">
     <jar jarfile="${servlet.jar}" basedir="${classes}" >
        <include name="javax/servlet/**" />
@@ -234,22 +251,24 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
-  <target name="jetty.jar" depends="classes,servlet.jar">
+  <target name="jetty.jar" depends="classes,servlet.jar,manifest">
     <jar jarfile="${jetty.jar}" basedir="${classes}" 
-     manifest="${src}/org/mortbay/jetty/MANIFEST.MF" >
+     manifest="${classes}/org/mortbay/jetty/MANIFEST.MF" >
        <include name="org/mortbay/**"  />
        <include name="org/jboss/**"  />
        <exclude name="**/jmx/**" />
+       <exclude name="**/MANIFEST.MF" />
     </jar>
   </target>
 
   <!-- ==================================================================== -->
-  <target name="jetty1.4.jar" depends="classes1.4,servlet.jar" if="jdk1.4.available">
+  <target name="jetty1.4.jar" depends="classes1.4,servlet.jar,manifest" if="jdk1.4.available">
     <jar jarfile="${jetty1.4.jar}" 
-     manifest="${src}/org/mortbay/jetty/MANIFEST.MF">
+     manifest="${classes}/org/mortbay/jetty/MANIFEST.MF">
        <fileset dir="${classes}">
          <include name="org/mortbay/**"/>
          <exclude name="**/jmx/**" />
+         <exclude name="**/MANIFEST.MF" />
        </fileset>
        <fileset dir="${classes1.4}">
          <include name="org/mortbay/**"/>
@@ -260,10 +279,10 @@ Other targets:
 
 
   <!-- ==================================================================== -->
-  <target name="mortbay.jmx.jar" depends="classes">
+  <target name="mortbay.jmx.jar" depends="classes,manifest">
     <copy file="${src}/org/mortbay/jetty/jmx/demo.mlet" tofile="${etc}/demo.mlet" />
     <jar jarfile="${mortbay.jmx.jar}"
-     manifest="${src}/org/mortbay/util/jmx/MANIFEST.MF">
+     manifest="${classes}/org/mortbay/util/jmx/MANIFEST.MF">
        <fileset dir="${classes}">
          <include name="org/mortbay/**/jmx/**"/>
        </fileset>
@@ -271,16 +290,27 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
-  <target name="mini.http.jar" depends="classes,servlet.jar">
-    <jar jarfile="${mini.http.jar}" basedir="${classes}" manifest="${src}/org/mortbay/MANIFEST.MF" compress="true">
-       <include name="org/mortbay/util/**" />
-       <include name="org/mortbay/http/**" />
+  <target name="mini.http.jar" depends="classes,manifest"
+     description="Builds minimal dynmaic http server">
+    <jar jarfile="${mini.http.jar}" basedir="${classes}" 
+     manifest="${classes}/org/mortbay/http/MANIFEST.MF"
+     compress="true">
+       <include name="org/mortbay/util/*" />
+       <include name="org/mortbay/http/*" />
+       <include name="org/mortbay/http/handler/ResourceHandler.class" />
+       <include name="org/mortbay/http/handler/DumpHandler.class" />
+       <include name="org/mortbay/http/handler/NullHandler.class" />
+       <include name="org/mortbay/http/handler/NotFoundHandler.class" />
        <include name="javax/servlet/http/Cookie.class" />
        <include name="javax/servlet/http/LocalStrings*.properties" />
-       <exclude name="org/mortbay/http/JsseListener.class" />
-       <exclude name="org/mortbay/http/SunJsseListener.class" />
+       <exclude name="org/mortbay/http/*JsseListener*.class" />
+       <exclude name="org/mortbay/http/RedirectListener.class" />
        <exclude name="org/mortbay/util/Converter" />
        <exclude name="org/mortbay/util/KeyPairTool.class" />
+       <exclude name="org/mortbay/util/TestCase.class" />
+       <exclude name="**/MANIFEST.MF" />
+       <exclude name="**/jmx" />
+       <exclude name="**/ajp" />
     </jar>
   </target>
 

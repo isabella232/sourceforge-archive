@@ -119,7 +119,7 @@ will need to read some more and setup the environment.
 
 
 
-Slow Start
+Environment
 ===========
 
 If you are using jdk1.4, you should use the path (or non-unix equivalent):
@@ -285,6 +285,21 @@ classes.
 
 The SocketChannelListener class uses non blocking IO for idle connections to
 greatly reduce the threads needed by Jetty.
+
+Minimal HTTP jar
+----------------
+A minimal HTTP server can be built with the ant target mini.http.jar.
+This builds the lib/org.mortbay.http.jar file which contains:
+  + Full HTTP/1.1 server
+  + Basic Authentication support
+  + ResourceHandler with cache and range support.
+  + DumpHandler as dynamic content demo.
+  + NCSA request log
+  + javax.servlet.http.Cookie support.
+
+The mini server can be run with
+
+  java -jar lib/org.mortbay.http.jar
 
 
 JettyExtra

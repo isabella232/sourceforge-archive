@@ -1140,9 +1140,11 @@ public class HttpServer implements LifeCycle
             System.err.println
                 ("\nUsage - java org.mortbay.http.HttpServer [[<addr>:]<port> .. ]");
             System.err.println
-                ("\n  Serves files from 'docroot' directory");
+                ("  Serves files from '.' directory");
             System.err.println
-                ("\n  Default port is 8080");
+                ("  Dump handler for not found requests");
+            System.err.println
+                ("  Default port is 8080");
             System.exit(1);
         }
         
@@ -1153,9 +1155,10 @@ public class HttpServer implements LifeCycle
             // Default is no virtual host
             String host=null;
             HttpContext context = server.getContext(host,"/");
-            context.setResourceBase("docroot/");
+            context.setResourceBase(".");
             context.addHandler(new ResourceHandler());
             context.addHandler(new DumpHandler());
+            context.addHandler(new NotFoundHandler());
             
             // Parse arguments
             for (int i=0;i<args.length;i++)
