@@ -304,6 +304,8 @@ public class ServletHolder extends Holder
         }
         catch(UnavailableException e)
         {
+            _servlet=null;
+            _config=null;
             _unavailableEx=e;
             _unavailable=-1;
             if (_unavailableEx.getUnavailableSeconds()>0)
@@ -313,6 +315,8 @@ public class ServletHolder extends Holder
         }
         catch(Exception e)
         {
+            _servlet=null;
+            _config=null;
             Code.warning(e);
             throw new UnavailableException(_servlet,e.toString());
         }    
