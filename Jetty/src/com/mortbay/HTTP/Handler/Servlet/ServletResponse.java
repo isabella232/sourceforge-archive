@@ -84,7 +84,7 @@ public class ServletResponse implements HttpServletResponse
         __charSetMap.put("tr", "ISO-8859-9");
         __charSetMap.put("uk", "ISO-8859-5");
         __charSetMap.put("zh", "GB2312");
-        __charSetMap.put("zh_TW", "Big5");   
+        __charSetMap.put("zh_TW", "Big5");    
     }
     
     
@@ -194,10 +194,8 @@ public class ServletResponse implements HttpServletResponse
      * before a call to {@link #getWriter}.  By default, the response locale
      * is the default locale for the server.
      * 
-     * @param loc  the locale of the response
-     *
-     * @see 		#getLocale
-     *
+     * @see   #getLocale
+     * @param loc the locale of the response
      */
     public void setLocale(Locale locale)
     {
@@ -207,16 +205,36 @@ public class ServletResponse implements HttpServletResponse
         _locale = locale;
         String lang = locale.getLanguage();
         setHeader(HttpFields.__ContentLanguage, lang);
-
+                          
+        /* get current MIME type from Content-Type header */                  
         String type=_httpResponse.getField(HttpFields.__ContentType);
-        if (type==null)
+        if (type==null) { /* servlet did not set Content-Type yet */
+            /* so lets assume default one */
             type="application/octet-stream";
-        int semi = type.indexOf(";");if (semi != -1)
-            type = type.substring(0, semi);
-        
-        String charset = (String)__charSetMap.get(lang);
-        if (charset != null)
-            type = type + "; charset=" + charset;
+        }
+        /* If there is already charset parameter in content-type,
+           we will leave it alone as it is already correct.
+           This allows for both setContentType() and setLocale() to be called.
+           It makes some sense for text/* MIME types to try to guess output encoding 
+           based on language code from locale when charset parameter is not present.
+           Guessing is not a problem because when encoding matters, setContentType()
+           should be called with charset parameter in MIME type.
+           
+           JH: I think guessing should be exterminated as it makes no sense.
+        */
+        if (type.startsWith("text/") && (type.indexOf(" charset=") == -1)) {
+            /* pick up encoding from map based on languge code */
+            String charset = (String)__charSetMap.get(lang);
+            if (charset != null) {
+                /* we have some guess */
+                if (type.indexOf(";")==-1) {
+                    /* there were no parameters */
+                    type = type+"; charset="+charset;
+                } else {
+                    /* there may already be some parameters, lets put it at the end */
+                    type = type+" charset="+charset;
+        }   }   }        
+        /* lets put updated MIME type back */
         setHeader(HttpFields.__ContentType,type);
     }
 
@@ -436,16 +454,30 @@ public class ServletResponse implements HttpServletResponse
     }
 
     /* ------------------------------------------------------------ */
-    public synchronized PrintWriter getWriter() 
+    public synchronized PrintWriter getWriter() throws java.io.IOException 
     {
         if (_outputState!=0 && _outputState!=2)
             throw new IllegalStateException();
+        /* if there is no writer yet */
         if (_writer==null)
-            _writer =
-                new PrintWriter
-                    (new OutputStreamWriter
-                        (_servletRequest.getHttpRequest()
-                         .getOutputStream()));
+        {
+            /* get encoding from Content-Type header */
+            String encoding = getCharacterEncoding();
+            if (encoding==null)
+                // get last resort hardcoded default
+                encoding = "ISO-8859-1"; 
+                
+            /* construct Writer using correct encoding */
+            try
+            {
+                _writer = new PrintWriter(new OutputStreamWriter(_servletRequest.getHttpRequest().getOutputStream(), encoding ));
+            }
+            catch (java.io.UnsupportedEncodingException e)
+            {
+                throw new java.io.IOException("Unsupported character encoding in Content-Type");
+            }
+            
+        }                    
         _outputState=2;
         return _writer;
     }
