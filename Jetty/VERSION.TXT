@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-5.0.RC3 - 27 August
+Jetty-5.0.RC3 - 28 August
  + DIGEST auth handles qop, stale and maxNonceAge.
  + Less verbose warning for non validating xml parser.
  + fixed jaas logout for jetty-jboss
