@@ -22,6 +22,7 @@ import com.mortbay.Util.Log;
 import com.mortbay.Util.LogSink;
 import com.mortbay.Util.WriterLogSink;
 import com.mortbay.Util.LifeCycle;
+import com.mortbay.Util.UrlEncoded;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Collection;
@@ -324,8 +325,6 @@ public class AdminServlet extends HttpServlet
             Code.setDebugPatterns(request.getParameter("P"));
             Code.setDebugTriggers(request.getParameter("T"));
 
-
-
             Log log = Log.instance();
             LogSink[] sinks = log.getLogSinks();
             boolean logStackTrace="on".equals(request.getParameter("LS"));
@@ -372,8 +371,11 @@ public class AdminServlet extends HttpServlet
         String action=lc.isStarted()?"Stop":"Start";
         
         comp.add("&nbsp;[");
-        comp.add(new Link(request.getServletPath()+
-                          "?A="+action+"&ID="+id,action));
+        comp.add(new Link(request.getContextPath()+
+                          request.getServletPath()+"/"+
+                          Long.toString(System.currentTimeMillis(),36)+
+                          "?A="+action+"&ID="+UrlEncoded.encodeString(id),
+                          action));
         comp.add("]");
         return comp;
     }

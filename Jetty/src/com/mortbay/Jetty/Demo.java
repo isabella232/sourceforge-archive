@@ -37,27 +37,11 @@ public class Demo
                 new HashUserRealm("Jetty Demo Realm",
                                   "./etc/demoRealm.properties");
             
-            // Admin server
-            HttpServer admin = new HttpServer();
-            admin.addRealm(realm);
-            SocketListener listener = (SocketListener)
-                admin.addListener(new InetAddrPort("127.0.0.1:8888"));
-            listener.setMaxIdleTimeMs(60000);
-            listener.setMaxReadTimeMs(60000);
-            context=admin.addContext(null,"/");
-            context.setRealm("Jetty Demo Realm");
-            context.addSecurityConstraint
-                ("/",
-                 new SecurityConstraint("admin",
-                                        "content-administrator"));
-            context.addServlet("Admin","/","com.mortbay.HTTP.AdminServlet");
-            context.addHandler(new NotFoundHandler());
-            admin.start();
-            
             // Make server
             HttpServer server = new HttpServer();
             server.addRealm(realm);
             
+            SocketListener listener=null;
             if (arg.length==0)
             {
                 listener = (SocketListener)
@@ -130,7 +114,24 @@ public class Demo
             // Start handlers and listener
             server.start();
 
-
+            
+            // Admin server
+            HttpServer admin = new HttpServer();
+            admin.addRealm(realm);
+            listener = (SocketListener)
+                admin.addListener(new InetAddrPort("127.0.0.1:8888"));
+            listener.setMaxIdleTimeMs(60000);
+            listener.setMaxReadTimeMs(60000);
+            context=admin.addContext(null,"/");
+            context.setRealm("Jetty Demo Realm");
+            context.addSecurityConstraint
+                ("/",
+                 new SecurityConstraint("admin",
+                                        "content-administrator"));
+            context.addServlet("Admin","/","com.mortbay.HTTP.AdminServlet");
+            context.addHandler(new NotFoundHandler());
+            admin.start();
+            
             
         }
         catch(Exception e)

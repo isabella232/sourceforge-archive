@@ -562,7 +562,7 @@ public class HttpServer implements LifeCycle
         }	
             
         _logSink=logSink;
-        if (_logSink!=null)
+        if (_logSink!=null && isStarted())
             _logSink.start();
     }
     
