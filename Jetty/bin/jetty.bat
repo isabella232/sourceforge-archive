@@ -18,13 +18,13 @@
 ::
 :: JAVA_HOME - this should be set to the directory that the 
 :: Java Developers Kit or JDK has been installed.
-:: Example: set JAVA_HOME=c:\jdk1.3
+:: Example: set JAVA_HOME=C:\jdk1.3
 ::
 :: JETTY_HOME - this should be set to the base installation directory
 :: where the Jetty server was installed.  The batch file will try to set
 :: this on its own by looking for the jetty.jar file in the lib
 :: subdirectory.
-:: Example: set JETTY_HOME=c:\Jetty-3.1.RC9
+:: Example: set JETTY_HOME=C:\Jetty-3.1.RC9
 ::
 :: JETTY_LOG - (Optional) this should be the full name of the subdirectory
 :: that should be used by Jetty for storing log files.  If it is not 
