@@ -31,7 +31,8 @@ import org.mortbay.util.Resource;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class HashUserRealm extends HashMap
+public class HashUserRealm
+    extends HashMap
     implements UserRealm
 {
     private String _name;
@@ -116,7 +117,7 @@ public class HashUserRealm extends HashMap
     }
     
     /* ------------------------------------------------------------ */
-    public synchronized UserPrincipal getAnonymous()
+    public UserPrincipal getAnonymous()
     {
         return new User();
     }
@@ -140,7 +141,7 @@ public class HashUserRealm extends HashMap
      *                    instance. 
      * @return Old UserPrinciple value or null
      */
-    public Object put(Object name, Object credentials)
+    public synchronized Object put(Object name, Object credentials)
     {
         if (credentials instanceof UserPrincipal)
             return super.put(name.toString(),
@@ -179,7 +180,7 @@ public class HashUserRealm extends HashMap
      * @param roleName 
      * @return True if the user can act in the role.
      */
-    public boolean isUserInRole(UserPrincipal user, String roleName)
+    public synchronized boolean isUserInRole(UserPrincipal user, String roleName)
     {
         if (user==null || ((User)user).getUserRealm()!=this)
             return false;
@@ -229,7 +230,7 @@ public class HashUserRealm extends HashMap
         }
         
         /* -------------------------------------------------------- */
-        public boolean authenticate(String password, HttpRequest request)
+        public synchronized boolean authenticate(String password, HttpRequest request)
         {
             _authed=_pw!=null && _pw.check(password);
             return _authed;
@@ -289,14 +290,14 @@ public class HashUserRealm extends HashMap
             return getName();
         }
         
-        private void pushRole(String role)
+        private synchronized void pushRole(String role)
         {
             if (roles==null)
                 roles=new ArrayList();
             roles.add(role);
         }
         
-        public void popRole(String role)
+        public synchronized void popRole(String role)
         {
             if (roles!=null)
                 roles.remove(role);
