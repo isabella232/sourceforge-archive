@@ -364,6 +364,8 @@ public class LineInput extends FilterInputStream
             byte[] new_buf=new byte[limit];
             System.arraycopy(_buf,_pos,new_buf,_pos,_avail-_pos);
             _buf=new_buf;
+            if (_byteBuffer!=null)
+                _byteBuffer.setBuffer(_buf);
         }
         _mark=_pos;
     }
@@ -632,6 +634,11 @@ public class LineInput extends FilterInputStream
         ByteBuffer(byte[] buffer)
         {
             super(buffer);
+        }
+        
+        void setBuffer(byte[] buffer)
+        {
+            buf=buffer;
         }
         
         void setStream(int offset,int length)
