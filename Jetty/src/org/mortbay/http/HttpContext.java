@@ -956,6 +956,8 @@ public class HttpContext extends ResourceCache
             LogSupport.ignore(log,e);
         }
 
+	System.err.println("WORK="+work);
+
         // No tempdir set so make one!
         try
         {
@@ -977,27 +979,36 @@ public class HttpContext extends ResourceCache
             temp=temp.replace('.','_');
             temp=temp.replace('\\','_');
 
-            _tmpDir=new File(System.getProperty("java.io.tmpdir"),temp);
-            if (_tmpDir.exists())
+            
+            if (work!=null)
+                _tmpDir=new File(work,temp);
+            else
             {
-                if(log.isDebugEnabled())log.debug("Delete existing temp dir "+_tmpDir+" for "+this);
-                if (!IO.delete(_tmpDir))
-                {
-                    if(log.isDebugEnabled())log.debug("Failed to delete temp dir "+_tmpDir);
-                }
+                _tmpDir=new File(System.getProperty("java.io.tmpdir"),temp);
                 
                 if (_tmpDir.exists())
                 {
-                    String old=_tmpDir.toString();
-                    _tmpDir=File.createTempFile(temp+"_","");
+                    if(log.isDebugEnabled())log.debug("Delete existing temp dir "+_tmpDir+" for "+this);
+                    if (!IO.delete(_tmpDir))
+                    {
+                        if(log.isDebugEnabled())log.debug("Failed to delete temp dir "+_tmpDir);
+                    }
+                
                     if (_tmpDir.exists())
-                        _tmpDir.delete();
-                    log.warn("Can't reuse "+old+", using "+_tmpDir);
+                    {
+                        String old=_tmpDir.toString();
+                        _tmpDir=File.createTempFile(temp+"_","");
+                        if (_tmpDir.exists())
+                            _tmpDir.delete();
+                        log.warn("Can't reuse "+old+", using "+_tmpDir);
+                    }
                 }
             }
 
-            _tmpDir.mkdir();
-            _tmpDir.deleteOnExit();
+            if (!_tmpDir.exists())
+                _tmpDir.mkdir();
+            if (work==null)
+                _tmpDir.deleteOnExit();
             if(log.isDebugEnabled())log.debug("Created temp dir "+_tmpDir+" for "+this);
         }
         catch(Exception e)
