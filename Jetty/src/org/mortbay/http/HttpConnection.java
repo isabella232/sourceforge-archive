@@ -554,15 +554,12 @@ public class HttpConnection
             {
               case 1:
                   {
-                      // if forced or (not closed and no length)
-                      if (_listener.getHttpServer().isChunkingForced() ||
-                          (!HttpFields.__Close.equals(_response.getField(HttpFields.__Connection)))&&
+                      // if (not closed and no length)
+                      if ((!HttpFields.__Close.equals(_response.getField(HttpFields.__Connection)))&&
                           (_response.getField(HttpFields.__ContentLength)==null))
                       {
                           // Chunk it!
-                          _response.removeField(HttpFields.__ContentLength);
-                          _response.setField(HttpFields.__TransferEncoding,
-                                         HttpFields.__Chunked);
+                          _response.setField(HttpFields.__TransferEncoding,HttpFields.__Chunked);
                           _outputStream.setChunking();
                       }
                       break;

@@ -78,6 +78,8 @@ public class HttpServerMBean extends LifeCycleMBean
         defineAttribute("version",READ_ONLY,ON_MBEAN);
         defineAttribute("components",READ_ONLY,ON_MBEAN);
         defineAttribute("requestLog");
+        
+        defineAttribute("trace");
 
         
         defineOperation("addListener",new String[]{"java.lang.String"},IMPACT_ACTION);

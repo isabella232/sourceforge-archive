@@ -101,7 +101,7 @@ class BadResource extends URLResource
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return super.toString()+"; BadResource: "+_message;
+        return super.toString()+"; BadResource="+_message;
     }
     
 }

@@ -30,6 +30,7 @@ abstract public class AbstractHttpHandler implements HttpHandler
     private transient HttpContext _context;
     private transient boolean _started=false;
 
+    
     /* ------------------------------------------------------------ */
     public void setName(String name)
     {
@@ -102,16 +103,21 @@ abstract public class AbstractHttpHandler implements HttpHandler
                             HttpResponse response)
         throws IOException
     {
+        boolean trace=getHttpContext().getHttpServer().getTrace();
+        
         // Handle TRACE by returning request header
         response.setField(HttpFields.__ContentType,
                           HttpFields.__MessageHttp);
-        OutputStream out = response.getOutputStream();
-        ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer();
-        writer.write(request.toString());
-        writer.flush();
-        response.setIntField(HttpFields.__ContentLength,writer.size());
-        writer.writeTo(out);
-        out.flush();
+        if (trace)
+        {
+            OutputStream out = response.getOutputStream();
+            ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer();
+            writer.write(request.toString());
+            writer.flush();
+            response.setIntField(HttpFields.__ContentLength,writer.size());
+            writer.writeTo(out);
+            out.flush();
+        }
         request.setHandled(true);
     }
 }
