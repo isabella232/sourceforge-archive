@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-4.2.4rc0
+Jetty-4.2.4rc0 - 12 December 2002
  + Simplified ThreadedServer
  + Use ThreadLocals for ByteArrayPool to avoid synchronization.
  + Use Version to reset HttpFields
