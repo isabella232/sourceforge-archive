@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+Jetty-5.1.1 - 1 December 2004
+
 Jetty-5.1.1RC1 
  + Some minor findbugs code cleanups
  + Made more WebApplicationHandle configuration methods public.
