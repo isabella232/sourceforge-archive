@@ -104,12 +104,12 @@ public abstract class
 	try
 	{
 	  _log.warn("UserTransactions MUST be completed by end of service() method");
-	  _log.warn("Rolling back orphanned transaction on current thread");
+	  _log.warn("Rolling back incomplete transaction on current thread");
 	  _tm.rollback();
 	}
 	catch (Exception e)
 	{
-	  _log.error("could not rollback() orphanned transaction", e);
+	  _log.error("could not rollback incomplete transaction", e);
 	}
       }
 
@@ -120,7 +120,7 @@ public abstract class
       }
       catch (Exception e)
       {
-	_log.error("could not disassociate orphanned transaction from current thread", e);
+	_log.error("could not disassociate transaction context from current thread", e);
       }
 
       garbage=null;
