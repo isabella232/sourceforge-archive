@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
  
- 
+ + Resource gets systemresources from it's own classloader.
  + don't include classes in release.
  + Allow load-on-startup with no content.
  + Fixed RollOverFileLogSink bug with extra log files.  
