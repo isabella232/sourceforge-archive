@@ -515,32 +515,42 @@
           description="Build the distribution archives">
     <mkdir dir="${dist}"/>
     
-    
-    <tar tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-all.tar.gz" 
+    <tar tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}.tar.gz" 
          compression="gzip"
          longfile="gnu">
       <tarfileset 
        dir="${basedir}"
-       prefix="Jetty-${RELEASE.MAJOR.MINOR}/">
-        <exclude name="dist/**"/>
+       prefix="Jetty-${RELEASE.MAJOR.MINOR}/"> 
+        <include name="LICENSE.html"/>
+        <include name="README.TXT"/>
+        <include name="VERSION.TXT"/>
+        <include name="*.jar"/>       
+        <include name="lib/**"/>      
+        <include name="logs"/>         
+        <include name="webapps/**"/>    
+        <include name="etc/LICENSE*"/>   
+        <include name="etc/jetty.xml"/>  
+        <include name="etc/webdefault.xml"/>         
         <exclude name="**/CVS/**"/>
-        <exclude name="**/logs/*.log"/>
       </tarfileset>
     </tar>
-
+    
 
     <tar 
-     tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-ext.tar.gz" 
+     tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-demo.tar.gz" 
      compression="gzip"
      longfile="gnu"
     >
       <tarfileset 
        dir="${basedir}"
-       prefix="Jetty-${RELEASE.MAJOR.MINOR}/">
-        <exclude name="dist/**"/>
+       prefix="Jetty-${RELEASE.MAJOR.MINOR}/">       
+        <include name="ext/**"/>    
+        <include name="demo/**"/>     
+        <include name="etc/**"/> 
+        <exclude name="etc/jetty.xml"/>  
+        <exclude name="etc/webdefault.xml"/>  
         <exclude name="**/CVS/**"/>
         <exclude name="**/logs/*.log"/>
-        <exclude name="**/ext/**"/>
       </tarfileset>
     </tar>
 
@@ -555,6 +565,8 @@
        prefix="Jetty-${RELEASE.MAJOR.MINOR}/">
         <include name="src/**"/>
         <include name="test/**"/>
+        <include name="build.xml"/>
+        <include name="ant.properties"/>
         <exclude name="**/CVS/**"/>
         <exclude name="**/logs/*.log"/>
         <exclude name="**/ext/**"/>
@@ -565,6 +577,21 @@
       </tarfileset>
     </tar>
  
+
+    <tar tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-all.tar.gz" 
+         compression="gzip"
+         longfile="gnu">
+      <tarfileset 
+       dir="${basedir}"
+       prefix="Jetty-${RELEASE.MAJOR.MINOR}/">
+        <exclude name="dist/**"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/logs/*.log"/>
+        <exclude name="testdocs/**"/>
+      </tarfileset>
+    </tar>
+
+
   </target>
 
 

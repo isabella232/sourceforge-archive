@@ -76,7 +76,7 @@ class JarFileResource extends JarResource
         _jarUrl=_urlString.substring(0,sep+2);
         _path=_urlString.substring(sep+2);
         if (_path.length()==0)
-            _path=null;        
+            _path=null;   
         _jarFile=_jarConnection.getJarFile();
         _file=new File(_jarFile.getName());
     }
@@ -90,6 +90,13 @@ class JarFileResource extends JarResource
     {
         if (_exists)
             return true;
+
+        if (_urlString.endsWith("!/"))
+        {
+            String file_url=_urlString.substring(4,_urlString.length()-2);
+            try{return newResource(file_url).exists();}
+            catch(Exception e) {Code.ignore(e); return false;}
+        }
         
         boolean check=checkConnection();
         
@@ -161,8 +168,6 @@ class JarFileResource extends JarResource
         _exists= ( _directory || _entry!=null);
         return _exists;
     }
-    
-
 
     /* ------------------------------------------------------------ */
     /**
@@ -172,7 +177,7 @@ class JarFileResource extends JarResource
      */
     public boolean isDirectory()
     {
-        return exists() && _directory;
+        return _urlString.endsWith("/") || exists() && _directory;
     }
     
     /* ------------------------------------------------------------ */

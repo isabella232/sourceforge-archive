@@ -164,13 +164,13 @@ public class TestResource extends junit.framework.TestCase
         data[i++]=new Data(data[rt],"TestData/",EXISTS,DIR);
         data[i++]=new Data(data[td],"alphabet.txt",EXISTS,!DIR,"ABCDEFGHIJKLMNOPQRSTUVWXYZ");
         
-        data[i++]=new Data("jar:file:/somejar.jar!/content/",!EXISTS,!DIR);
-        data[i++]=new Data("jar:file:/somejar.jar!/",!EXISTS,!DIR);
+        data[i++]=new Data("jar:file:/somejar.jar!/content/",!EXISTS,DIR);
+        data[i++]=new Data("jar:file:/somejar.jar!/",!EXISTS,DIR);
 
         int tj=i;
         data[i++]=new Data("jar:"+__userURL+"TestData/test.zip!/",EXISTS,DIR);
         data[i++]=new Data(data[tj],"Unkown",!EXISTS,!DIR);
-        data[i++]=new Data(data[tj],"/Unkown/",!EXISTS,!DIR);
+        data[i++]=new Data(data[tj],"/Unkown/",!EXISTS,DIR);
         
         data[i++]=new Data(data[tj],"subdir",EXISTS,DIR);
         data[i++]=new Data(data[tj],"/subdir/",EXISTS,DIR);
@@ -196,7 +196,7 @@ public class TestResource extends junit.framework.TestCase
             if (data[i]==null)
                 continue;
 
-            assertEquals(""+i+":"+data[i].test,data[i].dir,data[i].resource.isDirectory());
+            assertEquals(""+i+":"+data[i].test,data[i].exists,data[i].resource.exists());
         }
     }
     

@@ -35,6 +35,7 @@ public class JarResource extends URLResource
     /* ------------------------------------------------------------ */
     protected boolean checkConnection()
     {
+        super.checkConnection();
         try
         {
             if (_jarConnection!=_connection)

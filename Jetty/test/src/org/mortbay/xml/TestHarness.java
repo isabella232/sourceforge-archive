@@ -56,21 +56,13 @@ public class TestHarness
             XmlParser parser = new XmlParser();
 
             
-            Resource config12Resource=Resource.newSystemResource
-                ("org/mortbay/xml/configure_1_2.dtd");    
+            URL config12Resource=
+                XmlConfiguration.class.getResource("org/mortbay/xml/configure_1_2.dtd");    
             
-            parser.redirectEntity
-                ("configure.dtd",config12Resource);   
-            
-            parser.redirectEntity
-                ("configure_1_2.dtd",
-                 config12Resource);
-            parser.redirectEntity
-                ("http://jetty.mortbay.org/configure_1_2.dtd",
-                 config12Resource);
-            parser.redirectEntity
-                ("-//Mort Bay Consulting//DTD Configure 1.2//EN",
-                 config12Resource);
+            parser.redirectEntity("configure.dtd",config12Resource);
+            parser.redirectEntity("configure_1_2.dtd",config12Resource);
+            parser.redirectEntity("http://jetty.mortbay.org/configure_1_2.dtd",config12Resource);
+            parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.2//EN",config12Resource);
             
             String url = __userURL+"TestData/configure.xml";
             XmlParser.Node testDoc = parser.parse(url);
