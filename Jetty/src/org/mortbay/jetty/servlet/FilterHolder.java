@@ -10,6 +10,7 @@ import java.util.Enumeration;
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
+import org.mortbay.util.Code;
 
 /* --------------------------------------------------------------------- */
 /** 
@@ -65,9 +66,7 @@ public class FilterHolder
     /* ---------------------------------------------------------------- */
     public synchronized void destroy()
     {
-        _servletHandler=null;
-        stop();
-        super.destroy();
+        Code.notImplemented();
     }
     
     /* ------------------------------------------------------------ */

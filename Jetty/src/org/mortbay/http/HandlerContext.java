@@ -532,31 +532,6 @@ public class HandlerContext implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
-    /** Set HttpServer Access.
-     * If true then the HttpServer instance is available as a
-     * context attribute "org.mortbay.http.HttpServer".
-     * This should only been done for trusted contexts.
-     * @param access 
-     */
-    public void setHttpServerAccess(boolean access)
-    {
-        _httpServerAccess=access;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Get HttpServer Access.
-     * If true then the HttpServer instance is available as a
-     * context attribute "org.mortbay.http.HttpServer".
-     * This should only been done for trusted contexts.
-     * @return 
-     */
-    public boolean getHttpServerAccess()
-    {
-        return _httpServerAccess;
-    }
-    
-    
-    /* ------------------------------------------------------------ */
     /** Get all handlers.
      * @return 
      */
@@ -1115,17 +1090,10 @@ public class HandlerContext implements LifeCycle
         getMimeMap();
         getEncodingMap();
 
-        if (_httpServerAccess)
-            setAttribute("org.mortbay.http.HttpServer",_httpServer);
-        else
-            removeAttribute("org.mortbay.http.HttpServer");
         
         // setup the context loader
         loadClass(null);
         
-        if (_loader==null)
-        {
-        }
         
         // Start the handlers
         Thread thread = Thread.currentThread();

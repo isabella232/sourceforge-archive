@@ -462,6 +462,8 @@ public class HashSessionManager implements SessionManager
                         
                         if (oldValue==null)
                             l.attributeAdded(event);
+                        else if (value==null)
+                            l.attributeRemoved(event);
                         else
                             l.attributeReplaced(event);
                     }
@@ -473,14 +475,14 @@ public class HashSessionManager implements SessionManager
         public void removeAttribute(String name)
         {
             if (_invalid) throw new IllegalStateException();
-            Object value=_values.remove(name);
-            if (value!=null)
+            Object old=_values.remove(name);
+            if (old!=null)
             {
-                unbindValue(name, value);
+                unbindValue(name, old);
                 if (_sessionAttributeListeners.size()>0)
                 {
                     HttpSessionBindingEvent event =
-                        new HttpSessionBindingEvent(this,name,value);
+                        new HttpSessionBindingEvent(this,name,old);
                     
                     for(int i=0;i<_sessionAttributeListeners.size();i++)
                     {

@@ -180,14 +180,7 @@ public class Holder
     /* ------------------------------------------------------------ */
     public void destroy()
     {
-        _class=null;
-        _servletHandler=null;
-        _name=null;
-        _displayName=null;
-        _className=null;
-        if (_initParams!=null)
-            _initParams.clear();
-        _initParams=null;
+        Code.notImplemented();
     }
     
     /* ------------------------------------------------------------ */

@@ -111,7 +111,6 @@
     <Call name="addHandler">
       <Arg><New class="org.mortbay.http.handler.DumpHandler"/></Arg>
     </Call>
-    <Set name="HttpServerAccess">TRUE</Set>
 
     <Call name="addHandler">
       <Arg type="int">0</Arg>

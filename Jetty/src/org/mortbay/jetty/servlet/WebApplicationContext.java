@@ -382,7 +382,7 @@ public class WebApplicationContext extends ServletHandlerContext
         super.start();
 
         // Context listeners
-        if (_contextListeners!=null)
+        if (_contextListeners!=null && _servletHandler!=null)
         {
             ServletContextEvent event = new ServletContextEvent(_servletHandler.getServletContext());
             for (int i=0;i<_contextListeners.size();i++)
@@ -404,35 +404,23 @@ public class WebApplicationContext extends ServletHandlerContext
             for (int i=0;i<_filters.size();i++)
                 ((FilterHolder)_filters.get(i)).stop();
 
-        ServletContextEvent event = new ServletContextEvent(_servletHandler.getServletContext());
-        super.stop();
         // Context listeners
-        if (_contextListeners!=null)
+        if (_contextListeners!=null && _servletHandler!=null)
         {
+            ServletContextEvent event = new ServletContextEvent(_servletHandler.getServletContext());
+            super.stop();
             for (int i=0;i<_contextListeners.size();i++)
                 ((ServletContextListener)_contextListeners.get(i))
                     .contextDestroyed(event);
         }
+        else
+            super.stop();
     }
     
     /* ------------------------------------------------------------ */
     public void destroy()
     {
-        if (_filters!=null)
-            for (int i=0;i<_filters.size();i++)
-                ((FilterHolder)_filters.get(i)).destroy();
-
-        ServletContextEvent event = new ServletContextEvent(_servletHandler.getServletContext());
-        super.destroy();
-        // Context listeners
-        if (_contextListeners!=null)
-        {
-            for (int i=0;i<_contextListeners.size();i++)
-                ((ServletContextListener)_contextListeners.get(i))
-                    .contextDestroyed(event);
-            _contextListeners.clear();
-            _contextListeners=null;
-        }
+        Code.notImplemented();
     }
 
     /* ------------------------------------------------------------ */
@@ -478,9 +466,24 @@ public class WebApplicationContext extends ServletHandlerContext
         Object old = super.getAttribute(name);
         super.setAttribute(name,value);
 
-        if (_contextAttributeListeners!=null)
+        if (_contextAttributeListeners!=null && _servletHandler!=null)
         {
-            
+            ServletContextAttributeEvent event =
+                new ServletContextAttributeEvent(_servletHandler.getServletContext(),
+                                                 name,
+                                                 old!=null?old:value);
+            for (int i=0;i<_contextAttributeListeners.size();i++)
+            {
+                ServletContextAttributeListener l =
+                    (ServletContextAttributeListener)
+                    _contextAttributeListeners.get(i);
+                if (old==null)
+                    l.attributeAdded(event);
+                else if (value==null)
+                    l.attributeRemoved(event);
+                else
+                    l.attributeReplaced(event);    
+            }
         }
     }
     
@@ -490,6 +493,20 @@ public class WebApplicationContext extends ServletHandlerContext
     {
         Object old = super.getAttribute(name);
         super.removeAttribute(name);
+        
+        if (old !=null && _contextAttributeListeners!=null && _servletHandler!=null)
+        {
+            ServletContextAttributeEvent event =
+                new ServletContextAttributeEvent(_servletHandler.getServletContext(),
+                                                 name,old);
+            for (int i=0;i<_contextAttributeListeners.size();i++)
+            {
+                ServletContextAttributeListener l =
+                    (ServletContextAttributeListener)
+                    _contextAttributeListeners.get(i);
+                l.attributeReplaced(event);    
+            }
+        }
     }
     
     /* ------------------------------------------------------------ */

@@ -220,11 +220,7 @@ public class ServletHolder extends Holder
     /* ---------------------------------------------------------------- */
     public synchronized void destroy()
     {
-        stop();
-        if (_roleMap!=null)
-            _roleMap.clear();
-        _roleMap=null;
-        super.destroy();
+        Code.notImplemented();
     }
 
 
