@@ -12,9 +12,11 @@
   <!-- =============================================================== -->
   <!-- Configure the Debugger                                          -->
   <!-- =============================================================== -->
-  <Set name="Debug" class="org.mortbay.util.Code" type="boolean">false</Set>
-  <Set name="Verbose" class="org.mortbay.util.Code" type="int">0</Set>
-  <Set name="DebugPatterns" class="org.mortbay.util.Code" type="String"></Set>
+  <!--
+    <Set name="Debug" class="org.mortbay.util.Code" type="boolean">false</Set>
+    <Set name="Verbose" class="org.mortbay.util.Code" type="int">0</Set>
+    <Set name="DebugPatterns" class="org.mortbay.util.Code" type="String"></Set>
+  -->
 
   <!-- =============================================================== -->
   <!-- Configure the Logger                                            -->
@@ -140,7 +142,6 @@
     </Arg>
   </Call>
   -->
-
 
 
 
@@ -271,7 +272,9 @@
       <Arg>Common Gateway Interface</Arg>
       <Arg>/</Arg>
       <Arg>org.mortbay.servlet.CGI</Arg>
-     <Put name="Path">/bin:/usr/bin:/usr/local/bin</Put>
+      <!-- Set initParams for CGI -->
+      <Put name="Path">/bin:/usr/bin:/usr/local/bin</Put>
+      <!-- <Put name="commandPrefix">perl</Put> -->
     </Call>
   </Call>
 
