@@ -22,20 +22,26 @@ public class
   LocalState
   implements State
 {
-  protected final String _id;
+  protected String _id;
 
-  protected   long   _creationTime     =System.currentTimeMillis();
-  protected   long   _lastAccessedTime =_creationTime;
-  protected   Map    _attributes       =new HashMap();
+  protected long   _creationTime     =System.currentTimeMillis();
+  protected long   _lastAccessedTime =_creationTime;
+  protected Map    _attributes       =new HashMap();
 
-  protected   int    _maxInactiveInterval;
+  protected int    _maxInactiveInterval;
 
   public
     LocalState(String id, int maxInactiveInterval)
-  {
-    _id=id;
-    _maxInactiveInterval=maxInactiveInterval;
-  }
+    {
+      _id=id;
+      _maxInactiveInterval=maxInactiveInterval;
+    }
+
+  protected
+    LocalState()
+    {
+      // for deserialisation only
+    }
 
   public long        getCreationTime()                       {return _creationTime;}
   public String      getId()                                 {return _id;}

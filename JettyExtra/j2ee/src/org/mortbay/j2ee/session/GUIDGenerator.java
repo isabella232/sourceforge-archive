@@ -29,7 +29,7 @@ public class
      Generate a session-id that is not guessable
      @return generated session-id
   */
-  protected synchronized String generateSessionId()
+  public synchronized String generateSessionId()
     {
       if (_digest==null) {
 	_digest=getDigest();
