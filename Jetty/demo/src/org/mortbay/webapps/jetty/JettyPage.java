@@ -38,6 +38,8 @@ public class JettyPage extends Page
                 log.info("Real Jetty Site");
                 __realSite=true;
             }
+            
+            __realSite = true;
         }
         catch(Exception e) {LogSupport.ignore(log,e);}
     }
@@ -133,6 +135,11 @@ public class JettyPage extends Page
     private boolean _home;
     private String _context;
     
+    private Block _divLeft = null;
+    private Block _divHeader = null;
+    private Block _divRight = null;
+    private Block _divContent = null;
+    
     /* ------------------------------------------------------------ */
     private Section _selectedSection ;
     private Links _links ;
@@ -154,7 +161,7 @@ public class JettyPage extends Page
             ("<link REL=\"STYLESHEET\" TYPE=\"text/css\" HREF=\""+
              context+"/jetty.css\">");
 
-        addHeader("<link REL=\"icon\" HREF=\""+context+"/images/jicon.gif\" TYPE=\"image/gif\">");
+        addHeader("<link REL=\"icon\" HREF=\""+_context+"/images/jicon.gif\" TYPE=\"image/gif\">");
         
         addLinkHeader("Author",context,"http://www.mortbay.com");
         addLinkHeader("Copyright",context,"LICENSE.TXT");
@@ -208,9 +215,6 @@ public class JettyPage extends Page
 
         attribute("text","#000000");
         attribute(BGCOLOR,"#FFFFFF");
-        // attribute("link","#606CC0");
-        // attribute("vlink","#606CC0");
-        // attribute("alink","#606CC0");
         attribute("MARGINWIDTH","0");
         attribute("MARGINHEIGHT","0");
         attribute("LEFTMARGIN","0");
@@ -227,30 +231,33 @@ public class JettyPage extends Page
             addHeader("<META NAME=\"description\" CONTENT=\"Jetty Java HTTP Servlet Server\"><META NAME=\"keywords\" CONTENT=\"Jetty Java HTTP Servlet Server\">");
         }
         
-        _table = new Table(0);
+       
         
-        nest(_table);
-        _table.cellPadding(5);
-        _table.cellSpacing(5);
-        _table.newRow();
-        _table.newCell();
-        _table.cell().top();
-        _table.cell().center();
-        _table.cell().width("150");
+        _divLeft = new Block("div", "class=\"divLeft\"");
+        _divHeader = new Block("div", "class=\"divHeader\"");
+        _divRight = new Block("div", "class=\"divRight\"");
+        _divContent = new Block ("div", "class=\"divContent\"");
         
-        _table.add("<A HREF=http://jetty.mortbay.org><IMG SRC=\""+context+"/images/powered.gif\" WIDTH=140 HEIGHT=58 BORDER=0 ALT=\"Powered by Jetty\"></A>\n");
+        add(_divHeader);
+        add(_divLeft);
+        add(_divContent);
+        add(_divRight);
+        
+         String searchString = "<FORM method=GET action=http://www.google.com/custom><div class=prova><span>Search this site with Google:</span><INPUT TYPE=text name=q size=14 maxlength=255 value=\"\"><input type=hidden name=\"sitesearch\" value=\"mortbay.org\"><INPUT type=hidden name=cof VALUE=\"LW:468;L:http://jetty.mortbay.org/jetty/images/jetty_banner.gif;LH:60;AH:center;S:http://jetty.mortbay.org;AWFID:1e76608d706e7dfc;\"><input type=hidden name=domains value=\"mortbay.org\"><INPUT class=\"go\" type=submit name=sa VALUE=\"Go\"/></div></form>";
+       
+        if ("/index.html".equals(_path))
+          _divHeader.add("<img src=\""+_context+"/images/jetty_banner.gif\" alt=\"Jetty Java HTTP Servlet Server\" width=\"467\" height=\"60\"/>");
+        else
+          _divHeader.add("<img src=\""+_context+"/images/jetty_banner_still.gif\"  alt=\"Jetty Java HTTP Servlet Server\" width=\"467\" height=\"60\"/>");
 
+        _divHeader.add(searchString);
 
-     
-        
-        Table menu = new Table(0,"bgcolor=#FFFFFF");
-        menu.width("90%");
-        menu.cellPadding(2);
-        menu.cellSpacing(5);
-        
-        _table.add(menu);
-        
+       
+        Block _divMenu = new Block("div", "class=\"menuLeft\"");
+        _divLeft.add(_divMenu);
 
+        
+        Block _divMenuHead = null;//current menu header
         
         boolean para=true;
         // navigation - iterate over all sections
@@ -261,61 +268,47 @@ public class JettyPage extends Page
                  // this is the section header,make a new row
                  if (j==0)
                  {
-                     menu.newRow();
-                     menu.newCell(" bgcolor=#3333ff");
-                     menu.cell().middle();
-                     menu.cell().right();
+                    _divMenuHead = new Block("div", "class=\"menuHead\"");
+                    _divMenu.add(_divMenuHead);
 
                      if (__section[i][0]._link != null)
                      {
                          if(log.isDebugEnabled())log.debug("Section "+__section[i][0]._section+" has link "+__section[i][0]._link);
                          
                          if (_selectedSection._section.equals(__section[i][0]._section))
-                             menu.add ("<a class=selhdr href="+__section[i][0]._link+">"+__section[i][0]._section+"</a>");
+                             _divMenuHead.add ("<a class=selhdr href="+__section[i][0]._link+">"+__section[i][0]._section+"</a>");
                          else
-                             menu.add ("<a class=hdr href="+__section[i][0]._link+">"+__section[i][0]._section+"</a>");
+                             _divMenuHead.add ("<a class=hdr href="+__section[i][0]._link+">"+__section[i][0]._section+"</a>");
                      }
                      else
                      {
                          if(log.isDebugEnabled())log.debug("Section has no link: "+__section[i][0]._section);
-                         menu.add ("<font color=#ffffff><b>"+__section[i][0]._section+"</b></font>");
+                         	_divMenuHead.add ("<span class=\"empty\">"+__section[i][0]._section+"</span>");
                      }
                  }
                  else
                  {
-                     //if this is first of the subsections, make
-                     //a new row
-                     if (j==1)
-                     {
-                         menu.newRow();
-                         menu.newCell();
-                         menu.cell().top();
-                         menu.cell().right();
-                     }
-
+                    
+                     Block _divMenuItem = new Block("div", "class=\"menuItem\"");
+                     _divMenu.add(_divMenuItem);
+                     
                      if ((_selectedSection._subSection != null)
                          &&
                          _selectedSection._subSection.equals(__section[i][j]._subSection))
-                         menu.cell().add ("<a class=selmenu href="+__section[i][j]._link+">"+__section[i][j]._subSection+"</a>");
+                         _divMenuItem.add ("<a class=selmenu href="+__section[i][j]._link+">"+__section[i][j]._subSection+"</a>");
                      else
-                         menu.cell().add ("<a class=menu href="+__section[i][j]._link+">"+__section[i][j]._subSection+"</a>");
+                         _divMenuItem.add ("<a class=menu href="+__section[i][j]._link+">"+__section[i][j]._subSection+"</a>");
                  }
-                 
-                 menu.cell().add("<BR>");
-                 
              }
         }
 
-        if (__realSite)
-            _table.add("<A HREF=\"http://www.inetu.net\"><IMG SRC=\""+_context+"/images/inetu.gif\" WIDTH=121 HEIGHT=52 BORDER=0 ALT=\"InetU\"><br/>Managed Hosting by INetU</A><P>\n");
-       
-        _table.newCell();
-        _table.cell().top();
-        _table.cell().left();
         
+        _divLeft.add ("<P class=\"copyright\">Copyright 2005 Mort Bay Consulting</P>");
+        setNest(_divContent);
+        /*
         if (path.endsWith(".txt"))
             _table.nest(new Block(Block.Pre));
-        
+        */
     }
 
     /* ------------------------------------------------------------ */
@@ -334,30 +327,48 @@ public class JettyPage extends Page
     {
         if ("/index.html".equals(_path))
         {
-            _table.newCell();
-            _table.cell().top();
-            _table.cell().center();
             
-            _table.add("<A HREF=\"http://www.mortbay.com\"><IMG SRC=\""+_context+"/images/mbLogoBar.gif\" WIDTH=120 HEIGHT=75 BORDER=0 ALT=\"Mort Bay\"></A><P>\n");
-
-
-            _table.add("<FORM method=GET action=http://www.google.com/custom><small><A HREF=http://www.google.com/search><IMG SRC=http://www.google.com/logos/Logo_40wht.gif border=0 ALT=Google align=middle></A><BR><INPUT TYPE=text name=q size=14 maxlength=255 value=\"\"><BR><INPUT type=hidden name=cof VALUE=\"LW:468;L:http://jetty.mortbay.org/jetty/images/jetty_banner.gif;LH:60;AH:center;S:http://jetty.mortbay.org;AWFID:1e76608d706e7dfc;\"><input type=hidden name=domains value=\"mortbay.com;mortbay.org\"><input type=radio name=sitesearch value=\"mortbay.org\" checked> mortbay.org<br><input type=radio name=sitesearch value=\"mortbay.com\"> mortbay.com<br><INPUT type=submit name=sa VALUE=\"Google Search\"><BR></small></form>");
-
+            Block _resourceHead = new Block ("div", "class=menuRightHead");
+            _resourceHead.add("Related sites:");
+           _divRight.add(_resourceHead);
+            _divRight.add("<div class=\"menuRightItem\"><A HREF=\"http://www.mortbay.com\"><IMG SRC=\""+_context+"/images/mbLogoBar.gif\" WIDTH=120 HEIGHT=75 ALT=\"Mort Bay\"></A></div>");
             
-            _table.add("<A HREF=\"http://www.coredevelopers.net\"><IMG SRC=\""+_context+"/images/coredev.gif\" WIDTH=81 HEIGHT=81 BORDER=0 ALT=\"CoreDev\"></A><P>\n");
-            _table.add("<A HREF=\"http://sourceforge.net/projects/jetty/\">");
+            _divRight.add("<div class=\"menuRightItem\"><A HREF=\"http://sourceforge.net/projects/jetty/\">");
             if (__realSite)
-                _table.add("<IMG src=\"http://sourceforge.net/sflogo.php?group_id=7322\" width=\"88\" height=\"31\" border=\"0\" alt=\"SourceForge\">");
+                _divRight.add("<IMG src=\"http://sourceforge.net/sflogo.php?group_id=7322\" width=\"88\" height=\"31\" border=\"0\" alt=\"SourceForge\">");
             else
-                _table.add("<IMG SRC=\""+_context+"/images/sourceforge.gif\" WIDTH=88 HEIGHT=31 BORDER=\"0\" alt=\"SourceForge\"></A><P>\n");
-            _table.add("</A><P>\n");
+                _divRight.add("<IMG SRC=\""+_context+"/images/sourceforge.gif\" WIDTH=88 HEIGHT=31 BORDER=\"0\" alt=\"SourceForge\"></A>");
+            _divRight.add("</A></div>");
             
-            _table.add("<A HREF=\""+_context+"/freesoftware.html\"><IMG SRC=\""+_context+"/images/effbr.gif\" WIDTH=88 HEIGHT=32 BORDER=0 ALT=\"EFF\"></A><P>\n");    
+            
+            Block _associatesHead = new Block ("div", "class=menuRightHead");
+            _associatesHead.add("Associates:");
+            _divRight.add(_associatesHead);
+            _divRight.add("<div class=\"menuRightItem\"><A HREF=\"http://www.coredevelopers.net\"><IMG SRC=\""+_context+"/images/coredev.gif\" WIDTH=81 HEIGHT=81 BORDER=0 ALT=\"CoreDev\"></A></div>");
+            
+            if (__realSite)
+            {
+            Block _siteHead = new Block ("div", "class=menuRightHead");
+            _siteHead.add("Project site host:");
+            _divRight.add(_siteHead);
+            _divRight.add("<div class=\"menuRightItem\"><A HREF=\"http://www.inetu.net\"><IMG SRC=\""+_context+"/images/inetu.gif\" WIDTH=121 HEIGHT=52 BORDER=0 ALT=\"InetU\"></A></div>");
+            }
+        
+            Block _supportHead = new Block("div", "class=menuRightHead");
+            _supportHead.add("We support:");
+            _divRight.add(_supportHead);
+            _divRight.add("<div class=\"menuRightItem\"><A HREF=\""+_context+"/freesoftware.html\"><IMG SRC=\""+_context+"/images/effbr.gif\" WIDTH=88 HEIGHT=32 BORDER=0 ALT=\"EFF\"></A><P></div>");    
+        
+            
+            Block _poweredHead = new Block ("div", "class=menuRightHead");
+            _poweredHead.add("Logos for your project: ");
+            _divRight.add(_poweredHead);
+            _divRight.add("<div class=\"menuRightItem\"><A HREF=http://jetty.mortbay.org><IMG class=\"powered\" SRC=\""+_context+"/images/powered.gif\" WIDTH=140 HEIGHT=58 BORDER=0 ALT=\"Powered by Jetty\"></a></div>");
         }
         
-        unnest();
-        
-        add("&nbsp;<P>&nbsp;<P><Center><font size=-4 color=\"#606CC0\">Copyright 2004 Mort Bay Consulting.</FONT></Center>");
+       
+       
+       
     }
 
     /* ------------------------------------------------------------ */
