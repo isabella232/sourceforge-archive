@@ -59,7 +59,7 @@ public abstract class AbstractSessionManager implements SessionManager
     private int _dftMaxIdleSecs = -1;
     private int _scavengePeriodMs = 30000;
     private String _workerName ;
-    private boolean _useRequestedId=true;
+    private boolean _useRequestedId=false;
     protected transient ArrayList _sessionListeners=new ArrayList();
     protected transient ArrayList _sessionAttributeListeners=new ArrayList();
     protected transient Map _sessions;
