@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Updated international URI doco
+
 Jetty-4.1.0RC0 - 31 July 2002
  + Fixed getRealPath for packed war files.
  + Changed URI default charset back to ISO_8859_1

@@ -49,7 +49,7 @@ read Y
     mv JettyExtra JettyExtra-$VERSION
     tar cfz /usr/local/archive/JettyExtra-${VERSION}.tgz JettyExtra-$VERSION
 
-    cd /usr/local/share/java/jetty
+    cd /usr/local/java/jetty
     tar xfz /usr/local/archive/Jetty-${VERSION}.tgz
     tar xfz /usr/local/archive/JettyExtra-${VERSION}.tgz
     cp -f DEFAULT/up.sh Jetty-${VERSION}
