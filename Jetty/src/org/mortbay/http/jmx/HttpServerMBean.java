@@ -154,8 +154,7 @@ public class HttpServerMBean extends LifeCycleMBean
     /* ------------------------------------------------------------ */
     public String getVersion()
     {
-        return Version.__VersionDetail +
-            Version.__ServletEngine.substring(Version.__ServletEngine.indexOf("("));
+        return Version.__VersionDetail;
     }
     
     

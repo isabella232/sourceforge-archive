@@ -244,6 +244,34 @@
   </target>
 
   <!-- ==================================================================== -->
+  <target name="contrib" depends="prepare,classes" 
+   description="Compile the contrib classes" >
+
+    <available property="IBM.available" 
+               classname="com.ibm.jsse.IBMJSSEProvider" 
+               classpathref="extpath"/>
+    <available property="tyrex.available" 
+               classname="tyrex.naming.MemoryContext"
+               classpathref="extpath" />
+
+    <javac srcdir="${contrib}/src"
+           destdir="${classes}"
+           debug="${javac.debug}"
+           optimize="${javac.optimize}"
+           deprecation="${javac.deprecation}"
+           >
+       <classpath>
+         <path refid="extpath"/>
+         <pathelement path="${classes}"/>
+       </classpath>
+       <include name="**/*.java"/>
+       <exclude name="**/Ibm*.java" unless="IBM.available"/>
+       <exclude name="**/jmx/**/*.java" unless="jmx.available"/>
+       <exclude name="**/Naming*.java" unless="tyrex.available"/>
+    </javac>
+  </target>
+
+  <!-- ==================================================================== -->
   <target name="manifest" depends="classes">
     <copy todir="${classes}">
       <fileset dir="${src}">

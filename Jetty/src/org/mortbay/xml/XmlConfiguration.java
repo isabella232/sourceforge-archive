@@ -21,7 +21,7 @@ import java.util.Map;
 import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.Loader;
-import org.mortbay.util.Primitive;
+import org.mortbay.util.TypeUtil;
 import org.mortbay.util.Resource;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -595,7 +595,7 @@ public class XmlConfiguration
         String type = node.getAttribute("type");
         if (type!=null)
         {
-            aClass=Primitive.fromName(type);
+            aClass=TypeUtil.fromName(type);
             if (aClass==null)
             {
                 if ("String".equals(type))
@@ -731,9 +731,9 @@ public class XmlConfiguration
         if ("String".equals(type) || "java.lang.String".equals(type))
             return value.toString();
 
-        Class pClass = Primitive.fromName(type);
+        Class pClass = TypeUtil.fromName(type);
         if (pClass!=null)
-            return Primitive.valueOf(pClass,value.toString());
+            return TypeUtil.valueOf(pClass,value.toString());
         
         if ("URL".equals(type) || "java.net.URL".equals(type))
         {

@@ -43,7 +43,7 @@ import javax.management.modelmbean.ModelMBeanNotificationInfo;
 import javax.management.modelmbean.ModelMBeanOperationInfo;
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
-import org.mortbay.util.Primitive;
+import org.mortbay.util.TypeUtil;
 
 
 /* ------------------------------------------------------------ */
@@ -434,7 +434,7 @@ public class ModelMBeanImpl
 
         try
         {
-            Class type=Primitive.fromName(attrInfo.getType());
+            Class type=TypeUtil.fromName(attrInfo.getType());
             if (type==null)
                 type=Thread.currentThread().getContextClassLoader().loadClass(attrInfo.getType());
         
@@ -503,11 +503,11 @@ public class ModelMBeanImpl
             String methodKey=name+"(";
             for (int i=0;i<signature.length;i++)
             {
-                Class type=Primitive.fromName(signature[i]);
+                Class type=TypeUtil.fromName(signature[i]);
                 if (type==null)
                     type=Thread.currentThread().getContextClassLoader().loadClass(signature[i]);
                 types[i]=type;
-                signature[i]=type.isPrimitive()?Primitive.toName(type):signature[i];
+                signature[i]=type.isPrimitive()?TypeUtil.toName(type):signature[i];
                 methodKey+=(i>0?",":"")+signature[i];
             }
             methodKey+=")";
@@ -536,7 +536,7 @@ public class ModelMBeanImpl
                 (name,
                  findDescription(methodKey),
                  pInfo,
-                 returnClass.isPrimitive()?Primitive.toName(returnClass):(returnClass.getName()),
+                 returnClass.isPrimitive()?TypeUtil.toName(returnClass):(returnClass.getName()),
                  impact));
         }
         catch(Exception e)
@@ -566,7 +566,7 @@ public class ModelMBeanImpl
             String method=opInfo.getName()+"(";
             for (int i=0;i<pInfo.length;i++)
             {
-                Class type=Primitive.fromName(pInfo[i].getType());
+                Class type=TypeUtil.fromName(pInfo[i].getType());
                 if (type==null)
                     type=Thread.currentThread().getContextClassLoader().loadClass(pInfo[i].getType());
                 types[i]=type;

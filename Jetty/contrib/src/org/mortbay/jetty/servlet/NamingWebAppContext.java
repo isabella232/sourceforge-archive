@@ -20,14 +20,16 @@ import tyrex.naming.MemoryContext;
 import tyrex.tm.RuntimeContext;
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
-import org.mortbay.util.Primitive;
+import org.mortbay.util.TypeUtil;
 
+/* ------------------------------------------------------------ */
 public class NamingWebAppContext extends WebApplicationContext
 {
     MemoryContext _root;
     Context _rootComp;
     Context _rootCompEnv;
     
+    /* ------------------------------------------------------------ */
     public void start()
         throws Exception
     {
@@ -38,8 +40,8 @@ public class NamingWebAppContext extends WebApplicationContext
         _rootCompEnv = _rootComp.createSubcontext("env");
         super.start();
     }
-
-
+        
+    /* ------------------------------------------------------------ */
     protected void initWebXmlElement(String element, XmlParser.Node node)
         throws Exception
     {
@@ -50,7 +52,7 @@ public class NamingWebAppContext extends WebApplicationContext
         {
             String name=node.getString("env-entry-name",false,true);
             Object value=
-                Primitive.valueOf(node.getString("env-entry-type",false,true),
+                TypeUtil.valueOf(node.getString("env-entry-type",false,true),
                                   node.getString("env-entry-value",false,true));
             bind(_rootCompEnv,name,value);
         }
@@ -67,6 +69,7 @@ public class NamingWebAppContext extends WebApplicationContext
     }
 
     
+    /* ------------------------------------------------------------ */
     public boolean handle(HttpRequest request,
                           HttpResponse response)
         throws HttpException, IOException
@@ -96,6 +99,7 @@ public class NamingWebAppContext extends WebApplicationContext
     }    
 
 
+    /* ------------------------------------------------------------ */
     private void bind(Context ctx, String name, Object value)
         throws NamingException
     {
