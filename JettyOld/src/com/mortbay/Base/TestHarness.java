@@ -63,6 +63,7 @@ public class TestHarness
         t2.checkEquals(1,2,"Long comparison that fails");
         t1.checkEquals(1.1,1.1,"Double comparison that passes");
         t2.checkEquals(1.1,2.2,"Double comparison that fails");
+
         t1.checkEquals('a','a',"Char comparison that passes");
         t2.checkEquals('a','b',"Char comparison that fails");
         t1.checkContains("ABCD","BC","Contains check that passes");

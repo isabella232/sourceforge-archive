@@ -89,30 +89,54 @@ public class Test
     
     /*-------------------------------------------------------------------*/
     /** Check that string contains a substring
-     *  @param b        Boolean to check
-     *  @param check    Description of this check
+     *  @return Index of substring
      */
-    public void checkContains(String string, String subString, String check)
+    public int checkContains(String string, String subString, String check)
     {
+        return doCheckContains(string,0,subString,check);
+    }
+    
+    /*-------------------------------------------------------------------*/
+    /** Check that string contains a substring
+     *  @return Index of substring
+     */
+    public int checkContains(String string,
+                             int offset,
+                             String subString, String check)
+    {
+        return doCheckContains(string,offset,subString,check);
+    }
+
+    /*-------------------------------------------------------------------*/
+    /** Check that string contains a substring
+     *  @return Index of substring
+     */
+    private int doCheckContains(String string,
+                                int offset,
+                                String subString, String check)
+    {
+        int index=-1;
         reportBuf.append(testCase+" : "+check+" - ");
         if ((string==null && subString==null)
-            || (string!=null && (subString==null || string.indexOf(subString)>=0)))
+            || (string!=null && (subString==null ||
+                                 (index=string.indexOf(subString,offset))>=0)))
         {
             reportBuf.append(pass);
             Code.debug(check," OK");
         }
         else
         {
-            Frame frame = new Frame(1);
+            Frame frame = new Frame(2);
             passed=false;
             reportBuf.append(fail + " at " + frame);
             reportBuf.append('\n');
             reportBuf.append(spaces,0,testCase.length()+3);
             reportBuf.append('"' + subString + "\" not contained in \"" +
-                             string + '"');
+                             string.substring(offset) + '"');
             Code.debug(check," FAILED");
         }
         reportBuf.append('\n');
+        return index;
     }
     
  
@@ -197,21 +221,24 @@ public class Test
     private void commonCheckEquals(Object o1,Object o2,String check)
     {
         reportBuf.append(testCase+" : "+check+" - ");
+	Frame frame = new Frame(2);
         if (o1==o2 || ( o1!=null && o1.equals(o2)))
         {
             reportBuf.append(pass);
-            Code.debug(check," OK");
+            // Code.debug(check," OK"); instead:
+	    Log.message(Log.CODE_DEBUG, check + " OK", frame);
         }
         else
         {
-            Frame frame = new Frame(2);
+            //Frame frame = new Frame(2);
             passed=false;
             reportBuf.append(fail + " at " + frame);
             reportBuf.append('\n');
             reportBuf.append(spaces,0,testCase.length()+3);
             reportBuf.append(((o1!=null)?(o1.toString()):"null") + " != " +
                              ((o2!=null)?(o2.toString()):"null"));
-            Code.debug(check," FAILED");
+            //Code.debug(check," FAILED"); instead:
+	    Log.message(Log.CODE_DEBUG, check + " FAILED", frame);
         }
         reportBuf.append('\n');
     }
