@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-4.0.RC2 - wait for it....
+Jetty-4.0.RC2 - 12 March 2002
  + Fixed version for String XmlConfigurations
  + Fixed empty referrer in NCSA log.
  + Dont try to extract directories
