@@ -276,18 +276,24 @@ public class SecurityHandler extends NullHandler
                         continue;
                     
                     // Does this forbid everything?
-                    if (!sc.isAuthenticated() &&!sc.hasDataConstraint())
+                    if (sc.isForbidden())
                     {
                         response.sendError(HttpResponse.__403_Forbidden);
                         return;
                     }
                     
                     // Does it fail a role check?
-                    if (sc.isAuthenticated() &&
-                        !sc.hasRole(SecurityConstraint.NONE) &&
-                        !authenticatedInRole(pathInContext,pathParams,request,response,sc.roles()))
-                        // return as an auth challenge will have been set
-                        return;
+                    if (sc.isAuthenticated())
+                    {
+                        UserPrincipal user =
+                            authenticate(pathInContext,pathParams,request,response);
+                        if (user==null)
+                            return; // Auth challenge or redirection already sent
+
+                        if (!sc.isAnyRole() &&
+                            !userInRole(user,sc.getRoles(),request,response))
+                            return; // role failed.
+                    }
                     
                     // Does it fail a data constraint
                     if (sc.hasDataConstraint() &&
@@ -312,6 +318,83 @@ public class SecurityHandler extends NullHandler
                 .formAuthenticated(this,pathInContext,pathParams,request,response);
         }
     }
+
+    /* ------------------------------------------------------------ */
+    private UserPrincipal authenticate(String pathInContext,
+                                       String pathParams,
+                                       HttpRequest request,
+                                       HttpResponse response)
+        throws IOException
+    {
+        boolean userAuth=false;
+        
+        if (__BASIC_AUTH.equals(_authMethod))
+            userAuth=basicAuthenticated(request,response);
+        else if (__FORM_AUTH.equals(_authMethod))
+        {
+            if (_formAuthenticator==null)
+                response.sendError(HttpResponse.__500_Internal_Server_Error);
+            else
+                userAuth= _formAuthenticator
+                    .formAuthenticated(this,pathInContext,pathParams,request,response);
+        }
+        else
+        {
+            response.setField(HttpFields.__WwwAuthenticate,
+                              "basic realm=\""+_realmName+'"');
+            response.sendError(HttpResponse.__401_Unauthorized);
+        }
+        
+        if (!userAuth)
+            return null;
+        return (UserPrincipal) request.getUserPrincipal();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if request is authenticated in the role.
+     */
+    private boolean userInRole(UserPrincipal user,
+                               List roles,
+                               HttpRequest request,
+                               HttpResponse response)
+        throws IOException
+    {
+        // Check if user is in a role that is suitable
+        boolean inRole=false;
+
+        if (roles!=null)
+        {
+            for (int r=roles.size();r-->0;)
+            {
+                String role=roles.get(r).toString();            
+                if (user.isUserInRole(role))
+                {
+                    inRole=true;
+                    break;
+                }
+            }
+        }
+        
+        // If no role reject authentication.
+        if (!inRole)
+        {
+            Code.warning("AUTH FAILURE: role for "+
+                         request.getUserPrincipal().getName());
+            if (__BASIC_AUTH.equals(_authMethod))
+            {
+                response.setField(HttpFields.__WwwAuthenticate,
+                                  "basic realm=\""+_realmName+'"');
+                response.sendError(HttpResponse.__401_Unauthorized,"User not in role");
+            }
+            else
+                response.sendError(HttpResponse.__403_Forbidden,"User not in role");
+            return false;
+        }
+        
+        return inRole;
+    }
+    
 
     /* ------------------------------------------------------------ */
     /** 

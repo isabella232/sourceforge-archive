@@ -38,6 +38,7 @@ public class SocketListener
     private int _throttled=0;
     private boolean _lastLow=false;
     private boolean _lastOut=false;
+    private String _scheme="http";
     
     /* ------------------------------------------------------------------- */
     public SocketListener()
@@ -65,9 +66,15 @@ public class SocketListener
     }
 
     /* --------------------------------------------------------------- */
+    public void setDefaultScheme(String scheme)
+    {
+        _scheme=scheme;
+    }
+    
+    /* --------------------------------------------------------------- */
     public String getDefaultScheme()
     {
-        return "http";
+        return _scheme;
     }
 
     /* ------------------------------------------------------------ */

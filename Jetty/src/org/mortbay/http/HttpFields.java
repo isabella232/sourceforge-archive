@@ -643,8 +643,11 @@ public class HttpFields
     }
     
     /* ------------------------------------------------------------ */
+    /** Add fields from another HttpFields instance.
+     * Single valued fields are replaced, while all others are added.
+     * @param fields 
+     */
     public void add(HttpFields fields)
-        throws IllegalArgumentException
     {
         if (fields==null)
             return;
@@ -655,7 +658,7 @@ public class HttpFields
             String name = (String)enum.nextElement();
             FieldInfo info=getFieldInfo(name);
             if( info._singleValued ) 
-                add(name,fields.get(name));
+                put(name,fields.get(name));
             else
             {
                 Enumeration values = fields.getValues(name);

@@ -29,6 +29,7 @@ public class SecurityConstraint
         DC_CONFIDENTIAL=2;
     /* ------------------------------------------------------------ */
     public final static String NONE="NONE";
+    public final static String ANY_ROLE="*";
     
     /* ------------------------------------------------------------ */
     private String _name;
@@ -37,6 +38,8 @@ public class SecurityConstraint
     private List _roles;
     private List _umRoles;
     private int _dataConstraint=DC_NONE;
+    private boolean _anyRole=false;
+    private boolean _authenticate=false;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -102,9 +105,27 @@ public class SecurityConstraint
      */
     public synchronized void addRole(String role)
     {
-        if (_roles==null)
-            _roles=new ArrayList(3);
-        _roles.add(role);
+        if (ANY_ROLE.equals(role))
+        {
+            _roles=null;
+            _umRoles=null;
+            _anyRole=true;
+        }
+        else if (!_anyRole)
+        {
+            if (_roles==null)
+                _roles=new ArrayList(3);
+            _roles.add(role);
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if any user role is permitted.
+     */
+    public boolean isAnyRole()
+    {
+        return _anyRole;
     }
 
     /* ------------------------------------------------------------ */
@@ -141,11 +162,30 @@ public class SecurityConstraint
     
     /* ------------------------------------------------------------ */
     /** 
+     * @param authenticate True if users must be authenticated 
+     */
+    public void setAuthenticated(boolean authenticate)
+    {
+        _authenticate=authenticate;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
      * @return True if the constraint requires request authentication
      */
     public boolean isAuthenticated()
     {
-        return _roles!=null && _roles.size()>0;
+        return _authenticate;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if authentication required but no roles set
+     */
+    public boolean isForbidden()
+    {
+        return _authenticate && !_anyRole &&
+            (_roles==null || _roles.size()==0);
     }
     
     /* ------------------------------------------------------------ */
@@ -205,7 +245,7 @@ public class SecurityConstraint
     {
         return "SC{"+_name+
             ","+_methods+
-            ","+_roles+
+            ","+(_anyRole?"*":_roles.toString())+
             ","+(_dataConstraint==DC_NONE
                  ?"NONE}"
                  :(_dataConstraint==DC_INTEGRAL?"INTEGRAL}":"CONFIDENTIAL}"));

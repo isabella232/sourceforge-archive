@@ -683,6 +683,7 @@ public class WebApplicationContext extends ServletHandlerContext
         XmlParser.Node auths=node.get("auth-constraint");
         if (auths!=null)
         {
+            scBase.setAuthenticated(true);
             Iterator iter= auths.iterator("role-name");
             while(iter.hasNext())
             {
