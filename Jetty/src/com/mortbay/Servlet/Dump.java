@@ -177,6 +177,7 @@ public class Dump extends HttpServlet
                     table.add(",&nbsp;");
             }
 
+	    /* ------------------------------------------------------------ */
             table.newRow();
             table.newHeading()
                 .cell().nest(new Font(2,true))
@@ -189,8 +190,11 @@ public class Dump extends HttpServlet
             {
                 name=(String)a.nextElement();
                 table.newRow();
-                table.addHeading(name+":&nbsp;").cell().right();
-                table.addCell(sreq.getAttribute(name));
+                table.addHeading(name+":&nbsp;")
+		    .cell().attribute("VALIGN","TOP").right();
+		table.addCell("<pre>" +
+			      toString(sreq.getAttribute(name))
+			      + "</pre>");
             }
             
             table.newRow();
@@ -204,10 +208,14 @@ public class Dump extends HttpServlet
             {
                 name=(String)a.nextElement();
                 table.newRow();
-                table.addHeading(name+":&nbsp;").cell().right();
-                table.addCell(getServletContext().getAttribute(name));
+                table.addHeading(name+":&nbsp;")
+		    .cell().attribute("VALIGN","TOP").right();
+                table.addCell("<pre>" +
+			      toString(getServletContext()
+				       .getAttribute(name))
+			      + "</pre>");
             }
-            
+
             table.newRow();
             table.newHeading()
                 .cell().nest(new Font(2,true))
@@ -219,7 +227,7 @@ public class Dump extends HttpServlet
             {
                 name=(String)h.nextElement();
                 table.newRow();
-                table.addHeading(name+":&nbsp;").cell().right().top();
+                table.addHeading(name+":&nbsp;").cell().right();
                 table.addCell(sreq.getHeader(name));
             }
             
@@ -300,6 +308,32 @@ public class Dump extends HttpServlet
     public synchronized void destroy()
     {
         Code.debug("Destroyed");
+    }
+    
+    /* ------------------------------------------------------------ */
+    private static String toString(Object o)
+    {
+	if (o == null)
+	    return null;
+
+	if (o.getClass().isArray())
+	{
+	    StringBuffer sb = new StringBuffer();
+	    Object[] array = (Object[]) o;
+	    for (int i=0; i<array.length; i++)
+	    {
+		if (i > 0)
+		    sb.append("\n");
+		sb.append(array.getClass().getComponentType().getName());
+		sb.append("[");
+		sb.append(i);
+		sb.append("]=");
+		sb.append(toString(array[i]));
+	    }
+	    return sb.toString();
+	}
+	else
+	    return o.toString();
     }
     
 }
