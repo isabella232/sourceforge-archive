@@ -108,6 +108,12 @@ public class ServerMBean extends HttpServerMBean
                                      "java.lang.String",
                                      "boolean"},
                         IMPACT_ACTION);
+        defineOperation("addWebApplications",
+                        new String[]{"java.lang.String",
+                                     "java.lang.String",
+                                     "java.lang.String",
+                                     "boolean"},
+                        IMPACT_ACTION);
         _jettyServer=(Server)getManagedResource();
     }
     
