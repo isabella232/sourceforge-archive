@@ -16,19 +16,6 @@ import java.io.StringWriter;
  */
 public class Frame
 {
-    static
-    {
-        try
-        {
-            new Throwable().getStackTrace();
-        }
-        catch(Exception e)
-        {
-            System.err.println("ERROR: Jetty compiled for java 1.4 and cannot be run on this JVM");
-            System.err.println("       Please recompile Jetty using this JVM");
-            System.exit(1);
-        }
-    }
     
     /* ------------------------------------------------------------ */
     private static String __className=Frame.class.getName();

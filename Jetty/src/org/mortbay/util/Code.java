@@ -62,6 +62,23 @@ import java.util.Vector;
 */
 public class Code
 {
+
+    /* ------------------------------------------------------------ */
+    static
+    {
+        try
+        {
+            new Frame(0);
+        }
+        catch(Error e)
+        {
+            e.printStackTrace();
+            System.err.println("\nERROR: Jetty compiled for java 1.4 and cannot be run on this JVM");
+            System.err.println("       Please recompile Jetty using this JVM\n");
+            System.exit(1);
+        }
+    }
+    
     /*-------------------------------------------------------------------*/
     private static final String __lock="LOCK";
     private static final Class[] __noArgs=new Class[0];

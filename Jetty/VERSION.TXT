@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
 Jetty-4.0.1RC2 -
+ + Better error for jre1.3 with 1.4 classes
  + Cleaned up RD query string regeneration.
  + 3DES Keylength was being reported as 0. Now reports 168 bits.
  + Implemented the run-as servlet tag.
