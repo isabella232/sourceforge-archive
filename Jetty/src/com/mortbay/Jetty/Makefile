@@ -23,7 +23,7 @@ WEBAPPDIRS := \
 WEBAPPCLASSES := \
 	$(INSTALLROOT)/webapps/$(WEBAPP)/WEB-INF/classes/com/mortbay/Jetty/JettyServlet.class \
 	$(INSTALLROOT)/webapps/$(WEBAPP)/WEB-INF/classes/com/mortbay/Jetty/JettyPage.class \
-	$(INSTALLROOT)/webapps/$(WEBAPP)/WEB-INF/classes/com/mortbay/Jetty/JettyPage?Section.class \
+	$(INSTALLROOT)/webapps/$(WEBAPP)/WEB-INF/classes/com/mortbay/Jetty/JettyPage$$Section.class \
 	$(INSTALLROOT)/webapps/$(WEBAPP)/WEB-INF/classes/com/mortbay/Jetty/JettyIndex_en.properties
 
 WEBAPPFILES := \
