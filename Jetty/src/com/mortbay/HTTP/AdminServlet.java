@@ -11,6 +11,8 @@ import com.mortbay.HTML.Heading;
 import com.mortbay.HTML.Element;
 import com.mortbay.HTML.Block;
 import com.mortbay.HTML.Font;
+import com.mortbay.HTML.Form;
+import com.mortbay.HTML.Input;
 import com.mortbay.HTML.Link;
 import com.mortbay.HTML.List;
 import com.mortbay.HTML.Page;
@@ -64,10 +66,30 @@ public class AdminServlet extends HttpServlet
         throws ServletException, IOException
     {
         String action=request.getParameter("A");
-        boolean exit= "Exit".equals(action);
-        if (exit)
-          System.exit(1);
-        boolean start=!exit  && "Start".equals(action);
+        if ("exit all servers".equalsIgnoreCase(action))
+        {
+            new Thread(new Runnable()
+                {
+                    public void run()
+                    {
+                        try{Thread.sleep(1000);}
+                        catch(Exception e){Code.ignore(e);}
+                        Log.event("Stopping All servers");
+                        for (int s=0;s<_servers.size();s++)
+                        {
+                            HttpServer server=(HttpServer)_servers.get(s);
+                            try{server.stop();}
+                            catch(Exception e){Code.ignore(e);}
+                        }
+                        Log.event("Exiting JVM");
+                        System.exit(1);
+                    }
+                }).start();
+            
+            throw new HttpException(HttpResponse.__503_Service_Unavailable);
+        }
+        
+        boolean start="start".equalsIgnoreCase(action);
         String id=request.getParameter("ID");
 
         StringTokenizer tok=new StringTokenizer(id,":");
@@ -172,6 +194,13 @@ public class AdminServlet extends HttpServlet
         page.attribute("alink","#606CC0");
 
         page.add(new Block(Block.Bold).add(new Font(3,true).add(getServletInfo())));
+        page.add(Break.rule);
+        Form form=new Form(request.getContextPath()+
+                           request.getServletPath()+
+                           "?A=exit");
+        form.method("GET");
+        form.add(new Input(Input.Submit,"A","Exit All Servers"));
+        page.add(form);
         page.add(Break.rule);
         page.add(new Heading(3,"Components:"));
 

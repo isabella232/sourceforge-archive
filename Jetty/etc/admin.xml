@@ -21,6 +21,7 @@ $Id$
   <Call name="addListener">
     <Arg>
       <New class="com.mortbay.HTTP.SocketListener">
+        <Set name="Host">localhost</Set>
         <Set name="Port">8888</Set>
         <Set name="MinThreads">1</Set>
         <Set name="MaxThreads">5</Set>
