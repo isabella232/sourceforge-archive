@@ -497,6 +497,8 @@ public class ServletHttpRequest
         if (_session != null && ((SessionManager.Session)_session).isValid())
             return _session;
         
+	_session=null;
+
         String id = getRequestedSessionId();
         
         if (id != null)
