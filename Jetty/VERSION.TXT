@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
-
- + RolleverFileOutputStream manages Rollover thread.
+ + Apply the append flag of RolloverFileOutputStream constructor.
+ + RolloverFileOutputStream manages Rollover thread.
  + New look and feel for www site.
  + Fixed table refs in JDBCUserRealm.
  + Allow params in form auth URLs
