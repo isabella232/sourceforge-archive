@@ -139,7 +139,7 @@ public class MultiPartRequest
      */
     public InputStream getInputStream(String name)
     {
-        List part = (List)_partMap.get(name);
+        List part = (List)_partMap.getValues(name);
         if (part==null)
             return null;
         return new ByteArrayInputStream(((Part)part.get(0))._data);
