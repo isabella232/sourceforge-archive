@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + jetty.sh run was ignoring arguments
+
 Jetty-4.0.B2 - 25 Feb 2002
  + Minor Jasper updates
  + Improve handling of unknown URL protocols.

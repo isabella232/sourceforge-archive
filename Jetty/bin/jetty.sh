@@ -37,12 +37,12 @@
 # JAVA_OPTIONS
 #   Extra options to pass to the JVM
 #
-# JETTY_HOME 
+# JETTY_HOME
 #   Where Jetty is installed. If not set, the script will try go
 #   guess it by first looking at the invocation path for the script,
 #   and then by looking in standard locations as $HOME/opt/jetty
 #   and /opt/jetty. The java system property "jetty.home" will be
-#   set to this value for use by configure.xml files, f.e:
+#   set to this value for use by configure.xml files, f.e.:
 #
 #    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/jetty.war</Arg>
 #
@@ -52,19 +52,20 @@
 #      /dev/tty
 #
 # JETTY_LOG 
-#   Where jetty logs should be stored. The only effect of this 
-#   variable is to set the "jetty.log" java system property so
-#   configure.xml files can use it, f.e.:
+#   The directory where jetty logs should be stored. The only
+#   effect of this variable is to set the "jetty.log" java
+#   system property so configure.xml files can use it, f.e.:
 #
 #     <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.request.log</Arg>
 #
-#   This variable will be tipically set to something like /var/log/jetty. If
-#   not set, it will default to $JETTY_HOME/logs
+#   This variable will be typically set to something like /var/log/jetty. If
+#   not set, it will default to $JETTY_HOME/logs - probably rendering the
+#   above default attribute superfluous.
 #
 # JETTY_PORT
 #   Default port for Jetty servers. The default value is 8080. The java 
 #   system property "jetty.port" will be set to this value for use in 
-#   configure.xml files, f.e:
+#   configure.xml files, f.e.:
 #
 #    <Arg><SystemProperty name="jetty.port" default="80"/></Arg>
 #
@@ -287,7 +288,12 @@ fi
 #####################################################
 if [ -z "$CONFIGS" ] 
 then
-  CONFIGS="${JETTY_HOME}/etc/demo.xml ${JETTY_HOME}/etc/admin.xml"
+  if [ "$ACTION" = "demo" ]
+  then
+    CONFIGS="${JETTY_HOME}/etc/demo.xml ${JETTY_HOME}/etc/admin.xml"
+  else
+    CONFIGS="${JETTY_HOME}/etc/jetty.xml"
+  fi
 fi
 
 
@@ -434,19 +440,7 @@ JAVA_OPTIONS="-Djetty.home=$JETTY_HOME -Djetty.log=$JETTY_LOG -Djetty.port=$JETT
 #####################################################
 # This is how the Jetty server will be started
 #####################################################
-
-case "$ACTION" in
-  start|supervise|demo)
-     RUN_CMD="$JAVA -DLOG_FILE=$JETTY_LOG/yyyy_mm_dd.jetty.log -cp $CLASSPATH $JAVA_OPTIONS org.mortbay.jetty.Server $CONFIGS"
-  ;;
-  run)
-     CONFIGS="${JETTY_HOME}/etc/jetty.xml"
-     RUN_CMD="$JAVA -DLOG_FILE=$JETTY_LOG/yyyy_mm_dd.jetty.log -cp $CLASSPATH $JAVA_OPTIONS org.mortbay.jetty.Server $CONFIGS"
-  ;;
-  *)
-     RUN_CMD="$JAVA -cp $CLASSPATH $JAVA_OPTIONS org.mortbay.jetty.Server $CONFIGS"
-  ;;
-esac
+RUN_CMD="$JAVA $JAVA_OPTIONS -DLOG_FILE=$JETTY_LOG/yyyy_mm_dd.jetty.log -cp $CLASSPATH org.mortbay.jetty.Server $CONFIGS"
 
 #####################################################
 # Comment these out after you're happy with what 
