@@ -31,7 +31,7 @@
 
   <Set name="LogSink">
     <New class="org.mortbay.util.OutputStreamLogSink">
-      <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.request.log</Arg>
+      <Arg><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.request.log</Arg>
       <Set name="RetainDays">90</Set>
       <Set name="Append">true</Set>
       <Set name="flushOn">false</Set>

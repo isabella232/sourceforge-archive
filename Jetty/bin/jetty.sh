@@ -51,17 +51,6 @@
 #      /dev/console
 #      /dev/tty
 #
-# JETTY_LOG 
-#   The directory where jetty logs should be stored. The only
-#   effect of this variable is to set the "jetty.log" java
-#   system property so configure.xml files can use it, f.e.:
-#
-#     <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.request.log</Arg>
-#
-#   This variable will be typically set to something like /var/log/jetty. If
-#   not set, it will default to $JETTY_HOME/logs - probably rendering the
-#   above default attribute superfluous.
-#
 # JETTY_PORT
 #   Override the default port for Jetty servers. If not set then the
 #   default value in the xml configuration file will be used. The java
@@ -310,14 +299,6 @@ fi
 
 
 #####################################################
-# Check where logs should go.
-#####################################################
-if [ -z "$JETTY_LOG" ] 
-then
-  JETTY_LOG="${JETTY_HOME}/logs"
-fi
-
-#####################################################
 # Find a location for the pid file
 #####################################################
 if [  -z "$JETTY_RUN" ] 
@@ -457,7 +438,7 @@ CLASSPATH="$CP"
 #####################################################
 # Add jetty properties to Java VM options.
 #####################################################
-JAVA_OPTIONS="$JAVA_OPTIONS -Djetty.home=$JETTY_HOME -Djetty.log=$JETTY_LOG"
+JAVA_OPTIONS="$JAVA_OPTIONS -Djetty.home=$JETTY_HOME "
 
 #####################################################
 # This is how the Jetty server will be started
@@ -470,7 +451,6 @@ RUN_CMD="$JAVA $JAVA_OPTIONS -cp $CLASSPATH org.mortbay.jetty.Server $CONFIGS"
 #####################################################
 #echo "JETTY_HOME     =  $JETTY_HOME"
 #echo "JETTY_CONF     =  $JETTY_CONF"
-#echo "JETTY_LOG      =  $JETTY_LOG"
 #echo "JETTY_RUN      =  $JETTY_RUN"
 #echo "JETTY_PID      =  $JETTY_PID"
 #echo "JETTY_CONSOLE  =  $JETTY_CONSOLE"
@@ -541,7 +521,6 @@ case "$ACTION" in
         echo "Checking arguments to Jetty: "
         echo "JETTY_HOME     =  $JETTY_HOME"
         echo "JETTY_CONF     =  $JETTY_CONF"
-        echo "JETTY_LOG      =  $JETTY_LOG"
         echo "JETTY_RUN      =  $JETTY_RUN"
         echo "JETTY_PID      =  $JETTY_PID"
         echo "JETTY_CONSOLE  =  $JETTY_CONSOLE"

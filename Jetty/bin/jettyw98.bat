@@ -26,11 +26,6 @@
 :: subdirectory.
 :: Example: set JETTY_HOME=c:\Jetty-3.1.RC9
 ::
-:: JETTY_LOG - (Optional) this should be the full name of the subdirectory
-:: that should be used by Jetty for storing log files.  If it is not 
-:: provided then the logs directory below JETTY_HOME will be created 
-:: if needed and used.
-::
 :: JETTY_PORT
 ::   Default port for Jetty servers. The default value is 8080. The java 
 ::   system property "jetty.port" will be set to this value for use in 
@@ -40,7 +35,7 @@
 ::
 :: JETTY_OPTIONS - (Optional) Any options to be passed to the JVM 
 :: can be set in this variable.  It will have appended to it:
-::     -Djetty.home=%JETTY_HOME% -Djetty.logs=%JETTY_LOG%
+::     -Djetty.home=%JETTY_HOME% 
 ::
 :: NOTES: 
 :: -  etc\admin.xml file is always prepended to each set of arguments
@@ -160,17 +155,6 @@ if "%temp%=="" goto args_done
 :args_done
 
 rem ===========================================================
-rem == check for log directory
-rem ===========================================================
-echo ..Check for jetty_log
-if NOT "%JETTY_LOG%"=="" goto logs_set
-dir /b /ad | find /I "logs" >NUL
-if ERRORLEVEL 0 goto found_logs
-	mkdir logs
-:found_logs
-	set JETTY_LOG=%JETTY_HOME%\logs
-:logs_set
-
 echo ..Check for jetty_port
 if NOT "%JETTY_PORT%"=="" goto jetty_port_set
   set JETTY_PORT=8080
@@ -181,7 +165,7 @@ rem == build jvm options
 rem == doesn´t work in windows 98. Problem the '='
 rem ===========================================================
 echo ..Build jvm options
-set OPTIONS=-Djetty.home="%JETTY_HOME%" -Djetty.log="%JETTY_LOG%" -Djetty.port=%JETTY_PORT%
+set OPTIONS=-Djetty.home="%JETTY_HOME%" -Djetty.port=%JETTY_PORT%
 
 if DEFINED JETTY_OPTIONS set OPTIONS=%OPTIONS% %JETTY_OPTIONS%
 
@@ -199,7 +183,6 @@ echo 
 echo JAVA_HOME=%JAVA_HOME%
 echo JETTY_HOME=%JETTY_HOME%
 echo JETTY_DRIVE=%JETTY_DRIVE%
-echo JETTY_LOG=%JETTY_LOG%
 echo JETTY_PORT=%JETTY_PORT%
 echo OPTIONS=%OPTIONS%
 echo ARGS=%args%

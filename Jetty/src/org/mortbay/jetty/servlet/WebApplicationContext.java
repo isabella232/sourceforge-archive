@@ -164,6 +164,7 @@ public class WebApplicationContext
         setDirAllowed(in.readBoolean());
         setStatsOn(in.readBoolean());
         setPermissions((PermissionCollection)in.readObject());
+        setClassLoaderJava2Compliant(in.readBoolean());
         
         _deploymentDescriptor=(String)in.readObject();
         _defaultsDescriptor=(String)in.readObject();

@@ -170,7 +170,7 @@ Test results in ${test.results}
       </classpath>        
       <batchtest fork="no" todir="${test.results}">
         <fileset dir="${test.src}">
-          <include name="**/Tests.java" />
+          <include name="**/jetty/Tests.java" />
         </fileset>
       </batchtest>   
     </junit>
@@ -185,6 +185,7 @@ Test results in ${test.results}
    />
   </target>
 
+  <!-- ==================================================================== -->
   <target name="check.junit" unless="junit.available" >
     <fail message="
   The junit .jar is not in the Ant class path.
@@ -233,6 +234,7 @@ Test results in ${test.results}
       </classpath>
     </java>
   </target>
+
 </project>
 
 

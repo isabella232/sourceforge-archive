@@ -99,7 +99,7 @@ Instructions for running Watchdog on Linux
 
   <Set name="RequestLog">
     <New class="org.mortbay.http.NCSARequestLog">
-      <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.request.log</Arg>
+      <Arg><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.request.log</Arg>
     </New>
   </Set>
 

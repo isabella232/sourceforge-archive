@@ -253,8 +253,8 @@ type="boolean"&gt;true&lt;/Set&gt;
     &lt;Call name="add"&gt; 
       &lt;Arg&gt;
         &lt;New class="org.mortbay.util.WriterLogSink"&gt;
-          &lt;Arg&gt;&lt;SystemProperty name="jetty.log" 
-                default="./logs"/&gt;/debug_yyyy_mm_dd.log&lt;/Arg&gt;
+          &lt;Arg&gt;&lt;SystemProperty name="jetty.home" 
+                default="."/&gt;/logs/debug_yyyy_mm_dd.log&lt;/Arg&gt;
           &lt;Set name="RetainDays"&gt;90&lt;/Set&gt;
           &lt;Set name="Append"&gt;true&lt;/Set&gt;
           &lt;Call name="start"/&gt;

@@ -78,7 +78,7 @@ Other targets:
 
   <property name="jetty.run"       value="${etc}/admin.xml ${etc}/jetty.xml"/>
 
-  <property name="jvmarg"  value="-Djetty.home=${jetty.home} -Djetty.log=${jetty.home}/logs" />
+  <property name="jvmarg"  value="-Djetty.home=${jetty.home}" />
 
 
 
