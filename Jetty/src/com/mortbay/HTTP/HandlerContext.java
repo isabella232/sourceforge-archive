@@ -1128,11 +1128,7 @@ public class HandlerContext implements LifeCycle
         _attributes=null;
         _initParams.clear();
         _initParams=null;
-        if (_mimeMap!=null)
-            _mimeMap.clear();
         _mimeMap=null;
-        if (_encodingMap!=null)
-            _encodingMap.clear();
         _encodingMap=null;
         _hosts.clear();
         _hosts=null;
