@@ -116,6 +116,7 @@
     <delete dir="${dist}" quiet="false"/>
     <delete dir="${classes}" quiet="true"/>
     <delete dir="${test.classes}" quiet="true"/>
+    <delete dir="${javadoc}" quiet="false"/>
     <delete file="${mini.http.jar}" quiet="true"/>
     <ant antfile="${test}/build.xml" inheritAll="false" target="tidy"/>
     <ant antfile="${extra}/build.xml" inheritAll="false" target="tidy"/>
@@ -126,7 +127,6 @@
   <target name="clean" depends="tidy"
      description="Remove generated files">
     <delete dir="${jetty.webapp.classes}" quiet="false"/>
-    <delete dir="${javadoc}" quiet="false"/>
     <delete dir="${etc}/dtd" quiet="false"/>
     <delete dir="${logs}" quiet="false"/>
     <delete file="${jetty.jar}" quiet="false"/>
@@ -419,6 +419,13 @@
          <pathelement path="${extra}/ftp/src"/>  
        </sourcepath>
     </javadoc>
+
+    <jar jarfile="${webapps}/javadoc.war">
+      <fileset dir="${javadoc}">
+        <exclude name="**/CVS"/>
+      </fileset>
+    </jar>
+
   </target>
 
 

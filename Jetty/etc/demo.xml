@@ -189,6 +189,14 @@
   </Call>
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Add javadoc                                                     -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <Call name="addWebApplication">
+    <Arg>/javadoc/*</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/javadoc.war</Arg>
+  </Call>
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Add tomcat examples in naming context                           -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- NamingWebAppContext in JettyExtra package
@@ -295,17 +303,6 @@
   </Call>
 
 
-
-  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- Build the javadoc context.                                      -->
-  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <Call name="addContext">
-    <Arg>/javadoc/*</Arg>
-    <Set name="ResourceBase"><SystemProperty name="jetty.home" default="."/>/javadoc/</Set>
-    <Call name="addHandler">
-      <Arg><New class="org.mortbay.http.handler.ResourceHandler"/></Arg>
-    </Call>
-  </Call>
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Build the cgi-bin context.                                      -->
