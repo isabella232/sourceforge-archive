@@ -206,6 +206,8 @@ public class ServletHolder extends Holder
             throw ex;
         }        
 
+	_config=new Config();
+
         if (javax.servlet.SingleThreadModel.class
             .isAssignableFrom(_class))
             _servlets=new Stack();
@@ -213,7 +215,6 @@ public class ServletHolder extends Holder
         if (_initOnStartup)
         {
             _servlet=(Servlet)newInstance();
-            _config=new Config();
             try
             {
                 _servlet.init(_config);
@@ -286,11 +287,8 @@ public class ServletHolder extends Holder
             }
             
             if (_servlet==null)
+	    {
                 _servlet=(Servlet)newInstance();
-        
-            if (_config==null)
-            {
-                _config=new Config();
                 _servlet.init(_config);
             }
 
