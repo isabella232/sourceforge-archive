@@ -335,7 +335,7 @@ public class Dispatcher implements RequestDispatcher
             if (!_forwarded)
                 return super.getRequestURI();
 
-            return _path;
+            return URI.addPaths(_contextPath,_path);
         }
         
         /* ------------------------------------------------------------ */
