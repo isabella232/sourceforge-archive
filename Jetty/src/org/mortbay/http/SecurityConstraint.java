@@ -74,12 +74,13 @@ public class SecurityConstraint implements Cloneable, Serializable
     /* ------------------------------------------------------------ */
     private String _name;
     private Object _methods;
-    private List _umMethods;
     private Object _roles;
-    private List _umRoles;
     private int _dataConstraint= DC_UNSET;
     private boolean _anyRole= false;
     private boolean _authenticate= false;
+
+    private transient List _umMethods;
+    private transient List _umRoles;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -248,17 +249,12 @@ public class SecurityConstraint implements Cloneable, Serializable
 
     /* ------------------------------------------------------------ */
     public Object clone()
+	throws CloneNotSupportedException
     {
-        SecurityConstraint sc= new SecurityConstraint();
-        sc._name= _name;
-        sc._dataConstraint= _dataConstraint;
-        sc._anyRole= _anyRole;
-        sc._authenticate= _authenticate;
-
-        sc._methods= LazyList.clone(_methods);
-        sc._roles= LazyList.clone(_roles);
-
-        return sc;
+	SecurityConstraint sc = (SecurityConstraint) super.clone();
+	sc._umMethods=null;
+	sc._umRoles=null;
+	return sc;
     }
 
     /* ------------------------------------------------------------ */

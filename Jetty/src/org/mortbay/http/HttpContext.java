@@ -1846,8 +1846,7 @@ public class HttpContext extends Container
             if (_statsOn)
                 _statsStartedAt=System.currentTimeMillis();
             _requests=0;
-            _requestsActive=0;
-            _requestsActiveMax=0;
+            _requestsActiveMax=_requestsActive;
             _responses1xx=0;
             _responses2xx=0;
             _responses3xx=0;

@@ -1059,12 +1059,12 @@ public class HttpServer extends Container
         _connectionsDurationAve=0;
         _connectionsDurationMax=0;
         _connectionsRequestsAve=0;
-        _connectionsRequestsMax=0;
+        _connectionsRequestsMax=_connectionsOpen;
         
         _errors=0;
         _requests=0;
         _requestsActive=0;
-        _requestsActiveMax=0;
+        _requestsActiveMax=_requestsActive;
         _requestsDurationAve=0;
         _requestsDurationMax=0;
     }

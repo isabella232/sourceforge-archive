@@ -505,6 +505,6 @@ public class UrlEncoded extends MultiMap
      */
     public Object clone()
     {
-        return new UrlEncoded(this);
+	return super.clone();
     }
 }

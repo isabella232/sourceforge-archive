@@ -69,7 +69,7 @@ public class URI
         _path=uri._path;
         _encodedPath=uri._encodedPath;
         _query=uri._query;
-        if (uri._parameters!=null && uri._parameters.size()>0)
+        if (uri._parameters!=null) 
             _parameters=(UrlEncoded)uri._parameters.clone();
         _dirty=false;
     }
@@ -728,7 +728,12 @@ public class URI
      */
     public Object clone()
     {
-        return new URI(this);
+         URI u = (URI)super.clone();
+         if (_parameters!=null)
+             u._parameters=(UrlEncoded)_parameters.clone();
+         _dirty=false;
+         
+         return u;
     }
 
 

@@ -278,6 +278,6 @@ public class MultiMap extends HashMap implements Cloneable
     /* ------------------------------------------------------------ */
     public Object clone()
     {
-        return new MultiMap(this);
+	return super.clone();
     }
 }

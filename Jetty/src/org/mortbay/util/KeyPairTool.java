@@ -212,7 +212,7 @@ public class KeyPairTool
 	}
 
         Certificate[] certChain
-	    = (Certificate[])chain.toArray(new Certificate[0]);
+	    = (Certificate[])chain.toArray(new Certificate[chain.size()]);
 
         System.out.println("Loaded the cert chain. Depth = "
 			   + certChain.length);

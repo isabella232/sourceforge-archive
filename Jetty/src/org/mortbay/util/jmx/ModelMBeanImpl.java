@@ -631,11 +631,11 @@ public class ModelMBeanImpl
         {
             _dirty=false;
             ModelMBeanAttributeInfo[] attributes = (ModelMBeanAttributeInfo[])
-                _attributes.toArray(new ModelMBeanAttributeInfo[0]);
+                _attributes.toArray(new ModelMBeanAttributeInfo[_attributes.size()]);
             ModelMBeanOperationInfo[] operations = (ModelMBeanOperationInfo[])
-                _operations.toArray(new ModelMBeanOperationInfo[0]);
+                _operations.toArray(new ModelMBeanOperationInfo[_operations.size()]);
             ModelMBeanNotificationInfo[] notifications =(ModelMBeanNotificationInfo[])
-                _notifications.toArray(new ModelMBeanNotificationInfo[0]);
+                _notifications.toArray(new ModelMBeanNotificationInfo[_notifications.size()]);
 
             _beanInfo =
                 new ModelMBeanInfoSupport(_object.getClass().getName(),
