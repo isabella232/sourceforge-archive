@@ -9,6 +9,7 @@ Jetty-4.2.14
  + Use File.toURI().toURL() when jdk 1.2 alternative is available.
  + cookie timestamps are in GMT
  + Priority on ThreadedServer
+ + replaced win32 service with http://wrapper.tanukisoftware.org
 
 Jetty-4.2.12 - 12 August 2003
  + Restore max inactive interval for session manager
