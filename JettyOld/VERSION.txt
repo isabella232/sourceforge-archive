@@ -7,6 +7,7 @@ Release 2.3.4 - 18th January 2000 LATEST
   + DictionaryConverter handles null values.
   + URI decodes applies URL decoding to the path.
   + Servlet properties allow objects to be stored.
+  + Fixed interaction with resourcePaths and proxy demo.
 
 Release 2.3.3 - 19th October 1999 STABLE
   + Replaced UTF8 encoding with ISO-8859-1 for headers.

@@ -175,7 +175,7 @@ public class ForwardHandler extends NullHandler
 
                 try{
                     Code.debug("Forward to "+url+
-                               " via "+request.getResourcePath());
+                               "   resourcePath = "+request.getResourcePath());
                     request.setHeader(HttpHeader.Connection,null);
                     request.setHeader("Host",null);
                     request.setVersion(request.HTTP_1_0);

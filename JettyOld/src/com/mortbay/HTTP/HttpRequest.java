@@ -459,7 +459,16 @@ public class HttpRequest extends HttpHeader
     {
         out.write(method.getBytes());
         out.write(' ');
-        out.write(uri.toString().getBytes());
+        
+        if (resourcePath!=null && resourcePath.length()>0)
+        {
+            out.write(resourcePath.getBytes());
+            String qs = getQueryString();
+            if (qs!=null && qs.length()>0)
+                out.write(("?"+qs).getBytes());
+        }
+        else
+            out.write(uri.toString().getBytes());
         out.write(' ');
         out.write(version.getBytes());
         out.write(__CRLF);
