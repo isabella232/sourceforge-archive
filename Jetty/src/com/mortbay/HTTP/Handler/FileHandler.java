@@ -273,7 +273,7 @@ public class FileHandler extends NullHandler
             // check if directory
             if (file.isDirectory())
             {
-                if (!endsWithSlash)
+                if (!endsWithSlash && !path.equals("/"))
                 {
                     Code.debug("Redirect to directory/");
                         

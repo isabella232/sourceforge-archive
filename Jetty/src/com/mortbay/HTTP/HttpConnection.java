@@ -272,7 +272,7 @@ public class HttpConnection
             if (_request.getState()!=HttpMessage.__MSG_RECEIVED)
                 throw new HttpException(_response.__400_Bad_Request);
 	    
-	    Log.event("Request:"+_request.getRequestLine());
+	    Log.message("HTTP","Request:"+_request.getRequestLine(),null);
 	    if (Code.verbose(100))
 		Code.debug("Request:",_request.toString());
 
