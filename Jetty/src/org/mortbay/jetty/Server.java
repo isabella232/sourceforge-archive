@@ -21,6 +21,7 @@ import org.mortbay.jetty.servlet.WebApplicationContext;
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
 import org.mortbay.util.Resource;
+import org.mortbay.util.URI;
 import org.mortbay.xml.XmlConfiguration;
 
 
@@ -273,16 +274,18 @@ public class Server extends HttpServer
             throw new IllegalArgumentException("Not directory webapps resource "+r);
         
         String[] files=r.list();
+        
         for (int f=0;files!=null && f<files.length;f++)
         {
-            String app = r.addPath(files[f]).toString();
             String context=files[f];
             
             if (context.equalsIgnoreCase("CVS/") ||
                 context.equalsIgnoreCase("CVS") ||
                 context.startsWith("."))
                 continue;
+
             
+            String app = r.addPath(URI.encodePath(files[f])).toString();
             if (context.toLowerCase().endsWith(".war") ||
                 context.toLowerCase().endsWith(".jar"))
                 context=context.substring(0,context.length()-4);

@@ -2142,7 +2142,6 @@ public class HttpContext implements LifeCycle,
             
             _prev=null;
             _next=null;
-        }
-        
+        }        
     }
 }
