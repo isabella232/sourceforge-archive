@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import javax.management.MBeanException;
+import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -105,20 +106,25 @@ public class WebApplicationContextMBean extends ServletHttpContextMBean
      */
     public void postDeregister ()
     {
-        super.postDeregister();
         
+        MBeanServer mbeanServer = getMBeanServer();
         Iterator itor = _configurations.values().iterator();
         while (itor.hasNext())
         {
             try
             {
-                getMBeanServer().unregisterMBean((ObjectName)itor.next());
+                ObjectName o = (ObjectName)itor.next();
+                log.info("Unregistering: "+o);
+                
+                if (null!=mbeanServer)
+                    mbeanServer.unregisterMBean((ObjectName)o);
             }
             catch (Exception e)
             {
                 log.warn(LogSupport.EXCEPTION, e);
             }
         }
+        super.postDeregister();
     }
    
     
