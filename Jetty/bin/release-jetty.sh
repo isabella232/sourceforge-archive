@@ -32,8 +32,6 @@ read Y
     cvs $CVS_ARGS export -r Jetty_$TAG Jetty3
     cd $HOME/Jetty3
     ant all || exit 1
-    cp src/com/mortbay/HTTP/web.dtd etc
-    cp src/com/mortbay/Util/configure.dtd etc
     cd ..
     mv Jetty3 Jetty-$VERSION
     tar cfz /usr/local/archive/Jetty-${VERSION}.tgz --exclude Jetty-$VERSION/classes Jetty-$VERSION

@@ -1,15 +1,17 @@
 <BR><H1>Jetty 3 Servlet Demos</H1>
 
 These links demonstrate some Jetty 3 servlet handling:
-<UL><A HREF="/demo/dump/info?A=1&A=2&A=3&B=5&C=6">2.2&nbsp;Dump&nbsp;Servlet</A>:
+<UL><A HREF="/demo/dump/info?A=1&A=2&A=3&B=5&C=6">Dump&nbsp;Servlet</A>:
 configured by prefix in demo.xml.
 
-<BR><A HREF="/demo/other/path.DUMP?A=1&A=2&A=3&B=5&C=6">2.2&nbsp;Dump&nbsp;Servlet</A>:
+<BR><A HREF="/demo/other/path.DUMP?A=1&A=2&A=3&B=5&C=6">Dump&nbsp;Servlet</A>:
 configured by suffix in demo.xml.
 
-<BR><A HREF="/servlet/com.mortbay.Servlet.Dump/info?A=1&A=2&A=3&B=5&C=6">Dynamic&nbsp;2.2&nbsp;Dump&nbsp;Servlet</A>: class name in the URL.
+<BR><A HREF="/servlet/com.mortbay.Servlet.Dump/info?A=1&A=2&A=3&B=5&C=6">Dynamic&nbsp;Servlet</A>: system class name in the URL.
 
-<BR><A HREF="/demo/session">Session Demo</A>
+<BR><A HREF="/servlet/HelloWorldServlet/info?A=1&A=2&A=3&B=5&C=6">Dynamic&nbsp;Servlet</A>: context class name in the URL.
+
+<BR><A HREF="/demo/session">Session Demo</A>: Create and Invalidate sessions.
 
 <BR><A HREF="/demo/Dispatch/forward/dump/info?name=value">RequestDispatcher</A>: 
 forward to dump servlet.

@@ -89,7 +89,7 @@ $ID: $
     <Set name="ServingResources">TRUE</Set>
     <Call name="addServlet">
       <Arg>Dump</Arg>
-      <Arg>/dump,/dump/*,/handler/Dump,/handler/Dump/*</Arg>
+      <Arg>/dump/*,/handler/Dump,/handler/Dump/*</Arg>
       <Arg>com.mortbay.Servlet.Dump</Arg>
     </Call>
 

@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + upgraded build.xml to ant v1.2
  + Set MaxReadTimeMs in all examples
  + Further clean up of the connection close actions
  + Moved unused classes from com.mortbay.Util to com.mortbay.Tools in 
@@ -13,7 +14,9 @@ Jetty Versions
  + Set the thread context class loader in HandlerContext.handle
  + Prevent servlet setAttribute calls to protected context attributes.
  + Removed redundant context attributes.
- + Implemented mime mapping in webapplications
+ + Implemented mime mapping in webapplications.
+ + Strip ./ from relative resources.
+ + Added context class path dynamic servlet demo
 
 Jetty-3.0.0.rc2 - 29 Oct 2000
  + Replaced ISO-8859-1 literals with StringUtil static

@@ -87,11 +87,20 @@ public class Resource
         }
         catch(MalformedURLException e)
         {
-            if (!resource.startsWith("ftp:") &&
-                !resource.startsWith("file:") &&
-                !resource.startsWith("jar:"))
+            if(resource.startsWith("."+File.separator))
+            {
+                // It's a local file.
+                File file=new File(resource);
+                file =new File(file.getCanonicalPath());
+                url=file.toURL();
+            }
+            else if (!resource.startsWith("ftp:") &&
+                     !resource.startsWith("file:") &&
+                     !resource.startsWith("jar:"))
+            {
                 // Nope - try it as a file
                 url = new File(resource).toURL();
+            }
             else
                 Code.warning(e);
         }

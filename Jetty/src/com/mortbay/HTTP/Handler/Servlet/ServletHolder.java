@@ -130,6 +130,7 @@ public class ServletHolder
         try
         {
             ClassLoader loader=_context.getHandler().getClassLoader();
+            Code.debug("Servlet loader ",loader);
             if (loader==null)
                 _servletClass=Class.forName(getClassName());
             else

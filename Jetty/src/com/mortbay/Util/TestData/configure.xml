@@ -89,7 +89,7 @@
     <Set name="Test">Call1</Set>
     <Set name="Test" type="int">4</Set>
     <Call name="call">
-      <Arg type="URL">http://www.mortbay.com</Arg>
+      <Arg type="URL">http://www.mortbay.com/</Arg>
       <Arg type="boolean">false</Arg>
     </Call>
   </Call>

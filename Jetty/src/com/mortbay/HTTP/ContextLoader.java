@@ -35,24 +35,24 @@ public class ContextLoader extends URLClassLoader
      * @param quiet If true, non existant paths are not reported
      * @exception IOException
      */
-    public ContextLoader(String classpath,
+    public ContextLoader(String classPath,
                          ClassLoader parent)
     {
-        super(decodePath(classpath),parent);
-        _path=classpath;
-        _info=(PathInfo)__infoMap.get(classpath);
-
-        Code.debug("ContextLoader: ",classpath,",",parent,
+        super(decodePath(classPath),parent);
+        _info=(PathInfo)__infoMap.get(classPath);
+        _path=_info._classPath;
+        
+        Code.debug("ContextLoader: ",_path,",",parent,
                    " == ",_info._fileClassPath);
     }
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private static URL[] decodePath(String classpath)
+    private static URL[] decodePath(String classPath)
     {
         synchronized(__infoMap)
         {
-            PathInfo info=(PathInfo)__infoMap.get(classpath);
+            PathInfo info=(PathInfo)__infoMap.get(classPath);
             if (info!=null && info._urls!=null)
                 return info._urls;
 
@@ -60,7 +60,7 @@ public class ContextLoader extends URLClassLoader
             
             try{
                 StringTokenizer tokenizer =
-                    new StringTokenizer(classpath,",;");
+                    new StringTokenizer(classPath,",;");
                 info._urls = new URL[tokenizer.countTokens()];
                 int i=0;
                 while (tokenizer.hasMoreTokens())
@@ -68,26 +68,28 @@ public class ContextLoader extends URLClassLoader
                     Resource resource =
                         Resource.newResource(tokenizer.nextToken());
 
+                    info._classPath=(info._classPath==null)
+                        ?resource.toString()
+                        :(info._classPath+File.pathSeparator+resource.toString());
+                    
                     // Resolve file path if possible
                     File pfile=resource.getFile();
                     if (pfile==null)
                     {
                         info._unresolved=true;
-                        if (info._fileClassPath==null)
-                            info._fileClassPath=resource.toString();
-                        else
-                            info._fileClassPath=info._fileClassPath+
-                                File.pathSeparator+
-                                resource.toString(); 
+                        info._fileClassPath=(info._fileClassPath==null)
+                            ?resource.toString()
+                            :(info._fileClassPath+
+                              File.pathSeparator+
+                              resource.toString());
                     }
                     else
                     {
-                        if (info._fileClassPath==null)
-                            info._fileClassPath=pfile.getAbsolutePath();
-                        else
-                            info._fileClassPath=info._fileClassPath+
-                                File.pathSeparator+
-                                pfile.getAbsolutePath();                    
+                        info._fileClassPath=(info._fileClassPath==null)
+                            ?pfile.getCanonicalPath()
+                            :(info._fileClassPath+
+                              File.pathSeparator+
+                              pfile.getAbsolutePath());            
                     }
                     
                     // Add resource or expand jar/
@@ -117,7 +119,8 @@ public class ContextLoader extends URLClassLoader
                 info=new PathInfo();
             if (info._urls==null)
                 info._urls=new URL[0];
-            __infoMap.put(classpath,info);
+            __infoMap.put(classPath,info);
+            
             return info._urls;        
         }
     }
@@ -164,6 +167,7 @@ public class ContextLoader extends URLClassLoader
     private static class PathInfo
     {
         URL[] _urls=null;
+        String _classPath=null;
         String _fileClassPath=null;
         boolean _unresolved=false;
     }

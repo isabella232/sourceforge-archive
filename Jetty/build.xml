@@ -60,15 +60,17 @@ release     - Cleanup for release
     <mkdir dir="${javadoc}" />
     <mkdir dir="${classes}" />
     <mkdir dir="${logs}" />
+    <copy file="${src.dir}/com/mortbay/Util/configure.dtd" tofile="${basedir}/etc/configure.dtd" />
+    <copy file="${src.dir}/com/mortbay/HTTP/web.dtd" tofile="${basedir}/etc/web.dtd" />
   </target>
   
   <target name="clean">
-    <deltree dir="${jetty.webapp.classes}"/>
-    <deltree dir="${classes}"/>
-    <deltree dir="${javadoc}"/>
-    <delete  file="${jetty.jar}"/>
-    <delete  file="${servlet.jar}"/>
-    <delete  file="${jasper.jar}"/>
+    <delete dir="${jetty.webapp.classes}"/>
+    <delete dir="${classes}"/>
+    <delete dir="${javadoc}"/>
+    <delete file="${jetty.jar}"/>
+    <delete file="${servlet.jar}"/>
+    <delete file="${jasper.jar}"/>
   </target>
 
   
@@ -77,10 +79,12 @@ release     - Cleanup for release
   </target>
   
   <target name="servlet" depends="prepare">
-    <copydir src="${src.dir}" dest="${classes}">
-      <include name="javax/servlet/**/defaultManifest.mf" />
-      <include name="javax/servlet/**/*.properties" />
-    </copydir>
+    <copy todir="${classes}">
+      <fileset dir="${src.dir}">
+        <include name="javax/servlet/**/defaultManifest.mf" />
+        <include name="javax/servlet/**/*.properties" />
+      </fileset>
+    </copy>
     <javac srcdir="${src.dir}" 
            destdir="${classes}"
            classpath="${classpath}"
@@ -98,14 +102,14 @@ release     - Cleanup for release
   </target>
   
   <target name="jetty" depends="prepare,servlet">
-    <copydir src="${src.dir}" dest="${classes}">
-      <include name="com/mortbay/**/defaultManifest.mf" />
-      <include name="com/mortbay/**/*.dtd" />
-      <include name="com/mortbay/**/*.properties" />
-      <exclude name="com/mortbay/Jetty/JettyIndex*.properties" />
-    </copydir>
-    <copyfile src="{src.dir}/com/mortbay/Util/configure.dtd" dest="${basedir}/etc/configure.dtd" />
-    <copyfile src="{src.dir}/com/mortbay/HTTP/web.dtd" dest="${basedir}/etc/web.dtd" />
+    <copy todir="${classes}">
+      <fileset dir="${src.dir}">
+        <include name="com/mortbay/**/defaultManifest.mf" />
+        <include name="com/mortbay/**/*.dtd" />
+        <include name="com/mortbay/**/*.properties" />
+        <exclude name="com/mortbay/Jetty/JettyIndex*.properties" />
+      </fileset>
+    </copy>
     <javac srcdir="${src.dir}" 
            destdir="${classes}"
            classpath="${libs}"
@@ -136,10 +140,12 @@ release     - Cleanup for release
   </target>
   
   <target name="jasper" depends="prepare">
-    <copydir src="${src.dir}" dest="${classes}">
-      <include name="org/apache/jasper/**/defaultManifest.mf" />
-      <include name="org/apache/jasper/**/*.properties" />
-    </copydir>
+    <copy todir="${classes}">
+      <fileset dir="${src.dir}">
+        <include name="org/apache/jasper/**/defaultManifest.mf" />
+        <include name="org/apache/jasper/**/*.properties" />
+      </fileset>
+    </copy>
     <javac srcdir="${src.dir}" 
            destdir="${classes}"
            classpath="${classpath}"
@@ -160,10 +166,12 @@ release     - Cleanup for release
   </target>
 
   <target name="webapp" depends="libs">
-    <copydir src="${src.dir}" dest="${jetty.webapp.classes}">
-      <include name="com/mortbay/Jetty/defaultManifest.mf" />
-      <include name="com/mortbay/Jetty//*.properties" />
-    </copydir>
+    <copy todir="${jetty.webapp.classes}">
+      <fileset dir="${src.dir}">
+        <include name="com/mortbay/Jetty/defaultManifest.mf" />
+        <include name="com/mortbay/Jetty//*.properties" />
+      </fileset>
+    </copy>
     <javac srcdir="${src.dir}" 
            destdir="${jetty.webapp.classes}"
            classpath="${jetty.jar};${servlet.jar}"
@@ -174,8 +182,8 @@ release     - Cleanup for release
       <include name="com/mortbay/Jetty/JettyPage.java" />
       <include name="com/mortbay/Jetty/JettyServlet.java" />
     </javac>
-    <copyfile src="LICENSE.html" dest="${jetty.webapp}/LICENSE.html" />
-    <copyfile src="VERSION.TXT" dest="${jetty.webapp}/versions.txt" />
+    <copy file="LICENSE.html" tofile="${jetty.webapp}/LICENSE.html" />
+    <copy file="VERSION.TXT" tofile="${jetty.webapp}/versions.txt" />
     <jar jarfile="${jetty.war}"
          basedir="${jetty.webapp}" 
          >
@@ -195,13 +203,17 @@ release     - Cleanup for release
     </javadoc>
   </target>
 
-  <target name="test" depends="jetty">
+  <target name="test1" depends="jetty">
     <property name="classpath" value="${jetty.jar};${servlet.jar}" />
     <java classname="com.mortbay.Util.TestHarness"
           classpath="${classes};${xml.jar}"
           fork="yes"
           failonerror="yes" 
           />
+  </target>
+
+  <target name="test2" depends="jetty">
+    <property name="classpath" value="${jetty.jar};${servlet.jar}" />
     <java classname="com.mortbay.HTTP.TestHarness"
           classpath="${classes};${xml.jar}"
           fork="yes"
@@ -209,6 +221,8 @@ release     - Cleanup for release
           />
   </target>
   
+  <target name="test" depends="test1,test2" />
+
   <target name="all" depends="prepare,libs,webapp,javadoc,test"/>
   
   <target name="demo" depends="webapp" >
