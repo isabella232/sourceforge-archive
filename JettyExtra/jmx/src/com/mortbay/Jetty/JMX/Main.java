@@ -97,7 +97,7 @@ public class Main
     {
         if (arg.length==0)
         {
-            System.err.println("Usage - java com.cisco.aggbu.Main <mletURL>...");
+            System.err.println("Usage - java com.mortbay.Jetty.JMX.Main <mletURL>...");
             System.exit(1);
         }
         startMLet(arg);
