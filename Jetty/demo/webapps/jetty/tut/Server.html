@@ -206,8 +206,9 @@ If your content is packaged according to these
 specifications,    then simply call the <tt>addWebApplication </tt>method
 on the&nbsp;<a href="/javadoc/org/mortbay/jetty/Server.html">    
 org.mortbay.jetty.Server</a> instance, specifying at minimum a context 
-path, the directory or <tt>war</tt> file of your application, and a default
-configuration file. Jetty is then able to discover and configure all the required handlers including security, static content and servlets. 
+path, the directory or <tt>war</tt> file of your application. 
+Jetty is then able to discover and configure all the required handlers 
+including security, static content and servlets. 
 </p>
 <p>
 The method call will transparently create and return an
@@ -232,9 +233,7 @@ host   <tt> myhost</tt>:<br>
 WebApplicationContext webAppCtxt = 
                      server.addWebApplication("myhost",
                                               "/",
-                                              "./webapps/myapp/",
-                                              "./etc/webdefaults.xml", 
-                                              false);
+                                              "./webapps/myapp/");
 </pre>
 </tt>
                 <b>Code Example: &nbsp;Configuring a web application</b>
@@ -252,17 +251,6 @@ WebApplicationContext webAppCtxt =
     </li>
                   <li>The location of the web application, which may be a 
 directory    structure   or a <tt>war</tt> file </li>
-                  <li>The configuration file for web application defaults.
- This   file is in the same format  as  the web application  deployment descriptor. 
-   It provides default values for all web application set ups within a server. 
- The one supplied  in&nbsp;<tt>$JETTY_HOME/etc/webdefaults.xml </tt>suffices 
- in most cases.           </li>
-                  <li>An (optional) boolean to indicate that <tt>war</tt>
- files    should be extracted  to  a temporary directory  structure.  Some 
-mechanisms    such as JSP compilation   have difficulty working with un-expanded 
-            <tt>  war               </tt>files </li>
-                                                                        
-      
         </ul>
        The <tt>addWebApplication</tt> method is overloaded to accommodate 
 the   parameters  marked as (optional).<br>
@@ -283,10 +271,7 @@ To make things even easier, if you have multiple web apps to deploy, you can acc
 <td>
 <tt>
 <pre>
-server.addWebApplications ("myhost",
-                           "./webapps/",
-                           "./etc/webdefaults.xml",
-                           false);
+server.addWebApplications ("myhost","./webapps/");
 </pre>
 </tt>
 <b>Code Example: Configuring multiple web apps</b>
@@ -315,9 +300,7 @@ Server server = new Server();
 server.addListener(new InetAddrPort(8080));
 WebApplicationContext webAppCtxt = 
                       server.addWebApplication("myhost",
-                                               "./webapps/myapp/",
-                                               "./etc/webdefaults.xml",
-                                               false);
+                                               "./webapps/myapp/");
 server.start();
 </pre>
 </tt>
@@ -357,11 +340,7 @@ server.start();
 
   &lt;Call name="addWebApplication"&gt;
     &lt;Arg&gt;/&lt;/Arg&gt;
-    &lt;Arg&gt;
-      &lt;SystemProperty name="jetty.home" default="."/&gt; "/webapps/myapp"
-    &lt;/Arg&gt;
-    &lt;Arg&gt;&lt;SystemProperty name="jetty.home" default="."/&gt; "/etc/webdefaults.xml" &lt;/Arg&gt;
-    &lt;Arg type="boolean"&gt;false&lt;/Arg&gt;
+    &lt;Arg&gt;&lt;SystemProperty name="jetty.home" default="."/&gt;/webapps/myapp&lt;/Arg&gt;
   &lt;/Call&gt;
  &lt;/Configure&gt;
 </pre>
@@ -379,20 +358,33 @@ An explanation of the Jetty XML syntax can be found in the section on
                              <a href="XmlConfiguration.html">
     Jetty XML Configuration</a>.<br>
                            <br>
-   Once a web application has been identified to Jetty, the server automatically 
- looks in its <tt>WEB-INF</tt> directory for a file called <tt>web-jetty.xml</tt>
-                           in which additional configuration can be placed.<tt>
-   </tt><tt>This file must use the Jetty XML syntax.</tt>This is an example
- of one from the Jetty demonstration:<br>
-                                                                        
+  
 
+
+
+
+
+<br>
+<br>
+<big><b><a name="security"></a>Web Application Configuration</b></big><br><br>
+
+When a WebApplicationContext is started, up to three configuration files are applied
+as follows:
+   
+<ol>
+  <li><tt>webdefaults.xml</tt> This file must be in standard web.xml format and typically contains all the default settings for all webapplicatios.  By default the <tt>org/mortbay/jetty/servlet/webdefaults.xml</tt> file is used as a resource from the jetty jar and it configures the JspServlet and default session timeouts.  The default xml file may be changed for a particular context by calling <tt>setDefaultsDescriptor(String)</tt><br>&nbsp;</li>
+  <li><tt>web.xml</tt> The standard web application configuration file and is found in
+the <tt>WEB-INF</tt> directory of the webapplicaton.<br>&nbsp;</li>
+  <li><tt>web-jetty.xml</tt> This file must be in <tt>org.mortbay.xml.XmlConfiguration</tt> format and if found in the <tt>WEB-INF</tt>directory of a web application, it is applied to the <tt>WebApplicationContext</tt> instance.  It is typically used to change non standard configuration.<br>&nbsp;</li>
+</ol>
+
+                                    
 <table align=center cellspacing=2 cellpadding=0 border=0 width="70%">
 <tbody>
 <tr>
 <td>
 <tt>
-<pre>
-&lt;Configure class="org.mortbay.jetty.servlet.WebApplicationContext"&gt;
+<pre>&lt;Configure class="org.mortbay.jetty.servlet.WebApplicationContext"&gt;
 &nbsp;&nbsp;&nbsp; &lt;Set name="statsOn" type="boolean"&gt;false&lt;/Set&gt;
 &nbsp;&nbsp; &lt;Call name="getResourceHandler"&gt;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;Set name="putAllowed"&gt;true&lt;/Set&gt;
@@ -407,23 +399,11 @@ An explanation of the Jetty XML syntax can be found in the section on
 </tr>
 </tbody>
 </table>
+                       
 
-<br>
-<br>
-   The order in which the Jetty server applies the various XML configuration 
- files is:<br>
-                                                                        
-                                            
-                                        <ol>
-                                     <li><tt>webdefaults.xml</tt> which applies 
- to all web applications served by that server</li>
-                                     <li><tt>web.xml</tt> which applies to
- the particular web application</li>
-                                     <li><tt>web-jetty.xml</tt> which applies 
- to the particular web application <i>and must be expressed in the Jetty XML
- syntax</i><br>
-                                            </li>
-                                        </ol>
+
+
+
 <br>
 <br>
 <big><b><a name="security"></a>Web Application Security </b></big><br>
@@ -547,8 +527,6 @@ The Jetty configuration XML to do this to a webapplication is:
   &lt;Call name="addWebApplication"&gt;
     &lt;Arg&gt;/myapp/*&lt;/Arg&gt;
     &lt;Arg&gt;&lt;SystemProperty name="jetty.home" default="."/&gt;/demo/webapps/myapp&lt;/Arg&gt;
-    &lt;Arg&gt;&lt;SystemProperty name="jetty.home" default="."/&gt;/etc/webdefault.xml&lt;/Arg&gt;
-    &lt;Arg type="boolean"&gt;false&lt;/Arg&gt; 
     &lt;Call name="getServletHandler"&gt;
       &lt;Set name="sessionManager"&gt;
         &lt;New class="org.mortbay.jetty.servlet.HashSessionManager"&gt;

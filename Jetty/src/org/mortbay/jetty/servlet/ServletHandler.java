@@ -353,6 +353,9 @@ public class ServletHandler
     public synchronized void start()
         throws Exception
     {
+        if (isStarted())
+            return;
+        
         _httpContext=getHttpContext();
         
         _sessionManager.start();

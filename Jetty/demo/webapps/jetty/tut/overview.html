@@ -145,7 +145,7 @@ the Web Application Server</big></b></font></p>
           <tr>
             <td valign="top"><tt>Server server = new Server();<br>
        server.addListener(new InetAddrPort(8080));<br>
-       server.addWebApplication("/","./webapps/myapp/","./etc/webdefaults.xml");<br>
+       server.addWebApplication("/","./webapps/myapp/");<br>
        server.start();<br>
             </tt><br>
             <b>Code Example: Creating a Web Application Server</b><br>
@@ -181,7 +181,6 @@ above can be deployed by this XML configuration file:<br>
             <font size="-1"><big>      &lt;Call name="addWebApplication"&gt;</big></font><br>
             <font size="-1"><big>&nbsp; &lt;Arg&gt;/&lt;/Arg&gt;</big></font><br>
             <font size="-1"><big>&nbsp; &lt;Arg&gt;./webapps/myapp/&lt;/Arg&gt;</big></font><br>
-            <font size="-1"><big>&nbsp; &lt;Arg&gt;./etc/webdefault.xml/&lt;/Arg&gt;</big></font><br>
             <font size="-1"><big>      &lt;/Call&gt;</big></font><br>
             <br>
             <font size="-1"><big>    &lt;/Configure&gt;</big></font><br>
