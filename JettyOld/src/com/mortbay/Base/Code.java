@@ -357,6 +357,21 @@ public class Code
         }
     }
     
+    /*-------------------------------------------------------------------*/
+    /** Check assertion that a boolean is true. Logs and throws
+     * CodeException if
+     * the assertion fails.
+     * @param b The boolean to assert is true
+     * @throws CodeException Thrown if assertion fails
+     */
+    public static void assert(boolean b)
+    {
+        if (!b)
+        {
+            Log.message(Log.CODE_ASSERT, "", new Frame(1));
+            throw new CodeException("ASSERT FAILED!");
+        }
+    }
     
     /*-------------------------------------------------------------------*/
     /** Check assertion that a boolean is true. Logs and throws

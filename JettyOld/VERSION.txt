@@ -1,3 +1,11 @@
+Release 2.3.1 -
+  + Added assert with no message to Code
+  + Force UTF8 for FTP commands
+  + Force UTF8 for HTML 
+  + Changed demo servlets to use writers in preference to outputstreams
+  + NullHandler/Server default name.name.PROPERTIES to load prefix/name.name.properties
+  + Use UTF8 in HTTP headers
+
 Release 2.3.0 - 5th October 1999 - LATEST
   + Added SetUID class with native Unix call to set the 
     effective User ID.

@@ -207,9 +207,6 @@ public class Composite extends Element
     void flush(OutputStream out)
          throws IOException
     {
-        flush(new OutputStreamWriter(out));
+        flush(new OutputStreamWriter(out,"UTF8"));
     }
-
-    
 }
-

@@ -198,6 +198,20 @@ public class PropertyTree extends Properties
     }
     
     /* ------------------------------------------------------------ */
+    public StringBuffer getPrefix()
+    {
+        if (null == prefix)
+        {
+            StringBuffer sb = new StringBuffer();
+            String s = getProperty("ETC");
+            if (null != s) 
+                sb.append(s);
+            return sb;
+        }
+        return parent.getPrefix().append(prefix);
+    }
+
+    /* ------------------------------------------------------------ */
     public Enumeration propertyNames()
     {
         return keys();
@@ -529,14 +543,3 @@ public class PropertyTree extends Properties
         }
     }
 };
-
-
-
-
-
-
-
-
-
-
-

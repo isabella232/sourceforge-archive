@@ -501,7 +501,8 @@ public class HttpRequest extends HttpHeader
         Code.assert(httpServer!=null,"Not constructed with HttpServer");
         if (localThreadPool==null)
             localThreadPool=new ThreadPool(0,"LocalRequest");
-        
+
+        Code.debug("HandleRequestLocally()");
         final PipedInputStream in = new PipedInputStream();
         final PipedOutputStream out = new PipedOutputStream(in);
         final HttpResponse response = new HttpResponse(out,this);
@@ -864,24 +865,16 @@ public class HttpRequest extends HttpHeader
      */
     public String getCharacterEncoding ()
     {
-        String encoding = getHeader(ContentType);
-        if (encoding==null || encoding.length()==0)
+        String s = getHeader(ContentType);
+        try {
+            int i1 = s.indexOf("charset=",s.indexOf(';')) + 8;
+            int i2 = s.indexOf(' ',i1);
+            return (0 < i2) ? s.substring(i1,i2) : s.substring(i1);
+        }
+        catch (Exception e)
+        {
             return "ISO-8859-1";
-        
-        int i=encoding.indexOf(';');
-        if (i<0)
-            return "ISO-8859-1";
-        
-        i=encoding.indexOf("charset=",i);
-        if (i<0 || i+8>=encoding.length())
-            return "ISO-8859-1";
-            
-        encoding=encoding.substring(i+8);
-        i=encoding.indexOf(' ');
-        if (i>0)
-            encoding=encoding.substring(0,i);
-            
-        return encoding;
+        }
     }
     
     /* -------------------------------------------------------------- */
@@ -1142,8 +1135,18 @@ public class HttpRequest extends HttpHeader
         if (inputState!=0 && inputState!=2)
             throw new IllegalStateException();
         if (reader==null)
-            reader=new BufferedReader(new InputStreamReader(getInputStream()));
-        inputState=2;
+        {
+            try
+            {
+                reader=new BufferedReader(new InputStreamReader(getInputStream(),"UTF8"));
+            }
+            catch(UnsupportedEncodingException e)
+            {
+                Code.ignore(e);
+                reader=new BufferedReader(new InputStreamReader(getInputStream()));
+                inputState=2;
+            }
+        }
         return reader;
     }
 

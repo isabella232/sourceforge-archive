@@ -60,7 +60,7 @@ public class LookAndFeelServlet extends HttpServlet
     {
         try{
             response.setContentType("text/html");
-            OutputStream out = response.getOutputStream();
+            Writer out = response.getWriter();
 
             Page page = Page.getPage(pageType,request,response);
             
@@ -89,8 +89,9 @@ public class LookAndFeelServlet extends HttpServlet
             catch(FileNotFoundException ioe){
                 return;
             }
-            
+
             page.write(out);
+            out.flush();
         }
         catch(RuntimeException e){
             throw e;

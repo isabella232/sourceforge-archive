@@ -338,7 +338,7 @@ public class HtmlFilter extends HttpFilter
         {
             HttpRequest eRequest=
                 new HttpRequest(request.getHttpServer(),
-                                "GET",
+                                HttpRequest.GET,
                                 urlString);
             IO.copy(eRequest.handleRequestLocally(),out);
             eRequest.destroy();

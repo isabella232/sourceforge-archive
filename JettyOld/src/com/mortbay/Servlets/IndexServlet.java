@@ -76,8 +76,7 @@ public class IndexServlet extends HttpServlet
          throws ServletException, IOException
     {
         try{
-            OutputStream out = response.getOutputStream();
-            PrintWriter pout = new PrintWriter(out);
+            Writer out = response.getWriter();
 
             String address = request.getPathInfo()!=null
                 ?(request.getServletPath()+request.getPathInfo())
@@ -138,8 +137,8 @@ public class IndexServlet extends HttpServlet
             }
             page.add(Break.para);
         
-            page.write(pout);
-            pout.flush();
+            page.write(out);
+            out.flush();
         }
         catch(RuntimeException e){
             throw e;

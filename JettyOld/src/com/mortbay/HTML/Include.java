@@ -78,6 +78,9 @@ public class Include extends Element
     /* ------------------------------------------------------------ */
     /** Constructor.
      * Include InputStream.
+     * Byte to character transformation is done assuming the default
+     * local character set.  What this means is that on EBCDIC systems
+     * the included file is assumed to be in EBCDIC.
      * @param in stream
      * @exception IOException
      */

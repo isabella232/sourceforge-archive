@@ -166,7 +166,7 @@ public class HttpHeader
         com.mortbay.HTTP.HttpInputStream$CharBuffer cbuf;
         char[] lbuf=null;
         String last=null;
-        while ((cbuf=in.readCharBufferLine())!=(com.mortbay.HTTP.HttpInputStream$CharBuffer)null)
+        while ((cbuf=in.readCharBufferLine())!=null)
         {
             // check for empty line to end headers
             if (cbuf.size==0)
@@ -284,11 +284,10 @@ public class HttpHeader
     /* -------------------------------------------------------------- */
     /* Write Extra HTTP headers.
      */
-    protected void write(OutputStream out, String extra)
+    protected void write(Writer writer, String extra)
         throws IOException
     {
-        OutputStreamWriter writer = new OutputStreamWriter(out);
-        synchronized(out)   // Lock on the same object writer.write will use
+        synchronized(writer)   // Lock on the same object writer.write will use
         {
             int size=keys.size();
             for(int k=0;k<size;k++)
@@ -306,11 +305,7 @@ public class HttpHeader
                 writer.write(CRLF);
             }
             writer.write(CRLF);
-        
-            writer.flush();
         }
-    
-        out.flush();
     }
     
     
@@ -318,7 +313,16 @@ public class HttpHeader
     protected void write(OutputStream out)
     throws IOException
     {
-        write(out,null);
+        Writer writer=new OutputStreamWriter(out,"UTF8");
+        write(writer,null);
+        writer.flush();
+    }
+    
+    /* -------------------------------------------------------------- */
+    protected void write(Writer writer)
+    throws IOException
+    {
+        write(writer,null);
     }
     
     /* -------------------------------------------------------------- */
@@ -326,9 +330,9 @@ public class HttpHeader
     {
         try
         {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            write(bos);
-            return bos.toString();
+            StringWriter sw = new StringWriter();
+            write(sw,null);
+            return sw.toString();
         }
         catch(Exception e)
         {}

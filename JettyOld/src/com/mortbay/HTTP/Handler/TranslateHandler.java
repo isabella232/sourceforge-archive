@@ -107,11 +107,3 @@ public class TranslateHandler extends NullHandler
         return address;
     }
 }
-
-
-
-
-
-
-
-

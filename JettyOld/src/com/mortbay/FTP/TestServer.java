@@ -47,7 +47,7 @@ class TestServer extends Thread
             connection = listen.accept( );
             Code.debug("Test server connected");
             in = new LineInput(connection.getInputStream());
-            out = new OutputStreamWriter(connection.getOutputStream());
+            out = new OutputStreamWriter(connection.getOutputStream(),"UTF8");
             out.write(CmdReply.codeServiceReady+" OK\n");
             out.flush();
 
@@ -87,7 +87,7 @@ class TestServer extends Thread
             out.flush();
 
             Writer dataOut = new
-                OutputStreamWriter(dataConnection.getOutputStream());
+                OutputStreamWriter(dataConnection.getOutputStream(),"UTF8");
 
             Thread.sleep(1000);
             dataOut.write("How Now Brown Cow\n");
@@ -151,7 +151,7 @@ class TestServer extends Thread
             out.write(CmdReply.codeFileStatusOK+" Data port opened\n");
             out.flush();
 
-            dataOut = new OutputStreamWriter(dataConnection.getOutputStream());
+            dataOut = new OutputStreamWriter(dataConnection.getOutputStream(),"UTF8");
             dataOut.write("How Now Brown Cow\n");
             dataOut.flush();
             line = in.readLine();

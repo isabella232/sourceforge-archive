@@ -89,7 +89,7 @@ public abstract class Element
     public void write(OutputStream out)
          throws IOException
     {
-        Writer writer = new OutputStreamWriter(out);
+        Writer writer = new OutputStreamWriter(out,"UTF8");
         write(writer);
         writer.flush();
     }

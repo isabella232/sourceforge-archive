@@ -224,87 +224,97 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     public void writeHeaders() 
         throws IOException
     {
-        if (!headersWritten)
+        if (headersWritten)
+            return;
+        
+        // Add Date if not already there
+        if (getHeader(HttpHeader.Date)==null)
         {
-            // Add Date if not already there
-            if (getHeader(HttpHeader.Date)==null)
-            {
-                int s = Integer.parseInt(status);
-                if (s<100 || s>199)
-                    setDateHeader(HttpHeader.Date,new Date().getTime());
-            }
+            int s = Integer.parseInt(status);
+            if (s<100 || s>199)
+                setDateHeader(HttpHeader.Date,new Date().getTime());
+        }
 
             
-            // Tell anybody who wants to not headers are complete
-            // (e.g.. to activate filters by content-type)
-            if (observable!=null)
-            {
-                Code.debug("notify Observers");
-                observable.notifyObservers(this);
-            }
+        // Tell anybody who wants to not headers are complete
+        // (e.g.. to activate filters by content-type)
+        if (observable!=null)
+        {
+            Code.debug("notify Observers");
+            observable.notifyObservers(this);
+        }
             
-            // Should we chunk or close
-            if (HttpHeader.HTTP_1_1.equals(version))
-            {
-                String encoding = getHeader(HttpHeader.TransferEncoding);
-                String connection =getHeader(Connection);
-                String length = getHeader(HttpHeader.ContentLength);
+        // Should we chunk or close
+        if (HttpHeader.HTTP_1_1.equals(version))
+        {
+            String encoding = getHeader(HttpHeader.TransferEncoding);
+            String connection =getHeader(Connection);
+            String length = getHeader(HttpHeader.ContentLength);
                     
-                // chunk if we are told to
-                if (encoding!=null && encoding.equals(HttpHeader.Chunked))
+            // chunk if we are told to
+            if (encoding!=null && encoding.equals(HttpHeader.Chunked))
+            {
+                httpOut.setChunking(true);
+            }
+            // if we have no content length then ...
+            else if (length==null)
+            {
+                // if not closing and chunk by default
+                if (!(HttpHeader.Close.equals(connection))
+                    && chunkByDefault)
                 {
+                    // need to chunk
+                    setHeader(HttpHeader.TransferEncoding,
+                              HttpHeader.Chunked);
                     httpOut.setChunking(true);
-                }
-                // if we have no content length then ...
-                else if (length==null)
-                {
-                    // if not closing and chunk by default
-                    if (!(HttpHeader.Close.equals(connection))
-                        && chunkByDefault)
-                    {
-                        // need to chunk
-                        setHeader(HttpHeader.TransferEncoding,
-                                  HttpHeader.Chunked);
-                        httpOut.setChunking(true);
-                    }
-                    else
-                    {
-                        // have to close to mark the end
-                        setHeader(Connection,HttpHeader.Close);
-                    }
                 }
                 else
                 {
-                    // We have a content length, so we will not be
-                    // chunking, but we can be persistent, so we must
-                    // hide the next close.
-                    doNotClose=true;
+                    // have to close to mark the end
+                    setHeader(Connection,HttpHeader.Close);
                 }
             }
             else
             {
-                setHeader(Connection,HttpHeader.Close);
+                // We have a content length, so we will not be
+                // chunking, but we can be persistent, so we must
+                // hide the next close.
+                doNotClose=true;
             }
-            
-            
-            // Write the headers
-            Code.debug("Write Headers");
-            headersWritten=true;
-            handled=true;
-            out.write(getResponseLine().getBytes());
-            out.write(__CRLF);
-            if (cookies!=null)
-                super.write(out,cookies.toString());
-            else
-                super.write(out);
-
-            // Handle HEAD
-            if (request!=null && request.getMethod().equals("HEAD"))
-                // Fake a break in the HttpOutputStream
-                throw HeadException.instance;
-            
         }
+        else
+        {
+            setHeader(Connection,HttpHeader.Close);
+        }
+            
+            
+        // Write the headers
+        Code.debug("Write Headers");
+        headersWritten=true;
+        handled=true;
+        OutputStreamWriter writer = new OutputStreamWriter(out,"UTF8");
+        synchronized(writer)
+        {
+            writer.write(version);
+            writer.write(" ");
+            writer.write(status);
+            writer.write(" ");
+            writer.write(reason);
+            writer.write(CRLF);
+            
+            if (cookies!=null)
+                super.write(writer,cookies.toString());
+            else
+                super.write(writer);
+            writer.flush();
+        }
+        
+        // Handle HEAD
+        if (request!=null && request.getMethod().equals("HEAD"))
+            // Fake a break in the HttpOutputStream
+            throw HeadException.instance;
     }
+
     
     /* ------------------------------------------------------------- */
     /** Copy all data from an input stream to the HttpResponse.
@@ -649,8 +659,19 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     {
         if (outputState!=0 && outputState!=2)
             throw new IllegalStateException();
+        
         if (writer==null)
-            writer=new PrintWriter(new OutputStreamWriter(getOutputStream()));
+        {
+            try
+            {
+                writer=new PrintWriter(new OutputStreamWriter(getOutputStream(),getCharacterEncoding()));
+            }
+            catch(UnsupportedEncodingException e)
+            {
+                Code.warning(e);
+                writer=new PrintWriter(new OutputStreamWriter(getOutputStream()));
+            }
+        }
         outputState=2;
         return writer;
     }    

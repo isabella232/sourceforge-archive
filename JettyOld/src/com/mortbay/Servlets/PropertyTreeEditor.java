@@ -132,10 +132,9 @@ public class PropertyTreeEditor
             res.setContentType("application/x-java-properties; filename="+
                                filename);
             
-            OutputStream out = res.getOutputStream();
-            PrintWriter pout = new PrintWriter(out);
-            context.subtree.list(pout);
-            pout.flush();
+            PrintWriter out = new PrintWriter(res.getWriter());
+            context.subtree.list(out);
+            out.flush();
             context.page=null;
         }
         
@@ -374,11 +373,14 @@ public class PropertyTreeEditor
         if (context.page != null)
         {
             res.setContentType("text/html");
-            OutputStream out = res.getOutputStream();
-            PrintWriter pout = new PrintWriter(out);
-            context.page.write(pout);
-            pout.flush();
+            PrintWriter out = new PrintWriter(res.getWriter());
+            context.page.write(out);
+            out.flush();
         }
     }
     /* ------------------------------------------------------------ */
 };
+
+
+
+

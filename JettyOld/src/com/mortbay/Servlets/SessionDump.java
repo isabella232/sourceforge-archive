@@ -64,7 +64,6 @@ public class SessionDump extends HttpServlet
                       HttpServletResponse response) 
         throws ServletException, IOException
     {
-        PrintWriter pout = new PrintWriter(response.getOutputStream());
         Page page=Page.getPage(pageType,request,response);
         page.title("Session Dump Servlet");
         
@@ -121,9 +120,10 @@ public class SessionDump extends HttpServlet
                 page.add(tf);
             }
         }
-        
-        page.write(pout);
-        pout.flush();
+
+        Writer writer=response.getWriter();
+        page.write(writer);
+        writer.flush();
     }
 
     /* ------------------------------------------------------------ */

@@ -13,6 +13,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Writer;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
@@ -70,10 +71,9 @@ public class DispatchServlet extends HttpServlet
         }
         if (page != null){
             res.setContentType("text/html");
-            OutputStream out = res.getOutputStream();
-            PrintWriter pout = new PrintWriter(out);
-            page.write(pout);
-            pout.flush();
+            Writer writer = res.getWriter();
+            page.write(writer);
+            writer.flush();
         }
     }
     /* ------------------------------------------------------------ */

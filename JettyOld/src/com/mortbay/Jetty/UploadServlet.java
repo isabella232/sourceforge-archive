@@ -21,7 +21,7 @@ public class UploadServlet extends HttpServlet
         {
             String filename = mpr.getFilename("TF");
             LineNumberReader in = new LineNumberReader(
-                new InputStreamReader(mpr.getInputStream("TF")));
+                new InputStreamReader(mpr.getInputStream("TF"),"UTF8"));
             int lines=0;
             while (in.readLine()!=null)
                 lines++;
@@ -32,6 +32,6 @@ public class UploadServlet extends HttpServlet
         else
             page.add("No file uploaded.");
         
-        page.write(response.getOutputStream());
+        page.write(response.getWriter());
     }
 };

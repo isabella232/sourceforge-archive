@@ -110,7 +110,7 @@ public class EmbedUrl extends  Element
         try
         {
             skipHeader();
-            IO.copy(new InputStreamReader(replyStream),out);
+            IO.copy(new InputStreamReader(replyStream,"UTF8"),out);
             out.flush();
         }
         finally

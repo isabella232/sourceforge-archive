@@ -41,7 +41,7 @@ public class DefaultExceptionHandler implements ExceptionHandler
             
             PrintWriter pout=null;
             try{
-                pout=new PrintWriter(response.getOutputStream());
+                pout=new PrintWriter(response.getWriter());
             }
             catch(IllegalStateException ise)
             {

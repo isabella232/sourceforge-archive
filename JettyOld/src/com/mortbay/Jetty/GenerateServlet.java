@@ -38,6 +38,6 @@ public class GenerateServlet extends HttpServlet
         table.cell().attribute("COLSPAN","2");
         page.add(table);
         
-        page.write(response.getOutputStream());
+        page.write(response.getWriter());
     }
 }

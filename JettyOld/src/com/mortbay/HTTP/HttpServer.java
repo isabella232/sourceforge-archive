@@ -506,7 +506,8 @@ public class HttpServer implements ServletContext
             if (resourceBase==null)
             {
                 // Get request from this context
-                HttpRequest request = new HttpRequest(this,"GET",path);
+                HttpRequest request =
+                    new HttpRequest(this,HttpRequest.GET,path);
                 return request.handleRequestLocally();
             }
             else

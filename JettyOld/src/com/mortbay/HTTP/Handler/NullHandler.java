@@ -73,16 +73,27 @@ public class NullHandler implements HttpHandler
     protected static PropertyTree getProperties(PropertyTree props)
         throws IOException, FileNotFoundException
     {
-        PropertyTree properties=new PropertyTree();
-        String filename = props.getProperty("PROPERTIES");
-        if (filename!=null&&filename.length()>0)
-        {
-            Code.debug("Load ",filename);
-            properties.load(new BufferedInputStream(new FileInputStream(filename)));
+        PropertyTree properties = props.getTree("PROPERTY");
+        if (null == properties) {
+            properties = new PropertyTree();
         }
-        PropertyTree property= props.getTree("PROPERTY");
-        if (property!=null)
-            properties.load(property);
+        String filenameDefault = props.getPrefix().append("properties").toString();
+        String filename = props.getProperty("PROPERTIES");
+        if (null == filename)
+        {
+            // use default PROPERTIES file name
+            filename = filenameDefault;
+            if (!(new File(filename)).exists())
+                // use default filename
+                return properties;
+            
+        }
+        else if ((0 == filename.length()) || filename.equals("NONE"))
+            // no PROPERTIES file
+            return properties;
+        
+        Code.debug("Load ",filename);
+        properties.load(new BufferedInputStream(new FileInputStream(filename)));
         return properties;
     }
     

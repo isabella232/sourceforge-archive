@@ -85,8 +85,7 @@ public class MultiPartResponse
     {
         this.response=response;
         in = request.getInputStream();
-        outputStream=response.getOutputStream();
-        out=new OutputStreamWriter(response.getOutputStream());
+        out=response.getWriter();
 
         String ua = request.getHeader(HttpHeader.UserAgent);
         if (ua!=null && ua.indexOf("MSIE")>0)
