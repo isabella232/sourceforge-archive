@@ -117,26 +117,22 @@ public class ServletHttpRequest
     {
         _servletHandler=servletHandler;
         _pathInContext=pathInContext;
-        if (_pathInContext==null)
-        {
-            _servletPath=null;
-            _pathInfo=null;
-            _query=null;
-            _pathTranslated=null;
-            _sessionId=null;
-            _session=null;
-            _sessionIdState=__SESSIONID_NOT_CHECKED;
-            _in=null;
-            _reader=null;
-            _inputState=0;
-            _servletHolder=null;
-        }
-        else
-        {
+        _servletPath=null;
+        _pathInfo=null;
+        _query=null;
+        _pathTranslated=null;
+        _sessionId=null;
+        _session=null;
+        _sessionIdState=__SESSIONID_NOT_CHECKED;
+        _in=null;
+        _reader=null;
+        _inputState=0;
+        _servletHolder=null;
+
+        if (servletHandler!=null)
             _contextPath=_servletHandler.getHttpContext().getContextPath();
-            if (_contextPath.length()<=1)
+        if (_contextPath!=null&&_contextPath.length()<=1)
                 _contextPath="";
-        }
     }
     
     

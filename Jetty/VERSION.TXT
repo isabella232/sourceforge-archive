@@ -6,6 +6,8 @@ Jetty Versions
  + Removed jasper source and just include jars from 4.1.12
  + Worked around JVM1.3 bug for JSPs
  + Lowercase jsessionid for URLs only.
+ + Made NCSARequestLog easier to extend.
+ + Added definitions for RFC2518 WebDav response codes.
 
 Jetty-4.2.0rc1 - 2 November 2002
  + Support default mime mapping defined by *

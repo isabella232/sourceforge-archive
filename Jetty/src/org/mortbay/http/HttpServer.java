@@ -1273,12 +1273,20 @@ public class HttpServer implements LifeCycle,
     }
 
     /* ------------------------------------------------------------ */
+    /** Add a server event listener.
+     * Listeners are sent HttpServer.ComponentEvent instances when components
+     * such as listeners and contexts are added to the HttpServer.
+     * @param listener HttpServer.ComponentEventListener
+     */
     public void addEventListener(EventListener listener)
     {
         Code.debug("addEventListener: ",listener);
         if (_eventListeners==null)
             _eventListeners=new ArrayList();
-        _eventListeners.add(listener);
+        if (listener instanceof ComponentEventListener)
+            _eventListeners.add(listener);
+        else
+            Code.warning("Not a ComponentEventListener: "+listener);
     }
     
     /* ------------------------------------------------------------ */

@@ -305,10 +305,11 @@
   <!-- =============================================================== -->
   <Set name="RequestLog">
     <New class="org.mortbay.http.NCSARequestLog">
-      <Arg><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.request.log</Arg>
+      <Set name="filename"><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.request.log</Set>
+      <Set name="buffered">true</Set>
       <Set name="retainDays">90</Set>
       <Set name="append">true</Set>
-      <Set name="extended">false</Set>
+      <Set name="extended">true</Set>
       <Set name="LogTimeZone">GMT</Set>
       <Set name="ignorePaths">
         <Array type="String">

@@ -38,6 +38,7 @@ public class HttpResponse extends HttpMessage
       public final static int
           __100_Continue = 100,
           __101_Switching_Protocols = 101,
+          __102_Processing = 102,
           __200_OK = 200,
           __201_Created = 201,
           __202_Accepted = 202,
@@ -45,6 +46,7 @@ public class HttpResponse extends HttpMessage
           __204_No_Content = 204,
           __205_Reset_Content = 205,
           __206_Partial_Content = 206,
+          __207_Multi_Status = 207,
           __300_Multiple_Choices = 300,
           __301_Moved_Permanently = 301,
           __302_Moved_Temporarily = 302,
@@ -69,12 +71,16 @@ public class HttpResponse extends HttpMessage
           __415_Unsupported_Media_Type = 415,
           __416_Requested_Range_Not_Satisfiable = 416,
           __417_Expectation_Failed = 417,
+          __422_Unprocessable_Entity = 422,
+          __423_Locked = 423,
+          __424_Failed_Dependency = 424,
           __500_Internal_Server_Error = 500,
           __501_Not_Implemented = 501,
           __502_Bad_Gateway = 502,
           __503_Service_Unavailable = 503,
           __504_Gateway_Timeout = 504,
-          __505_HTTP_Version_Not_Supported = 505;
+          __505_HTTP_Version_Not_Supported = 505,
+          __507_Insufficient_Storage = 507;
 
           
     /* -------------------------------------------------------------- */

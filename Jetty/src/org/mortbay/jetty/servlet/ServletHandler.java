@@ -524,11 +524,10 @@ public class ServletHandler extends AbstractHttpHandler
             handleTrace(httpRequest,httpResponse);
             return;
         }
-        
-        // Check if this is re-entrant
+
+        // Look for existing request/response objects
         ServletHttpRequest request = (ServletHttpRequest) httpRequest.getWrapper();
         ServletHttpResponse response = (ServletHttpResponse) httpResponse.getWrapper();
-        boolean reentrant=false;
         if (request==null)
         {
             // Build the request and response.
@@ -537,16 +536,13 @@ public class ServletHandler extends AbstractHttpHandler
             httpRequest.setWrapper(request);
             httpResponse.setWrapper(response);
         }
-        else if (request.getPathInContext()==null)
+        else
         {
             // Recycled request
             request.recycle(this,pathInContext);
+            response.recycle();
         }
-        else
-        {
-            Code.warning("XXX - REENTRANT");
-            reentrant=true;
-        }
+        
         
         // Look for the servlet
         Map.Entry servlet=getHolderEntry(pathInContext);
@@ -555,26 +551,21 @@ public class ServletHandler extends AbstractHttpHandler
             
         try
         {
-            // Do the first time through stuff.
-            if (!reentrant)
+            // Adjust request paths
+            if (servlet!=null)
             {
-                // Adjust request paths
-                if (servlet!=null)
-                {
-                    String servletPathSpec=(String)servlet.getKey(); 
-                    request.setServletPaths(PathMap.pathMatch(servletPathSpec,pathInContext),
-                                            PathMap.pathInfo(servletPathSpec,pathInContext),
-                                            servletHolder);
-                }
-                
-                // Handle the session ID
-                request.setSessionId(pathParams);
-                HttpSession session=request.getSession(false);
-                if (session!=null)
-                    ((SessionManager.Session)session).access();
-                
-                Code.debug("session=",session);                
+                String servletPathSpec=(String)servlet.getKey(); 
+                request.setServletPaths(PathMap.pathMatch(servletPathSpec,pathInContext),
+                                        PathMap.pathInfo(servletPathSpec,pathInContext),
+                                        servletHolder);
             }
+            
+            // Handle the session ID
+            request.setSessionId(pathParams);
+            HttpSession session=request.getSession(false);
+            if (session!=null)
+                ((SessionManager.Session)session).access();
+            Code.debug("session=",session);
 
             // Do that funky filter and servlet thang!
             if (servletHolder!=null)
@@ -644,9 +635,6 @@ public class ServletHandler extends AbstractHttpHandler
                 if (!httpRequest.isHandled())
                     new Throwable().printStackTrace();
             }
-            
-            request.recycle(null,null);
-            response.recycle();
         }
     }
 
