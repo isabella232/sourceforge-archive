@@ -21,7 +21,6 @@ import org.mortbay.util.URI;
 
 /* ------------------------------------------------------------ */
 /** 
- * @see
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
