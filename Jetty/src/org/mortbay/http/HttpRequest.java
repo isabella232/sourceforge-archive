@@ -69,7 +69,7 @@ public class HttpRequest extends HttpMessage
      */
     public static int __maxFormContentSize=
         Integer.getInteger("org.mortbay.http.HttpRequest.maxFormContentSize",
-                           100000).intValue();
+                           200000).intValue();
     
     /* ------------------------------------------------------------ */
     /** Maximum header line length.
@@ -841,8 +841,18 @@ public class HttpRequest extends HttpMessage
                             ByteArrayOutputStream2 bout =
                                 new ByteArrayOutputStream2(content_length>0?content_length:4096);
                             InputStream in = getInputStream();
-                            int max=(content_length<0||content_length>__maxFormContentSize)
-                                ?__maxFormContentSize:content_length;
+                            int max=content_length;
+                            if (max<0)
+                                max=__maxFormContentSize;
+                            else if (max>__maxFormContentSize)
+                            {
+                                Code.warning("Form content truncated");
+                                max=__maxFormContentSize;
+                            }
+
+                            // Copy to a byte array.
+                            // XXX - this is very inefficient and we could
+                            // save lots of memory by streaming this!!!!
                             IO.copy(in,bout,max);
                             
                             byte[] content=bout.getBuf();
