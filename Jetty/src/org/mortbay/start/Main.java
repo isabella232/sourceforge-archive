@@ -27,6 +27,9 @@ import java.security.Policy;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
+
+import org.mortbay.util.IO;
+
 /*-------------------------------------------*/
 /**
  * Main start class. This class is intended to be the main class listed in the MANIFEST.MF of the
@@ -131,7 +134,7 @@ public class Main
             loader.loadClass(classname);
             return true;
         } 
-	catch(NoClassDefFoundError e) {}
+    catch(NoClassDefFoundError e) {}
         catch(ClassNotFoundException e) {}
         return false;
     }
@@ -408,16 +411,17 @@ public class Main
         }
         args=(String[])al.toArray(new String[al.size()]);
         // set up classpath:
+        InputStream cpcfg = null;
         try
         {
             Monitor.monitor();
-            InputStream cpcfg=getClass().getClassLoader().getResourceAsStream(_config);
+            
+            cpcfg=getClass().getClassLoader().getResourceAsStream(_config);
             if(_debug)
                 System.err.println("config="+_config);
             if(cpcfg==null)
                 cpcfg=new FileInputStream(_config);
             configure(cpcfg,args.length);
-            cpcfg.close();
             File file=new File(System.getProperty("jetty.home"));
             String canonical=file.getCanonicalPath();
             System.setProperty("jetty.home",canonical);
@@ -426,6 +430,10 @@ public class Main
         {
             e.printStackTrace();
             System.exit(1);
+        }
+        finally
+        {
+            IO.close(cpcfg);
         }
         // okay, classpath complete.
         System.setProperty("java.class.path",_classpath.toString());

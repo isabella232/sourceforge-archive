@@ -39,6 +39,7 @@ public class FilterHolder
 {
     /* ------------------------------------------------------------ */
     public static final int
+        __DEFAULT=0,
         __REQUEST=1,
         __FORWARD=2,
         __INCLUDE=4,
@@ -111,7 +112,7 @@ public class FilterHolder
     {
         if (_servlets==null)
             _servlets=new HashMap();
-        _servlets.put(servlet,new Integer(0));
+        _servlets.put(servlet,new Integer(__DEFAULT));
     }
     
     /* ------------------------------------------------------------ */
@@ -122,7 +123,7 @@ public class FilterHolder
     {
         if (_pathSpecs==null)
             _pathSpecs=new PathMap(true);
-        _pathSpecs.put(pathSpec,TypeUtil.newInteger(0));
+        _pathSpecs.put(pathSpec,TypeUtil.newInteger(__DEFAULT));
     }
     
     /* ------------------------------------------------------------ */
@@ -144,7 +145,7 @@ public class FilterHolder
         Integer t=(Integer)_pathSpecs.match(path);
         if (t==null)
             return false;
-        return (t.intValue()==0 && type==__REQUEST) || (t.intValue()&type)!=0;
+        return (t.intValue()==0 && type==__REQUEST) || (t.intValue()&type)!=__DEFAULT;
     }
     
     /* ------------------------------------------------------------ */

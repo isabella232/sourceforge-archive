@@ -20,6 +20,7 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.util.IO;
 import org.mortbay.util.LogSupport;
 
 /* ---------------------------------------------------------------- */
@@ -111,9 +112,10 @@ public class Image extends Tag
     {
         if (gif.canRead())
         {
+            FileInputStream in = null;
             try{
                 byte [] buf = new byte[10];
-                FileInputStream in = new FileInputStream(gif);
+                in = new FileInputStream(gif);
                 if (in.read(buf,0,10)==10)
                 {
                     if(log.isDebugEnabled())log.debug("Image "+gif.getName()+
@@ -127,6 +129,9 @@ public class Image extends Tag
             }
             catch (IOException e){
                 LogSupport.ignore(log,e);
+            }
+            finally {
+                IO.close(in);
             }
         }
         

@@ -278,6 +278,15 @@ public class MultiMap extends HashMap implements Cloneable
     /* ------------------------------------------------------------ */
     public Object clone()
     {
-	return super.clone();
+        MultiMap mm = (MultiMap) super.clone();
+        
+        Iterator iter = mm.entrySet().iterator();
+        while (iter.hasNext())
+        {
+            Map.Entry entry = (Map.Entry)iter.next();
+            entry.setValue(LazyList.clone(entry.getValue()));
+        }
+        
+        return mm;
     }
 }

@@ -278,6 +278,43 @@ public class IO extends ThreadPool
     {
         return __nullStream;
     }
+
+    /**
+     * closes an input stream, and logs exceptions
+     *
+     * @param is the input stream to close
+     */
+    public static void close(InputStream is)
+    {
+        try
+        {
+            if (is != null)
+                is.close();
+        }
+        catch (IOException e)
+        {
+            LogSupport.ignore(log,e);
+        }
+    }
+
+    /**
+     * closes an output stream, and logs exceptions
+     *
+     * @param os the output stream to close
+     */
+    public static void close(OutputStream os)
+    {
+        try
+        {
+            if (os != null)
+                os.close();
+        }
+        catch (IOException e)
+        {
+            LogSupport.ignore(log,e);
+        }
+    }
+
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */

@@ -254,6 +254,7 @@ public class Tests extends junit.framework.TestCase
 
     /* ------------------------------------------------------------ */
     public void testURI()
+        throws Exception
     {
         URI uri;
 

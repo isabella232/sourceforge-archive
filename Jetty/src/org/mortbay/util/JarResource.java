@@ -126,9 +126,16 @@ public class JarResource extends URLResource
                     dir.mkdirs();
 
                 // Make file
-                FileOutputStream fout = new FileOutputStream(file);
-                IO.copy(jin,fout);
-                fout.close();
+                FileOutputStream fout = null;
+                try
+                {
+                    fout = new FileOutputStream(file);
+                    IO.copy(jin,fout);
+                }
+                finally
+                {
+                    IO.close(fout);
+                }
 
                 // touch the file.
                 if (entry.getTime()>=0)

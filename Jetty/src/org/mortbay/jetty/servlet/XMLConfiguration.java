@@ -555,52 +555,59 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
     /* ------------------------------------------------------------ */
     protected void initSecurityConstraint(XmlParser.Node node)
     {
-        SecurityConstraint scBase=new SecurityConstraint();
-        XmlParser.Node auths=node.get("auth-constraint");
-        if(auths!=null)
+        try
         {
-            scBase.setAuthenticate(true);
-            // auth-constraint
-            Iterator iter=auths.iterator("role-name");
-            while(iter.hasNext())
+            SecurityConstraint scBase = new SecurityConstraint();
+            XmlParser.Node auths = node.get("auth-constraint");
+            if (auths != null)
             {
-                String role=((XmlParser.Node)iter.next()).toString(false,true);
-                scBase.addRole(role);
+                scBase.setAuthenticate(true);
+                // auth-constraint
+                Iterator iter = auths.iterator("role-name");
+                while (iter.hasNext())
+                {
+                    String role = ((XmlParser.Node) iter.next()).toString(false, true);
+                    scBase.addRole(role);
+                }
+            }
+            XmlParser.Node data = node.get("user-data-constraint");
+            if (data != null)
+            {
+                data = data.get("transport-guarantee");
+                String guarantee = data.toString(false, true).toUpperCase();
+                if (guarantee == null || guarantee.length() == 0 || "NONE".equals(guarantee))
+                    scBase.setDataConstraint(SecurityConstraint.DC_NONE);
+                else if ("INTEGRAL".equals(guarantee))
+                    scBase.setDataConstraint(SecurityConstraint.DC_INTEGRAL);
+                else if ("CONFIDENTIAL".equals(guarantee))
+                    scBase.setDataConstraint(SecurityConstraint.DC_CONFIDENTIAL);
+                else
+                {
+                    log.warn("Unknown user-data-constraint:" + guarantee);
+                    scBase.setDataConstraint(SecurityConstraint.DC_CONFIDENTIAL);
+                }
+            }
+            Iterator iter = node.iterator("web-resource-collection");
+            while (iter.hasNext())
+            {
+                XmlParser.Node collection = (XmlParser.Node) iter.next();
+                String name = collection.getString("web-resource-name", false, true);
+                SecurityConstraint sc = (SecurityConstraint) scBase.clone();
+                sc.setName(name);
+                Iterator iter2 = collection.iterator("http-method");
+                while (iter2.hasNext())
+                    sc.addMethod(((XmlParser.Node) iter2.next()).toString(false, true));
+                iter2 = collection.iterator("url-pattern");
+                while (iter2.hasNext())
+                {
+                    String url = ((XmlParser.Node) iter2.next()).toString(false, true);
+                    getWebApplicationContext().addSecurityConstraint(url, sc);
+                }
             }
         }
-        XmlParser.Node data=node.get("user-data-constraint");
-        if(data!=null)
+        catch (CloneNotSupportedException e)
         {
-            data=data.get("transport-guarantee");
-            String guarantee=data.toString(false,true).toUpperCase();
-            if(guarantee==null||guarantee.length()==0||"NONE".equals(guarantee))
-                scBase.setDataConstraint(SecurityConstraint.DC_NONE);
-            else if("INTEGRAL".equals(guarantee))
-                scBase.setDataConstraint(SecurityConstraint.DC_INTEGRAL);
-            else if("CONFIDENTIAL".equals(guarantee))
-                scBase.setDataConstraint(SecurityConstraint.DC_CONFIDENTIAL);
-            else
-            {
-                log.warn("Unknown user-data-constraint:"+guarantee);
-                scBase.setDataConstraint(SecurityConstraint.DC_CONFIDENTIAL);
-            }
-        }
-        Iterator iter=node.iterator("web-resource-collection");
-        while(iter.hasNext())
-        {
-            XmlParser.Node collection=(XmlParser.Node)iter.next();
-            String name=collection.getString("web-resource-name",false,true);
-            SecurityConstraint sc=(SecurityConstraint)scBase.clone();
-            sc.setName(name);
-            Iterator iter2=collection.iterator("http-method");
-            while(iter2.hasNext())
-                sc.addMethod(((XmlParser.Node)iter2.next()).toString(false,true));
-            iter2=collection.iterator("url-pattern");
-            while(iter2.hasNext())
-            {
-                String url=((XmlParser.Node)iter2.next()).toString(false,true);
-                getWebApplicationContext().addSecurityConstraint(url,sc);
-            }
+            log.fatal(e);
         }
     }
 

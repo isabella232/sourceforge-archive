@@ -30,7 +30,6 @@ import java.util.StringTokenizer;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.IO;
-import org.mortbay.util.LogSupport;
 import org.mortbay.util.Resource;
 
 /* ------------------------------------------------------------ */
@@ -111,9 +110,17 @@ public class ContextLoader extends URLClassLoader
                         jar.deleteOnExit();
                         if (log.isDebugEnabled())
                             log.debug("Extract " + resource + " to " + jar);
-                        FileOutputStream out= new FileOutputStream(jar);
-                        IO.copy(in, out);
-                        out.close();
+                        FileOutputStream out = null;
+                        try
+                        {
+                            out= new FileOutputStream(jar);
+                            IO.copy(in, out);
+                        }
+                        finally
+                        {
+                            IO.close(out);
+                        }
+
                         URL url= jar.toURL();
                         addURL(url);
                         _urlClassPath=

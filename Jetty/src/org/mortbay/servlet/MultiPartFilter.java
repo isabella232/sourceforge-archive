@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.util.IO;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringUtil;
@@ -152,83 +153,89 @@ public class MultiPartFilter implements Filter
             
             OutputStream out=null;
             File file=null;
-            if (filename!=null && filename.length()>0)
+            try
             {
-                file = File.createTempFile("MultiPart", "", tempdir);
-                out = new FileOutputStream(file);
-                request.setAttribute(name,file);
-                params.put(name, filename);
-            }
-            else
-                out=new ByteArrayOutputStream();
-            
-            int state=-2;
-            int c;
-            boolean cr=false;
-            boolean lf=false;
-            
-            // loop for all lines`
-            while(true)
-            {
-                int b=0;
-                while((c=(state!=-2)?state:in.read())!=-1)
+                if (filename!=null && filename.length()>0)
                 {
-                    state=-2;
-                    // look for CR and/or LF
-                    if(c==13||c==10)
+                    file = File.createTempFile("MultiPart", "", tempdir);
+                    out = new FileOutputStream(file);
+                    request.setAttribute(name,file);
+                    params.put(name, filename);
+                }
+                else
+                    out=new ByteArrayOutputStream();
+                
+                int state=-2;
+                int c;
+                boolean cr=false;
+                boolean lf=false;
+                
+                // loop for all lines`
+                while(true)
+                {
+                    int b=0;
+                    while((c=(state!=-2)?state:in.read())!=-1)
                     {
-                        if(c==13)
-                            state=in.read();
-                        break;
+                        state=-2;
+                        // look for CR and/or LF
+                        if(c==13||c==10)
+                        {
+                            if(c==13)
+                                state=in.read();
+                            break;
+                        }
+                        // look for boundary
+                        if(b>=0&&b<byteBoundary.length&&c==byteBoundary[b])
+                            b++;
+                        else
+                        {
+                            // this is not a boundary
+                            if(cr)
+                                out.write(13);
+                            if(lf)
+                                out.write(10);
+                            cr=lf=false;
+                            if(b>0)
+                                out.write(byteBoundary,0,b);
+                            b=-1;
+                            out.write(c);
+                        }
                     }
-                    // look for boundary
-                    if(b>=0&&b<byteBoundary.length&&c==byteBoundary[b])
-                        b++;
-                    else
+                    // check partial boundary
+                    if((b>0&&b<byteBoundary.length-2)||(b==byteBoundary.length-1))
                     {
-                        // this is not a boundary
                         if(cr)
                             out.write(13);
                         if(lf)
                             out.write(10);
                         cr=lf=false;
-                        if(b>0)
-                            out.write(byteBoundary,0,b);
+                        out.write(byteBoundary,0,b);
                         b=-1;
-                        out.write(c);
                     }
-                }
-                // check partial boundary
-                if((b>0&&b<byteBoundary.length-2)||(b==byteBoundary.length-1))
-                {
+                    // boundary match
+                    if(b>0||c==-1)
+                    {
+                        if(b==byteBoundary.length)
+                            lastPart=true;
+                        if(state==10)
+                            state=-2;
+                        break;
+                    }
+                    // handle CR LF
                     if(cr)
                         out.write(13);
                     if(lf)
                         out.write(10);
-                    cr=lf=false;
-                    out.write(byteBoundary,0,b);
-                    b=-1;
-                }
-                // boundary match
-                if(b>0||c==-1)
-                {
-                    if(b==byteBoundary.length)
-                        lastPart=true;
+                    cr=(c==13);
+                    lf=(c==10||state==10);
                     if(state==10)
                         state=-2;
-                    break;
                 }
-                // handle CR LF
-                if(cr)
-                    out.write(13);
-                if(lf)
-                    out.write(10);
-                cr=(c==13);
-                lf=(c==10||state==10);
-                if(state==10)
-                    state=-2;
             }
-            out.close();
+            finally
+            {
+                IO.close(out);
+            }
             
             if (file==null)
             {
