@@ -1,0 +1,153 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3c.org/TR/1999/REC-html401-19991224/loose.dtd"><html><head><!-- #BeginTemplate "/Templates/defaulttemplate.dwt" --><!-- #BeginEditable "doctitle" --><title>hsqldb at SourceForge.net</title><!-- #EndEditable -->
+ 
+
+
+
+
+<meta content="text/html; charset=windows-1252" http-equiv="Content-Type">
+<meta name="author" content="dedmike@users.sourceforge.net">
+<meta name="description" content="hsqldb: Full-featured 100% Java ORDBMS">
+<meta name="keywords" content="Java,, WWW, Java database, JDBC, RDBMS, SQL, Database, ORDBMS, hsqldb, HypersonicSQL">
+<meta name="robots" content="INDEX,NOFOLLOW">
+
+<link rel="contents" href="http://hsqldb.sourceforge.net/" title="hsqldb">
+<link href="http://hsqldb.sourceforge.net/" rel="copyright" title="Copyright by hsqldb Development Group"></head> 
+
+
+<body bgcolor="#ffffff" link="#0000ff" alink="#00ff00" vlink="#0000ff" text="#000000">
+<table border="1" summary="Navigation" width="100%" cellpadding="8" cellspacing="0">
+   <tbody><tr> 
+      <td> 
+         <a href="http://hsqldb.sourceforge.net/"><img border="0" alt="hsqldb.org Home Page" height="59" width="154" src="LICENSE.hsqldb_files/line-1.gif"></a>
+         <h2><a target="_top" href="http://hsqldb.sourceforge.net/index.html"><font color="#0000ff">hsqldb</font></a> 
+        - 100% Java 
+        Database</h2>
+         <p>Lightweight 100% Java SQL Database Engine<br>
+            <font size="-7">A Project of <a target="_top" href="http://hsqldb.sourceforge.net/">the 
+        hsqldb Development Team</a></font></p>
+         </td>
+      <td width="45%" valign="top"> 
+         <dl><dt><font size="-1">General </font> 
+            </dt><dd><font size="-1">&lt;<a target="_top" href="http://sourceforge.net/project/showfiles.php?group_id=23316&amp;release_id=117043">Download</a>&gt; 
+          &lt;<a target="_top" href="http://sourceforge.net/news/?group_id=23316">News</a>&gt;&lt;<a target="_top" href="http://sourceforge.net/projects/hsqldb">Project 
+          Page</a>&gt; &lt;<a target="_top" href="http://hsqldb.sourceforge.net/web/hsqlLicense.html">License</a>&gt; 
+          </font> 
+            </dd><dt><font size="-1">Contact and Support </font> 
+            </dt><dd><font size="-1"> &lt;<a target="_top" href="http://hsqldb.sourceforge.net/web/hsqlSupport.html">Support</a>&gt;  &lt;<a target="_top" href="http://hsqldb.sourceforge.net/web/hsqlFAQ.html">FAQ</a>&gt; 
+          </font> 
+            </dd><dt><font size="-1">Documentation and Development </font> 
+            </dt><dd><font size="-1">&lt;<a target="_top" href="http://hsqldb.sourceforge.net/web/hsqlFeatures.html">Features</a>&gt; 
+          &lt;<a target="_top" href="http://hsqldb.sourceforge.net/web/hsqlDocsFrame.html">Documentation</a>&gt; &lt;<a target="_top" href="http://hsqldb.sourceforge.net/web/hsqlDevelopment.html">Developers</a>&gt; &lt;<a target="_top" href="http://hsqldb.sourceforge.net/web/changelog.html">Changes</a>&gt; </font></dd></dl>
+      </td>
+   </tr>
+</tbody></table>
+ 
+<!-- #BeginEditable "body" -->
+ 
+<h2><b>COPYRIGHTS AND LICENSES</b></h2>
+<p align="left"> <br>
+  <br>
+  <b>This product includes Hypersonic SQL.<br>
+  </b></p>
+<h3 align="left"><b>ORIGINAL LICENSE (a.k.a. "hypersonic_lic.txt")</b></h3>
+<p align="left"><b>For content, code, and products originally developed by Thomas 
+  Mueller and the Hypersonic SQL Group:</b><br>
+  <br>
+  Copyright (c) 1995-2000 by the Hypersonic SQL Group. All rights reserved. <br>
+  Redistribution and use in source and binary forms, with or without modification, 
+  are permitted<br>
+  provided that the following conditions are met: <br>
+  - Redistributions of source code must retain the above copyright notice, this 
+  list of conditions<br>
+  and the following disclaimer. <br>
+  - Redistributions in binary form must reproduce the above copyright notice, 
+  this list of<br>
+  conditions and the following disclaimer in the documentation and/or other materials<br>
+  provided with the distribution. <br>
+  - All advertising materials mentioning features or use of this software must 
+  display the<br>
+  following acknowledgment: "This product includes Hypersonic SQL." 
+  <br>
+  - Products derived from this software may not be called "Hypersonic SQL" 
+  nor may<br>
+  "Hypersonic SQL" appear in their names without prior written permission 
+  of the<br>
+  Hypersonic SQL Group. <br>
+  - Redistributions of any form whatsoever must retain the following acknowledgment: 
+  "This<br>
+  product includes Hypersonic SQL." <br>
+  This software is provided "as is" and any expressed or implied warranties, 
+  including, but<br>
+  not limited to, the implied warranties of merchantability and fitness for a 
+  particular purpose are<br>
+  disclaimed. In no event shall the Hypersonic SQL Group or its contributors be 
+  liable for any<br>
+  direct, indirect, incidental, special, exemplary, or consequential damages (including, 
+  but<br>
+  not limited to, procurement of substitute goods or services; loss of use, data, 
+  or profits;<br>
+  or business interruption). However caused any on any theory of liability, whether 
+  in contract,<br>
+  strict liability, or tort (including negligence or otherwise) arising in any 
+  way out of the use of this<br>
+  software, even if advised of the possibility of such damage. <br>
+  This software consists of voluntary contributions made by many individuals on 
+  behalf of the<br>
+  Hypersonic SQL Group.<br>
+  <br>
+</p>
+<h3 align="left">For work added by the HSQL Development Group (a.k.a. hsqldb_lic.txt):</h3>
+<p><b>For content, code, and products subsequently developed by the hsqldb Development 
+Group:</b><br>
+</p>
+<p align="left">Copyright (c) 2001-2002, The HSQL Development Group<br>
+  All rights reserved.<br>
+  <br>
+  Redistribution and use in source and binary forms, with or without<br>
+  modification, are permitted provided that the following conditions are met:<br>
+  <br>
+  Redistributions of source code must retain the above copyright notice, this<br>
+  list of conditions and the following disclaimer, including earlier<br>
+  license statements (above) and comply with all above license conditions.<br>
+  <br>
+  Redistributions in binary form must reproduce the above copyright notice,<br>
+  this list of conditions and the following disclaimer in the documentation<br>
+  and/or other materials provided with the distribution, including earlier<br>
+  license statements (above) and comply with all above license conditions.<br>
+  <br>
+  Neither the name of the HSQL Development Group nor the names of its<br>
+  contributors may be used to endorse or promote products derived from this<br>
+  software without specific prior written permission.<br>
+  <br>
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS 
+  IS"<br>
+  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE<br>
+  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE<br>
+  ARE DISCLAIMED. IN NO EVENT SHALL HSQL DEVELOPMENT GROUP, HSQLDB.ORG, <br>
+  OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, <br>
+  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, <br>
+  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;<br>
+  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND<br>
+  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT<br>
+  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS<br>
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+<br>
+<a href="http://sourceforge.net/"> </a>
+<!-- #EndEditable -->
+ 
+<p> 
+ 
+<a href="http://sourceforge.net/"> <img alt="SourceForge Logo" border="0" height="32" width="95" src="LICENSE.hsqldb_files/sflogo.png"></a> 
+<!-- #BeginEditable "extralogo" --><!-- #EndEditable --> 
+</p><h6 align="center">
+  This page last updated <!-- #BeginEditable "update" -->8 December 2002<!-- #EndEditable --></h6>
+<h6 align="center">This product includes Hypersonic SQL.</h6>
+<h6>
+  Java is a Trademark of Sun Microsystems, Inc. (under various licenses). <i>Original 
+  contents © 1995-2000 <a target="_top" href="http://hsql.sourceforge.net/">The Hypersonic 
+  SQL Group.</a> Modifications of the original contents and all other contents 
+  of this page are ©2001-2002 <a target="_top" href="http://hsqldb.sourceforge.net/">The 
+  hsqldb Development Group.</a> All rights reserved under the terms of the applicable 
+  <a target="_top" href="http://hsqldb.sourceforge.net/web/hsqlLicense.html">Licenses</a>. Questions 
+  and comments about this page may be addressed to the <a href="mailto:dedmike@users.sourceforge.net">Webmaster</a>.</i></h6>
+<!-- #EndTemplate --></body></html>
