@@ -16,6 +16,7 @@ import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpOutputStream;
 import org.mortbay.http.HttpResponse;
@@ -60,50 +61,6 @@ public class ServletHttpResponse implements HttpServletResponse
         }
     }
     
-    private static Map __charSetMap = new HashMap();
-    static
-    {
-        // list borrowed from tomcat 3.2B6 - thanks guys.
-        __charSetMap.put("ar", "ISO-8859-6");
-        __charSetMap.put("be", "ISO-8859-5");
-        __charSetMap.put("bg", "ISO-8859-5");
-        __charSetMap.put("ca", StringUtil.__ISO_8859_1);
-        __charSetMap.put("cs", "ISO-8859-2");
-        __charSetMap.put("da", StringUtil.__ISO_8859_1);
-        __charSetMap.put("de", StringUtil.__ISO_8859_1);
-        __charSetMap.put("el", "ISO-8859-7");
-        __charSetMap.put("en", StringUtil.__ISO_8859_1);
-        __charSetMap.put("es", StringUtil.__ISO_8859_1);
-        __charSetMap.put("et", StringUtil.__ISO_8859_1);
-        __charSetMap.put("fi", StringUtil.__ISO_8859_1);
-        __charSetMap.put("fr", StringUtil.__ISO_8859_1);
-        __charSetMap.put("hr", "ISO-8859-2");
-        __charSetMap.put("hu", "ISO-8859-2");
-        __charSetMap.put("is", StringUtil.__ISO_8859_1);
-        __charSetMap.put("it", StringUtil.__ISO_8859_1);
-        __charSetMap.put("iw", "ISO-8859-8");
-        __charSetMap.put("ja", "Shift_JIS");
-        __charSetMap.put("ko", "EUC-KR");     
-        __charSetMap.put("lt", "ISO-8859-2");
-        __charSetMap.put("lv", "ISO-8859-2");
-        __charSetMap.put("mk", "ISO-8859-5");
-        __charSetMap.put("nl", StringUtil.__ISO_8859_1);
-        __charSetMap.put("no", StringUtil.__ISO_8859_1);
-        __charSetMap.put("pl", "ISO-8859-2");
-        __charSetMap.put("pt", StringUtil.__ISO_8859_1);
-        __charSetMap.put("ro", "ISO-8859-2");
-        __charSetMap.put("ru", "ISO-8859-5");
-        __charSetMap.put("sh", "ISO-8859-5");
-        __charSetMap.put("sk", "ISO-8859-2");
-        __charSetMap.put("sl", "ISO-8859-2");
-        __charSetMap.put("sq", "ISO-8859-2");
-        __charSetMap.put("sr", "ISO-8859-5");
-        __charSetMap.put("sv", StringUtil.__ISO_8859_1);
-        __charSetMap.put("tr", "ISO-8859-9");
-        __charSetMap.put("uk", "ISO-8859-5");
-        __charSetMap.put("zh", "GB2312");
-        __charSetMap.put("zh_TW", "Big5");    
-    }
     
     /* ------------------------------------------------------------ */
     private HttpResponse _httpResponse;
@@ -272,18 +229,21 @@ public class ServletHttpResponse implements HttpServletResponse
                JH: I think guessing should be exterminated as it makes no sense.
             */
         {
-            /* pick up encoding from map based on languge code */
-            String lang = locale.getLanguage();
-            String charset = (String)__charSetMap.get(lang);
-            if (charset != null && charset.length()>0)
+            HttpContext httpContext=_servletHttpRequest.getServletHandler().getHttpContext();
+            if (httpContext instanceof ServletHttpContext)
             {
-                int semi=type.indexOf(';');
-                if (semi<0)
-                    type += "; charset="+charset;
-                else
-                    type = type.substring(0,semi)+"; charset="+charset;
+                String charset = ((ServletHttpContext)httpContext).getLocaleEncoding(locale);
+                if (charset != null && charset.length()>0)
+                {
+                    int semi=type.indexOf(';');
+                    if (semi<0)
+                        type += "; charset="+charset;
+                    else
+                        type = type.substring(0,semi)+"; charset="+charset;
+                }
             }
-        }        
+        }
+        
         /* lets put updated MIME type back */
         setHeader(HttpFields.__ContentType,type);
     }

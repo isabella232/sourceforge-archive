@@ -319,6 +319,8 @@ public class WebApplicationContext
     {
         if (isStarted())
             return;
+        
+        setWelcomeFiles(null);
         _tagLibMap=new HashMap(3);
         
         // save context classloader
@@ -750,6 +752,8 @@ public class WebApplicationContext
             initMimeConfig(node);
         else if ("welcome-file-list".equals(element))
             initWelcomeFileList(node);
+        else if ("locale-encoding-mapping-list".equals(element))
+            initLocaleEncodingList(node);
         else if ("error-page".equals(element))
             initErrorPage(node);
         else if ("taglib".equals(element))
@@ -1028,7 +1032,6 @@ public class WebApplicationContext
     /* ------------------------------------------------------------ */
     protected void initWelcomeFileList(XmlParser.Node node)
     {
-        setWelcomeFiles(null);
         Iterator iter= node.iterator("welcome-file");
         while(iter.hasNext())
         {
@@ -1036,6 +1039,19 @@ public class WebApplicationContext
             String index=indexNode.toString(false,true);
             Code.debug("Index: ",index);
             addWelcomeFile(index);
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    protected void initLocaleEncodingList(XmlParser.Node node)
+    {
+        Iterator iter= node.iterator("locale-encoding-mapping");
+        while(iter.hasNext())
+        {
+            XmlParser.Node mapping=(XmlParser.Node)iter.next();
+            String locale= mapping.getString("locale",false,true);
+            String encoding= mapping.getString("encoding",false,true);
+            addLocaleEncoding(locale,encoding);
         }
     }
 

@@ -125,6 +125,8 @@ public class FormAuthenticator implements Authenticator
 
         // Setup session 
         HttpSession session=request.getSession(check);
+        if (session==null)
+            return null;
         
         // Handle a request for authentication.
         if ( uri.substring(uri.lastIndexOf("/")+1).startsWith(__J_SECURITY_CHECK) )

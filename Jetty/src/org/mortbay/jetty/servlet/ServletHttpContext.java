@@ -6,6 +6,8 @@
 package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Locale;
 import javax.servlet.ServletContext;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpRequest;
@@ -21,7 +23,9 @@ import org.mortbay.util.Code;
  * @author Greg Wilkins (gregw)
  */
 public class ServletHttpContext extends HttpContext
-{    
+{
+    private HashMap _localeEncodingMap  = new HashMap();
+    
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
@@ -137,6 +141,30 @@ public class ServletHttpContext extends HttpContext
             return false;
         
         return true;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void addLocaleEncoding(String locale,String encoding)
+    {
+        _localeEncodingMap.put(locale, encoding);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Get the character encoding for a locale. The full locale name is first
+     * looked up in the map of encodings. If no encoding is found, then the
+     * locale language is looked up. 
+     *
+     * @param locale a <code>Locale</code> value
+     * @return a <code>String</code> representing the character encoding for
+     * the locale or null if none found.
+     */
+    public String getLocaleEncoding(Locale locale)
+    {
+        String encoding = (String)_localeEncodingMap.get(locale.toString());
+        if (encoding==null)
+            encoding = (String)_localeEncodingMap.get(locale.getLanguage());
+        return encoding;
     }
     
     /* ------------------------------------------------------------ */
