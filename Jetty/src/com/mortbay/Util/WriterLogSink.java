@@ -358,45 +358,49 @@ public class WriterLogSink
     private void openFile(String filename)
         throws IOException
     {
-        try
+        synchronized(_stringBuffer)
         {
-            File file = new File(filename);
-            filename=file.getCanonicalPath();
-            file=new File(filename);
-            File dir= new File(file.getParent());
-            if (!dir.exists() && dir.canWrite())
-                throw new IOException("Cannot write log directory "+dir);
-
-            Date now=new Date();
-                
-            // Is this a rollover file?
-            int i=file.getName().toLowerCase().indexOf(YYYY_MM_DD);
-            if (i>=0)
+            try
             {
-                file=new File(dir,
-                              file.getName().substring(0,i)+
-                              _fileDateFormat.format(now)+
-                              file.getName().substring(i+YYYY_MM_DD.length()));
-                _rollover=new Rollover();
+                File file = new File(filename);
+                filename=file.getCanonicalPath();
+                file=new File(filename);
+                File dir= new File(file.getParent());
+                if (!dir.exists() && dir.canWrite())
+                    throw new IOException("Cannot write log directory "+dir);
+                
+                Date now=new Date();
+                
+                // Is this a rollover file?
+                int i=file.getName().toLowerCase().indexOf(YYYY_MM_DD);
+                if (i>=0)
+                {
+                    file=new File(dir,
+                                  file.getName().substring(0,i)+
+                                  _fileDateFormat.format(now)+
+                                  file.getName().substring(i+YYYY_MM_DD.length()));
+                    if (_rollover==null)
+                        _rollover=new Rollover();
+                }
+                
+                if (file.exists()&&!file.canWrite())
+                    throw new IOException("Cannot write log file "+file);
+                
+                if (!_append && file.exists())
+                    file.renameTo(new File(file.toString()+"."+__fileBackupFormat.format(now)));
+                
+                _out=new PrintWriter(new FileWriter(file.toString(),_append));
+                
+                if (_rollover!=null && !_rollover.isAlive())
+                    _rollover.start();
+            
             }
-            
-            if (file.exists()&&!file.canWrite())
-                throw new IOException("Cannot write log file "+file);
-
-            if (!_append && file.exists())
-                file.renameTo(new File(file.toString()+"."+__fileBackupFormat.format(now)));
-            
-            _out=new PrintWriter(new FileWriter(file.toString(),_append));
-            
-            if (_rollover!=null && !_rollover.isAlive())
-                _rollover.start();
-            
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-            _out=new PrintWriter(System.err);
-            throw e;
+            catch(IOException e)
+            {
+                e.printStackTrace();
+                _out=new PrintWriter(System.err);
+                throw e;
+            }
         }
     }
     
@@ -632,7 +636,7 @@ public class WriterLogSink
 
                     // Update the filename
                     openFile(_filename);
-                    Log.event("Log rolled over");
+                    Log.event("Rolled over "+_filename);
                 }
                 catch(InterruptedIOException e){break;}
                 catch(InterruptedException e){break;}

@@ -9,6 +9,7 @@ Jetty-3.0.0 - 17 Dec 2000
  + Optional extract war files.
  + Fixed WriterLogSink init bug
  + Use inner class to avoid double null check sync problems
+ + Fixed rollover bug in WriterLogSink
 
 Jetty-3.0.0.rc8 - 13 Dec 2000
  + Optional alias checking added to FileResource.  Turned on by default
