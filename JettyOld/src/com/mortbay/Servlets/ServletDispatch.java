@@ -154,13 +154,18 @@ public class ServletDispatch
 	       java.lang.IllegalAccessException,
 	       java.lang.InstantiationException
     {
-	if (path == null){
+	if (path == null)
+	{
 	    path = new Vector();
 	    String pathi = req.getPathInfo();
-	    StringTokenizer st = new StringTokenizer(pathi, "/");
-	    while (st.hasMoreTokens())
-		path.addElement(st.nextToken());
+	    if (pathi!=null)
+	    {
+		StringTokenizer st = new StringTokenizer(pathi, "/");
+		while (st.hasMoreTokens())
+		    path.addElement(st.nextToken());
+	    }
 	}
+	
 	if (path.size() == 0) 
 	    return doDefaultDispatch(obj, null, context, req, res);
 	String funcName = path.firstElement().toString();
