@@ -45,6 +45,8 @@ public class NCSARequestLogMBean extends LifeCycleMBean
         defineAttribute("logTimeZone");
         defineAttribute("retainDays");
         defineAttribute("extended");
+        defineAttribute("logCookies");
+        defineAttribute("logLatency");
         defineAttribute("append");
     }
 }

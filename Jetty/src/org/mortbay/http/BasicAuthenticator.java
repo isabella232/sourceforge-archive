@@ -42,11 +42,16 @@ public class BasicAuthenticator implements Authenticator
      * @exception IOException 
      */
     public Principal authenticate(UserRealm realm,
-                                           String pathInContext,
-                                           HttpRequest request,
-                                           HttpResponse response)
-        throws IOException
+            String pathInContext,
+            HttpRequest request,
+            HttpResponse response)
+    throws IOException
     {
+        
+        System.err.println("BASIC: q="+request.getQuery());
+        System.err.println("BASIC: t="+request.getParameter("test"));
+        
+        
         // Get the user if we can
         Principal user=null;
         String credentials = request.getField(HttpFields.__Authorization);
