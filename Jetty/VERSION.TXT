@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+Jetty-3.1.2 - 12 Oct 2001
  + Fixed authentication role handling in FORM auth.
  + Fixed double entry on PathMap.getMatches
  + Fixed FORM Authentication username.
