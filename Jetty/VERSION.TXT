@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.4rc0
  + Simplified ThreadedServer
  + Use ThreadLocals for ByteArrayPool to avoid synchronization.
  + Use Version to reset HttpFields
@@ -13,6 +14,8 @@ Jetty Versions
  + Limit form content size.
  + Handle = in param values.
  + Added HttpContext.flushCache
+ + Configurable root context.
+ + RootNotFoundHandler to help when no context found.
 
 Jetty-4.2.3 - 2 December 2002
  + Removed aggressive threadpool shrinkage to avoid deadlock on SMP machines. 
