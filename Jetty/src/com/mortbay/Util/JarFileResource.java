@@ -106,7 +106,7 @@ class JarFileResource extends Resource
             // Do we need to look more closely?
             if (jarFile!=null && _entry==null && !_directory)
             {
-                // OK - we have a FarFile, lets look at the entries for our path
+                // OK - we have a JarFile, lets look at the entries for our path
                 Enumeration e=jarFile.entries();
                 while(e.hasMoreElements())
                 {
@@ -160,7 +160,7 @@ class JarFileResource extends Resource
     /* ------------------------------------------------------------ */
     public String[] list()
     {
-        if(isDirectory() && _list==null)
+        if(isDirectory() && _list==null && checkConnection())
         {
             Enumeration e=_jarFile.entries();
             String dir=_urlString.substring(_urlString.indexOf("!/")+2);
