@@ -276,6 +276,8 @@ public class ResourceHandler extends NullHandler
                 handleOptions(response, pathInContext);
             else if (method.equals(HttpRequest.__MOVE))
                 handleMove(request, response, pathInContext, resource);
+            else if (method.equals(HttpRequest.__TRACE))
+                handleTrace(request, response);
             else
             {
                 Code.debug("Unknown action:"+method);

@@ -5,14 +5,20 @@
 
 package org.mortbay.http.handler;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import org.mortbay.http.ChunkableOutputStream;
+import org.mortbay.util.Code;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
+import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.util.Code;
 import org.mortbay.util.Log;
+import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
 /** Base HTTP Handler.
@@ -65,6 +71,26 @@ abstract public class NullHandler implements HttpHandler
         else if (_context!=context)
             throw new IllegalStateException("Can't initialize handler for different context");
     }
+
+
+    /* ----------------------------------------------------------------- */
+    public void handleTrace(HttpRequest request,
+                        HttpResponse response)
+        throws IOException
+    {
+        // Handle TRACE by returning request header
+        response.setField(HttpFields.__ContentType,
+                          HttpFields.__MessageHttp);
+        ChunkableOutputStream out = response.getOutputStream();
+        ByteArrayOutputStream buf = new ByteArrayOutputStream(2048);
+        Writer writer = new OutputStreamWriter(buf,StringUtil.__ISO_8859_1);
+        writer.write(request.toString());
+        writer.flush();
+        response.setIntField(HttpFields.__ContentLength,buf.size());
+        buf.writeTo(out);
+        request.setHandled(true);
+    }
+    
     
     /* ----------------------------------------------------------------- */
     public void start()

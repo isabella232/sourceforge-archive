@@ -10,12 +10,12 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import org.mortbay.http.ChunkableOutputStream;
+import org.mortbay.util.Code;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.util.Code;
 import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
@@ -75,21 +75,8 @@ public class NotFoundHandler extends NullHandler
         
         else if (method.equals(HttpRequest.__TRACE))
         {
-            // 9.8
-            // Handle TRACE by returning request header
-            response.setField(HttpFields.__ContentType,
-                              HttpFields.__MessageHttp);
-            ChunkableOutputStream out = response.getOutputStream();
-            ByteArrayOutputStream buf = new ByteArrayOutputStream(2048);
-            Writer writer = new OutputStreamWriter(buf,StringUtil.__ISO_8859_1);
-            writer.write(request.toString());
-            writer.flush();
-            response.setIntField(HttpFields.__ContentLength,buf.size());
-            buf.writeTo(out);
-            request.setHandled(true);
+            handleTrace(request,response);
         }
-
-        
         else
         {
             // Unknown METHOD

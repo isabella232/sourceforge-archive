@@ -1,5 +1,7 @@
 Jetty Versions
 --------------
+
+ + Common handling of TRACE 
  + Updated tutorial and FAQ
  + Reduce object count and add hash width to StringMap
  + Factor out RolloverFileOutputStream from OutputStreamLogSink
