@@ -286,7 +286,12 @@ fi
 #####################################################
 if [  -z "$JETTY_CONSOLE" ] 
 then
-  JETTY_CONSOLE=/dev/console
+  if [ -w /dev/console ]
+  then
+    JETTY_CONSOLE=/dev/console
+  else
+    JETTY_CONSOLE=/dev/tty
+  fi
 fi
 
 
