@@ -8,7 +8,7 @@ RCSEXISTS=no
 
 if [ "$CFG_REPOSITORY" = "" ]
 then
-   [ -d /projects/repository ] && CFG_REPOSITORY=/projects/repository
+   [ -d /home/repository ] && CFG_REPOSITORY=/home/repository
    [ "$CFG_REPOSITORY" = "" -a -d /usr/local/lib/cfg ] && \
    	CFG_REPOSITORY=/usr/local/lib/cfg
    [ "$CFG_REPOSITORY" = "" ] && CFG_REPOSITORY=/usr/local/repository
