@@ -16,6 +16,14 @@ Jetty-4.2.0rc0 - 24 October 2002
  + Added authenticator to admin.xml
  + Fixed Session timeout NPE.
 
+Jetty-4.0.6 - 24 October 2002
+ + Clear interrupted status in ThreadPool
+ + Fixed forward query string handling
+ + fixed forward attribute handling for jsp-file servlets
+ + Fixed setCharacterEncoding to work with getReader
+ + Fixed handling of relative sendRedirect after forward.
+ + Fixed virtual hosts temp directories.
+
 Jetty-4.2.0beta0 - 13 October 2002
  + New ThreadPool implementation.
  + New Buffering implementation.
