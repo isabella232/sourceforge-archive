@@ -92,7 +92,7 @@ release     - Cleanup for release
            destdir="${classes}"
            classpath="${classpath}"
            debug="on" 
-           optimize="on" 
+           optimize="off" 
            deprecation="off"
            >
       <include name="javax/servlet/**/*.java"/> 
@@ -177,7 +177,7 @@ release     - Cleanup for release
            destdir="${jetty.webapp.classes}"
            classpath="${jetty.jar};${servlet.jar}"
            debug="on" 
-           optimize="on" 
+           optimize="off" 
            deprecation="off" 
            >
       <include name="com/mortbay/Jetty/JettyPage.java" />

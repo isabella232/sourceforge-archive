@@ -1,6 +1,6 @@
 
 <H1>Review of Servlet Engines and Servlet Plugins</H1>
-The German computer 
+In early 2000,
 "<A HREF=http://www.heise.de/ix>iX Magazine</A>" did a testing on 6 servlet
 engines and servlet plugins. The candidates were:
 <UL>
@@ -14,36 +14,9 @@ engines and servlet plugins. The candidates were:
 The article was written by <a href="mailto:hs@tagtraum.com">Hendrik Schreiber
 &lt;hs@tagtraum.com&gt;</a> whose site is 
 <a HREF="http://www.tagtraum.com">http://www.tagtraum.com</a>. Hendrik developed
-the Jo java WWW server.
-<P>
-For the testing 3 different servlets were used and 4 different clients.
-<h3>Servlets:</h3>
-<NL>
-<LI>	A simple file servlet that is using the content-length header field
-when serving files. The served files were of different sizes: 1 Byte,
-100  Byte and 1, 10, 100, 1000 kByte. The number of requests for the
-different file sizes were chosen in a realistic distribution (0-1kByte
-35%, 1-10kByte 50%, 10-100kByte 14%, 100-1Mbyte 1%).
-<LI>	A "hello world" servlet (no content-length header)
-<LI>	A more complex servlet that is using most of the Servlet API 2.0
-methods (setting headers, cookies but no sessions).
-</NL>
-You will find the source code under: 
-<A HREF=ftp://ftp.heise.de/pub/ix/ix_listings/2000/01/>ftp://ftp.heise.de/pub/ix/ix_listings/2000/01/</A>
-<H3>Clients:</h3>
-<NL>
-<LI>	A basic HTTP 1.0 client
-<LI>	HTTP 1.0 with "Keep-Alive" (like Netscape 4.6)
-<LI>	HTTP 1.1 without Pipelining (IE 5.0)
-<LI>	HTTP 1.1 with Pipelining
-</NL>
-<h3>Hardware:</h3>
-4 clients, 1 server, 1 controller all the same hardware:
-PII 400MHz, 128Mbyte, Asus P2B, 100Mbit, NT4 SP5 
-
-<h3>Software:</h3>
-Sun's JDK 1.2.2 with JIT, restricted to 100 handler threads per machine. Unlike many other vendor benchmarks the test aimed at a high level of concurrency of up to 400 concurrent requests, in order to not only measure isolated, sequential roundtrip times, but a more realistic heavyload situation.
-
+the Jo java WWW server.   An <A HREF="#UPDATE">update</A> for the latest jetty is
+included below.
+<HR>
 
 <H3>Results:</h3>
 Results are the max requests per second reached, regardless of the used protocol. FileServlet results were weighed according to a real world distribution, APIMethodTest was only tested with a simple HTTP/1.0 client.
@@ -51,9 +24,9 @@ Results are the max requests per second reached, regardless of the used protocol
 <TABLE BORDER=1 CELLPADDING=1 CELLSPACING=0 WIDTH=600>
 <TR>
 <TH ALIGN=left VALIGN=top WIDTH=150>Server</TH>
-<TH ALIGN=left VALIGN=top WIDTH=105>FileServlet with Content-Length set</TH>
-<TH ALIGN=left VALIGN=top WIDTH=115>FileServlet without Content-Length header</TH>
-<TH ALIGN=left VALIGN=top WIDTH=135>HelloWorld servlet</TH>
+<TH ALIGN=left VALIGN=top WIDTH=105>FileServlet Content-Length</TH>
+<TH ALIGN=left VALIGN=top WIDTH=115>FileServlet&nbsp;no Content-Length</TH>
+<TH ALIGN=left VALIGN=top WIDTH=135>HelloWorld&nbsp;Servlet</TH>
 <TH ALIGN=left VALIGN=top WIDTH=98>APIMethodTest Servlet</TH>
 </TR>
 <TR>
@@ -100,6 +73,34 @@ Results are the max requests per second reached, regardless of the used protocol
 </TR>
 </TABLE>
 
+<h3>Servlets:</h3>
+<UL>
+<LI>	A simple file servlet that is using the content-length header field
+when serving files. The served files were of different sizes: 1 Byte,
+100  Byte and 1, 10, 100, 1000 kByte. The number of requests for the
+different file sizes were chosen in a realistic distribution (0-1kByte
+35%, 1-10kByte 50%, 10-100kByte 14%, 100-1Mbyte 1%).
+<LI>	A "hello world" servlet (no content-length header)
+<LI>	A more complex servlet that is using most of the Servlet API 2.0
+methods (setting headers, cookies but no sessions).
+</UL>
+You will find the source code under: 
+<A HREF=ftp://ftp.heise.de/pub/ix/ix_listings/2000/01/>ftp://ftp.heise.de/pub/ix/ix_listings/2000/01/</A>
+<H3>Clients:</h3>
+<UL>
+<LI>	A basic HTTP 1.0 client
+<LI>	HTTP 1.0 with "Keep-Alive" (like Netscape 4.6)
+<LI>	HTTP 1.1 without Pipelining (IE 5.0)
+<LI>	HTTP 1.1 with Pipelining
+</UL>
+<h3>Hardware:</h3>
+4 clients, 1 server, 1 controller all the same hardware:
+PII 400MHz, 128Mbyte, Asus P2B, 100Mbit, NT4 SP5 
+
+<h3>Software:</h3>
+Sun's JDK 1.2.2 with JIT, restricted to 100 handler threads per machine. Unlike many other vendor benchmarks the test aimed at a high level of concurrency of up to 400 concurrent requests, in order to not only measure isolated, sequential roundtrip times, but a more realistic heavyload situation.
+
+
 <h3>Discussion:</h3>
 In the end the pure java servers were twice as fast as the plugins.
 Jetty was the fastest servlet engine (Jigsaw was a bit faster with the
@@ -112,12 +113,30 @@ not get a response and Pipelining did not work properly. Additionally
 Jetty wrote some content in the language of the installed JDK, so the
 tests on the German installation with GET and the "If-Modified" header
 failed too.
-<P>
-<I>
-<h3>Jetty's Reply</h3>
-The bugs reported with If-Modified and interworking with IE 5.0 have
-been found and fixed as of Jetty-2.3.5.   The alpha releases of Jetty-3
-have complete implementation of HTTP/1.1 which is tested against
-RFC2616. Once Jetty-3 is integrated with a servlet engine in early 2000, it
-will provide even greater performance and flexibility than Jetty-2.
-</I>
+
+<HR>
+<HR>
+
+<A name="UPDATE"></A>
+<h3>Jetty Update</h3>
+<UL>
+<LI>All the Jetty problems described in the article have been fixed
+since Jetty-2.3.5 and Jetty-3.0.0.
+<LI>Jetty-3 has been implemented against RFC2616 and is fully HTTP/1.1 
+compliant.
+<LI>Jetty-3 has increased base throughput over Jetty-2 by about 15%.  This
+is without considering the other performance improvements from HTTP/1.1
+and the 2.3 servlet API including:<BR>
+&nbsp;+&nbsp;Persistent connections for most dynamic content.<BR>
+&nbsp;+&nbsp;Range support for partial GET's.<BR>
+&nbsp;+&nbsp;Request forwarding removes need for many client redirects.<BR>
+<LI>Jetty-3 has yet to be thoroughly independantly tested against the latest
+breed of Servlet containers - but we are more than happy to contribute to
+any such effort.
+<LI>The Jetty-3 footprint has remained small. A complete HTTP server and servlet container
+can be contained in a 250KB jar file. Just an extensible HTTP/1.1 server is only a
+170KB jar file.
+</UL>
+
+
+

@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-3.0.2 - 
+Jetty-3.0.2 - 13 Jan 2001
  + Replaced ResourceHandler FIFO cache with LRU cache.
  + Greatly improved buffering in ChunkableOutputStream
  + Padded error bodies for IE bug.
@@ -13,6 +13,7 @@ Jetty-3.0.2 -
  + Removed classloading stats which were causing circular class loading problems.
  + Allow '+' in path portion of a URL.
  + Try ISO8859_1 encoding if can't find ISO-8859-1
+ + Restructured demo site pages.
 
 Jetty-3.0.1 - 20 Dec 2000
  + Fixed value unbind notification for session invalidation. 

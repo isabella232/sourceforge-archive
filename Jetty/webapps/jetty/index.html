@@ -9,20 +9,19 @@ any Java application.
 <UL>
   <LI><A HREF="#Java">100% Java</A>
   <LI><A HREF="#Open">Open Source</A>
+  <LI><A HREF="#HTTP11">HTTP Protocol 1.1</A>
   <LI><A HREF="#Servlets">Servlet API 2.2</A>
-  <LI><A HREF="#HTTP11">HTTP/1.1 Protocol</A>
-  <LI><A HREF="#Embeddable">Embeddable</A>
   <LI><A HREF="#JSP">Java Server Pages 1.1</A>
   <LI><A HREF="#SSL">SSL Support</A>
 </UL>
 </TD><TD VALIGN=top>
 <UL>
-  <LI><A HREF="#Modular">Modular Architecture</A>
+  <LI><A HREF="#Modular">Modular Architecture</A>  
+  <LI><A HREF="#Embeddable">Embeddable</A>
   <LI><A HREF="#Efficient">Small & Efficient</A>
-  <LI><A HREF="#Filtering">Response Filtering</A>
   <LI><A HREF="#Config">Flexible Configuration</A>
-  <LI><A HREF="#Util">Utility Classes</A>
   <LI><A HREF="#HTML">HTML Generation</A>.
+  <LI><A HREF="#EJB">EJB Integration</A>.
 </UL>
 </TD></TR>
 </TABLE>
@@ -117,60 +116,22 @@ Jetty has a <A HREF="JsseSSL.html">SunJsseListener</A> which uses Sun's JSSE ref
 <BR>&nbsp;<H3>Small & Efficient</H3>
 Jetty has been optimized by commercial and experimental use since 1995 and
 a small and efficient server is the result: <UL>
-  <LI>A full featured server can be configured in a jar file under 100KB.
+  <LI>A full featured server can be configured in a jar file under 200KB.
   <LI>Optimized parsing is performed on requests.
   <LI>Minimal Object and thread creation.
   <LI>Server performance degrades gracefully under stress.
 </UL>
-
 
 <A NAME="Config"></A>
 <BR>&nbsp;<H3>Flexible Configuration</H3>       
 Jetty has been designed to highly configurable and flexible. It can be used
 as a stand-alone server running application servlets or it can be embedded
 in java application to provide a WWW interface to the services that they
-provide.  The configuration of a server is controlled by an abstract
-interface of which there are several implementations:<UL>
-  <LI>Property file driven configuration.
-  <LI>Dynamic loading of servlets from path.
-  <LI>Dedicated File Serving from current directory.
-  <LI>Interpretation of other common server configuration files.
-  <LI>Application specific configuration implementations.
+provide.  The configuration of a server is controlled by:<UL>
+  <LI>J2EE deployment descriptors.
+  <LI>Direct API calls.
+  <LI>XML configuration.
 </UL>
-
-
-
-<A NAME="Filtering"></A>
-<BR>&nbsp;<H3>Response Filtering</H3>
-Jetty provides a mechanism to allow filters to be conditionally inserted
-into the output stream of a response to a request.  These filters, which
-are activated on content type, allow pages arbitrary changes to be made to
-responses that may have been generated, retrieved from a file or even
-fetched from another server.
-<p>
-Jetty provides a filter for HTML which can use reflection to execute
-Java method calls embedded in specially formatted HTML comments.
-This is allows dynamic content to be added to pages that have been
-statically authored or generated elsewhere.
-Support is provided to use this mechanism for server side includes and
-URL embedding.
-
-
-
-<A NAME="Util"></A>
-<BR>&nbsp;<H3>Utility Classes </B></BR> 
-Bundled with Jetty are several utility packages which form a good basis
-for a Java software infrastructure for WWW development, including:
-<UL>
-  <LI><A HREF=/javadoc/com/mortbay/Util/Code.html>Code debugging, asserts, warnings and event logging</A>.
-  <LI><A HREF=/javadoc/com/mortbay/Util/Test.html>Test harness for automated regression testing</A>.
-  <LI><A HREF=/javadoc/com/mortbay/FTP/package-summary.html>FTP client package</A>.
-  <LI><A HREF=/javadoc/com/mortbay/HTML/package-summary.html>HTML Generation</A>.
-  <LI><A HREF=/javadoc/com/mortbay/JDBC/package-summary.html>JDBC wrappers</A>.
-  <LI><A HREF=/javadoc/com/mortbay/Util/package-summary.html>Property Tree files</A>.
-  <LI><A HREF=/javadoc/com/mortbay/Util/package-summary.html>Net and IO utilities</A>.
-</UL>
-
 
 <A NAME="HTML"></A>
 <BR>&nbsp;<H3>HTML Generation</H3>
@@ -182,3 +143,10 @@ from a database.
 Jetty comes with a rich HTML generation package that can be used on its
 own, with another servlet server or in Jetty servlets. Supported for
 templated look and feel is a key element of this package.
+
+<A NAME="EJB"></A>
+<BR>&nbsp;<H3>EJB Integration</H3>
+Jetty has been wrapped as a JMX module for the <A HREF="www.jboss.org">JBoss</A> EJB 
+application server. This gives a complete J2EE container with 
+HTTP, Servlets, JSPs and EJBs all within a single JVM.
+
