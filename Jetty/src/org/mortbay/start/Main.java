@@ -130,9 +130,9 @@ public class Main
         {
             loader.loadClass(classname);
             return true;
-        }
-        catch(ClassNotFoundException e)
-        {}
+        } 
+	catch(NoClassDefFoundError e) {}
+        catch(ClassNotFoundException e) {}
         return false;
     }
 

@@ -488,11 +488,8 @@
           description="Build the distribution archives">
     <mkdir dir="${dist}"/>
     
-
-    <tar tarfile="${dist}/jetty-${RELEASE.MAJOR.MINOR}.tar.gz" 
-         compression="gzip"
-         longfile="gnu">
-      <tarfileset 
+    <zip destfile="${dist}/jetty-${RELEASE.MAJOR.MINOR}.tar.gz" >
+      <zipfileset 
        dir="${basedir}"
        prefix="jetty-${RELEASE.MAJOR.MINOR}/"> 
         <include name="LICENSE.TXT"/>
@@ -512,16 +509,11 @@
         <include name="etc/commons-logging.properties"/> 
         <include name="etc/simplelog.properties"/>         
         <exclude name="**/CVS/**"/>
-      </tarfileset>
+      </zipfileset>
     </tar>
-    
 
-    <tar 
-     tarfile="${dist}/jetty-${RELEASE.MAJOR.MINOR}-extra.tar.gz" 
-     compression="gzip"
-     longfile="gnu"
-    >
-      <tarfileset 
+    <zip destfile="${dist}/jetty-${RELEASE.MAJOR.MINOR}-extra.zip" >
+      <zipfileset 
        dir="${basedir}"
        prefix="jetty-${RELEASE.MAJOR.MINOR}/">   
         <include name="demo/**"/>   
@@ -532,16 +524,11 @@
         <exclude name="extra/**/src/**"/>  
         <exclude name="**/CVS/**"/>
         <exclude name="**/logs/*.log"/>
-      </tarfileset>
+      </zipfileset>
     </tar>
 
-
-    <tar 
-     tarfile="${dist}/jetty-${RELEASE.MAJOR.MINOR}-src.tar.gz" 
-     compression="gzip"
-     longfile="gnu"
-    >
-      <tarfileset 
+    <zip destfile="${dist}/jetty-${RELEASE.MAJOR.MINOR}-src.zip" >
+      <zipfileset 
        dir="${basedir}"
        prefix="jetty-${RELEASE.MAJOR.MINOR}/">
         <include name="src/**"/>
@@ -551,23 +538,9 @@
         <include name="ant.properties"/>
         <exclude name="**/CVS/**"/>
         <exclude name="**/logs/*.log"/>
-      </tarfileset>
+      </zipfileset>
     </tar>
  
-
-    <tar tarfile="${dist}/jetty-${RELEASE.MAJOR.MINOR}-all.tar.gz" 
-         compression="gzip"
-         longfile="gnu">
-      <tarfileset 
-       dir="${basedir}"
-       prefix="jetty-${RELEASE.MAJOR.MINOR}/">
-        <exclude name="dist/**"/>
-        <exclude name="**/CVS/**"/>
-        <exclude name="**/logs/*.log"/>
-        <exclude name="testdocs/**"/>
-      </tarfileset>
-    </tar>
-
     <zip destfile="${dist}/jetty-${RELEASE.MAJOR.MINOR}-all.zip">
       <zipfileset 
        dir="${basedir}"
