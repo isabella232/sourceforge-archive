@@ -7,7 +7,9 @@ package org.mortbay.util;
 
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -314,5 +316,6 @@ public class DateCache
     public String getFormatString()
     {
         return _formatString;
-    }    
+    } 
+    
 }

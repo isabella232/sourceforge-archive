@@ -11,7 +11,7 @@ import junit.framework.TestSuite;
 /* ------------------------------------------------------------ */
 /** Util meta JUnitTestHarness.
  * @version $Id$
- * @author Juancarlo Añez <juancarlo@modelistica.com>
+ * @author Juancarlo Aï¿½ez <juancarlo@modelistica.com>
  */
 public class Tests extends junit.framework.TestCase
 {
@@ -32,8 +32,18 @@ public class Tests extends junit.framework.TestCase
       junit.textui.TestRunner.run(suite());
     }
 
-    public void testPlaceHolder()
+    public void testISODate()
     {
+      System.err.println(HttpFields.formatDate(System.currentTimeMillis(),  true));
+      System.err.println(HttpFields.formatDate(System.currentTimeMillis(), false));
+
+      assertEquals("Thu, 01 Jan 1970 00:00:00 GMT",HttpFields.formatDate(0,false));
+      assertEquals("Thu, 01-Jan-70 00:00:01 GMT",HttpFields.formatDate(1000,true));
+
+      assertEquals("Thu, 01 Jan 1970 00:01:00 GMT",HttpFields.formatDate(60000,false));
+      assertEquals("Thu, 01-Jan-70 00:01:01 GMT",HttpFields.formatDate(61000,true));
+      
+      
       assertTrue(true);
     }
 }

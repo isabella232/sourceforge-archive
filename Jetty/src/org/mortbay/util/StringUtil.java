@@ -243,6 +243,16 @@ public class StringUtil
     }
     
     /* ------------------------------------------------------------ */
+    public static void append2digits(StringBuffer buf,int i)
+    {
+        if (i<100)
+        {
+            buf.append((char)(i/10+'0'));
+            buf.append((char)(i%10+'0'));
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Return a non null string.
      * @param s String
      * @return The string passed in or empty string if it is null. 

@@ -95,13 +95,12 @@ public class SessionDump extends HttpServlet
     {
         response.setContentType("text/html");
         Page page= new Page();
-        
-        page.title("Session Dump Servlet");        
-        
+
         HttpSession session = request.getSession(getURI(request).indexOf("new")>0);
         
-        TableForm tf =
-            new TableForm(response.encodeURL(getURI(request)));
+        page.title("Session Dump Servlet: ");        
+        
+        TableForm tf = new TableForm(response.encodeURL(getURI(request)));
         tf.method("POST");
         
         if (session==null)
@@ -112,7 +111,7 @@ public class SessionDump extends HttpServlet
         else
         {
             try
-            {
+            {   
                 tf.addText("ID",session.getId());
                 tf.addText("State",session.isNew()?"NEW":"Valid");
                 tf.addText("Creation",
@@ -122,6 +121,8 @@ public class SessionDump extends HttpServlet
                 tf.addText("Max Inactive",
                            ""+session.getMaxInactiveInterval());
 
+                tf.addText("Context",""+session.getServletContext());
+                
                 Enumeration keys=session.getAttributeNames();
                 while(keys.hasMoreElements())
                 {

@@ -67,8 +67,8 @@ public class ExpiryHandler extends AbstractHttpHandler
         if (_ttl<0)
             expires=HttpFields.__01Jan1970;
         else
-            expires=HttpFields.__dateSend
-                    .format(new Date(System.currentTimeMillis()+1000L*_ttl));
+            expires=HttpFields.formatDate
+              (System.currentTimeMillis()+1000L*_ttl,false);
         response.setField(HttpFields.__Expires,expires);
     }
 }
