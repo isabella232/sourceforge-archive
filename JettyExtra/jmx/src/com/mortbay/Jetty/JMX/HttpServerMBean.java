@@ -55,14 +55,25 @@ public class HttpServerMBean extends LifeCycleMBean
      * @exception MBeanException 
      * @exception InstanceNotFoundException 
      */
-    public HttpServerMBean()
+    protected HttpServerMBean(Server jettyServer)
         throws MBeanException, InstanceNotFoundException
     {
         super(null);
-        _jettyServer=new Server();
+        _jettyServer=jettyServer;
         _jettyServer.addBeanContextMembershipListener(this);
         try{setManagedResource(_jettyServer,"objectReference");}
         catch(InvalidTargetObjectTypeException e){Code.warning(e);}
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @exception MBeanException 
+     * @exception InstanceNotFoundException 
+     */
+    public HttpServerMBean()
+        throws MBeanException, InstanceNotFoundException
+    {
+        this(new Server());
     }
 
     /* ------------------------------------------------------------ */
