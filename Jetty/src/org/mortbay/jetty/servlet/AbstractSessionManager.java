@@ -67,6 +67,7 @@ public abstract class AbstractSessionManager implements SessionManager
     
     /* ------------------------------------------------------------ */
     public final static int __distantFuture = 60*60*24*7*52*20;
+    private final static String __NEW_SESSION_ID="org.mortbay.jetty.newSessionId";
 
     /* ------------------------------------------------------------ */
     /* global Map of ID to session */
@@ -188,7 +189,9 @@ public abstract class AbstractSessionManager implements SessionManager
             // in this server and thus we are doing a cross context dispatch.
             if (_useRequestedId)
             {
-                String requested_id=request.getRequestedSessionId();
+                String requested_id=(String)request.getAttribute(__NEW_SESSION_ID);
+                if (requested_id==null)
+                    requested_id=request.getRequestedSessionId();
                 if (requested_id !=null && 
                     requested_id!=null && __allSessions.containsKey(requested_id) && !_sessions.containsKey(requested_id))
                 return requested_id;
@@ -238,7 +241,9 @@ public abstract class AbstractSessionManager implements SessionManager
         for(int i=0;i<_sessionListeners.size();i++)
             ((HttpSessionListener)_sessionListeners.get(i))
             .sessionCreated(event);
-           
+        
+        if (getUseRequestedId())
+            request.setAttribute(__NEW_SESSION_ID, session.getId());
         return session;
     }
 

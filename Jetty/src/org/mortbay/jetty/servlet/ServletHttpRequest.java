@@ -89,7 +89,7 @@ public class ServletHttpRequest
     private String _pathInfo=null;
     private String _query=null;
     private String _pathTranslated=null;
-    private String _sessionId=null;
+    private String _requestedSessionId=null;
     private HttpSession _session=null;
     private String _sessionIdState=__SESSIONID_NOT_CHECKED;
     private ServletIn _in =null;
@@ -123,7 +123,7 @@ public class ServletHttpRequest
         _pathInfo=null;
         _query=null;
         _pathTranslated=null;
-        _sessionId=null;
+        _requestedSessionId=null;
         _session=null;
         _sessionIdState=__SESSIONID_NOT_CHECKED;
         _in=null;
@@ -418,9 +418,9 @@ public class ServletHttpRequest
     }
     
     /* ------------------------------------------------------------ */
-    void setSessionId(String pathParams)
+    void setRequestedSessionId(String pathParams)
     {
-        _sessionId=null;
+        _requestedSessionId=null;
         
         // try cookies first
         if (_servletHandler.isUsingCookies())
@@ -432,20 +432,20 @@ public class ServletHttpRequest
                 {
                     if (SessionManager.__SessionCookie.equalsIgnoreCase(cookies[i].getName()))
                     {
-                        if (_sessionId!=null)
+                        if (_requestedSessionId!=null)
                         {
                             // Multiple jsessionid cookies. Probably due to
                             // multiple paths and/or domains. Pick the first
                             // known session or the last defined cookie.
                             SessionManager manager = _servletHandler.getSessionManager();
-                            if (manager!=null && manager.getHttpSession(_sessionId)!=null)
+                            if (manager!=null && manager.getHttpSession(_requestedSessionId)!=null)
                                 break;
                             log.debug("multiple session cookies");
                         }
                         
-                        _sessionId=cookies[i].getValue();
+                        _requestedSessionId=cookies[i].getValue();
                         _sessionIdState = __SESSIONID_COOKIE;
-                        if(log.isDebugEnabled())log.debug("Got Session "+_sessionId+" from cookie");
+                        if(log.isDebugEnabled())log.debug("Got Session "+_requestedSessionId+" from cookie");
                     }
                 }
             }
@@ -458,23 +458,23 @@ public class ServletHttpRequest
                 pathParams.substring(SessionManager.__SessionURL.length()+1);
             if(log.isDebugEnabled())log.debug("Got Session "+id+" from URL");
             
-            if (_sessionId==null)
+            if (_requestedSessionId==null)
             {
-                _sessionId=id;
+                _requestedSessionId=id;
                 _sessionIdState = __SESSIONID_URL;
             }
-            else if (!id.equals(_sessionId))
+            else if (!id.equals(_requestedSessionId))
                 log.debug("Mismatched session IDs");
         }
         
-        if (_sessionId == null)
+        if (_requestedSessionId == null)
             _sessionIdState = __SESSIONID_NONE;        
     }
     
     /* ------------------------------------------------------------ */
     public String getRequestedSessionId()
     {
-        return _sessionId;
+        return _requestedSessionId;
     }
     
     /* ------------------------------------------------------------ */
@@ -547,7 +547,7 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     public boolean isRequestedSessionIdValid()
     {
-        return _sessionId != null && getSession(false) != null;
+        return _requestedSessionId != null && getSession(false) != null;
     }
     
     /* -------------------------------------------------------------- */

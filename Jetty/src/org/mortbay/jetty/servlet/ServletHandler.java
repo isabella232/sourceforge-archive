@@ -558,7 +558,7 @@ public class ServletHandler extends Container implements HttpHandler
             }
             
             // Handle the session ID
-            request.setSessionId(pathParams);
+            request.setRequestedSessionId(pathParams);
             HttpSession session=request.getSession(false);
             if (session!=null)
                 ((SessionManager.Session)session).access();

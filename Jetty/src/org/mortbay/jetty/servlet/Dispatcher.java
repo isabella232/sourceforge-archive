@@ -305,7 +305,6 @@ public class Dispatcher implements RequestDispatcher
         HashMap _attributes;
         boolean _xContext;
         HttpSession _xSession;
-        String _requestedSessionId;
         ServletHttpRequest _servletHttpRequest;
         
         /* ------------------------------------------------------------ */
@@ -616,14 +615,14 @@ public class Dispatcher implements RequestDispatcher
                 {
                     log.debug("Ctx dispatch session");
 
-                    getRequestedSessionId();
-                    if (_requestedSessionId==null)
+                    String rsid=getRequestedSessionId();
+                    if (rsid==null)
                     {
                         HttpSession session=super.getSession(false);
                         if (session!=null)
-                            _requestedSessionId=session.getId();
+                            rsid=session.getId();
                     }
-                    _xSession=_servletHandler.getHttpSession(_requestedSessionId);
+                    _xSession=_servletHandler.getHttpSession(rsid);
                     if (create && _xSession==null)
                     {
                         _xSession=_servletHandler.newHttpSession(this);
@@ -665,14 +664,6 @@ public class Dispatcher implements RequestDispatcher
         public HttpSession getSession()
         {
             return getSession(true);
-        }
-
-        /* ------------------------------------------------------------ */
-        public String getRequestedSessionId()
-        {
-            if (_requestedSessionId!=null)
-                return _requestedSessionId;
-            return super.getRequestedSessionId();
         }
         
         /* ------------------------------------------------------------ */
