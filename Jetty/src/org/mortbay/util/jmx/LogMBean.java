@@ -5,18 +5,10 @@
 
 package org.mortbay.util.jmx;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import javax.management.AttributeNotFoundException;
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.ObjectName;
-import javax.management.ReflectionException;
-import javax.management.modelmbean.ModelMBean;
-import org.mortbay.util.Code;
 import org.mortbay.util.Log;
-import org.mortbay.util.LogSink;
 
 
 public class LogMBean extends ModelMBeanImpl

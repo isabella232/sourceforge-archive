@@ -6,7 +6,6 @@
 package org.mortbay.jetty.servlet.jmx;
 
 import javax.management.MBeanException;
-import org.mortbay.http.jmx.HttpHandlerMBean;
 import org.mortbay.jetty.servlet.SessionManager;
 import org.mortbay.util.jmx.LifeCycleMBean;
 

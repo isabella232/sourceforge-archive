@@ -5,13 +5,10 @@
 
 package org.mortbay.jetty.servlet.jmx;
 
-import javax.management.MBeanException;
-import org.mortbay.http.jmx.HttpHandlerMBean;
-import org.mortbay.jetty.servlet.WebApplicationHandler;
-import org.mortbay.http.PathMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.List;
+import javax.management.MBeanException;
+import org.mortbay.jetty.servlet.WebApplicationHandler;
 
 
 /* ------------------------------------------------------------ */
