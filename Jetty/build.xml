@@ -46,7 +46,7 @@ Other targets:
   <property name="test.src"       value="${test}/src"/>
   <property name="test.classes"   value="${test}/classes" />
   <property name="extra"          value="${basedir}/extra" />
-  <property name="build.compiler" value="jikes"/>
+  <!-- property name="build.compiler" value="jikes"/ -->
   <!-- property name="build.compiler" value="classic"/ -->
   <!-- property name="build.compiler" value="modern" / -->
 

@@ -37,7 +37,7 @@ the Ant optional tasks from:
   <property name="test.src"       value="${test}/src"/>
   <property name="test.classes"   value="${test}/classes"/>
   <property name="test.results"   value="${test}/results"/>
-  <property name="build.compiler" value="jikes"/>
+  <!-- property name="build.compiler" value="jikes"/ -->
   <!-- property name="build.compiler" value="classic"/ -->
   <!-- property name="build.compiler" value="modern" / -->
 
