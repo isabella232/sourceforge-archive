@@ -12,6 +12,7 @@ import javax.management.ObjectName;
 import javax.management.modelmbean.InvalidTargetObjectTypeException;
 import javax.management.modelmbean.ModelMBean;
 import org.mortbay.http.HttpServer;
+import org.mortbay.http.Version;
 import org.mortbay.http.HttpServer.ComponentEvent;
 import org.mortbay.util.Code;
 import org.mortbay.util.jmx.LifeCycleMBean;
@@ -75,6 +76,7 @@ public class HttpServerMBean extends LifeCycleMBean
         
         defineAttribute("listeners",READ_ONLY);
         defineAttribute("contexts",READ_ONLY);
+        defineAttribute("version",READ_ONLY,ON_MBEAN);
         defineAttribute("components",READ_ONLY,ON_MBEAN);
         defineAttribute("requestLog");
 
@@ -149,6 +151,14 @@ public class HttpServerMBean extends LifeCycleMBean
         }
     }
 
+    /* ------------------------------------------------------------ */
+    public String getVersion()
+    {
+        return Version.__VersionDetail +
+            Version.__ServletEngine.substring(Version.__ServletEngine.indexOf("("));
+    }
+    
+    
     /* ------------------------------------------------------------ */
     public ObjectName[] getComponents()
     {

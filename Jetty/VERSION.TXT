@@ -10,6 +10,7 @@ Jetty-4.2.6
  + Added HttpContext.setHosts to restrict context by real interface.
  + Added MBeans for session managers
  + Improved SocketChannelListener contributed.
+ + Added version to HttpServerMBean.
 
 Jetty-4.2.5 - 14 January 2003
  + Fixed pathParam bug for ;jsessionid
