@@ -170,6 +170,7 @@ public class ByteBufferOutputStream extends OutputStream
         {
             byte[] buf = new byte[(_buf.length+n)*4/3];
             System.arraycopy(_buf,_start,buf,_start,_end-_start);
+            _fullAt = _fullAt  + buf.length-_buf.length;
             _buf=buf;
         }
     }
