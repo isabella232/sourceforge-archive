@@ -144,7 +144,7 @@ main.files.File.PROPERTY.Indexes		 : index.html
 main.files.File.PROPERTY.FILES.Laf.PATHS         : /laf
 main.files.File.PROPERTY.FILES.Laf.DIRECTORY     : %user.dir%/FileBase
 main.files.File.PROPERTY.FILES.Javadoc.PATHS     : /javadoc
-main.files.File.PROPERTY.FILES.Javadoc.DIRECTORY : %user.dir%/javadoc
+main.files.File.PROPERTY.FILES.Javadoc.DIRECTORY : %user.dir%/doc
 main.files.File.PROPERTY.FILES.Software.PATHS    : /software
 main.files.File.PROPERTY.FILES.Software.DIRECTORY: %user.dir%
 main.files.File.PROPERTY.FILES.Servlet.PATHS     : /javadoc/javax/servlet
