@@ -35,6 +35,7 @@ Contributions, Testing & valuable feedback from:
   Shiraz Kanga <skanga@bigfoot.com>
   Adam Klatzkin <Adam.Klatzkin@bentley.com>
   Adnan Musi <adnan.musi-@ssmb.com.au>
+  Jason Weinstein <jasonw@reticular.com>
 
   Plus a few more in the pipe line (tell me if your one of them...)
 

@@ -95,7 +95,7 @@ public class Cookies
         if (expires!=null)
         {
             int maxAge = (int)
-                ((System.currentTimeMillis()-expires.getTime())/1000);
+                ((expires.getTime()-System.currentTimeMillis())/1000);
             cookie.setMaxAge(maxAge);
         }
 

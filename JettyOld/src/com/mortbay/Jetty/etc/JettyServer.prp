@@ -38,6 +38,7 @@ PROPERTY.DefaultPageType		  : com.mortbay.Jetty.JettyLaF
 # MaxListenerThreads	     - Max listener threads per listener
 # MaxListenerThreadIdleMs    - Max idle time Ms before listen thread
 #                              death
+# HTTP1_0_KeepAlive          - Boolean for using Keep-Alive with HTTP/1.0
 # MimeMap		     - Property file of MIME mappings
 # 
 # ------------------------------------------------------------------------
@@ -48,6 +49,7 @@ main.PROPERTY.SessionMaxInactiveInterval  : 3600
 main.PROPERTY.MinListenerThreads	  : 1
 main.PROPERTY.MaxListenerThreads	  : 20
 main.PROPERTY.MaxListenerThreadIdleMs	  : 60000
+main.PROPERTY.HTTP1_0_KeepAlive           : True
 main.PROPERTY.MimeMap			  : ./etc/Mime.prp
 main.LISTENER.all.CLASS                   : com.mortbay.HTTP.HttpListener
 main.LISTENER.all.ADDRS                   : 0.0.0.0:8080

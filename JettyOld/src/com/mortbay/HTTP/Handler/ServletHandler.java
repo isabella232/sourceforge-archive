@@ -33,6 +33,7 @@ public class ServletHandler extends NullHandler
     Hashtable nameMap=null;
     boolean autoReloadDynamicServlets=true;
     String pathTranslated=null;
+    Properties dynamicServletProperties=null;
     
     /* ----------------------------------------------------------------- */
     /** Construct basic auth handler.
@@ -60,14 +61,18 @@ public class ServletHandler extends NullHandler
      * CLASSPATH : ./servlets:        # CLASS Paths for dynamic servlet loading
      * AutoReloadDynamicServlets: True# Should dynamic servlets auto reload
      * Loader : className             # ServletLoader for dynamic servlets
+     * PROPERTY.key:val               # Property for dynamic servlets
+     * PROPERTIES: file               # File of properties for dynamic servlets
      * PathTranslated : path          # Optional prefix for getPathTranslated
      * SERVLET.name.CLASS: className  # Class of servlet
      * SERVLET.name.CLASSPATH: path   # CLASSPATH to load servlet from
      * SERVLET.name.PATHS: /path      # Servlet path
-     * SERVLET.name.CHUNK: False      # Should servlet HTTP/1.1 chunk by default
+     * SERVLET.name.CHUNK: False      # Should servlet HTTP/1.1 chunk by
+     *                                  default
      * SERVLET.name.PROPERTY.key:val  # Servlet property
      * SERVLET.name.PROPERTIES: file  # File of servlet properties
-     * SERVLET.name.Initialize: False # Initialize when loaded. 
+     * SERVLET.name.Initialize: False # Initialize when loaded.
+     * SERVLET.name.AutoReload: False # Auto reload servlet.
      * SERVLET.name.Loader: className # ServletLoader for servlet
      *
      * </PRE>
@@ -92,7 +97,8 @@ public class ServletHandler extends NullHandler
         dynamicLoader = tree.getProperty("Loader");
         autoReloadDynamicServlets = tree.getBoolean("AutoReloadDynamicServlets");
         pathTranslated = tree.getProperty("PathTranslated");
-        
+        dynamicServletProperties = getProperties(tree);
+
         if (dynamicPaths!=null && dynamicClassPath!=null &&
             dynamicPaths.size()>0 && dynamicClassPath.length()>0)
         {
@@ -133,6 +139,8 @@ public class ServletHandler extends NullHandler
                 Vector paths = servletTree.getVector("PATHS",",;");
                 for (int p=paths.size();p-->0;)
                     servletMap.put(paths.elementAt(p),servletHolder);
+                if (servletTree.getBoolean("AutoReload"))
+                    servletHolder.setAutoReload(true);
                 servletHolder.setInitialize(servletTree.getBoolean("Initialize"));
             }
             catch(ClassNotFoundException e)
@@ -203,7 +211,7 @@ public class ServletHandler extends NullHandler
                                               servletClass,
                                               servletClass,
                                               dynamicClassPath,
-                                              null);
+                                              dynamicServletProperties);
                     holder.setServer(httpServer);
                     holder.setAutoReload(autoReloadDynamicServlets);
                     servletMap.put(pathSpec,holder);

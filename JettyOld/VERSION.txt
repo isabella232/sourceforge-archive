@@ -1,3 +1,9 @@
+  + Fixed expires bug in Cookies
+  + Added configuration option to turn off Keep-Alive in HTTP/1.0
+  + Allow configured servlets to be auto reloaded.
+  + Allow properties to be configured for dynamic servlets.
+  + Added contrib/com/kiwiconsulting/jetty JSSE SSL adaptor to release.
+
 Release 2.3.4 - 18th January 2000 LATEST
   + include from linux rather than genunix for native builds
   + Fixed IllegalStateException handling in DefaultExceptionHandler

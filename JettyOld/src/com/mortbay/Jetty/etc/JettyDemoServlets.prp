@@ -10,6 +10,8 @@
 # Loader                  - The class name of the ClassLoader to use to load
 #                           dynamic servlets. Must be an implementation of
 #                           com.mortbay.HTTP.Handler.ServletLoader
+# PROPERTY.*              - Properties for the dynamic servlets.
+# PROPERTIES              - File of properties for the dynamic servlets.
 # PathTranslated          - Optional override of default prefix for 
 #                           getPathTranslated()
 # SERVLET.name.CLASS      - The class of servlet "name".
@@ -25,6 +27,7 @@
 #                           the "name" servlet is loaded.
 # SERVLET.name.Loader     - The implmentation of ServletLoader to use to load
 #                           the "name" servlet.
+# SERVLET.name.AutoReload - Should the servlet be reloaded automatically.
 # ------------------------------------------------------------------------
 
 PATHS				    : /servlet/;/SERVLET/;/Servlet/
@@ -40,6 +43,7 @@ SERVLET.Dump.PROPERTY.AttrY	    : ValueY
 SERVLET.Dump.PROPERTY.AttrZ	    : ValueZ
 SERVLET.Dump.PROPERTIES		    : ./etc/JettyDemoDump.prp
 SERVLET.Dump.Initialize		    : True
+SERVLET.Dump.AutoReload             : False
 SERVLET.Dump.Loader                 : com.mortbay.HTTP.Handler.FileJarServletLoader
 
 SERVLET.Exit.CLASS		    : com.mortbay.Servlets.Exit

@@ -44,6 +44,9 @@ public interface HttpConfiguration
     /** Property name for User ID of the server (UNIX ONLY) */
     public static final String SetUserID="SetUserID";
 
+    /** Property name for controlling HTTP/1.0 Keep alive */
+    public static final String HTTP1_0_KeepAlive="HTTP1_0_KeepAlive";
+    
     /* ------------------------------------------------------------ */
     /** The IP addresses and ports the HTTP server listens on
      */

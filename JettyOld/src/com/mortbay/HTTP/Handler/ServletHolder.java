@@ -190,6 +190,8 @@ public class ServletHolder implements ServletConfig
      */
     public void reload()
     {
+        System.err.println("RELOAD "+this);
+        
         if (servletClass.getClassLoader()!=loader)
         {
             Code.warning("Cannot reload "+this);

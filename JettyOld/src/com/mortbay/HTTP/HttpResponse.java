@@ -293,14 +293,17 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
                 String length = getHeader(HttpHeader.ContentLength);
                 if (length!=null && length.length()>0 && request!=null)
                 {
-                    // We have a length, so Consider a keep-alive
-                    connection=request.getHeader(Connection);
-                    if (connection!=null &&
-                        "keep-alive".equals(StringUtil.asciiToLowerCase(connection)))
+                    if (request.getHttpServer().http1_0_KeepAlive)
                     {
-                        // Lets Keep the connection alive
-                        setHeader(Connection,"Keep-Alive");
-                        doNotClose=true;
+                        // We have a length, so Consider a keep-alive
+                        connection=request.getHeader(Connection);
+                        if (connection!=null &&
+                            "keep-alive".equals(StringUtil.asciiToLowerCase(connection)))
+                        {
+                            // Lets Keep the connection alive
+                            setHeader(Connection,"Keep-Alive");
+                            doNotClose=true;
+                        }
                     }
                 }
             }

@@ -61,7 +61,6 @@ import java.util.*;
  *
  * <p><h4>Notes</h4>
  * The server understands HTTP/1.1 and HTTP/1.0.
- * HTTP/1.0 is without keep-alive extensions.
  * <p><h4>Usage</h4><PRE>
  * java com.mortbay.HTTP.HttpServer [ HttpConfigurationClass ]
  * </PRE>
@@ -81,6 +80,8 @@ public class HttpServer implements ServletContext
     private PathMap exceptionHandlersMap;
     private Hashtable servletHandlerMap = new Hashtable(11);
     private String resourceBase=null;
+
+    boolean http1_0_KeepAlive=true;
     
     /* -------------------------------------------------------------------- */
     /** Construct, must be configured later
@@ -100,6 +101,15 @@ public class HttpServer implements ServletContext
     
     /* -------------------------------------------------------------------- */
     /** Configure and start the server
+     * Defined server properties are:<PRE>
+     * SessionMaxInactiveInterval - Max idle time Ms before session death
+     * MinListenerThreads         - Min listener threads per listener
+     * MaxListenerThreads         - Max listener threads per listener
+     * MaxListenerThreadIdleMs    - Max idle time Ms before listen thread
+     *                              death
+     * HTTP1_0_KeepAlive          - Boolean for using Keep-Alive with HTTP/1.0
+     * MimeMap		          - Property file of MIME mappings
+     * </PRE>
      */
     public synchronized void configure(HttpConfiguration config)
          throws Exception
@@ -179,6 +189,13 @@ public class HttpServer implements ServletContext
             Integer.parseInt(p.getProperty(HttpConfiguration
                                            .MaxListenerThreadIdleMs,"0"));
 
+        String keepAlive10 = p.getProperty(HttpConfiguration
+                                           .HTTP1_0_KeepAlive,"True");
+        if (keepAlive10.length()>0)
+        {
+            char c = keepAlive10.charAt(0);
+            http1_0_KeepAlive = c=='t'||c=='T'||c=='0';
+        }
         
         InetAddrPort[] addresses = config.addresses();
         Class[] classes = config.listenerClasses();
