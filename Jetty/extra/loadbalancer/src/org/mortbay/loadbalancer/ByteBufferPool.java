@@ -3,7 +3,7 @@
 // $Id$
 // ========================================================================
 
-package org.mortbay.util;
+package org.mortbay.loadbalancer;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;

@@ -3,8 +3,7 @@
 // $Id$
 // ========================================================================
 
-package org.mortbay.util;
-
+package org.mortbay.loadbalancer;
 
 /* ------------------------------------------------------------ */
 public class NonBlockingQueue 

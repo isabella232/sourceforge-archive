@@ -15,7 +15,6 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
-import org.mortbay.util.ByteBufferPool;
 import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LifeCycleThread;

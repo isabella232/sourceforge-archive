@@ -10,9 +10,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URISyntaxException;
 import java.security.Permission;
 
 
@@ -50,12 +51,36 @@ class FileResource extends URLResource
     
     /* -------------------------------------------------------- */
     FileResource(URL url)
-        throws IOException
+        throws IOException, URISyntaxException
     {
-        super(url,url.openConnection());
+        super(url,null);
 
-        Permission perm = _connection.getPermission();
-        _file =new File(perm.getName());
+        try
+        {
+            // Try standard API to convert URL to file.
+            _file =new File(new URI(url.toString()));
+        }
+        catch (Exception e)
+        {
+            Code.ignore(e);
+            try
+            {
+                // Assume that File.toURL produced unencoded chars. So try
+                // encoding them.
+                String urls=
+                    "file:"+org.mortbay.util.URI.encodePath(url.toString().substring(5));
+                _file =new File(new URI(urls));
+            }
+            catch (Exception e2)
+            {
+                Code.ignore(e2);
+
+                // Still can't get the file.  Doh! try good old hack!
+                checkConnection();
+                Permission perm = _connection.getPermission();
+                _file =new File(perm.getName());
+            }
+        }
         
         checkAliases(url);
     }
@@ -67,28 +92,6 @@ class FileResource extends URLResource
         _file=file;
         checkAliases(url);
     }
-
-    /* -------------------------------------------------------- */
-    public Resource addPath(String path)
-        throws IOException,MalformedURLException
-    {
-        if (!isDirectory())
-            return super.addPath(path);
-
-        path = URI.canonicalPath(path);
-        
-        // treat all paths being added as relative
-        if (path.startsWith("/"))
-            path = path.substring(1);
-
-        File newFile = new File(_file,path);
-
-        if (path.length()>0 && !path.endsWith("/") && newFile.isDirectory())
-            path+="/";
-
-        return new FileResource(new URL(_url,path),null,newFile);
-    }
-    
     
     /* ------------------------------------------------------------ */
     private void checkAliases(URL url)
@@ -240,10 +243,10 @@ class FileResource extends URLResource
         }
         return list;
     }
-        
+         
     /* ------------------------------------------------------------ */
     /** Encode according to this resource type.
-     * File URIs are not encoded.
+     * File URIs are encoded.
      * @param uri URI to encode.
      * @return The uri unchanged.
      */
@@ -253,9 +256,9 @@ class FileResource extends URLResource
     }
     
     /* ------------------------------------------------------------ */
-    /**
+    /** 
      * @param o
-     * @return
+     * @return 
      */
     public boolean equals( Object o)
     {

@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
-import org.mortbay.util.NonBlockingQueue;
 
 public class Policy
 {

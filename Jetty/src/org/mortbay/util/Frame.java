@@ -5,57 +5,50 @@
 
 package org.mortbay.util;
 
-import java.io.PrintWriter;
+
 
 
 /*-----------------------------------------------------------------------*/
 /** Access the current execution frame.
+ * This version of the Frame class uses the JDK 1.4 mechanisms to
+ * access the stack frame
  */
 public class Frame
 {
-    /*-------------------------------------------------------------------*/
-    /** Shared static instances, reduces object creation at expense
-     * of lock contention in multi threaded debugging */
-    private static Throwable __throwable = new Throwable();
-    private static StringBuffer __stringBuffer = new StringBuffer();
-    private static StringBufferWriter __stringBufferWriter = new StringBufferWriter(__stringBuffer);
-    private static PrintWriter __printWriter = new PrintWriter(__stringBufferWriter,false);
+    
+    /* ------------------------------------------------------------ */
+    private static String __className=Frame.class.getName();
     private static final String __lineSeparator = System.getProperty("line.separator");
-    private static final int __lineSeparatorLen = __lineSeparator.length();
+    
+    /*-------------------------------------------------------------------*/
+    private StackTraceElement[] _stack;
     
     /*-------------------------------------------------------------------*/
     /** The full stack of where the Frame was created. */
-    private String _stack;
+    private String _string;
+    
     /** The Method (including the "(file.java:99)") the Frame was created in */
     private String _method= "unknownMethod";
+    
     /** The stack depth where the Frame was created (main is 1) */
     private int _depth=0;
+    
     /** Name of the Thread the Frame was created in */
     private String _thread= "unknownThread";
+    
     /** The file and linenumber of where the Frame was created. */
     private String _file= "UnknownFile";
 
     private String _where;
-    private int _lineStart=0;
-    private int _lineEnd;
-
-
-
+    private int _top=0;
+    
     /*-------------------------------------------------------------------*/
     /** Construct a frame.
      */
     public Frame()
     {
-        // Dump the stack
-        synchronized(__printWriter)
-        {
-            __stringBuffer.setLength(0);
-            __throwable.fillInStackTrace();
-            __throwable.printStackTrace(__printWriter);
-            __printWriter.flush();
-            _stack = __stringBuffer.toString();
-        }
-        internalInit(0, false);
+        _stack=new Throwable().getStackTrace();
+        init(0, false);
     }
     
     /*-------------------------------------------------------------------*/
@@ -64,16 +57,8 @@ public class Frame
      */
     public Frame(int ignoreFrames)
     {
-        // Dump the stack
-        synchronized(__printWriter)
-        {
-            __stringBuffer.setLength(0);
-            __throwable.fillInStackTrace();
-            __throwable.printStackTrace(__printWriter);
-            __printWriter.flush();
-            _stack = __stringBuffer.toString();
-        }
-        internalInit(ignoreFrames, false);
+        _stack=new Throwable().getStackTrace();
+        init(ignoreFrames, false);
     }
     
     /* ------------------------------------------------------------ */
@@ -83,60 +68,38 @@ public class Frame
      */
     Frame(int ignoreFrames, boolean partial)
     {
-        synchronized(__printWriter)
-        {
-            __stringBuffer.setLength(0);
-            __throwable.fillInStackTrace();
-            __throwable.printStackTrace(__printWriter);
-            __printWriter.flush();
-            _stack = __stringBuffer.toString();
-        }
-        // Dump the stack
-        internalInit(ignoreFrames, partial);
+        _stack=new Throwable().getStackTrace();
+        init(ignoreFrames, partial);
     }
     
     /* ------------------------------------------------------------ */
-    /** Internal only Constructor. */
-    private Frame(String stack, int ignoreFrames, boolean partial)
+    private Frame(StackTraceElement[] stack,int top)
     {
-        _stack = stack;
-        internalInit(ignoreFrames, partial);
+        _stack=stack;
+        _top=top;
+        _where=_stack[_top].toString();
+        complete();
     }
     
     /* ------------------------------------------------------------ */
-    void internalInit(int ignoreFrames, boolean partial)
+    private void init(int ignoreFrames, boolean partial)
     {
         // Extract stack components, after we look for the Frame constructor
  	// itself and pull that off the stack!
-        
-        _lineStart = 0;
- 	_lineStart = _stack.indexOf("Frame.<init>(",_lineStart);
-        if (_lineStart==-1)
+        int check=_stack.length;
+        if (check>3) check=3;
+        for (int i=0;i<check;i++)
         {
-            // JIT has inlined Frame constructor
-            _lineStart =
-                _stack.indexOf(__lineSeparator)+__lineSeparatorLen;
+            if (__className.equals(_stack[i].getClassName()) &&
+                "<init>".equalsIgnoreCase(_stack[i].getMethodName()))
+            {
+                _top=i+1;
+                break;
+            }
         }
-        
-        
-        _lineStart = _stack.indexOf(__lineSeparator,_lineStart)+
- 	    __lineSeparatorLen;
-        for (int i = 0; _lineStart > 0 && i < ignoreFrames; i++)
-        {
-            _lineStart = _stack.indexOf(__lineSeparator,_lineStart)+
-                         __lineSeparatorLen;
-        }
-        _lineEnd = _stack.indexOf(__lineSeparator,_lineStart);
-        
-        if (_lineEnd < _lineStart || _lineStart < 0){
-            _where = null;
-            _stack = null;
-        }
-        else
-        {
-            _where = _stack.substring(_lineStart,_lineEnd);
-            if (!partial) complete();
-        }
+        _top+=ignoreFrames;
+        _where=_stack[_top].toString();
+        if (!partial) complete();
     }
     
     /* ------------------------------------------------------------ */
@@ -144,85 +107,66 @@ public class Frame
      */
     void complete()
     {
-        // trim stack
-        if (_stack != null) 
-            _stack = _stack.substring(_lineStart);
-        else
-        {
-            // Handle nulls
-            if (_method==null)
-                _method= "unknownMethod";
-            if (_file==null)
-                _file= "UnknownFile";
-            return;
-        }
-
-        // calculate stack depth
-        int i=0-__lineSeparatorLen;
-        while ((i=_stack.indexOf(__lineSeparator,i+__lineSeparatorLen))>0)
-                _depth++;
-        
-        // extract details
-        if (_where!=null)
-        {
-            int lb = _where.indexOf('(');
-            int rb = _where.indexOf(')');
-
-            if (lb>=0 && rb >=0 && lb<rb) 
-            {
-                _file = _where.substring(lb+1,rb).trim();
-                if (_file.indexOf(':') < 0)
-                    _file = null;
-            }
-              
-            int at = _where.indexOf("at ");
-            if (at >=0 && (at+3)<_where.length())
-                _method = _where.substring(at+3);
-            if (at < 0 && rb > 0) 
-            {
-                _method = _where.trim();
-                _method = _method.substring(_method.indexOf(' ') + 1);
-            }
-        }
-        
-        // Get Thread name
+        _file=_stack[_top].getFileName()+":"+_stack[_top].getLineNumber();
+        _method=_stack[_top].getClassName()+"."+_stack[_top].getMethodName();
+        _depth=_stack.length-_top;
         _thread = Thread.currentThread().getName();
-
-        // Handle nulls
-        if (_method==null)
-            _method= "unknownMethod";
-        if (_file==null)
-            _file= "UnknownFile";
     }
     
+    /*-------------------------------------------------------------------*/
+    public StackTraceElement getStackTraceElement()
+    {
+        return _stack[_top];
+    }
     
     /*-------------------------------------------------------------------*/
     public String getStack()
     {
-        return _stack;
+        if (_string==null)
+        {
+            StringBuffer buf= new StringBuffer(512);
+            
+            for (int i=0;i<_stack.length;i++)
+            {
+                if (i>_top)
+                    buf.append(__lineSeparator);
+                buf.append(_stack[i].toString());
+            }
+            _string=buf.toString();
+        }
+        
+        return _string;
     }
     
     /*-------------------------------------------------------------------*/
     public String getMethod()
     {
+        if (_method==null)
+            complete();
         return _method;
     }
     
     /*-------------------------------------------------------------------*/
     public int getDepth()
     {
+        if (_thread==null)
+            complete();
         return _depth;
     }
     
     /*-------------------------------------------------------------------*/
     public String getThread()
     {
+        if (_thread==null)
+            complete();
         return _thread;
     }
     
     /*-------------------------------------------------------------------*/
     public String getFile()
     {
+        if (_file==null)
+            complete();
         return _file;
     }
     
@@ -235,7 +179,9 @@ public class Frame
     /*-------------------------------------------------------------------*/
     public String toString()
     {
-        return "["+_thread + "]" + _method;
+        if (_thread==null)
+            complete();
+        return "["+_thread + "]" + _method+"("+_file+")";
     }
     
     /* ------------------------------------------------------------ */
@@ -244,10 +190,9 @@ public class Frame
      */
     public Frame getParent()
     {
-        Frame f = new Frame("Frame.<init>("+__lineSeparator+_stack, 1, false);
-        if (f._where == null) return null;
-        f._thread = _thread;
-        return f;
+        if (_top+1>=_stack.length)
+            return null;
+        return new Frame(_stack,_top+1);
     }    
 }
 

@@ -5,7 +5,6 @@
 
 package org.mortbay.loadbalancer;
 
-import org.mortbay.util.ByteBufferPool;
 import org.mortbay.util.InetAddrPort;
 
 /* ------------------------------------------------------------ */

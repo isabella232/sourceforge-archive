@@ -10,9 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import org.mortbay.util.ByteBufferPool;
 import org.mortbay.util.Code;
-import org.mortbay.util.NonBlockingQueue;
 
 /* ------------------------------------------------------------ */
 public class Connection 
