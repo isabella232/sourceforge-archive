@@ -16,6 +16,7 @@
 package org.mortbay.xml;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
@@ -137,6 +138,24 @@ public class XmlConfiguration
         configuration="<?xml version=\"1.0\"  encoding=\"ISO-8859-1\"?>\n<!DOCTYPE Configure PUBLIC \"-//Mort Bay Consulting//DTD Configure 1.2//EN\" \"http://jetty.mortbay.org/configure_1_2.dtd\">"+
             configuration;
         InputSource source = new InputSource(new StringReader(configuration));
+        synchronized(__parser)
+        {
+            _config = __parser.parse(source);	
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param configuration An input stream containing a complete
+     * e.g. configuration file
+     * @exception SAXException 
+     * @exception IOException 
+     */
+    public XmlConfiguration(InputStream configuration)
+        throws SAXException, IOException
+    {
+        initParser();
+        InputSource source = new InputSource(configuration);
         synchronized(__parser)
         {
             _config = __parser.parse(source);	
