@@ -498,39 +498,51 @@
 
   <!-- ==================================================================== -->
   <target name="dist" 
-          depends="jars,webapps,extra,test,javadoc,tidy" 
+          depends="jars,webapps,extra,javadoc,test,tidy" 
           description="Build the distribution archives">
     <mkdir dir="${dist}"/>
-    
-    
+
     <tar tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}.tar.gz" 
          compression="gzip"
          longfile="gnu">
       <tarfileset 
        dir="${basedir}"
-       prefix="Jetty-${RELEASE.MAJOR.MINOR}/">
-        <exclude name="dist/**"/>
+       prefix="Jetty-${RELEASE.MAJOR.MINOR}/"> 
+        <include name="LICENSE.html"/>
+        <include name="README.TXT"/>
+        <include name="VERSION.TXT"/>
+        <include name="*.jar"/>       
+        <include name="lib/**"/>       
+        <include name="ext/**"/>       
+        <include name="logs"/>         
+        <include name="webapps/**"/>    
+        <include name="etc/LICENSE*"/>   
+        <include name="etc/admin.xml"/>  
+        <include name="etc/jetty.xml"/>   
+        <include name="etc/jetty.mlet"/>  
+        <include name="etc/webdefault.xml"/>         
         <exclude name="**/CVS/**"/>
-        <exclude name="**/logs/*.log"/>
       </tarfileset>
     </tar>
 
-
     <tar 
-     tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-no-ext.tar.gz" 
+     tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-extra.tar.gz" 
      compression="gzip"
      longfile="gnu"
     >
       <tarfileset 
        dir="${basedir}"
-       prefix="Jetty-${RELEASE.MAJOR.MINOR}/">
-        <exclude name="dist/**"/>
+       prefix="Jetty-${RELEASE.MAJOR.MINOR}/">   
+        <include name="demo/**"/>   
+        <include name="extra/**"/>     
+        <include name="etc/**"/> 
+        <exclude name="etc/jetty.xml"/>  
+        <exclude name="etc/webdefault.xml"/>  
+        <exclude name="extra/**/src/**"/>  
         <exclude name="**/CVS/**"/>
         <exclude name="**/logs/*.log"/>
-        <exclude name="**/ext/**"/>
       </tarfileset>
     </tar>
-
 
     <tar 
      tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-src.tar.gz" 
@@ -540,17 +552,39 @@
       <tarfileset 
        dir="${basedir}"
        prefix="Jetty-${RELEASE.MAJOR.MINOR}/">
+        <include name="src/**"/>
+        <include name="test/**"/> 
+        <include name="extra/**/src/**"/>  
+        <include name="build.xml"/>
+        <include name="ant.properties"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/logs/*.log"/>
+      </tarfileset>
+    </tar>
+
+    <tar tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-all.tar.gz" 
+         compression="gzip"
+         longfile="gnu">
+      <tarfileset 
+       dir="${basedir}"
+       prefix="Jetty-${RELEASE.MAJOR.MINOR}/">
         <exclude name="dist/**"/>
         <exclude name="**/CVS/**"/>
         <exclude name="**/logs/*.log"/>
-        <exclude name="**/ext/**"/>
-        <exclude name="**/javadoc/**"/>
-        <exclude name="**/lib/**"/>
-        <exclude name="**/classes/**"/>
-        <exclude name="**/demo/**"/>
+        <exclude name="testdocs/**"/>
       </tarfileset>
     </tar>
- 
+
+    <zip destfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-all.zip">
+      <zipfileset 
+       dir="${basedir}"
+       prefix="Jetty-${RELEASE.MAJOR.MINOR}/">
+        <exclude name="dist/**"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/logs/*.log"/>
+        <exclude name="testdocs/**"/>
+      </zipfileset>
+    </zip>
   </target>
 
 

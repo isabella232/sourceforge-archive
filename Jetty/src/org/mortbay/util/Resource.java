@@ -92,7 +92,7 @@ public abstract class Resource implements Serializable
                         resource=resource.substring(2);
                     
                     File file=new File(resource).getCanonicalFile();
-                    url=file.toURL();                    
+                    url=file.toURI().toURL();                    
                     
                     URLConnection connection=url.openConnection();
                     FileResource fileResource= new FileResource(url,connection,file);

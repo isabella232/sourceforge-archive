@@ -347,6 +347,7 @@ public class HttpFields
         tz.setID("GMT");
         __dateSend.setTimeZone(tz);
         __dateCache.setTimeZone(tz);
+        __dateCookie.setTimeZone(tz);
         
         __dateReceive = new SimpleDateFormat[__dateReceiveFmt.length];
         for(int i=0;i<__dateReceive.length;i++)

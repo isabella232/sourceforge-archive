@@ -1,10 +1,14 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.14 
  + Correctly setup context classloader in cross context dispatch.
  + Put a semi busy loop into proxy tunnels for IE problems
  + Fixed handling of error pages for IO and Servlet exceptions
  + updated extra/j2ee to jboss 3.2.1+
+ + Use File.toURI().toURL() when jdk 1.2 alternative is available.
+ + cookie timestamps are in GMT
+ + Priority on ThreadedServer
 
 Jetty-4.2.12 - 12 August 2003
  + Restore max inactive interval for session manager

@@ -16,9 +16,6 @@ import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 
 /* ------------------------------------------------------------ */
 /** Abstract resource class.
@@ -29,8 +26,6 @@ import org.apache.commons.logging.LogFactory;
  */
 public abstract class Resource implements Serializable
 {
-    private static Log log = LogFactory.getLog(Resource.class);
-
     Object _associate;
     
     /* ------------------------------------------------------------ */
@@ -54,7 +49,7 @@ public abstract class Resource implements Serializable
             }
             catch(Exception e)
             {
-                log.debug(LogSupport.EXCEPTION,e);
+                Code.debug(e);
                 return new BadResource(url,e.toString());
             }
         }
@@ -105,13 +100,13 @@ public abstract class Resource implements Serializable
                 }
                 catch(Exception e2)
                 {
-                    log.debug(LogSupport.EXCEPTION,e2);
+                    Code.debug(e2);
                     throw e;
                 }
             }
             else
             {
-                log.warn("Bad Resource: "+resource);
+                Code.warning("Bad Resource: "+resource);
                 throw e;
             }
         }
@@ -172,7 +167,6 @@ public abstract class Resource implements Serializable
         
         if (url==null)
             return null;
-        
         return newResource(url);
     }
 
