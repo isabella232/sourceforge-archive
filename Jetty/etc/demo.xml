@@ -310,6 +310,7 @@
       <Arg>org.mortbay.servlet.CGI</Arg>
       <!-- Set initParams for CGI -->
       <Put name="Path">/bin:/usr/bin:/usr/local/bin</Put>
+      <Put name="ENV_TEST">jetty.home is <SystemProperty name="jetty.home" default="."/></Put>
       <!-- <Put name="commandPrefix">perl</Put> -->
     </Call>
   </Call>
