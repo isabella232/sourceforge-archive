@@ -1,23 +1,21 @@
 BODY
 {
+        font-family: san-serif,Helvetica,Arial;
         background-color: #FFFFFF;
 }
 
 P, BODY, TD, OL, UL, MENU, BLOCKQUOTE, DIV
 {
-        font-family: Helvetica,Arial,Lucida;
+        font-size: normal;
         color: #000000;
 }
 
 TH, H1, H2, H3
 {
-        font-family: Helvetica,Arial,Lucida;
         font-weight: bold;
         text-decoration: none;
-	color: #000099;
+	color: #3333ff;
 }
-
-
 
 PRE
 {
@@ -27,7 +25,6 @@ PRE
 a.hdr 
 { 
   text-decoration: none; 
-  font-family: Helvetica,Arial,Lucida;
   font-weight: bold;
   color: #999999;
 }
@@ -35,7 +32,6 @@ a.hdr
 a.selhdr
 {
   text-decoration: none; 
-  font-family: Helvetica,Arial,Lucida;
   font-weight: bold;
   color: #ff6600;
 }
@@ -43,7 +39,6 @@ a.selhdr
 a.menu
 {  
   text-decoration: none; 
-  font-family: Helvetica,Arial,Lucida;
   font-weight: bold;
   font-size: smaller;
   color: #3333ff; 
@@ -52,7 +47,6 @@ a.menu
 a.selmenu
 {
   text-decoration: none; 
-  font-family: Helvetica,Arial,Lucida;
   font-weight: bold;
   font-size: smaller;
   color: #ff6600;
@@ -87,7 +81,7 @@ A:active { color: #3333ff }
 
 A
 {
-        font-family: Helvetica,Arial,Lucida;
         color:#3333ff;
+        font-weight: none;
         text-decoration: none;
 }

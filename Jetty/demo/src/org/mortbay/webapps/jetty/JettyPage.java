@@ -237,7 +237,7 @@ public class JettyPage extends Page
         _table.newCell();
         _table.cell().top();
         _table.cell().center();
-        _table.cell().width("15%");
+        _table.cell().width("150");
         
         _table.add("<A HREF=http://jetty.mortbay.org><IMG SRC=\""+context+"/images/powered.gif\" WIDTH=140 HEIGHT=58 BORDER=0 ALT=\"Powered by Jetty\"></A>\n");
 
@@ -306,8 +306,6 @@ public class JettyPage extends Page
              }
         }
 
-        _table.add("<FORM method=GET action=http://www.google.com/custom><small><A HREF=http://www.google.com/search><IMG SRC=http://www.google.com/logos/Logo_40wht.gif border=0 ALT=Google align=middle></A><BR><INPUT TYPE=text name=q size=14 maxlength=255 value=\"\"><BR><INPUT type=hidden name=cof VALUE=\"LW:468;L:http://jetty.mortbay.org/jetty/images/jetty_banner.gif;LH:60;AH:center;S:http://jetty.mortbay.org;AWFID:1e76608d706e7dfc;\"><input type=hidden name=domains value=\"mortbay.com;mortbay.org\"><input type=radio name=sitesearch value=\"mortbay.org\" checked> mortbay.org<br><input type=radio name=sitesearch value=\"mortbay.com\"> mortbay.com<br><INPUT type=submit name=sa VALUE=\"Google Search\"><BR></small></form>");
-        
         _table.newCell();
         _table.cell().top();
         _table.cell().left();
@@ -338,6 +336,10 @@ public class JettyPage extends Page
             _table.cell().center();
             
             _table.add("<A HREF=\"http://www.mortbay.com\"><IMG SRC=\""+_context+"/images/mbLogoBar.gif\" WIDTH=120 HEIGHT=75 BORDER=0 ALT=\"Mort Bay\"></A><P>\n");
+
+
+            _table.add("<FORM method=GET action=http://www.google.com/custom><small><A HREF=http://www.google.com/search><IMG SRC=http://www.google.com/logos/Logo_40wht.gif border=0 ALT=Google align=middle></A><BR><INPUT TYPE=text name=q size=14 maxlength=255 value=\"\"><BR><INPUT type=hidden name=cof VALUE=\"LW:468;L:http://jetty.mortbay.org/jetty/images/jetty_banner.gif;LH:60;AH:center;S:http://jetty.mortbay.org;AWFID:1e76608d706e7dfc;\"><input type=hidden name=domains value=\"mortbay.com;mortbay.org\"><input type=radio name=sitesearch value=\"mortbay.org\" checked> mortbay.org<br><input type=radio name=sitesearch value=\"mortbay.com\"> mortbay.com<br><INPUT type=submit name=sa VALUE=\"Google Search\"><BR></small></form>");
+
             
             _table.add("<A HREF=\"http://www.jboss.org\"><IMG SRC=\""+_context+"/images/jboss.gif\" WIDTH=134 HEIGHT=60 BORDER=0 ALT=\"JBoss Group\"></A><P>\n");
             
