@@ -42,7 +42,7 @@ public class URI
 
 
     public static final String __CHARSET=
-        System.getProperty("org.mortbay.util.URI.charset",StringUtil.__ISO_8859_1);
+        System.getProperty("org.mortbay.util.URI.charset",StringUtil.__UTF_8);
     
     /* ------------------------------------------------------------ */
     private String _uri;

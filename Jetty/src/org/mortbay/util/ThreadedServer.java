@@ -276,7 +276,26 @@ abstract public class ThreadedServer extends ThreadPool
     {
         return _tcpNoDelay;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the acceptQueueSize or -1 if not set.
+     */
+    public int getAcceptQueueSize()
+    {
+        return _acceptQueueSize;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * The size of the queue for unaccepted connections.
+     * If not set, will default to greater of maxThreads or 50. 
+     * @param acceptQueueSize The acceptQueueSize to set.
+     */
+    public void setAcceptQueueSize(int acceptQueueSize)
+    {
+        _acceptQueueSize = acceptQueueSize;
+    }
     
     /* ------------------------------------------------------------------- */
     /** Handle new connection.
@@ -624,21 +643,4 @@ abstract public class ThreadedServer extends ThreadPool
         }
     }
     
-    /**
-     * @return Returns the acceptQueueSize or -1 if not set.
-     */
-    public int getAcceptQueueSize()
-    {
-        return _acceptQueueSize;
-    }
-    
-    /**
-     * The size of the queue for unaccepted connections.
-     * If not set, will default to greater of maxThreads or 50. 
-     * @param acceptQueueSize The acceptQueueSize to set.
-     */
-    public void setAcceptQueueSize(int acceptQueueSize)
-    {
-        _acceptQueueSize = acceptQueueSize;
-    }
 }

@@ -151,6 +151,26 @@ public class SocketListener
         return _scheme;
     }
 
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the lowResources threshold
+     */
+    public int getLowResources()
+    {
+        return _lowResources;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param lowResources The number of idle threads needed to not be in
+     * low resources state.
+     */
+    public void setLowResources(int lowResources)
+    {
+        _lowResources = lowResources;
+    }
+    
     /* ------------------------------------------------------------ */
     /** 
      * @return time in ms that connections will persist if listener is
@@ -427,24 +447,5 @@ public class SocketListener
     public void setConfidentialPort(int confidentialPort)
     {
         _confidentialPort = confidentialPort;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the lowResources threshold
-     */
-    public int getLowResources()
-    {
-        return _lowResources;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param lowResources The number of idle threads needed to not be in
-     * low resources state.
-     */
-    public void setLowResources(int lowResources)
-    {
-        _lowResources = lowResources;
     }
 }

@@ -50,6 +50,8 @@ public class StringUtil
         }
     }
     
+    public static String __UTF_8="UTF-8";
+    
     private static char[] lowercases = {
           '\000','\001','\002','\003','\004','\005','\006','\007',
           '\010','\011','\012','\013','\014','\015','\016','\017',
