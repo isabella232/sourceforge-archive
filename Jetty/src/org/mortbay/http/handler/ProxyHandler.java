@@ -198,6 +198,7 @@ public class ProxyHandler extends AbstractHttpHandler
 
             // copy headers
             boolean xForwardedFor=false;
+            boolean hasContent=false;
             Enumeration enum = request.getFieldNames();
             while (enum.hasMoreElements())
             {
@@ -207,6 +208,9 @@ public class ProxyHandler extends AbstractHttpHandler
                     continue;
                 if (connectionHdr!=null && connectionHdr.indexOf(hdr)>=0)
                     continue;
+
+                if (HttpFields.__ContentType.equals(hdr))
+                    hasContent=true;
                 
                 Enumeration vals = request.getFieldValues(hdr);
                 while (vals.hasMoreElements())
@@ -242,7 +246,7 @@ public class ProxyHandler extends AbstractHttpHandler
                 
                 // do input thang!
                 InputStream in=request.getInputStream();
-                if (in.available()>0) // XXX need better tests than this
+                if (hasContent)
                 {
                     connection.setDoOutput(true);
                     IO.copy(in,connection.getOutputStream());
