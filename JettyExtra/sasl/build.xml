@@ -83,7 +83,7 @@ demo        - Runs the demo web application.
   </target>
 
   <target name="javadoc" depends="sasl.jar">
-    <javadoc packagenames="com.mortbay.Jetty.HTTP.SASL"
+    <javadoc packagenames="com.mortbay.HTTP.SASL"
              sourcepath="${src}"
              classpath="${classpath}:${jetty.sasl.jar}"
              destdir="${javadoc}"
