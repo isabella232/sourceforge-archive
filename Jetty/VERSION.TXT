@@ -1,6 +1,11 @@
 Jetty Versions
 --------------
 
+Jetty-3.0.5 - 
+ + Branched from 3.1 trunk to fix major errors
+
+
+
 Jetty-3.0.4 - 23 Feb 2001
  + Fixed LineInput bug with split CRLF.
 
