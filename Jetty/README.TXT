@@ -6,7 +6,7 @@ It is designed to be light weight, high performance, embeddable,
 extensible and flexible, thus making it an ideal platform for serving  
 dynamic HTTP requests from any Java application.
 
-This  release of Jetty 3 is a significant revision of the Jetty 2 code 
+This release of Jetty 3 is a significant revision of the Jetty 2 code 
 base. The aims of the Jetty 3 developement include:
 
   + Fully RFC2616 compliant implementation of HTTP/1.1.
@@ -26,7 +26,8 @@ run:
 Browse to:
   http://localhost:8080
 
-If this doesn't work - you will need to read some more and setup the environment.
+If this doesn't work - you will need to read some more and setup the
+environment.
 
 
 
@@ -77,8 +78,8 @@ the demo with:
 
   bin/jetty.sh start admin demo
 
-This script find the JVM and sets the CLASSPATH, so it can be used as 
-an /etc/init.d script and will look for xml config files in 
+This script finds the JVM and sets the CLASSPATH, so it can be used as 
+an /etc/init.d script and also looks for xml config files in 
 /etc/jetty (among other places).
 
 
@@ -86,12 +87,12 @@ Configuring the Server
 ======================
 
 The class com.mortbay.Jetty.Server reads an xml configuration
-file and configures 1 or more instances of com.mortbay.HTTP.HttpServer:
+file and configures one or more instances of com.mortbay.HTTP.HttpServer:
 
   java com.mortbay.Jetty.Server [configuration.xml]
 
 The class com.mortbay.HTTP.HttpServer is the main class to be
-configured.  It has a configuratin API and a command line API and
+configured.  It has a configuration API and a command line API and
 can be run with
 
   java com.mortbay.HTTP.HttpServer [options | -?]
@@ -176,10 +177,10 @@ NOTES
 Classpaths Handling.
 --------------------
 If a context has it's own classpath set, then a ContextLoader
-is created with tha classpath set.  A ContextLoader is a specialize
+is created with tha classpath set.  A ContextLoader is a specialized
 URLClassLoader so any Resource/URL/File combination may be used to
 specify a path.   This classloader has the ServletHandlers classloader
-set as it parent, so normal Java2 loader hierarchy semantics are 
+set as its parent, so normal Java2 loader hierarchy semantics are 
 followed.
 
 Note that if the context is a packed WAR file, then the elements
