@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+Jetty-4.0.0 - wait for it...
+
 Jetty-4.0.RC2 - 12 March 2002
  + Fixed security constraint problem with //
  + Fixed version for String XmlConfigurations
