@@ -8,6 +8,8 @@ Jetty-5
    See sf.net bugs 1031520 - 1032205
  + Refactored, simplified and optimized HttpOutputStream
  + Added filter chain cache
+ + Added JSR77 servlet statistic support
+ + Refactored webapp context configurations
 
 Jetty-4
  + LineInput handles readers with small internal buffer
