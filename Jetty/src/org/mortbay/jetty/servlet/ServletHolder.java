@@ -56,7 +56,6 @@ public class ServletHolder extends Holder
     private transient Servlet _servlet;
     private transient Config _config;
     private transient long _unavailable;
-    private transient ServletHandler _servletHandler;
     private transient UnavailableException _unavailableEx;
 
     
@@ -150,7 +149,7 @@ public class ServletHolder extends Holder
     /* ---------------------------------------------------------------- */
     public ServletContext getServletContext()
     {
-        return _servletHandler.getServletContext();
+        return ((ServletHandler)_httpHandler).getServletContext();
     }
 
     /* ------------------------------------------------------------ */
@@ -201,8 +200,6 @@ public class ServletHolder extends Holder
         throws Exception
     {
         _unavailable=0;
-        _servletHandler=(ServletHandler)_httpHandler;
-            
         super.start();
         
         if (!javax.servlet.Servlet.class
@@ -240,7 +237,7 @@ public class ServletHolder extends Holder
         }
 
         if (_run_as!=null)
-            _realm=_servletHandler.getHttpContext().getRealm();
+            _realm=((ServletHandler)_httpHandler).getHttpContext().getRealm();
         
     }
 
@@ -258,7 +255,6 @@ public class ServletHolder extends Holder
         }
         _config=null;
         super.stop();
-        _servletHandler=null;
     }
     
 
@@ -408,7 +404,7 @@ public class ServletHolder extends Holder
         /* -------------------------------------------------------- */
         public ServletContext getServletContext()
         {
-            return _servletHandler.getServletContext();
+            return ((ServletHandler)_httpHandler).getServletContext();
         }
 
         /* -------------------------------------------------------- */
