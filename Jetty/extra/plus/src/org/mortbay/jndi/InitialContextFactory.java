@@ -76,18 +76,22 @@ public class InitialContextFactory implements javax.naming.spi.InitialContextFac
     public Context getInitialContext(Hashtable env) 
     {
         log.debug("InitialContextFactory.getInitialContext()");
-
-        Context ctx = (Context)_roots.get(env);
+//
+//        Context ctx = (Context)_roots.get(env);
+//        
+//        if(log.isDebugEnabled())log.debug("Returning context root: "+ctx);
+//
+//        if (ctx == null)
+//        {
+//            ctx = new NamingContext (env);
+//            ((NamingContext)ctx).setNameParser(new DefaultParser());
+//            _roots.put (env, ctx);
+//            if(log.isDebugEnabled())log.debug("Created new root context:"+ctx);
+//        }
         
-        if(log.isDebugEnabled())log.debug("Returning context root: "+ctx);
-
-        if (ctx == null)
-        {
-            ctx = new NamingContext (env);
-            ((NamingContext)ctx).setNameParser(new DefaultParser());
-            _roots.put (env, ctx);
-            if(log.isDebugEnabled())log.debug("Created new root context:"+ctx);
-        }
+        Context ctx = new NamingContext (env);
+        ((NamingContext)ctx).setNameParser(new DefaultParser());
+        if(log.isDebugEnabled())log.debug("Created new root context:"+ctx);
 
         return ctx;
     }

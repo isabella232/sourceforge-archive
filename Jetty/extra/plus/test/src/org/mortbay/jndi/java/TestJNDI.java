@@ -250,6 +250,19 @@ public class TestJNDI extends TestCase
 
         //test NameInNamespace
         assertEquals ("comp/env", sub2.getNameInNamespace());
+        
+        //test close does nothing
+        Context closeCtx = (Context)initCtx.lookup("java:comp/env");
+        closeCtx.close();
+        
+        
+        //test what happens when you close an initial context
+        InitialContext closeInit = new InitialContext();
+        closeInit.close();
+        
+        //test what happens when you close an initial context that was used
+        initCtx.close();
+        
 
     } 
 

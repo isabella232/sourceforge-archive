@@ -1127,14 +1127,15 @@ public class NamingContext implements Context, Cloneable
 
     /*------------------------------------------------*/    
     /**
-     * Not supported.
+     * Do nothing
      *
      * @exception NamingException if an error occurs
      */
     public void close ()
         throws NamingException
     {
-        throw new OperationNotSupportedException();       
+        
+        
     }
 
 
