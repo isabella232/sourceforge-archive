@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-4.1.B1 
+Jetty-4.1.B1 - 19 July 2002
  + Updated mini.http.jar target
  + CGI Servlet, pass all HTTP headers through.
  + CGI Servlet, catch and report program invocation failure status.

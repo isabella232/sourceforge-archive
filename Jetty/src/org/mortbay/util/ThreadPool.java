@@ -269,7 +269,7 @@ public class ThreadPool
     /* ------------------------------------------------------------ */
     /** Get the maximum thread stop time.
      * Threads that do not stop within this time are interrupted and
-     * then discarded.  If <=0 the max idle time is used instead.
+     * then discarded.  If <0 the max idle time is used instead.
      * @return Max stop time in ms.
      */
     public int getMaxStopTimeMs()
