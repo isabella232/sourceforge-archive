@@ -11,6 +11,8 @@ import java.util.Enumeration;
 import java.util.Map;
 import org.jboss.ha.httpsession.server.ClusteredHTTPSessionServiceMBean;
 import org.jboss.logging.Logger;
+import org.jboss.metadata.WebMetaData;
+
 
 //----------------------------------------
 
@@ -228,5 +230,13 @@ public class ClusterState
     getContentLastAccessTime()
   {
     return getLastAccessedTime();
+  }
+
+  public void sessionHasBeenStored()
+  {}
+
+  public int getReplicationTypeForSession()
+  {
+     return WebMetaData.REPLICATION_TYPE_SYNC;
   }
 }
