@@ -20,10 +20,10 @@ public interface HttpHandler extends LifeCycle
     public String getName();
     
     /* ------------------------------------------------------------ */
-    public HandlerContext getHandlerContext();
+    public HttpContext getHttpContext();
 
     /* ------------------------------------------------------------ */
-    public void initialize(HandlerContext context);
+    public void initialize(HttpContext context);
     
     /* ------------------------------------------------------------ */
     /** Start the handler.
@@ -42,24 +42,10 @@ public interface HttpHandler extends LifeCycle
         throws InterruptedException;
     
     /* ------------------------------------------------------------ */
-    /** Destroy the handler.
-     * New requests are refused and all current requests are immediately
-     * terminated.
-     */
-    public void destroy();
-
-
-    /* ------------------------------------------------------------ */
     /** 
      * @return True if the handler has been started. 
      */
     public boolean isStarted();
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return True if the handler has been destroyed. 
-     */
-    public boolean isDestroyed();
     
     /* ------------------------------------------------------------ */
     /** Handle a request.

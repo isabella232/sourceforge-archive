@@ -733,11 +733,11 @@ public class HttpConnection
      * servicing a request.
      * @param request The request
      * @param response The response
-     * @return The HandlerContext that completed handling of the request or null.
+     * @return The HttpContext that completed handling of the request or null.
      * @exception HttpException 
      * @exception IOException 
      */
-    protected HandlerContext service(HttpRequest request, HttpResponse response)
+    protected HttpContext service(HttpRequest request, HttpResponse response)
         throws HttpException, IOException
     {
         if (_httpServer==null)
@@ -776,7 +776,7 @@ public class HttpConnection
         PoolThread poolThread=(_handlingThread instanceof PoolThread)
             ? ((PoolThread)_handlingThread):null;
         
-        HandlerContext context=null;
+        HttpContext context=null;
         try
         {
             // Create or recycle connection

@@ -6,7 +6,7 @@
 package org.mortbay.http.handler;
 
 import java.io.IOException;
-import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpRequest;
@@ -25,8 +25,7 @@ abstract public class NullHandler implements HttpHandler
 {
     /* ----------------------------------------------------------------- */
     private boolean _started=false;
-    private boolean _destroyed=true;
-    private HandlerContext _context;
+    private HttpContext _context;
     private String _name;
 
     /* ------------------------------------------------------------ */
@@ -49,16 +48,16 @@ abstract public class NullHandler implements HttpHandler
     
     
     /* ------------------------------------------------------------ */
-    public HandlerContext getHandlerContext()
+    public HttpContext getHttpContext()
     {
         return _context;
     }
     
     /* ------------------------------------------------------------ */
-    /** Initialize with a HandlerContext.
-     * @param configuration Must be the HandlerContext of the handler
+    /** Initialize with a HttpContext.
+     * @param configuration Must be the HttpContext of the handler
      */
-    public void initialize(HandlerContext context)
+    public void initialize(HttpContext context)
     {
         if (_context==null)
             _context=context;
@@ -76,7 +75,6 @@ abstract public class NullHandler implements HttpHandler
             Code.warning("Handler Context not started for "+this);
         
         _started=true;
-        _destroyed=false;
         Log.event("Started "+this);
     }
     
@@ -87,27 +85,12 @@ abstract public class NullHandler implements HttpHandler
         _started=false;
         Log.event("Stopped "+this);
     }
-    
-    /* ----------------------------------------------------------------- */
-    public void destroy()
-    {
-        _started=false;
-        _destroyed=true;
-        _context=null;
-        Log.event("Destroyed "+this);
-    }
 
     /* ----------------------------------------------------------------- */
     public boolean isStarted()
     {
         return _started;
     }
-    
-    /* ----------------------------------------------------------------- */
-    public boolean isDestroyed()
-    {
-        return _destroyed;
-    }    
     
     /* ------------------------------------------------------------ */
     public String toString()

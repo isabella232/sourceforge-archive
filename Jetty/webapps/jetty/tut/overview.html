@@ -20,7 +20,7 @@ HTTP Server instances are configured via the <A href="/javadoc/org/mortbay/http/
 <PRE>
     HttpServer server = new HttpServer();
     server.addListener(new InetAddrPort(8080));
-    HandlerContext context = server.addContext("/");
+    HttpContext context = server.addContext("/");
     context.setResourceBase("./docroot/");
     context.setServingResources(true);
     server.start();

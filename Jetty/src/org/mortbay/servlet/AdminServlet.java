@@ -33,7 +33,7 @@ import org.mortbay.html.Link;
 import org.mortbay.html.List;
 import org.mortbay.html.Page;
 import org.mortbay.html.Target;
-import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpListener;
@@ -143,7 +143,7 @@ public class AdminServlet extends HttpServlet
                     contextPath+="/*";
                 int contextIndex=Integer.parseInt(tok.nextToken());
                 target+=":"+contextIndex;
-                HandlerContext
+                HttpContext
                     context=server.getContext(host,contextPath,contextIndex);
                 
                 if (tokens==4)
@@ -273,8 +273,8 @@ public class AdminServlet extends HttpServlet
                     {
                         String id4=id3+":"+i4;
                         Composite cItem = cList.newItem();
-                        HandlerContext hc=
-                            (HandlerContext)contextList.get(i4);
+                        HttpContext hc=
+                            (HttpContext)contextList.get(i4);
                         cItem.add(lifeCycle(request,id4,hc));
                         cItem.add("<BR>ResourceBase="+hc.getResourceBase());
                         cItem.add("<BR>ClassPath="+hc.getClassPath());

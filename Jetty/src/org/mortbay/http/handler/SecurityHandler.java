@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpHandler;
@@ -176,7 +176,7 @@ public class SecurityHandler extends NullHandler
         {
             
             if (!_realmForced)
-                _realm = getHandlerContext().getHttpServer()
+                _realm = getHttpContext().getHttpServer()
                     .getRealm(_realmName);
             super.start();
             if (_realm==null)
@@ -218,7 +218,7 @@ public class SecurityHandler extends NullHandler
                 // look for FormAuthenticator
                 try
                 {
-                    Iterator iter = getHandlerContext().getHandlers().iterator();
+                    Iterator iter = getHttpContext().getHandlers().iterator();
                     while (iter.hasNext())
                     {
                         HttpHandler handler=(HttpHandler)iter.next();

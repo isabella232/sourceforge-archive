@@ -595,21 +595,6 @@ public class WriterLogSink
     {
         return _started;
     }
-
-    /* ------------------------------------------------------------ */
-    public void destroy()
-    {
-        if (_filename!=null)
-            _out.close();
-        _out=null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public boolean isDestroyed()
-    {
-        return !_started && _out==null;
-    }
-
     
     /* ------------------------------------------------------------ */
     private class Rollover extends Thread

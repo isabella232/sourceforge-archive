@@ -41,15 +41,6 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
     {
         return _running;
     }
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return 
-     */
-    public boolean isDestroyed()
-    {
-        return _thread==null && _configuration==null;
-    }
 
     /* ------------------------------------------------------------ */
     /** 
@@ -85,23 +76,6 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
         }
     }
     
-    /* ------------------------------------------------------------ */
-    /** 
-     */
-    public void destroy()
-    {
-        _running=false;
-        if (_thread!=null)
-        {
-            _thread.interrupt();
-            Thread.yield();
-            if (_thread.isAlive())
-                _thread.stop();
-            _thread=null;
-        }
-        _configuration=null;
-    }
-
 
     /* ------------------------------------------------------------ */
     /** 

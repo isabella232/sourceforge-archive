@@ -211,12 +211,6 @@ public class ServletHolder extends Holder
     }
     
     
-    /* ---------------------------------------------------------------- */
-    public synchronized void destroy()
-    {
-        Code.notImplemented();
-    }
-
 
     /* ------------------------------------------------------------ */
     /** Get the servlet.

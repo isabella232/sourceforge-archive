@@ -62,13 +62,13 @@ abstract public class HttpMessage
     protected HttpConnection _connection;
     protected String _characterEncoding;
     protected String _mimeType;
+    protected Object _facade;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
     protected HttpMessage()
-    {
-    }
+    {}
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -78,6 +78,31 @@ abstract public class HttpMessage
         _connection=connection;
     }
 
+    /* ------------------------------------------------------------ */
+    /** Set a facade object.
+     * A Facade object is a wrapper object that is associated with
+     * this message and presents it with an different interface. The
+     * primary example of a HttpRequest facade is ServletRequest.
+     * A single facade object may be associated with the message with
+     * this call and retrieved with the getFacade method.
+     * @see getFacade
+     * @param facade 
+     */
+    public void setFacade(Object facade)
+    {
+        _facade=facade;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get an assoicated facade object.
+     * @see setFacade
+     * @return Facade object.
+     */
+    public Object getFacade()
+    {
+        return _facade;
+    }
+    
     /* ------------------------------------------------------------ */
     protected void reset()
     {

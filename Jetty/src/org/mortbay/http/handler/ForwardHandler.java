@@ -8,7 +8,7 @@ package org.mortbay.http.handler;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
@@ -118,7 +118,7 @@ public class ForwardHandler extends NullHandler
             Code.debug("Forward from ",pathInContext," to ",newPath);
             
             int last=request.setState(HttpMessage.__MSG_EDITABLE);
-            String context=getHandlerContext().getContextPath();
+            String context=getHttpContext().getContextPath();
             if (context.length()==1)
                 request.setPath(newPath);
             else
@@ -128,7 +128,7 @@ public class ForwardHandler extends NullHandler
                 UrlEncoded.decodeTo(query, request.getParameters());
             }
             request.setState(last);
-            getHandlerContext().getHttpServer().service(request,response);
+            getHttpContext().getHttpServer().service(request,response);
             return;
         }
     }

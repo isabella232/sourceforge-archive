@@ -154,19 +154,10 @@ public class Service
     /* ------------------------------------------------------------ */
     private static void destroyAll()
     {
-        if (_configs!=null)
-        {
-            synchronized(_configs)
-            {
-                for(int i=0;i<_servers.size();i++)
-                {
-                    HttpServer server = (HttpServer)_servers.get(i);
-                    server.destroy();
-                }
-                _servers.clear();
-                _servers=null;
-            }
-        }
+        stopAll();
+        if (_servers!=null)
+            _servers.clear();
+        _servers=null;
     }
 
     /* ------------------------------------------------------------ */

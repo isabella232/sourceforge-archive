@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.StringTokenizer;
-import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpMessage;
@@ -82,7 +82,7 @@ public class HTAccessHandler extends NullHandler
         try
         {
             // Do we have resources?
-            Resource baseResource=getHandlerContext().getBaseResource();
+            Resource baseResource=getHttpContext().getBaseResource();
             if (baseResource==null)
                 return;
             Resource reqResource = baseResource.addPath(pathInContext);

@@ -231,10 +231,10 @@ public class TestRequest
     /* --------------------------------------------------------------- */
     public static void testMimeTypes()
     {        
-        Test t = new Test("org.mortbay.http.HandlerContext.getMimeByExtension");
+        Test t = new Test("org.mortbay.http.HttpContext.getMimeByExtension");
         try
         {
-            HandlerContext c = new HandlerContext(null,"/");
+            HttpContext c = new HttpContext(null,"/");
             c.getMimeMap();
             
             t.checkEquals(c.getMimeByExtension("index.html"),"text/html","index.html");

@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import org.mortbay.http.ChunkableOutputStream;
-import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpMessage;
@@ -182,7 +182,7 @@ public class ResourceHandler extends NullHandler
     public synchronized void start()
         throws Exception
     {
-        _baseResource=getHandlerContext().getBaseResource();
+        _baseResource=getHttpContext().getBaseResource();
         
         Log.event("ResourceHandler started in "+ _baseResource);
         _mostRecentlyUsed=null;
@@ -197,11 +197,6 @@ public class ResourceHandler extends NullHandler
         throws InterruptedException
     {
         super.stop();
-    }
- 
-    /* ----------------------------------------------------------------- */
-    public void destroy()
-    {
         synchronized(_cacheMap)
         {
             if( _cacheMap != null)
@@ -210,7 +205,6 @@ public class ResourceHandler extends NullHandler
             _mostRecentlyUsed=null;
             _leastRecentlyUsed=null;
         }
-        super.destroy();
     }
 
     /* ------------------------------------------------------------ */
@@ -222,7 +216,7 @@ public class ResourceHandler extends NullHandler
     private Resource makeresource(String pathSpec,String path)
         throws MalformedURLException,IOException
     {
-        Resource baseResource=getHandlerContext().getBaseResource();
+        Resource baseResource=getHttpContext().getBaseResource();
         if (baseResource==null)
             return null;
         String info=PathMap.pathInfo(pathSpec,path);
@@ -244,7 +238,7 @@ public class ResourceHandler extends NullHandler
         if (pathInContext==null)
             throw new HttpException(HttpResponse.__403_Forbidden);
         
-        Resource baseResource=getHandlerContext().getBaseResource();
+        Resource baseResource=getHttpContext().getBaseResource();
         if (baseResource==null)
             return;
         
@@ -363,7 +357,7 @@ public class ResourceHandler extends NullHandler
                         String ipath=URI.addPaths(request.getPath(),(String)_indexFiles.get(i));
                         request.setPath(ipath);
                         request.setState(last);
-                        getHandlerContext().handle(request,response);
+                        getHttpContext().handle(request,response);
                         return;
                     }
                 }
@@ -542,7 +536,7 @@ public class ResourceHandler extends NullHandler
             return;
         }
 
-        String contextPath = getHandlerContext().getContextPath();
+        String contextPath = getHttpContext().getContextPath();
         if (contextPath!=null && !newPath.startsWith(contextPath))
         {
             response.sendError(response.__405_Method_Not_Allowed,
@@ -906,9 +900,9 @@ public class ResourceHandler extends NullHandler
         public UnCachedFile(Resource resource)
         {
             this.resource = resource;
-            encoding = getHandlerContext().getMimeByExtension(resource.getName());
+            encoding = getHttpContext().getMimeByExtension(resource.getName());
             if (encoding==null)
-                encoding=getHandlerContext().getMimeByExtension(".default");
+                encoding=getHttpContext().getMimeByExtension(".default");
             length = resource.length();
         }
 
@@ -1123,9 +1117,9 @@ public class ResourceHandler extends NullHandler
                 read+=len;
             }
             in.close();
-            encoding=getHandlerContext().getMimeByExtension(resource.getName());
+            encoding=getHttpContext().getMimeByExtension(resource.getName());
             if (encoding==null)
-                encoding=getHandlerContext().getMimeByExtension(".default");
+                encoding=getHttpContext().getMimeByExtension(".default");
         }
 
         /* ------------------------------------------------------------ */

@@ -5,16 +5,16 @@ files to a server's local disk.
 <BR><BR>
 Having an open-sourced pure-java implementation of both the core webserver
 and the servlet container in a single implementation / code tree has proven
-invaluable. Jetty 3's HandlerContext&nbsp;<!-- widget ref --> paradigm has allowed us to support
+invaluable. Jetty 3's HttpContext&nbsp;<!-- widget ref --> paradigm has allowed us to support
 serving servlets / JSPs for potentially thousands of students efficiently
 by:
 <BR><BR>
 	1) A low-priority Handler (reg'd at "/") that detects if a URI
 along the lines of "/~username/*" has been hit. If so, it strips out the
 username component, and if the user actually exists and has not been set up in
-this fashon already, if builds a new HandlerContext&nbsp;<!-- widget ref --> to deal with requests for
+this fashon already, if builds a new HttpContext&nbsp;<!-- widget ref --> to deal with requests for
 this user's static resources, dynamically loaded servlets, and JSPs. It pushes
-the new HandlerContext&nbsp;<!-- widget ref --> onto the stack as handling the "/~username/*", so that
+the new HttpContext&nbsp;<!-- widget ref --> onto the stack as handling the "/~username/*", so that
 this new "personal" handler will be queried for that person's stuff before
 the low-priority one will.
 <BR><BR>

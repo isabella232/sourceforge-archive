@@ -15,7 +15,7 @@ import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import org.mortbay.http.ChunkableOutputStream;
-import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
@@ -74,14 +74,14 @@ public class Dispatcher implements RequestDispatcher
         }
         else
             _resourceHandler=(ResourceHandler)
-                _servletHandler.getHandlerContext().getHandler(ResourceHandler.class);
+                _servletHandler.getHttpContext().getHandler(ResourceHandler.class);
         
         // If no servlet found
         if (_holder==null && _resourceHandler!=null)
         {
             // Look for a static resource
             try{
-                Resource resource= _servletHandler.getHandlerContext().getBaseResource();
+                Resource resource= _servletHandler.getHttpContext().getBaseResource();
                 if (resource!=null)
                     resource = resource.addPath(_path);
                 if (resource.exists() && !resource.isDirectory())
@@ -184,7 +184,7 @@ public class Dispatcher implements RequestDispatcher
             
             // Forward request
             httpRequest.setAttribute(ServletHandler.__SERVLET_HOLDER,_holder);
-            _servletHandler.getHandlerContext().handle(_path,null,httpRequest,httpResponse);
+            _servletHandler.getHttpContext().handle(0,_path,null,httpRequest,httpResponse);
         }
     }
         

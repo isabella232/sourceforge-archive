@@ -61,13 +61,6 @@ public class FilterHolder
         super.stop();   
     }
     
-    
-    /* ---------------------------------------------------------------- */
-    public synchronized void destroy()
-    {
-        Code.notImplemented();
-    }
-    
     /* ------------------------------------------------------------ */
     public Filter getFilter()
     {

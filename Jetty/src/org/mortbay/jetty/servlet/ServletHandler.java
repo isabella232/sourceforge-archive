@@ -32,7 +32,7 @@ import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
-import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpMessage;
@@ -72,7 +72,6 @@ public class ServletHandler
     private static final boolean __Slosh2Slash=File.separatorChar=='\\';
 
     /* ------------------------------------------------------------ */
-    public final static String __SERVLET_REQUEST="org.mortbay.jetty.Request";
     public final static String __SERVLET_HOLDER="org.mortbay.jetty.Holder";
     public final static String __J_URI="org.mortbay.jetty.URI";
     public final static String __J_AUTHENTICATED="org.mortbay.jetty.Auth";
@@ -80,7 +79,7 @@ public class ServletHandler
     /* ------------------------------------------------------------ */
     private PathMap _servletMap=new PathMap();
     private Map _nameMap=new HashMap();
-    private HandlerContext _handlerContext;
+    private HttpContext _httpContext;
     private Context _context;
     private ClassLoader _loader;
     private String _dynamicServletPathSpec;
@@ -224,12 +223,12 @@ public class ServletHandler
     public synchronized void start()
         throws Exception
     {
-        _handlerContext=getHandlerContext();
+        _httpContext=getHttpContext();
         
         _sessionManager.start();
         
         // Initialize classloader
-        _loader=getHandlerContext().getClassLoader();
+        _loader=getHttpContext().getClassLoader();
 
         // start the handler - protected by synchronization until
         // end of the call.
@@ -269,28 +268,10 @@ public class ServletHandler
         _sessionManager.stop();
         _loader=null;
         _context=null;
-        _handlerContext=null;
+        _httpContext=null;
         super.stop();
     }
     
-    /* ----------------------------------------------------------------- */
-    public synchronized void destroy()
-    {
-        // Destroy servlets
-        Iterator i = _servletMap.values().iterator();
-        while (i.hasNext())
-        {
-            ServletHolder holder = (ServletHolder)i.next();
-            holder.destroy();
-        }
-
-        _sessionManager.destroy();
-        _sessionManager=null;
-        _loader=null;
-        _context=null;
-        _handlerContext=null;
-        super.destroy();
-    }
     
     
     /* ------------------------------------------------------------ */
@@ -366,14 +347,15 @@ public class ServletHandler
     {
         // Look for a previously built servlet request.
         ServletRequest servletRequest = (ServletRequest)
-            httpRequest.getAttribute(ServletHandler.__SERVLET_REQUEST);
+            httpRequest.getFacade();
         
         if (servletRequest==null)
         {
             servletRequest  = new ServletRequest(this,httpRequest);
-            httpRequest.setAttribute(ServletHandler.__SERVLET_REQUEST,servletRequest);
+            httpRequest.setFacade(servletRequest);
             ServletResponse servletResponse =
                 new ServletResponse(servletRequest,httpResponse);
+            httpResponse.setFacade(servletResponse);
         }
         return servletRequest;
     }
@@ -552,7 +534,7 @@ public class ServletHandler
                     // OK lets look for a dynamic servlet.
                     String path=pathInContext;
                     Code.debug("looking for ",servletClass," in ",
-                               getHandlerContext().getClassPath());
+                               getHttpContext().getClassPath());
                 
                     // remove prefix
                     servletClass=servletClass.substring(1);
@@ -591,11 +573,11 @@ public class ServletHandler
                         // This context has a specific class loader.
                         if (servlet.getClass().getClassLoader()!=_loader)
                         {
-                            holder.destroy();
+                            holder.stop();
                             String msg = "Dynamic servlet "+
                                 servletClass+
                                 " is not loaded from context: "+
-                                getHandlerContext().getContextPath();
+                                getHttpContext().getContextPath();
                         
                             Code.warning(msg);
                             throw new UnavailableException(msg);
@@ -719,10 +701,10 @@ public class ServletHandler
         public ServletContext getContext(String uri)
         {        
             ServletHandler handler= (ServletHandler)
-                _handlerContext.getHttpServer()
+                _httpContext.getHttpServer()
                 .findHandler(org.mortbay.jetty.servlet.ServletHandler.class,
                              uri,
-                             _handlerContext.getHosts());
+                             _httpContext.getHosts());
             if (handler!=null)
                 return handler.getServletContext();
             return null;
@@ -743,13 +725,13 @@ public class ServletHandler
         /* ------------------------------------------------------------ */
         public String getMimeType(String file)
         {
-            return _handlerContext.getMimeByExtension(file);
+            return _httpContext.getMimeByExtension(file);
         }
 
         /* ------------------------------------------------------------ */
         public Set getResourcePaths(String uriInContext)
         {
-            Resource baseResource=_handlerContext.getBaseResource();
+            Resource baseResource=_httpContext.getBaseResource();
             uriInContext=Resource.canonicalPath(uriInContext);
             if (baseResource==null || uriInContext==null)
                 return Collections.EMPTY_SET;
@@ -784,7 +766,7 @@ public class ServletHandler
         public URL getResource(String uriInContext)
             throws MalformedURLException
         {
-            Resource baseResource=_handlerContext.getBaseResource();
+            Resource baseResource=_httpContext.getBaseResource();
             uriInContext=Resource.canonicalPath(uriInContext);
             if (baseResource==null || uriInContext==null)
                 return null;
@@ -794,7 +776,7 @@ public class ServletHandler
                 if (resource.exists())
                     return resource.getURL();
 
-                String aliasedUri=_handlerContext.getResourceAlias(uriInContext);
+                String aliasedUri=_httpContext.getResourceAlias(uriInContext);
                 if (aliasedUri!=null)
                     return getResource(aliasedUri);
             }
@@ -935,7 +917,7 @@ public class ServletHandler
             if (__Slosh2Slash)
                 path=path.replace('\\','/');
         
-            Resource baseResource=_handlerContext.getBaseResource();
+            Resource baseResource=_httpContext.getBaseResource();
             if (baseResource==null )
                 return null;
 
@@ -963,29 +945,29 @@ public class ServletHandler
 
         /* ------------------------------------------------------------ */
         /** Get context init parameter.
-         * Delegated to HandlerContext.
+         * Delegated to HttpContext.
          * @param param param name
          * @return param value or null
          */
         public String getInitParameter(String param)
         {
-            return _handlerContext.getInitParameter(param);
+            return _httpContext.getInitParameter(param);
         }
 
         /* ------------------------------------------------------------ */
         /** Get context init parameter names.
-         * Delegated to HandlerContext.
+         * Delegated to HttpContext.
          * @return Enumeration of names
          */
         public Enumeration getInitParameterNames()
         {
-            return _handlerContext.getInitParameterNames();
+            return _httpContext.getInitParameterNames();
         }
 
     
         /* ------------------------------------------------------------ */
         /** Get context attribute.
-         * Delegated to HandlerContext.
+         * Delegated to HttpContext.
          * @param name attribute name.
          * @return attribute
          */
@@ -994,7 +976,7 @@ public class ServletHandler
             if ("javax.servlet.context.tempdir".equals(name))
             {
                 // Initialize temporary directory
-                File tempDir=(File)_handlerContext
+                File tempDir=(File)_httpContext
                     .getAttribute("javax.servlet.context.tempdir");
                 if (tempDir==null)
                 {
@@ -1004,7 +986,7 @@ public class ServletHandler
                             tempDir.delete();
                         tempDir.mkdir();
                         tempDir.deleteOnExit();
-                        _handlerContext
+                        _httpContext
                             .setAttribute("javax.servlet.context.tempdir",
                                           tempDir);
                     }
@@ -1016,21 +998,21 @@ public class ServletHandler
                 Code.debug("TempDir=",tempDir);
             }
 
-            return _handlerContext.getAttribute(name);
+            return _httpContext.getAttribute(name);
         }
 
         /* ------------------------------------------------------------ */
         /** Get context attribute names.
-         * Delegated to HandlerContext.
+         * Delegated to HttpContext.
          */
         public Enumeration getAttributeNames()
         {
-            return _handlerContext.getAttributeNames();
+            return _httpContext.getAttributeNames();
         }
 
         /* ------------------------------------------------------------ */
         /** Set context attribute names.
-         * Delegated to HandlerContext.
+         * Delegated to HttpContext.
          * @param name attribute name.
          * @param value attribute value
          */
@@ -1041,12 +1023,12 @@ public class ServletHandler
                 Code.warning("Servlet attempted update of "+name);
                 return;
             }
-            _handlerContext.setAttribute(name,value);
+            _httpContext.setAttribute(name,value);
         }
 
         /* ------------------------------------------------------------ */
         /** Remove context attribute.
-         * Delegated to HandlerContext.
+         * Delegated to HttpContext.
          * @param name attribute name.
          */
         public void removeAttribute(String name)
@@ -1056,14 +1038,14 @@ public class ServletHandler
                 Code.warning("Servlet attempted update of "+name);
                 return;
             }
-            _handlerContext.removeAttribute(name);
+            _httpContext.removeAttribute(name);
         }
     
         /* ------------------------------------------------------------ */
         public String getServletContextName()
         {
-            if (_handlerContext instanceof WebApplicationContext)
-                return ((WebApplicationContext)_handlerContext).getDisplayName();
+            if (_httpContext instanceof WebApplicationContext)
+                return ((WebApplicationContext)_httpContext).getDisplayName();
             return null;
         }
     }

@@ -16,7 +16,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import org.mortbay.http.ChunkableOutputStream;
-import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpResponse;
@@ -510,7 +510,7 @@ public class ServletResponse implements HttpServletResponse
                 /* implementation of educated defaults */
                 String mimeType = _httpResponse.getMimeType();                
                 encoding = _servletRequest.getServletHandler()
-                    .getHandlerContext().getEncodingByMimeType(mimeType);
+                    .getHttpContext().getEncodingByMimeType(mimeType);
             }
             if (encoding==null)
                 // get last resort hardcoded default

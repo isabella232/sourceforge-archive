@@ -45,7 +45,7 @@ import org.mortbay.util.URI;
  * configure instances of this class.
  *
  * The HttpServer implements the BeanContext API so that membership
- * events may be generated for HttpListeners, HandlerContexts and WebApplications.
+ * events may be generated for HttpListeners, HttpContexts and WebApplications.
  *
  * @see HttpContext
  * @see HttpHandler
@@ -67,10 +67,10 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     private HashMap _realmMap = new HashMap(3);
     
     // HttpServer[host->PathMap[contextPath->List[HanderContext]]]
-    // HandlerContext[List[HttpHandler]]
+    // HttpContext[List[HttpHandler]]
     private StringMap _hostMap = new StringMap();
     
-    private HandlerContext _notFoundContext=null;
+    private HttpContext _notFoundContext=null;
     private boolean _chunkingForced=false;
     
     private LogSink _requestLogSink;
@@ -155,10 +155,10 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
             }
         }
         
-        Iterator contexts = getHandlerContexts().iterator();
+        Iterator contexts = getHttpContexts().iterator();
         while(contexts.hasNext())
         {
-            HandlerContext context=(HandlerContext)contexts.next();
+            HttpContext context=(HttpContext)contexts.next();
             if (!context.isStarted())
                 try{context.start();}catch(Exception e){mex.add(e);}
         }
@@ -192,10 +192,10 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
             if (listener.isStarted())
                 return true;
         }
-        Iterator contexts = getHandlerContexts().iterator();
+        Iterator contexts = getHttpContexts().iterator();
         while(contexts.hasNext())
         {
-            HandlerContext context=(HandlerContext)contexts.next();
+            HttpContext context=(HttpContext)contexts.next();
             if (context.isStarted())
                 return true;
         }
@@ -228,10 +228,10 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
             }
         }
         
-        Iterator contexts = getHandlerContexts().iterator();
+        Iterator contexts = getHttpContexts().iterator();
         while(contexts.hasNext())
         {
-            HandlerContext context=(HandlerContext)contexts.next();
+            HttpContext context=(HttpContext)contexts.next();
             if (context.isStarted())
                 context.stop();
         }
@@ -242,58 +242,6 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
             Log.event("Stopped "+_requestLogSink);
         }
         Log.event("Stopped "+this);
-    }
-
-    
-    /* ------------------------------------------------------------ */
-    /** Stop all listeners then handlers.
-     * All the handlers are unmapped and the listeners removed.
-     */
-    public synchronized void destroy()
-    {
-        __servers.remove(this);
-        Iterator listeners = getListeners().iterator();
-        while(listeners.hasNext())
-        {
-            HttpListener listener =(HttpListener)listeners.next();
-            try{listener.destroy();}
-            catch(Exception e){Code.warning(e);}
-        }
-        
-        Iterator contexts = getHandlerContexts().iterator();
-        while(contexts.hasNext())
-        {
-            HandlerContext context=(HandlerContext)contexts.next();
-            try{context.destroy();}
-            catch(Exception e){Code.warning(e);}
-        }
-
-	if (_hostMap==null)
-	    Code.warning("HttpServer.destroy() on an"
-			 +" already destroyed HttpServer.");
-	else
-	{
-	    _hostMap.clear();
-	    _hostMap=null;
-	}
-
-	if (_listeners!=null)
-	{
-	    _listeners.clear();
-	    _listeners=null;
-	}
-	
-        if (_requestLogSink!=null)
-        {
-            remove(_requestLogSink);
-            _requestLogSink.destroy();
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    public synchronized boolean isDestroyed()
-    {
-        return _hostMap==null;
     }
     
     /* ------------------------------------------------------------ */
@@ -407,15 +355,15 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
 
 
     /* ------------------------------------------------------------ */
-    /** Create a new HandlerContext.
+    /** Create a new HttpContext.
      * Specialized HttpServer classes may specialize this method to
-     * return subclasses of HandlerContext.
+     * return subclasses of HttpContext.
      * @param contextPathSpec 
-     * @return A new instance of HandlerContext or a subclass of HandlerContext
+     * @return A new instance of HttpContext or a subclass of HttpContext
      */
-    protected HandlerContext newHandlerContext(String contextPathSpec)
+    protected HttpContext newHttpContext(String contextPathSpec)
     {
-        return new HandlerContext(this,contextPathSpec);
+        return new HttpContext(this,contextPathSpec);
     }
     
     /* ------------------------------------------------------------ */
@@ -424,9 +372,9 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
      * host and contextPath. Requests are offered to multiple
      * contexts in the order they where added to the HttpServer.
      * @param contextPath
-     * @return A HandlerContext instance created by a call to newHandlerContext.
+     * @return A HttpContext instance created by a call to newHttpContext.
      */
-    public HandlerContext addContext(String contextPath)
+    public HttpContext addContext(String contextPath)
     {
         return addContext(null,contextPath);
     }
@@ -439,13 +387,13 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
      * contexts in the order they where added to the HttpServer.
      * @param host Virtual hostname or null for all hosts.
      * @param contextPathSpec
-     * @return A HandlerContext instance created by a call to newHandlerContext.
+     * @return A HttpContext instance created by a call to newHttpContext.
      */
-    public HandlerContext addContext(String host, String contextPathSpec)
+    public HttpContext addContext(String host, String contextPathSpec)
     {
         if (host!=null && host.length()==0)
             host=null;
-        HandlerContext hc = newHandlerContext(contextPathSpec);
+        HttpContext hc = newHttpContext(contextPathSpec);
         addContext(host,hc);
         return hc;
     }
@@ -458,7 +406,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
      * @param context 
      */
     public void addContext(String host,
-                           HandlerContext context)
+                           HttpContext context)
     {
         PathMap contextMap=(PathMap)_hostMap.get(host);
         if (contextMap==null)
@@ -503,7 +451,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
             {
                 if (i< contextList.size())
                 {
-                    HandlerContext hc=(HandlerContext)contextList.get(i);
+                    HttpContext hc=(HttpContext)contextList.get(i);
                     if (hc!=null && hc.isStarted())
                         throw new IllegalStateException("Context not stopped");
                     remove(hc);
@@ -519,7 +467,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     /** Remove a context or Web application.
      * @exception IllegalStateException if context not stopped
      */
-    public void removeContext(HandlerContext context)
+    public void removeContext(HttpContext context)
         throws IllegalStateException
     {
         if (context.isStarted())
@@ -548,11 +496,11 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
      * @param host The virtual host or null for all hosts.
      * @param contextPathSpec
      * @param i Index among contexts of same host and pathSpec.
-     * @return The HandlerContext or null.
+     * @return The HttpContext or null.
      */
-    public HandlerContext getContext(String host, String contextPathSpec, int i)
+    public HttpContext getContext(String host, String contextPathSpec, int i)
     {
-        HandlerContext hc=null;
+        HttpContext hc=null;
 
         PathMap contextMap=(PathMap)_hostMap.get(host);
         if (contextMap!=null)
@@ -562,7 +510,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
             {
                 if (i>=contextList.size())
                     return null;
-                hc=(HandlerContext)contextList.get(i);
+                hc=(HttpContext)contextList.get(i);
             }
         }
 
@@ -574,20 +522,20 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     /** Get or create context. 
      * @param host The virtual host or null for all hosts.
      * @param contextPath 
-     * @return HandlerContext. If multiple contexts exist for the same
+     * @return HttpContext. If multiple contexts exist for the same
      * host and pathSpec, the most recently added context is returned.
-     * If no context exists, a new context is created by a call to newHandlerContext.
+     * If no context exists, a new context is created by a call to newHttpContext.
      */
-    public HandlerContext getContext(String host, String contextPath)
+    public HttpContext getContext(String host, String contextPath)
     { 
-        HandlerContext hc=null;
+        HttpContext hc=null;
 
         PathMap contextMap=(PathMap)_hostMap.get(host);
         if (contextMap!=null)
         {
             List contextList = (List)contextMap.get(contextPath);
             if (contextList!=null && contextList.size()>0)
-                hc=(HandlerContext)contextList.get(contextList.size()-1);
+                hc=(HttpContext)contextList.get(contextList.size()-1);
             
         }
         if (hc==null)
@@ -616,7 +564,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
                 Iterator contexts=list.iterator();
                 while(contexts.hasNext())
                 {
-                    HandlerContext context = (HandlerContext) contexts.next();
+                    HttpContext context = (HttpContext) contexts.next();
                     set.addAll(context.getHandlers());
                 }
             }
@@ -628,7 +576,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     /** 
      * @return Collection of all handler.
      */
-    public synchronized Set getHandlerContexts()
+    public synchronized Set getHttpContexts()
     {
         if (_hostMap==null)
             return Collections.EMPTY_SET;
@@ -727,20 +675,20 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     /* ------------------------------------------------------------ */
     /** Service a request.
      * Handle the request by passing it to the HttpHandler contained in
-     * the mapped HandlerContexts.
+     * the mapped HttpContexts.
      * The requests host and path are used to select a list of
-     * HandlerContexts. Each HttpHandler in these context is offered
+     * HttpContexts. Each HttpHandler in these context is offered
      * the request in turn, until the request is handled.
      *
      * If no handler handles the request, 404 Not Found is returned.
      *
      * @param request 
      * @param response
-     * @return The HandlerContext that completed handling of the request or null.
+     * @return The HttpContext that completed handling of the request or null.
      * @exception IOException 
      * @exception HttpException 
      */
-    public HandlerContext service(HttpRequest request,HttpResponse response)
+    public HttpContext service(HttpRequest request,HttpResponse response)
         throws IOException, HttpException
     {
         String host=request.getHost();
@@ -766,8 +714,8 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
                 
                         for (int j=0;j<contextList.size();j++)
                         {
-                            HandlerContext context=
-                                (HandlerContext)contextList.get(j);
+                            HttpContext context=
+                                (HttpContext)contextList.get(j);
                             
                             if (Code.debug())
                                 Code.debug("Try ",context,",",new Integer(j));
@@ -789,7 +737,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
         {
             if (_notFoundContext==null)
             {
-                _notFoundContext=new HandlerContext(this,"/");
+                _notFoundContext=new HttpContext(this,"/");
                 _notFoundContext.addHandler(new NotFoundHandler());
                 try{_notFoundContext.start();}catch(Exception e){Code.warning(e);}
             }
@@ -834,8 +782,8 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
                 
                         for (int j=0;j<contextList.size();j++)
                         {
-                            HandlerContext context=
-                                (HandlerContext)contextList.get(j);
+                            HttpContext context=
+                                (HttpContext)contextList.get(j);
                             
                             HttpHandler handler =
                                 context.getHandler(handlerClass);
@@ -1122,7 +1070,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
 
             // Default is no virtual host
             String host=null;
-            HandlerContext context = server.getContext(host,"/");
+            HttpContext context = server.getContext(host,"/");
             context.setResourceBase("docroot/");
             context.setServingResources(true);
             context.addHandler(new DumpHandler());

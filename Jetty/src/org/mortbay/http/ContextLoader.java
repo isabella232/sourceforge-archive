@@ -19,7 +19,7 @@ import org.mortbay.util.IO;
 import org.mortbay.util.Resource;
 
 /* ------------------------------------------------------------ */
-/** ClassLoader for HandlerContext.
+/** ClassLoader for HttpContext.
  * Specializes URLClassLoader with some utility and file mapping
  * methods.
  *

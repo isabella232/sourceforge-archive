@@ -105,16 +105,6 @@ public class SocketListener
         super.stop();
         Log.event("Stopped SocketListener on "+getInetAddrPort());
     }
-    
-    /* --------------------------------------------------------------- */
-    public void destroy()
-    {
-        Log.event("Destroy SocketListener on "+getInetAddrPort());
-        super.destroy();
-        if (_server!=null)
-            _server.removeListener(this);
-        _server=null;
-    }
 
     /* ------------------------------------------------------------ */
     /** Handle Job.

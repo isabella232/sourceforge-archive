@@ -8,12 +8,12 @@
 
 The <a href="/javadoc/org/mortbay/http/HttpServer.html">org.mortbay.http.HttpServer</a> class provides a connection between a collection of request listeners and collections of request handlers:
 <PRE>
-  HttpListener --&gt; HttpServer --&gt; HandlerContext --&gt; HttpHandler
+  HttpListener --&gt; HttpServer --&gt; HttpContext --&gt; HttpHandler
 </PRE>
 A simple example of this to have single SocketListener listening for normal HTTP requests and a ResourceHandler serving static content:
 
 <PRE>
-  SocketListener --&gt; HttpServer --&gt; HandlerContext --&gt; ResourceHandler
+  SocketListener --&gt; HttpServer --&gt; HttpContext --&gt; ResourceHandler
    port: 80                             "/"            "./docroot"
 </PRE>
 
@@ -23,7 +23,7 @@ Implementations of the <a href="/javadoc/org/mortbay/http/HttpListener.html">org
 Multiple listeners may be used to listen on different ports or specific IP addresses.  This is most frequently used for SSL or multi-hosting:
 
 <PRE>
-  SocketListener -+&gt; HttpServer --&gt; HandlerContext --&gt; ResourceHandler
+  SocketListener -+&gt; HttpServer --&gt; HttpContext --&gt; ResourceHandler
    port: 80       |                     "/"            "./docroot"
   JSSEListener   -+ 
    port: 443      |                      
@@ -70,18 +70,18 @@ Thus attributes such as min/max threads, min/max idle times etc are set via the 
 <P>
 <FONT Size=+1><B>Handler Contexts</B></FONT><BR>
 
-A <a href="/javadoc/org/mortbay/http/HandlerContext.html">org.mortbay.http.HandlerContext</a> is a collection of 
+A <a href="/javadoc/org/mortbay/http/HttpContext.html">org.mortbay.http.HttpContext</a> is a collection of 
 <a href="/javadoc/org/mortbay/http/HttpHandler.html">org.mortbay.http.HttpHandler</a> implementations, which are tried in turn until a request is handled.  Typically a context might have a security, servlet and resource handler:
 
 <PRE>
-  SocketListener --&gt; HttpServer --&gt; HandlerContext +-&gt; SecurityHandler
+  SocketListener --&gt; HttpServer --&gt; HttpContext +-&gt; SecurityHandler
    port: 80                             "/"        |
                                                    +-&gt; ServletHandler
                                                    |
                                                    +-&gt; ResourceHandler
 </PRE>
 
-HttpHandlers within a HandlerContext share the following attributes:<UL>
+HttpHandlers within a HttpContext share the following attributes:<UL>
 <LI>Initialization parameters
 <LI>An optional virtual host name for the context.
 <LI>A path prefix for the context.
@@ -96,9 +96,9 @@ HttpHandlers within a HandlerContext share the following attributes:<UL>
 Multiple contexts are typically used to server several applications from the same port(s) using URL mappings:
 
 <PRE>
-  SocketListener --&gt; HttpServer +-&gt; HandlerContext --&gt; HttpHandler(s)
+  SocketListener --&gt; HttpServer +-&gt; HttpContext --&gt; HttpHandler(s)
    port: 80                     |       path: /contextpath1/*
-                                +-&gt; HandlerContext --&gt; HttpHandler(s)
+                                +-&gt; HttpContext --&gt; HttpHandler(s)
                                         path: /contextpath2/*           
 </PRE>
 
@@ -106,10 +106,10 @@ Or virtual hosts:
 
 
 <PRE>
-  SocketListener --&gt; HttpServer +-&gt; HandlerContext --&gt; HttpHandler(s)
+  SocketListener --&gt; HttpServer +-&gt; HttpContext --&gt; HttpHandler(s)
    port: 80                     |    host: www.acme.com
                                 |    path: /
-                                +-&gt; HandlerContext --&gt; HttpHandler(s)
+                                +-&gt; HttpContext --&gt; HttpHandler(s)
                                         host: www.myacme.org
                                         path: /
 </PRE>
@@ -117,51 +117,51 @@ If multiple contexts are to be served from the same port, but on different
 IP addresses, then each context may be given its own HttpServer:
 
 <PRE>
-  SocketListener --&gt; HttpServer --&gt; HandlerContext --&gt; HttpHandler(s)
+  SocketListener --&gt; HttpServer --&gt; HttpContext --&gt; HttpHandler(s)
    host: www.acme.com                   path: /
    port: 80  
-  SocketListener --&gt; HttpServer --&gt; HandlerContext --&gt; HttpHandler(s)
+  SocketListener --&gt; HttpServer --&gt; HttpContext --&gt; HttpHandler(s)
    host: www.myacme.org                 path: /
    port: 80                              
 </PRE>
 
-The HttpServer is used as a factory to create HandlerContext instances
+The HttpServer is used as a factory to create HttpContext instances
 for a specific context path:
 <PRE>
-    HandlerContext context = server.addContext("/context/*");
+    HttpContext context = server.addContext("/context/*");
     context.setResourceBase("./docroot/");
 </PRE>
 Or for a specific virtual host and context path:
 <PRE>
-    HandlerContext context = server.addContext("myhost","/context/*");
+    HttpContext context = server.addContext("myhost","/context/*");
     context.setResourceBase("./docroot/");
 </PRE>
 A handler context may be registered with multiple virtual hosts, but only a single context path:
 <PRE>
-    HandlerContext context = server.addContext("myhost1","/context/*");
+    HttpContext context = server.addContext("myhost1","/context/*");
     context.setResourceBase("./docroot/");
     server.addContext("myhost2",context);
 </PRE>
 Virtual hosts may have several aliases registered:
 <PRE>
-    HandlerContext context = server.addContext("myhost","/context/*");
+    HttpContext context = server.addContext("myhost","/context/*");
     server.addHostAlias("myhost","myhost.com");
     server.addHostAlias("myhost","www.myhost.com");
     server.addHostAlias("myhost","1.2.3.4");
 </PRE>
 
-Each call to <CODE>addContext()</CODE> will create new HandlerContext instance.  Multiple contexts can exist for the 
+Each call to <CODE>addContext()</CODE> will create new HttpContext instance.  Multiple contexts can exist for the 
 same contextPath and they are tried in the order they were added until the request is handled.   If you wish to avoid 
 the possibility of creating multiple contexts, the <CODE>getContext</CODE> can be used to get an existing context or
 to create one if one does not exist:
 <PRE>
-    HandlerContext context = server.getContext("myhost","/context/*");
+    HttpContext context = server.getContext("myhost","/context/*");
     context.setResourceBase("./docroot/");
 </PRE>
 
-Derivations of HttpServer may implement the <Code>newHandlerContext()</Code> method to change the factory method for creating new Contexts.  This is used by the <a href="/javadoc/org/mortbay/jetty/Server.html">org.mortbay.jetty.Server</a> class to return 
-HandlerContext derivations that have conveniance methods for configuring servlets.
-The <a href="/javadoc/org/mortbay/jetty/server/WebApplicationContext.html">org.mortbay.jetty.servlet.WebApplicationContext</a> class is a specialization of HandlerContext that configures the handlers by looking at the standard web application files and layout.
+Derivations of HttpServer may implement the <Code>newHttpContext()</Code> method to change the factory method for creating new Contexts.  This is used by the <a href="/javadoc/org/mortbay/jetty/Server.html">org.mortbay.jetty.Server</a> class to return 
+HttpContext derivations that have conveniance methods for configuring servlets.
+The <a href="/javadoc/org/mortbay/jetty/server/WebApplicationContext.html">org.mortbay.jetty.servlet.WebApplicationContext</a> class is a specialization of HttpContext that configures the handlers by looking at the standard web application files and layout.
 <P>
 
 <FONT Size=+1><B>HTTP Handlers</B></FONT><BR>
@@ -176,7 +176,7 @@ Headers may be modified or OutputStream filters added.
 </UL>
 The handlers provided in the <A href="/javadoc/org/mortbay/http/handler/package-summary.html">org.mortbay.http.handler</A> package are:<UL>
 <A href="/javadoc/org/mortbay/http/handler/NullHandler.html">NullHandler</A> - An abstract base implementation of the interface.
-<BR><A href="/javadoc/org/mortbay/http/handler/ResourceHandler.html">ResourceHandler</A> - Serve static content from the resource base of the HandlerContext (see below).
+<BR><A href="/javadoc/org/mortbay/http/handler/ResourceHandler.html">ResourceHandler</A> - Serve static content from the resource base of the HttpContext (see below).
 <BR><A href="/javadoc/org/mortbay/http/handler/SecurityHandler.html">SecurityHandler</A> - Provide BASIC and FORM authentication.
 <BR><A href="/javadoc/org/mortbay/http/handler/HTAccessHandler.html">HTAccessHandler</A> - Provide apache .htaccess style security.
 <BR><A href="/javadoc/org/mortbay/http/handler/NotFoundHandler.html">NotFoundHandler</A> - Handles unserviced requests.
@@ -185,10 +185,10 @@ The handlers provided in the <A href="/javadoc/org/mortbay/http/handler/package-
 </UL>
 Note that a ServletHandler is provided by the <A href="/javadoc/org/mortbay/jetty/servlet/package-summary.html">org.mortbay.jetty.servlet</A> package and is discussed in detail later in this tutorial.
 <P>
-HttpHandlers are tried within a context in the order they were added to the HandlerContext. The following code creates a 
+HttpHandlers are tried within a context in the order they were added to the HttpContext. The following code creates a 
 context that checks authentication, then tries a servlet mapping before finally trying static content:
 <PRE>
-    HandlerContext context = server.addContext("/");
+    HttpContext context = server.addContext("/");
     context.add(new SecurityHandler());
     context.add(new ServletHandler());
     context.add(new ResourceHandler());
@@ -205,16 +205,16 @@ The <a href="/javadoc/org/mortbay/http/handler/ResourceHandler.html">org.mortbay
 <LI>Index/welcome files.
 <LI>Generation of directory listings.
 </UL>
-The root directory or URL for serving static content is the ResourceBase of the HandlerContext.  Thus to 
+The root directory or URL for serving static content is the ResourceBase of the HttpContext.  Thus to 
 server static content from the directory "./docroot/":
 <PRE>
-    HandlerContext context = server.addContext("myhost","/context/*");
+    HttpContext context = server.addContext("myhost","/context/*");
     context.setResourceBase("./docroot/");
     context.add(new ResourceHandler());
 </PRE>
 As this is a frequent configuration option, a conveniance setServingResources method is provided that creates the ResourceHandler:
 <PRE>
-    HandlerContext context = server.addContext("myhost","/context/*");
+    HttpContext context = server.addContext("myhost","/context/*");
     context.setResourceBase("./docroot/");
     context.setServingResources(true);
 </PRE>

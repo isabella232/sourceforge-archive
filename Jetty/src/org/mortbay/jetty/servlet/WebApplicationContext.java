@@ -26,7 +26,7 @@ import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
-import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
@@ -46,11 +46,11 @@ import org.mortbay.xml.XmlParser;
 
 
 /* ------------------------------------------------------------ */
-/** Standard web.xml configured HandlerContext.
+/** Standard web.xml configured HttpContext.
  *
- * This specialization of HandlerContext uses the standardized web.xml
+ * This specialization of HttpContext uses the standardized web.xml
  * to describe a web application and configure the handlers for the
- * HandlerContext.
+ * HttpContext.
  * <P>
  * It creates and/or configures the following Handlers:<UL>
  * <LI>SecurityHandler - Implements BASIC and FORM
@@ -67,7 +67,7 @@ import org.mortbay.xml.XmlParser;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class WebApplicationContext extends ServletHandlerContext
+public class WebApplicationContext extends ServletHttpContext
 {
     /* ------------------------------------------------------------ */
     private String _name;
@@ -415,12 +415,6 @@ public class WebApplicationContext extends ServletHandlerContext
             super.stop();
     }
     
-    /* ------------------------------------------------------------ */
-    public void destroy()
-    {
-        Code.notImplemented();
-    }
-
     /* ------------------------------------------------------------ */
     public synchronized void addEventListener(EventListener listener)
         throws IllegalArgumentException
@@ -1018,7 +1012,7 @@ public class WebApplicationContext extends ServletHandlerContext
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "WebApplicationContext["+getHandlerContextName()+","+
+        return "WebApplicationContext["+getHttpContextName()+","+
             (_name==null?_war:_name)+"]";
     }
     

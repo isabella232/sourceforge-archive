@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.net.URL;
-import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpServer;
-import org.mortbay.jetty.servlet.ServletHandlerContext;
+import org.mortbay.jetty.servlet.ServletHttpContext;
 import org.mortbay.jetty.servlet.WebApplicationContext;
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
@@ -22,8 +22,8 @@ import org.mortbay.xml.XmlConfiguration;
  * support for initialization from xml configuration files
  * that follow the XmlConfiguration dtd.
  *
- * HandlerContexts created by Server are of the type
- * org.mortbay.jetty.servlet.ServletHandlerContext unless otherwise
+ * HttpContexts created by Server are of the type
+ * org.mortbay.jetty.servlet.ServletHttpContext unless otherwise
  * specified.
  *
  * This class also provides a main() method which starts a server for
@@ -32,7 +32,7 @@ import org.mortbay.xml.XmlConfiguration;
  * hook is thread is registered to stop these servers.   
  *
  * @see org.mortbay.xml.XmlConfiguration
- * @see org.mortbay.jetty.servlet.ServletHandlerContext
+ * @see org.mortbay.jetty.servlet.ServletHttpContext
  * @version $Revision$
  * @author Greg Wilkins (gregw)
  */
@@ -128,17 +128,17 @@ public class Server extends HttpServer
     }
     
     /* ------------------------------------------------------------ */
-    /** Create a new ServletHandlerContext.
+    /** Create a new ServletHttpContext.
      * Ths method is called by HttpServer to creat new contexts.  Thus
      * calls to addContext or getContext that result in a new Context
      * being created will return an
-     * org.mortbay.jetty.servlet.ServletHandlerContext instance.
+     * org.mortbay.jetty.servlet.ServletHttpContext instance.
      * @param contextPathSpec 
-     * @return ServletHandlerContext
+     * @return ServletHttpContext
      */
-    protected HandlerContext newHandlerContext(String contextPathSpec)
+    protected HttpContext newHttpContext(String contextPathSpec)
     {
-        return new ServletHandlerContext(this,contextPathSpec);
+        return new ServletHttpContext(this,contextPathSpec);
     }
     
     /* ------------------------------------------------------------ */

@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 import javax.servlet.http.Cookie;
 import org.mortbay.http.ChunkableOutputStream;
-import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpMessage;
@@ -66,7 +66,7 @@ public class DumpHandler extends NullHandler
         Writer writer = new OutputStreamWriter(buf,StringUtil.__ISO_8859_1);
         writer.write("<HTML><H1>Dump HttpHandler</H1>");
         writer.write("<PRE>\npath="+request.getPath()+
-                    "\ncontextPath="+getHandlerContext().getContextPath()+
+                    "\ncontextPath="+getHttpContext().getContextPath()+
                     "\npathInContext="+pathInContext+
                     "\n</PRE>\n");
         writer.write("<H3>Header:</H3><PRE>");

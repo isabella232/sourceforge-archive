@@ -110,7 +110,7 @@ public class HttpResponse extends HttpMessage
     /* -------------------------------------------------------------- */
     private int _status= __200_OK;
     private String _reason;
-    private HandlerContext _handlerContext;
+    private HttpContext _httpContext;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -133,21 +133,21 @@ public class HttpResponse extends HttpMessage
     }
 
     /* ------------------------------------------------------------ */
-    /** Get the HandlerContext handling this reponse. 
+    /** Get the HttpContext handling this reponse. 
      * @return 
      */
-    public HandlerContext getHandlerContext()
+    public HttpContext getHttpContext()
     {
-        return _handlerContext;
+        return _httpContext;
     }
     
     /* ------------------------------------------------------------ */
-    /** Set the HandlerContext handling this reponse. 
+    /** Set the HttpContext handling this reponse. 
      * @return 
      */
-    void setHandlerContext(HandlerContext context)
+    void setHttpContext(HttpContext context)
     {
-        _handlerContext=context;
+        _httpContext=context;
     }
     
     /* ------------------------------------------------------------ */
@@ -316,7 +316,7 @@ public class HttpResponse extends HttpMessage
         {
             // Handle error page.
             // XXX some servlet dependancies in attribute names here.
-            String error_page = _handlerContext==null?null:_handlerContext.getErrorPage(error);
+            String error_page = _httpContext==null?null:_httpContext.getErrorPage(error);
             if (error_page!=null)
             {
                 if (request.getAttribute("javax.servlet.error.status_code")==null)
@@ -326,7 +326,7 @@ public class HttpResponse extends HttpMessage
                     request.setAttribute("javax.servlet.error.message",
                                          message==null?reason:message);
                     // Do a forward to the error page resource.
-                    getHandlerContext().handle(error_page,null,request,this);
+                    getHttpContext().handle(0,error_page,null,request,this);
                 }
                 else
                     Code.warning("Error "+code+" while serving error page for "+

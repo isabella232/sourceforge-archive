@@ -16,10 +16,10 @@ configuring the servlet container provided by the
 
 <FONT Size=+1><B>Servlet Mappings</B></FONT><BR>
 The <Code>addContext()</Code> methods return instances of the
-<a href="/javadoc/org/mortbay/jetty/servlet/ServletHandlerContext.html">org.mortbay.jetty.servlet.ServletHandlerContext</a> class to allow servlet mappings to be simply configured:
+<a href="/javadoc/org/mortbay/jetty/servlet/ServletHttpContext.html">org.mortbay.jetty.servlet.ServletHttpContext</a> class to allow servlet mappings to be simply configured:
 <PRE>
-    ServletHandlerContext context = 
-        (ServletHandlerContext)server.getContext(null,"/");
+    ServletHttpContext context = 
+        (ServletHttpContext)server.getContext(null,"/");
     context.addServlet("Dump",
                        "/dump/*",
                        "org.mortbay.servlet.Dump");
@@ -28,7 +28,7 @@ This configuration gets (or creates) a context at / and maps the Dump servlet to
 with "/dump/*".   This configuration can also be done without using the 
 conveniance methods and is equivalent to the following:
 <PRE>
-    HandlerContext context = server.getContext(null,"/"); 
+    HttpContext context = server.getContext(null,"/"); 
     ServletHandler handler = new ServletHandler();
     handler.addServlet("Dump",
                        "/dump/*",
@@ -40,8 +40,8 @@ conveniance methods and is equivalent to the following:
 The ServletHandler can be configured to dynamically create mappings for servlets that have
 their classnames within the requested URL:
 <PRE>
-    ServletHandlerContext context = 
-        (ServletHandlerContext)server.getContext(null,"/context/*");
+    ServletHttpContext context = 
+        (ServletHttpContext)server.getContext(null,"/context/*");
     context.setClassPath("./servlets/");
     context.setDynamicServletPathSpec("/servlet/*");
 </PRE>

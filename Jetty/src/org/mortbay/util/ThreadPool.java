@@ -189,13 +189,6 @@ public class ThreadPool
     }
     
     /* ------------------------------------------------------------ */
-
-    public boolean isDestroyed()
-    {
-        return _threadSet==null;
-    }
-    
-    /* ------------------------------------------------------------ */
     /** Get the number of threads in the pool.
      * @return Number of threads
      */
@@ -265,7 +258,7 @@ public class ThreadPool
     /* ------------------------------------------------------------ */
     /** Set the maximum thread idle time.
      * Threads that are idle for longer than this period may be
-     * destroyed.
+     * stopped.
      * @param maxIdleTimeMs Max idle time in ms.
      */
     public void setMaxIdleTimeMs(int maxIdleTimeMs)
@@ -293,16 +286,6 @@ public class ThreadPool
     public void setMaxStopTimeMs(int maxStopTimeMs)
     {
         _maxStopTimeMs=maxStopTimeMs;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Not required.
-     * Calls destroy().
-     * @param o ignored.
-     */
-    synchronized public void initialize(Object o)
-    {
-        destroy();
     }
     
     /* ------------------------------------------------------------ */
@@ -417,48 +400,6 @@ public class ThreadPool
         Log.event("Wait for "+thread);
         return false;
     }
-    
-    
-    /* ------------------------------------------------------------ */
-    /** Destroy the ThreadPool.
-     * All threads are interrupted and if they do not terminate after
-     * a short delay, they are stopped.
-     */
-    public void destroy() 
-    {
-        Code.debug("Destroy ThreadPool ",_name);
-
-        if (_threadSet==null)
-            return;
-        
-        _running=false;
-        
-        synchronized(this)
-        {
-            if (_threadSet!=null && !_threadSet.isEmpty())
-            {
-                Iterator iter = _threadSet.iterator();
-                while(iter.hasNext())
-                {
-                    Thread thread=(Thread)iter.next();
-                    if (_idleSet.contains(thread))
-                    {
-                        Code.debug("Interrupt idle ",thread);
-                        thread.interrupt();
-                    }
-                    else 
-                    {
-                        Log.event("Interrupt "+thread);
-                        thread.interrupt();
-                    }
-                }
-            }
-        }
-        Thread.yield();
-        _threadSet.clear();
-        _threadSet=null;
-    }
-
     
     /* ------------------------------------------------------------ */
     /* Start a new Thread.

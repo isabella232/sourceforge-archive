@@ -607,24 +607,6 @@ public class OutputStreamLogSink
     {
         return _started;
     }
-
-    /* ------------------------------------------------------------ */
-    public void destroy()
-    {
-        if (_out!=null && _out!=System.err && _filename!=null)
-        {
-            try{_out.close();}
-            catch(Exception e){Code.ignore(e);}
-        }       
-        _out=null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public boolean isDestroyed()
-    {
-        return !_started && _out==null;
-    }
-
     
     /* ------------------------------------------------------------ */
     private class Rollover extends Thread

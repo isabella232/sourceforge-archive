@@ -11,7 +11,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.handler.NullHandler;
 import org.mortbay.util.Code;
 import org.mortbay.util.LifeCycle;
@@ -143,7 +143,7 @@ public class Holder
     public void start()
         throws Exception
     {
-        _class=_servletHandler.getHandlerContext().loadClass(_className);
+        _class=_servletHandler.getHttpContext().loadClass(_className);
         Code.debug("Started holder of ",_class);
     }
     
@@ -167,18 +167,6 @@ public class Holder
     public void stop()
     {
         _class=null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void destroy()
-    {
-        Code.notImplemented();
-    }
-    
-    /* ------------------------------------------------------------ */
-    public boolean isDestroyed()
-    {
-        return _className==null;
     }
     
     /* ------------------------------------------------------------ */

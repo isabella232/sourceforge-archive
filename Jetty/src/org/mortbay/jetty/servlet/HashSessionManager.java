@@ -163,20 +163,6 @@ public class HashSessionManager implements SessionManager
         if (scavenger!=null)
             scavenger.interrupt();
     }
-
-
-    /* ------------------------------------------------------------ */
-    public boolean isDestroyed()
-    {
-        return _sessions==null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void destroy()
-    {
-        stop();
-        _sessions=null;
-    }
     
     /* -------------------------------------------------------------- */
     /** Find sessions that have timed out and invalidate them.

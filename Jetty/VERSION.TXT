@@ -1,6 +1,12 @@
 Jetty Versions
 --------------
 
+ + Added Context and Session Event Handling
+ + Added FilterHolder
+ + Changed HandlerContext to HttpContext
+ + Simplified ServletHandler
+ + Removed destroy methods
+
 Jetty-4.0.D0 - 06 Nov 2001
  + Branched from Jetty_3_1 == Jetty_3_1_4
  + 2.3 Servlet API

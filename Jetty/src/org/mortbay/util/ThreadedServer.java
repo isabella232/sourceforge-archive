@@ -435,41 +435,6 @@ abstract public class ThreadedServer extends ThreadPool
         _acceptor=null;
     }
     
-    /* --------------------------------------------------------------- */
-    synchronized public void destroy()
-    {
-        if (_acceptor!=null)
-        {
-            _acceptor._running=false;
-            _acceptor.interrupt();
-            Thread.yield();
-        }
-
-        synchronized(this)
-        {
-            if (_acceptor!=null)
-                _acceptor.forceStop();
-            _acceptor=null;
-        }
-
-        try{
-            super.destroy();
-            
-            synchronized(this)
-            {
-                if (_listen!=null)
-                    _listen.close();
-            }
-        }
-        catch(Exception e)
-        {
-            Code.warning(e);
-        }
-        
-        _listen=null;
-        _acceptor=null;
-    }
-
 
     /* ------------------------------------------------------------ */
     public String toString()

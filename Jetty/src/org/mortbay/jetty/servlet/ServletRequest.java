@@ -29,7 +29,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpUtils;
-import org.mortbay.http.HandlerContext;
+import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpMessage;
@@ -96,7 +96,7 @@ public class ServletRequest
     ServletRequest(ServletHandler servletHandler,HttpRequest request)
     {
         _servletHandler=servletHandler;
-        _contextPath=_servletHandler.getHandlerContext().getContextPath();
+        _contextPath=_servletHandler.getHttpContext().getContextPath();
         if (_contextPath.length()<=1)
             _contextPath="";
 
@@ -136,7 +136,7 @@ public class ServletRequest
                          String query)
     {
         _servletHandler=servletHandler;
-        _contextPath=_servletHandler.getHandlerContext().getContextPath();
+        _contextPath=_servletHandler.getHttpContext().getContextPath();
         if (_contextPath.length()<=1)
             _contextPath="";
 
@@ -326,7 +326,7 @@ public class ServletRequest
         if (_pathTranslated==null)
         {
             Resource resource =
-                _servletHandler.getHandlerContext().getBaseResource();
+                _servletHandler.getHttpContext().getBaseResource();
 
             if (resource==null)
                 return null;
