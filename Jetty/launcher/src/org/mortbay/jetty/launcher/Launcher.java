@@ -42,20 +42,27 @@ public class Launcher {
     private Classpath _classpath = new Classpath();
     private boolean _debug = Boolean.getBoolean("org.mortbay.jetty.launcher.debug");
     
-    public static void main(String[] args) {
-        try {
+    public static void main(String[] args)
+    {
+        try
+        {
             new Launcher().run(args);
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             e.printStackTrace();
         }
     }
     
     
-    static File getDirectory(String name) {
-        try {
-            if (name != null) {
+    static File getDirectory(String name)
+    {
+        try
+        {
+            if (name != null)
+            {
                 File dir = new File(name).getCanonicalFile();
-                if (dir.isDirectory()) {
+                if (dir.isDirectory())
+                {
                     return dir;
                 }
             }
@@ -64,11 +71,15 @@ public class Launcher {
     }
     
 
-    boolean isAvailable(String classname) {
-        try {
+    boolean isAvailable(String classname)
+    {
+        try
+        {
             Class check = Class.forName(classname);
             return true;
-        } catch (ClassNotFoundException e) {
+        }
+        catch (ClassNotFoundException e)
+        {
             return false;
         }
     }
@@ -91,10 +102,11 @@ public class Launcher {
     }
     
     
-    void configureClasspath(String home, Classpath classpath, InputStream config) {
+    void configureClasspath(String home, Classpath classpath, InputStream config)
+    {
         
-        try {
-        
+        try
+        {
             BufferedReader cfg = new BufferedReader(new InputStreamReader(config,"ISO-8859-1"));
             Version java_version = new Version(System.getProperty("java.version"));
             Version ver = new Version();
@@ -102,89 +114,136 @@ public class Launcher {
             // JAR's already processed
             java.util.Hashtable done = new Hashtable();
             String line = cfg.readLine();
-            while (line != null) {
-                if ((line.length() > 0) && (!line.startsWith("#"))) {
+            while (line != null)
+            {
+                if ((line.length() > 0) && (!line.startsWith("#")))
+                {
                     if (_debug) System.err.println(">"+line);
                     StringTokenizer st = new StringTokenizer(line);
                     String jarfile = st.nextToken();
                     boolean include_jar = true;
-                    while (include_jar && st.hasMoreTokens()) {
+                    while (include_jar && st.hasMoreTokens())
+                    {
                         String condition = st.nextToken();
-                        if (condition.equals("never")) {
+                        if (condition.equals("never"))
+                        {
                             include_jar = false;
-                        } else if (condition.equals("always")) {
+                        }
+                        else if (condition.equals("always"))
+                        {
                             
-                        } else if (condition.equals("available")) {
+                        }
+                        else if (condition.equals("available"))
+                        {
                             String class_to_check = st.nextToken();
-                            if (!isAvailable(class_to_check)) {
+                            if (!isAvailable(class_to_check))
+                            {
                                 include_jar = false;
                             }
-                        } else if (condition.equals("!available")) {
+                        }
+                        else if (condition.equals("!available"))
+                        {
                             String class_to_check = st.nextToken();
-                            if (isAvailable(class_to_check)) {
+                            if (isAvailable(class_to_check))
+                            {
                                 include_jar = false;
                             }
-                        } else if (condition.equals("java")) {
+                        }
+                        else if (condition.equals("java"))
+                        {
                             String operator = st.nextToken();
                             String version = st.nextToken();
                             ver.parse(version);
-                            if (operator.equals("<")) {
+                            if (operator.equals("<"))
+                            {
                                 if (java_version.compare(ver) >= 0) include_jar = false;
-                            } else if (operator.equals(">")) {
+                            }
+                            else if (operator.equals(">"))
+                            {
                                 if (java_version.compare(ver) <= 0) include_jar = false;
-                            } else if (operator.equals("<=")||operator.equals("=<")) {
+                            }
+                            else if (operator.equals("<=")||operator.equals("=<"))
+                            {
                                 if (java_version.compare(ver) > 0) include_jar = false;
-                            } else if (operator.equals(">=")||operator.equals("=>")) {
+                            }
+                            else if (operator.equals(">=")||operator.equals("=>"))
+                            {
                                 if (java_version.compare(ver) < 0) include_jar = false;
-                            } else if (operator.equals("==")) {
+                            }
+                            else if (operator.equals("=="))
+                            {
                                 if (java_version.compare(ver) != 0) include_jar = false;
-                            } else if (operator.equals("!=")||operator.equals("<>")) {
+                            }
+                            else if (operator.equals("!=")||operator.equals("<>"))
+                            {
                                 if (java_version.compare(ver) == 0) include_jar = false;
-                            } else {
+                            }
+                            else
+                            {
                                 // report error
                             }
                         }
                     }
+                    
                     // ok, should we include?
-                    if (jarfile.endsWith("/*")) {
+                    if (jarfile.endsWith("/*"))
+                    {
                         // directory of JAR files
                         File extdir = new File(home+File.separatorChar+jarfile.substring(0,jarfile.length()-1).replace('/',File.separatorChar));
-                        File[] jars = extdir.listFiles( new FilenameFilter() {
-                            public boolean accept(File dir, String name) {
-                                String namelc = name.toLowerCase();
-                                return namelc.endsWith(".jar") || name.endsWith(".zip");
-                            }
-                        } );
-                        for (int i=0; i<jars.length; i++) {
+                        File[] jars = extdir.listFiles(new FilenameFilter()
+                            {
+                                public boolean accept(File dir, String name)
+                                {
+                                    String namelc = name.toLowerCase();
+                                    return namelc.endsWith(".jar") || name.endsWith(".zip");
+                                    
+                                }
+                            } );
+                        
+                        
+                        for (int i=0; i<jars.length; i++)
+                        {
                             String jar = jars[i].getCanonicalPath();
-                            if (!done.containsKey(jar)) {
+                            if (!done.containsKey(jar))
+                            {
                                 done.put(jar,jar);
-                                if (include_jar) {
-                                    if (_debug) System.err.println("Adding JAR from directory: "+jar);
-                                    classpath.addComponent(jar);
+                                if (include_jar)
+                                {
+                                    if (classpath.addComponent(jar) && _debug)
+                                        System.err.println("Adding JAR from directory: "+jar);
                                 }
                             }
                         }
-                    } else if (jarfile.endsWith("/")) {
+                    }
+                    else if (jarfile.endsWith("/"))
+                    {
                         // class directory
                         File cd = new File(home+File.separatorChar+jarfile.replace('/',File.separatorChar));
                         String d = cd.getCanonicalPath();
-                        if (!done.containsKey(d)) {
+                        if (!done.containsKey(d))
+                        {
                             done.put(d,d);
-                            if (include_jar) {
-                                if (_debug) System.err.println("Adding directory: "+d);
-                                classpath.addComponent(d);
+                            if (include_jar)
+                            {
+                                if (classpath.addComponent(d) && _debug)
+                                    System.err.println("Adding directory: "+d);
                             }
                         }
-                    } else {
+                    }
+                    else
+                    {
                         // single JAR file
-                        File f = new File(home+File.separatorChar+jarfile.replace('/',File.separatorChar));
+                        File f = jarfile.startsWith("/")
+                            ?new File(jarfile.replace('/',File.separatorChar))
+                            :new File(home+File.separatorChar+jarfile.replace('/',File.separatorChar));
                         String d = f.getCanonicalPath();
-                        if (!done.containsKey(d)) {
+                        if (!done.containsKey(d))
+                        {
                             done.put(d,d);
-                            if (include_jar) {
-                                if (_debug) System.err.println("Adding single JAR: "+d);
-                                classpath.addComponent(d);
+                            if (include_jar)
+                            {
+                                if (classpath.addComponent(d) &&_debug)
+                                    System.err.println("Adding single JAR: "+d);
                             }
                         }
                     }
@@ -192,32 +251,39 @@ public class Launcher {
                 line = cfg.readLine();
             }
         }
-        catch (Exception e) {
+        catch (Exception e)
+        {
             e.printStackTrace();
         }
     }
     
     
-    public void run(String[] args) {
+    public void run(String[] args)
+    {
         
         //--------------------
         // detect jetty.home:
         //--------------------
         _home_dir = getDirectory(System.getProperty("jetty.home"));
-        if (_home_dir == null) {
+        if (_home_dir == null)
+        {
             // test for [CD]
             File extdir = getDirectory("ext");
-            if (extdir != null) {
+            if (extdir != null)
+            {
                 // alright, we have home
                 _home_dir = extdir.getParentFile();
             }
         }
         if (_home_dir == null) {
+            
             // test for parent
             File extdir = getDirectory(".."+File.separator+"ext");
-            if (extdir != null) {
+            if (extdir != null)
+            {
                 // alright, we have home
-                try {
+                try
+                {
                     _home_dir = extdir.getParentFile().getCanonicalFile();
                 } catch (IOException e) { }
             }
@@ -225,7 +291,8 @@ public class Launcher {
         //TODO: more attempts here...
 
 
-        if (_home_dir != null) {
+        if (_home_dir != null)
+        {
             // if we managed to detect jetty.home, store it in system property
             System.setProperty("jetty.home",_home_dir.getPath());
             System.setProperty("user.dir",_home_dir.getPath());
@@ -248,39 +315,57 @@ public class Launcher {
             // add JARs from ext and lib
             // be smart about it
             
-            try {
+            try
+            {
                 InputStream cpcfg = null;
-                try {
+                try
+                {
                     cpcfg = new java.io.FileInputStream(_home_dir.getPath()+File.separatorChar+"etc"+File.separatorChar+"classpath.config");
-                } catch (java.io.FileNotFoundException e) {
+                }
+                catch (java.io.FileNotFoundException e)
+                {
                     cpcfg = null;
                 }
-                if (cpcfg == null) {
+                if (cpcfg == null)
+                {
                     if (_debug) System.err.println("Configuring classpath from default resource");
                     cpcfg = getClass().getClassLoader().getResourceAsStream("org/mortbay/jetty/launcher/classpath.config");
-                } else {
+                }
+                else
+                {
                     if (_debug) System.err.println("Configuring classpath from etc/classpath.config");
                 }
                 configureClasspath(_home_dir.getPath(), _classpath, cpcfg);
                 cpcfg.close();
-            } catch (IOException e) {
+            }
+            catch (IOException e)
+            {
                 e.printStackTrace();
             }
             
             
             // try to find javac and add it in classpaths
             String java_home = System.getProperty("java.home");
-            if (java_home != null) {
+            if (java_home != null)
+            {
                 File jdk_home = null;
-                try {
+                try
+                {
                     jdk_home = new File(java_home).getParentFile().getCanonicalFile();
-                } catch (IOException e) {}
-                if (jdk_home != null) {
+                }
+                catch (IOException e)
+                {}
+                if (jdk_home != null)
+                {
                     File tools_jar_file = null;
-                    try {
+                    try
+                    {
                         tools_jar_file = new File(jdk_home, "lib"+File.separator+"tools.jar").getCanonicalFile();
-                    } catch (IOException e) {}
-                    if ((tools_jar_file != null) && tools_jar_file.isFile()) {
+                    }
+                    catch (IOException e) {}
+                    
+                    if ((tools_jar_file != null) && tools_jar_file.isFile())
+                    {
                         // OK, found tools.jar in java.home/../lib
                         // add it in
                         _classpath.addComponent(tools_jar_file);
@@ -294,13 +379,15 @@ public class Launcher {
             ClassLoader cl = _classpath.getClassLoader();
 
             // clean up tempdir for Jetty...
-            try {
-            File tmpdir = new File(System.getProperty("java.io.tmpdir")).getCanonicalFile();
-            if (tmpdir.isDirectory()) {
-                System.setProperty("java.io.tmpdir",tmpdir.getPath());
+            try
+            {
+                File tmpdir = new File(System.getProperty("java.io.tmpdir")).getCanonicalFile();
+                if (tmpdir.isDirectory())
+                {
+                    System.setProperty("java.io.tmpdir",tmpdir.getPath());    
+                }
             }
-            
-        } catch (IOException e) {}
+            catch (IOException e) {}
 
             if (_debug) System.err.println("JETTY_HOME="+System.getProperty("jetty.home"));
             if (_debug) System.err.println("TEMPDIR="+System.getProperty("java.io.tmpdir"));
@@ -309,24 +396,34 @@ public class Launcher {
             // Invoke org.mortbay.jetty.Server.main(args) using new classloader.
             Thread.currentThread().setContextClassLoader(cl);
             
-            try {
-                if (args.length == 0) { // no args, try demo
+            try
+            {
+                if (args.length == 0)
+                { // no args, try demo
                    invokeMain(cl,"org.mortbay.jetty.Server", new String[] { "etc"+File.separator+"demo.xml", "etc"+File.separator+"admin.xml" } );
                    // for demo, try to invoke web browser on Windows
-                   if (System.getProperty("os.name").indexOf("Windows")!=-1) {
+                   if (System.getProperty("os.name").indexOf("Windows")!=-1)
+                   {
                         if (_debug) System.err.println("Trying to launch IE browser...");
                         Process p = Runtime.getRuntime().exec( new String[] {"C:\\Program Files\\Internet Explorer\\iexplore.exe","http://localhost:8080/"});
-                        if (p==null) {
+                        if (p==null)
+                        {
                             if (_debug) System.err.println("Failed to start browser.");
                         }
                    }
-                } else {
+                }
+                else
+                {
                    invokeMain(cl,"org.mortbay.jetty.Server",args);
                 }
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
             }
             
-        } else {
+        }
+        else
+        {
             // if not, warn user
             System.err.println("WARNING: jetty.home cound not be autodetected, bailing out.");
             System.err.flush();

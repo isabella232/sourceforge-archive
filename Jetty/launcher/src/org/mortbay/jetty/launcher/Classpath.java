@@ -24,72 +24,63 @@ public class Classpath {
 
     Vector _elements = new Vector();    
 
-    public Classpath() {
-    }    
+    public Classpath()
+    {}    
 
-    public Classpath(String initial) {
+    public Classpath(String initial)
+    {
         addClasspath(initial);
     }
         
-    public void addComponent(String component) {
+    public boolean addComponent(String component)
+    {
         if ((component != null)&&(component.length()>0)) {
             try {
                 File f = new File(component);
-                if (f.exists()) {
+                if (f.exists())
+                {
                     File key = f.getCanonicalFile();
-                    if (!_elements.contains(key)) {
+                    if (!_elements.contains(key))
+                    {
                         _elements.add(key);
+                        return true;
                     }
                 }
             } catch (IOException e) {}
         }
+        return false;
     }
     
-    public void addComponent(File component) {
+    public boolean addComponent(File component)
+    {
         if (component != null) {
             try {
                 if (component.exists()) {
                     File key = component.getCanonicalFile();
                     if (!_elements.contains(key)) {
                         _elements.add(key);
+                        return true;
                     }
                 }
             } catch (IOException e) {}
         }
+        return false;
     }
 
-    public void addClasspath(String s) {
-        if (s != null) {
+    public void addClasspath(String s)
+    {
+        if (s != null)
+        {
             StringTokenizer t = new StringTokenizer(s, File.pathSeparator);
-            while (t.hasMoreTokens()) {
+            while (t.hasMoreTokens())
+            {
                 addComponent(t.nextToken());
             }
         }
     }    
     
-    public void addExtdir(File extdir) {
-        if (extdir != null) {
-            if (extdir.isDirectory()) {
-                File[] jars = extdir.listFiles( new FilenameFilter() {
-                    public boolean accept(File dir, String name) {
-                        String namelc = name.toLowerCase();
-                        return namelc.endsWith(".jar") || name.endsWith(".zip");
-                    }
-                } );
-                // to make specific ordering possible by prefixing jars with numbers
-                Arrays.sort(jars);
-                for (int i=0; i<jars.length; i++) {
-                    addComponent(jars[i]);
-                }
-            }
-        }
-    }    
-    
-    public void addExtdir(File dir, String subdir) {
-        addExtdir(new File(dir,subdir));
-    }
-    
-    public String toString() {
+    public String toString()
+    {
         StringBuffer cp = new StringBuffer(1024);
         int cnt = _elements.size();
         if (cnt >= 1) {
