@@ -8,8 +8,6 @@ package org.mortbay.j2ee.session;
 //----------------------------------------
 
 import java.rmi.RemoteException;
-import java.util.Timer;
-import java.util.TimerTask;
 import javax.ejb.CreateException;
 import javax.ejb.CreateException;
 import javax.ejb.RemoveException;
@@ -23,9 +21,8 @@ import org.mortbay.j2ee.session.interfaces.CMPStatePK;
 //----------------------------------------
 
 public class CMPStore
-  implements Store
+  extends AbstractStore
 {
-  Category       _log=Category.getInstance(getClass().getName());
   InitialContext _jndiContext;
   CMPStateHome   _home;
   String         _name="jetty/CMPState"; // TODO - parameterise
@@ -35,12 +32,6 @@ public class CMPStore
     CMPStore(Manager manager)
   {
     _manager=manager;
-  }
-
-  public void
-    destroy()
-  {
-    // tidy up
   }
 
   // Store LifeCycle
@@ -54,32 +45,7 @@ public class CMPStore
     _home=(CMPStateHome)PortableRemoteObject.narrow(o, CMPStateHome.class);
     _log.info("Support for CMP-based Distributed HttpSessions loaded successfully: "+_home);
 
-    synchronized (getClass())
-    {
-      if (_scavengerCount++==0)
-      {
-	boolean isDaemon=true;
-	_scavenger=new Timer(isDaemon);
-	long delay=Math.round(Math.random()*_scavengerPeriod);
-	_log.debug("local scavenge delay is: "+delay+" seconds");
-	_scavenger.scheduleAtFixedRate(new Scavenger(), delay*1000, _scavengerPeriod*1000);
-	_log.debug("started local scavenger");
-      }
-    }
-  }
-
-  public void
-    stop()
-  {
-    synchronized (getClass())
-    {
-      if (--_scavengerCount==0)
-      {
-	_scavenger.cancel();
-	_scavenger=null;
-	_log.debug("stopped local scavenger");
-      }
-    }
+    super.start();
   }
 
   // State LifeCycle
@@ -129,69 +95,14 @@ public class CMPStore
     ((CMPState)state).remove();
   }
 
-  protected GUIDGenerator _guidGenerator=new GUIDGenerator();
-
-  public String
-    allocateId()
-  {
-    return _guidGenerator.generateSessionId();
-  }
-
-  public void
-    deallocateId(String id)
-  {
-    // these ids are disposable
-  }
-
   public boolean
     isDistributed()
   {
     return true;
   }
 
-  /**
-   * The period between scavenges
-   */
-  protected int _scavengerPeriod=60*30;	// 1/2 an hour
-  /**
-   * The extra time we wait before tidying up a CMPState to ensure
-   * that if it loaded locally it will be scavenged locally first...
-   */
-  protected int _scavengerExtraTime=60*30; // 1/2 an hour
-  /**
-   * A maxInactiveInterval of -1 means never scavenge. The DB would
-   * fill up verey quickly - so we can override -1 with a real value
-   * here.
-   */
-  protected int _actualMaxInactiveInterval=60*60*24*28;	// 28 days
-
-  public void setScavengerPeriod(int secs) {_scavengerPeriod=secs;}
-  public void setScavengerExtraTime(int secs) {_scavengerExtraTime=secs;}
-  public void setActualMaxInactiveInterval(int secs) {_actualMaxInactiveInterval=secs;}
-
-  protected static Timer _scavenger;
-  protected static int   _scavengerCount=0;
-
-  class Scavenger
-    extends TimerTask
-  {
-    public void
-      run()
-    {
-      try
-      {
-	scavenge(_scavengerExtraTime, _actualMaxInactiveInterval);
-      }
-      catch (Exception e)
-      {
-	_log.warn("could not scavenge distributed sessions", e);
-      }
-    }
-  }
-
-
   public void
-    scavenge(int extraTime, int actualMaxInactiveInterval)
+    scavenge()
     throws RemoteException
   {
     // run a GC method EJB-side to remove all Sessions whose
@@ -202,7 +113,8 @@ public class CMPStore
     // session does not 'belong' to any of them, or they would have
     // already GC-ed it....
 
-    _home.scavenge(extraTime, actualMaxInactiveInterval);
+    _log.info("distributed scavenging...");
+    _home.scavenge(_scavengerExtraTime, _actualMaxInactiveInterval);
   }
 
   public void

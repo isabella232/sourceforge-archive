@@ -26,23 +26,24 @@ public interface
   void stop();
   void destroy();	// corresponds to ctor
 
+  // Store accessors
+  void setScavengerPeriod(int secs);
+  void setScavengerExtraTime(int secs);
+  void setActualMaxInactiveInterval(int secs);
+  boolean isDistributed();
+
+  // ID allocation
+  String allocateId() throws Exception;
+  void   deallocateId(String id) throws Exception;
+
   // State LifeCycle
   State newState(String id, int maxInactiveInterval) throws Exception;
   State loadState(String id) throws Exception;
   void  storeState(State state) throws Exception;
   void  removeState(State state) throws Exception;
 
-  // ID allocation
-  String allocateId() throws Exception;
-  void   deallocateId(String id) throws Exception;
-
-  boolean isDistributed();
-  void scavenge(int extraTime, int actualMaxInactiveInterval) throws Exception;
-
+  // Store misc
+  void scavenge() throws Exception;
   void passivateSession(StateAdaptor sa);
-
-  void setScavengerPeriod(int secs);
-  void setScavengerExtraTime(int secs);
-  void setActualMaxInactiveInterval(int secs);
 }
 

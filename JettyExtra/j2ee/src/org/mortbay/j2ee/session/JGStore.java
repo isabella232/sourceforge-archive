@@ -12,6 +12,7 @@ import java.rmi.RemoteException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Iterator;
 import org.apache.log4j.Category;
 import org.javagroups.Address;
 import org.javagroups.Channel;
@@ -84,7 +85,6 @@ public class
     JGStore(Manager manager)
     {
       super(manager);
-      _log.info("CREATING JGSTORE");
 
       try
       {
@@ -110,8 +110,6 @@ public class
     {
       super.start();
 
-      _log.info("STARTING JGSTORE");
-
       if (!_channel.isOpen()) _channel.open();
       _channel.connect("HTTPSESSION_REPLICATION:"+getContextPath()); // group should be on a per-context basis
       _dispatcher.start();
@@ -124,7 +122,6 @@ public class
   public void
     stop()
     {
-      _log.info("STOPPING JGSTORE");
       _dispatcher.stop();
       _channel.disconnect();
       _channel.close();
@@ -135,7 +132,6 @@ public class
   public void
     destroy()
     {
-      _log.info("DESTROYING JGSTORE");
       _dispatcher=null;
       _channel=null;
 

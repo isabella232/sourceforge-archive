@@ -9,12 +9,14 @@ package org.mortbay.j2ee.session;
 
 import java.rmi.RemoteException;
 import java.util.Enumeration;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.Map;
 import org.apache.log4j.Category;
-import org.javagroups.util.Util;
 import org.javagroups.Message;
 import org.javagroups.blocks.MessageDispatcher;
+import org.javagroups.util.Util;
 
 //----------------------------------------
 
@@ -36,13 +38,10 @@ import org.javagroups.blocks.MessageDispatcher;
 
 abstract public class
   AbstractReplicatedStore
-  implements Store
+  extends AbstractStore
 {
-  protected final Category _log=Category.getInstance(getClass().getName());
-  protected Map            _sessions=new HashMap();
-  protected GUIDGenerator  _guidGenerator=new GUIDGenerator();
-  protected Manager        _manager;
-  protected int            _actualMaxInactiveInterval;
+  protected Map     _sessions=new HashMap();
+  protected Manager _manager;
 
   //----------------------------------------
   // Store API - Store LifeCycle
@@ -54,27 +53,12 @@ abstract public class
     }
 
   public void
-    start()
-    throws Exception
-    {
-      // nothing to do
-    }
-
-  public void
-    stop()
-    {
-      // nothing to do
-    }
-
-  public void
     destroy()			// corresponds to ctor
     {
       _sessions.clear();
       _sessions=null;
-
-      _guidGenerator=null;
-
       _manager=null;
+      super.destroy();
     }
 
   //----------------------------------------
@@ -84,10 +68,9 @@ abstract public class
     newState(String id, int maxInactiveInterval)
     throws Exception
     {
-      int actualMaxInactiveInterval=60*60*24; // TODO
       long creationTime=System.currentTimeMillis();
       Class[]  argClasses   = {String.class, String.class, Long.class, Integer.class, Integer.class};
-      Object[] argInstances = {getContextPath(), id, new Long(creationTime), new Integer(maxInactiveInterval), new Integer(actualMaxInactiveInterval)};
+      Object[] argInstances = {getContextPath(), id, new Long(creationTime), new Integer(maxInactiveInterval), new Integer(_actualMaxInactiveInterval)};
       publish("create", argClasses, argInstances);
 
       // if we get one - all we have to do is loadState - because we
@@ -134,30 +117,22 @@ abstract public class
     }
 
   //----------------------------------------
-  // Store API - GUID management
-
-  public String
-    allocateId()
-  {
-    return _guidGenerator.generateSessionId();
-  }
+  // Store API - garbage collection
 
   public void
-    deallocateId(String id)
-  {
-  }
-
-  //----------------------------------------
-  // Store API - garbage collection - NYI/TODO
-
-  public void scavenge(int extraTime, int actualMaxInactiveInterval) throws Exception {}
-  public void setScavengerPeriod(int secs) {}
-  public void setScavengerExtraTime(int secs) {}
-
-  public void
-    setActualMaxInactiveInterval(int secs)
+    scavenge()
+    throws Exception
     {
-      _actualMaxInactiveInterval=secs;
+      _log.info("distributed scavenging...");
+      synchronized (_sessions)
+      {
+	for (Iterator i=_sessions.entrySet().iterator(); i.hasNext();)
+ 	  if (!((ReplicatedState)((Map.Entry)i.next()).getValue()).isValid(_scavengerExtraTime))
+	  {
+	    _log.info("scavenging state");
+	    i.remove();
+	  }
+      }
     }
 
   //----------------------------------------

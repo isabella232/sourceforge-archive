@@ -127,10 +127,22 @@ public class
       }
     }
 
+  protected long
+    remainingTime()
+    {
+      int maxInactiveInterval=_maxInactiveInterval<1?_actualMaxInactiveInterval:_maxInactiveInterval;
+      return (_lastAccessedTime+(maxInactiveInterval*1000))-System.currentTimeMillis();
+    }
+
+  public boolean
+    isValid(int extraTime)
+    {
+      return remainingTime()+(extraTime*1000)>0;
+    }
+
   public boolean
     isValid()
     {
-      long maxInactiveInterval=(_maxInactiveInterval<1?_actualMaxInactiveInterval:_maxInactiveInterval)*1000;
-      return (_lastAccessedTime+maxInactiveInterval)>System.currentTimeMillis();
+      return isValid(0);
     }
 }

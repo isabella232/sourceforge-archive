@@ -23,36 +23,21 @@ public class LocalStore
   }
 
   // Store LifeCycle
-  public void
-    start()
-  {
-  }
-
-  public void
-    stop()
-  {
-  }
-
-  public void
-    destroy()
-  {
-  }
+  public void start() {}
+  public void stop() {}
+  public void destroy() {}
 
   // State LifeCycle
   public State
     newState(String id, int maxInactiveInterval)
   {
-    int actualMaxInactiveInterval=60*60*24;	// TODO
-    return new LocalState(id, maxInactiveInterval, actualMaxInactiveInterval);
+    return new LocalState(id, maxInactiveInterval, _actualMaxInactiveInterval);
   }
 
   public State
     loadState(String id)
   {
-    synchronized (_sessions)
-    {
-      return (State)_sessions.get(id);
-    }
+    synchronized (_sessions) {return (State)_sessions.get(id);}
   }
 
   public void
@@ -60,10 +45,7 @@ public class LocalStore
   {
     try
     {
-      synchronized (_sessions)
-      {
-	_sessions.put(state.getId(), state);
-      }
+      synchronized (_sessions) {_sessions.put(state.getId(), state);}
     }
     catch (Exception e)
     {
@@ -76,10 +58,7 @@ public class LocalStore
   {
     try
     {
-      synchronized (_sessions)
-      {
-	_sessions.remove(state.getId());
-      }
+      synchronized (_sessions) {_sessions.remove(state.getId());}
     }
     catch (Exception e)
     {
@@ -106,12 +85,6 @@ public class LocalStore
     return false;
   }
 
-  public void
-    scavenge(int extraTime, int actualMaxInactiveInterval)
-  {
-    // Java's GC will do it for us !
-    // NYI - TODO
-  }
 
   public void
     passivateSession(StateAdaptor sa)
@@ -120,8 +93,11 @@ public class LocalStore
     sa.invalidate();
   }
 
-  // TODO
-  public void setScavengerPeriod(int secs) {}
-  public void setScavengerExtraTime(int secs) {}
-  public void setActualMaxInactiveInterval(int secs) {}
+    // there is no need to scavenge distributed state - as there is none.
+  public void setScavengerPeriod(int period) {}
+  public void setScavengerExtraTime(int time) {}
+  public void scavenge() {}
+
+  protected int _actualMaxInactiveInterval=0;
+  public void setActualMaxInactiveInterval(int interval) {_actualMaxInactiveInterval=interval;}
 }

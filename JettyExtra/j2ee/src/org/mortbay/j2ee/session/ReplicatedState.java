@@ -229,4 +229,11 @@ public class
     {
       return _state.removeAttribute(name, returnValue.booleanValue());
     }
+
+  // hacky...
+  public boolean
+    isValid(int extraTime)
+    {
+      return _state.isValid(extraTime);
+    }
 }

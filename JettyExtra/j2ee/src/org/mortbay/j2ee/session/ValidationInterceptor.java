@@ -44,9 +44,17 @@ public class ValidationInterceptor
     {
       valid=_state.isValid();
     }
-    catch (Exception e)
+    catch (java.rmi.NoSuchObjectException ignore)
     {
-      _log.error("couldn't determine validity of HttpSession: "+_session);
+      //      _log.info("IGNORE ABOVE NoSuchEntityException - harmless");
+    }
+    catch (javax.ejb.NoSuchEntityException ignore)
+    {
+      //      _log.info("IGNORE ABOVE NoSuchEntityException - harmless");
+    }
+   catch (Exception e)
+    {
+      _log.error("couldn't determine validity of HttpSession: "+_session, e);
     }
 
     if (!valid)

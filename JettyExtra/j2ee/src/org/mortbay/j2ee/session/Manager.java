@@ -554,43 +554,43 @@ public class Manager
   protected HttpSession
     findSession(String id)
   {
-    // check local cache
-
     HttpSession container=null;
 
-    // the store might be distributed and it might need loading...
     try
     {
+      // find the state
       State state=_store.loadState(id);
 
+      // is it valid ?
       state=((state!=null) && state.isValid())?state:null; // expensive ?
 
+      // if so
       if (state!=null)
       {
 
 	// this looks slow - but to be 100% safe we need to make sure
 	// that no-one can enter another container for the same id,
 	// whilst we are thinking about it...
+
+	// is there a container already available ?
 	synchronized (_sessions)
 	{
 	  // do we have an existing container ?
-	  Object tmp=_sessions.get(id);
+	  container=(HttpSession)_sessions.get(id);
 
-	  if (tmp==null)
+	  // if not...
+	  if (container==null)
 	  {
+	    // make a new one...
 	    container=newContainer(id, state);// we could lower contention by preconstructing containers... - TODO
 	    _sessions.put(id, container);
-	  }
-	  else
-	  {
-	    container=(HttpSession)tmp;
 	  }
 	}
       }
     }
     catch (Exception ignore)
     {
-      _log.info("did not find distributed session: "+id);
+      _log.debug("did not find distributed session: "+id);
     }
 
     return container;
@@ -704,7 +704,7 @@ public class Manager
   protected void
     scavenge()
   {
-    _log.debug("local scavenging...");
+    _log.info("local scavenging...");
     //
     // take a quick copy...
     Collection copy;
@@ -718,9 +718,17 @@ public class Manager
       // because it has a local cache of the necessary details, it
       // will only go to the Stored State if it really thinks that it
       // is invalid...
-      ((StateAdaptor)i.next()).getLastAccessedTime();
+      String id=null;;
+      try
+      {
+	StateAdaptor sa=(StateAdaptor)i.next();
+	id=sa.getId();
+	sa.getLastAccessedTime();
+      }
+      catch (Exception ignore)
+      {
+	synchronized (_sessions) {_sessions.remove(id);}
+      }
     }
-    //
-    _log.debug("...local scavenging");
   }
 }
