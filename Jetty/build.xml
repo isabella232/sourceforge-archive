@@ -51,7 +51,7 @@
   <property name="jetty.webapp.webinf"    value="${jetty.webapp}/WEB-INF"/>
   <property name="jetty.webapp.classes"   value="${jetty.webapp.webinf}/classes"/>
 
-  <property name="jetty1.3.jar"    value="${lib}/org.mortbay.jetty-jdk1.3.jar"/>
+  <property name="jetty1.2.jar"    value="${lib}/org.mortbay.jetty-jdk1.2.jar"/>
   <property name="jetty1.4.jar"    value="${lib}/org.mortbay.jetty.jar"/>
   <property name="mortbay.jmx.jar" value="${lib}/org.mortbay.jmx.jar"/>
   <property name="mini.http.jar"   value="${lib}/org.mortbay.http.jar"/>

@@ -181,7 +181,7 @@ public class AJP13Packet
         if (Code.verbose(99))
             Code.debug("AJP13 rcv: "+this.toString(64));
 
-	//System.err.println(Thread.currentThread()+" AJP13 rcv>>>> "+this.toString());
+	// System.err.println(Thread.currentThread()+" AJP13 rcv>>>> "+this.toString(32));
     }
 
     /* ------------------------------------------------------------ */
@@ -190,7 +190,7 @@ public class AJP13Packet
     {
         if (Code.verbose(99))
             Code.debug("AJP13 snd: "+this.toString(64));
-	//System.err.println(Thread.currentThread()+" AJP13 snd<<<< "+this.toString());
+	// System.err.println(Thread.currentThread()+" AJP13 snd<<<< "+this.toString(32));
         out.write(_buf,0,_bytes);
     }
     
@@ -362,7 +362,6 @@ public class AJP13Packet
         StringBuffer b=new StringBuffer();
         StringBuffer a=new StringBuffer();
 
-        
         b.append(_bytes);
         b.append('/');
         b.append(_buf.length);

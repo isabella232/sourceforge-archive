@@ -127,7 +127,10 @@ public class AJP13Connection extends HttpConnection
         try
         {
             try
-            { packet = _ajpIn.nextPacket(); }
+            {
+                packet = null;
+                packet = _ajpIn.nextPacket();
+            }
             catch (IOException e)
             {
                 Code.ignore(e);
@@ -235,15 +238,20 @@ public class AJP13Connection extends HttpConnection
         }
         finally
         {
+            // abort if nothing received.
+            if (packet==null)
+                return false;
+            
             // flush and end the output
             try{
+                //Consume unread input.
+                // while(_ajpIn.skip(4096)>0 || _ajpIn.read()>=0);
+
+                // end response
                 getOutputStream().flush(true);
                 response.commit();
                 _ajpOut.end(persistent);
 
-                //Consume unread input.
-                while(_ajpIn.skip(4096)>0 || _ajpIn.read()>=0);
-                
                 // Close the outout
                 _ajpOut.close();
 
