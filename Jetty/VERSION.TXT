@@ -1,4 +1,5 @@
    + Removed Converter utilities and InetGateway.
+   + added bin/useJava2Collections to convert to JDK1.2
 
 Jetty-3.0.A5 - 19 Oct 1999
    + Use ISO8859_1 instead of UTF8 for headers etc.

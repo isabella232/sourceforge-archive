@@ -136,42 +136,51 @@ public class HttpFields extends HashMap
 
     /* -------------------------------------------------------------- */
     public final static DateCache __dateCache = 
-        new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
+        new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'",
+                      Locale.US);
     public final static SimpleDateFormat __dateSend = 
-        new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'");
-    public final static SimpleDateFormat __dateReceive[] =
+        new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'",
+                             Locale.US);
+    private final static String __dateReceiveFmt[] =
     {
-        new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz"),
-        new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss"),
-        new SimpleDateFormat("EEE dd MMM yyyy HH:mm:ss zzz"),
-        new SimpleDateFormat("EEE dd MMM yyyy HH:mm:ss"),
-        new SimpleDateFormat("EEE MMM dd yyyy HH:mm:ss zzz"),
-        new SimpleDateFormat("EEE MMM dd yyyy HH:mm:ss"),
-        new SimpleDateFormat("EEE MMM-dd-yyyy HH:mm:ss zzz"),
-        new SimpleDateFormat("EEE MMM-dd-yyyy HH:mm:ss"),
-        new SimpleDateFormat("dd MMM yyyy HH:mm:ss zzz"),
-        new SimpleDateFormat("dd MMM yyyy HH:mm:ss"),
-        new SimpleDateFormat("dd-MMM-yy HH:mm:ss zzz"),
-        new SimpleDateFormat("dd-MMM-yy HH:mm:ss"),
-        new SimpleDateFormat("MMM dd HH:mm:ss yyyy zzz"),
-        new SimpleDateFormat("MMM dd HH:mm:ss yyyy"),
-        new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy zzz"),
-        new SimpleDateFormat("EEE MMM dd HH:mm:ss yyyy"),
-        new SimpleDateFormat("EEE, MMM dd HH:mm:ss yyyy zzz"),
-        new SimpleDateFormat("EEE, MMM dd HH:mm:ss yyyy"),
-        new SimpleDateFormat("EEE, dd-MMM-yy HH:mm:ss zzz"),
-        new SimpleDateFormat("EEE, dd-MMM-yy HH:mm:ss"),
-        new SimpleDateFormat("EEE dd-MMM-yy HH:mm:ss zzz"),
-        new SimpleDateFormat("EEE dd-MMM-yy HH:mm:ss"),
+        "EEE, dd MMM yyyy HH:mm:ss zzz",
+        "EEE, dd MMM yyyy HH:mm:ss",
+        "EEE dd MMM yyyy HH:mm:ss zzz",
+        "EEE dd MMM yyyy HH:mm:ss",
+        "EEE MMM dd yyyy HH:mm:ss zzz",
+        "EEE MMM dd yyyy HH:mm:ss",
+        "EEE MMM-dd-yyyy HH:mm:ss zzz",
+        "EEE MMM-dd-yyyy HH:mm:ss",
+        "dd MMM yyyy HH:mm:ss zzz",
+        "dd MMM yyyy HH:mm:ss",
+        "dd-MMM-yy HH:mm:ss zzz",
+        "dd-MMM-yy HH:mm:ss",
+        "MMM dd HH:mm:ss yyyy zzz",
+        "MMM dd HH:mm:ss yyyy",
+        "EEE MMM dd HH:mm:ss yyyy zzz",
+        "EEE MMM dd HH:mm:ss yyyy",
+        "EEE, MMM dd HH:mm:ss yyyy zzz",
+        "EEE, MMM dd HH:mm:ss yyyy",
+        "EEE, dd-MMM-yy HH:mm:ss zzz",
+        "EEE, dd-MMM-yy HH:mm:ss",
+        "EEE dd-MMM-yy HH:mm:ss zzz",
+        "EEE dd-MMM-yy HH:mm:ss",
     };
+    public static SimpleDateFormat __dateReceive[];
     static
     {
         TimeZone tz = TimeZone.getTimeZone("GMT");
         tz.setID("GMT");
         __dateSend.setTimeZone(tz);
-        __dateCache.getFormat().setTimeZone(tz);
+        __dateCache.setTimeZone(tz);
+        
+        __dateReceive = new SimpleDateFormat[__dateReceiveFmt.length];
         for(int i=0;i<__dateReceive.length;i++)
+        {
+            __dateReceive[i] =
+                new SimpleDateFormat(__dateReceiveFmt[i],Locale.US);
             __dateReceive[i].setTimeZone(tz);
+        }
     }
     
     /* -------------------------------------------------------------- */

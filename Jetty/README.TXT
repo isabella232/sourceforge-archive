@@ -31,6 +31,17 @@ so the following CLASSPATH is required (or the non unix equivalent):
 
   CLASSPATH=$JETTY3_HOME/lib/jetty3.jar:$JETTY3_HOME/lib/collections.jar
 
+To compile the source with JDK1.1 the following class path should be used.
+
+  CLASSPATH=$JETTY3_HOME/src:$JETTY3_HOME/lib/collections.jar
+
+To compile with JDK1.2, the com.sun.java.util.collections package
+must be removed by running the bin/useJava2Collections script must be
+run in the src directory and then compile using the class path:
+
+  CLASSPATH=$JETTY3_HOME
+
+
 
 Test Harnesses
 ==============

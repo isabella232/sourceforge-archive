@@ -1,0 +1,17 @@
+#!/bin/sh
+
+find . -name '*.java' -print | while read FILE
+do
+    printf "%s - " "$FILE"
+
+    sed -e '/^import.*com.sun.java.util.collections/d' \
+        -e 's/com.sun.java.util.collections.//g' $FILE > /tmp/u2c$$
+    if diff -q $FILE /tmp/u2c$$ > /dev/null
+    then
+	printf "ok\n" 
+    else
+        mv $FILE $FILE.jdk1_1
+	mv /tmp/u2c$$ $FILE
+	printf "UPDATED\n" 
+    fi
+done
