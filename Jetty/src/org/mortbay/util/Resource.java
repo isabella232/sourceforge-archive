@@ -49,17 +49,25 @@ public class Resource
         String urls=url.toExternalForm();
         if( urls.startsWith( "file:"))
         {
-            URLConnection connection=url.openConnection();
-            Permission perm = connection.getPermission();
-            if (perm instanceof java.io.FilePermission)
+            try
             {
-                File file =new File(perm.getName());
-                FileResource fileResource= new FileResource(url,connection,file);
-                if (fileResource.getAlias()!=null)
-                    return fileResource.getAlias();
-                return fileResource;
+                URLConnection connection=url.openConnection();
+                Permission perm = connection.getPermission();
+                if (perm instanceof java.io.FilePermission)
+                {
+                    File file =new File(perm.getName());
+                    FileResource fileResource= new FileResource(url,connection,file);
+                    if (fileResource.getAlias()!=null)
+                        return fileResource.getAlias();
+                    return fileResource;
+                }
+                Code.warning("File resource without FilePermission:"+url);
             }
-            Code.warning("File resource without FilePermission:"+url);
+            catch(Exception e)
+            {
+                Code.debug(e);
+                return new BadResource(url,e.toString());
+            }
         }
         else if( urls.startsWith( "jar:file:"))
         {
@@ -95,22 +103,33 @@ public class Resource
                !resource.startsWith("file:") &&
                !resource.startsWith("jar:"))
             {
-                // It's a file.
-                if (resource.startsWith("./"))
-                    resource=resource.substring(2);
-                
-                File file=new File(resource);
-                if (resource.indexOf("..")>=0)
-                    file=new File(file.getCanonicalPath());
-                url=file.toURL();
-                URLConnection connection=url.openConnection();
-                FileResource fileResource= new FileResource(url,connection,file);
-                if (fileResource.getAlias()!=null)
-                    return fileResource.getAlias();
-                return fileResource;
+                try
+                {
+                    // It's a file.
+                    if (resource.startsWith("./"))
+                        resource=resource.substring(2);
+                    
+                    File file=new File(resource);
+                    if (resource.indexOf("..")>=0)
+                        file=new File(file.getCanonicalPath());
+                    url=file.toURL();
+                    URLConnection connection=url.openConnection();
+                    FileResource fileResource= new FileResource(url,connection,file);
+                    if (fileResource.getAlias()!=null)
+                        return fileResource.getAlias();
+                    return fileResource;
+                }
+                catch(Exception e2)
+                {
+                    Code.debug(e2);
+                    return new BadResource(url,e2.toString());
+                }
             }
             else
-                Code.warning(e);
+            {
+                Code.debug(e);
+                return new BadResource(url,e.toString());
+            }
         }
 
         String nurl=url.toString();

@@ -31,6 +31,11 @@ import java.util.Map;
  * org.mortbay.jetty.servlet.ServletHandlerContext unless otherwise
  * specified.
  *
+ * This class also provides a main() method which starts a server for
+ * each config file passed on the command line.  If the system
+ * property JETTY_NO_SHUTDOWN_HOOK is not set to true, then a shutdown
+ * hook is thread is registered to stop these servers.   
+ *
  * @see org.mortbay.xml.XmlConfiguration
  * @see org.mortbay.jetty.servlet.ServletHandlerContext
  * @version $Revision$
@@ -38,7 +43,7 @@ import java.util.Map;
  */
 public class Server extends HttpServer
 {
-    private String _configuration; 
+    private String _configuration;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -252,34 +257,37 @@ public class Server extends HttpServer
         }
 
         // Create and add a shutdown hook
-        try
+        if (!Boolean.getBoolean("JETTY_NO_SHUTDOWN_HOOK"))
         {
-            Method shutdownHook=
-                java.lang.Runtime.class
-                .getMethod("addShutdownHook",new Class[] {java.lang.Thread.class});
-            Thread hook = 
-                new Thread() {
-                        public void run()
-                        {
-                            setName("Shutdown");
-                            Log.event("Shutdown hook executing");
-                            for (int i=0;i<servers.length;i++)
+            try
+            {
+                Method shutdownHook=
+                    java.lang.Runtime.class
+                    .getMethod("addShutdownHook",new Class[] {java.lang.Thread.class});
+                Thread hook = 
+                    new Thread() {
+                            public void run()
                             {
-                                try{servers[i].stop();}
+                                setName("Shutdown");
+                                Log.event("Shutdown hook executing");
+                                for (int i=0;i<servers.length;i++)
+                                {
+                                    try{servers[i].stop();}
+                                    catch(Exception e){Code.warning(e);}
+                                }
+                                
+                                // Try to avoid JVM crash
+                                try{Thread.sleep(1000);}
                                 catch(Exception e){Code.warning(e);}
                             }
-                            
-                            // Try to avoid JVM crash
-                            try{Thread.sleep(200);}
-                            catch(Exception e){Code.warning(e);}
-                        }
-                    };
-            shutdownHook.invoke(Runtime.getRuntime(),
-                                new Object[]{hook});
-        }
-        catch(Exception e)
-        {
-            Code.debug("No shutdown hook",e);
+                        };
+                shutdownHook.invoke(Runtime.getRuntime(),
+                                    new Object[]{hook});
+            }
+            catch(Exception e)
+            {
+                Code.debug("No shutdown hook in JVM ",e);
+            }
         }
     }
 }
