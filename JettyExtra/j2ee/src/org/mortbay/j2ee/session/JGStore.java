@@ -145,11 +145,15 @@ public class
       super();
 
       _loader=Thread.currentThread().getContextClassLoader();
+    }
 
+  protected void
+    init()
+    {
       try
       {
 	// start up our channel...
-	_channel=new JChannel(_protocolStack); // channel should be JBoss or new Jetty channel
+	_channel=new JChannel(getProtocolStack()); // channel should be JBoss or new Jetty channel
 
 	MessageListener messageListener=this;
 	MembershipListener membershipListener=this;
@@ -199,9 +203,9 @@ public class
 
 	if (_members!=null)
 	{
-	    _members=(Vector)_members.clone(); // we don't own it
-	    _members.remove(_channel.getLocalAddress());
-	  }
+	  _members=(Vector)_members.clone(); // we don't own it
+	  _members.remove(_channel.getLocalAddress());
+	}
 	else
 	  _members=new Vector(0);
 
@@ -224,6 +228,8 @@ public class
     throws Exception
     {
       super.start();
+
+      init();
 
       String channelName=getChannelName();
       _log.debug("starting ("+channelName+")....");
@@ -329,7 +335,7 @@ public class
   // should we cache the state, in case two new nodes come up together ?
 
   public synchronized byte[]
-    getState()
+			    getState()
     {
       ClassLoader oldLoader=Thread.currentThread().getContextClassLoader();
       try
