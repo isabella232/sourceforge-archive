@@ -45,11 +45,7 @@ public class MailTest extends HttpServlet
         {
             InitialContext ctx = new InitialContext();
 
-            Object o = ctx.lookup ("java:comp/env/mail/TestMail");
-	    Log.event("o="+o);
-	    Log.event("o.class.classloader="+o.getClass().getClassLoader());
-	    Log.event("session.class.classloader="+Session.class.getClassLoader());
-            Session session = (Session)ctx.lookup ("java:comp/env/mail/TestMail");
+            Session session = (Session)ctx.lookup ("java:comp/env/mail/Session");
             
             // create a message
             Message msg = new MimeMessage(session);

@@ -57,6 +57,7 @@ public class NamingContext implements Context, Cloneable
             }
         };
 
+    
     protected Context _parent = null;
     protected String _name = null;
     protected Hashtable _env = null;
@@ -292,57 +293,72 @@ public class NamingContext implements Context, Cloneable
     public void bind(Name name, Object obj) 
         throws NamingException
     {
+
+        Name cname = toCanonicalName(name);
         
-        if (name == null)
+        if (cname == null)
             throw new NamingException ("Name is null");
         
-        if (name.size() == 0)
+        if (cname.size() == 0)
             throw new NamingException ("Name is empty");
 
 
         //if no subcontexts, just bind it
-        if (name.size() == 1)
+        if (cname.size() == 1)
         {
-            Binding binding = getBinding (name);
+            Binding binding = getBinding (cname);
             if (binding == null)
-                addBinding (name, obj);
+                addBinding (cname, obj);
             else
-                throw new NameAlreadyBoundException (name.toString());
+                throw new NameAlreadyBoundException (cname.toString());
         }
         else
         {
-            Code.debug ("Checking for existing binding for name="+name+" for first element of name="+name.getPrefix(0));
-            //walk down the subcontext hierarchy
-            Binding  binding = getBinding (name.getPrefix(1));
-            if (binding == null)
-                throw new NameNotFoundException (name.get(0)+ " is not bound");
-            
-            Object ctx = binding.getObject();
+            Code.debug ("Checking for existing binding for name="+cname+" for first element of name="+cname.get(0));
+          
+            //walk down the subcontext hierarchy       
+            //need to ignore trailing empty "" name components
+                    
+            String firstComponent = cname.get(0);
+            Object ctx = null;
 
+            if (firstComponent.equals(""))
+                ctx = this;
+            else
+            {
 
-            if (ctx instanceof Reference)
-            {  
-                //deference the object
-                try
-                {
-                    ctx = NamingManager.getObjectInstance(ctx, name, this, _env);
-                }
-                catch (NamingException e)
-                {
-                    throw e;
-                }
-                catch (Exception e)
-                {
-                    throw new NamingException (e.getMessage());
+                Binding  binding = getBinding (firstComponent);
+                if (binding == null)
+                    throw new NameNotFoundException (firstComponent+ " is not bound");
+                
+                ctx = binding.getObject();
+                
+                
+                if (ctx instanceof Reference)
+                {  
+                    //deference the object
+                    try
+                    {
+                        ctx = NamingManager.getObjectInstance(ctx, getNameParser("").parse(firstComponent), this, _env);
+                    }
+                    catch (NamingException e)
+                    {
+                        throw e;
+                    }
+                    catch (Exception e)
+                    {
+                        throw new NamingException (e.getMessage());
+                    }
                 }
             }
-        
+
+
             if (ctx instanceof Context)
             {
-                ((Context)ctx).bind (name.getSuffix(1), obj);
+                ((Context)ctx).bind (cname.getSuffix(1), obj);
             }
             else
-                throw new NotContextException ("Object bound at "+name.get(0) +" is not a Context");
+                throw new NotContextException ("Object bound at "+firstComponent +" is not a Context");
         }
     }
 
@@ -374,58 +390,67 @@ public class NamingContext implements Context, Cloneable
     public Context createSubcontext (Name name)
         throws NamingException
     {
-        if (name == null)
+        Name cname = toCanonicalName (name);
+
+        if (cname == null)
             throw new NamingException ("Name is null");
-        if (name.size() == 0)
+        if (cname.size() == 0)
             throw new NamingException ("Name is empty");
 
-        if (name.size() == 1)
+        if (cname.size() == 1)
         {
             //not permitted to bind if something already bound at that name
-            Binding binding = getBinding (name);
+            Binding binding = getBinding (cname);
             if (binding != null)
-                throw new NameAlreadyBoundException (name.toString());
+                throw new NameAlreadyBoundException (cname.toString());
 
-            Context ctx = new NamingContext ((Hashtable)_env.clone(), name.get(0), this, _parser);
-            addBinding (name, ctx);
+            Context ctx = new NamingContext ((Hashtable)_env.clone(), cname.get(0), this, _parser);
+            addBinding (cname, ctx);
             return ctx;
         }
         
-
+            
         //If the name has multiple subcontexts, walk the hierarchy by
         //fetching the first one. All intermediate subcontexts in the 
         //name must already exist.
-        Binding binding = getBinding (name.getPrefix(0));
-        if (binding == null)
-            throw new NameNotFoundException (name.get(0) + " is not bound");
-        
-        Object ctx = binding.getObject();
+        String firstComponent = cname.get(0);
+        Object ctx = null;
 
-        if (ctx instanceof Reference)
-        {  
-            //deference the object
-            Code.debug ("Object bound at "+name.getPrefix(0) +" is a Reference");
-            try
-            {
-               ctx = NamingManager.getObjectInstance(ctx, name, this, _env);
-            }
-            catch (NamingException e)
-            {
-                throw e;
-            }
-            catch (Exception e)
-            {
-                throw new NamingException (e.getMessage());
+        if (firstComponent.equals(""))
+            ctx = this;
+        else
+        {
+            Binding binding = getBinding (firstComponent);
+            if (binding == null)
+                throw new NameNotFoundException (firstComponent + " is not bound");
+            
+            ctx = binding.getObject();
+            
+            if (ctx instanceof Reference)
+            {  
+                //deference the object
+                Code.debug ("Object bound at "+firstComponent +" is a Reference");
+                try
+                {
+                    ctx = NamingManager.getObjectInstance(ctx, getNameParser("").parse(firstComponent), this, _env);
+                }
+                catch (NamingException e)
+                {
+                    throw e;
+                }
+                catch (Exception e)
+                {
+                    throw new NamingException (e.getMessage());
+                }
             }
         }
         
-
         if (ctx instanceof Context)
         {
-            return ((Context)ctx).createSubcontext (name.getSuffix(1));
+            return ((Context)ctx).createSubcontext (cname.getSuffix(1));
         }
         else
-            throw new NotContextException (name.get(0) +" is not a Context");
+            throw new NotContextException (firstComponent +" is not a Context");
     }
 
 
@@ -483,19 +508,22 @@ public class NamingContext implements Context, Cloneable
     public Object lookup(Name name)
         throws NamingException
     {
-        Code.debug ("Looking up name="+name);
+        Code.debug ("Looking up name=\""+name+"\"");
+        Name cname = toCanonicalName(name);
 
-        if ((name == null) || (name.size() == 0))
+        if ((cname == null) || (cname.size() == 0))
         {
+            Code.debug("Null or empty name, returning copy of this context");
             NamingContext ctx = new NamingContext (_env, _name, _parent, _parser);
             ctx._bindings = _bindings;
             return ctx;
         }
-      
 
-        if (name.size() == 1)
+    
+      
+        if (cname.size() == 1)
         {
-            Binding binding = getBinding (name);
+            Binding binding = getBinding (cname);
             if (binding == null)
                 throw new NameNotFoundException();
 
@@ -520,7 +548,7 @@ public class NamingContext implements Context, Cloneable
                 //deference the object
                 try
                 {
-                    return NamingManager.getObjectInstance(o, name, this, _env);
+                    return NamingManager.getObjectInstance(o, cname, this, _env);
                 }
                 catch (NamingException e)
                 {
@@ -536,36 +564,45 @@ public class NamingContext implements Context, Cloneable
         }
 
         //it is a multipart name, recurse to the first subcontext
-        Binding binding = getBinding (name.getPrefix(1));
-        if (binding == null)
-            throw new NameNotFoundException ();
-        
-        //as we have bound a reference to an object factory 
-        //for the component specific contexts
-        //at "comp" we need to resolve the reference
-        Object ctx = binding.getObject();
+   
+        String firstComponent = cname.get(0);
+        Object ctx = null;
 
-        if (ctx instanceof Reference)
-        {  
-            //deference the object
-            try
-            {
-               ctx = NamingManager.getObjectInstance(ctx, name, this, _env);
-            }
-            catch (NamingException e)
-            {
-                throw e;
-            }
-            catch (Exception e)
-            {
-                throw new NamingException (e.getMessage());
+        if (firstComponent.equals(""))
+            ctx = this;
+        else
+        {
+            
+            Binding binding = getBinding (firstComponent);
+            if (binding == null)
+                throw new NameNotFoundException ();
+            
+            //as we have bound a reference to an object factory 
+            //for the component specific contexts
+            //at "comp" we need to resolve the reference
+            ctx = binding.getObject();
+            
+            if (ctx instanceof Reference)
+            {  
+                //deference the object
+                try
+                {
+                    ctx = NamingManager.getObjectInstance(ctx, getNameParser("").parse(firstComponent), this, _env);
+                }
+                catch (NamingException e)
+                {
+                    throw e;
+                }
+                catch (Exception e)
+                {
+                    throw new NamingException (e.getMessage());
+                }
             }
         }
-        
         if (!(ctx instanceof Context))
             throw new NotContextException();
 
-        return ((Context)ctx).lookup (name.getSuffix(1));
+        return ((Context)ctx).lookup (cname.getSuffix(1));
     }
 
 
@@ -596,19 +633,20 @@ public class NamingContext implements Context, Cloneable
     public Object lookupLink (Name name)
         throws NamingException 
     {      
+        Name cname = toCanonicalName(name);
 
-        if (name == null)
+        if (cname == null)
         {
             NamingContext ctx = new NamingContext (_env, _name, _parent, _parser);
             ctx._bindings = _bindings;
             return ctx;
         }
-        if (name.size() == 0)
+        if (cname.size() == 0)
             throw new NamingException ("Name is empty");
 
-        if (name.size() == 1)
+        if (cname.size() == 1)
         {
-            Binding binding = getBinding (name);
+            Binding binding = getBinding (cname);
             if (binding == null)
                 throw new NameNotFoundException();
 
@@ -620,7 +658,7 @@ public class NamingContext implements Context, Cloneable
                 //deference the object
                 try
                 {
-                    return NamingManager.getObjectInstance(o, name.getPrefix(1), this, _env);
+                    return NamingManager.getObjectInstance(o, cname.getPrefix(1), this, _env);
                 }
                 catch (NamingException e)
                 {
@@ -639,34 +677,43 @@ public class NamingContext implements Context, Cloneable
             }
         }
 
-        //it is a multipart name, recurse to the first subcontext
-        Binding binding = getBinding (name.getPrefix(1));
-        if (binding == null)
-            throw new NameNotFoundException ();
-        
-        Object ctx = binding.getObject();
 
-        if (ctx instanceof Reference)
-        {  
-            //deference the object
-            try
-            {
-               ctx = NamingManager.getObjectInstance(ctx, name, this, _env);
-            }
-            catch (NamingException e)
-            {
-                throw e;
-            }
-            catch (Exception e)
-            {
-                throw new NamingException (e.getMessage());
+        //it is a multipart name, recurse to the first subcontext
+        String firstComponent = cname.get(0);
+        Object ctx = null;
+        
+        if (firstComponent.equals(""))
+            ctx = this;
+        else
+        {
+            Binding binding = getBinding (firstComponent);
+            if (binding == null)
+                throw new NameNotFoundException ();
+            
+            ctx = binding.getObject();
+
+            if (ctx instanceof Reference)
+            {  
+                //deference the object
+                try
+                {
+                    ctx = NamingManager.getObjectInstance(ctx, getNameParser("").parse(firstComponent), this, _env);
+                }
+                catch (NamingException e)
+                {
+                    throw e;
+                }
+                catch (Exception e)
+                {
+                    throw new NamingException (e.getMessage());
+                }
             }
         }
-        
+
         if (!(ctx instanceof Context))
             throw new NotContextException();
 
-        return ((Context)ctx).lookup (name.getSuffix(1));
+        return ((Context)ctx).lookup (cname.getSuffix(1));
     }
 
 
@@ -697,54 +744,60 @@ public class NamingContext implements Context, Cloneable
         throws NamingException
     {
         Code.debug ("list() on Context="+getName()+" for name="+name);
-        
-        Enumeration enumerator = _bindings.elements();
-        while (enumerator.hasMoreElements())
-        {
-            Binding b = (Binding)enumerator.nextElement();
-            Code.debug (b.getName()+" : "+b.getClassName());
-        }
+        Name cname = toCanonicalName(name);
 
-        if (name == null)
+     
+
+        if (cname == null)
         {
             return new NameEnumeration(EMPTY_ENUM);
         }
 
-        //recurse down subcontexts until we reach the final one
-        if (name.size() == 0)
+        
+        if (cname.size() == 0)
         {
            return new NameEnumeration (_bindings.elements()); 
         }
 
-        //multipart name
-        Binding binding = getBinding (name.getPrefix(1));
-        if (binding == null)
-            throw new NameNotFoundException ();
-        
-        Object ctx = binding.getObject();
+      
 
-        if (ctx instanceof Reference)
-        {  
-            //deference the object
-            Code.debug ("Dereferencing Reference for "+name.getPrefix(1));
-            try
-            {
-               ctx = NamingManager.getObjectInstance(ctx, name.getPrefix(1), this, _env);
-            }
-            catch (NamingException e)
-            {
-                throw e;
-            }
-            catch (Exception e)
-            {
-                throw new NamingException (e.getMessage());
+        //multipart name
+        String firstComponent = cname.get(0);
+        Object ctx = null;
+
+        if (firstComponent.equals(""))
+            ctx = this;
+        else
+        {
+            Binding binding = getBinding (firstComponent);
+            if (binding == null)
+                throw new NameNotFoundException ();
+            
+            ctx = binding.getObject();
+            
+            if (ctx instanceof Reference)
+            {  
+                //deference the object
+                Code.debug ("Dereferencing Reference for "+name.get(0));
+                try
+                {
+                    ctx = NamingManager.getObjectInstance(ctx, getNameParser("").parse(firstComponent), this, _env);
+                }
+                catch (NamingException e)
+                {
+                    throw e;
+                }
+                catch (Exception e)
+                {
+                    throw new NamingException (e.getMessage());
+                }
             }
         }
-        
+
         if (!(ctx instanceof Context))
             throw new NotContextException();
 
-        return ((Context)ctx).list (name.getSuffix(1));       
+        return ((Context)ctx).list (cname.getSuffix(1));       
     }
 
 
@@ -774,45 +827,60 @@ public class NamingContext implements Context, Cloneable
      */
     public NamingEnumeration listBindings(Name name)
         throws NamingException
-    {
-        if (name == null)
+    {  
+        Name cname = toCanonicalName (name);
+
+        if (cname == null)
         {
             return new BindingEnumeration(EMPTY_ENUM);
         }
 
-        if (name.size() == 0)
+        if (cname.size() == 0)
         {
            return new BindingEnumeration (_bindings.elements()); 
         }
 
-        //multipart name
-        Binding binding = getBinding (name.getPrefix(1));
-        if (binding == null)
-            throw new NameNotFoundException ();
+      
         
-        Object ctx = binding.getObject();
+        //multipart name
+        String firstComponent = cname.get(0);
+        Object ctx = null;
 
-        if (ctx instanceof Reference)
-        {  
-            //deference the object
-            try
-            {
-               ctx = NamingManager.getObjectInstance(ctx, name, this, _env);
-            }
-            catch (NamingException e)
-            {
-                throw e;
-            }
-            catch (Exception e)
-            {
-                throw new NamingException (e.getMessage());
+        //if a name has a leading "/" it is parsed as "" so ignore it by staying
+        //at this level in the tree
+        if (firstComponent.equals(""))
+            ctx = this;
+        else
+        {
+            //it is a non-empty name component
+            Binding binding = getBinding (firstComponent);
+            if (binding == null)
+                throw new NameNotFoundException ();
+        
+            ctx = binding.getObject();
+
+            if (ctx instanceof Reference)
+            {  
+                //deference the object
+                try
+                {
+                    ctx = NamingManager.getObjectInstance(ctx, getNameParser("").parse(firstComponent), this, _env);
+                }
+                catch (NamingException e)
+                {
+                    throw e;
+                }
+                catch (Exception e)
+                {
+                    throw new NamingException (e.getMessage());
+                }
             }
         }
-        
+
         if (!(ctx instanceof Context))
             throw new NotContextException();
 
-        return ((Context)ctx).listBindings (name.getSuffix(1));
+        return ((Context)ctx).listBindings (cname.getSuffix(1));
     }
 
 
@@ -843,54 +911,67 @@ public class NamingContext implements Context, Cloneable
     public void rebind(Name name,
                        Object obj)
         throws NamingException
-    { 
-                if (name == null)
+    {    
+
+        Name cname = toCanonicalName(name);
+
+        if (cname == null)
             throw new NamingException ("Name is null");
         
-        if (name.size() == 0)
+        if (cname.size() == 0)
             throw new NamingException ("Name is empty");
 
 
         //if no subcontexts, just bind it
-        if (name.size() == 1)
+        if (cname.size() == 1)
         {
-            Binding binding = getBinding (name);           
-            addBinding (name, obj);
+            Binding binding = getBinding (cname);           
+            addBinding (cname, obj);
         }
         else
-        {
-            Code.debug ("Checking for existing binding for name="+name+" for first element of name="+name.getPrefix(0));
+        { 
             //walk down the subcontext hierarchy
-            Binding  binding = getBinding (name.getPrefix(1));
-            if (binding == null)
-                throw new NameNotFoundException (name.get(0)+ " is not bound");
+            Code.debug ("Checking for existing binding for name="+cname+" for first element of name="+cname.get(0));
+                    
+            String firstComponent = cname.get(0);
+            Object ctx = null;
+
             
-            Object ctx = binding.getObject();
+            if (firstComponent.equals(""))
+                ctx = this;
+            else
+            {
+                Binding  binding = getBinding (name.get(0));
+                if (binding == null)
+                    throw new NameNotFoundException (name.get(0)+ " is not bound");
+            
+                ctx = binding.getObject();
 
 
-            if (ctx instanceof Reference)
-            {  
-                //deference the object
-                try
-                {
-                    ctx = NamingManager.getObjectInstance(ctx, name, this, _env);
-                }
-                catch (NamingException e)
-                {
-                    throw e;
-                }
-                catch (Exception e)
-                {
-                    throw new NamingException (e.getMessage());
+                if (ctx instanceof Reference)
+                {  
+                    //deference the object
+                    try
+                    {
+                        ctx = NamingManager.getObjectInstance(ctx, getNameParser("").parse(firstComponent), this, _env);
+                    }
+                    catch (NamingException e)
+                    {
+                        throw e;
+                    }
+                    catch (Exception e)
+                    {
+                        throw new NamingException (e.getMessage());
+                    }
                 }
             }
-        
+
             if (ctx instanceof Context)
             {
-                ((Context)ctx).rebind (name.getSuffix(1), obj);
+                ((Context)ctx).rebind (cname.getSuffix(1), obj);
             }
             else
-                throw new NotContextException ("Object bound at "+name.get(0) +" is not a Context");
+                throw new NotContextException ("Object bound at "+firstComponent +" is not a Context");
         }
     }
 
@@ -1154,5 +1235,49 @@ public class NamingContext implements Context, Cloneable
         return (Binding) _bindings.get(name.toString());
     }
 
+
+    /*------------------------------------------------*/    
+    /**
+     * Get a name to object binding from this Context
+     *
+     * @param name as a String
+     * @return null or the Binding
+     */
+    protected Binding getBinding (String name)
+    {
+        Code.debug ("Looking up binding for "+name+" for context="+_name);
+        return (Binding) _bindings.get(name);
+    }
+
+
+
+    /*------------------------------------------------*/    
+    /**
+     * Remove leading or trailing empty components from
+     * name. Eg "/comp/env/" -> "comp/env"
+     *
+     * @param name the name to normalize
+     * @return normalized name
+     */
+    public Name toCanonicalName (Name name)
+    {
+        Name canonicalName = name;
+
+        if (name != null)
+        {
+            if (canonicalName.size() > 1)
+            {
+                if (canonicalName.get(0).equals(""))
+                    canonicalName = canonicalName.getSuffix(1);
+ 
+                
+                if (canonicalName.get(canonicalName.size()-1).equals(""))
+                    canonicalName = canonicalName.getPrefix(canonicalName.size()-1);
+                
+            }
+        }
+
+        return canonicalName;
+    }
 
 } 

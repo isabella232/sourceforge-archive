@@ -20,6 +20,9 @@ import javax.naming.StringRefAddr;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.mortbay.jndi.NamingContext;
+import org.mortbay.util.Code;
+
 
 public class TestJNDI extends TestCase
 {
@@ -76,8 +79,62 @@ public class TestJNDI extends TestCase
         assertEquals ("123", initCtxA.lookup("blah"));
 
         
+        
+        
         InitialContext initCtx = new InitialContext();
         Context sub0 = (Context)initCtx.lookup("java:");
+
+        Code.debug ("------ Looked up java: --------------");
+
+        Name n = sub0.getNameParser("").parse("/red/green/");
+
+
+        Code.debug ("get(0)="+n.get(0));
+        Code.debug ("getPrefix(1)="+n.getPrefix(1));
+        n = n.getSuffix(1);
+        Code.debug ("getSuffix(1)="+n);
+        Code.debug ("get(0)="+n.get(0));
+        Code.debug ("getPrefix(1)="+n.getPrefix(1));
+        n = n.getSuffix(1);
+        Code.debug ("getSuffix(1)="+n);
+        Code.debug ("get(0)="+n.get(0));
+        Code.debug ("getPrefix(1)="+n.getPrefix(1));
+        n = n.getSuffix(1);
+        Code.debug ("getSuffix(1)="+n);
+
+        n = sub0.getNameParser("").parse("pink/purple/");
+        Code.debug ("get(0)="+n.get(0));
+        Code.debug ("getPrefix(1)="+n.getPrefix(1));
+        n = n.getSuffix(1);
+        Code.debug ("getSuffix(1)="+n);
+        Code.debug ("get(0)="+n.get(0));
+        Code.debug ("getPrefix(1)="+n.getPrefix(1));
+
+        NamingContext ncontext = (NamingContext)sub0;
+
+        Name nn = ncontext.toCanonicalName(ncontext.getNameParser("").parse("/yellow/blue/"));
+        Code.debug (nn);
+        assertEquals (2, nn.size());
+
+        nn = ncontext.toCanonicalName(ncontext.getNameParser("").parse("/yellow/blue"));
+        Code.debug(nn);
+        assertEquals (2, nn.size());
+
+        nn = ncontext.toCanonicalName(ncontext.getNameParser("").parse("/"));
+        Code.debug ("/ parses as: "+nn+" with size="+nn.size());
+        Code.debug(nn);
+        assertEquals (1, nn.size());
+
+        nn = ncontext.toCanonicalName(ncontext.getNameParser("").parse(""));
+        Code.debug(nn);
+        assertEquals (0, nn.size());
+
+        Context fee = ncontext.createSubcontext("fee");
+        fee.bind ("fi", "88");
+        assertEquals("88", initCtxA.lookup("java:/fee/fi"));
+        assertEquals("88", initCtxA.lookup("java:/fee/fi/"));
+        assertTrue (initCtxA.lookup("java:/fee/") instanceof javax.naming.Context);
+
         try
         {
             Context sub1 = sub0.createSubcontext ("comp");
@@ -88,6 +145,9 @@ public class TestJNDI extends TestCase
             //expected exception
         }
 
+       
+
+        //check bindings at comp
         Context sub1 = (Context)initCtx.lookup("java:comp");
 
         Context sub2 = sub1.createSubcontext ("env");
@@ -95,10 +155,12 @@ public class TestJNDI extends TestCase
         initCtx.bind ("java:comp/env/rubbish", "abc");
         assertEquals ("abc", (String)initCtx.lookup("java:comp/env/rubbish"));
 
+        //check binding LinkRefs
         LinkRef link = new LinkRef ("java:comp/env/rubbish");
         initCtx.bind ("java:comp/env/poubelle", link);
         assertEquals ("abc", (String)initCtx.lookup("java:comp/env/poubelle"));
 
+        //check binding References
         StringRefAddr addr = new StringRefAddr("blah", "myReferenceable");
         Reference ref = new Reference (java.lang.String.class.getName(),
                                        addr,
@@ -145,6 +207,9 @@ public class TestJNDI extends TestCase
         //test that the other bindings are already there       
         assertEquals ("xyz", (String)initCtx.lookup("java:comp/env/poubelle"));
 
+        //test java:/comp/env/stuff
+        assertEquals ("xyz", (String)initCtx.lookup("java:/comp/env/poubelle/"));
+
         //test list Names
         NamingEnumeration nenum = initCtx.list ("java:comp/env");
         HashMap results = new HashMap();
@@ -168,5 +233,7 @@ public class TestJNDI extends TestCase
         //test NameInNamespace
         assertEquals ("comp/env", sub2.getNameInNamespace());
 
-    }
+    } 
+
+
 }

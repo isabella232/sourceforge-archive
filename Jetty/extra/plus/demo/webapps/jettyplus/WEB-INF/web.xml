@@ -35,7 +35,7 @@
       Mail service
     </description>
     <res-ref-name>
-      mail/TestMail
+      mail/Session
     </res-ref-name>
     <res-type>
        javax.mail.Session

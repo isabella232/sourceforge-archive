@@ -59,7 +59,8 @@ public class javaRootURLContext implements Context
                                            addr,
                                            ContextFactory.class.getName(),
                                            (String)null);
-            
+
+            //bind special object factory at comp
             _nameRoot.bind ("comp", ref);
         }
         catch (Exception e)
@@ -306,7 +307,6 @@ public class javaRootURLContext implements Context
         {
             if (name.startsWith(URL_PREFIX))
                newName = name.substring(URL_PREFIX.length());
- 
         }
         
         return newName;

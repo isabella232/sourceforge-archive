@@ -176,6 +176,7 @@ Test results in ${test.results}
   <!-- ==================================================================== -->
   <target name="testJNDI" depends="prepare, check.junit.task, check.junit, classes">   
    <junit fork="yes" printsummary="yes" haltonerror="yes" haltonfailure="yes" >
+      <jvmarg value="-DDEBUG"/>
       <formatter type="plain" usefile="true" />                  
       <classpath> 
          <path refid="classpath" />
