@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Renamed getHttpServers and added setAnonymous
  + Updated crimson to 1.1.3
  + Added hack for compat tests in watchdog for old tomcat stuff 
  + Added AbstractSessionManager

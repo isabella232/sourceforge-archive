@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.WeakHashMap;
 import org.mortbay.http.handler.DumpHandler;
 import org.mortbay.http.handler.NotFoundHandler;
 import org.mortbay.util.Code;
@@ -59,8 +60,29 @@ import org.mortbay.util.URI;
 public class HttpServer implements LifeCycle
 {
     /* ------------------------------------------------------------ */
-    private static ArrayList __servers = new ArrayList(3);
-    private static List __roServers = Collections.unmodifiableList(__servers);
+    private static WeakHashMap __servers = new WeakHashMap();
+    private static Collection __roServers =
+        Collections.unmodifiableCollection(__servers.keySet());
+    
+    /* ------------------------------------------------------------ */
+    /** Get HttpServer Collection.
+     * Get a collection of all known HttpServers.  Servers can be
+     * removed from this list with the setAnonymous call.
+     * @return  Collection of all servers.
+     */
+    public static Collection getHttpServers()
+    {
+        return __roServers;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @deprecated User getHttpServers()
+     */
+    public static List getHttpServerList()
+    {
+        return new ArrayList(__roServers);
+    }
     
     /* ------------------------------------------------------------ */
     private HashMap _listeners = new HashMap(3);
@@ -80,8 +102,31 @@ public class HttpServer implements LifeCycle
      */
     public HttpServer()
     {
-        __servers.add(this);
+        this(false);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param anonymous If true, the server is not included in the
+     * static server lists and stopAll methods.
+     */
+    public HttpServer(boolean anonymous)
+    {
+        setAnonymous(anonymous);
         _virtualHostMap.setIgnoreCase(true);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param anonymous If true, the server is not included in the
+     * static server lists and stopAll methods.
+     */
+    public void setAnonymous(boolean anonymous)
+    {
+        if (anonymous)
+            __servers.remove(this);
+        else
+            __servers.put(this,__servers);
     }
     
     /* ------------------------------------------------------------ */
@@ -788,12 +833,6 @@ public class HttpServer implements LifeCycle
     public void setChunkingForced(boolean forced)
     {
          _chunkingForced=forced;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public static List getHttpServerList()
-    {
-        return __roServers;
     }
 
     /* ------------------------------------------------------------ */

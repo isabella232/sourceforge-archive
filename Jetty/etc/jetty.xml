@@ -16,12 +16,32 @@
     </Arg>
   </Call>
 
+  
+  <!-- add a single web application to the / context -->
+  <Call name="addWebApplication">
+    <Arg>/</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/root</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
+
+     <Call name="getServletHandler">
+       <Call name="getSessionManager">
+         <Call name="setMaxInactiveInterval">
+           <Arg type="int">20</Arg>
+         </Call>
+       </Call>
+     </Call>
+
+
+  </Call>
+
+  <!-- Uncomment this section to  configure all webapplications found in the webapps directory 
   <Call name="addWebApplications">
     <Arg></Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/webapps/</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
     <Arg type="boolean">false</Arg>
   </Call>
+  -->
 
   <Set name="RequestLog">
     <New class="org.mortbay.http.NCSARequestLog">

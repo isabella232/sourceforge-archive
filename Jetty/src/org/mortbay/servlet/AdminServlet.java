@@ -58,14 +58,14 @@ import org.mortbay.util.UrlEncoded;
  */
 public class AdminServlet extends HttpServlet
 {
-    private java.util.List _servers;
+    private Collection _servers;
     
     /* ------------------------------------------------------------ */
     public void init(ServletConfig config)
          throws ServletException
     {
         super.init(config);
-        _servers=HttpServer.getHttpServerList();
+        _servers =HttpServer.getHttpServers();
     }
     
     /* ------------------------------------------------------------ */
@@ -83,9 +83,10 @@ public class AdminServlet extends HttpServlet
                         try{Thread.sleep(1000);}
                         catch(Exception e){Code.ignore(e);}
                         Log.event("Stopping All servers");
-                        for (int s=0;s<_servers.size();s++)
+                        Iterator s=_servers.iterator();
+                        while(s.hasNext())
                         {
-                            HttpServer server=(HttpServer)_servers.get(s);
+                            HttpServer server=(HttpServer)s.next();
                             try{server.stop();}
                             catch(Exception e){Code.ignore(e);}
                         }
@@ -106,8 +107,14 @@ public class AdminServlet extends HttpServlet
         
         try{
             target=tok.nextToken();
-            HttpServer server=(HttpServer)
-                _servers.get(Integer.parseInt(target));
+            int t=Integer.parseInt(target);
+            Iterator s=_servers.iterator();
+            HttpServer server=null;
+            while(s.hasNext() && t>=0)
+                if (t--==0)
+                    server=(HttpServer)s.next();
+                else
+                    s.next();
             
             if (tokens==1)
             {
@@ -214,12 +221,14 @@ public class AdminServlet extends HttpServlet
 
         List sList=new List(List.Ordered);
         page.add(sList);
-        String id1;
         
-        for(int i1=0;i1<_servers.size();i1++)
+        String id1;
+        int i1=0;
+        Iterator s=_servers.iterator();
+        while(s.hasNext())
         {
-            id1=""+i1;
-            HttpServer server=(HttpServer)_servers.get(i1);
+            id1=""+i1++;
+            HttpServer server=(HttpServer)s.next();            
             Composite sItem = sList.newItem();
             sItem.add("<B>HttpServer&nbsp;");
             sItem.add(lifeCycle(request,id1,server));

@@ -291,7 +291,7 @@ public class Server extends HttpServer
         
         if (arg.length==0)
         {
-            System.err.println("Using default configuration: etc/jetty.xml");
+            Log.event("Using default configuration: etc/jetty.xml");
             arg=dftConfig;
         }
 

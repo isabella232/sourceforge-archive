@@ -57,7 +57,13 @@ $Id$
       <Arg>/</Arg>
       <Arg>org.mortbay.servlet.AdminServlet</Arg>
     </Call>
+    <Call name="setAttribute">
+      <Arg>org.mortbay.http.HttpServer</Arg>
+      <Arg><Call name="getHttpServer"/></Arg>
+    </Call>
   </Call>
+
+  <Set name="anonymous">true</Set>
 
 </Configure>
 

@@ -19,11 +19,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.mortbay.util.Code;
 
-
 /* ------------------------------------------------------------ */
 /** Forward Servlet Request.
+ * This servlet can be configured with init parameters to use
+ * a RequestDispatcher to forward requests.
  *
- * 
+ * The servlet path of a request is used to look for a initparameter
+ * of that name. If a parameter is found, it's value is used to get a
+ * RequestDispatcher.
+ *
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
