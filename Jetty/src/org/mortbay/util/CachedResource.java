@@ -74,7 +74,8 @@ public class CachedResource extends Resource
             if (l<0)
                 l=1024;
             ByteArrayOutputStream2 bout = new ByteArrayOutputStream2(l);
-            IO.copy(_resource.getInputStream(),bout);
+            InputStream in = _resource.getInputStream();
+            try{IO.copy(in,bout);} finally {in.close();}
             _buf=bout.getBuf();
             if (_buf.length!=l)
                 _buf=bout.toByteArray();

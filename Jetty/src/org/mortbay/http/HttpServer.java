@@ -90,7 +90,6 @@ public class HttpServer implements LifeCycle,
     
     /* ------------------------------------------------------------ */
     private List _listeners = new ArrayList(3);
-    private HttpEncoding _httpEncoding ;
     private HashMap _realmMap = new HashMap(3);    
     private StringMap _virtualHostMap = new StringMap();
     private boolean _chunkingForced=false;
@@ -579,27 +578,6 @@ public class HttpServer implements LifeCycle,
         return existing;
     }
     
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return The HttpEncoding helper instance.
-     */
-    public HttpEncoding getHttpEncoding()
-    {
-        if (_httpEncoding==null)
-            _httpEncoding=new HttpEncoding();
-        return _httpEncoding;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** The HttpEncoding instance is used to extend the transport
-     * encodings supprted by this server.
-     * @param httpEncoding The HttpEncoding helper instance.
-     */
-    public void setHttpEncoding(HttpEncoding httpEncoding)
-    {
-        _httpEncoding = httpEncoding;
-    }
     
     /* ------------------------------------------------------------ */
     /** Get the requests per GC.

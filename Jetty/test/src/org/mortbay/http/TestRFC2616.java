@@ -312,19 +312,6 @@ public class TestRFC2616
             TestRFC2616 listener = new TestRFC2616();
             int offset=0;
             
-            // Chunk once
-            offset=0;
-            response=listener.getResponses("GET /R1 HTTP/1.1\n"+
-                                           "Host: localhost\n"+
-                                           "Transfer-Encoding: chunked,chunked\n"+
-                                           "Content-Type: text/plain\n"+
-                                           "\015\012"+
-                                           "5;\015\012"+
-                                           "123\015\012\015\012"+
-                                           "0;\015\012\015\012");
-            Code.debug("RESPONSE: ",response);
-            t.checkContains(response,"HTTP/1.1 400 Bad","Chunked once");
-
             // Chunk last
             offset=0;
             response=listener.getResponses("GET /R1 HTTP/1.1\n"+
@@ -338,19 +325,6 @@ public class TestRFC2616
             Code.debug("RESPONSE: ",response);
             t.checkContains(response,"HTTP/1.1 400 Bad","Chunked last");
             
-            // Unknown encoding
-            offset=0;
-            response=listener.getResponses("GET /R1 HTTP/1.1\n"+
-                                           "Host: localhost\n"+
-                                           "Transfer-Encoding: xxx,chunked\n"+
-                                           "Content-Type: text/plain\n"+
-                                           "\015\012"+
-                                           "5;\015\012"+
-                                           "123\015\012\015\012"+
-                                           "0;\015\012\015\012");
-            Code.debug("RESPONSE: ",response);
-            t.checkContains(response,"HTTP/1.1 501","Unknown encoding");
-
             // Chunked
             offset=0;
             response=listener.getResponses("GET /R1 HTTP/1.1\n"+
@@ -445,60 +419,6 @@ public class TestRFC2616
             offset = t.checkContains(response,offset,"HTTP/1.1 200","3.6.1 Chunking")+10;
             offset = t.checkContains(response,offset,"123456","3.6.1 Chunking");
             offset = t.checkContains(response,offset,"/R2","3.6.1 Chunking")+10;
-
-            // gzip encoding
-            offset=0;
-            ByteArrayOutputStream bout1 = new ByteArrayOutputStream();
-            bout1.write(("GET /R1 HTTP/1.1\n"+
-                        "Host: localhost\n"+
-                        "Transfer-Encoding: gzip,chunked\n"+
-                        "Content-Type: text/plain\n"+
-                        "\n").getBytes());
-            ByteArrayOutputStream bout2 = new ByteArrayOutputStream();
-            GZIPOutputStream gout=new GZIPOutputStream(bout2);
-            gout.write("1234567890".getBytes());
-            gout.flush();
-            gout.close();
-            byte[] gzip_content=bout2.toByteArray();
-            bout1.write("3;\n".getBytes());
-            for (int i=0;i<3;i++)
-                bout1.write(gzip_content[i]);
-            bout1.write(("\n"+(gzip_content.length-3)+";\n").getBytes());
-            for (int i=3;i<gzip_content.length;i++)
-                bout1.write(gzip_content[i]);
-            bout1.write(("\n"+
-                         "0;\n\n"+
-                         
-                         "GET /R2 HTTP/1.1\n"+
-                         "Host: localhost\n"+
-                         "Connection: close\n"+
-                         "\n").getBytes());
-            
-            response=new String(listener.getResponses(bout1.toByteArray()));
-            Code.debug("RESPONSE: ",response);
-            offset = t.checkContains(response,offset,"HTTP/1.1 200","gzip in")+10;
-            offset = t.checkContains(response,offset,"1234567890","gzip in");
-            
-            // output gzip
-            Code.setDebug(false);
-            offset=0;
-            byte[] rbytes=listener.getResponses(("GET /R1?gzip HTTP/1.1\n"+
-                                                 "Host: localhost\n"+
-                                                 "TE: gzip\n" +
-                                                 "Connection: close\n"+
-                                                 "\n").getBytes());
-            Code.debug("RESPONSE: ",new String(rbytes));
-            ByteArrayInputStream bin = new ByteArrayInputStream(rbytes);
-            HttpInputStream cin = new HttpInputStream(bin);
-            HttpFields header = new HttpFields();
-            header.read((LineInput)cin.getInputStream());
-            Code.debug("HEADER:\n",header);
-            cin.setChunking();
-            GZIPInputStream gin = new GZIPInputStream(cin);
-            ByteArrayOutputStream bout3 = new ByteArrayOutputStream();
-            IO.copy(gin,bout3);
-            response=new String(bout3.toByteArray());
-            t.checkContains(response,"<H3>","gzip out");
         }
         catch(Exception e)
         {
@@ -507,7 +427,6 @@ public class TestRFC2616
             if (response!=null)
                 Code.warning(response);
         }
-
     }
    
     
