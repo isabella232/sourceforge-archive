@@ -846,7 +846,13 @@ public class TestHarness
             t.checkEquals(m2.getValues("K1").get(2),"V3","clone List");
             t.checkEquals(m2.getValue("K1",0),"V1","clone List");
             t.checkEquals(m2.getValue("K1",1),"V2","clone List");
-            t.checkEquals(m2.getValue("K1",2),"V3","clone List");            
+            t.checkEquals(m2.getValue("K1",2),"V3","clone List");       
+            
+            t.check(mm.removeValue("K1","V2"),"delete");
+            t.check(mm.get("K1")!=null,"!deleted");
+            t.check(mm.removeValue("K1","V1"),"delete");
+            t.check(mm.get("K1")==null,"deleted");
+            t.check(!mm.removeValue("K1","V0"),"!deleted");
         }
         catch(Exception e)
         {
