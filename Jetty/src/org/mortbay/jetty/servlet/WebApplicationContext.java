@@ -526,6 +526,13 @@ public class WebApplicationContext extends ServletHttpContext
     
     
     /* ------------------------------------------------------------ */
+    /** Set the defaults web.xml file.
+     * The default web.xml is used to configure all webapplications
+     * before the WEB-INF/web.xml file is applied.  By default the
+     * org/mortbay/jetty/servlet/webdefault.xml resource from the
+     * org.mortbay.jetty.jar is used.
+     * @param defaults File, Resource, URL or null.
+     */
     public void setDefaultsDescriptor(String defaults)
     {
         if (isStarted())
@@ -540,6 +547,9 @@ public class WebApplicationContext extends ServletHttpContext
     }
     
     /* ------------------------------------------------------------ */
+    /** 
+     * @param war Filename or URL of the web application directory or WAR file. 
+     */
     public void setWAR(String war)
     {
         if (isStarted())
@@ -554,6 +564,10 @@ public class WebApplicationContext extends ServletHttpContext
     }
     
     /* ------------------------------------------------------------ */
+    /** 
+     * @param extract If true, a WAR is extracted to a temporary
+     * directory before being deployed. 
+     */
     public void setExtractWAR(boolean extract)
     {
         if (isStarted())
