@@ -19,7 +19,8 @@ public class Frame
     
     /* ------------------------------------------------------------ */
     private static String __className=Frame.class.getName();
-        
+    private static final String __lineSeparator = System.getProperty("line.separator");
+    
     /*-------------------------------------------------------------------*/
     private StackTraceElement[] _stack;
     
@@ -129,7 +130,7 @@ public class Frame
             for (int i=0;i<_stack.length;i++)
             {
                 if (i>_top)
-                    buf.append("\n");
+                    buf.append(__lineSeparator);
                 buf.append(_stack[i].toString());
             }
             _string=buf.toString();
