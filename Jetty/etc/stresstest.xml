@@ -38,8 +38,8 @@
     <Arg>
       <New class="org.mortbay.http.nio.SocketChannelListener">
         <Set name="Port">8888</Set>
-        <Set name="MinThreads">2</Set>
-        <Set name="MaxThreads">5</Set>
+        <Set name="MinThreads">10</Set>
+        <Set name="MaxThreads">50</Set>
         <Set name="SslPort">8443</Set>
       </New>
     </Arg>

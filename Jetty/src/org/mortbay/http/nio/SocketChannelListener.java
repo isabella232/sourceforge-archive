@@ -30,8 +30,6 @@ import org.mortbay.util.LineInput;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.ThreadPool;
 
-import sun.security.action.GetLongAction;
-
 /* ------------------------------------------------------------------------------- */
 /**  EXPERIMENTAL NIO listener!
  * 
@@ -54,6 +52,9 @@ public class SocketChannelListener extends ThreadPool implements HttpListener
     private transient ServerSocketChannel _acceptChannel;
     private transient Selector _selector;
     private transient SelectorThread _selectorThread;
+    private transient boolean _isLow=false;
+    private transient boolean _isOut=false;
+    private transient long _warned=0;
     
     
     /* ------------------------------------------------------------------------------- */
@@ -181,7 +182,6 @@ public class SocketChannelListener extends ThreadPool implements HttpListener
     public void persistConnection(HttpConnection connection)
     {
         // TODO Auto-generated method stub
-
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -190,8 +190,27 @@ public class SocketChannelListener extends ThreadPool implements HttpListener
      */
     public boolean isLowOnResources()
     {
-        // TODO Auto-generated method stub
-        return false;
+        boolean low = (getMaxThreads()-getThreads()+getIdleThreads())<getMinThreads();
+        
+        if (low && !_isLow)
+        {
+            log.info("LOW ON THREADS (("+
+                      getMaxThreads()+"-"+
+                      getThreads()+"+"+
+                      getIdleThreads()+")<"+
+                      getMinThreads()+") on "+ this);
+            _warned=System.currentTimeMillis();
+            _isLow=true;
+        }
+        else if (!low && _isLow)
+        {
+            if (System.currentTimeMillis()-_warned > 1000)
+            {
+                _isOut=false;
+                _isLow=false;
+            }
+        }
+        return low;
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -200,8 +219,19 @@ public class SocketChannelListener extends ThreadPool implements HttpListener
      */
     public boolean isOutOfResources()
     {
-        // TODO Auto-generated method stub
-        return false;
+        boolean out =
+            getThreads()==getMaxThreads() &&
+            getIdleThreads()==0;
+        
+        if (out && !_isOut)
+        {
+            log.warn("OUT OF THREADS: "+this);
+            _warned=System.currentTimeMillis();
+            _isLow=true;
+            _isOut=true;
+        }
+        
+        return out;
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -360,6 +390,8 @@ public class SocketChannelListener extends ThreadPool implements HttpListener
     private class SelectorThread extends Thread
     {
         boolean _running= false;
+
+        /* ------------------------------------------------------------ */
         public void run()
         {
             try
@@ -422,10 +454,14 @@ public class SocketChannelListener extends ThreadPool implements HttpListener
                 _selectorThread= null;
             }
         }
-        
+
+        /* ------------------------------------------------------------ */
         void doAccept(SelectionKey key)
             throws IOException, InterruptedException
         {            
+            if (isLowOnResources())
+                return;
+                
             ServerSocketChannel server = (ServerSocketChannel) key.channel();
             SocketChannel channel = server.accept();
             channel.configureBlocking(false);
@@ -448,20 +484,23 @@ public class SocketChannelListener extends ThreadPool implements HttpListener
 
             Connection connection=new Connection(channel,readKey, SocketChannelListener.this);
             readKey.attach(connection);
-
         }
 
+        /* ------------------------------------------------------------ */
         void doRead(SelectionKey key) 
             throws IOException
         {
             Connection connection = (Connection)key.attachment();
+            if (connection._idle && isOutOfResources())
+                // Don't handle idle connections if out of resources.
+                return;
             ByteBuffer buf= connection._in.getBuffer();
             int count = ((SocketChannel)key.channel()).read(buf);
             if (count<0)
             {
                 connection.close();
             }
-            else if (count>0)
+            else 
             {
                 buf.flip();
                 connection.write(buf);
@@ -503,25 +542,51 @@ public class SocketChannelListener extends ThreadPool implements HttpListener
             _listener=listener;
             _in=(ByteBufferInputStream) ((LineInput)(getInputStream().getInputStream())).getInputStream();
             _out=(SocketChannelOutputStream)(getOutputStream().getOutputStream());
+            _in.setTimeout(listener.getMaxIdleTimeMs());
         }
         
 
         /* ------------------------------------------------------------------------------- */
         void write(ByteBuffer buf)
         {
-            _in.write(buf);
-            if (_idle)
+            if (!_idle)
+                _in.write(buf);
+            else
             {
-                try
+                boolean written=false;
+                
+                // Is there any actual content there?
+                for (int i=buf.position();i<buf.limit();i++)
                 {
-                    _listener.run(this);
-                    _idle=false;
+                    byte b = buf.get(i);
+                    
+                    if (b>' ')
+                    {
+                        buf.position(i);
+                    
+                        try
+                        {
+                            written=true;
+                            _in.write(buf);
+                            _listener.run(this);
+                            _idle=false;
+                        }
+                        catch(InterruptedException e)
+                        {
+                            LogSupport.ignore(log, e);
+                        }
+                        finally
+                        {
+                            break;
+                        }
+                    }
                 }
-                catch(InterruptedException e)
+                
+                if (!written)
                 {
-                    LogSupport.ignore(log, e);
+                    _in.recycle(buf);
                 }
-            }   
+            }
         }
         
         /* ------------------------------------------------------------------------------- */
@@ -542,7 +607,9 @@ public class SocketChannelListener extends ThreadPool implements HttpListener
             }
             catch(IOException e)
             {
-                log.warn("not handled!?!?",e);
+                log.warn(e.toString());
+                log.debug(e);
+                destroy();
             }
             finally
             {
@@ -552,9 +619,11 @@ public class SocketChannelListener extends ThreadPool implements HttpListener
         }
 
         /* ------------------------------------------------------------------------------- */
-        public void close()
+        public synchronized void close()
             throws IOException
          {
+                 _out.close();
+                 _in.close();
                  if (!_channel.isOpen())
                     return;
                  _key.cancel();

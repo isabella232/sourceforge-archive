@@ -9,6 +9,8 @@ package org.mortbay.http.nio;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
@@ -26,6 +28,7 @@ public class ByteBufferInputStream extends InputStream
 {
     private static Log log= LogFactory.getLog(ByteBufferInputStream.class);
     
+    long _timeout=30000;
     int _bufferSize;
     ByteBuffer _buffer;
     Object _buffers;
@@ -39,6 +42,25 @@ public class ByteBufferInputStream extends InputStream
     {
         super();
         _bufferSize=bufferSize;
+    }
+
+
+    /* ------------------------------------------------------------------------------- */
+    /** getSoTimeout.
+     * @return
+     */
+    public long getTimeout()
+    {
+        return _timeout;
+    }
+
+    /* ------------------------------------------------------------------------------- */
+    /** setSoTimeout.
+     * @param l
+     */
+    public void setTimeout(long l)
+    {
+        _timeout= l;
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -99,6 +121,7 @@ public class ByteBufferInputStream extends InputStream
     public synchronized int read(byte[] buf, int offset, int length) 
         throws IOException
     {
+
         if (!waitForContent())
             return -1;
             
@@ -152,12 +175,18 @@ public class ByteBufferInputStream extends InputStream
     /* ------------------------------------------------------------------------------- */
      public synchronized void write(ByteBuffer buffer)
      {
-         _buffers=LazyList.add(_buffers,buffer);
-         this.notify();
+         if (buffer.hasRemaining())
+         {
+             _buffers=LazyList.add(_buffers,buffer); 
+            this.notify();
+         }
+         else
+             recycle(buffer);
      }
 
     /* ------------------------------------------------------------------------------- */
     private synchronized boolean waitForContent()
+        throws InterruptedIOException
     {
         if (_buffer!=null)
         {
@@ -165,7 +194,7 @@ public class ByteBufferInputStream extends InputStream
                 return true;
              
              // recycle buffer
-             _recycle=LazyList.add(_recycle,_buffer);
+             recycle(_buffer);
              _buffer=null;
         }        
         
@@ -173,17 +202,21 @@ public class ByteBufferInputStream extends InputStream
         {
             try
             {
-                this.wait();
+                this.wait(_timeout);
             }
             catch(InterruptedException e)
             {
-                LogSupport.ignore(log,e);
-                return false;
+                log.debug(e);
+                throw new InterruptedIOException(e.toString());
             }
         }    
         
-        if (LazyList.size(_buffers)==0)
+        if (_closed)
             return false;
+            
+        if (LazyList.size(_buffers)==0)
+            throw new SocketTimeoutException();
+        
         _buffer=(ByteBuffer)LazyList.get(_buffers, 0);
         _buffers=LazyList.remove(_buffers, 0);
         
@@ -204,12 +237,20 @@ public class ByteBufferInputStream extends InputStream
             s--;
              buf=(ByteBuffer)LazyList.get(_recycle, s);
              _recycle=LazyList.remove(_recycle,s);
+             buf.clear();
         }
         else
+        {
             buf=ByteBuffer.allocateDirect(_bufferSize);
+        }
          return buf;     
     }
-    
+
+    /* ------------------------------------------------------------------------------- */
+    public synchronized void recycle(ByteBuffer buf)
+    {
+         _recycle=LazyList.add(_recycle,buf);
+    }
 
     /* ------------------------------------------------------------------------------- */
     public void destroy()
@@ -218,4 +259,6 @@ public class ByteBufferInputStream extends InputStream
         _buffers=null;
         _recycle=null;
     }
+    
+
 }
