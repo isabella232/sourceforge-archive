@@ -566,7 +566,7 @@ public class ServletHandler extends Container implements HttpHandler
             
             // Do that funky filter and servlet thang!
             if (servletHolder!=null)
-                dispatch(pathInContext,request,response,servletHolder);
+                dispatch(pathInContext,request,response,servletHolder, Dispatcher.__REQUEST);
         }
         catch(Exception e)
         {
@@ -650,6 +650,7 @@ public class ServletHandler extends Container implements HttpHandler
      * @param request 
      * @param response 
      * @param servletHolder 
+     * @param type the type of dispatch as defined in the Dispatcher class.
      * @exception ServletException 
      * @exception UnavailableException 
      * @exception IOException 
@@ -657,7 +658,8 @@ public class ServletHandler extends Container implements HttpHandler
     protected void dispatch(String pathInContext,
                             HttpServletRequest request,
                             HttpServletResponse response,
-                            ServletHolder servletHolder)
+                            ServletHolder servletHolder, 
+                            int type)
         throws ServletException,
                UnavailableException,
                IOException

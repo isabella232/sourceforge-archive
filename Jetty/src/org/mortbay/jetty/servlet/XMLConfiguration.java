@@ -323,12 +323,12 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
         String filterName=node.getString("filter-name",false,true);
         String pathSpec=node.getString("url-pattern",false,true);
         String servletName=node.getString("servlet-name",false,true);
-        int dispatcher=FilterHolder.__DEFAULT;
+        int dispatcher=Dispatcher.__DEFAULT;
         Iterator iter=node.iterator("dispatcher");
         while(iter.hasNext())
         {
             String d=((XmlParser.Node)iter.next()).toString(false,true);
-            dispatcher|=FilterHolder.type(d);
+            dispatcher|=Dispatcher.type(d);
         }
             
         FilterHolder holder=(servletName!=null)

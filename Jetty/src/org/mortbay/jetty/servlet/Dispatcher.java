@@ -58,19 +58,30 @@ public class Dispatcher implements RequestDispatcher
 {
     static Log log = LogFactory.getLog(Dispatcher.class);
 
+
+    /* ------------------------------------------------------------ */
+    /** Dispatch types */
+    public static final int __DEFAULT=0;
+    public static final int __REQUEST=1;
+    public static final int __FORWARD=2;
+    public static final int __INCLUDE=4;
+    public static final int __ERROR=8;
+    public static final int __ALL=15;
+    
+    /** Dispatch include attribute names */
     public final static String __INCLUDE_REQUEST_URI= "javax.servlet.include.request_uri";
     public final static String __INCLUDE_CONTEXT_PATH= "javax.servlet.include.context_path";
     public final static String __INCLUDE_SERVLET_PATH= "javax.servlet.include.servlet_path";
     public final static String __INCLUDE_PATH_INFO= "javax.servlet.include.path_info";
     public final static String __INCLUDE_QUERY_STRING= "javax.servlet.include.query_string";
 
+    /** Dispatch include attribute names */
     public final static String __FORWARD_REQUEST_URI= "javax.servlet.forward.request_uri";
     public final static String __FORWARD_CONTEXT_PATH= "javax.servlet.forward.context_path";
     public final static String __FORWARD_SERVLET_PATH= "javax.servlet.forward.servlet_path";
     public final static String __FORWARD_PATH_INFO= "javax.servlet.forward.path_info";
     public final static String __FORWARD_QUERY_STRING= "javax.servlet.forward.query_string";
 
-    
     
     public final static StringMap __managedAttributes = new StringMap();
     static
@@ -94,6 +105,7 @@ public class Dispatcher implements RequestDispatcher
     String _uriInContext;
     String _pathInContext;
     String _query;
+
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -146,7 +158,7 @@ public class Dispatcher implements RequestDispatcher
                         ServletResponse servletResponse)
         throws ServletException, IOException     
     {
-        dispatch(servletRequest,servletResponse,FilterHolder.__INCLUDE);
+        dispatch(servletRequest,servletResponse,Dispatcher.__INCLUDE);
     }
     
     /* ------------------------------------------------------------ */
@@ -154,7 +166,7 @@ public class Dispatcher implements RequestDispatcher
                         ServletResponse servletResponse)
         throws ServletException,IOException
     {
-        dispatch(servletRequest,servletResponse,FilterHolder.__FORWARD);
+        dispatch(servletRequest,servletResponse,Dispatcher.__FORWARD);
     }
     
     /* ------------------------------------------------------------ */
@@ -162,13 +174,13 @@ public class Dispatcher implements RequestDispatcher
                         ServletResponse servletResponse)
         throws ServletException,IOException
     {
-        dispatch(servletRequest,servletResponse,FilterHolder.__ERROR);
+        dispatch(servletRequest,servletResponse,Dispatcher.__ERROR);
     }
     
     /* ------------------------------------------------------------ */
     void dispatch(ServletRequest servletRequest,
                   ServletResponse servletResponse,
-                  int filterType)
+                  int type)
         throws ServletException,IOException
     {
         HttpServletRequest httpServletRequest=(HttpServletRequest)servletRequest;
@@ -184,11 +196,11 @@ public class Dispatcher implements RequestDispatcher
         // wrap the request and response
         DispatcherRequest request = new DispatcherRequest(httpServletRequest,
                                                           servletHttpRequest,
-                                                          filterType);
+                                                          type);
         DispatcherResponse response = new DispatcherResponse(request,
                                                              httpServletResponse);        
         
-        if (filterType==FilterHolder.__FORWARD)
+        if (type==Dispatcher.__FORWARD)
             servletResponse.resetBuffer();
         
         // Merge parameters
@@ -222,13 +234,13 @@ public class Dispatcher implements RequestDispatcher
                     if (filter!=null && filter.isUnwrappedDispatchSupported())
                     {
                         filter.setDispatch(request, response);
-                        _servletHandler.dispatch(null,httpServletRequest,httpServletResponse,_holder);
+                        _servletHandler.dispatch(null,httpServletRequest,httpServletResponse,_holder, type);
                     }
                     else
-                        _servletHandler.dispatch(null,request,response,_holder);
+                        _servletHandler.dispatch(null,request,response,_holder, type);
                 }
                 else
-                	_servletHandler.dispatch(null,request,response,_holder);
+                	_servletHandler.dispatch(null,request,response,_holder, type);
             }
             else
             {
@@ -257,16 +269,16 @@ public class Dispatcher implements RequestDispatcher
                     if (filter!=null && filter.isUnwrappedDispatchSupported())
                     {
                         filter.setDispatch(request, response);
-                        _servletHandler.dispatch(_pathInContext,httpServletRequest,httpServletResponse,_holder);
+                        _servletHandler.dispatch(_pathInContext,httpServletRequest,httpServletResponse,_holder, type);
                     }
                     else
-                        _servletHandler.dispatch(_pathInContext,request,response,_holder);
+                        _servletHandler.dispatch(_pathInContext,request,response,_holder, type);
                 }
                 else
-                    _servletHandler.dispatch(_pathInContext,request,response,_holder);
+                    _servletHandler.dispatch(_pathInContext,request,response,_holder, type);
                 
                 
-                if (filterType!=FilterHolder.__INCLUDE)
+                if (type!=Dispatcher.__INCLUDE)
                     response.close();
                 else if (response.isFlushNeeded())
                     response.flushBuffer();
@@ -289,6 +301,23 @@ public class Dispatcher implements RequestDispatcher
         return "Dispatcher["+_pathSpec+","+_holder+"]";
     }
         
+
+    /* ------------------------------------------------------------ */
+    /** Dispatch type from name
+     */
+    public static int type(String type)
+    {
+        if ("request".equalsIgnoreCase(type))
+            return __REQUEST;
+        if ("forward".equalsIgnoreCase(type))
+            return __FORWARD;
+        if ("include".equalsIgnoreCase(type))
+            return __INCLUDE;
+        if ("error".equalsIgnoreCase(type))
+            return __ERROR;
+        throw new IllegalArgumentException(type);
+    }
+
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -370,7 +399,7 @@ public class Dispatcher implements RequestDispatcher
         /* ------------------------------------------------------------ */
         public String getRequestURI()
         {
-            if (_filterType==FilterHolder.__INCLUDE || isNamed())
+            if (_filterType==Dispatcher.__INCLUDE || isNamed())
                 return super.getRequestURI();
             return URI.addPaths(_contextPath,_uriInContext);
         }
@@ -378,7 +407,7 @@ public class Dispatcher implements RequestDispatcher
         /* ------------------------------------------------------------ */
         public StringBuffer getRequestURL()
         {
-            if (_filterType==FilterHolder.__INCLUDE || isNamed())
+            if (_filterType==Dispatcher.__INCLUDE || isNamed())
                 return super.getRequestURL();
             StringBuffer buf = getRootURL();
             if (_contextPath.length()>0)
@@ -416,25 +445,25 @@ public class Dispatcher implements RequestDispatcher
         /* ------------------------------------------------------------ */
         public String getContextPath()
         {
-            return(_filterType==FilterHolder.__INCLUDE||isNamed())?super.getContextPath():_contextPath;
+            return(_filterType==Dispatcher.__INCLUDE||isNamed())?super.getContextPath():_contextPath;
         }
         
         /* ------------------------------------------------------------ */
         public String getServletPath()
         {
-            return(_filterType==FilterHolder.__INCLUDE||isNamed())?super.getServletPath():_servletPath;
+            return(_filterType==Dispatcher.__INCLUDE||isNamed())?super.getServletPath():_servletPath;
         }
         
         /* ------------------------------------------------------------ */
         public String getPathInfo()
         {
-            return(_filterType==FilterHolder.__INCLUDE||isNamed())?super.getPathInfo():_pathInfo;
+            return(_filterType==Dispatcher.__INCLUDE||isNamed())?super.getPathInfo():_pathInfo;
         }
         
         /* ------------------------------------------------------------ */
         public String getQueryString()
         {
-            return(_filterType==FilterHolder.__INCLUDE||isNamed())?super.getQueryString():_query;
+            return(_filterType==Dispatcher.__INCLUDE||isNamed())?super.getQueryString():_query;
         }
         
 
@@ -531,7 +560,7 @@ public class Dispatcher implements RequestDispatcher
             if (_attributes!=null && _attributes.containsKey(name))
                 return _attributes.get(name);
                 
-            if (_filterType==FilterHolder.__INCLUDE && !isNamed())
+            if (_filterType==Dispatcher.__INCLUDE && !isNamed())
             {
                 if (name.equals(__INCLUDE_PATH_INFO))    return _pathInfo;
                 if (name.equals(__INCLUDE_REQUEST_URI))  return URI.addPaths(_contextPath,_uriInContext);
@@ -548,7 +577,7 @@ public class Dispatcher implements RequestDispatcher
                 if (name.equals(__INCLUDE_QUERY_STRING)) return null;
             }
 
-            if (_filterType!=FilterHolder.__INCLUDE && !isNamed())
+            if (_filterType!=Dispatcher.__INCLUDE && !isNamed())
             {
                 if (name.equals(__FORWARD_PATH_INFO))
                     return _servletHttpRequest.getPathInfo();
@@ -574,7 +603,7 @@ public class Dispatcher implements RequestDispatcher
             while (e.hasMoreElements())
                 set.add(e.nextElement());
             
-            if (_filterType==FilterHolder.__INCLUDE && !isNamed())
+            if (_filterType==Dispatcher.__INCLUDE && !isNamed())
             {
                 set.add(__INCLUDE_PATH_INFO);
                 set.add(__INCLUDE_REQUEST_URI);
@@ -591,7 +620,7 @@ public class Dispatcher implements RequestDispatcher
                 set.remove(__INCLUDE_QUERY_STRING);
             }
 
-            if (_filterType!=FilterHolder.__INCLUDE && !isNamed())
+            if (_filterType!=Dispatcher.__INCLUDE && !isNamed())
             {
                 set.add(__FORWARD_PATH_INFO);
                 set.add(__FORWARD_REQUEST_URI);
@@ -694,7 +723,7 @@ public class Dispatcher implements RequestDispatcher
         
         public String getMethod()
         {
-            if (this._filterType==FilterHolder.__ERROR)
+            if (this._filterType==Dispatcher.__ERROR)
                 return org.mortbay.http.HttpRequest.__GET;
             return super.getMethod();
         }
@@ -717,7 +746,7 @@ public class Dispatcher implements RequestDispatcher
             super(response);
             _request=request;
             request._response=this;
-            _include=_request._filterType==FilterHolder.__INCLUDE;
+            _include=_request._filterType==Dispatcher.__INCLUDE;
             
         }
 
@@ -806,7 +835,7 @@ public class Dispatcher implements RequestDispatcher
         public void sendError(int status, String message)
             throws IOException
         {
-            if (_request._filterType!=FilterHolder.__ERROR && !_include)
+            if (_request._filterType!=Dispatcher.__ERROR && !_include)
                 super.sendError(status,message);
         }
         
@@ -814,7 +843,7 @@ public class Dispatcher implements RequestDispatcher
         public void sendError(int status)
             throws IOException
         {
-            if (_request._filterType!=FilterHolder.__ERROR && !_include)
+            if (_request._filterType!=Dispatcher.__ERROR && !_include)
                 super.sendError(status);
         }
         
@@ -878,7 +907,7 @@ public class Dispatcher implements RequestDispatcher
         /* ------------------------------------------------------------ */
         public void setStatus(int status)
         {
-            if (_request._filterType!=FilterHolder.__ERROR && !_include)
+            if (_request._filterType!=Dispatcher.__ERROR && !_include)
                 super.setStatus(status);
         }
         
@@ -897,7 +926,7 @@ public class Dispatcher implements RequestDispatcher
         */
         public void setStatus(int status, String message)
         {
-            if (_request._filterType!=FilterHolder.__ERROR && !_include)
+            if (_request._filterType!=Dispatcher.__ERROR && !_include)
                 super.setStatus(status,message);
         }
         

@@ -38,29 +38,6 @@ public class FilterHolder
     extends Holder
 {
     /* ------------------------------------------------------------ */
-    public static final int
-        __DEFAULT=0,
-        __REQUEST=1,
-        __FORWARD=2,
-        __INCLUDE=4,
-        __ERROR=8,
-        __ALL=15;
-    
-
-    public static int type(String type)
-    {
-        if ("request".equalsIgnoreCase(type))
-            return __REQUEST;
-        if ("forward".equalsIgnoreCase(type))
-            return __FORWARD;
-        if ("include".equalsIgnoreCase(type))
-            return __INCLUDE;
-        if ("error".equalsIgnoreCase(type))
-            return __ERROR;
-        throw new IllegalArgumentException(type);
-    }
-    
-    /* ------------------------------------------------------------ */
     private PathMap _pathSpecs;
     private Map _servlets;
 
@@ -90,7 +67,7 @@ public class FilterHolder
     {
         if (_servlets==null || !_servlets.containsKey(name))
             throw new IllegalStateException();
-        _servlets.put(name,TypeUtil.newInteger(((Integer)_servlets.get(name)).intValue()|type(type)));
+        _servlets.put(name,TypeUtil.newInteger(((Integer)_servlets.get(name)).intValue()|Dispatcher.type(type)));
     }
     
     /* ------------------------------------------------------------ */
@@ -101,7 +78,7 @@ public class FilterHolder
     {
         if (_pathSpecs==null || !_pathSpecs.containsKey(pathSpec))
             throw new IllegalStateException();
-        _pathSpecs.put(pathSpec,TypeUtil.newInteger(((Integer)_pathSpecs.get(pathSpec)).intValue()|type(type)));
+        _pathSpecs.put(pathSpec,TypeUtil.newInteger(((Integer)_pathSpecs.get(pathSpec)).intValue()|Dispatcher.type(type)));
     }
     
     /* ------------------------------------------------------------ */
@@ -112,7 +89,7 @@ public class FilterHolder
     {
         if (_servlets==null)
             _servlets=new HashMap();
-        _servlets.put(servlet,new Integer(__DEFAULT));
+        _servlets.put(servlet,new Integer(Dispatcher.__DEFAULT));
     }
     
     /* ------------------------------------------------------------ */
@@ -123,7 +100,7 @@ public class FilterHolder
     {
         if (_pathSpecs==null)
             _pathSpecs=new PathMap(true);
-        _pathSpecs.put(pathSpec,TypeUtil.newInteger(__DEFAULT));
+        _pathSpecs.put(pathSpec,TypeUtil.newInteger(Dispatcher.__DEFAULT));
     }
     
     /* ------------------------------------------------------------ */
@@ -145,7 +122,7 @@ public class FilterHolder
         Integer t=(Integer)_pathSpecs.match(path);
         if (t==null)
             return false;
-        return (t.intValue()==0 && type==__REQUEST) || (t.intValue()&type)!=__DEFAULT;
+        return (t.intValue()==0 && type==Dispatcher.__REQUEST) || (t.intValue()&type)!=Dispatcher.__DEFAULT;
     }
     
     /* ------------------------------------------------------------ */
@@ -161,7 +138,7 @@ public class FilterHolder
         Integer t=(Integer)_servlets.get(name);
         if (t==null)
             return false;
-        return (t.intValue()==0 && type==__REQUEST) || (t.intValue()&type)!=0;
+        return (t.intValue()==0 && type==Dispatcher.__REQUEST) || (t.intValue()&type)!=0;
     }
 
     /* ------------------------------------------------------------ */

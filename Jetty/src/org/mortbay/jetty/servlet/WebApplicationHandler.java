@@ -291,11 +291,11 @@ public class WebApplicationHandler extends ServletHandler
 
     /* ----------------------------------------------------------------- */
     private HashMap[] getChainCache() {
-         HashMap[] _chainCache=new HashMap[FilterHolder.__ERROR+1];
-        _chainCache[FilterHolder.__REQUEST]=new HashMap();
-        _chainCache[FilterHolder.__FORWARD]=new HashMap();
-        _chainCache[FilterHolder.__INCLUDE]=new HashMap();
-        _chainCache[FilterHolder.__ERROR]=new HashMap();
+         HashMap[] _chainCache=new HashMap[Dispatcher.__ERROR+1];
+        _chainCache[Dispatcher.__REQUEST]=new HashMap();
+        _chainCache[Dispatcher.__FORWARD]=new HashMap();
+        _chainCache[Dispatcher.__INCLUDE]=new HashMap();
+        _chainCache[Dispatcher.__ERROR]=new HashMap();
         return _chainCache;
     }
 
@@ -415,20 +415,15 @@ public class WebApplicationHandler extends ServletHandler
         String pathInContext,
         HttpServletRequest request,
         HttpServletResponse response,
-        ServletHolder servletHolder)
+        ServletHolder servletHolder, int type)
         throws ServletException, UnavailableException, IOException
     {
-        // Determine request type.
-        int requestType= 0;
-        
-        if (request instanceof ServletHttpRequest)
+        if (type == Dispatcher.__REQUEST)
         {
-            // This is NOT a dispatched request.
+            // This is NOT a dispatched request (it it is an initial request)
             ServletHttpRequest servletHttpRequest= (ServletHttpRequest)request;
             ServletHttpResponse servletHttpResponse= (ServletHttpResponse)response;  
             
-            // Request
-            requestType= FilterHolder.__REQUEST;
             // protect web-inf and meta-inf
             if (StringUtil.startsWithIgnoreCase(pathInContext, "/web-inf")
                     || StringUtil.startsWithIgnoreCase(pathInContext, "/meta-inf"))
@@ -467,25 +462,14 @@ public class WebApplicationHandler extends ServletHandler
                                 servletHttpResponse.getHttpResponse()))
                     return;
             }
-            
-            // Forward or error
-            requestType=-1;
-            if (jsr154Filter!=null)
-            {
-                Dispatcher.DispatcherRequest dr=jsr154Filter.getDispatchRequest();
-                if (dr!=null)
-                    requestType=dr.getFilterType();
-            }
-            if (requestType<0)
-                requestType= ((Dispatcher.DispatcherRequest)request).getFilterType();
         }
         
         // Build and/or cache filter chain
         FilterChain chain=null;
         if (pathInContext != null) {
-            chain = getChainForPath(requestType, pathInContext, servletHolder);
+            chain = getChainForPath(type, pathInContext, servletHolder);
         } else {
-            chain = getChainForName(requestType, servletHolder);
+            chain = getChainForName(type, servletHolder);
         }
 
         if (log.isDebugEnabled()) log.debug("chain="+chain);
@@ -746,7 +730,7 @@ public class WebApplicationHandler extends ServletHandler
          */
         boolean appliesTo(String path, int type)
         {
-            boolean b=((_dispatches&type)!=0 || (_dispatches==0 && type==FilterHolder.__REQUEST)) && (_pathSpec==null || PathMap.match(_pathSpec, path));
+            boolean b=((_dispatches&type)!=0 || (_dispatches==0 && type==Dispatcher.__REQUEST)) && (_pathSpec==null || PathMap.match(_pathSpec, path));
            return b;
         }
     }
