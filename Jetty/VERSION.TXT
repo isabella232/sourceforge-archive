@@ -2,7 +2,6 @@ Jetty Versions
 --------------
 
  + Start ServletHandler as part of the FilterHandler start.
- - addWebApplication fixed in tutorial
  + Simplified addWebApplication
  + Added String constructor to XmlConfiguration.
  + Added org.mortbay.http.JDBCUserRealm
