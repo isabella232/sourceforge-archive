@@ -88,6 +88,7 @@ public class ServletHttpResponse implements HttpServletResponse
     private HttpSession _session=null;
     private boolean _noSession=false;
     private Locale _locale=null;
+    private boolean _explicitEncoding=false;
 
     
     /* ------------------------------------------------------------ */
@@ -107,6 +108,7 @@ public class ServletHttpResponse implements HttpServletResponse
         _session=null;
         _noSession=false;
         _locale=null;
+        _explicitEncoding=false;
     }
     
     /* ------------------------------------------------------------ */
@@ -233,7 +235,7 @@ public class ServletHttpResponse implements HttpServletResponse
      */
     public void setLocale(Locale locale)
     {
-        if (this._outputState!=0 || locale == null)
+        if (this._outputState!=0 || locale == null || isCommitted())
             return; 
 
         _locale = locale;
@@ -257,7 +259,7 @@ public class ServletHttpResponse implements HttpServletResponse
                 int semi=type.indexOf(';');
                 if (semi<0)
                     type += "; charset="+charset;
-                else
+                else if (!_explicitEncoding)
                     type = type.substring(0,semi)+"; charset="+charset;
 
                 setHeader(HttpFields.__ContentType,type);
@@ -605,7 +607,11 @@ public class ServletHttpResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void setContentType(String contentType) 
     {
+        if (isCommitted())
+            return;
         _httpResponse.setContentType(contentType);
+        if (contentType.indexOf(';')>0)
+            _explicitEncoding=true;
         if (_locale!=null)
             setLocale(_locale);
     }
@@ -613,8 +619,11 @@ public class ServletHttpResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void setCharacterEncoding(String encoding)
     {
-        if (this._outputState==0)
+        if (this._outputState==0 && !isCommitted())
+        {
+            _explicitEncoding=true;
             _httpResponse.setCharacterEncoding(encoding,true);
+        }
     }
     
     /* ------------------------------------------------------------ */
