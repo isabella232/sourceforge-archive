@@ -124,6 +124,9 @@ public class ServletHandler extends AbstractHttpHandler
         if (isStarted())
             throw new IllegalStateException("Started");
 
+        int mii=0;
+        boolean setMii=false;
+ 
         if (getHttpContext()!=null && _sessionManager!=null)
 	{
             _sessionManager.initialize(null);
@@ -135,6 +138,8 @@ public class ServletHandler extends AbstractHttpHandler
                     _sessionManager.removeEventListener(listener);
                 }
             }
+            mii=_sessionManager.getMaxInactiveInterval();
+            setMii=true;
 	}
 
         _sessionManager=sm;
@@ -150,7 +155,11 @@ public class ServletHandler extends AbstractHttpHandler
                 }
             }
 	    if (_sessionManager!=null)
+            {
                 _sessionManager.initialize(this);
+                if (setMii)
+                    _sessionManager.setMaxInactiveInterval(mii);
+            } 
         }
     }
     

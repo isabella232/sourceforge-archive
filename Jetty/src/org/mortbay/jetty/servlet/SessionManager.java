@@ -75,6 +75,9 @@ public interface SessionManager extends LifeCycle, Serializable
     public HttpSession newHttpSession(HttpServletRequest request);
 
     /* ------------------------------------------------------------ */
+    public int getMaxInactiveInterval();
+
+    /* ------------------------------------------------------------ */
     public void setMaxInactiveInterval(int seconds);
 
     /* ------------------------------------------------------------ */

@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + restore max inactive interval for session manager
  + Removed protection of org.mortbay.http attributes
  + Fixed parameter ordering for a forward request.
  + Fixed up HTAccessHandler
