@@ -1,0 +1,36 @@
+BODY
+{
+        background-color: #FFFFFF;
+}
+
+P, BODY, TD, OL, UL, MENU, BLOCKQUOTE, DIV
+{
+        font-family: Lucida,Verdana,Helvetica,Arial;
+        color: #000000;
+}
+
+TH, H1
+{
+        font-family: Lucida,Verdana,Helvetica,Arial;
+        font-weight: bold;
+        text-decoration: none;
+}
+
+A
+{
+        font-family: Lucida,Verdana,Helvetica,Arial;
+        color: #606CC0;
+        font-weight: bold;
+        text-decoration: none;
+}
+
+PRE
+{
+        font-family: Courier New, Courier;
+}
+
+
+
+
+
+
