@@ -5,29 +5,24 @@
 ======================================================================== 
  This build file specifies how to build Jetty3 using ANT, the 
  build tool from the Apache/Jakarta project. 
-
   <http://jakarta.apache.org/ant/index.html>
 ======================================================================== 
 -->
-
 <project name="Jetty3 Web, Servlet, and JSP server" 
   default="webapp" 
   basedir=".">
   
   <property name="app.name"       value="Jetty3" />
   <property name="version"        value="3.0.B04" />
-
   <property name="src.dir"        value="${basedir}/src" />
   <property name="webapps"        value="${basedir}/webapps"/>
   <property name="lib"            value="${basedir}/lib"/>
   <property name="classes"        value="${basedir}/classes"/>
   <property name="javadoc"        value="${basedir}/javadoc"/>
-
   <property name="jetty.webapp"           value="${webapps}/jetty"/>
   <property name="jetty.war"              value="${webapps}/jetty.war"/>
   <property name="jetty.webapp.webinf"    value="${jetty.webapp}/WEB-INF"/>
   <property name="jetty.webapp.classes"   value="${jetty.webapp.webinf}/classes"/>
-
   <property name="jetty.jar"      value="${lib}/com.mortbay.jetty.jar"/>
   <property name="servlet.jar"    value="${lib}/javax.servlet.jar"/>
   <property name="jasper.jar"     value="${lib}/org.apache.jasper.jar"/>
@@ -43,8 +38,6 @@
     <mkdir dir="${javadoc}"/>
     <mkdir dir="${classes}" />
   </target>
-
-
   <target name="clean">
     <deltree dir="${jetty.webapp.classes}"/>
     <deltree dir="${classes}"/>
@@ -53,12 +46,9 @@
     <delete  file="${servlet.jar}"/>
     <delete  file="${jasper.jar}"/>
   </target>
-
-
   <target name="check_packages">
     <!-- available property="prop.name" classname="com.some.Class" / -->
   </target>
-
   <target name="javax" depends="prepare">
     <copydir src="${src.dir}" dest="${classes}">
       <include name="javax/**/defaultManifest.mf" />
@@ -78,7 +68,6 @@
        <include name="javax/**" />
     </jar>
   </target>
-
   <target name="jetty" depends="prepare,javax">
     <copydir src="${src.dir}" dest="${classes}">
       <include name="com/mortbay/**/defaultManifest.mf" />
@@ -103,7 +92,6 @@
        <include name="com/mortbay/**"  />
     </jar>
   </target>
-
   <target name="jasper" depends="prepare">
     <copydir src="${src.dir}" dest="${classes}">
       <include name="org/apache/jasper/**/defaultManifest.mf" />
@@ -123,11 +111,9 @@
        <include name="org/apache/jasper/**"  />
     </jar>
   </target>
-
  
   <target name="libs" depends="javax,jetty,jasper">
   </target>
-
   <target name="webapp" depends="libs">
     <copydir src="${src.dir}" dest="${jetty.webapp.classes}">
       <include name="com/mortbay/Jetty/defaultManifest.mf" />
@@ -149,7 +135,6 @@
        <include name="**"  />
     </jar>
   </target>
-
   <target name="javadoc" depends="libs">
     <mkdir dir="${javadoc}"/>
     <javadoc packagenames="com.mortbay.*,javax.servlet.*"
@@ -162,10 +147,7 @@
              bottom="Copyright &#169; 2000 Mortbay Consulting Pty. Ltd. All Rights Reserved.">
     </javadoc>
   </target>
-
-
   <target name="all" depends="prepare,libs,webapp,javadoc"/>
-
   <target name="dist" depends="all" >
     <property name="tarfile" value="Jetty-${version}.tar" />    
     <delete  file="${tarfile}"/>
@@ -180,4 +162,3 @@
 </target>
   
 </project>
-
