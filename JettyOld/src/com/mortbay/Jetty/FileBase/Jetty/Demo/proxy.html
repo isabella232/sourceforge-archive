@@ -1,0 +1,19 @@
+<h1>Proxy Handler</h1>
+<TABLE><TR><TD>
+This demo server has been configured as a proxy server for HTTP and FTP
+requests.  If you alter your browser configuration to set this server as
+its proxy, then you can browse HTTP and FTP sites that are visible to the
+machine the server is running on. If you browse the other parts of this
+server, you will see two requests in the request log, one as a proxy the
+other as the real request.
+<p>
+To demonstrate the proxy without changing your browser, the server will
+handle the following this
+<A HREF="/ProxyDump/path?A=B">link</A>
+by translating it to a proxy request, then forwarding it to itself, where
+it will be handled as a proxy request by again forwarding the request to
+itself and accessing the Dump servlet. Careful examination of the
+debug trace or request log will be required to see this actually working.
+Note that request logs are written as requests complete, so the link
+above will generate three entries in reverse order.
+</TD></TR></TABLE>

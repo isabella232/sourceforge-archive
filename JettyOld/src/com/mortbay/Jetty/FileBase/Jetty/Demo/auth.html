@@ -1,0 +1,16 @@
+<!-- -*- html-helper -->
+<BLOCKQUOTE>
+<h1>Basic Authentication</h1>
+Jetty supports basic HTTP authentication with it's AuthHandler class.
+This site has 2 realms configured, called "Basic" and "Other".
+<P>
+Click <A HREF=/Auth/Jetty/Demo/auth.html>here</A> to fetch this page via
+the "Basic" realm (user=jetty password=jetty).
+<P>
+Click <A HREF=/Other/Jetty/Demo/auth.html>here</A> to fetch this page via
+the "Other" realm (user=other password=other).
+<P>
+Note that these links use request translation to guide the authenticated
+requests back to this page. The <A HREF=/Auth/Dump>dump</A>
+demo also shows the operation of basic authentication.
+</BLOCKQUOTE>

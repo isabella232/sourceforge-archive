@@ -1,0 +1,109 @@
+
+This is a combined release of Jetty and the MortBay utility packages:
+     com/mortbay/Base
+     com/mortbay/Util
+     com/mortbay/FTP
+     com/mortbay/JDBC
+     com/mortbay/HTML
+     com/mortbay/HTTP
+     com/mortbay/Servlets
+     com/mortbay/Jetty
+
+
+Release 2.0Beta1
+  + Improved performance of Code.debug() calls, significantly
+    in the case of non matching debug patterns.
+  + Fixed bug with calls to service during initialization of servlet
+  + Provided addSection on com.mortbay.HTML.Page
+  + Provided reset on com.mortbay.HTML.Composite.
+  + Proxy demo in different server instance
+  + Handle full URLs in HTTP requests (to some extent)
+
+Release 2.0Alpha2
+  + JDK1.2 javax.servlet API
+  + Added date format to Log
+  + Added timezome to Log
+  + Handle params in getIntHeader and getDateHeader
+  + Removed HttpRequest.getByteContent
+  + Use javax.servlet.http.HttpUtils.parsePostData
+  + Use javax.servlet.http.Cookie
+  + Use javax.servlet.http.HttpSession
+  + Handle Single Threaded servlets with servlet pool
+
+
+Release 1.3.5
+  + Fixed socket inet bug in FTP
+  + Debug triggers added to com.mortbay.Base.Code
+  + Added date format to Log
+  + Correct handling of multiple parameters 
+
+
+Release 2.0Alpha1 Wed 8 April 1998
+  + Fixed forward bug with no port number 
+  + Removed HttpRequestHeader class
+  + Debug triggers added to com.mortbay.Base.Code
+  + Handle HTTP/1.1 Host: header
+  + Correct formatting of Date HTTP headers
+  + HttpTests test harness
+  + Add HTTP/1.1 Date: header    
+  + Handle file requests with If-Modified-Since: or If-Unmodified-Since:
+  + Handle HEAD properly
+  + Send Connection: close
+  + Requires Host: header for 1.1 requests
+  + Sends chunked data for 1.1 responses of unknown length.
+  + handle extra spaces in HTTP headers
+  + Really fixed handling of multiple parameters 
+  + accept chunked data
+  + Send 100 Continue for HTTP/1.1 requests (concerned about push???)
+  + persistent connections
+
+Release 1.3.4 - Sun 15 Mar 1998
+  + Fixed handling of multiple parameters in query and form content.
+    "?A=1%2C2&A=C%2CD" now returns two values ("1,2" & "C,D") rather
+    than 4.
+  + ServletHandler now takes an optional file base directory
+    name which is used to set the translated path for pathInfo in
+    servlet requests.
+  + Dump servlet enhanced to excercise these changes.
+ 
+Release 1.3.3
+  + Fixed TableForm.addButtonArea bug.
+  + TableForm.extendRow() uses existing cell
+  + Closed exception window in HttpListener.java
+
+Release 1.3.2
+  + Fixed proxy bug with no port number 
+  + Added per Table cell composite factories
+
+Release 1.3.1
+  + Minor fixes in SmtpMail
+  + ForwardHandler only forwards as http/1.0 (from Tobias.Miller)
+  + Impoved parsing of stack traces
+  + Better handling of InvoicationTargetException in debug
+  + Minor release adjustments for Tracker
+
+Release 1.3.0
+  + Added DbAdaptor to JDBC wrappers
+  + Beta release of Tracker
+
+Release 1.2.0
+  + Reintroduced STF
+  + Fixed install bug for nested classes
+  + Better Debug configuration
+  + DebugServlet
+  + Alternate look and feel for Jetty
+
+Release 1.1.1
+  + Improved documentation
+
+Release 1.1 
+  + Improved connection caching in java.mortbay.JDBC
+  + Moved HttpCode to com.mortbay.Util
+
+Release 1.0.1
+  + Bug fixes
+
+Release 1.0  
+  + First release in com.mortbay package structure
+  + Included Util, JDBC, HTML, HTTP, Jetty
+

@@ -1,0 +1,13 @@
+
+ + Standard format server-side includes
+ 
+ + HTTP Meta tags in HTML
+ 
+ + HTTP/1.1:
+     - Timeout connection
+
+ + Convert Servlets to use get & post methods
+
+ + Check head method against Head exception
+
+ + Change connection monitoring method.

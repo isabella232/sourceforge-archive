@@ -1,0 +1,80 @@
+<!-- -*- html-helper -->
+<h1>PathMap Dictionary Configuration</h1>
+<BLOCKQUOTE>
+<TABLE><TR><TD>
+Most of Jetty's configuration uses the
+<A HREF=/javadoc/com.mortbay.HTTP.PathMap.html>com.mortbay.HTTP.PathMap</A>
+class. PathMap is an implementation of Dictionary that uses a best
+match of a path prefix to select an Object from the dictionary. Thus an
+understanding of PathMap is required to configure Jeeves.
+<p>
+PathMap will always return the longest matching path prefix that it
+contains. Paths may be matched exactly, as an arbitrary prefix or as
+a path prefix.
+</TD></TR></TABLE>
+<TABLE BORDER=1 CELLPADDING=5>
+<TR><TH>Path Prefix</TH><TH>Match Examples</TH><TH>Miss Examples</TH>
+<TR><TD>
+/aaa/bbb
+</TD><TD>
+/aaa/bbb<BR>
+/aaa/bbb/<BR>
+/aaa/bbb/ccc<BR>
+/aaa/bbbbbb
+</TD><TD>
+/aaa<BR>
+/aaa/ccc
+</TD></TR>
+
+<TR><TD>
+/aaa/bbb%
+</TD><TD>
+/aaa/bbb<BR>
+/aaa/bbb/<BR>
+/aaa/bbb/ccc
+</TD><TD>
+/aaa<BR>
+/aaa/ccc<BR>
+/aaa/bbbbbb
+</TD></TR>
+
+<TR><TD>
+/aaa/bbb/
+</TD><TD>
+/aaa/bbb/<BR>
+/aaa/bbb/ccc<BR>
+</TD><TD>
+/aaa<BR>
+/aaa/bbb<BR>
+/aaa/bbbbbb<BR>
+/aaa/ccc
+</TD></TR>
+
+<TR><TD>
+/aaa/bbb|
+</TD><TD>
+/aaa/bbb<BR>
+/aaa/bbb/<BR>
+</TD><TD>
+/aaa<BR>
+/aaa/ccc<BR>
+/aaa/bbb/ccc<BR>
+/aaa/bbbbbb
+</TD></TR>
+
+<TR><TD>
+/aaa/bbb$
+</TD><TD>
+/aaa/bbb<BR>
+</TD><TD>
+/aaa<BR>
+/aaa/ccc<BR>
+/aaa/bbb/<BR>
+/aaa/bbb/ccc<BR>
+/aaa/bbbbbb
+</TD></TR>
+
+</TABLE>
+
+
+</BLOCKQUOTE>

@@ -1,0 +1,15 @@
+<!-- -*- html-helper -->
+<h1>Server Push & Multi-part MIME</h1>
+Because Jetty assigns each request it own Thread, it is a simple matter
+for that thread to continue execution and  send updates
+back to the browser, continually or in response to some asynchronous
+condition.
+<p>Combined with Multi-part MIME encoding it is possible for the server
+to update the entire browser frame when ever it chooses.
+<P>
+Many browsers support server push and multi part MIME, but unfortunately
+MSIE 3 is not among them.
+<P>
+Click <A HREF=/Demo/push>here</A> to see simple example.
+<P>
+The <A HREF=/Chat>Chat</A> demo is also a good example.

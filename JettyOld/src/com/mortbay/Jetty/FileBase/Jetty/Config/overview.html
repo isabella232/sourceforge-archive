@@ -1,0 +1,99 @@
+<!-- -*- html-helper -->
+<h1>Jetty Configuration Overview</h1>
+<BLOCKQUOTE>
+<TABLE><TR><TD>
+Jetty has been design with flexible deployment options. It has been decoupled
+from any utility libraries so that it does not require it's own configuration
+files or system and only the handler required for a particular site need to
+be included, so a server can be as efficient or as powerful as required. 
+
+<P><B>Configuration Decoupling</B><BR>
+In Jetty's previous life as MBServler, serveral configuration file formats
+were used trialed.  However, regardless of the merits of the actual
+format and package used, the main problem for WWW developers was that it
+was just another format, different to those used by the rest of their
+applications.
+<p>
+Thus configuration has been abstracted to a Java interface, of which multiple
+implementations can be developed.  An implementation of the interface
+<A HREF=/javadoc/com.mortbay.HTTP.HttpConfiguration.html>com.mortbay.HTTP.HttpConfiguration</A>
+must be passed to an instance of 
+<A HREF=/javadoc/com.mortbay.HTTP.HttpServer.html>com.mortbay.HTTP.HttpServer</A>
+in order to configure a Jetty deployment.  The implementation of
+HttpConfiguration may:<UL>
+  <LI>Read configuration information from a custom file or database.
+  <LI>Read configuration information from a config file format of another
+       Servlet server (eg Jeeves).
+  <LI>Hard code a specific configuration.
+  <LI>Parameterize a particulare subset of configurations
+  <LI>Map some other configuration mechanism.
+</UL>
+Two HttpConfiguration implementations are included with the Jetty
+distribution:<BR>
+<A HREF=/javadoc/com.mortbay.HTTP.Configure.SimpleServletConfig.html>com.mortbay.HTTP.Configure.SimpleServletConfig</A>
+provides a simple configuration where a single servlet may be configured and
+served from command line options.<BR>
+<A HREF=/javadoc/com.mortbay.Jetty.Demo.html>com.mortbay.Jetty.Demo</A>
+is a hard coded configuration for the Jetty demonstration site.
+<p>
+Implementations of HttpConfiguration will soon be available that map to
+the ISS-Util configuration files used by MBServler.
+
+<P><B>Handler Stacks</B><BR>
+The functionality of Jetty is provided by the combination of individual
+HttpHandler instances that are arranged in stacks of handlers.  The main
+task of configuring Jetty is to configure individual handlers and then
+arrange them in stacks for particular request paths.
+
+Current Handlers implemented by Jetty include:<UL>
+  <LI><A HREF=/javadoc/com.mortbay.HTTP.Handler.LogHandler.html>Log Handler</A>
+       - Writes request log files.
+  <LI><A HREF=/javadoc/com.mortbay.HTTP.Handler.ParamHandler.html>Parameter Handler</A>
+       - Move form content and cookies into request parameters.
+  <LI><A HREF=/javadoc/com.mortbay.HTTP.Handler.SessionHandler.html>Session
+       Handler</A>
+       - Maintain session and browser Id's and session data.
+  <LI><A HREF=/javadoc/com.mortbay.HTTP.Handler.BasicAuthHandler.html>Authentication handler</A>
+       - Handle basic name and password authentication.
+  <LI><A HREF=/javadoc/com.mortbay.HTTP.Handler.TranslateHandler.html>Translate Handler</A>
+       - Translate request paths.
+  <LI><A HREF=/javadoc/com.mortbay.HTTP.Handler.FilterHandler.html>Filter Handler</A>
+       - Insert filters into responses for tag handling, encryption etc.
+  <LI><A HREF=/javadoc/com.mortbay.HTTP.Handler.ServletHandler.html>Servlet Handler</A>
+       - Dispatch servlet requests
+  <LI><A HREF=/javadoc/com.mortbay.HTTP.Handler.FileHandler.html>File Handler</A>
+       - Handle file requests.
+  <LI><A HREF=/javadoc/com.mortbay.HTTP.Handler.ForwardHandler.html>Forward Handler</A>
+       - Forwarded requests to other servers.
+  <LI><A HREF=/javadoc/com.mortbay.HTTP.Handler.ProxyHandler.html>Proxy Handler</A>
+       - Act as a HTTP Proxy server
+  <LI><A HREF=/javadoc/com.mortbay.HTTP.Handler.NotFoundHandler.html>NotFound Handler</A>
+       - Generate the Not Found response
+</UL>
+A simple configuration of Jetty may match any request path starting with "/"
+to a stack of:
+<BLOCKQUOTE>
+<B>ParamHandler</B> - To move form and cookie values to the request
+parameters.
+<BR><B>ServletHandler</B> - To service any requests for servlets.
+<BR><B>FileHandler</B> - To service any requests for files or directories.
+<BR><B>NotFoundHandler</B> - To reject any requests not handled by a servlet or
+a file.
+</BLOCKQUOTE>
+The Demo configuration used by the Jetty demonstration site, maps
+a full stack of handlers to all paths starting with "/". But then to
+server the javadoc generated manual pages, it adds a small stack
+mapped at "/javadoc/" whcih only includes:
+<BLOCKQUOTE>
+<B>FileHandler</B> - To service any requests for manual pages
+<BR><B>NotFoundHandler</B> - To reject any requests for non existant manual pages.
+</BLOCKQUOTE>
+
+<P><B>Exception Stacks</B><BR>
+Exception handler stacks can be configured in a similar fashion to
+HttpHandlers.  However, for HttpConfigurations extended from the
+NullConfiguration class, a default exceptionHandler is provided that
+simply formats any exception as part of the response.
+
+</TD></TR></TABLE>
+</BLOCKQUOTE>

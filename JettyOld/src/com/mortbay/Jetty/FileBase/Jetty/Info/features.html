@@ -1,0 +1,324 @@
+<!-- -*- html-helper -->
+<h1>Jetty Java HTTP Server</h1>
+
+<BLOCKQUOTE>
+<TABLE><TR><TD>
+Jetty is a HTTP Server written entirely in
+Java. It is designed to be embedable, extensible and
+flexible, thus making it an ideal platform for serving 
+dynamic HTTP requests from any Java application.
+Jetty supports the javax.servlet API defined
+by JavaSoft plus many more features.
+<P>
+Jetty is not intended to be used as a stand-alone WWW server. Although it
+can be used in that mode, they are many other full featured servers available
+that do that job very well.  Jetty is primarily intended to be embedded in
+Java applications, either to provide a primarary or management interface
+over HTTP. Just as java is an ideal language for developing cross platform
+distributed applications, embedded HTTP with generated HTML are an ideal
+way of providing a distributed cross platform user interfaces.
+</TD></TR></TABLE>
+
+<h1>Jetty Features</h1>
+<A HREF="#Java HTTP Server">Java HTTP Servlet Server</A>
+<BR><A HREF="#Software Engineering">Software Engineering</A>
+<BR><A HREF="#Flexible Deployment">Flexible Deployment</A>
+<BR><A HREF="#Standard HTTP File serving">Standard HTTP File serving</A>
+<BR><A HREF="#Serving Standard Servlets">Serving Standard Servlets</A>
+<BR><A HREF="#Extensible Request Handlers">Extensible Request Handlers</A>
+<BR><A HREF="#Extensible Exception Handlers">Extensible Exception Handlers</A>
+<BR><A HREF="#HTML Generation">HTML Generation</A>
+<BR><A HREF="#Server Push Support">Server Push Support</A>
+<BR><A HREF="#Client Session Tracking">Client Session Tracking</A>
+<BR><A HREF="#Response Filtering">Response Filtering</A>
+<BR><A HREF="#Request Forwarding">Request Forwarding</A>
+<BR><A HREF="#Proxy Handling">Proxy Handling</A>
+<BR><A HREF="#Flexible Configuration">Flexible Configuration</A>
+<BR><A HREF="#Legacy Integration">Legacy Integration</A>
+<BR><A HREF="#Telephony and SmartCard Support">Telephony and SmartCard Support</A>
+<BR>
+</UL>
+<h1>Jetty Download</h1>
+Download the
+<A HREF="ftp://ftp.mortbay.com/pub">lastest version
+of Jetty and other Mort Bay packages</A>
+<P><HR>
+<BLOCKQUOTE>
+<TABLE><TR><TD>
+<A NAME="Java HTTP Server"></A>
+<P><B>Java HTTP Servlet Server</B></BR>  
+Jetty is a HTTP Server written in Java.  It is an ideal
+platform for server-side development of Dynamic WWW services or as a basis
+for WWW enabling Java applications.
+Quoting from Javasofts <A HREF=http://www.javasoft.com/products/java-server/servlets/index.html>
+Java Servlet API White Paper</A>:
+<BLOCKQUOTE><I>
+Java is a great platform for writing the server side of your web-based application. The same features which make Java a better platform
+for writing client applications make it better for writing servers. Your server applications will benefit from its type safety and other rapid
+development features even more than your client applications did, because multi-threading support is built into the Java platform. 
+<P>
+Java makes it easy to develop and deploy all parts of a professional, maintainable distributed system application. The Servlet API
+provides you the fastest way to start using Java Server technology in your networked applications. You can start with applications which
+involve clients and a single server, and gradually create multi-tier enterprise applications which integrate the power and flexibility of Java
+throughout your existing network ... because Java Servlets run on the software and hardware you've already installed. 
+</I></BLOCKQUOTE>
+Jetty provides these benefits of Java in a HTTP/HTML enabled platform, which
+can be used as the basis for new WWW services or to WWW enable existing
+applications.
+
+<A NAME="Software Engineering"></A>
+<P><B>Software Engineering</B></BR>  
+Traditional WWW development using authored HTML pages is not a scalable
+approach for the development of significant WWW sites, nor does CGI access
+provide and adequate mechanism for accessing dynamic state of a running
+application. The authored HTML plus CGI approach creates configuration and
+maintenance problems for even small sites.
+<P>
+Using the highly productive Java programming environment for WWW
+server development allows object oriented software engineering
+techniques to be applied to:<UL>
+  <LI>Extraction of common elements for re-use within the site and
+       potentially between sites.
+  <LI>Create a site architecture that supports both generalized behavior and
+       specialized functionality.
+  <LI>Implment and enforce the standards and conventions of a sites Look
+       and Feel.
+  <LI>Creation of site specific server-side infrastructure for site
+       development and maintenance by less skilled developers.
+  <LI>Configuration control.
+  <LI>Build, Testing and release strategies.
+</UL>
+<P>
+Bundled with Jetty are several utility packages which form a good basis
+for a Java software infrastructure for WWW development, including:
+<UL>
+  <LI>Code debugging, asserts, warnings and event logging.
+  <LI>Test harness for automated regression testing.
+  <LI>FTP client package
+  <LI>JDBC wrappers.
+  <LI>HTML Generation.
+</UL> 
+<A NAME="Flexible Deployment"></A>
+<P><B>Flexible Deployment</B></BR>       
+Jetty has been designed to highly configurable and flexible. It can be used
+as a stand-alone server running application servlets or it can be embedded
+in java application to provide a WWW interface to the services that they
+provide.
+<p>With embeded Jetty development, a HTTP server can be instantiated in 
+every Java virtual machine (JVM) of a distributed system, even if it is only
+to present a management interface of application status and statistics.
+<p>The many extensible features of Jetty are provided via handlers,
+that only need to be loaded if they are configured to be used. Thus a
+minimal Jetty installation consumes very few system resources.
+<A NAME="Standard HTTP File serving"></A>
+<P><B>Standard HTTP File serving</B><BR>
+Jetty can serve standard files like most other HTTP servers and supports:
+<UL>
+  <LI>File name extension used to map to MIME type.
+  <LI>Default index files for directories.
+  <LI>Directory listings
+  <LI>Multiple directory hierarchies.
+</UL>
+<A NAME="Serving Servlets"></A>
+<P><B>Serving Servlets</B><BR>
+Jetty supports the javax.servlet.* API defined by JavaSoft:
+<BLOCKQUOTE><I>
+Servlets are protocol- and platform-independent server side components,
+written in Java, which dynamically extend Java-enabled
+servers. They provide a general framework for services built using the
+request-response paradigm. </I> [Javasofts Java Servlet API White Paper]
+</BLOCKQUOTE>
+<p>
+
+<A NAME="Extensible Request Handlers"></A>
+<P><B>Extensible Request Handlers</B><BR>
+In addition to servlets, Jetty also supports extensible Http Handlers.
+A HttpHandler is syntactically similar to a servlet, but semantically they
+are more similar to the filter concept of NCSA's JigSaw Java HttpServer.
+<P>
+When a HTTP request is received, the request path and server configuration
+are used to select a stack of HttpHandler instances. The request
+and response are passed to each handler in the stack until the
+request is handled.  HttpHandlers may choose to ignore, modify or handle a
+request given to them. They also may choose to ignore, generate or modify
+the response to a request.
+<p>
+The ability of a HttpHandler to modify the request and responses passed
+to them and for handlers to be stacked, make them a much more flexible
+and powerful paradigm than chaining servlets.
+File serving and the Jetty servlet environment are implemented as a
+HttpHandlers. 
+<p>
+Current Handlers provided with Jetty include:<UL>
+  <LI>Log Handler
+  <LI>Parameter Handler
+  <LI>Session Handler
+  <LI>Authentication handler
+  <LI>Translate Handler
+  <LI>Filter Handler
+  <LI>Servlet Handler
+  <LI>File Handler
+  <LI>Forward Handler
+  <LI>Proxy Handler
+  <LI>NotFound Handler
+</UL>
+Possible future handlers include:<UL>
+  <LI>Cache request handler
+  <LI>Random content handler
+  <LI>Statistics collection handler
+</UL>
+
+
+<A NAME="Extensible Exception Handlers"></A>
+<P><B>Extensible Exception Handlers</B><BR>
+Jetty has an extensible exception handler mechanism similar to the
+HttpHandler mechanism.  If a handler or servlet throws an exception,
+then the request path and server configuration is used to select
+a stack of exception handlers.  The exception is passed to each handler
+in turn, until one of them handles it.
+<p>
+This allows a WWW application to install better catch all handling of
+errors that give clients application specific apologies rather than
+internal error messages and stack traces.
+
+
+<A NAME="HTML Generation"></A>
+<P><B>HTML Generation</B><BR>
+While HTML is a simple language to learn and write, it can be also be
+very tedious, contrived and error prone.  Furthermore, authored HTML
+is a static resource and cannot be customized to each request or updated
+from a database.
+<P>
+Jetty comes with a rich HTML generation package that can be used on its
+own, with another servlet server or in Jetty servlets. Supported for
+templated look and feel is a key element of this package.
+
+
+<A NAME="Server Side Includes"></A>
+<P><B>Server Side Includes</B><BR>
+HTML Generation requires programming skills, which may not always be
+available.  Jetty has a number of server side inclusion mechanisms that
+allow authored HTML to be combined with dynamic content.  The contents of
+a file or even results from another HTTP request can be included (embedded)
+in a page as it is generated or by filtering a response stream.  The
+combination of these techniques allows a "best of both worlds" solution to
+be developed.
+
+
+<A NAME="Server Push Support"></A>
+<P><B>Server Push Support</B><BR>
+Because Jetty assigns each request it own Thread, it is a simple matter
+for that thread to continue execution and  send updates
+back to the browser, continually or in response to some asynchronous
+condition.
+<p>Combined with Multi-part MIME encoding it is possible for the server
+to update the entire browser frame when ever it chooses.
+
+
+<A NAME="Client Session Tracking"></A>
+<P><B>Client Session Tracking</B><BR>
+Jetty uses it's handler architecture and cookie support to
+provide user session and browser tracking.  Each browser that hits
+a Jetty site is assigned a permanent browser Id. Every client session is
+also assigned an Id and session data may be queried, set or modified to
+allow communication and maintain state between multiple requests from the
+same same session.
+
+
+<A NAME="Response Filtering"></A>
+<P><B>Response Filtering</B><BR>
+Jetty provides a mechanism to allow filters to be conditionally inserted
+into the output stream of a response to a request.  These filters, which
+are activated on content type, allow pages arbitrary changes to be made to
+responses that may have been generated, retrieved from a file or even
+fetched from another server.
+<p>
+Jetty provides a filter for HTML which can use reflection to execute
+Java method calls embedded in specially formatted HTML comments.
+This is allows dynamic content to be added to pages that have been
+statically authored or generated elsewhere.
+Support is provided to use this mechanism for server side includes and
+URL embedding.
+<P>
+Other potential uses for filters include:<UL>
+  <LI>Server-side includes.
+  <LI>Encryption and/or authentication with digital signatures.
+  <LI>Modification of link URLs for link tracking or page relocation.
+  <LI>Embedding application specific dynamic content in authored HTML pages.
+  <LI>Translation of formats not supported by a browser eg. JPG to GIF or
+       EBCDIC to ASCII.
+</UL>
+
+
+<A NAME="Request Forwarding"></A>
+<P><B>Request Forwarding</B><BR>
+When developing a WWW site, it often is desirable to combine the
+features of several different servers.  Jetty can forward requests that
+it receives to another WWW server and pass the response it back as the
+response to the original request.
+<P>
+While similar to a redirect, forwarding offers several key benefits:<UL>
+  <LI>The response is passed back through Jetty, so it may be filtered
+       or modified in other ways.
+  <LI>The browser only sees a single request and response and two
+       round trips are not required.
+  <LI>The client does not need to access the destination server, so it
+       may be placed behind a firewall on a secure network. Jetty thus
+       can act as a HTTP firewall.
+</UL>
+
+
+<A NAME="Proxy Handling"></A>
+<P><B>Proxy Handling</B><BR>
+The ProxyHandler implementation of HTTP Handler, allows Jetty to be
+configured as a proxy server for both FTP and HTTP requests. The results
+of proxy requests are handled in the same fashion as any other request, so
+the full features of Jetty may be applied to create intelligent proxy
+services.
+
+
+<A NAME="Flexible Configuration"></A>
+<P><B>Flexible Configuration</B><BR>
+Jetty has been design with flexible configuration options. It has been
+decoupled from any utility libraries so that it does not require
+it's own configuration files or system.
+<p>
+Instead, abstract configuration interfaces are used to
+map the servers configuration needs to the appropriate mechanism for a
+particular deployment.  Developers can implement these interfaces to
+support their own configuration preferance. This may be configuration files
+for a large stand alone server or a small hand coded class for a
+server embedded in another Java application with a minimal set of handlers.
+
+
+<A NAME="Legacy Integration"></A>
+<P><B>Legacy Integration</B><BR>
+Java is an ideal environment to access a exiting IT resources via JDBC,
+CORBA or third party interface products.  Jetty allows these existing IT
+resources to be represented as dynamic WWW services and forms an ideal middle
+tier of a three tiered client-server solution.
+<p>
+Furthermore, The ability of Jetty to get responses from other HTTP servers and
+modify or embed them in other pages, allows multiple services to be combined
+into a single consistent WWW presence.
+Thus existing systems can be used while migrating to a dynamic WWW approach.
+
+
+<A NAME="Telephony and SmartCard Support"></A>
+<P><B>Telephony and SmartCard Support</B><BR>
+Jetty has been used as the basis for the products developed by
+<A HREF="http://www.iswitched.com">Intelligent Switched Systems</A><BR>
+<I>CallAccess</I> allows integration of WWW and Telephony services into a
+single service environment.  Client calls can be handled by both
+automatic IVR, WWW directed operators or a combination
+of both.  WWW sites can be telephony enabled to call clients at their
+request.<P>
+<I>SmartAccess</I> provides a SmartCard authentication platform that
+uses tones generated by the smartcard to identify a client over the phone
+or over the WWW.  The system provides fraud prevention and
+detection for accidental, malicious and systematic attacks.
+
+</TD></TR></TABLE>
+</BLOCKQUOTE>
+
+

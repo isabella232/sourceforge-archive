@@ -1,0 +1,24 @@
+<!-- -*- html-helper -->
+<h1>User Sessions and Browser Id</h1>
+<BLOCKQUOTE>
+<BLOCKQUOTE>
+Jetty uses it's handler architecture and cookie support to
+provide user session and browser tracking.
+<p>
+Whenever a request without a session Id or a browser Id is received,
+a new Id is generated and sent as a set-cookie in the response. Session Id
+cookies are set to expire with the browser session and browser Id cookies are
+set to expire in 100 years.
+<p>
+As some browsers do not support cookies, a session status and browser status
+are maintained. These indicate if an Id is newly assigned, Old (ie from a
+previous run of the server) or OK (been set and received by the browser).
+<p>
+On request, Jetty creates a Hashtable associated with a session Id. Values
+may set, modified or deleted in this session data to allow communication and
+state to be passed between multiple requests from the same session.
+<P>
+Click <A HREF=/SessionDump>here</A> to access the Session Dump servlet.
+
+</BLOCKQUOTE>
+</BLOCKQUOTE>

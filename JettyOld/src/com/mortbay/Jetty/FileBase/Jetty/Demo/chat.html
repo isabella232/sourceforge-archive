@@ -1,0 +1,22 @@
+<!-- -*- html-helper -->
+<h1>Chat Room</h1>
+<TABLE><TR><TD>
+This demonstration is of a simple chat servlet implemented in Jetty. It is
+an excellent demonstration of frames, look&feels, authentication and
+server push.<P>
+The Header and Footer frames are created by the JettyLaF look and feel
+class, without any knowledge of the chat servlet.  The chat servlet then
+creates its frames inside the content area defined by the look and feel.
+<P>
+Click <A HREF="/Chat">here</A> to enter the chat room using normal
+authentication.    If you want to talk to yourself, use one of the
+following links to simulate another user:<BR>
+<CENTER>
+<A HREF="/ChatNoAuth?user=tom">tom</A>,
+<A HREF="/ChatNoAuth?user=dick">dick</A>,
+<A HREF="/ChatNoAuth?user=harry">harry</A>,
+</CENTER>
+<P>
+Note that MSIE3 does not support server push, so this demo will not work
+for that browser.
+</TABLE>
