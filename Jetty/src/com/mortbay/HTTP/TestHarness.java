@@ -420,38 +420,6 @@ public class TestHarness
             t.checkEquals(p.getMatch("/YYY").getValue(),"9",
                           "multi paths");
             
-            t.checkEquals(p.getMatch("/abs/path;extra").getValue(),"1",
-                          "; in path");
-            t.checkEquals(p.getMatch("/abs/path/longer;extra").getValue(),"2",
-                          "; in path");
-
-            t.checkEquals(p.pathMatch("/abs/path","/abs/path;extra"),
-                          "/abs/path;extra",
-                          "; in path match");
-            t.checkEquals(p.pathInfo("/abs/path","/abs/path;extra"),
-                          null,
-                          "; in path info");
-            
-            t.checkEquals(p.getMatch("/animal;extra").getValue(),"5",
-                          "; in path");
-            t.checkEquals(p.pathInfo("/animal/*","/animal;extra"),";extra",
-                          "; in path");
-            t.checkEquals(p.pathMatch("/animal/*","/animal;extra"),"/animal",
-                          "; in path");
-            t.checkEquals(p.getMatch("/animal/;extra").getValue(),"5",
-                          "; in path");
-            t.checkEquals(p.pathInfo("/animal/*","/animal/;extra"),"/;extra",
-                          "; in path");
-            t.checkEquals(p.pathMatch("/animal/*","/animal/;extra"),"/animal",
-                          "; in path");
-            t.checkEquals(p.getMatch("/animal/xx;extra").getValue(),"5",
-                          "; in path");
-            t.checkEquals(p.pathInfo("/animal/*","/animal/xx;extra"),"/xx;extra",
-                          "; in path");
-            t.checkEquals(p.pathMatch("/animal/*","/animal/xx;extra"),"/animal",
-                          "; in path");
-
-            
             p.put("/*","0");
 
             t.checkEquals(p.get("/abs/path"),"1","Get absolute path");

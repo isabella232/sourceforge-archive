@@ -5,6 +5,7 @@
 
 package com.mortbay.HTTP;
 
+import com.mortbay.Util.StringMap;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -45,8 +46,12 @@ import java.util.StringTokenizer;
 public class PathMap extends HashMap
 {
     /* --------------------------------------------------------------- */
-    HashMap _entryMap=new HashMap();
-    HashMap _prefixMap=new HashMap();
+    StringMap _prefixMap=new StringMap();
+    StringMap _suffixMap=new StringMap();
+    StringMap _exactMap=new StringMap();
+    Map.Entry _prefixDefault=null;
+    Map.Entry _default=null;
+    Set _entrySet;
     
     /* --------------------------------------------------------------- */
     /** Construct empty PathMap.
@@ -54,6 +59,7 @@ public class PathMap extends HashMap
     public PathMap()
     {
         super(11);
+        _entrySet=entrySet();
     }
     
     /* --------------------------------------------------------------- */
@@ -62,6 +68,7 @@ public class PathMap extends HashMap
     public PathMap(int capacity)
     {
         super (capacity);
+        _entrySet=entrySet();
     }
     
     /* --------------------------------------------------------------- */
@@ -70,6 +77,7 @@ public class PathMap extends HashMap
     public PathMap(Map m)
     {
         putAll(m);
+        _entrySet=entrySet();
     }
     
     /* --------------------------------------------------------------- */
@@ -85,29 +93,35 @@ public class PathMap extends HashMap
         
         while (tok.hasMoreTokens())
         {
-            String prefix=tok.nextToken();
+            String spec=tok.nextToken();
             
-            if (!prefix.startsWith("/") && !prefix.startsWith("*."))
-                throw new IllegalArgumentException("PathSpec "+pathSpec+". must start with '/' or '*.'");
+            if (!spec.startsWith("/") && !spec.startsWith("*."))
+                throw new IllegalArgumentException("PathSpec "+spec+". must start with '/' or '*.'");
             
-            old = super.put(prefix,object);
+            old = super.put(spec,object);
             
             // Look for the entry that was just created.
-            Set entries = entrySet();
-            Iterator iter=entries.iterator();
+            Iterator iter=_entrySet.iterator();
             while(iter.hasNext())
             {
                 Map.Entry entry =
                     (Map.Entry)iter.next();
-                if (entry.getKey().equals(prefix))
+                if (entry.getKey().equals(spec))
                 {
-                    // Create a map to the entry
-                    _entryMap.put(prefix,entry);
-                    
-                    // Also create a prefix map to the entry
-                    if (prefix.endsWith("/*"))
-                        _prefixMap.put(prefix.substring(0,prefix.length()-2),entry);
-                    break;
+                    if (spec.equals("/*"))
+                        _prefixDefault=entry;
+                    else if (spec.endsWith("/*"))
+                    {
+                        _prefixMap.put(spec.substring(0,spec.length()-2),entry);
+                        _exactMap.put(spec.substring(0,spec.length()-1),entry);
+                        _exactMap.put(spec.substring(0,spec.length()-2),entry);
+                    }
+                    else if (spec.startsWith("*."))
+                        _suffixMap.put(spec.substring(2),entry);
+                    else if (spec.equals("/"))
+                        _default=entry;
+                    else
+                        _exactMap.put(spec,entry);
                 }
             }
         }
@@ -136,46 +150,37 @@ public class PathMap extends HashMap
      */
     public synchronized Map.Entry getMatch(String path)
     {
-        Object entry;
+        Map.Entry entry;
 
         // try exact match
-        entry=_entryMap.get(path);
+        entry=_exactMap.getEntry(path,0,path.length());
         if (entry!=null)
-            return (Map.Entry) entry;
+            return (Map.Entry) entry.getValue();
         
-        // try exact prefix prefix search
-        entry=_prefixMap.get(path);
-        if (entry!=null)
-            return (Map.Entry) entry;
-            
         // prefix search
-        String prefix=path;
-        int i;
-        while((i=prefix.lastIndexOf('/'))>=0)
+        int i=path.length();
+        while((i=path.lastIndexOf('/',i-1))>=0)
         {
-            prefix=prefix.substring(0,i);
-            entry=_prefixMap.get(prefix);
+            entry=_prefixMap.getEntry(path,0,i);
             if (entry!=null)
-                return (Map.Entry) entry;
+                return (Map.Entry) entry.getValue();
         }
+        
+        // Prefix Default
+        if (_prefixDefault!=null)
+            return _prefixDefault;
         
         // Extension search
         i=0;
         while ((i=path.indexOf('.',i+1))>0)
         {
-            String extension="*"+path.substring(i);
-            entry=_entryMap.get(extension);
+            entry=_suffixMap.getEntry(path,i+1,path.length()-i-1);
             if (entry!=null)
-                return (Map.Entry) entry;
-        }
-
-        // try exact match upto ';'
-        i=path.lastIndexOf(';');
-        if (i>0)
-            return getMatch(path.substring(0,i));        
+                return (Map.Entry) entry.getValue();
+        }        
         
         // Default
-        return (Map.Entry) _entryMap.get("/");
+        return _default;
     }
     
     /* --------------------------------------------------------------- */
@@ -186,54 +191,39 @@ public class PathMap extends HashMap
      */
     public List getMatches(String path)
     {        
-        Object entry;
+        Map.Entry entry;
         ArrayList entries= new ArrayList(8);
         
         // try exact match
-        entry=_entryMap.get(path);
+        entry=_exactMap.getEntry(path,0,path.length());
         if (entry!=null)
-            entries.add(entry);
-        
-        
-        // try exact prefix prefix search
-        entry=_prefixMap.get(path);
-        if (entry!=null)
-            entries.add(entry);
+            entries.add(entry.getValue());
         
         // prefix search
-        String prefix=path;
-        int i;
-        while((i=prefix.lastIndexOf('/'))>=0)
+        int i=path.length();
+        while((i=path.lastIndexOf('/',i-1))>=0)
         {
-            prefix=prefix.substring(0,i);
-            entry=_prefixMap.get(prefix);
+            entry=_prefixMap.getEntry(path,0,i);
             if (entry!=null)
-                entries.add(entry);
+                entries.add(entry.getValue());
         }
+        
+        // Prefix Default
+        if (_prefixDefault!=null)
+            entries.add(_prefixDefault);
         
         // Extension search
         i=0;
         while ((i=path.indexOf('.',i+1))>0)
         {
-            String extension="*"+path.substring(i);
-            entry=_entryMap.get(extension);
+            entry=_suffixMap.getEntry(path,i+1,path.length()-i-1);
             if (entry!=null)
-                entries.add(entry);
+                entries.add(entry.getValue());
         }
 
-
-        // try exact match upto ';'
-        i=path.lastIndexOf(';');
-        if (i>0)
-        {
-            entries.addAll(getMatches(path.substring(0,i)));        
-            return entries;
-        }
-        
         // Default
-        entry=_entryMap.get("/");
-        if (entry!=null)
-            entries.add(entry);
+        if (_default!=null)
+            entries.add(_default);
         return entries;
     }
 
@@ -243,23 +233,34 @@ public class PathMap extends HashMap
     {
         if (pathSpec!=null)
         {
-            String prefix=pathSpec.toString();
-            if (prefix.endsWith("/*"))
-                _prefixMap.remove(prefix.substring(0,prefix.length()-2));
+            String spec=(String) pathSpec;
+            if (spec.equals("/*"))
+                _prefixDefault=null;
+            else if (spec.endsWith("/*"))
+            {
+                _prefixMap.remove(spec.substring(0,spec.length()-2));
+                _exactMap.remove(spec.substring(0,spec.length()-1));
+                _exactMap.remove(spec.substring(0,spec.length()-2));
+            }
+            else if (spec.startsWith("*."))
+                _suffixMap.remove(spec.substring(2));
+            else if (spec.equals("/"))
+                _default=null;
+            else
+                _exactMap.remove(spec);
         }
-        _entryMap.remove(pathSpec);
         return super.remove(pathSpec);
     }
     
     /* --------------------------------------------------------------- */
     public void clear()
     {
-        _entryMap.clear();
-        _prefixMap.clear();
+        _exactMap=new StringMap();
+        _prefixMap=new StringMap();
+        _suffixMap=new StringMap();
+        _default=null;
         super.clear();
     }
-
-    
     
     /* --------------------------------------------------------------- */
     /**

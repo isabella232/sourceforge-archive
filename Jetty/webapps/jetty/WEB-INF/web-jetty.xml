@@ -16,10 +16,11 @@ com.mortbay.Jetty.Servlet.WebApplicationContext objet
 
 <!-- example context log file  
    <Set name="LogSink">
-      <New class="com.mortbay.Util.WriterLogSink">
+      <New class="com.mortbay.Util.StreamLogSink">
       <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.jetty.request.log</Arg>
-      <Set name="RetainDays">90</Set>
-      <Set name="Append">true</Set>
+      <Set name="retainDays">90</Set>
+      <Set name="append">true</Set>
+      <Set name="flushOn">false</Set>
     </New>
   </Set>
 -->

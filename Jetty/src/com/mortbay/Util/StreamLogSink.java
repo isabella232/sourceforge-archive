@@ -5,7 +5,8 @@
 
 package com.mortbay.Util;
 
-import java.io.PrintWriter;
+import java.io.OutputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.FileWriter;
@@ -21,9 +22,11 @@ import java.util.GregorianCalendar;
 /* ------------------------------------------------------------ */
 /** A Log sink.
  * This class represents both a concrete or abstract sink of
- * Log data.  The default implementation logs to a PrintWriter, but
- * derived implementations may log to files, syslog, or other
- * logging APIs.
+ * Log data.  The default implementation logs to System.err, but
+ * other output stream or files may be specified.
+ *
+ * Currently this Stream only writes in ISO8859_1 encoding.  For
+ * Other encodings use the less efficient WriterLogSink.
  *
  * If a logFilename is specified, output is sent to that file.
  * If the filename contains "yyyy_mm_dd", the log file date format
@@ -59,7 +62,7 @@ import java.util.GregorianCalendar;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class WriterLogSink
+public class StreamLogSink
     implements LogSink
 {
     /*-------------------------------------------------------------------*/
@@ -107,37 +110,30 @@ public class WriterLogSink
     protected boolean _logOneLine=false;
     
     /*-------------------------------------------------------------------*/
-    protected PrintWriter _out;
+    protected OutputStream _out;
+    protected ByteArrayISO8859Writer _buffer = new ByteArrayISO8859Writer(4096);
     protected boolean _started;
     private String _filename;
     private boolean _append=true;
-    private StringBuffer _stringBuffer = new StringBuffer(512);
     private Thread _rollover;
     protected boolean _flushOn=true;
+    protected int _bufferSize=4096;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
-    public WriterLogSink()
+    public StreamLogSink()
         throws IOException
     {
         _filename=System.getProperty("LOG_FILE");
         if (_filename==null)
-            _out=new PrintWriter(System.err);
+            _out=System.err;
+
+        System.err.println("StreamLogSink");
     }
         
     /* ------------------------------------------------------------ */
-    /** Constructor. 
-     * @param out 
-     */
-    public WriterLogSink(PrintWriter out)
-    {
-        _out=out;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public WriterLogSink(String filename)
-        throws IOException
+    public StreamLogSink(String filename)
     {
         _filename=filename;
     }
@@ -192,6 +188,7 @@ public class WriterLogSink
     {
         return _dateFormat.getFormatString();
     }
+    
     /* ------------------------------------------------------------ */
     public void setLogDateFormat(String logDateFormat)
     {
@@ -287,75 +284,70 @@ public class WriterLogSink
     }
     
     /* ------------------------------------------------------------ */
-    public void setWriter(PrintWriter out)
+    public  synchronized void setOutputStream(OutputStream out)
     {
-        synchronized(_stringBuffer)
-        {
-            setFilename(null);
-            _out=out;
-        }
+        setFilename(null);
+        _buffer.reset();
+        _out=out;
     }
 
     /* ------------------------------------------------------------ */
-    public PrintWriter getWriter()
+    public OutputStream getOutputStream()
     {
         return _out;
     }
 
     /* ------------------------------------------------------------ */
-    public void setFilename(String filename)
+    public  synchronized void setFilename(String filename)
     {
-        synchronized(_stringBuffer)
+        try
         {
-            try
+            if (filename!=null)
             {
-		if (filename!=null)
-		{
-		    filename=filename.trim();
-		    if (filename.length()==0)
-			filename=null;
-		}
-
-                // Do we need to close the last file?
-		if (filename==null || !filename.equals(_filename))
-		{
-		    if (_out!=null && _filename!=null)
-                    {
-                        try{_out.close();}
-                        catch(Exception e){e.printStackTrace();}
-                        _out=null;
-                    }
-		    _filename=null;
-                    if (_rollover!=null)
-                        _rollover.interrupt();
-                    _rollover=null;
-		}
-                
-                // Do we have a new file
-                if (filename !=null && !filename.equals(_filename))
+                filename=filename.trim();
+                if (filename.length()==0)
+                    filename=null;
+            }
+            
+            // Do we need to close the last file?
+            if (filename==null || !filename.equals(_filename))
+            {
+                if (_out!=null && _out!=System.err && _filename!=null)
                 {
-                    try{
-                        _filename=filename;
-                        if(isStarted())
-                            openFile(filename);
-                    }
-                    catch(IOException e)
-                    {
-                        e.printStackTrace();
-                        _out=null;
-                        _filename=null;
-                        setWriter(new PrintWriter(System.err));
-		    }
-		}
+                    try{_out.close();}
+                    catch(Exception e){e.printStackTrace();}
+                    _out=null;
+                }
+                _filename=null;
+                if (_rollover!=null)
+                    _rollover.interrupt();
+                _rollover=null;
             }
-            catch(Exception e)
+            
+            // Do we have a new file
+            if (filename !=null && !filename.equals(_filename))
             {
-                e.printStackTrace();
+                try{
+                    _filename=filename;
+                    if(isStarted())
+                        openFile(filename);
+                }
+                catch(IOException e)
+                {
+                    e.printStackTrace();
+                    _out=null;
+                    _filename=null;
+                    setOutputStream(System.err);
+                }
             }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
         }
         
         if (_filename==null && _out==null)
-            _out=new PrintWriter(System.err);
+            _out=System.err;
     }
 
     /* ------------------------------------------------------------ */
@@ -380,52 +372,49 @@ public class WriterLogSink
     /* 
      * @param filename 
      */
-    private void openFile(String filename)
+    private synchronized void openFile(String filename)
         throws IOException
     {
-        synchronized(_stringBuffer)
+        try
         {
-            try
-            {
-                File file = new File(filename);
-                filename=file.getCanonicalPath();
-                file=new File(filename);
-                File dir= new File(file.getParent());
-                if (!dir.exists() && dir.canWrite())
+            File file = new File(filename);
+            filename=file.getCanonicalPath();
+            file=new File(filename);
+            File dir= new File(file.getParent());
+            if (!dir.exists() && dir.canWrite())
                     throw new IOException("Cannot write log directory "+dir);
-                
-                Date now=new Date();
-                
-                // Is this a rollover file?
-                int i=file.getName().toLowerCase().indexOf(YYYY_MM_DD);
-                if (i>=0)
-                {
-                    file=new File(dir,
-                                  file.getName().substring(0,i)+
-                                  _fileDateFormat.format(now)+
-                                  file.getName().substring(i+YYYY_MM_DD.length()));
-                    if (_rollover==null)
-                        _rollover=new Rollover();
-                }
-                
-                if (file.exists()&&!file.canWrite())
-                    throw new IOException("Cannot write log file "+file);
-                
-                if (!_append && file.exists())
-                    file.renameTo(new File(file.toString()+"."+__fileBackupFormat.format(now)));
-                
-                _out=new PrintWriter(new FileWriter(file.toString(),_append));
-                
-                if (_rollover!=null && !_rollover.isAlive())
-                    _rollover.start();
             
-            }
-            catch(IOException e)
+            Date now=new Date();
+            
+            // Is this a rollover file?
+            int i=file.getName().toLowerCase().indexOf(YYYY_MM_DD);
+            if (i>=0)
             {
-                e.printStackTrace();
-                _out=new PrintWriter(System.err);
-                throw e;
+                file=new File(dir,
+                              file.getName().substring(0,i)+
+                              _fileDateFormat.format(now)+
+                              file.getName().substring(i+YYYY_MM_DD.length()));
+                if (_rollover==null)
+                    _rollover=new Rollover();
             }
+            
+            if (file.exists()&&!file.canWrite())
+                throw new IOException("Cannot write log file "+file);
+            
+            if (!_append && file.exists())
+                file.renameTo(new File(file.toString()+"."+__fileBackupFormat.format(now)));
+            
+            _out=new FileOutputStream(file.toString(),_append);
+        
+        if (_rollover!=null && !_rollover.isAlive())
+            _rollover.start();
+        
+        }
+        catch(IOException e)
+        {
+            e.printStackTrace();
+            _out=System.err;
+            throw e;
         }
     }
     
@@ -437,10 +426,11 @@ public class WriterLogSink
     {
         _flushOn=on;
         if (on && _out!=null)
-            _out.flush();
+        {
+            try{_out.flush();}
+            catch(IOException e){e.printStackTrace();}
+        }
         
-        if (!on)
-            Code.warning("Using WriterLogSink. It is less efficient than StreamLogSink");
     }
     
     /* ------------------------------------------------------------ */
@@ -463,34 +453,34 @@ public class WriterLogSink
      * @param frame The frame that generated the message.
      * @param time The time stamp of the message.
      */
-    public void log(String tag,
-                    Object msg,
-                    Frame frame,
-                    long time)
+    public  synchronized void log(String tag,
+                                  Object msg,
+                                  Frame frame,
+                                  long time)
     {
-        // Lock buffer
-        synchronized(_stringBuffer)
+        if (_out==null)
+            return;
+
+        try
         {
-            _stringBuffer.setLength(0);
-            
             // Log the time stamp
             if (_logTimeStamps)
-                _stringBuffer.append(_dateFormat.format(time));
-        
+                _buffer.write(_dateFormat.format(time));
+            
             // Log the tag
             if (_logTags)
-                _stringBuffer.append(tag);
-
+                _buffer.write(tag);
+            
             // Log the label
             if (_logLabels && frame != null)
             {
-                _stringBuffer.append(frame.toString());
+                _buffer.write(frame.toString());
             }
-
+            
             // Log the stack depth.
             if (_logStackSize && frame != null)
             {
-                _stringBuffer.append(((frame._depth>9)?"":"0")+frame._depth+"> ");
+                _buffer.write(((frame._depth>9)?"":"0")+frame._depth+"> ");
             }
             
             // Determine the indent string for the message and append it
@@ -498,14 +488,14 @@ public class WriterLogSink
             // line is not blank
             String nl=__lineSeparator+(_logOneLine?"":"+ ");
             
-            if (_logLabels && !_logOneLine && _stringBuffer.length() > 0)
-            	_stringBuffer.append(nl);
-
+            if (_logLabels && !_logOneLine && _buffer.length() > 0)
+                _buffer.write(nl);
+            
             // Log indented message
             String smsg=(msg==null)
                 ?"???"
                 :((msg instanceof String)?((String)msg):msg.toString());
-
+            
             if (_logOneLine)
             {
                 smsg=StringUtil.replace(smsg,"\015\012","<|");
@@ -519,17 +509,25 @@ public class WriterLogSink
                 smsg=StringUtil.replace(smsg,"\012","<|");
                 smsg=StringUtil.replace(smsg,"<|",nl);
             }
-            _stringBuffer.append(smsg);
-
+            _buffer.write(smsg);
+            _buffer.write("\n");
+            
             // Add stack frame to message
             if (_logStackTrace && frame != null)
             {
-                _stringBuffer.append(nl);
-                _stringBuffer.append(frame._stack);
+                _buffer.write(nl);
+                _buffer.write(frame._stack);
             }
             
-            log(_stringBuffer.toString());
+            if (_flushOn || _buffer.length()>_bufferSize)
+            {
+                _buffer.writeTo(_out);
+                _buffer.reset();
+                if (_flushOn)
+                    _out.flush();
+            }
         }
+        catch(IOException e){e.printStackTrace();}
     }
     
     /* ------------------------------------------------------------ */
@@ -538,16 +536,21 @@ public class WriterLogSink
      * implementation writes the message to a PrintWriter.
      * @param formattedLog 
      */
-    public void log(String formattedLog)
+    public synchronized void log(String formattedLog)
     {
-        if (_out==null)
-            return;
-        synchronized(_stringBuffer)
+        try
         {
-            _out.println(formattedLog);
-            if (_flushOn)
-                _out.flush();
+            _buffer.write(formattedLog);
+            _buffer.write("\n");
+            if (_flushOn || _buffer.length()>_bufferSize)
+            {
+                _buffer.writeTo(_out);
+                _buffer.reset();
+                if (_flushOn)
+                    _out.flush();
+            }
         }
+        catch(IOException e){e.printStackTrace();}
     }
 
     
@@ -555,17 +558,15 @@ public class WriterLogSink
     /** Stop a log sink.
      * The default implementation does nothing 
      */
-    public void start()
+    public synchronized void start()
     {
-        synchronized(_stringBuffer)
+        if (_filename!=null)
         {
-            if (_filename!=null)
-            {
-                try{openFile(_filename);}
-                catch(IOException e){e.printStackTrace();}   
-            }
-            _started=_out!=null;
+            try{openFile(_filename);}
+            catch(IOException e){e.printStackTrace();}   
         }
+        _started=true;
+        System.err.println("Started "+_out);
     }
     
     
@@ -581,9 +582,13 @@ public class WriterLogSink
         {
             try{_out.flush();}
             catch(Exception e){Code.ignore(e);}
+        }
+        
+        if (_out!=null && _out!=System.err && _filename!=null)
+        {
+            try{_out.close();}
+            catch(Exception e){Code.ignore(e);}
         }       
-        if (_filename!=null)
-            _out.close();
         if (_rollover!=null)
             _rollover.interrupt();
         _rollover=null;
@@ -598,8 +603,11 @@ public class WriterLogSink
     /* ------------------------------------------------------------ */
     public void destroy()
     {
-        if (_filename!=null)
-            _out.close();
+        if (_out!=null && _out!=System.err && _filename!=null)
+        {
+            try{_out.close();}
+            catch(Exception e){Code.ignore(e);}
+        }       
         _out=null;
     }
     
@@ -615,7 +623,7 @@ public class WriterLogSink
     {
         Rollover()
         {
-            setName("Rollover: "+WriterLogSink.this.hashCode());
+            setName("Rollover: "+StreamLogSink.this.hashCode());
         }
         
         public void run()

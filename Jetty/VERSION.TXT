@@ -1,6 +1,7 @@
 Jetty3 Versions
 --------------
 
+Jetty-3.1.rc8 - 22 Aug 2001
  + Support WEB-INF/web-jetty.xml configuration extension for webapps
  + Allow per context log files.
  + Updated sponsors page
@@ -12,6 +13,7 @@ Jetty3 Versions
    * URI pathAdd
    * StringMap
    * URI canonicalPath
+   * StreamLogSink replaces WriterLogSink
  + Separation of URL params in HttpHandler API.
  + Fixed handling of default mime types
  + Allow contextpaths without leading /

@@ -127,11 +127,14 @@ public class StringMap
             last=null;
             node=null;
         }
-
-        Object old = up._value;
-        up._key=key;
-        up._value=value;
-        return old;
+        if (up!=null)
+        {
+            Object old = up._value;
+            up._key=key;
+            up._value=value;
+            return old;
+        }
+        return null;
     }
     
     /* ------------------------------------------------------------ */
@@ -259,5 +262,41 @@ public class StringMap
         if (up!=null && up._key==null)
             return null;
         return up;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public Object remove(String key)
+    {
+        Node node = _root;
+        Node up = null;
+
+        // look for best match
+    charLoop:
+        for (int i=0;i<key.length();i++)
+        {
+            char c=key.charAt(i);
+
+            // While we have a node to try
+            while (node!=null) 
+            {
+                // If it is a matching node, goto next char
+                if (node._char==c || _ignoreCase&&(node._lchar==c||node._uchar==c))
+                {
+                    up=node;
+                    node=node._children;
+                    continue charLoop;
+                }
+                node=node._next;                
+            }
+            return null;
+        }
+
+        if (up!=null && up._key==null)
+            return null;
+        
+        Object old = up._value;
+        up._value=null;
+        
+        return old;
     }
 }

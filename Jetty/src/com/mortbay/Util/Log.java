@@ -40,14 +40,14 @@ import java.util.StringTokenizer;
  * options LOG_DATE_FORMAT, LOG_FILE_BACKUP_FORMAT, LOG_FILE_RETAIN_DAYS,
  * LOG_FILE_DATE_FORMAT and LOG_TIME_ZONE.
  *
- * <p> If the property LOG_CLASSES is missing, a single WriterLogSink is
+ * <p> If the property LOG_CLASSES is missing, a single StreamLogSink is
  * used to output to System.err.
  *
  * <p> As an alternative to the above behavior, you can create LogSinks
  * in code and add() them to the Log. If you do this before the first
  * use of the log, the default initialization will be skipped.
  *
- * @see com.mortbay.Util.WriterLogSink
+ * @see com.mortbay.Util.StreamLogSink
  */
 public class Log 
 {
@@ -84,7 +84,7 @@ public class Log
             _logOptions=System.getProperty("LOG_OPTIONS",
                                            Code.debug()?"stLT":"tT");
             String sinkClasses = System.getProperty("LOG_CLASSES",
-                                                    "com.mortbay.Util.WriterLogSink");
+                                                    "com.mortbay.Util.StreamLogSink");
             StringTokenizer sinkTokens = new StringTokenizer(sinkClasses, ";");
                     
             LogSink sink= null;
@@ -131,7 +131,7 @@ public class Log
         try
         {
             if (logSinkClass==null || logSinkClass.length()==0)
-                logSinkClass="com.mortbay.Util.WriterLogSink";
+                logSinkClass="com.mortbay.Util.StreamLogSink";
             Class sinkClass =  Class.forName(logSinkClass);
             LogSink sink=(LogSink)sinkClass.newInstance();
             add(sink);
