@@ -92,4 +92,16 @@ org.mortbay.jetty.servlet.WebApplicationContext objet
     </Call>
     -->
 
+
+    <Call name="addServlet">
+      <Arg>/other/*</Arg>
+      <Arg>org.mortbay.jetty.servlet.Default</Arg>
+    
+      <Call name="setInitParameter">
+        <Arg>resourceBase</Arg>
+        <Arg>/tmp</Arg>
+      </Call>
+      <Call name="start"/>
+    </Call>
+
 </Configure>

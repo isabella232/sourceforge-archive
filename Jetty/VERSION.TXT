@@ -1,15 +1,20 @@
 Jetty Versions
 --------------
 
-Jetty-4.2
+
+Jetty-5.0.RC2
+ + Fixed DIGEST challenge delimiters
+ + HTAccess calls UnixCrypt correctly
  + integrated jetty-jboss with jboss-3.2.4
+ + Error dispatchers are always GET requests.
+ + OPTIONS works for all URLs on default servlet
  + add JMX support for JettyPlus
  + add listing of java:comp/env for webapp with JMX
  + make choice of override of JNDI ENC entries: config.xml or web.xml 
+ + Default servlet may use only pathInfo for resource
+ + Fixed session leak in j2ee
 
-Jetty-5.0.0
- + Fixed DIGEST challenge delimiters
- + HTAccess calls UnixCrypt correctly
+Jetty-4.2
  + integrated jetty-jboss with jboss-3.2.4
  + add JMX support for JettyPlus
  + add listing of java:comp/env for webapp with JMX

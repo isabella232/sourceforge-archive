@@ -139,7 +139,7 @@ public class Default extends HttpServlet
                 throw new UnavailableException(e.toString()); 
             }
         }
-       
+	if (log.isDebugEnabled()) log.debug("resource base = "+_resourceBase);
         
         if (_putAllowed)
             _AllowString+=", PUT";
@@ -181,22 +181,31 @@ public class Default extends HttpServlet
     protected Resource getResource(String pathInContext)
         throws IOException
     {
-        if (_resourceBase==null)
-            return _httpContext.getResource(pathInContext);
-        return _resourceBase.addPath(pathInContext);
+	Resource r = (_resourceBase==null)
+            ? _httpContext.getResource(pathInContext)
+            : _resourceBase.addPath(pathInContext);
+
+	if (log.isDebugEnabled()) log.debug("RESOURCE="+r);
+	return r;
     }
     
     /* ------------------------------------------------------------ */
     protected void service(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException
     {
-        String pathInContext=URI.addPaths((String)request.getAttribute(Dispatcher.__INCLUDE_SERVLET_PATH),
-                                          (String)request.getAttribute(Dispatcher.__INCLUDE_PATH_INFO));
-        if (pathInContext==null)
-            pathInContext=URI.addPaths(request.getServletPath(),request.getPathInfo());
-        
+	String servletPath=(String)request.getAttribute(Dispatcher.__INCLUDE_SERVLET_PATH);
+	String pathInfo=null;
+	if (servletPath==null)
+	{
+	    servletPath=request.getServletPath();
+	    pathInfo=request.getPathInfo();
+	}
+	else
+	    pathInfo=(String)request.getAttribute(Dispatcher.__INCLUDE_PATH_INFO);
+
+        String pathInContext=URI.addPaths(servletPath,pathInfo);
         boolean endsWithSlash= pathInContext.endsWith("/");
-        Resource resource=getResource(pathInContext);
+        Resource resource=getResource(pathInfo==null?servletPath:pathInfo);
 
         // Is the method allowed?  
         String method=request.getMethod();      
@@ -458,15 +467,10 @@ public class Default extends HttpServlet
         throws IOException
     {
         // Handle OPTIONS request for entire server
-        if ("*".equals(request.getRequestURI()))
-        {
-            // 9.2
-            response.setIntHeader(HttpFields.__ContentLength,0);
-            response.setHeader(HttpFields.__Allow,_AllowString);                
-            response.flushBuffer();
-        }
-        else
-            response.sendError(HttpResponse.__404_Not_Found);
+        // 9.2
+        response.setIntHeader(HttpFields.__ContentLength,0);
+        response.setHeader(HttpFields.__Allow,_AllowString);                
+        response.flushBuffer();
     }
     
     /* ------------------------------------------------------------ */

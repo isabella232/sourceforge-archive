@@ -45,8 +45,13 @@ public class ExServlet extends HttpServlet
         catch(Throwable th)
         {
             throw new ServletException(th);
-        }
-        
+        }   
+    }
+    
+    public void doPost(HttpServletRequest sreq, HttpServletResponse sres) 
+    throws ServletException, IOException
+    {
+        doGet(sreq,sres);
     }
 
     /* ------------------------------------------------------------ */

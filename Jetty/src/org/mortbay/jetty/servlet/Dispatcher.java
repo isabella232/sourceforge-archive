@@ -643,6 +643,12 @@ public class Dispatcher implements RequestDispatcher
             return _servletHandler.getServletContext().getRequestDispatcher(url);
         }
         
+        public String getMethod()
+        {
+            if (this._filterType==FilterHolder.__ERROR)
+                return org.mortbay.http.HttpRequest.__GET;
+            return super.getMethod();
+        }
     }
     
     /* ------------------------------------------------------------ */
