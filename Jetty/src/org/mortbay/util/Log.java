@@ -249,9 +249,9 @@ public class Log
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     * Log a warning.
-     * @param message the Ovbject to use as a wrning message.
+    /** Log a warning message.
+     * @see org.mortbay.util.Code for warnings of exceptions etc.
+     * @param message the Object to use as a warning message.
      * @param stackDepth number of levels of stack to ignore.
      */
     public static void warning(Object message, int stackDepth)
@@ -261,7 +261,8 @@ public class Log
     
     /* ------------------------------------------------------------ */
     /** Log a warning.
-     * @param message the Ovbject to use as a wrning message.
+     * @see org.mortbay.util.Code for warnings of exceptions etc.
+     * @param message the Object to use as a warning message.
      */
     public static void warning(Object message)
     {

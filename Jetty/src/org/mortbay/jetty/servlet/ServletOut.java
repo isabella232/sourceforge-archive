@@ -63,4 +63,9 @@ class ServletOut extends ServletOutputStream
     {
         _out=IO.getNullStream();
     }
+
+    public void print(String s) throws IOException 
+    {
+         if (s!=null) write(s.getBytes());
+    }
 }
