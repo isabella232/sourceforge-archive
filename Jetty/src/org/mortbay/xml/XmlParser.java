@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Stack;
+import java.net.URL;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.mortbay.util.Code;
@@ -118,8 +119,8 @@ public class XmlParser
         Handler handler= new Handler();
         XMLReader reader = _parser.getXMLReader();
         reader.setContentHandler(handler);
-  	reader.setErrorHandler(handler);
-  	reader.setEntityResolver(handler);
+        reader.setErrorHandler(handler);
+        reader.setEntityResolver(handler);
         _parser.parse(source, handler);
         if (handler._error!=null)
             throw handler._error;
@@ -156,14 +157,41 @@ public class XmlParser
         Handler handler= new Handler();
         XMLReader reader = _parser.getXMLReader();
         reader.setContentHandler(handler);
-  	reader.setErrorHandler(handler);
-  	reader.setEntityResolver(handler);
+        reader.setErrorHandler(handler);
+        reader.setEntityResolver(handler);
         _parser.parse(new InputSource(in), handler);
         if (handler._error!=null)
             throw handler._error;
         Node doc=(Node)handler._top.get(0);
         handler.clear();
         return doc;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Parse URL.
+     */
+    public synchronized Node parse(URL url)
+        throws IOException,SAXException
+    {
+        Node n=null;
+        InputStream is = url.openStream();
+        try 
+        {
+           n = parse(is);
+        } 
+        finally 
+        {
+          try 
+          {
+            is.close();
+          } 
+          catch (Exception e) 
+          {
+             // xerces closes streams you give it to parse, so this close() will throw an exception. 
+             // This behavior is stupid, so we should not assume it.
+          }
+        }
+	return n;
     }
     
     
@@ -268,7 +296,7 @@ public class XmlParser
             Code.warning("FATAL@"+getLocationString(ex)+
                          " : "+ex.toString());
             throw ex;
-        }	    
+        }           
 
         /* ------------------------------------------------------------ */
         private String getLocationString(SAXParseException ex)
@@ -351,10 +379,10 @@ public class XmlParser
             {
                 _attrs=new Attribute[attrs.getLength()];
                 for (int i = 0; i <attrs.getLength(); i++)
-		{
-		    String name = attrs.getLocalName(i);
-		    if ( name==null || name.equals("") )
-			name = attrs.getQName(i);
+                {
+                    String name = attrs.getLocalName(i);
+                    if ( name==null || name.equals("") )
+                        name = attrs.getQName(i);
                     _attrs[i]=new Attribute(name,
                                             attrs.getValue(i));
                 }                    
@@ -376,7 +404,7 @@ public class XmlParser
         /* ------------------------------------------------------------ */
         /** Get an array of element attributes.
          */
- 	public Attribute[] getAttributes()
+        public Attribute[] getAttributes()
         {
             return _attrs;
         }
@@ -385,7 +413,7 @@ public class XmlParser
         /** Get an element attribute.
          * @return attribute or null.
          */
- 	public String getAttribute(String name)
+        public String getAttribute(String name)
         {
             return getAttribute(name,null);
         }
@@ -394,7 +422,7 @@ public class XmlParser
         /** Get an element attribute.
          * @return attribute or null.
          */
- 	public String getAttribute(String name, String dft)
+        public String getAttribute(String name, String dft)
         {
             if (_attrs==null || name==null)
                 return dft;
@@ -408,7 +436,7 @@ public class XmlParser
         /* ------------------------------------------------------------ */
         /** Get the number of children nodes.
          */
- 	public int size()
+        public int size()
         {
             if (_list!=null)
                 return _list.size();
@@ -419,7 +447,7 @@ public class XmlParser
         /** Get the ith child node or content.
          * @return Node or String.
          */
- 	public Object get(int i)
+        public Object get(int i)
         {
             if (_list!=null)
                 return _list.get(i);
@@ -431,7 +459,7 @@ public class XmlParser
          * @param tag 
          * @return Node or null.
          */
- 	public Node get(String tag)
+        public Node get(String tag)
         {
             if (_list!=null)
             {
@@ -471,7 +499,7 @@ public class XmlParser
                 _lastString=false;
                 _list.add(i,o);
             }
-        }	
+        }       
 
         /* ------------------------------------------------------------ */
         public void clear()
@@ -509,7 +537,7 @@ public class XmlParser
         /** Convert to a string.
          * @param tag If false, only content is shown.
          */
- 	public synchronized String toString(boolean tag)
+        public synchronized String toString(boolean tag)
         {
             StringBuffer buf = new StringBuffer();
             synchronized(buf)
@@ -523,7 +551,7 @@ public class XmlParser
         /** Convert to a string.
          * @param tag If false, only content is shown.
          */
- 	public synchronized String toString(boolean tag,boolean trim)
+        public synchronized String toString(boolean tag,boolean trim)
         {
             String s=toString(tag);
             if (s!=null && trim)
@@ -539,17 +567,17 @@ public class XmlParser
                 buf.append("<");
                 buf.append(_tag);
             
-		if (_attrs!=null)
-		{
-		    for (int i=0;i<_attrs.length;i++)
-		    {
-			buf.append(' ');
-			buf.append(_attrs[i].getName());
-			buf.append("=\"");
-			buf.append(_attrs[i].getValue());
-			buf.append("\"");
-		    }
-		}
+                if (_attrs!=null)
+                {
+                    for (int i=0;i<_attrs.length;i++)
+                    {
+                        buf.append(' ');
+                        buf.append(_attrs[i].getName());
+                        buf.append("=\"");
+                        buf.append(_attrs[i].getValue());
+                        buf.append("\"");
+                    }
+                }
             }
 
             if (_list!=null)
@@ -584,7 +612,7 @@ public class XmlParser
          * @param tag The tag of the nodes.
          * @return Iterator over all child nodes with the specified tag.
          */
- 	public Iterator iterator(final String tag)
+        public Iterator iterator(final String tag)
         {
             return new Iterator()
                 {

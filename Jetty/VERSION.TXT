@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Worked around bad jboss URL handler in XMLParser
+
 Jetty-4.2.19 - 19 Mar 2004
  + Fixed DOS attack problem
 

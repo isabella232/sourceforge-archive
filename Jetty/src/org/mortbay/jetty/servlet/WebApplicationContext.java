@@ -383,7 +383,7 @@ public class WebApplicationContext
                 
                 // XXX - don't know why? _defaultsDescriptor=dftResource.toString();
                 XmlParser.Node defaultConfig =
-                    xmlParser.parse(dftResource.getURL().toString());
+                    xmlParser.parse(dftResource.getURL());
                 initialize(defaultConfig);
             }
 
@@ -400,7 +400,7 @@ public class WebApplicationContext
                 {
                     XmlParser.Node config=null;
                     _deploymentDescriptor=web.toString();
-                    config = xmlParser.parse(web.getURL().toString());
+                    config = xmlParser.parse(web.getURL());
                     initialize(config);
                 }
                 
