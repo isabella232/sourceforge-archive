@@ -18,7 +18,6 @@ $Id$
 -->
 
 <Configure class="org.mortbay.jetty.Server">
-  <!-- 
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.SocketListener">
@@ -30,7 +29,6 @@ $Id$
       </New>
     </Arg>
   </Call>
-  -->
 
   <Call name="addRealm">
     <Arg>
