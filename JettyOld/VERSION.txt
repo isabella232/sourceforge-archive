@@ -1,6 +1,7 @@
-Release 2.4.1 - 2nd April 2000 LATEST STABLE
+Release 2.4.1 - 9th April 2000 LATEST STABLE
   + Removed debug println from ServletHolder.
   + Set encoding before exception in FileHandler.
+  + Fixed bug in HtmlFilter for tags split between writes.
 
 Release 2.4.0 - 24th March 2000 
   + Upgraded to gnujsp 1.0.0

@@ -127,7 +127,43 @@ public class TestHarness
                              "called");
             test.checkEquals("a=b",two,"called with =");
             test.checkEquals("<!=",three,"almost tag");
-            
+                        
+            Code.setSuppressWarnings(true);
+
+            bout.reset();
+            f.write("Testing<!=Bl".getBytes());
+            f.flush();
+            f.write("ah>123".getBytes());
+            f.flush();
+            test.checkEquals("Testing123",bout.toString(),
+                             "split write");
+
+            bout.reset();
+            f.write("Testing<!".getBytes());
+            f.flush();
+            f.write("=Blah>123".getBytes());
+            f.flush();
+            test.checkEquals("Testing123",bout.toString(),
+                             "split write");
+
+            bout.reset();
+            f.write("Testing<".getBytes());
+            f.flush();
+            f.write("!=Blah>123".getBytes());
+            f.flush();
+            test.checkEquals("Testing123",bout.toString(),
+                             "split write");
+
+            bout.reset();
+            f.write("Testing<TTT<".getBytes());
+            f.flush();
+            f.write("!Blah>123".getBytes());
+            f.flush();
+            test.checkEquals("Testing<TTT<!Blah>123",bout.toString(),
+                             "split write");
+
+            Code.setSuppressWarnings(false);
+
         }
         catch(Exception e)
         {

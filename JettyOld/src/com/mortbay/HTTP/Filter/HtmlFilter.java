@@ -176,9 +176,9 @@ public class HtmlFilter extends HttpFilter
                   end=i;
                   // If we are sitting on some tag chars which are not
                   // in the buffer, write them out.
-                  if(last==1 && end==off)
+                  if(last==1 && end==off || last==2 && end==off+1)
                       out.write('<');
-                  if(last==2 && end<=off+1)
+                  if(last==2 && end==off)
                       out.write("<!".getBytes());
                   break;
                   
@@ -189,7 +189,10 @@ public class HtmlFilter extends HttpFilter
               case 3: // Got a =
                   // write what we have got before the tag
                   if (end>=off)
+                  {
                       out.write(buf,off,end-off+1);
+                      off=end+1;
+                  }
                   break;
                   
               case 4: // Tag text
@@ -267,9 +270,9 @@ public class HtmlFilter extends HttpFilter
 
         // write what we have got that is OK
         if (end>=off)
-            out.write(buf,off,end-off+1);
+	    out.write(buf,off,end-off+1);
     }
-    
+
     /* ------------------------------------------------------------- */
     public void write(int  b)
          throws IOException
