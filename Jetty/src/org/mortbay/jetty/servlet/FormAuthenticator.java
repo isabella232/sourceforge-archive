@@ -45,6 +45,11 @@ public class FormAuthenticator implements Authenticator
     /* ------------------------------------------------------------ */
     public void setLoginPage(String path)
     {
+        if (!path.startsWith("/"))
+        {
+            Code.warning("form-login-page must start with /");
+            path="/"+path;
+        }
         _formLoginPage=path;
     }
 
@@ -57,6 +62,11 @@ public class FormAuthenticator implements Authenticator
     /* ------------------------------------------------------------ */
     public void setErrorPage(String path)
     {
+        if (!path.startsWith("/"))
+        {
+            Code.warning("form-error-page must start with /");
+            path="/"+path;
+        }
         _formErrorPage=path;
     }
 
