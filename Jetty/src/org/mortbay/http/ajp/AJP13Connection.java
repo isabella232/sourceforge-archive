@@ -122,7 +122,8 @@ public class AJP13Connection extends HttpConnection
         HttpRequest request = getRequest();
         HttpResponse response = getResponse();
         HttpContext context = null;
-
+        boolean persistent=false;
+        
         try
         {
             try
@@ -224,20 +225,19 @@ public class AJP13Connection extends HttpConnection
                   Code.warning("Not implemented: "+packet);
             }
 
-            _ajpOut.end(true);
+            persistent=true;
             
-            return true;
         }
         catch (Exception e)
         {
             Code.warning(e);
             try{_ajpOut.end(false);}catch (IOException e2){Code.ignore(e2);}
-            return false;
         }
         finally
         {
-            // flush the output
+            // flush and end the output
             try{getOutputStream().flush(true);} catch (Exception e){Code.warning(e);}
+            try{_ajpOut.end(persistent);} catch (Exception e){Code.warning(e);}
             
             // Consume unread input.
             try{while(_ajpIn.skip(4096)>0 || _ajpIn.read()>=0);}
@@ -257,6 +257,7 @@ public class AJP13Connection extends HttpConnection
                 context.log(request,response,-1);
             
         }
+        return persistent;
     }
 
 
