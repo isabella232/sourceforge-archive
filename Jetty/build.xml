@@ -28,12 +28,13 @@ release     - Cleanup for release
 -->
 <project name="Jetty3 HTTP Server" default="webapp" basedir=".">
   <property name="src"            value="${basedir}/src" />
-  <property name="webapps"        value="${basedir}/webapps"/>
-  <property name="webappsrc"      value="${basedir}/webappsrc"/>
+  <property name="etc"            value="${basedir}/etc" />
   <property name="lib"            value="${basedir}/lib"/>
   <property name="classes"        value="${basedir}/classes"/>
   <property name="javadoc"        value="${basedir}/javadoc"/>
   <property name="logs"           value="${basedir}/logs"/>
+  <property name="webapps"        value="${basedir}/webapps"/>
+  <property name="webappsrc"      value="${basedir}/webappsrc"/>
   <property name="build.compiler" value="jikes"/>
   <!-- property name="build.compiler" value="classic"/ -->
   <!-- property name="build.compiler" value="modern"/ -->
@@ -57,8 +58,8 @@ release     - Cleanup for release
     <mkdir dir="${javadoc}" />
     <mkdir dir="${classes}" />
     <mkdir dir="${logs}" />
-    <copy file="${src}/com/mortbay/Util/configure.dtd" tofile="${basedir}/etc/configure.dtd" />
-    <copy file="${src}/com/mortbay/HTTP/web.dtd" tofile="${basedir}/etc/web.dtd" />
+    <copy file="${src}/com/mortbay/Util/configure.dtd" tofile="${etc}/configure.dtd" />
+    <copy file="${src}/com/mortbay/HTTP/web.dtd" tofile="${etc}/web.dtd" />
   </target>
 
 
@@ -92,7 +93,6 @@ release     - Cleanup for release
            deprecation="off"
            >
        <include name="**/*.java"/>
-       <exclude name="com/mortbay/webapps/**" />
     </javac>
   </target>
 
@@ -197,8 +197,8 @@ release     - Cleanup for release
           fork="yes"
           failonerror="yes"
           >
-       <jvmarg line="-Djetty.home=. -Djetty.log=." />
-       <arg line="etc/admin.xml etc/demo.xml" />
+       <jvmarg line="-Djetty.home=. -Djetty.log=./logs" />
+       <arg line="${etc}/admin.xml ${etc}/demo.xml" />
     </java>
   </target>
 

@@ -262,7 +262,8 @@ echo RUN_CMD        =  %RUN_CMD%
 
 if not "%ACTION%"=="start" goto try_stop
         echo "Starting Jetty: "
-        echo "STARTED `date`" >>%JETTY_LOG%\jetty.out
+        echo "STARTED %date%" >>%JETTY_LOG%\jetty.out 
+        echo "RUN_CMD %RUN_CMD%" >> %JETTY_LOG%\jetty.out
         start %RUN_CMD% >> %JETTY_LOG%\jetty.out
         goto END
 

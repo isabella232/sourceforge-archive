@@ -64,11 +64,11 @@ public class HttpConnection
      * a socket. This is not used by HttpConnection other than to make
      * it available via getConnection().
      */
-    protected HttpConnection(HttpListener listener,
-                             InetAddress remoteAddr,
-                             InputStream in,
-                             OutputStream out,
-                             Object connection)
+    public HttpConnection(HttpListener listener,
+                          InetAddress remoteAddr,
+                          InputStream in,
+                          OutputStream out,
+                          Object connection)
     {
         _listener=listener;
         _remoteAddr=remoteAddr;

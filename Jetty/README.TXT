@@ -31,6 +31,9 @@ environment.
 
 Quick start on Windows
 ======================
+Due to problems with the servlet security model (see below). It is vital
+that windows users use the exact case for drive letters, URLs and filenames. 
+
 run:
   %JETTY_HOME%\bin\jetty.sh run demo.xml
 
@@ -369,27 +372,10 @@ Specific access should be granted with constraints like:
 
 JMX Management
 --------------
-
-Jetty is instrumented with an optional JMX managment layer, which wraps key Jetty objects
-as model MBeans.  To use the JMX classes you must download a JMX server from javasoft
-or elsewhere and include them in your classpath.  For suns reference JMX this
-is:
-
-  CLASSPATH=$CLASSPATH:\
-     $JMX_HOME/lib/jmxri.jar:\
-     $JMX_HOME/lib/jmxtools.jar
-
-There is an ant target jmx which can be used to build Jetty with jmx support.
-The Jetty JMX classes are in the com.mortbay.Jetty.JMX package.  A JMX startup script
-is in $JETTY_HOME/etc/jetty.mlet file.
-
-This file can be run with the following command:
-
-  java com.mortbay.Jetty.JMX.Main $JETTY_HOME/etc/jetty.mlet
-
-The MBeans created can be via at http://localhost:8082
-
-JMX management is highly experimental and likely to change.
-
-
+Jetty is instrumented with an optional JMX managment layer.
+This is contained in the Jetty3Extra release
   
+
+SASL Authentication
+-------------------
+A SASL listener is included in the Jetty3Extra release
