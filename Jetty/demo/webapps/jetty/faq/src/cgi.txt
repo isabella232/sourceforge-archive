@@ -1,12 +1,11 @@
+SECTION: 900-Content
 TITLE: CGI
-QUESTION: Can I do CGI with Jetty?
+QUESTION: Can Jetty do CGI?
 
-Yes!
-<P>
-The Jetty distribution includes a CGI servlet <A TITLE="View JavaDoc" HREF="/javadoc/org/mortbay/servlet/CGI.html">org.mortbay.servlet.CGI</A>. You configure it in your xml
+The Jetty distribution includes a CGI servlet <A TITLE="View JavaDoc" HREF="/javadoc/org/mortbay/servlet/CGI.html">org.mortbay.servlet.CGI</A>. You configure it in your jetty.xml
 configuration file along these lines:
 <P>
-<pre>
+<PRE>
   &lt;Call name="addContext"&gt;
     &lt;Arg&gt;/cgi-bin/*&lt;/Arg&gt;
     &lt;Set name="ResourceBase"&gt;/home/jules/www/cgi-bin&lt;/Set&gt;
@@ -18,4 +17,5 @@ configuration file along these lines:
      &lt;Put name="Path"&gt;/usr/local/bin:/usr/ucb:/bin:/usr/bin&lt;/Put&gt;
     &lt;/Call&gt;
   &lt;/Call&gt;
-</pre>
+
+</PRE>

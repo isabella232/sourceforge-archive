@@ -1,0 +1,13 @@
+SECTION: 100-FAQ
+TITLE: FAQ Who
+QUESTION: Who wrote the FAQ?
+
+The Jetty FAQs have been contributed by many developers and Jetty users and contributions 
+are always welcome.   Key contributors include:<ul>
+<li>Greg Wilkins</li>
+<li>Jules Gosnell</li>
+<li>Jan Bartel</li>
+<li>Cris Perdue</li>
+<li>Jan Hlavaty</li>
+<li>Chris Haynes</li>
+</ul>

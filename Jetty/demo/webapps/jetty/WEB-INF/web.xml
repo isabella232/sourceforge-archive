@@ -80,7 +80,7 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
     </init-param>
     <init-param>
         <param-name>refreshMSec</param-name>
-	<param-value>120000</param-value>
+	<param-value>10000</param-value>
     </init-param>
     <load-on-startup>0</load-on-startup>
   </servlet>

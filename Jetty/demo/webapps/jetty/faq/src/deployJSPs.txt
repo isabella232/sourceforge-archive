@@ -1,4 +1,4 @@
-SECTION: JSP
+SECTION: 900-Content
 TITLE: Deploy JSPs
 QUESTION: How can I deploy JSPs?
 

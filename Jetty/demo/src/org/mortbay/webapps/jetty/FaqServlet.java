@@ -58,7 +58,7 @@ import org.mortbay.html.*;
 public class FaqServlet extends HttpServlet
 {
     private static Log log = LogFactory.getLog(JettyServlet.class);
-    public static final String GENERAL_SECTION_NAME = "General";
+    public static final String GENERAL_SECTION_NAME = "200-General";
    
     private TreeMap sectionMap;
     private String faqSrcDir;
@@ -187,52 +187,30 @@ public class FaqServlet extends HttpServlet
 
         if ((timestamp == 0) || ((now - timestamp) >= refreshInterval))
             refreshMap();
-
        
         String contextPath = request.getContextPath();
         String servletPath = request.getServletPath();
         String pathInfo = request.getPathInfo();
-        
-        log.info ("contextPath="+contextPath);
-        log.info ("servletPath="+servletPath);
-        log.info ("pathInfo="+pathInfo);
 
         Page page = null;
-
-        if (servletPath.equals("/faq") && (request.getQueryString() == null))
+        TreeMap entries=null;
+        FaqEntry entry=null;
+        String section = request.getParameter ("s");
+        String title = request.getParameter ("t");
+        if (section!=null)
         {
-            if ((pathInfo == null) 
-                || 
-                (pathInfo.equals("/")) 
-                || 
-                (pathInfo.equals("/index.html")))
-            {
-                page = generateFaqIndex(contextPath, servletPath);
-            }
+            entries = (TreeMap)sectionMap.get(section);
+            if (entries!=null && title!=null)
+                entry = (FaqEntry)entries.get (title);
         }
-        else
-        {
-            String section = request.getParameter ("s");
-            String title = request.getParameter ("t");
-            if ((section == null) || (section.trim().equals("")))
-                throw new ServletException ("No section specified");
-            if ((title == null) || (title.trim().equals("")))
-                throw new ServletException ("No title specified");
 
-            log.info ("section="+section+" title="+title);
-            TreeMap entries = (TreeMap)sectionMap.get(section);
-            if (entries == null)
-                throw new ServletException ("No matching entries for section="+section);
-            FaqEntry entry = (FaqEntry)entries.get (title);
-            if (entry == null)
-                throw new ServletException ("No matching entry for title="+title);
-
+        if (entry!=null)
             page = generateFaqEntry (contextPath, servletPath, entry);
-        }
-
+        else
+            page = generateFaqIndex(contextPath, servletPath);
+        
         response.setContentType("text/html");
-        Writer out = response.getWriter();
-        page.write(out);
+        page.write(response.getWriter());
     }
 
 
@@ -258,9 +236,6 @@ public class FaqServlet extends HttpServlet
         throws IOException
     {
         //time consuming: read all files in the faq directory
-
-        log.info ("Refreshing faq");
-
         clearFaqMap ();
 
         Set fileNameSet = getServletConfig().getServletContext().getResourcePaths ("/"+faqSrcDir);
@@ -272,74 +247,75 @@ public class FaqServlet extends HttpServlet
         while (itor.hasNext())
         {
             String fileName = (String)itor.next();
-            log.info ("Handling file "+fileName);
-
-            if (fileName.endsWith("FAQ.html"))
-            {
-                log.info ("Skipping FAQ.html");
+            if (!fileName.endsWith(".txt") && !fileName.endsWith(".html"))
                 continue;
-            }
-            
-            
-            InputStream is = getServletConfig().getServletContext().getResourceAsStream(fileName);
-            BufferedReader reader = new BufferedReader (new InputStreamReader(is));
-            boolean moreLines = true;
-            FaqEntry entry = new FaqEntry();
-            while (moreLines)
+
+            try
             {
-                String line = reader.readLine();
-                if (line == null)
-                    moreLines = false;
-                else
+                InputStream is = getServletConfig().getServletContext().getResourceAsStream(fileName);
+                BufferedReader reader = new BufferedReader (new InputStreamReader(is));
+                boolean moreLines = true;
+                FaqEntry entry = new FaqEntry();
+                while (moreLines)
                 {
-                    String key;
-                    if (line.length() >= 8)
+                    String line = reader.readLine();
+                    if (line == null)
+                        moreLines = false;
+                    else
                     {
-                        key = line.substring(0,8);
-                        if (key.equalsIgnoreCase("SECTION:"))
+                        String key;
+                        if (line.length() >= 8)
                         {
-                            entry.setSection (line.substring (8).trim());
-                            continue;
+                            key = line.substring(0,8);
+                            if (key.equalsIgnoreCase("SECTION:"))
+                            {
+                                entry.setSection (line.substring (8).trim());
+                                continue;
+                            }
                         }
-                    }
-                    
-                    if (line.length() >= 6)
-                    {
-                        key = line.substring (0,6);
-                        if (key.equalsIgnoreCase("TITLE:"))
-                        {
-                            entry.setTitle (line.substring (6).trim());
-                            continue;
-                        }
-                    }
-
-                    if (line.length() >= 9)
-                    {
-                        key = line.substring (0,9);
                         
-                        if (key.equalsIgnoreCase("QUESTION:"))
+                        if (line.length() >= 6)
                         {
-                            entry.setQuestion (line.substring(9).trim());
-                            continue;
+                            key = line.substring (0,6);
+                            if (key.equalsIgnoreCase("TITLE:"))
+                            {
+                                entry.setTitle (line.substring (6).trim());
+                                continue;
+                            }
                         }
+                                
+                        if (line.length() >= 9)
+                        {
+                            key = line.substring (0,9);
+                            
+                            if (key.equalsIgnoreCase("QUESTION:"))
+                            {
+                                entry.setQuestion (line.substring(9).trim());
+                                continue;
+                            }
+                        }
+                        
+                        entry.appendBody (line+"\n");
                     }
-
-                    entry.appendBody (line+"\n");
                 }
-            }
 
-            //if there is no title, use the filename instead
-            if (entry.getTitle() == null)
-            {
-                int fileSepIndex = fileName.lastIndexOf ("/");
-                int dotIndex = fileName.lastIndexOf(".");
-                String tmp = (fileSepIndex >=0?fileName.substring(fileSepIndex): fileName);
-                tmp = (dotIndex >= 0?tmp.substring(0, dotIndex): tmp);
-                entry.setTitle (tmp);
-            }
-
+                //if there is no title, use the filename instead
+                if (entry.getTitle() == null)
+                {
+                    int fileSepIndex = fileName.lastIndexOf ("/");
+                    String tmp = (fileSepIndex >=0?fileName.substring(fileSepIndex): fileName);
+                    int dotIndex = tmp.lastIndexOf(".");
+                    tmp = (dotIndex >= 0?tmp.substring(0, dotIndex): tmp);
+                    entry.setTitle (tmp);
+                }
             
-            insertFaqEntry (entry);
+                insertFaqEntry (entry);
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+                log(e.toString());
+            }
         }
 
         timestamp = System.currentTimeMillis();
@@ -373,7 +349,10 @@ public class FaqServlet extends HttpServlet
 
         String sectionName = entry.getSection();
         if (sectionName == null)
+        {
             sectionName = GENERAL_SECTION_NAME;
+            System.err.println("NO section for "+entry);
+        }
 
         TreeMap entryMap = (TreeMap)sectionMap.get(sectionName);
         if (entryMap == null)
@@ -402,6 +381,7 @@ public class FaqServlet extends HttpServlet
                 
         JettyPage page = new JettyPage (contextPath, servletPath);
         page.title ("Jetty FAQ");
+        page.add("&nbsp;<br/>");
         page.add(new Heading (1, "Jetty FAQ &nbsp; <IMG SRC=\"/jetty/images/info.gif\" ALIGN=\"MIDDLE\" BORDER=\"0\">"));
 
         page.add(new Text ("These frequently asked questions have been contributed by Jetty users.  If you have a question and/or answer that is not here, email <A HREF=\"http:///lists.sourceforge.net/lists/listinfo/jetty-discuss/\">Jetty Discuss</A>."));
@@ -411,19 +391,22 @@ public class FaqServlet extends HttpServlet
         while (itor.hasNext())
         {
             String section = (String)itor.next();
-            page.add(new Heading (1, section));
+            page.add(new Heading (1, section.substring(4)));
             
             TreeMap entryMap = (TreeMap)sectionMap.get(section);
             if (entryMap == null)
                 continue;
             
+	    page.add("<ul>");
             Iterator entries = entryMap.entrySet().iterator();
             while (entries.hasNext())
             {
                 FaqEntry entry = (FaqEntry)((Map.Entry)entries.next()).getValue();
+	        page.add("<li>");
                 page.add (new Link (contextPath+servletPath+"?s="+section+"&t="+entry.getTitle(), entry.getQuestion()));
-                page.add (new Text("<P>"));
+	        page.add("</li>");
             }
+	    page.add("</ul>");
             
         }
         return page;
@@ -440,13 +423,14 @@ public class FaqServlet extends HttpServlet
     private Page generateFaqEntry (String contextPath, String servletPath, FaqEntry entry)
     {        
         JettyPage page = new JettyPage (contextPath, servletPath);
-        page.title ("Jetty FAQ");
+        page.title ("Jetty FAQ: "+entry.getQuestion());
         
+        page.add("&nbsp;<br/>");
         page.add (new Heading (1, entry.getQuestion()));
 
         page.add (new Text (entry.getBody()));
         page.add (new Text ("<P>"));
-        page.add (new Link (contextPath+servletPath+"/index.html","<IMG SRC=\"/jetty/images/info_sm.gif\" BORDER=\"0\"><BR CLEAR=\"bottom\"> JettyFaq"));
+        page.add (new Link (contextPath+servletPath+"/","<IMG SRC=\"/jetty/images/info_sm.gif\" BORDER=\"0\"><BR CLEAR=\"bottom\"> JettyFaq"));
         page.add (new Text ("<BR><BR>"));
         
         return page;

@@ -1,4 +1,4 @@
-SECTION: HTTP
+SECTION: 700-Clustering
 TITLE: modjk
 QUESTION: Can Jetty be run with mod_jk?
 
