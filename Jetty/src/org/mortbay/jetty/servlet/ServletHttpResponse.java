@@ -233,7 +233,7 @@ public class ServletHttpResponse implements HttpServletResponse
      */
     public void setLocale(Locale locale)
     {
-        if (locale == null)
+        if (this._outputState!=0 || locale == null)
             return; 
 
         _locale = locale;
