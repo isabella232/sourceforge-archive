@@ -633,6 +633,7 @@ public class HttpContext implements LifeCycle,
     public void setMaxCachedFileSize(int maxCachedFileSize)
     {
         _maxCachedFileSize = maxCachedFileSize;
+        _cache.clear();
     }
 
     /* ------------------------------------------------------------ */
@@ -645,6 +646,7 @@ public class HttpContext implements LifeCycle,
     public void setMaxCacheSize(int maxCacheSize)
     {
         _maxCacheSize = maxCacheSize;
+        _cache.clear();
     }
 
     /* ------------------------------------------------------------ */
@@ -753,6 +755,7 @@ public class HttpContext implements LifeCycle,
                         _leastRecentlyUsed.invalidate();
                     
                     cached=resource.cache();
+                    if (Code.verbose()) Code.debug("CACHED: ",resource);
                     new CachedMetaData(cached,pathInContext);
                     return cached;
                 }
@@ -1867,6 +1870,7 @@ public class HttpContext implements LifeCycle,
             }
             _loader=null;
         }
+        _cache.clear();
         Log.event("Stopped "+this);
     }
     
