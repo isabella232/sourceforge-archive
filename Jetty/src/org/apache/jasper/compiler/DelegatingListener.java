@@ -89,6 +89,10 @@ final class DelegatingListener implements ParseEventListener {
         this.action = action;
     }
 
+    public void setDefault(boolean isXml) {
+        delegate.setDefault(isXml);
+    }
+
     public void setReader(JspReader reader) {
 	delegate.setReader(reader);
     }

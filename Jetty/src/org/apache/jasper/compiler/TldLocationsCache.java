@@ -200,6 +200,10 @@ public class TldLocationsCache {
     {
 
         Set libSet = ctxt.getResourcePaths("/WEB-INF/lib");
+        if (libSet == null) {
+            System.err.println("processJars: cannot find /WEB-INF/lib");
+            return;
+        }
         Iterator it = libSet.iterator();
         while (it.hasNext()) {
             String resourcePath = (String) it.next();

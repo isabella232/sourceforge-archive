@@ -35,7 +35,7 @@ JDK 1.4 Quick start
 If using jdk 1.4 run:
 
   cd <jetty install directory>
-  java -jar lib/org.mortbay.jetty.jar etc/demo.xml
+  java -server -jar lib/org.mortbay.jetty.jar etc/demo.xml
 
 Where cd and / have been repaced with any non-unix platform versions. 
 Browse to http://localhost:8080
@@ -168,7 +168,7 @@ Running the Demo Server
 A Demo server can be run on port 8080 with the commands:
 
   cd $JETTY_HOME
-  java org.mortbay.jetty.Server etc/admin.xml etc/demo.xml
+  java -server org.mortbay.jetty.Server etc/admin.xml etc/demo.xml
 
 
 You can access this demo with at http://localhost:8080
@@ -190,13 +190,13 @@ that should be read before trying to configure Jetty.
 The class org.mortbay.jetty.Server reads an xml configuration
 file and configures one or more instances of org.mortbay.http.HttpServer:
 
-  java org.mortbay.jetty.Server [configuration.xml]
+  java -server org.mortbay.jetty.Server [configuration.xml]
 
 The class org.mortbay.http.HttpServer is the main class to be
 configured.  It has a configuration API and a command line API and
 can be run with
 
-  java org.mortbay.http.HttpServer [options | -?]
+  java -server org.mortbay.http.HttpServer [options | -?]
 
 The org.mortbay.jetty.Server class is simply an xml configuration
 frontend to org.mortbay.http.HttpServer.

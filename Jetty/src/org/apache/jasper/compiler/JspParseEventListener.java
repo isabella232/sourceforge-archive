@@ -104,7 +104,10 @@ public class JspParseEventListener implements ParseEventListener {
 
     String jspServletBase = Constants.JSP_SERVLET_BASE;
     String serviceMethodName = Constants.SERVICE_METHOD_NAME;
-    String servletContentType = Constants.SERVLET_CONTENT_TYPE;
+    String servletContentType = null;
+    String pageEncoding = null;
+    String defaultType = null;
+    String defaultCharset = null;
 
     String extendsClass = "";
     Vector interfaces = new Vector();
@@ -149,6 +152,16 @@ public class JspParseEventListener implements ParseEventListener {
     final void addGenerator(Generator gen) throws JasperException {
         gen.init(ctxt);
         generators.addElement(gen);
+    }
+
+    public void setDefault(boolean isXml) {
+        if (isXml) {
+            defaultType = "text/xml;";
+            defaultCharset = "UTF-8";
+        } else {
+            defaultType = "text/html;";
+            defaultCharset = "ISO-8859-1";
+        }
     }
 
     public static void setCommentGenerator(CommentGenerator generator) {
@@ -345,14 +358,15 @@ public class JspParseEventListener implements ParseEventListener {
         writer.println("}");
 
 	writer.println("_jspxFactory = JspFactory.getDefaultFactory();");
-	if (this.contentTypeDir == true)
-	    writer.println("response.setContentType(" +
-			   writer.quoteString(servletContentType)
+
+        // Per errata_a, determine the default output content type
+        if (servletContentType == null) {
+            servletContentType = defaultType +
+			((pageEncoding == null)? defaultCharset: pageEncoding);
+        }
+	writer.println("response.setContentType("
+			   + writer.quoteString(servletContentType)
 			   + ");");
-	else
-	    writer.println("response.setContentType(\"" +
-			   servletContentType +
-			   ";charset=ISO-8859-1\");");
 	writer.println("pageContext = _jspxFactory.getPageContext(this, request, response,");
 	writer.println("\t\t\t"
 			+ writer.quoteString(error) + ", "
@@ -480,13 +494,7 @@ public class JspParseEventListener implements ParseEventListener {
             if (pageEncoding == null)
                 throw new CompileException(start,
 					   Constants.getString("jsp.error.page.invalid.pageencoding"));
-	    // We do nothing with pageEncoding.
-	    // This is handled by the parser
-	    // to set the encoding type on the reader before we even
-	    // start parsing the page.
-	    // No restriction on one such attribute per translation unit.
-	    // We can have one per page.
-	    // FIXME: we do not track multiple occurrences per page 
+            listener.pageEncoding = pageEncoding;
         }
     }
 

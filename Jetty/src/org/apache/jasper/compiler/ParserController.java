@@ -207,6 +207,7 @@ public class ParserController {
             // dispatch to the proper parser
 	    
             reader = getReader(absFileName, encoding);
+            jspHandler.setDefault(isXml);
             if (isXml) {
                 (new ParserXJspSax(absFileName, reader, jspHandler)).parse();
             } else {

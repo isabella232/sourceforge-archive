@@ -415,6 +415,17 @@ public class TagLibraryInfoImpl extends TagLibraryInfo {
                                   );
             }
 
+        // JSP.C1: It is a (translation time) error for an action that
+	// has one or more variable subelements to have a TagExtraInfo
+	// class that returns a non-null object.
+
+	if (tei != null && variableVector.size() != 0) {
+	    throw new JasperException(
+                          Constants.getString(
+                              "jsp.warning.teiclass.is.nonnull",
+                              new Object[] {teiclass}));
+        }
+	
         TagInfo taginfo = new TagInfo(name, tagclass, bodycontent,
                                       info, this, 
                                       tei,

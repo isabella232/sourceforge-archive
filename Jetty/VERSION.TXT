@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
  + Updated international URI doco
+ + Updated jasper to CVS snapshot 200208011920
 
 Jetty-4.1.0RC0 - 31 July 2002
  + Fixed getRealPath for packed war files.

@@ -72,7 +72,7 @@ import java.util.Enumeration;
 
 import org.apache.jasper.Constants;
 import org.apache.jasper.JasperException;
-
+import org.apache.jasper.logging.Logger;
 
 import org.w3c.dom.*;
 import javax.xml.parsers.DocumentBuilder;
@@ -475,9 +475,9 @@ class MyEntityResolver implements EntityResolver {
 		return isrc;
 	    }
 	}
-	throw new SAXException(
-	    Constants.getString("jsp.error.parse.xml.invalidPublicId",
-				new Object[]{publicId}));
+	Constants.message("jsp.error.parse.xml.invalidPublicId",
+				new Object[]{publicId}, Logger.ERROR);
+        return null;
     }
 }
 

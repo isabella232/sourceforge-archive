@@ -86,6 +86,7 @@ public interface ParseEventListener {
      * and the reader is different for each one.
      */
     public void setReader(JspReader reader);
+    public void setDefault(boolean isXml);
 
     void setTemplateInfo(Mark start, Mark stop);
     void beginPageProcessing() throws JasperException;

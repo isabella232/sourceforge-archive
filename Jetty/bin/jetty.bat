@@ -155,7 +155,7 @@ if NOT "%JETTY_PORT%"=="" goto jetty_port_set
 rem ===========================================================
 rem == build jvm options
 rem ===========================================================
-set OPTIONS=-Djetty.home="%JETTY_HOME%" -Djetty.log="%JETTY_LOG%" -Djetty.port=%JETTY_PORT%
+set OPTIONS=-server -Djetty.home="%JETTY_HOME%" -Djetty.log="%JETTY_LOG%" -Djetty.port=%JETTY_PORT%
 if DEFINED JETTY_OPTIONS set OPTIONS=%OPTIONS% %JETTY_OPTIONS%
 
 rem ===========================================================

@@ -457,7 +457,7 @@ CLASSPATH="$CP"
 #####################################################
 # Add jetty properties to Java VM options.
 #####################################################
-JAVA_OPTIONS="-Djetty.home=$JETTY_HOME -Djetty.log=$JETTY_LOG $JAVA_OPTIONS"
+JAVA_OPTIONS="-server -Djetty.home=$JETTY_HOME -Djetty.log=$JETTY_LOG $JAVA_OPTIONS"
 
 #####################################################
 # This is how the Jetty server will be started

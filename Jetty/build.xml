@@ -73,6 +73,8 @@ Other targets:
 
   <property name="tools.jar"       value="${env.JAVA_HOME}/lib/tools.jar"/>
 
+  <property name="jvmarg"  value="-server -Djetty.home=${jetty.home} -Djetty.log=${jetty.home}/logs" />
+
   <!-- ==================================================================== -->
   <path id="extpath">
     <fileset dir="${ext}">
@@ -435,7 +437,7 @@ Other targets:
          <pathelement path="${env.CLASSPATH}" />
          <path refid="classpath" />
        </classpath>
-       <jvmarg line="-Djetty.home=${jetty.home} -Djetty.log=${jetty.home}/logs" />
+       <jvmarg line="${jvmarg}" />
        <arg line="${etc}/admin.xml ${etc}/demo.xml" />
     </java>
   </target>
@@ -451,7 +453,7 @@ Other targets:
          <pathelement path="${mortbay.jmx.jar}"/>
          <path refid="classpath"/>
        </classpath>
-       <jvmarg line="-Djetty.home=${basedir} -Djetty.log=${basedir}/logs" />
+       <jvmarg line="${jvmarg}" />
        <arg line="${etc}/demo.mlet" />
     </java>
   </target>
@@ -468,7 +470,7 @@ Other targets:
          <pathelement path="${env.CLASSPATH}" />
          <path refid="classpath" />
        </classpath>
-       <jvmarg line="-Djetty.home=${jetty.home} -Djetty.log=${jetty.home}/logs" />
+       <jvmarg line="${jvmarg}" />
        <arg line="${etc}/admin.xml ${etc}/jetty.xml" />
     </java>
   </target>
@@ -485,7 +487,7 @@ Other targets:
          <pathelement path="${env.CLASSPATH}" />
          <path refid="classpath" />
        </classpath>
-       <jvmarg line="-Djetty.home=${jetty.home} -Djetty.log=${jetty.home}/logs" />
+       <jvmarg line="${jvmarg}" />
        <arg line="${etc}/admin.xml ${etc}/watchdog.xml" />
     </java>
   </target>
