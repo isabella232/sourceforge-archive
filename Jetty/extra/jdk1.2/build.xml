@@ -3,9 +3,6 @@
  Copyright (c) 2003 Mort Bay Consulting (Australia) Pty. Ltd.
  $Id$
 ========================================================================
-========================================================================
-
-
 -->
 
 <project name="LoadBalancer" default="jars" basedir=".">

@@ -70,7 +70,7 @@ public class Default extends HttpServlet
 {
     private HttpContext _httpContext;
     private ServletHandler _servletHandler;
-    private String _AllowString="GET, POST, HEAD, OPTION, TRACE";
+    private String _AllowString="GET, POST, HEAD, OPTIONS, TRACE";
     
     private boolean _acceptRanges=true;
     private boolean _dirAllowed;

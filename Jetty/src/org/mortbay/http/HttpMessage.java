@@ -1,5 +1,5 @@
 // ===========================================================================
-// Copyright (c) 1996 Mort Bay Consulting Pty. Ltd. All rights reserved.
+// Copyright (c) 1996-2003 Mort Bay Consulting Pty. Ltd. All rights reserved.
 // $Id$
 // ---------------------------------------------------------------------------
 
@@ -28,7 +28,11 @@ import org.mortbay.util.TypeUtil;
  * header fields, content and optional trailer fields, while managing the
  * state of the message.
  *
+<<<<<<< HttpMessage.java
  * @version $Id$
+=======
+ * @version $Id$
+>>>>>>> 1.26.2.1
  * @author Greg Wilkins (gregw)
  */
 

@@ -1,5 +1,5 @@
 // ========================================================================
-// Copyright (c) 1997 Mort Bay Consulting, Sydney
+// Copyright (c) 1997-2003 Mort Bay Consulting, Sydney
 // $Id$
 // ========================================================================
 package org.mortbay.util;

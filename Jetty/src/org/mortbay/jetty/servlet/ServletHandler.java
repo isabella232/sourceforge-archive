@@ -77,7 +77,7 @@ public class ServletHandler extends AbstractHttpHandler
     
     /* ------------------------------------------------------------ */
     private static final boolean __Slosh2Slash=File.separatorChar=='\\';
-    private static String __AllowString="GET, HEAD, POST, OPTION, TRACE";
+    private static String __AllowString="GET, HEAD, POST, OPTIONS, TRACE";
     
     /* ------------------------------------------------------------ */
     private boolean _usingCookies=true;

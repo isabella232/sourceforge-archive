@@ -72,7 +72,7 @@ public class TestRequest
             "  GET     ",                 null,  null,      null,
             "GET",                        null,  null,      null,
             "",                           null,  null,      null,
-            "Option * http/1.1  ",        "OPTION", "*",    "HTTP/1.1",
+            "Options * http/1.1  ",       "OPTIONS", "*",    "HTTP/1.1",
             "GET /xxx/%%123/blah HTTP/1.0",  null, null,       null,
             "GET http://h:x/ HTTP/1.0",   null, null,       null,
         };

@@ -8,6 +8,11 @@ Jetty-5.x.x
  + updated to jasper 5.0.3
  + Implemented setCharaterEncoding 
 
+
+Jetty-4.2.x
+ + Added missing S to some OPTIONS strings
+ + Added open method to threaded server.
+
 Jetty-4.2.11 - 12 July 2003
  + Fixed race in servlet initialization code.
  + Cookie params all in lower case.

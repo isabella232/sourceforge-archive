@@ -374,18 +374,19 @@ abstract public class ThreadedServer extends ThreadPool
         }
         return null;
     }
-    
+
     /* ------------------------------------------------------------------- */
-    /* Start the ThreadedServer listening
+    /** Open the server socket.
+     * This method can be called to open the server socket in advance of starting the
+     * listener. This can be used to test if the port is available.
+     *
+     * @exception IOException if an error occurs
      */
-    synchronized public void start()
-        throws Exception
+    public void open()
+        throws IOException
     {
-        try
+        if (_listen==null)
         {
-            if (isStarted())
-                return;
-            
             _listen=newServerSocket(_address,
                                     (getMaxThreads()>0?(getMaxThreads()+1):50));
             if (_address==null)
@@ -401,7 +402,22 @@ abstract public class ThreadedServer extends ThreadPool
             _soTimeOut=getMaxIdleTimeMs();
             if (_soTimeOut>=0)
                 _listen.setSoTimeout(_soTimeOut);
+        }
+    }
+    
+    /* ------------------------------------------------------------------- */
+    /* Start the ThreadedServer listening
+     */
+    synchronized public void start()
+        throws Exception
+    {
+        try
+        {
+            if (isStarted())
+                return;
 
+            open();
+            
             _running=true;
             _acceptor=new Acceptor();
             _acceptor.setDaemon(isDaemon());

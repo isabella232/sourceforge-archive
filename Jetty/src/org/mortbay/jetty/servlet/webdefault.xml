@@ -59,7 +59,7 @@
   <!-- ==================================================================== -->
   <!-- The default servlet.                                                 -->
   <!-- This servlet, normally mapped to /, provides the handling for static -->
-  <!-- content, OPTION and TRACE methods for the context.                   -->
+  <!-- content, OPTIONS and TRACE methods for the context.                  -->
   <!-- The following initParameters are supported:                          -->
   <!--                                                                      -->
   <!--   acceptRanges     If true, range requests and responses are         -->
