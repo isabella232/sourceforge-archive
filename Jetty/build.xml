@@ -223,7 +223,7 @@ Other targets:
         <pathelement path="${servlet.jar}" />
         <pathelement path="${jetty.jar}"   />
       </classpath>
-      <include name="org/mortbay/webapps/jetty/*.java" />
+      <include name="org/**/*.java" />
     </javac>
 
     <copy file="LICENSE.html" tofile="${jetty.webapp}/LICENSE.html" />

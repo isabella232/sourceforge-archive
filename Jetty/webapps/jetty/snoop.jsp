@@ -172,8 +172,8 @@
 ClassLoader=<%= this.getClass().getClassLoader() %>
 ThreadContextClassLoader=<%= Thread.currentThread().getContextClassLoader() %>
 
-Class from context classpath = <%= org.mortbay.webapps.jetty.JettyPage.class %>
-Class from system classpath = <%= org.xml.sax.Parser.class %>
+Class from context classpath = <%= org.CheckLoader.class %> from <%= org.CheckLoader.class.getClassLoader() %>
+Class from system classpath = <%= org.mortbay.util.Resource.class %> from <%= org.mortbay.util.Resource.class.getClassLoader() %>
 
 getServletContext().getResourcePaths("/WEB-INF") = <%= getServletContext().getResourcePaths("/WEB-INF") %>
 </PRE>
