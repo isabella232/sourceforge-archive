@@ -118,13 +118,13 @@ public class Resource
                 catch(Exception e2)
                 {
                     Code.debug(e2);
-                    return new BadResource(url,e2.toString());
+                    throw e;
                 }
             }
             else
             {
-                Code.debug(e);
-                return new BadResource(url,e.toString());
+                Code.warning("Bad Resource: "+resource);
+                throw e;
             }
         }
 

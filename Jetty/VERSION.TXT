@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Handle special characters in resource file names better.
+
 Jetty-4.0.D4 - 14 Jan 2002
  + Prevent output after forward
  + Handle ServletRequestWrappers for Generic Servlets

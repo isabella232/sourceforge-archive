@@ -256,7 +256,9 @@ public class ResourceHandler extends NullHandler
         
         try
         {
-            resource = baseResource.addPath(pathInContext);
+            Code.setDebug(true);
+            
+            resource = baseResource.addPath(URI.encodePath(pathInContext));
             Code.debug("PATH=",pathInContext,
                        " RESOURCE=",resource);
             
@@ -822,7 +824,7 @@ public class ResourceHandler extends NullHandler
             if (parent)
             {
                 out.write("<TR><TD><A HREF=");
-                out.write(padSpaces(URI.addPaths(base,"../")));
+                out.write(URI.encodePath(URI.addPaths(base,"../")));
                 out.write(">Parent Directory</A></TD><TD></TD><TD></TD></TR>\n");
             }
      
@@ -830,13 +832,15 @@ public class ResourceHandler extends NullHandler
                                                            DateFormat.MEDIUM);
             for (int i=0 ; i< ls.length ; i++)
             {
-                Resource item = file.addPath(ls[i]);
+                String encoded=URI.encodePath(ls[i]);
+                Resource item = file.addPath(encoded);
   
                 out.write("<TR><TD><A HREF=\"");
-                String path=URI.addPaths(base,ls[i]);
+                String path=URI.addPaths(base,encoded);
+                
                 if (item.isDirectory() && !path.endsWith("/"))
                     path=URI.addPaths(path,"/");
-                out.write(padSpaces(path));
+                out.write(path);
                 out.write("\">");
                 out.write(ls[i]);
                 out.write("&nbsp;");
@@ -857,18 +861,6 @@ public class ResourceHandler extends NullHandler
                                "Directory access not allowed");
         }
     }
-
-
- 
-    /* ------------------------------------------------------------ */
-    /**
-     * Replaces spaces by %20
-     */
-    private String padSpaces(String str)
-    {
-        return StringUtil.replace(str," ","%20");
-    }
- 
 
  
     /* ------------------------------------------------------------ */

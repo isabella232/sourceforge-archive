@@ -455,23 +455,44 @@ public class URI
         if (path==null || path.length()==0)
             return path;
         
-        StringBuffer buf = new StringBuffer(path.length()<<1);
-        encodePath(buf,path);
-        return buf.toString();
+        StringBuffer buf = encodePath(null,path);
+        return buf==null?path:buf.toString();
     }
         
     /* ------------------------------------------------------------ */
     /* Encode a URI path.
      * @param path The path the encode
-     * @param buf StringBuffer to encode path into
+     * @param buf StringBuffer to encode path into (or null)
+     * @return The StringBuffer or null if no substitutions required.
      */
-    public static void encodePath(StringBuffer buf, String path)
+    public static StringBuffer encodePath(StringBuffer buf, String path)
     {
+        if (buf==null)
+        {
+        loop:
+            for (int i=0;i<path.length();i++)
+            {
+                char c=path.charAt(i);
+                switch(c)
+                {
+                  case '%':
+                  case '?':
+                  case ';':
+                  case '#':
+                  case ' ':
+                      buf=new StringBuffer(path.length()<<1);
+                      break loop;
+                }
+            }
+            if (buf==null)
+                return null;
+        }
+        
         synchronized(buf)
         {
             for (int i=0;i<path.length();i++)
             {
-                char c=path.charAt(i);
+                char c=path.charAt(i);       
                 switch(c)
                 {
                   case '%':
@@ -495,6 +516,8 @@ public class URI
                 }
             }
         }
+
+        return buf;
     }
     
     /* ------------------------------------------------------------ */

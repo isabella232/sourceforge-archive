@@ -8,10 +8,10 @@
 # Use com.mortbay.Util.Password to generate crypted passwords.
 #
 
-Users: tom dick harry
+Users: jetty tom dick harry
 
-TestGroup: tom harry
+TestGroup: jetty tom harry
 
-AdminGroup: admin jetty
+AdminGroup: jetty admin 
 
 
