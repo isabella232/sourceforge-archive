@@ -67,7 +67,7 @@
 
 usage()
 {
-    echo "Usage: $0 {start|stop|run|restart|check} [ CONFIGS ... ] "
+    echo "Usage: $0 {start|stop|run|restart|check|supervise} [ CONFIGS ... ] "
     exit 1
 }
 
@@ -416,7 +416,7 @@ JAVA_OPTIONS="-Djetty.home=$JETTY_HOME -Djetty.log=$JETTY_LOG $JAVA_OPTIONS"
 #####################################################
 
 case "$ACTION" in
-  start)
+  start|supervise)
      RUN_CMD="$JAVA -DLOG_FILE=$JETTY_LOG/yyyy_mm_dd.jetty.log -cp $CLASSPATH $JAVA_OPTIONS org.mortbay.jetty.Server $CONFIGS"
   ;;
   *)
@@ -476,6 +476,14 @@ case "$ACTION" in
         sleep 5
         $0 start $*
         ;;
+
+  supervise)
+       #
+       # Under control of daemontools supervise monitor which
+       # handles restarts and shutdowns via the svc program.
+       #
+         exec $RUN_CMD
+         ;;
 
   run)
         echo "Running Jetty: "
