@@ -497,6 +497,7 @@ public class CgiServlet extends HttpServlet
             ev.setenv("REQUEST_URI"         ,request.getRequestURI());
             ev.setenv("SCRIPT_FILENAME"     ,scriptFilename);
             ev.setenv("URL_SCHEME"          ,request.getScheme());
+            ev.setenv("HTTPS"               ,"ON","https".equals(request.getScheme()));
         }
 
         return ev;
