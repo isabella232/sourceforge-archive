@@ -201,15 +201,22 @@ public class AJP13Packet
             throw new IOException("Bad JSP13 rcv packet:"+magic+" "+this);
         int len=getInt();
 
+        // check packet fits into the buffer
+        int packetLength = __HDR_SIZE + len;
+        if ( packetLength > _buf.length )
+            throw new IOException("AJP13 packet (" + packetLength +
+                                  "bytes) too large for buffer (" + _buf.length +
+                                  " bytes)");
+        
         // read packet
         do
         {
-            int l=in.read(_buf,_bytes,len+__HDR_SIZE-_bytes);
+            int l=in.read(_buf,_bytes,packetLength-_bytes);
             if (l<0)
                 return false;
             _bytes+=l;
         }
-        while (_bytes<len);
+        while (_bytes<packetLength);
         
         if (Code.verbose(99))
             Code.debug("AJP13 rcv: "+this.toString(64));

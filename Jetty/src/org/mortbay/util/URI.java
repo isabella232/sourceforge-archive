@@ -355,7 +355,7 @@ public class URI
             _parameters=new UrlEncoded();
         
         if (query!=null)
-            _parameters.decode(query);
+            _parameters.decode(query,__CHARSET);
     }
     
     /* ------------------------------------------------------------ */
