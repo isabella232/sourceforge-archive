@@ -63,7 +63,11 @@ public class AdminServlet extends HttpServlet
                             HttpServletResponse response) 
         throws ServletException, IOException
     {
-        boolean start="Start".equals(request.getParameter("A"));
+        String action=request.getParameter("A");
+        boolean exit= "Exit".equals(action);
+        if (exit)
+          System.exit(1);
+        boolean start=!exit  && "Start".equals(action);
         String id=request.getParameter("ID");
 
         StringTokenizer tok=new StringTokenizer(id,":");
