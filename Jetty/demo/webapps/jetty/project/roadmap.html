@@ -1,0 +1,45 @@
+
+<H1>Jetty Road Map&nbsp;&nbsp;<img src="/jetty/images/roadmap.gif" align=middle></H1>
+
+<H2>Stable Series: Jetty 4.2.x</H2>
+
+This is the current stable series of Jetty since November 2002. Development is 
+continuing on this series for stability, increased integration and extensions such as:<UL>
+<LI>JBoss integration.
+<LI>Jonas integration.
+<LI>JMX extension.
+<LI>JettyPlus JNDI and JOTM integration.
+</UL>
+
+The code of 4.2.x is in the <a href="http://cvs.sourceforge.net/viewcvs.py/jetty/Jetty/?only_with_tag=Jetty_4_2">Jetty_4_2 branch of CVS</a>.
+
+<H2>Development Series: Jetty 5.0.x</H2>
+The servlet specication 2.4 will final in Q4 2003.  The 2.4 spec is
+pretty incremental on the 2.3 spec, so this will be an evolution rather than
+revolution.  The Jetty 5 series is an moderate increment of the 4.2 series, which
+already had much of the required infrastructure for the 2.4 specification.
+This will allow a stable Jetty 5.0 to be release soon after the final specification.
+<p>
+Jetty 5.0 is currently in alpha release and the latest code is available
+in the <a href="http://cvs.sourceforge.net/viewcvs.py/jetty/Jetty/">CVS HEAD</a>. 
+
+<H2>Experimental Series </H2>
+The <a href="http://cvs.sourceforge.net/viewcvs.py/jetty/JettyExperimental/">JettyExperimental CVS</a>
+contains experimental code for a new HTTP layer for Jetty.  The code is close to providing
+a fully HTTP/1.1 compliant stack meeting the following aims:
+<ul>
+<li>Flyweight. The code has been stripped down to just support the core HTTP/1.1</li>
+<li>Improved buffering for performance, minimal footprint and portability. NIO direct buffers 
+will be able to be used where available.</li>
+<li>It is blocking-agnostic, so that NIO non-blocking semantics can be used when
+the application layer supports it</li> 
+<li>Highly portable. It is intended for the stack to be able to run on anything from 
+a PDA to the latest greatest version of JRE on a SMP</li>
+</ul>
+<p>
+The code is close to a first release of a HTTP stack in Q4 2003.
+Only once the HTTP stack is stable and tested, will servlets be considered
+for main release. Jetty 5.1 is the likely target in Q1 2004.
+</p>
+<hr>
+<a href="index.html">Return to the Jetty project page</a>.
