@@ -104,7 +104,7 @@
     <Arg></Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/webapps/</Arg>
     <Arg>org/mortbay/jetty/servlet/webdefault.xml</Arg>
-    <Arg type="boolean">false</Arg>
+    <Arg type="boolean">true</Arg>
   </Call>
 
 

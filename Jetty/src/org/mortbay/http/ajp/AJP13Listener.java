@@ -57,7 +57,6 @@ public class AJP13Listener
 
     /* ------------------------------------------------------------------- */
     public AJP13Listener(InetAddrPort address)
-        throws IOException
     {
         super(address);
     }

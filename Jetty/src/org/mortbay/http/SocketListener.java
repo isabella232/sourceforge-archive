@@ -54,7 +54,6 @@ public class SocketListener
 
     /* ------------------------------------------------------------------- */
     public SocketListener(InetAddrPort address)
-        throws IOException
     {
         super(address);
     }

@@ -24,6 +24,10 @@ public interface LifeCycle
     /** Stop the LifeCycle.
      * The LifeCycle may wait for current activities to complete
      * normally, but it can be interrupted.
+     * @exception InterruptedException Stopping a lifecycle is rarely atomic
+     * and may be interrupted by another thread.  If this happens
+     * InterruptedException is throw and the component will be in an
+     * indeterminant state and should probably be discarded.
      */
     public void stop()
         throws InterruptedException;

@@ -189,7 +189,7 @@ public class HttpOutputStream
             _bufferSize=capacity;
             if (_bufferedOut!=null)
             {
-                boolean fixed=_chunkingOut.isFixed();
+                boolean fixed=_bufferedOut.isFixed();
                 _bufferedOut.setFixed(false);
                 _bufferedOut.ensureSpareCapacity(capacity);
                 _bufferedOut.setFixed(fixed);

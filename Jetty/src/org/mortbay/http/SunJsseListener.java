@@ -120,7 +120,6 @@ public class SunJsseListener extends JsseListener
      * @exception IOException 
      */
     public SunJsseListener()
-        throws IOException
     {
         super();
     }
@@ -132,11 +131,9 @@ public class SunJsseListener extends JsseListener
      * @exception IOException 
      */
     public SunJsseListener(InetAddrPort p_address)
-        throws IOException
     {
         super( p_address);
     }
-
     
     /* ------------------------------------------------------------ */
     /* 

@@ -92,7 +92,6 @@ public abstract class JsseListener extends SocketListener
      * @exception IOException 
      */
     public JsseListener()
-        throws IOException
     {
         super();
         setDefaultScheme(HttpMessage.__SSL_SCHEME);
@@ -108,7 +107,6 @@ public abstract class JsseListener extends SocketListener
      * @exception IOException 
      */
     public JsseListener( InetAddrPort p_address)
-        throws IOException
     {
         super(p_address);
         if( p_address.getPort() == 0 )
