@@ -2,6 +2,7 @@
 Release 2.4.8 23 Oct 2000
   + Fixed bug with 304 replies with bodies.
   + Improved win32 make files.
+  + Fixed closing socket problem
 
 Release 2.4.7 6th Oct 2000
   + Allow Objects to be passed to LogSink
