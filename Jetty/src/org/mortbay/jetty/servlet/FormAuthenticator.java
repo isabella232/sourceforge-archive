@@ -301,6 +301,8 @@ public class FormAuthenticator implements Authenticator
         
         public void valueUnbound(HttpSessionBindingEvent event)
         {
+            Code.debug("unbind "+this);
+            
             if (_realm!=null && _realm instanceof SSORealm)
                 ((SSORealm)_realm).clearSingleSignOn(_jUserName);
                 
