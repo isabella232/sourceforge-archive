@@ -100,7 +100,7 @@ public class Default extends HttpServlet
     private boolean getInitBoolean(String name)
     {
         String value=getInitParameter(name);
-        return value.length()>0 &&
+        return value!=null && value.length()>0 &&
             (value.startsWith("t")||
              value.startsWith("T")||
              value.startsWith("y")||
