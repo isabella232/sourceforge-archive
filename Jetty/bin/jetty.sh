@@ -418,7 +418,7 @@ fi
 #####################################################
 case "'uname'" in
 CYGWIN*) PATH_SEPARATOR=";";;
-*) PATH_SEPRATATOR=":";;
+*) PATH_SEPARATOR=":";;
 esac
 
 
