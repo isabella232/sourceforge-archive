@@ -208,8 +208,9 @@ if x==x%JAVA% (
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set CP=%JETTY_HOME%\lib\javax.servlet.jar
 set CP=%CP%;%JETTY_HOME%\lib\com.mortbay.jetty.jar
+set CP=%CP%;%JETTY_HOME%\lib\com.mortbay.http.jar
 set CP=%CP%;%JETTY_HOME%\lib\javax.xml.jaxp.jar
-set CP=%CP%;%JETTY_HOME%\lib\org.apache.cromson.jar
+set CP=%CP%;%JETTY_HOME%\lib\org.apache.crimson.jar
 if exist "%JETTY_HOME%\LIB\org.apache.jasper.jar"  set CP=%CP%;%JETTY_HOME%\lib\org.apache.jasper.jar
 if exist "%JETTY_HOME%\LIB\com.sun.net.ssl.jar"    set CP=%CP%;%JETTY_HOME%\lib\com.sun.net.ssl.jar
 if exist "%JAVA_HOME%\lib\tools.jar"               set CP=%CP%;%JAVA_HOME%\lib\tools.jar
