@@ -20,7 +20,7 @@ import java.util.*;
  * The HTTP configuration allows a single servlet to be configured and
  * served from command line options.
  * <P>Usage<PRE>
- * java com.mortbay.HTTP.Configure.servletServer path name class [port]
+ * java com.mortbay.HTTP.Configure.FileServer [-help] [port  [urlPath [classPath]]]
  * </PRE>
  * @see com.mortbay.HTTP.HttpConfiguration
  * @version $Id$
