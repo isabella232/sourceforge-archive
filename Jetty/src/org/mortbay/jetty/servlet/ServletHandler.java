@@ -384,12 +384,6 @@ public class ServletHandler extends AbstractHttpHandler
                 _sessionListeners.remove(_sessionListeners.indexOf(listener));
         }
     }
-    
-    /* ------------------------------------------------------------ */
-    public synchronized boolean isStarted()
-    {
-        return super.isStarted();
-    }
 
     /* ------------------------------------------------------------ */
     public boolean isAutoInitializeServlets()
@@ -464,6 +458,8 @@ public class ServletHandler extends AbstractHttpHandler
             holder_set.toArray(new ServletHolder [holder_set.size()]);
         java.util.Arrays.sort (holders);
         
+        super.stop();
+        
         // Stop servlets
         for (int i=holders.length; i-->0;)
         {
@@ -477,8 +473,6 @@ public class ServletHandler extends AbstractHttpHandler
         
         // Stop the session manager
         _sessionManager.stop();
-        
-        super.stop();
         
         _loader=null;
         _context=null;
