@@ -437,6 +437,7 @@ public class Server extends HttpServer
                                     try{servers[i].stop();}
                                     catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
                                 }
+                                log.info("Shutdown hook complete");
                                 
                                 // Try to avoid JVM crash
                                 try{Thread.sleep(1000);}

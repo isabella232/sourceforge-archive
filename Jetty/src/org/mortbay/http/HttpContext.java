@@ -555,7 +555,6 @@ public class HttpContext extends ResourceCache
 
     /* ------------------------------------------------------------ */
     /** Set a context attribute.
-     * Attributes are cleared when the context is stopped.
      * @param name attribute name
      * @param value attribute value
      */

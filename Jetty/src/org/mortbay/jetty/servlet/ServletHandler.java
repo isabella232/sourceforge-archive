@@ -352,8 +352,6 @@ public class ServletHandler extends AbstractHttpHandler
     {
         if (isStarted())
             return;
-        
-        _attributes.clear();
 
         if (_sessionManager!=null)
             _sessionManager.start();
@@ -429,7 +427,7 @@ public class ServletHandler extends AbstractHttpHandler
         
         // Stop the session manager
         _sessionManager.stop();
-        
+        _attributes.clear();
         _loader=null;
     }
 
