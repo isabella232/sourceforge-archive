@@ -1,17 +1,26 @@
-/* ==============================================
- * Copyright 2003 Mort Bay Consulting Pty Ltd. All rights reserved.
- * Distributed under the artistic license.
- * Created on 17-Apr-2003
- * $Id$
- * ============================================== */
+// ========================================================================
+// $Id$
+// Copyright 2004 Mort Bay Consulting Pty. Ltd.
+// ------------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at 
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ========================================================================
 
 package org.mortbay.http;
+
 
 import java.io.IOException;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.OutBuffer;
+import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
 
 /* ------------------------------------------------------------------------------- */
@@ -34,6 +43,7 @@ public class HttpOutput
     private static Buffer SEND_CONTINUE=new ByteArrayBuffer("HTTP/1.1 100 Continue\015\012\015\012");
  
     private Buffer _buffer;
+    private EndPoint _endp;
     private boolean _chunking;
     private boolean _closed;
     private boolean _closing;
@@ -43,16 +53,14 @@ public class HttpOutput
     private HttpHeader _header;
     private Buffer _headerBuffer;
     private boolean _headResponse;
-    private OutBuffer _outBuffer;
     private boolean _persistent=true;
     private Buffer _trailerBuffer;
     private int _version=HttpVersions.HTTP_1_1_ORDINAL;
 
-    public HttpOutput(Buffer buffer,HttpHeader header,int headerReserve)
+    public HttpOutput(Buffer buffer,org.mortbay.io.EndPoint endp,HttpHeader header, int headerReserve)
     {
         _buffer=buffer;
-        if(buffer instanceof OutBuffer)
-            _outBuffer=(OutBuffer)buffer;
+        _endp=endp;
         _header=header;
         _headerBuffer=new ByteArrayBuffer(headerReserve);
         _trailerBuffer=new ByteArrayBuffer(LAST_CHUNK.length());
@@ -149,7 +157,7 @@ public class HttpOutput
         _header=null;
         _headerBuffer=null;
         _trailerBuffer=null;
-        _outBuffer=null;
+        _endp=null;
         _persistent=false;
     }
 
@@ -176,7 +184,8 @@ public class HttpOutput
         // handle HEAD
         if(_headResponse)
         {
-            _outBuffer.clear();
+            // TODO - this is almost certainly NOT correct!
+            _buffer.clear();
             _trailerBuffer.clear();
         }
 
@@ -206,19 +215,19 @@ public class HttpOutput
 
         // Actually do the flush & perhaps close
         _flushing=true;
-        if(_outBuffer!=null)
+        if(_endp!=null)
         {
-            _outBuffer.flush(_headerBuffer,_trailerBuffer);
+            _endp.flush(_headerBuffer,_buffer,_trailerBuffer);
             _flushing=
             _headerBuffer.hasContent()||
-            _outBuffer.hasContent()||
+            _buffer.hasContent()||
             _trailerBuffer.hasContent();
             if(!_flushing)
             {
                 if(_closing)
                 {
                     if(!_persistent)
-                        _outBuffer.close();
+                        _endp.close();
                     _closed=true;
                     _closing=false;
                     // TODO write any remaining content-length (or just close??)
@@ -295,12 +304,12 @@ public class HttpOutput
     public void sendContinue()
     throws IOException
     {
-        if(_outBuffer!=null)
+        if(_endp!=null)
         {
-            _outBuffer.put(SEND_CONTINUE);
-            while(_outBuffer.length()>0)
+            _buffer.put(SEND_CONTINUE);
+            while(_buffer.length()>0)
                 // TODO - need to fix these busy loops!
-                _outBuffer.flush();
+                _endp.flush(_buffer);
         }
     }
 

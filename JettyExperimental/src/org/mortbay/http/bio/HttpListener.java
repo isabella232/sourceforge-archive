@@ -1,13 +1,22 @@
 // ========================================================================
-// Copyright (c) 1999 Mort Bay Consulting (Australia) Pty. Ltd.
 // $Id$
+// Copyright 2004 Mort Bay Consulting Pty. Ltd.
+// ------------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at 
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 // ========================================================================
 
 package org.mortbay.http.bio;
 import java.io.Serializable;
 import java.net.UnknownHostException;
 
-import org.mortbay.http.*;
 import org.mortbay.thread.LifeCycle;
 
 
@@ -28,52 +37,7 @@ import org.mortbay.thread.LifeCycle;
  */
 public interface HttpListener extends LifeCycle, Serializable
 {
-    public static final String ATTRIBUTE="org.mortbay.http.HttpListener";
         
-    /* ------------------------------------------------------------ */
-    /** Set the HttpServer instance for this HttpListener.
-     * This method is called by the HttpServer.addListener method.
-     * It should not be called directly.
-     * @param server The HttpServer instance this HttpListener has been added to.
-     */
-    public void setHttpServer(HttpServer server);
-
-    /* ------------------------------------------------------------ */
-    /** Get the HttpServer instance for this HttpListener.
-     * @return The HttpServer instance this HttpListener has been added to,
-     * or null if the listener is not added to any HttpServer.
-     */
-    public HttpServer getHttpServer();
-    
-    /* ------------------------------------------------------------ */
-    /** Set the host or IP of the interface used by this listener. 
-     * @param host The hostname or IP address of the interface used by this
-     * listeners. If null or "0.0.0.0" then all available interfaces are used
-     * by this listener.
-     */
-    public void setHost(String host)
-        throws UnknownHostException;
-
-    /* ------------------------------------------------------------ */
-    /** Get the host or IP of the interface used by this listener. 
-     * @return The hostname or IP address of the interface used by this
-     * listeners. If null or "0.0.0.0" then all available interfaces are used
-     * by this listener.
-     */
-    public String getHost();
-    
-    /* ------------------------------------------------------------ */
-    /** Set the port number of the listener. 
-     * @param port The TCP/IP port number to be used by this listener.
-     */
-    public void setPort(int port);
-
-    /* ------------------------------------------------------------ */
-    /** Get the port number of the listener.
-     * @return The TCP/IP port number used by this listener.
-     */
-    public int getPort();
-
     /* ------------------------------------------------------------ */
     /** Get the size of the buffers used by connections from this listener. 
      * @return The default buffer size in bytes.
@@ -111,8 +75,7 @@ public interface HttpListener extends LifeCycle, Serializable
      * be a HttpConnection created by this listener.
      * @param request The request to customize.
      */
-    public void customizeRequest(HttpConnection connection,
-                                                                HttpRequest request);
+    public void customizeRequest(HttpConnection connection,HttpRequest request);
     
     /* ------------------------------------------------------------ */
     /** Prepare a connection for persistance.

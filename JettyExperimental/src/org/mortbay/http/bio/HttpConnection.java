@@ -1,10 +1,17 @@
-/*
- * =============================================================
- *  Copyright 2003 Mort Bay Consulting Pty Ltd. All
- * rights reserved. Distributed under the artistic license. Created on 17-Apr-2003 $Id:
- * HttpConnection.java,v 1.5 2004/01/10 00:09:16 gregwilkins Exp $
- * =============================================================
- */
+// ========================================================================
+// $Id$
+// Copyright 2004 Mort Bay Consulting Pty. Ltd.
+// ------------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at 
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ========================================================================
 
 package org.mortbay.http.bio;
 
@@ -18,9 +25,10 @@ import org.mortbay.http.HttpStatus;
 import org.mortbay.http.HttpVersions;
 import org.mortbay.http.handler.DumpHandler;
 import org.mortbay.io.Buffer;
+import org.mortbay.io.EndPoint;
+import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.Portable;
-import org.mortbay.io.bio.InputStreamBuffer;
-import org.mortbay.io.bio.OutputStreamBuffer;
+import org.mortbay.io.bio.SocketEndPoint;
 
 /* ------------------------------------------------------------------------------- */
 /**
@@ -29,6 +37,7 @@ import org.mortbay.io.bio.OutputStreamBuffer;
 public class HttpConnection implements Runnable
 {
     protected Socket _socket;
+    protected EndPoint _endp;
     protected HttpInputStream _in;
     protected HttpOutputStream _out;
     private HttpListener _listener;
@@ -41,24 +50,29 @@ public class HttpConnection implements Runnable
     {
         _listener=listener;
         _socket=socket;
-        InputStreamBuffer in=new InputStreamBuffer(socket,4096);
+        _endp = new SocketEndPoint(socket);
+        ByteArrayBuffer inBuf=new ByteArrayBuffer(4096);
+        ByteArrayBuffer outBuf=new ByteArrayBuffer(4096);
         _request=new HttpRequest(this);
-        _in=new HttpInputStream(in,_request);
+        _in=new HttpInputStream(inBuf,_endp, _request);
         _request.setHttpInputStream(_in);
-        OutputStreamBuffer out=new OutputStreamBuffer(socket,4096);
         _response=new HttpResponse(_request);
-        _out=new HttpOutputStream(out,_response,1024);
+        _out=new HttpOutputStream(outBuf,_endp,_response, 1024);
         _response.setHttpOutputStream(_out);
     }
 
-    public HttpConnection(HttpListener listener,Buffer in,Buffer out)
+    public HttpConnection(HttpListener listener,EndPoint io)
     {
         _listener=listener;
+        _endp=io;
+        ByteArrayBuffer inBuf=new ByteArrayBuffer(4096);
+        ByteArrayBuffer outBuf=new ByteArrayBuffer(4096);
+        
         _request=new HttpRequest(this);
-        _in=new HttpInputStream(in,_request);
+        _in=new HttpInputStream(inBuf,_endp, _request);
         _request.setHttpInputStream(_in);
         _response=new HttpResponse(_request);
-        _out=new HttpOutputStream(out,_response,out.capacity()/4);
+        _out=new HttpOutputStream(outBuf,_endp,_response, outBuf.capacity()/4);
         _response.setHttpOutputStream(_out);
     }
 
@@ -95,6 +109,9 @@ public class HttpConnection implements Runnable
 
     public boolean handleRequest() throws IOException
     {
+        if (_in==null)
+            return false;
+        
         if(_handler==null)
             _handler=new DumpHandler();
         try
@@ -148,7 +165,9 @@ public class HttpConnection implements Runnable
         }
         finally
         {
-            if(_response.getHttpOutputStream().isPersistent())
+            if(_response!=null && 
+               _response.getHttpOutputStream()!=null &&
+               _response.getHttpOutputStream().isPersistent())
             {
                 _in.resetStream();
                 _out.resetStream();

@@ -1,14 +1,25 @@
-package org.mortbay.http;
+// ========================================================================
+// $Id$
+// Copyright 2004 Mort Bay Consulting Pty. Ltd.
+// ------------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at 
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ========================================================================
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+package org.mortbay.http;
 
 import junit.framework.TestCase;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.bio.InputStreamBuffer;
+import org.mortbay.io.bio.StringEndPoint;
 
 /**
  * @author gregw
@@ -53,11 +64,12 @@ public class HttpParserTest extends TestCase
     public void testLineParse0()
 	throws Exception
     {
-        String http= "POST /foo HTTP/1.0\015\012" + "\015\012";
-        ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
+        StringEndPoint io=new StringEndPoint();
+        io.setInput("POST /foo HTTP/1.0\015\012" + "\015\012");
+        ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
 
         Handler handler = new Handler();
-        HttpParser parser= new HttpParser(buffer,handler);
+        HttpParser parser= new HttpParser(buffer,io, handler);
         parser.parse();
         assertEquals("POST", f0);
         assertEquals("/foo", f1);
@@ -68,12 +80,13 @@ public class HttpParserTest extends TestCase
     public void testLineParse1()
 	throws Exception
     {
-        String http= "GET /999\015\012";
-        ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
+        StringEndPoint io=new StringEndPoint();
+        io.setInput("GET /999\015\012");
+        ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
 
         f2= null;
         Handler handler = new Handler();
-        HttpParser parser= new HttpParser(buffer,handler);
+        HttpParser parser= new HttpParser(buffer,io, handler);
         parser.parse();
         assertEquals("GET", f0);
         assertEquals("/999", f1);
@@ -84,12 +97,13 @@ public class HttpParserTest extends TestCase
     public void testLineParse2()
 	throws Exception
     {
-        String http= "POST /222  \015\012";
-        ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
+        StringEndPoint io=new StringEndPoint();
+        io.setInput("POST /222  \015\012");
+        ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
 
         f2= null;
         Handler handler = new Handler();
-        HttpParser parser= new HttpParser(buffer,handler);
+        HttpParser parser= new HttpParser(buffer,io, handler);
         parser.parse();
         assertEquals("POST", f0);
         assertEquals("/222", f1);
@@ -100,7 +114,8 @@ public class HttpParserTest extends TestCase
     public void testHeaderParse()
 	throws Exception
     {
-        String http=
+        StringEndPoint io=new StringEndPoint();
+        io.setInput(
             "GET / HTTP/1.0\015\012"
                 + "Header1: value1\015\012"
                 + "Header2  :   value 2a  \015\012"
@@ -108,11 +123,11 @@ public class HttpParserTest extends TestCase
                 + "Header3: \015\012"
                 + "Header4 \015\012"
                 + "  value4\015\012"
-                + "\015\012";
-        ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
+                + "\015\012");
+        ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
 
         Handler handler = new Handler();
-        HttpParser parser= new HttpParser(buffer,handler);
+        HttpParser parser= new HttpParser(buffer,io, handler);
         parser.parse();
         assertEquals("GET", f0);
         assertEquals("/", f1);
@@ -131,7 +146,8 @@ public class HttpParserTest extends TestCase
     public void testChunkParse()
     	throws Exception
     {
-        String http=
+        StringEndPoint io=new StringEndPoint();
+        io.setInput(
             "GET /chunk HTTP/1.0\015\012"
                 + "Header1: value1\015\012"
 				+ "Transfer-Encoding: chunked\015\012"
@@ -140,11 +156,11 @@ public class HttpParserTest extends TestCase
                 + "0123456789\015\012"
                 + "1a\015\012"
                 + "ABCDEFGHIJKLMNOPQRSTUVWXYZ\015\012"
-                + "0\015\012";
-        ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
+                + "0\015\012");
+        ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
 
         Handler handler = new Handler();
-        HttpParser parser= new HttpParser(buffer,handler);
+        HttpParser parser= new HttpParser(buffer,io, handler);
         parser.parse();
         assertEquals("GET", f0);
         assertEquals("/chunk", f1);
@@ -158,7 +174,8 @@ public class HttpParserTest extends TestCase
     public void testMultiParse()
 		throws Exception
     {
-        String http=
+        StringEndPoint io=new StringEndPoint();
+        io.setInput(
             "GET /mp HTTP/1.0\015\012"
                 + "Header1: value1\015\012"
 				+ "Transfer-Encoding: chunked\015\012"
@@ -176,12 +193,12 @@ public class HttpParserTest extends TestCase
                 + "Header3: value3\015\012"
 				+ "Content-Length: 10\015\012"
                 + "\015\012"
-                + "0123456789\015\012";
+                + "0123456789\015\012");
 
-        ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
+        ByteArrayBuffer buffer= new ByteArrayBuffer(4096);
 
         Handler handler = new Handler();
-        HttpParser parser= new HttpParser(buffer,handler);
+        HttpParser parser= new HttpParser(buffer,io, handler);
         parser.parse();
         assertEquals("GET", f0);
         assertEquals("/mp", f1);
@@ -210,10 +227,10 @@ public class HttpParserTest extends TestCase
         assertEquals("0123456789", content);
     }
 
-    public void testInputStreamParse() throws Exception
+    public void testStreamParse() throws Exception
     {
-        String http=
-            "GET / HTTP/1.0\015\012"
+        StringEndPoint io=new StringEndPoint();
+        String http="GET / HTTP/1.0\015\012"
                 + "Header1: value1\015\012"
 				+ "Transfer-Encoding: chunked\015\012"
                 + "\015\012"
@@ -231,12 +248,6 @@ public class HttpParserTest extends TestCase
 				+ "Content-Length: 10\015\012"
                 + "\015\012"
                 + "0123456789\015\012";
-
-        File file= File.createTempFile("test", ".txt");
-        FileOutputStream out= new FileOutputStream(file);
-        out.write(http.getBytes());
-        out.flush();
-        out.close();
 
         int[] tests=
             {
@@ -256,10 +267,11 @@ public class HttpParserTest extends TestCase
         for (int t= 0; t < tests.length; t++)
         {
             String tst="t"+tests[t];
-            InputStreamBuffer buffer= new InputStreamBuffer(new FileInputStream(file), tests[t]);
+            ByteArrayBuffer buffer= new ByteArrayBuffer(tests[t]);
+            io.setInput(http);
 
             Handler handler = new Handler();
-            HttpParser parser= new HttpParser(buffer,handler);
+            HttpParser parser= new HttpParser(buffer,io, handler);
             parser.parse();
             assertEquals(tst,"GET", f0);
             assertEquals(tst,"/", f1);

@@ -1,9 +1,24 @@
+// ========================================================================
+// $Id$
+// Copyright 2004 Mort Bay Consulting Pty. Ltd.
+// ------------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at 
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ========================================================================
+
 package org.mortbay.http;
 
 import java.io.IOException;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
-import org.mortbay.io.InBuffer;
+import org.mortbay.io.EndPoint;
 
 /**
  * An input class that can process a HTTP stream, extracting headers, dechunking content and
@@ -15,6 +30,7 @@ public class HttpInput extends HttpParser.EventHandler
     private HttpParser _parser;
     
     private Buffer _buffer;
+    private EndPoint _endp;
     
     private Buffer _content;
     private Buffer _parsedContent;
@@ -27,11 +43,12 @@ public class HttpInput extends HttpParser.EventHandler
     private boolean _messageComplete;
     private boolean _request;
 
-    public HttpInput(Buffer buffer,HttpHeader header)
+    public HttpInput(Buffer buffer,EndPoint io,HttpHeader header)
     {
         _buffer=buffer;
+        _endp=io;
         _header=header;
-        _parser=new HttpParser(_buffer,this);
+        _parser=new HttpParser(_buffer,io,this);
     }
 
     /*
@@ -40,8 +57,8 @@ public class HttpInput extends HttpParser.EventHandler
     public void close() throws IOException
     {
         // Either close real stream or consume all the content.
-        if(_parser.getContentLength()==HttpParser.EOF_CONTENT&&_buffer instanceof InBuffer)
-            ((InBuffer)_buffer).close();
+        if(_parser.getContentLength()==HttpParser.EOF_CONTENT&&_endp!=null)
+            _endp.close();
         else
             while(_parser.inContentState())
                 _parser.parseNext();
@@ -56,6 +73,7 @@ public class HttpInput extends HttpParser.EventHandler
     public void destroy()
     {
         _buffer=null;
+        _endp=null;
         _parsedContent=null;
         _parsedHeader=null;
         _content=null;

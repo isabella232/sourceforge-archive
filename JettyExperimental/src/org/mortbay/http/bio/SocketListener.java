@@ -1,6 +1,16 @@
 // ========================================================================
-// Copyright (c) 1999-2002 Mort Bay Consulting (Australia) Pty. Ltd.
 // $Id$
+// Copyright 2004 Mort Bay Consulting Pty. Ltd.
+// ------------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at 
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
 // ========================================================================
 
 package org.mortbay.http.bio;
@@ -9,7 +19,6 @@ import java.net.Socket;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.http.*;
 import org.mortbay.http.HttpSchemes;
 import org.mortbay.thread.ThreadedServer;
 import org.mortbay.util.LogSupport;
@@ -42,7 +51,6 @@ public class SocketListener
     private String _confidentialScheme=HttpSchemes.HTTPS;
     private int _integralPort=0;
     private int _confidentialPort=0;
-    private boolean _identifyListener=false;
     private int _bufferSize=8192;
     private int _bufferReserve=512;
     private HttpHandler _handler;
@@ -104,22 +112,6 @@ public class SocketListener
     public void setBufferReserve(int size)
     {
         _bufferReserve=size;
-    }
-        
-    /* ------------------------------------------------------------ */
-    public boolean getIdentifyListener()
-    {
-        return _identifyListener;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @param identifyListener If true, the listener name is added to all
-     * requests as the org.mortbay.http.HttListener attribute
-     */
-    public void setIdentifyListener(boolean identifyListener)
-    {
-        _identifyListener = identifyListener;
     }
     
     /* --------------------------------------------------------------- */
@@ -225,9 +217,6 @@ public class SocketListener
     public void customizeRequest(HttpConnection connection,
                                                                 HttpRequest request)
     {
-        if (_identifyListener)
-            request.setAttribute(HttpListener.ATTRIBUTE,getName());
-        
         Socket socket=connection.getSocket();
         customizeRequest(socket,request);
     }

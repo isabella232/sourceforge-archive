@@ -1,9 +1,18 @@
-/*
- * Created on 9/01/2004
- *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
- */
+// ========================================================================
+// $Id$
+// Copyright 2004 Mort Bay Consulting Pty. Ltd.
+// ------------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at 
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ========================================================================
+
 package org.mortbay.http.bio;
 
 import java.io.IOException;
@@ -14,10 +23,7 @@ import java.util.List;
 import junit.framework.TestCase;
 
 import org.mortbay.http.HttpHeader;
-import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.InBuffer;
-import org.mortbay.io.OutBuffer;
+import org.mortbay.io.bio.StringEndPoint;
 
 /**
  * @author gregw
@@ -1264,6 +1270,7 @@ public class RFC2616Test extends TestCase
             System.err.println("'"+c+"' not in:");
             System.err.println(s.substring(offset));
             System.err.println("--\nskipped:"+s.substring(0,offset));
+            System.err.println("--");
             assertTrue(test,false);
         }
 	    return o;
@@ -1287,8 +1294,7 @@ public class RFC2616Test extends TestCase
 
     static class TestListener 
     {
-        InBuf in;
-        OutBuf out;
+        StringEndPoint io;
         HttpConnection connection;
         
         TestListener()
@@ -1298,20 +1304,16 @@ public class RFC2616Test extends TestCase
         String getResponses(String requests)
             throws IOException
         {
-            in=new InBuf();
-            out=new OutBuf(in);
-            connection=new HttpConnection(null,in,out);
+            io = new StringEndPoint();
+            connection=new HttpConnection(null,io);
             
             System.out.println("IN :"+requests);
-            in.fill=requests;
-            in.closed=false;
-            out.closed=false;
+            io.setInput(requests);
             
             try
             {
                 int loop=0;        
-                while((in.fill!=null || in.length()>0) && !out.isClosed()  && 
-                         connection.handleRequest())
+                while(connection.handleRequest())
                 {
                     if (loop++>10)
                         break;
@@ -1322,119 +1324,12 @@ public class RFC2616Test extends TestCase
                 e.printStackTrace();
             }
             
-            String r = out.flush.toString();
-            out.flush.setLength(0);
+            String r = io.getOutput();
             System.out.println("OUT:"+r);
             return r;
         }
     }
     
-    static class InBuf extends ByteArrayBuffer implements InBuffer
-    {
-        String fill;
-        boolean closed;
-
-        InBuf()
-        {
-            super(8192);
-        }
-
-        public boolean isClosed()
-        {
-            return closed;
-        }
-
-        public void close() throws IOException
-        {
-            closed=true;
-        }
-
-        public int fill() throws IOException
-        {
-            if (closed)
-                throw new IOException("EOF");
-                
-            if (fill!=null)
-            {
-                byte[] b=fill.getBytes();
-                put(b,0,b.length);
-                fill=null;
-                return b.length;
-            }
-            return 0;
-        }
-    }
-    
-    static class OutBuf extends ByteArrayBuffer implements OutBuffer
-    {
-        StringBuffer flush= new StringBuffer();
-        boolean closed;
-        InBuf in;
-        
-        OutBuf(InBuf in)
-        {
-            super(8192);
-            this.in=in;
-        }
-
-        /* 
-         */
-        public boolean isClosed()
-        {
-            return closed;
-        }
-
-        /* 
-         */
-        public void close() throws IOException
-        {
-          closed=true;
-          in.close();
-        }
-
-        /* 
-         */
-        public int flush() throws IOException
-        {
-            if (closed)
-                throw new IOException("EOF");
-                
-            int l=flush.length();
-            if (length()>0)
-            {
-                flush.append(toString());
-                clear();
-                return flush.length()-l;
-            }
-            return 0;
-        }
-
-        /* 
-         */
-        public int flush(Buffer header, Buffer trailer) throws IOException
-        {
-            if (closed)
-                throw new IOException("EOF");
-            int l=0;
-            if (header!=null && header.length()>0)
-            {
-                l+=header.length();
-                flush.append(header.toString());
-                header.clear();
-            }
-            
-            l+=flush();
-
-            if (trailer!=null && trailer.length()>0)
-            {
-                l+=trailer.length();
-                flush.append(trailer.toString());
-                trailer.clear();
-            }
-            
-            return l;
-        }
-    }
 }
 
 

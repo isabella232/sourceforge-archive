@@ -1,11 +1,26 @@
+// ========================================================================
+// $Id$
+// Copyright 2004 Mort Bay Consulting Pty. Ltd.
+// ------------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at 
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ========================================================================
+
 package org.mortbay.http;
 
 import java.io.IOException;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferCache;
+import org.mortbay.io.EndPoint;
 import org.mortbay.io.BufferUtil;
-import org.mortbay.io.InBuffer;
 import org.mortbay.io.Portable;
 
 /* ------------------------------------------------------------------------------- */
@@ -58,8 +73,8 @@ public class HttpParser
     protected int chunkLength;
     protected int chunkPosition;
     
-    private Buffer source;
-    private Buffer inSource;
+    private EndPoint endp;
+    private Buffer buffer;
     private Buffer header;
     private boolean close=false;
     private boolean content=false;
@@ -68,12 +83,10 @@ public class HttpParser
     /* ------------------------------------------------------------------------------- */
     /** Constructor. 
      */
-    public HttpParser(Buffer source, EventHandler handler)
+    public HttpParser(Buffer buffer, EndPoint io, EventHandler handler)
     {
-        this.source=source;
-        if (source instanceof InBuffer)
-            inSource=(InBuffer)source;
-        
+        this.buffer=buffer;
+        this.endp=io;
         this.handler=handler;
     }
 
@@ -131,7 +144,7 @@ public class HttpParser
             parseNext();
     }
 
-/* ------------------------------------------------------------------------------- */
+    /* ------------------------------------------------------------------------------- */
     /**
      * Parse until next Event.
      *  
@@ -147,13 +160,13 @@ public class HttpParser
             handler.messageComplete(contentPosition);
             return;
         }
-        if (source.length() == 0)
+        if (buffer.length() == 0)
         {
-            if (source.markIndex() == 0 && source.putIndex() == source.capacity()) 
+            if (buffer.markIndex() == 0 && buffer.putIndex() == buffer.capacity()) 
             throw new IllegalStateException("Buffer too small");
             int filled = -1;
-            if (inSource != null) 
-            filled = ((InBuffer) source).fill();
+            if (endp != null) 
+                filled = endp.fill(buffer);
             if (filled < 0 && state == STATE_EOF_CONTENT)
             {
                 state = STATE_END;
@@ -161,14 +174,14 @@ public class HttpParser
                 return;
             }
             if (filled < 0) 
-            throw new IOException("EOF");
+                throw new IOException("EOF");
         }
         byte ch;
 
         // Handler header
-        while (state < STATE_END && source.length() > 0)
+        while (state < STATE_END && buffer.length() > 0)
         {
-            ch = source.get();
+            ch = buffer.get();
             if (eol == CARRIAGE_RETURN && ch == LINE_FEED)
             {
                 eol = LINE_FEED;
@@ -181,7 +194,7 @@ public class HttpParser
                 contentLength = UNKNOWN_CONTENT;
                 if (ch > SPACE)
                 {
-                    source.mark();
+                    buffer.mark();
                     state = STATE_FIELD0;
                 }
                 break;
@@ -189,37 +202,37 @@ public class HttpParser
               case STATE_FIELD0:
                 if (ch == SPACE)
                 {
-                    handler.foundStartLineToken0(source.sliceFromMark());
+                    handler.foundStartLineToken0(buffer.sliceFromMark());
                     state = STATE_SPACE1;
                     return;
                 }
                 else if (ch < SPACE)
                 { 
-                throw new RuntimeException(toString(source)); 
+                throw new RuntimeException(toString(buffer)); 
                 }
                 break;
                 
               case STATE_SPACE1:
                 if (ch > SPACE)
                 {
-                    source.mark();
+                    buffer.mark();
                     state = STATE_FIELD1;
                 }
                 else if (ch < SPACE) 
-                throw new RuntimeException(toString(source));
+                throw new RuntimeException(toString(buffer));
                 break;
                 
               case STATE_FIELD1:
                 if (ch == SPACE)
                 {
-                    handler.foundStartLineToken1(source.sliceFromMark());
+                    handler.foundStartLineToken1(buffer.sliceFromMark());
                     state = STATE_SPACE2;
                     return;
                 }
                 else if (ch < SPACE)
                 {
                     // HTTP/0.9
-                    handler.foundStartLineToken1(source.sliceFromMark());
+                    handler.foundStartLineToken1(buffer.sliceFromMark());
                     handler.headerComplete();
                     state = STATE_END;
                     handler.messageComplete(contentPosition);
@@ -230,7 +243,7 @@ public class HttpParser
               case STATE_SPACE2:
                 if (ch > SPACE)
                 {
-                    source.mark();
+                    buffer.mark();
                     state = STATE_FIELD2;
                 }
                 else if (ch < SPACE)
@@ -246,7 +259,7 @@ public class HttpParser
               case STATE_FIELD2:
                 if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                 {
-                    handler.foundStartLineToken2(source.sliceFromMark());
+                    handler.foundStartLineToken2(buffer.sliceFromMark());
                     eol = ch;
                     state = STATE_HEADER;
                     return;
@@ -292,7 +305,7 @@ public class HttpParser
                 else
                 {
                     length = 1;
-                    source.mark();
+                    buffer.mark();
                     state = STATE_HEADER_NAME;
                 }
                 break;
@@ -302,7 +315,7 @@ public class HttpParser
                 {
                     if (length > 0)
                     {
-                        header = HttpHeaders.CACHE.lookup(source.sliceFromMark(length));
+                        header = HttpHeaders.CACHE.lookup(buffer.sliceFromMark(length));
                         handler.foundHttpHeader(header);
                     }
                     eol = ch;
@@ -313,7 +326,7 @@ public class HttpParser
                 {
                     if (length > 0)
                     {
-                        header = HttpHeaders.CACHE.lookup(source.sliceFromMark(length));
+                        header = HttpHeaders.CACHE.lookup(buffer.sliceFromMark(length));
                         handler.foundHttpHeader(header);
                     }
                     length = -1;
@@ -323,15 +336,15 @@ public class HttpParser
                 else if (ch != SPACE && ch != TAB)
                 {
                     if (length == -1) 
-                    source.mark();
-                    length = source.getIndex() - source.markIndex();
+                    buffer.mark();
+                    length = buffer.getIndex() - buffer.markIndex();
                 }
                 break;
                 
               case STATE_HEADER_VALUE:
                 if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                 {
-                    Buffer value = HttpHeaderValues.CACHE.lookup(source.sliceFromMark(length));
+                    Buffer value = HttpHeaderValues.CACHE.lookup(buffer.sliceFromMark(length));
                     if (length > 0)
                     {
                         int ho = BufferCache.getOrdinal(header);
@@ -356,6 +369,7 @@ public class HttpParser
                                 contentLength = CHUNKED_CONTENT;
                             else
                             {
+                                // TODO avoid string conversion here
                                 String c = value.toString();
                                 if (c.endsWith(HttpHeaderValues.CHUNKED))
                                     contentLength = CHUNKED_CONTENT;
@@ -377,8 +391,8 @@ public class HttpParser
                 else if (ch != SPACE && ch != TAB)
                 {
                     if (length == -1) 
-                    source.mark();
-                    length = source.getIndex() - source.markIndex();
+                    buffer.mark();
+                    length = buffer.getIndex() - buffer.markIndex();
                 }
                 break;
             }
@@ -386,25 +400,25 @@ public class HttpParser
 
         // Handle content
         Buffer chunk;
-        while (state > STATE_END && source.length() > 0)
+        while (state > STATE_END && buffer.length() > 0)
         {
-            if (eol == CARRIAGE_RETURN && source.peek() == LINE_FEED)
+            if (eol == CARRIAGE_RETURN && buffer.peek() == LINE_FEED)
             {
-                eol = source.get();
+                eol = buffer.get();
                 continue;
             }
             eol = 0;
             switch (state)
             {
               case STATE_EOF_CONTENT:
-                chunk = source.get(-1);
+                chunk = buffer.get(-1);
                 handler.foundContent(contentPosition, chunk);
                 contentPosition += chunk.length();
                 return;
                 
               case STATE_CONTENT:
                 {
-                    int length = source.length();
+                    int length = buffer.length();
                     int remaining = contentLength - contentPosition;
                     if (remaining == 0)
                     {
@@ -414,18 +428,18 @@ public class HttpParser
                     }
                     else if (length > remaining) 
                     length = remaining;
-                    chunk = source.get(length);
+                    chunk = buffer.get(length);
                     handler.foundContent(contentPosition, chunk);
                     contentPosition += chunk.length();
                 }
                 return;
                 
               case STATE_CHUNKED_CONTENT:
-                ch = source.peek();
+                ch = buffer.peek();
                 if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
-                    eol = source.get();
+                    eol = buffer.get();
                 else if (ch <= SPACE)
-                    source.get();
+                    buffer.get();
                 else
                 {
                     chunkLength = 0;
@@ -435,7 +449,7 @@ public class HttpParser
                 break;
                 
               case STATE_CHUNK_SIZE:
-                ch = source.get();
+                ch = buffer.get();
                 if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                 {
                     eol = ch;
@@ -461,7 +475,7 @@ public class HttpParser
                 break;
                 
               case STATE_CHUNK_PARAMS:
-                ch = source.get();
+                ch = buffer.get();
                 if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                 {
                     eol = ch;
@@ -478,7 +492,7 @@ public class HttpParser
                 
               case STATE_CHUNK:
                 {
-                    int length = source.length();
+                    int length = buffer.length();
                     int remaining = chunkLength - chunkPosition;
                     if (remaining == 0)
                     {
@@ -487,7 +501,7 @@ public class HttpParser
                     }
                     else if (length > remaining) 
                     length = remaining;
-                    chunk = source.get(length);
+                    chunk = buffer.get(length);
                     handler.foundContent(contentPosition, chunk);
                     contentPosition += chunk.length();
                     chunkPosition += chunk.length();

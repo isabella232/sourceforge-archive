@@ -1,9 +1,18 @@
-/*
- * Created on 7/01/2004
- *
- * To change the template for this generated file go to
- * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code and Comments
- */
+// ========================================================================
+// $Id$
+// Copyright 2004 Mort Bay Consulting Pty. Ltd.
+// ------------------------------------------------------------------------
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at 
+// http://www.apache.org/licenses/LICENSE-2.0
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+// ========================================================================
+
 package org.mortbay.util;
 
 
@@ -43,60 +52,60 @@ public class StringUtilTest extends TestCase
 
     public void testAsciiToLowerCase()
     {
-        String lc="√°bc def 1√±3";
-        assertEquals(StringUtil.asciiToLowerCase("√°Bc DeF 1√±3"), lc);
+        String lc="·bc def 1Û3";
+        assertEquals(StringUtil.asciiToLowerCase("·Bc DeF 1Û3"), lc);
         assertTrue(StringUtil.asciiToLowerCase(lc)==lc);
     }
 
     public void testStartsWithIgnoreCase()
     {
         
-        assertTrue(StringUtil.startsWithIgnoreCase("√°b√°defg", "√°b√°"));
-        assertTrue(StringUtil.startsWithIgnoreCase("√°bcdefg", "√°bc"));
-        assertTrue(StringUtil.startsWithIgnoreCase("√°bcdefg", "√°Bc"));
-        assertTrue(StringUtil.startsWithIgnoreCase("√°Bcdefg", "√°bc"));
-        assertTrue(StringUtil.startsWithIgnoreCase("√°Bcdefg", "√°Bc"));
-        assertTrue(StringUtil.startsWithIgnoreCase("√°bcdefg", ""));
-        assertTrue(StringUtil.startsWithIgnoreCase("√°bcdefg", null));
-        assertTrue(StringUtil.startsWithIgnoreCase("√°bcdefg", "√°bcdefg"));
+        assertTrue(StringUtil.startsWithIgnoreCase("·b·defg", "·b·"));
+        assertTrue(StringUtil.startsWithIgnoreCase("·bcdefg", "·bc"));
+        assertTrue(StringUtil.startsWithIgnoreCase("·bcdefg", "·Bc"));
+        assertTrue(StringUtil.startsWithIgnoreCase("·Bcdefg", "·bc"));
+        assertTrue(StringUtil.startsWithIgnoreCase("·Bcdefg", "·Bc"));
+        assertTrue(StringUtil.startsWithIgnoreCase("·bcdefg", ""));
+        assertTrue(StringUtil.startsWithIgnoreCase("·bcdefg", null));
+        assertTrue(StringUtil.startsWithIgnoreCase("·bcdefg", "·bcdefg"));
 
         assertFalse(StringUtil.startsWithIgnoreCase(null, "xyz")); 
-        assertFalse(StringUtil.startsWithIgnoreCase("√°bcdefg", "xyz"));
-        assertFalse(StringUtil.startsWithIgnoreCase("√°", "xyz")); 
+        assertFalse(StringUtil.startsWithIgnoreCase("·bcdefg", "xyz"));
+        assertFalse(StringUtil.startsWithIgnoreCase("·", "xyz")); 
     }
 
     public void testEndsWithIgnoreCase()
     {
-        assertTrue(StringUtil.endsWithIgnoreCase("√°bcd√°f√°", "√°f√°"));
-        assertTrue(StringUtil.endsWithIgnoreCase("√°bcdefg", "efg"));
-        assertTrue(StringUtil.endsWithIgnoreCase("√°bcdefg", "eFg"));
-        assertTrue(StringUtil.endsWithIgnoreCase("√°bcdeFg", "efg"));
-        assertTrue(StringUtil.endsWithIgnoreCase("√°bcdeFg", "eFg"));
-        assertTrue(StringUtil.endsWithIgnoreCase("√°bcdefg", ""));
-        assertTrue(StringUtil.endsWithIgnoreCase("√°bcdefg", null));
-        assertTrue(StringUtil.endsWithIgnoreCase("√°bcdefg", "√°bcdefg"));
+        assertTrue(StringUtil.endsWithIgnoreCase("·bcd·f·", "·f·"));
+        assertTrue(StringUtil.endsWithIgnoreCase("·bcdefg", "efg"));
+        assertTrue(StringUtil.endsWithIgnoreCase("·bcdefg", "eFg"));
+        assertTrue(StringUtil.endsWithIgnoreCase("·bcdeFg", "efg"));
+        assertTrue(StringUtil.endsWithIgnoreCase("·bcdeFg", "eFg"));
+        assertTrue(StringUtil.endsWithIgnoreCase("·bcdefg", ""));
+        assertTrue(StringUtil.endsWithIgnoreCase("·bcdefg", null));
+        assertTrue(StringUtil.endsWithIgnoreCase("·bcdefg", "·bcdefg"));
 
         assertFalse(StringUtil.endsWithIgnoreCase(null, "xyz")); 
-        assertFalse(StringUtil.endsWithIgnoreCase("√°bcdefg", "xyz"));
-        assertFalse(StringUtil.endsWithIgnoreCase("√°", "xyz"));  
+        assertFalse(StringUtil.endsWithIgnoreCase("·bcdefg", "xyz"));
+        assertFalse(StringUtil.endsWithIgnoreCase("·", "xyz"));  
     }
 
     public void testIndexFrom()
     {
-        assertEquals(StringUtil.indexFrom("√°bcd", "xyz"),-1);
-        assertEquals(StringUtil.indexFrom("√°bcd", "√°bcz"),0);
-        assertEquals(StringUtil.indexFrom("√°bcd", "bcz"),1);
-        assertEquals(StringUtil.indexFrom("√°bcd", "dxy"),3);
+        assertEquals(StringUtil.indexFrom("·bcd", "xyz"),-1);
+        assertEquals(StringUtil.indexFrom("·bcd", "·bcz"),0);
+        assertEquals(StringUtil.indexFrom("·bcd", "bcz"),1);
+        assertEquals(StringUtil.indexFrom("·bcd", "dxy"),3);
     }
 
     public void testReplace()
     {
-        String s="√°bc √°bc √°bc";
-        assertEquals(StringUtil.replace(s, "√°bc", "xyz"),"xyz xyz xyz");
+        String s="·bc ·bc ·bc";
+        assertEquals(StringUtil.replace(s, "·bc", "xyz"),"xyz xyz xyz");
         assertTrue(StringUtil.replace(s,"xyz","pqy")==s);
         
-        s=" √°bc ";
-        assertEquals(StringUtil.replace(s, "√°bc", "xyz")," xyz ");
+        s=" ·bc ";
+        assertEquals(StringUtil.replace(s, "·bc", "xyz")," xyz ");
         
     }
 
@@ -123,7 +132,7 @@ public class StringUtilTest extends TestCase
      */
     public void testEqualsStringcharArrayintint()
     {
-        assertTrue(StringUtil.equals("√°bc", new char[] {'x','√°','b','c','z'},1,3));
+        assertTrue(StringUtil.equals("·bc", new char[] {'x','·','b','c','z'},1,3));
         assertFalse(StringUtil.equals("axc", new char[] {'x','a','b','c','z'},1,3));
     }
 
