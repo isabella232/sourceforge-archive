@@ -114,7 +114,14 @@ public class ProxyHandler extends NullHandler
             request.setHeader(HttpHeader.Connection,null);
             request.setHeader("Host",null);
             request.setVersion(request.HTTP_1_0);
-            request.write(socket.getOutputStream());
+            OutputStream out = socket.getOutputStream();
+            request.write(out);
+            int len = request.getContentLength();
+            if (len>0)
+            {
+                Code.debug("Proxy content for ",url);
+                IO.copy(request.getInputStream(),out,len);
+            }
             Code.debug("waiting for forward reply...");
             response.writeInputStream(socket.getInputStream(),-1,true);
         }

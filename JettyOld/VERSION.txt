@@ -1,6 +1,7 @@
 
 Release 2.3.5 - 25th January 2000 LATEST 
   + Fixed nasty bug with HTTP/1.1 redirects.
+  + ProxyHandler sends content for POSTs etc.
   + Force locale of date formats to US.
   + Fixed expires bug in Cookies
   + Added configuration option to turn off Keep-Alive in HTTP/1.0
