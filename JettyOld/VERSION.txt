@@ -1,8 +1,14 @@
+Jetty2 Versions
+--------------
+
+  + More robust Makefiles.
+  + Fixed CgiServlet redirect problem.
 
 Release 2.4.9 12 Nov 2000
   + HttpListener ignore InterruptedIOExceptions
   + HttpListener default max idle time = 20s
   + HtmlFilter handles non default encodings
+  + Writing HttpRequests encodes path
   + HttpRequest.write uses ISO8859_1 encoding.
 
 Release 2.4.8 23 Oct 2000
