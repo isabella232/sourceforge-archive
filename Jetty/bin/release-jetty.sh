@@ -36,7 +36,7 @@ read Y
     make jars
     make rclean
     rm -fr classes
-    
+    mkdir logs    
     rm -fr javadoc
     JETTY_HOME=$HOME/Jetty3 bin/generateJavaDoc 
 

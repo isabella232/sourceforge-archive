@@ -86,13 +86,15 @@ abstract public class ThreadedServer extends ThreadPool
      */
     public synchronized void setAddress(InetAddrPort address) 
     {
-        _address = address;
         if (isStarted())
         {
             Code.debug( "Restart for ", address );
             try{stop();}catch(InterruptedException e){Code.warning(e);}
+            _address = address;
             start();
         }
+        else
+            _address = address;
     }
 
     /* ------------------------------------------------------------ */
