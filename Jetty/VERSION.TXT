@@ -20,6 +20,7 @@ Jetty-4.2.4rc0
  + Fixed dir listing from jars.
  + Dir listings in UTF8
  + Character encoding handling for GET requests.
+ + Removed container transfer encoding handling.
 
 Jetty-4.2.3 - 2 December 2002
  + Removed aggressive threadpool shrinkage to avoid deadlock on SMP machines. 
