@@ -1,5 +1,7 @@
 Jetty3 Versions
 --------------
+
+ + Avoid script vulnerability in error pages.
  + Close persistent HTTP/1.0 connections on missing Content-Length
  + Use exec for jetty.sh run
  + Improved SSL debugging information.

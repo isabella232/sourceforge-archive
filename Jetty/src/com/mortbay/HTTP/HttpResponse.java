@@ -328,13 +328,22 @@ public class HttpResponse extends HttpMessage
             }
             else
             {
+	        if (message!=null)
+		{
+		    message=StringUtil.replace(message,"<","&lt;");
+		    message=StringUtil.replace(message,">","&gt;");
+		}
+	        String uri=getRequest().getPath();
+		uri=StringUtil.replace(uri,"<","&lt;");
+		uri=StringUtil.replace(uri,">","&gt;");
+
                 String body=
                     "<HTML>\n<HEAD>\n<TITLE>Error "+code+
                     " "+reason+
                     "</TITLE>\n<BODY>\n<H2>HTTP ERROR: "+code+
                     " "+reason+
                     "</H2>\n"+(message==null?"":message)+
-                    ("<P>RequestURI="+getRequest().getPath());
+                    ("<P>RequestURI="+uri);
                 
                 for (int i=0;i<10;i++)
                     body+="<!-- Padding for IE                                                 -->";
