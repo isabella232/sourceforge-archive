@@ -598,7 +598,7 @@ public class HttpOutputStream
     {
         private OutputStreamWriter _writer=null;
         private boolean _writting=false;
-        private byte[] _buf = ByteArrayPool.getByteArray();
+        private byte[] _buf = ByteArrayPool.getByteArray(4096);
         private String _encoding;
         
         /* -------------------------------------------------------- */
