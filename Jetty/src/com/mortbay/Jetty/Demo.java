@@ -118,7 +118,7 @@ public class Demo
             server.start();
             
             // Admin server
-            HttpServer admin = new HttpServer();
+            HttpServer admin = new Server();
             admin.addRealm(realm);
             listener = (SocketListener)
                 admin.addListener(new InetAddrPort("127.0.0.1:8888"));

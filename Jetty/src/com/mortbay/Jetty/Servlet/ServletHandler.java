@@ -49,7 +49,10 @@ import javax.servlet.UnavailableException;
 public class ServletHandler extends NullHandler 
 {
     /* ------------------------------------------------------------ */
-    private final String __JSP_SERVLET="org.apache.jasper.servlet.JspServlet";
+    public final static String __JSP_SERVLET="org.apache.jasper.servlet.JspServlet";
+    public final static String __SERVLET_REQUEST="com.mortbay.Jetty.Servlet.ServletRequest";
+    public final static String __SERVLET_RESPONSE="com.mortbay.Jetty.Servlet.ServletResponse";
+    public final static String __SERVLET_HOLDER="com.mortbay.Jetty.Servlet.ServletHolder";
     
     /* ------------------------------------------------------------ */
     private PathMap _servletMap=new PathMap();
@@ -292,16 +295,23 @@ public class ServletHandler extends NullHandler
         try
         {            
             // Build servlet request and response
-            ServletRequest request =
-                new ServletRequest(_context,httpRequest);
-            ServletResponse response =
-                new ServletResponse(request,httpResponse);
-
-            // Check session stuff
-            pathInContext=request.setSessionId(pathInContext);
-            HttpSession session=null;
-            if ((session=request.getSession(false))!=null)
-                Context.access(session);
+            ServletRequest request = (ServletRequest)
+                httpRequest.getAttribute(ServletHandler.__SERVLET_REQUEST);
+            ServletResponse response;
+            if (request==null)
+            {
+                request  = new ServletRequest(_context,httpRequest);
+                response = new ServletResponse(request,httpResponse);
+                // Check session stuff
+                pathInContext=request.setSessionId(pathInContext);
+                HttpSession session=null;
+                if ((session=request.getSession(false))!=null)
+                    Context.access(session);
+            }
+            else
+            {
+                response=(ServletResponse)request.getAttribute(ServletHandler.__SERVLET_RESPONSE);
+            }
 
             // handle
             handle(pathInContext,request,response);
@@ -454,23 +464,30 @@ public class ServletHandler extends NullHandler
         Code.debug("Looking for servlet at ",pathInContext);
         HttpResponse httpResponse=response.getHttpResponse();
 
-        Map.Entry entry=getHolderEntry(pathInContext);
-        
-        if (entry!=null)
+        ServletHolder holder =(ServletHolder)
+            request.getAttribute(ServletHandler.__SERVLET_HOLDER);
+        if (holder==null)
         {
-            String servletPathSpec=(String)entry.getKey();
-            ServletHolder holder = (ServletHolder)entry.getValue();
+            Map.Entry entry=getHolderEntry(pathInContext);
+            if (entry!=null)
+            {
+                String servletPathSpec=(String)entry.getKey();
+                holder = (ServletHolder)entry.getValue();
         
-            Code.debug("Pass request to servlet at ",entry);
-            request.setPaths(PathMap.pathMatch(servletPathSpec,
-                                               pathInContext),
-                             PathMap.pathInfo(servletPathSpec,
-                                              pathInContext));
-            
+                Code.debug("Pass request to servlet at ",entry);
+                request.setPaths(PathMap.pathMatch(servletPathSpec,
+                                                   pathInContext),
+                                 PathMap.pathInfo(servletPathSpec,
+                                                  pathInContext));
+            }
+        }
+
+        if (holder!=null)
+        {
             // service request
             holder.handle(request,response);
             response.setOutputState(0);
-            Code.debug("Handled by ",entry);
+            Code.debug("Handled by ",holder);
             if (!httpResponse.isCommitted())
                 httpResponse.commit();  
         }

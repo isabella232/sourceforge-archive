@@ -990,9 +990,12 @@ public class HandlerContext implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
-    /** 
+    /** Handler request.
+     * Determine the path within the context and then call
+     * handle(pathInContext,request,response).
      * @param request 
      * @param response 
+     * @return True if the request has been handled.
      * @exception HttpException 
      * @exception IOException 
      */
@@ -1029,6 +1032,24 @@ public class HandlerContext implements LifeCycle
             return true;
         }	  
 
+        return handle(pathInContext,request,response);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Handler request.
+     * Call each HttpHandler until request is handled.
+     * @param pathInContext 
+     * @param request 
+     * @param response 
+     * @return True if the request has been handled.
+     * @exception HttpException 
+     * @exception IOException 
+     */
+    public boolean handle(String pathInContext,
+                          HttpRequest request,
+                          HttpResponse response)
+        throws HttpException, IOException
+    {
         // Save the thread context loader
         Thread thread = Thread.currentThread();
         ClassLoader lastContextLoader=thread.getContextClassLoader();

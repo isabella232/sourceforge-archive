@@ -120,15 +120,12 @@ public abstract class JsseListener extends SocketListener
                                                p_address.getInetAddress() );
             }
         }
-        catch( Exception e ) //TEMPXXXFIXME is this the "right thing to do"?
+        catch( Exception e )
         {
             Code.warning(e);
-            return null;
+            throw new IOException("Could not create JsseListener socket: "+e.toString());
         }
-        finally
-        {
-            return socket;
-        }
+        return socket;
     }
 
     /* ------------------------------------------------------------ */

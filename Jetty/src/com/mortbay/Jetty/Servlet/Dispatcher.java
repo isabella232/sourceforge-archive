@@ -6,6 +6,7 @@
 package com.mortbay.Jetty.Servlet;
 
 import com.mortbay.HTTP.HttpFields;
+import com.mortbay.HTTP.HttpHandler;
 import com.mortbay.HTTP.HandlerContext;
 import com.mortbay.HTTP.Handler.ResourceHandler;
 import com.mortbay.HTTP.HttpRequest;
@@ -61,15 +62,16 @@ public class Dispatcher implements RequestDispatcher
 
         for(int i=_handlerContext.getHandlerSize();i-->0;)
         {
-            if (_handlerContext.getHandler(i) instanceof ServletHandler)
+            HttpHandler handler = _handlerContext.getHandler(i);
+            
+            if (handler instanceof ServletHandler)
             {
                 // Look for path in servlet handlers
-                ServletHandler handler=(ServletHandler)
-                    _handlerContext.getHandler(i);
-                if (!handler.isStarted())
+                ServletHandler shandler=(ServletHandler)handler;                
+                if (!shandler.isStarted())
                     continue;
 
-                Map.Entry entry=handler.getHolderEntry(_path);
+                Map.Entry entry=shandler.getHolderEntry(_path);
                 if(entry!=null)
                 {
                     _pathSpec=(String)entry.getKey();
@@ -77,12 +79,12 @@ public class Dispatcher implements RequestDispatcher
                     break;
                 }
             }
-            else if (_handlerContext.getHandler(i) instanceof ResourceHandler &&
+            else if (handler instanceof ResourceHandler &&
                      _resourceHandler==null)
             {
                 // remember resourceHandler as we may need it for a
                 // resource forward.
-                _resourceHandler=(ResourceHandler)_handlerContext.getHandler(i);
+                _resourceHandler=(ResourceHandler)handler;
             }
         }
 
@@ -166,32 +168,14 @@ public class Dispatcher implements RequestDispatcher
         httpRequest.removeAttribute( "javax.servlet.include.context_path");
         httpRequest.removeAttribute( "javax.servlet.include.query_string");
         httpRequest.removeAttribute( "javax.servlet.include.path_info");
-
-        // Handler resource forward.
-        if (_resource!=null)
-        {
-            Code.debug("Forward request to resource ",_resource);
-            _resourceHandler.handleGet(httpRequest,httpResponse,
-                                       _path,_resource,false);
-            return;
-        }
-            
-        // handle named servlet
-        if (_pathSpec==null )
-        {
-            Code.debug("Forward request to named ",_holder);
-            // just call it with existing request/response
-            _holder.handle(servletRequest,servletResponse);
-            return;
-        }
         
-        // merge query string
+        // merge query params
         if (_query!=null && _query.length()>0)
         {
             MultiMap parameters=new MultiMap();
             UrlEncoded.decodeTo(_query,parameters);
             servletRequest.pushParameters(parameters);
-
+            
             String oldQ=servletRequest.getQueryString();
             if (oldQ!=null && oldQ.length()>0)
             {
@@ -206,17 +190,31 @@ public class Dispatcher implements RequestDispatcher
             }
         }
         
-        // The path of the new request is the forward path
-        // context must be the same, info is recalculate.
-        Code.debug("Forward request to ",_holder,
-                   " at ",_pathSpec);
-        servletRequest.setForwardPaths(_context,
-                                       PathMap.pathMatch(_pathSpec,_path),
-                                       PathMap.pathInfo(_pathSpec,_path),
-                                       _query);
+        if (_path==null)
+        {
+            // go direct to named servlet
+            _holder.handle(servletRequest,servletResponse);
+        }
+        else
+        {
+            // The path of the new request is the forward path
+            // context must be the same, info is recalculate.
+            if (_pathSpec!=null)
+            {
+                Code.debug("Forward request to ",_holder,
+                           " at ",_pathSpec);
+                servletRequest.setForwardPaths(_context,
+                                               PathMap.pathMatch(_pathSpec,_path),
+                                               PathMap.pathInfo(_pathSpec,_path),
+                                               _query);
+            }
             
-        // try service request
-        _holder.handle(servletRequest,servletResponse);
+            // Forward request
+            httpRequest.setAttribute(ServletHandler.__SERVLET_REQUEST,request);
+            httpRequest.setAttribute(ServletHandler.__SERVLET_RESPONSE,response);
+            httpRequest.setAttribute(ServletHandler.__SERVLET_HOLDER,_holder);
+            _context.getHandlerContext().handle(_path,httpRequest,httpResponse);
+        }
     }
         
         
