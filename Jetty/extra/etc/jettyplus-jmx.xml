@@ -26,9 +26,9 @@
      </Call>
 
      <Call name="createMBean">
-       <Arg>org.mortbay.jetty.jmx.ServerMBean</Arg>
+       <Arg>org.mortbay.jetty.plus.jmx.ServerMBean</Arg>
        <Arg><New class="javax.management.ObjectName"><Arg>org.mortbay:jetty=default</Arg></New></Arg>
-       <Arg><Array type="java.lang.Object"><Item>extra/etc/jettyplus-jmx.xml</Item></Array></Arg>
+       <Arg><Array type="java.lang.Object"><Item>extra/etc/jettyplus.xml</Item></Array></Arg>
        <Arg><Array type="java.lang.String"><Item>java.lang.String</Item></Array></Arg>
      </Call>
 

@@ -63,6 +63,8 @@ public class NamingContext implements Context, Cloneable
 {
     private static Log log = LogFactory.getLog(NamingContext.class);
 
+    public static final String IMMUTABLE_PROPERTY = "org.mortbay.jndi.immutable";
+    
     public static final Enumeration EMPTY_ENUM = new Enumeration ()
         {       
             public boolean hasMoreElements()
@@ -216,7 +218,10 @@ public class NamingContext implements Context, Cloneable
                          Context parent, 
                          NameParser parser) 
     {
-        _env = env;
+        if (env == null)
+            _env = new Hashtable();
+        else
+            _env = new Hashtable(env);
         _name = name;
         _parent = parent;
         _parser = parser;
@@ -232,7 +237,10 @@ public class NamingContext implements Context, Cloneable
      */
     public NamingContext (Hashtable env)
     {
-        _env = env;
+        if (env == null)
+            _env = new Hashtable();
+        else
+            _env = new Hashtable(env);
     }
 
 
@@ -312,6 +320,8 @@ public class NamingContext implements Context, Cloneable
     public void bind(Name name, Object obj) 
         throws NamingException
     {
+        if (null != _env.get(IMMUTABLE_PROPERTY))
+            throw new NamingException ("This context is immutable");
 
         Name cname = toCanonicalName(name);
         
@@ -410,6 +420,10 @@ public class NamingContext implements Context, Cloneable
     public Context createSubcontext (Name name)
         throws NamingException
     {
+        if (null != _env.get(IMMUTABLE_PROPERTY))
+            throw new NamingException ("This context is immutable");
+        
+        
         Name cname = toCanonicalName (name);
 
         if (cname == null)
@@ -939,6 +953,8 @@ public class NamingContext implements Context, Cloneable
                        Object obj)
         throws NamingException
     {    
+        if (null != _env.get(IMMUTABLE_PROPERTY))
+            throw new NamingException ("This context is immutable");
 
         Name cname = toCanonicalName(name);
 
@@ -1205,6 +1221,9 @@ public class NamingContext implements Context, Cloneable
                                    Object propVal)
         throws NamingException
     {
+        if (null != _env.get(IMMUTABLE_PROPERTY))
+            throw new NamingException ("This context is immutable");
+        
         return _env.put (propName, propVal);
     }
 
@@ -1220,6 +1239,10 @@ public class NamingContext implements Context, Cloneable
     public Object removeFromEnvironment(String propName)
         throws NamingException
     {
+        
+        if (null != _env.get(IMMUTABLE_PROPERTY))
+            throw new NamingException ("This context is immutable");
+        
         return _env.remove (propName);
     }
 

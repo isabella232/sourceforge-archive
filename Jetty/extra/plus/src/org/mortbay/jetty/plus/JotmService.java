@@ -127,11 +127,11 @@ public class JotmService extends TMService
             
             //  Register the user transaction and transaction mgr objects in JNDI
             Context ictx = null;
-            
+            Context ctx = null;
             
             try 
             {
-                ictx = new InitialContext();
+                ictx = new InitialContext();                
                 if(log.isDebugEnabled())log.debug("InitialContext instanceof "+ictx.getClass().getName());
                 if(log.isDebugEnabled())log.debug("java.naming.factory.initial="+System.getProperty("java.naming.factory.initial"));
             } 
@@ -143,6 +143,7 @@ public class JotmService extends TMService
             
             try 
             {
+                
                 Util.bind(ictx, getJNDI(), m_tm.getUserTransaction());
                 if(log.isDebugEnabled())log.debug("UserTransaction object bound in JNDI with name " + getJNDI());
             }

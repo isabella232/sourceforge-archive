@@ -173,6 +173,8 @@ public class TestJNDI extends TestCase
         initCtx.bind ("java:comp/env/rubbish", "abc");
         assertEquals ("abc", (String)initCtx.lookup("java:comp/env/rubbish"));
 
+       
+        
         //check binding LinkRefs
         LinkRef link = new LinkRef ("java:comp/env/rubbish");
         initCtx.bind ("java:comp/env/poubelle", link);
@@ -260,10 +262,25 @@ public class TestJNDI extends TestCase
         InitialContext closeInit = new InitialContext();
         closeInit.close();
         
+       
+        
+        //check locking the context
+        Context ectx = (Context)initCtx.lookup("java:comp");
+        ectx.bind("crud", "xxx");
+        ectx.addToEnvironment("org.mortbay.jndi.immutable", "TRUE");
+        assertEquals ("xxx", (String)initCtx.lookup("java:comp/crud"));
+        try
+        {
+            ectx.bind("crud2", "xxx2");
+        }
+        catch (NamingException ne)
+        {
+            //expected failure to modify immutable context
+        }
+        
         //test what happens when you close an initial context that was used
         initCtx.close();
         
-
     } 
 
 

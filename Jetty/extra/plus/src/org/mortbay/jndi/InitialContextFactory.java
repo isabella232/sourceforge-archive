@@ -27,6 +27,7 @@ import javax.naming.NamingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.jndi.local.localContext;
 
 
 /*------------------------------------------------*/    
@@ -67,7 +68,7 @@ public class InitialContextFactory implements javax.naming.spi.InitialContextFac
     /**
      * Get Context that has access to default Namespace.
      * This method won't be called if a name URL beginning
-     * with java: is passed to a Context.
+     * with java: or local: is passed to an InitialContext.
      *
      * @see org.mortbay.jndi.java.javaURLContextFactory
      * @param env a <code>Hashtable</code> value
@@ -76,22 +77,26 @@ public class InitialContextFactory implements javax.naming.spi.InitialContextFac
     public Context getInitialContext(Hashtable env) 
     {
         log.debug("InitialContextFactory.getInitialContext()");
-  
-          Context ctx = (Context)_roots.get(env);
-          
-          if(log.isDebugEnabled())log.debug("Returning context root: "+ctx);
-  
-          if (ctx == null)
-          {
-              ctx = new NamingContext (env);
-              ((NamingContext)ctx).setNameParser(new DefaultParser());
-              _roots.put (env, ctx);
-              if(log.isDebugEnabled())log.debug("Created new root context:"+ctx);
-          }
+        
+//        Context ctx = new NamingContext(env);
+//        ((NamingContext)ctx).setNameParser(new DefaultParser());
+        Context ctx = new localContext(env);
+        if(log.isDebugEnabled())log.debug("Created initial context delegate for local namespace:"+ctx);
+//          Context ctx = (Context)_roots.get(env);
+//          
+//          if(log.isDebugEnabled())log.debug("Returning context root: "+ctx);
+//  
+//          if (ctx == null)
+//          {
+//              ctx = new NamingContext (env);
+//              ((NamingContext)ctx).setNameParser(new DefaultParser());
+//              _roots.put (env, ctx);
+//              if(log.isDebugEnabled())log.debug("Created new root context:"+ctx);
+//          }
         
 //        Context ctx = new NamingContext (env);
-//        ((NamingContext)ctx).setNameParser(new DefaultParser());
-//        if(log.isDebugEnabled())log.debug("Created new root context:"+ctx);
+//        
+//        
 
         return ctx;
     }

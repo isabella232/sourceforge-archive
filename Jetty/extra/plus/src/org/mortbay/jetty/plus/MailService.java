@@ -243,10 +243,9 @@ public class MailService extends AbstractService implements Map
                                                  null);
             // bind to JNDI
             InitialContext initialCtx = new InitialContext();
-           
             Util.bind(initialCtx, getJNDI(), reference);
             
-            if(log.isDebugEnabled())log.debug("Bound reference to "+getJNDI());
+            if(log.isDebugEnabled())log.debug("Bound reference to "+""+getJNDI());
 
             //look up the Session object to test
             Object o = initialCtx.lookup (getJNDI());

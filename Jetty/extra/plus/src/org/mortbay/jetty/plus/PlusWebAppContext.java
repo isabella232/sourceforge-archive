@@ -164,7 +164,7 @@ public class PlusWebAppContext extends WebApplicationContext
         throws Exception
     { 
         //create ENC for this webapp 
-        Context compCtx =  (Context)_initialCtx.lookup ("java:comp");
+        Context compCtx =  (Context)_initialCtx.lookup ("java:comp");        
         Context envCtx = compCtx.createSubcontext("env");
         if(log.isTraceEnabled())log.trace(envCtx);
 
@@ -230,7 +230,17 @@ public class PlusWebAppContext extends WebApplicationContext
             return (PlusWebAppContext)getWebApplicationContext();
         }
         
-
+        public void configureWebApp ()
+        throws Exception
+        {
+            super.configureWebApp();
+            
+            //lock this webapp's java:comp namespace
+            Context compCtx = (Context)getPlusWebAppContext()._initialCtx.lookup("java:comp");    
+            compCtx.addToEnvironment("org.mortbay.jndi.immutable", "TRUE");
+        }
+        
+        
         /* ------------------------------------------------------------ */
         protected void initWebXmlElement(String element, XmlParser.Node node)
             throws Exception
@@ -275,10 +285,10 @@ public class PlusWebAppContext extends WebApplicationContext
                 
                 if(log.isDebugEnabled())log.debug("Linking resource-ref java:comp/env/"+name+" to global "+name);
                 
-                Object o = getPlusWebAppContext()._initialCtx.lookup (name);
+                Object o = getPlusWebAppContext()._initialCtx.lookup (""+name);
                 
                 if(log.isDebugEnabled())log.debug("Found Object in global namespace: "+o.toString());
-                Util.bind (envCtx, name,  new LinkRef(name));
+                Util.bind (envCtx, name,  new LinkRef(""+name));
             }
             else if ("resource-env-ref".equals(element))
             {
@@ -293,7 +303,7 @@ public class PlusWebAppContext extends WebApplicationContext
                 String name=node.getString("resource-env-ref-name",false,true);
                 
                 if(log.isDebugEnabled())log.debug("Linking resource-env-ref java:comp/env/"+name +" to global "+name);
-                Util.bind (envCtx, name, new LinkRef(name));
+                Util.bind (envCtx, name, new LinkRef(""+name));
             }
             else if ("ejb-ref".equals(element) ||
                      "ejb-local-ref".equals(element) ||
@@ -305,6 +315,8 @@ public class PlusWebAppContext extends WebApplicationContext
             {
                 super.initWebXmlElement(element, node);
             }
+            
+          
         }
 
     }

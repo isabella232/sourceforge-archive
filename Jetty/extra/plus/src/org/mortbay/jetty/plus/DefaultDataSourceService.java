@@ -6,9 +6,7 @@
  */
 package org.mortbay.jetty.plus;
 
-import javax.naming.Binding;
-import javax.naming.Context;
-import javax.naming.NamingException;
+
 import javax.sql.ConnectionPoolDataSource;
 import javax.sql.DataSource;
 
@@ -16,8 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.enhydra.jdbc.pool.StandardPoolDataSource;
 import org.enhydra.jdbc.util.Logger;
-import org.mortbay.jndi.Util;
-import org.mortbay.util.LogSupport;
+
 
 
 /** DefaultDataSourceService

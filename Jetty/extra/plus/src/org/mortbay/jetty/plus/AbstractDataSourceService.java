@@ -13,7 +13,6 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 
-import javax.naming.Binding;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.Name;
@@ -210,7 +209,7 @@ public abstract class AbstractDataSourceService extends AbstractService
             log.info("Starting Service "+getName());       
             
             Context ictx = null;
-            
+            Context ctx = null;
             try 
             {
                 ictx = new InitialContext();
@@ -241,7 +240,7 @@ public abstract class AbstractDataSourceService extends AbstractService
                 try 
                 {
                     Util.bind(ictx, dsName, ref);
-                    if(log.isDebugEnabled())log.debug("DataSource ref bound in JNDI with name " + dsName);
+                    if(log.isDebugEnabled())log.debug("DataSource ref bound in JNDI with name "+dsName);
                 } 
                 catch (NamingException e) 
                 {
