@@ -24,8 +24,6 @@ public class ServletHttpContext extends HttpContext
 {    
     /* ------------------------------------------------------------ */
     /** Constructor. 
-     * @param server 
-     * @param contextPathSpec 
      */
     public ServletHttpContext()
     {
@@ -65,7 +63,6 @@ public class ServletHttpContext extends HttpContext
     /** Add a servlet to the context.
      * Conveniance method.
      * If no ServletHandler is found in the context, a new one is added.
-     * @param name The name of the servlet.
      * @param pathSpec The pathspec within the context
      * @param className The classname of the servlet.
      * @return The ServletHolder.

@@ -134,7 +134,6 @@ public class IbmJsseListener
 
   /** Constructor. 
      * @param p_address 
-     * @param p_server 
      * @exception IOException 
      */
   public IbmJsseListener(InetAddrPort p_address)

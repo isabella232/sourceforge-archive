@@ -31,7 +31,7 @@ public class JAASGroup implements Group
     /* ------------------------------------------------------------ */
     /**
      *
-     * @param param1 <description>
+     * @param principal <description>
      * @return <description>
      */
     public synchronized boolean addMember(Principal principal)
@@ -41,7 +41,7 @@ public class JAASGroup implements Group
 
     /**
      *
-     * @param param1 <description>
+     * @param principal <description>
      * @return <description>
      */
     public synchronized boolean removeMember(Principal principal)
@@ -51,7 +51,7 @@ public class JAASGroup implements Group
 
     /**
      *
-     * @param param1 <description>
+     * @param principal <description>
      * @return <description>
      */
     public boolean isMember(Principal principal)

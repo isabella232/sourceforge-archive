@@ -765,7 +765,6 @@ public class Code
      * @param o4 Another Object to pass to the debug Log.
      * @param o5 Another Object to pass to the debug Log.
      * @param o6 Another Object to pass to the debug Log.
-     * @param o6 Another Object to pass to the debug Log.
      * @param o7 Another Object to pass to the debug Log.
      */
     public static void debug(Object o1,Object o2,Object o3, Object o4,

@@ -30,7 +30,7 @@ public abstract class Resource implements Serializable
     
     /* ------------------------------------------------------------ */
     /** Construct a resource from a url.
-     * @param resource A URL.
+     * @param url A URL.
      * @return A Resource object.
      */
     public static Resource newResource(URL url)
