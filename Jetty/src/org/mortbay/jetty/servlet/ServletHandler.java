@@ -89,6 +89,9 @@ import org.mortbay.util.URI;
 public class ServletHandler extends AbstractHttpHandler
 {
     /* ------------------------------------------------------------ */
+    public static final String __DEFAULT_SERVLET="default";
+    
+    /* ------------------------------------------------------------ */
     private static final boolean __Slosh2Slash=File.separatorChar=='\\';
     private static String __AllowString="GET, HEAD, POST, OPTION, TRACE";
     
@@ -817,10 +820,15 @@ public class ServletHandler extends AbstractHttpHandler
     }
 
     /* ------------------------------------------------------------ */
+    /** Get Named dispatcher.
+     * @param name The name of the servlet. If null or empty string, the
+     * containers default servlet is returned.
+     * @return Request dispatcher for the named servlet.
+     */
     public RequestDispatcher getNamedDispatcher(String name)
     {
         if (name == null || name.length()==0)
-            return null;
+            name=__DEFAULT_SERVLET;
 
         try { return new Dispatcher(ServletHandler.this,name); }
         catch(Exception e) {Code.ignore(e);}
