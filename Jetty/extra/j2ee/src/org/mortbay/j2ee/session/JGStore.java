@@ -360,12 +360,9 @@ public class
       {
 	Class[] tmp={String.class, Integer.class, Object[].class};
 	MethodCall mc = new MethodCall(getClass().getMethod("dispatch",tmp));
-        Object[] args = new Object[3];
-        args[0] = id;
-        args[1] = _methodToInteger.get(method.getName());
-        args[2] = argInstances;
-        mc.setArgs(args);
-
+	mc.addArg(id);
+	mc.addArg(_methodToInteger.get(method.getName()));
+	mc.addArg(argInstances);
 
 	// we need some way of synchronising _member read/write-ing...
 	_dispatcher.callRemoteMethods(_members,
