@@ -7,7 +7,6 @@ package org.mortbay.http;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.Security;
