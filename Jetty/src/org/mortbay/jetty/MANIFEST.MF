@@ -7,6 +7,8 @@ Implementation-Version: 4.1.D3
 Specification-Vendor: Mort Bay Consulting, Pty. Ltd.
 Implementation-Vendor: Mort Bay Consulting, Pty. Ltd.
 Implementation-URL: http://jetty.mortbay.org
+Main-Class: org.mortbay.jetty.Server
+Class-Path: javax.servlet.jar org.apache.jasper.jar ../ext/com.sun.net.ssl.jar
 
 Name: org/mortbay/jetty/
 Specification-Title:  Jetty HTTP Servlet Server

@@ -60,8 +60,8 @@ Other targets:
   <property name="jetty.webapp.webinf"    value="${jetty.webapp}/WEB-INF"/>
   <property name="jetty.webapp.classes"   value="${jetty.webapp.webinf}/classes"/>
 
-  <property name="jetty.jar"       value="${lib}/org.mortbay.jetty.jar"/>
-  <property name="jetty1.4.jar"    value="${lib}/org.mortbay.jetty-jdk1.4.jar"/>
+  <property name="jetty.jar"       value="${lib}/org.mortbay.jetty-jdk1.2.jar"/>
+  <property name="jetty1.4.jar"    value="${lib}/org.mortbay.jetty.jar"/>
   <property name="mortbay.jmx.jar" value="${lib}/org.mortbay.jmx.jar"/>
   <property name="mini.http.jar"   value="${basedir}/org.mortbay.http.jar"/>
   <property name="servlet.jar"     value="${lib}/javax.servlet.jar"/>
@@ -235,7 +235,8 @@ Other targets:
 
   <!-- ==================================================================== -->
   <target name="jetty.jar" depends="classes,servlet.jar">
-    <jar jarfile="${jetty.jar}" basedir="${classes}" manifest="${src}/org/mortbay/MANIFEST.MF" >
+    <jar jarfile="${jetty.jar}" basedir="${classes}" 
+     manifest="${src}/org/mortbay/jetty/MANIFEST.MF" >
        <include name="org/mortbay/**"  />
        <include name="org/jboss/**"  />
        <exclude name="**/jmx/**" />
@@ -244,7 +245,8 @@ Other targets:
 
   <!-- ==================================================================== -->
   <target name="jetty1.4.jar" depends="classes1.4,servlet.jar" if="jdk1.4.available">
-    <jar jarfile="${jetty1.4.jar}" manifest="${src}/org/mortbay/MANIFEST.MF">
+    <jar jarfile="${jetty1.4.jar}" 
+     manifest="${src}/org/mortbay/jetty/MANIFEST.MF">
        <fileset dir="${classes}">
          <include name="org/mortbay/**"/>
          <exclude name="**/jmx/**" />
@@ -260,7 +262,8 @@ Other targets:
   <!-- ==================================================================== -->
   <target name="mortbay.jmx.jar" depends="classes">
     <copy file="${src}/org/mortbay/jetty/jmx/demo.mlet" tofile="${etc}/demo.mlet" />
-    <jar jarfile="${mortbay.jmx.jar}">
+    <jar jarfile="${mortbay.jmx.jar}"
+     manifest="${src}/org/mortbay/util/jmx/MANIFEST.MF">
        <fileset dir="${classes}">
          <include name="org/mortbay/**/jmx/**"/>
        </fileset>

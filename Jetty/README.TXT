@@ -14,7 +14,22 @@ extensible and flexible, thus making it an ideal platform for serving
 dynamic HTTP requests from any Java application.
 
 
-Quick start on Unix
+Quick start on all platforms
+============================
+
+If using jdk 1.4 run:
+
+  cd <jetty install directory>
+  java -jar lib/org.mortbay.jetty.jar etc/demo.xml
+  
+Where cd and / have been repaced with any non-unix platform versions. 
+
+For JMX demo run:
+  cd <jetty install directory>
+  java -jar lib/org.mortbay.jmx.jar etc/demo.mlet
+
+
+Medium start on Unix
 ===================
 run:
   export JETTY_HOME=<jetty install directory>
@@ -38,7 +53,7 @@ detailed instructions on how to setup the runtime environment.
 
 
 
-Quick start on Windows
+Medium start on Windows
 ======================
 Due to problems with the servlet security model (see below).  It is vital
 that windows users use the exact case for drive letters, URLs and filenames.
@@ -63,8 +78,8 @@ will need to read some more and setup the environment.
 
 
 
-Ant Quick Start
-===============
+Ant Start
+=========
 
 If you have the ant java build tool ant installed, you may use that to
 start jetty.  The demo can be started with:
@@ -94,29 +109,29 @@ the JMX web agent on 8082.
 
 Environment
 ===========
-Development has been done in JDK1.2 and the following CLASSPATH is
-required (or the non unix equivalent):
+
+If you are using jdk1.4, you should use the path (or non-unix equivalent):
 
   CLASSPATH=\
     $JETTY_HOME/lib/org.mortbay.jetty.jar:\
     $JETTY_HOME/lib/javax.servlet.jar:\
+    $JETTY_HOME/lib/org.apache.jasper.jar
+
+
+For jdk1.2 or jdk1.3 us the following classpath
+
+  CLASSPATH=\
+    $JETTY_HOME/lib/org.mortbay.jetty-jdk1.2.jar:\
+    $JETTY_HOME/lib/javax.servlet.jar:\
     $JETTY_HOME/lib/org.apache.jasper.jar:\
     $JETTY_HOME/ext/javax.xml.jaxp.jar:\
     $JETTY_HOME/ext/org.apache.crimson.jar
-
-If you are using jdk1.4, you should use the path:
-
-  CLASSPATH=\
-    $JETTY_HOME/lib/org.mortbay.jetty-jdk1.4.jar:\
-    $JETTY_HOME/lib/javax.servlet.jar:\
-    $JETTY_HOME/lib/org.apache.jasper.jar
 
 
 To use SSL you will also need to add the the jar below, which is
 a merge of the jsse, jnet and jcert jars from the JSSE package
 (see $JETTY_HOME/doc/JsseSSL.html for more details):
     $JETTY_HOME/ext/com.sun.net.ssl.jar
-
 
 To use JMX the classpath must also include:
     $JETTY_HOME/ext/jmxri.jar
@@ -247,8 +262,8 @@ hierarchy.  If Jetty is built and the 1.4 classes are available, the source
 in $JETTY_HOME/src1.4 is used to replace or enhance the standard classes.
 
 These extra or enhanced classes are placed in the
-org.mortbay.jetty-jdk1.4.jar file, which must be in your path instead of 
-org.mortbay.jetty.jar for the enhanced classes to replace the standard
+org.mortbay.jetty.jar file, which must be in your path instead of 
+org.mortbay.jetty-jdk1.2.jar for the enhanced classes to replace the standard
 classes.
 
 The SocketChannelListener class uses non blocking IO for idle connections to

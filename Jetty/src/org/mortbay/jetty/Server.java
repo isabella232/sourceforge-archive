@@ -1,3 +1,8 @@
+// ========================================================================
+// Copyright (c) 2002 Mort Bay Consulting (Australia) Pty. Ltd.
+// $Id$
+// ========================================================================
+
 package org.mortbay.jetty;
 
 import java.io.IOException;
