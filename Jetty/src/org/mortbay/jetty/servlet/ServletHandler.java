@@ -559,8 +559,7 @@ public class ServletHandler extends AbstractHttpHandler
                 if (session!=null)
                     ((SessionManager.Session)session).access();
                 
-                Code.debug("session=",session);
-                
+                Code.debug("session=",session);                
             }
 
             // Do that funky filter and servlet thang!

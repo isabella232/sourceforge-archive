@@ -651,7 +651,7 @@ public class SimpleServer
       
     // Create a servlet container
     ServletHandler servlets = new ServletHandler();
-    context.addHttpHandler(servlets);
+    context.addHandler(servlets);
 
     // Map a servlet onto the container
     servlets.addServlet("Dump","/Dump/*","org.mortbay.servlet.Dump");

@@ -84,7 +84,7 @@ public class FormAuthenticator implements Authenticator
         String uri = pathInContext;
 
         // Setup session 
-        HttpSession session=request.getSession(true);             
+        HttpSession session=request.getSession(true);
         
         // Handle a request for authentication.
         if ( uri.substring(uri.lastIndexOf("/")+1).startsWith(__J_SECURITY_CHECK) )
@@ -105,16 +105,13 @@ public class FormAuthenticator implements Authenticator
                 if (nuri==null)
                     nuri=URI.addPaths(request.getContextPath(),_formErrorPage);
 
-                response.setHeader(HttpFields.__Location,nuri);
-                response.sendError(HttpResponse.__302_Moved_Temporarily);
+                response.sendRedirect(response.encodeRedirectURL(nuri));
             }
             else
             {
                 Code.debug("Form authentication FAILED for ",username);
-                response.setHeader(HttpFields.__Location,
-                                   URI.addPaths(request.getContextPath(),
-                                                _formErrorPage));
-                response.sendError(HttpResponse.__302_Moved_Temporarily);
+                response.sendRedirect(response.encodeRedirectURL(URI.addPaths(request.getContextPath(),
+                                                _formErrorPage)));
             }
             
             // Security check is always false, only true after final redirection.
@@ -144,8 +141,8 @@ public class FormAuthenticator implements Authenticator
         if (httpRequest.getQuery()!=null)
             uri+="?"+httpRequest.getQuery();
         session.setAttribute(__J_URI, URI.addPaths(request.getContextPath(),uri));
-        response.sendRedirect(URI.addPaths(request.getContextPath(),
-                                           _formLoginPage));
+        response.sendRedirect(response.encodeRedirectURL(URI.addPaths(request.getContextPath(),
+                                           _formLoginPage)));
         return null;
     }
 

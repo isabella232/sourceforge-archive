@@ -29,6 +29,20 @@ import org.mortbay.util.Resource;
 /* ------------------------------------------------------------ */
 /** HashMapped User Realm.
  *
+ * An implementation of UserRealm that stores users and roles in-memory in
+ * HashMaps.
+ * <P>
+ * Typically these maps are populated by calling the load() method or passing
+ * a properties resource to the constructor. The format of the properties
+ * file is: <PRE>
+ *  username: password [,rolename ...]
+ * </PRE>
+ * Passwords may be clear text, obfuscated or checksummed.  The class 
+ * com.mortbay.Util.Password should be used to generate obfuscated
+ * passwords or password checksums.
+ * 
+ * If DIGEST Authentication is used, the password must be in a recoverable
+ * format, either plain text or OBF:.
  * @see Password
  * @version $Id$
  * @author Greg Wilkins (gregw)
@@ -41,14 +55,13 @@ public class HashUserRealm extends HashMap implements UserRealm, Externalizable
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
-     * @param name 
      */
     public HashUserRealm()
     {}
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
-     * @param name 
+     * @param name Realm Name
      */
     public HashUserRealm(String name)
     {
@@ -133,12 +146,18 @@ public class HashUserRealm extends HashMap implements UserRealm, Externalizable
     }
     
     /* ------------------------------------------------------------ */
+    /** 
+     * @param name The realm name 
+     */
     public void setName(String name)
     {
         _realmName=name;
     }
     
     /* ------------------------------------------------------------ */
+    /** 
+     * @return The realm name. 
+     */
     public String getName()
     {
         return _realmName;
