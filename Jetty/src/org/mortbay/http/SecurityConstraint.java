@@ -415,6 +415,7 @@ public class SecurityConstraint implements Cloneable, Serializable
             // Handle pre-authenticated request
             if (request.getAuthType() != null && request.getAuthUser() != null)
             {
+                // TODO - is this still needed???
                 user= request.getUserPrincipal();
                 if (user == null)
                     user= realm.authenticate(request.getAuthUser(), null, request);
@@ -463,6 +464,10 @@ public class SecurityConstraint implements Cloneable, Serializable
                     return false; // role failed.
                 }
             }
+        }
+        else
+        {
+            request.setUserPrincipal(HttpRequest.__NOT_CHECKED);
         }
 
         return true;

@@ -1248,6 +1248,7 @@ public class HttpContext extends ResourceCache
                 request,
                 response);
         }
+        request.setUserPrincipal(HttpRequest.__NOT_CHECKED);
         return true;
     }
 

@@ -1136,6 +1136,8 @@ public class HttpRequest extends HttpMessage
     /* ------------------------------------------------------------ */
     public boolean hasUserPrincipal()
     {
+        if (_userPrincipal==__NOT_CHECKED)
+            getUserPrincipal();
         return _userPrincipal!=null && _userPrincipal!=__NO_USER;
     }
     
@@ -1145,8 +1147,9 @@ public class HttpRequest extends HttpMessage
         if (_userPrincipal==__NO_USER)
             return null;
             
-        if (_userPrincipal==null)
+        if (_userPrincipal==__NOT_CHECKED)
         {
+            // Try a lazy authentication
             HttpContext context=getHttpResponse().getHttpContext();
             if (context!=null)
             {
@@ -1156,7 +1159,9 @@ public class HttpRequest extends HttpMessage
                 {
                     try
                     {
-                        auth.authenticate(realm, getPath(), this,null);
+                        // TODO - should not need to recalculate this!
+                        String pathInContext=getPath().substring(context.getContextPath().length());
+                        auth.authenticate(realm, pathInContext, this,null);
                     }
                     catch(Exception e)
                     {
@@ -1164,8 +1169,11 @@ public class HttpRequest extends HttpMessage
                     }
                 }
             }
-            if (_userPrincipal==null)
+            if (_userPrincipal==null || _userPrincipal==__NOT_CHECKED)
                 _userPrincipal=__NO_USER;
+
+            if (_userPrincipal==__NO_USER)
+                return null;
         }
         return _userPrincipal;
     }
@@ -1223,5 +1231,6 @@ public class HttpRequest extends HttpMessage
         super.destroy();
     }
     
-    private static Principal __NO_USER=new Principal(){public String getName(){return null;}};
+    static Principal __NO_USER=new Principal(){public String getName(){return null;}};
+    static Principal __NOT_CHECKED=new Principal(){public String getName(){return null;}};
 }
