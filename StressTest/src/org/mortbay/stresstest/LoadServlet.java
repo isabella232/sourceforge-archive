@@ -12,6 +12,21 @@ import javax.servlet.http.*;
 /* ------------------------------------------------------------ */
 public class LoadServlet extends HttpServlet
 {
+    public static char[] __chars=new char[16384];
+    public static byte[] __bytes=new byte[16384];
+    static
+    {
+	for (int i=0;i<16384;i++)
+	{
+	    __chars[i]=(char)('a'+(i%28));
+	    if (i%28==26)
+		__chars[i]='\r';
+	    if (i%28==27)
+		__chars[i]='\n';
+	    __bytes[i]=(byte)__chars[i];
+	}
+    }
+
     /* ------------------------------------------------------------ */
     public void init(ServletConfig config)
          throws ServletException
@@ -30,28 +45,46 @@ public class LoadServlet extends HttpServlet
     public void doGet(HttpServletRequest request, HttpServletResponse response) 
         throws ServletException, IOException
     {
-        String info=request.getPathInfo();
-        String encoding=request.getParameter("encoding");
-        if (encoding!=null)
-            request.setCharacterEncoding(encoding);
-
-        // Reader r = request.getReader();
-        // while (r.read()!=-1);
-
         int lines=10;
         String l=request.getParameter("lines");
         if (l!=null)
             lines=Integer.parseInt(l);
-        
+        int block=-1;
+        String b=request.getParameter("block");
+        if (b!=null)
+            block=Integer.parseInt(b);
+
         response.setContentType("text/plain");
-        PrintWriter out = response.getWriter();
-        for (int i=0;i<10;i++)
+        
+	if (block>0 && lines==0)
+	{
+            response.getOutputStream().write(__bytes,0,block);
+	}
+        else
         {
-            out.write("Now ");
-            out.write("is the time for all good men to come to the aid of the party\n");
+            String info=request.getPathInfo();
+            String encoding=request.getParameter("encoding");
+            if (encoding!=null)
+                request.setCharacterEncoding(encoding);
+            
+            // Reader r = request.getReader();
+            // while (r.read()!=-1);
+            
+            
+            PrintWriter out = response.getWriter();
+            for (int i=0;i<lines;i++)
+            {
+                out.write("Now ");
+                out.write("is the time for all good men to come to the aid of the party\n");
+            }
+            
+            if (block>0)
+                out.write(__chars,0,block);
+            
+            out.flush();
         }
-        out.flush();
     }
+    
 
     /* ------------------------------------------------------------ */
     public String getServletInfo()
