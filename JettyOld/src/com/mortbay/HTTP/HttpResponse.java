@@ -352,6 +352,14 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     }
     
 
+    /* ------------------------------------------------------------- */
+    /** Get the HttpOutputStream of the response.
+     */
+    synchronized HttpOutputStream getHttpOutputStream()
+    {
+	return httpOut;
+    }
+
     /* -------------------------------------------------------------- */
     /* ServletResponse methods -------------------------------------- */
     /* -------------------------------------------------------------- */

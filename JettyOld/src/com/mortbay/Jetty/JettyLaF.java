@@ -184,14 +184,14 @@ public class JettyLaF extends Page
 	    if ("Home".equals(section))
 	    {
 		grid.cell()
-		    .add(new Font(3,true).face("Helvetica")
+		    .add(new Font(2,true).face("Helvetica")
 			 .add("Mort Bay Consulting's<P>"))
-		    .add(new Font(4,true).face("Helvetica")
+		    .add(new Font(3,true).face("Helvetica")
 			 .add("JETTY<BR>Java HTTP Server"));
 	    }
 	    else
 		grid.cell()
-		    .add(new Font(4,true).face("Helvetica")
+		    .add(new Font(3,true).face("Helvetica")
 			 .add(heading));
 
 	    grid.newCell().cell()

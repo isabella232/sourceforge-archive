@@ -63,8 +63,7 @@ public class HttpFilter extends FilterOutputStream
 	    this.request=response.getRequest();
 	    this.response=response;
 	    info = new Hashtable();
-	    HttpOutputStream httpOut = (HttpOutputStream)
-		response.getOutputStream();
+	    HttpOutputStream httpOut = response.getHttpOutputStream();
 	    super.out = httpOut.replaceOutputStream(this);
 	    activate();
 	}

@@ -2,6 +2,7 @@
 Release 2.1.7 - 22 April 1999
   + Fixed showstopper bug with getReader and getWriter in
     requests and responses.
+  + HttpFilter uses package interface to get HttpOutputStream
 
 Release 2.1.6 - 21 April 1999
   + Reduced initial size of most hashtables to reduce

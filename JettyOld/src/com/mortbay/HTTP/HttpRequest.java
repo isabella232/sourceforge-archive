@@ -437,6 +437,14 @@ public class HttpRequest extends HttpHeader
 	uri.put(name,values);
     }
     
+    /* ------------------------------------------------------------- */
+    /** Get the HttpInputStream of the request.
+     */
+    synchronized HttpInputStream getHttpInputStream()
+    {
+	return in;
+    }
+    
     /* -------------------------------------------------------------- */
     /* - SERVLET METHODS -------------------------------------------- */
     /* -------------------------------------------------------------- */
