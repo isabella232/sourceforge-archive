@@ -63,12 +63,12 @@ within the application.  The configuration of the application
 within Jetty requires on the context of the application to be
 set.
 <CODE><PRE>  &lt;Call name="addWebApplication">
-    &lt;Arg>/default,/default/*&lt;/Arg>
+    &lt;Arg>/default/*&lt;/Arg>
     &lt;Arg>&lt;SystemProperty name="user.dir"/>/webapps/default/&lt;/Arg>
   &lt;/Call></PRE></CODE>
 These tags correspond to:
 <CODE><PRE>  server.addWebApplication(
-    "/default,/default/*",
+    "/default/*",
     System.getProperty("user.dir")+"/webapps/default"
   );</PRE></CODE><HR>
 <B>Adding Servlets and Other Handlers</B>
@@ -114,13 +114,13 @@ configured for a context.
 To this context we add the "Dump" servlet:
 <CODE><PRE>    &lt;Call name="addServlet">
       &lt;Arg>Dump&lt;/Arg>
-      &lt;Arg>/dump,/dump/*,/handler/Dump,/handler/Dump/*&lt;/Arg>
+      &lt;Arg>/dump/*:/handler/Dump/*&lt;/Arg>
       &lt;Arg>org.mortbay.servlet.Dump&lt;/Arg>
     &lt;/Call></PRE></CODE>
 In pseudo-Java, this is:
 <CODE><PRE>    context.addServlet(
       "Dump",
-      "/dump,/dump/*,/handler/Dump,/handler/Dump/*",
+      "/dump/*:/handler/Dump/*",
       "com.mortaby.Servlet.Dump"
     );</PRE></CODE>
 The last <Call> adds a non-Servlet Handler to the context:

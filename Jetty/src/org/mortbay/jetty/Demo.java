@@ -72,7 +72,7 @@ public class Demo
             context.setResourceBase("docroot/");
 
             context.addServlet("Dump",
-                               "/dump/*,*.DUMP",
+                               "/dump/*:*.DUMP",
                                "org.mortbay.servlet.Dump");
             context.addServlet("Session",
                                "/session",
@@ -80,7 +80,7 @@ public class Demo
             context.addServlet("Dispatch",
                                "/Dispatch/*",
                                "org.mortbay.servlet.RequestDispatchTest");
-            context.addServlet("JSP","*.jsp,*.jsP,*.jSp,*.jSP,*.Jsp,*.JsP,*.JSp,*.JSP",
+            context.addServlet("JSP","*.jsp:*.jsP:*.jSp:*.jSP:*.Jsp:*.JsP:*.JSp:*.JSP",
                                "org.apache.jasper.servlet.JspServlet");
             context.setServingResources(true);
             context.addHandler(new DumpHandler());

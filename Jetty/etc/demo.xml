@@ -130,7 +130,7 @@ $Id$
 
     <Call name="addServlet">
       <Arg>Dump</Arg>
-      <Arg>/dump/*,*.DUMP</Arg>
+      <Arg>/dump/*:*.DUMP</Arg>
       <Arg>org.mortbay.servlet.Dump</Arg>
       <Put name="InitParam">Value</Put>
     </Call>
@@ -146,7 +146,7 @@ $Id$
     </Call>
     <Call name="addServlet">
       <Arg>JSP</Arg>
-      <Arg>*.jsp,*.jsP,*.jSp,*.jSP,*.Jsp,*.JsP,*.JSp,*.JSP</Arg>
+      <Arg>*.jsp:*.jsP:*.jSp:*.jSP:*.Jsp:*.JsP:*.JSp:*.JSP</Arg>
       <Arg>org.apache.jasper.servlet.JspServlet</Arg>
     </Call>   
 

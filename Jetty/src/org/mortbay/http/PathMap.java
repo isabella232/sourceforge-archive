@@ -34,8 +34,10 @@ import java.util.StringTokenizer;
  * <LI>Longest suffix match.
  * <LI>default.
  * </NL>
- * Multiple path specifications can be mapped by providing a coma
- * separated list of specifications.
+ * Multiple path specifications can be mapped by providing a list of
+ * specifications.  The list is separated by the characters specified
+ * in the "org.mortbay.http.PathMap.separators" System property, which
+ * defaults to :
  * <P>
  * Note that this is a very different mapping to that provided by PathMap
  * in Jetty2.
@@ -48,6 +50,9 @@ import java.util.StringTokenizer;
  */
 public class PathMap extends HashMap
 {
+    /* ------------------------------------------------------------ */
+    public static final String __pathSpecSeparators = System.getProperty("org.mortbay.http.PathMap.separators",":");
+    
     /* --------------------------------------------------------------- */
     StringMap _prefixMap=new StringMap();
     StringMap _suffixMap=new StringMap();
@@ -92,7 +97,7 @@ public class PathMap extends HashMap
      */
     public synchronized Object put(Object pathSpec, Object object)
     {
-        StringTokenizer tok = new StringTokenizer(pathSpec.toString(),",");
+        StringTokenizer tok = new StringTokenizer(pathSpec.toString(),__pathSpecSeparators);
         Object old =null;
         
         while (tok.hasMoreTokens())

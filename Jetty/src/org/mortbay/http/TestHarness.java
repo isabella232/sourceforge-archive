@@ -359,7 +359,7 @@ public class TestHarness
             p.put("*.tar.gz","6");
             p.put("*.gz","7");
             p.put("/","8");
-            p.put("/XXX,/YYY","9");
+            p.put("/XXX:/YYY","9");
             
             t.checkEquals(p.get("/abs/path"),"1","Get absolute path");
             t.checkEquals(p.getMatch("/abs/path").getKey(),"/abs/path",

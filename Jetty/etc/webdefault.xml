@@ -15,7 +15,7 @@
 
   <servlet-mapping>
     <servlet-name>JSP</servlet-name>
-    <url-pattern>*.jsp,*.jsP,*.jSp,*.jSP,*.Jsp,*.JsP,*.JSp,*.JSP</url-pattern>
+    <url-pattern>*.jsp:*.jsP:*.jSp:*.jSP:*.Jsp:*.JsP:*.JSp:*.JSP</url-pattern>
   </servlet-mapping>
 
   <session-config>
