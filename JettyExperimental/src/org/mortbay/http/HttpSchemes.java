@@ -24,6 +24,6 @@ package org.mortbay.http;
 public class HttpSchemes
 {
     public final static String
-        HTTP = "http",
+        HTTP ="http",
         HTTPS="https";
 }

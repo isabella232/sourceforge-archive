@@ -15,7 +15,7 @@
 
 package org.mortbay.http.bio;
 
-import org.mortbay.http.HttpHeader;
+import org.mortbay.http.temp.HttpHeader;
 import org.mortbay.io.Portable;
 
 /* ------------------------------------------------------------------------------- */

@@ -32,8 +32,14 @@ package org.mortbay.io;
  *
  * @version 1.0
  */
-public interface Buffer
+public interface Buffer extends Cloneable
 {
+    public final static int 
+      IMMUTABLE=0,
+      READONLY=1,
+      READWRITE=2;
+    public final boolean VOLATILE=true;
+    public final boolean NON_VOLATILE=false;
 
     /**
      *  Get the underlying array, if one exists.
@@ -47,18 +53,35 @@ public interface Buffer
      */
     byte[] asArray();
     
+    /** 
+     * Get the unerlying buffer. If this buffer wraps a backing buffer.
+     * @return The root backing buffer or this if there is no backing buffer;
+     */
+    Buffer buffer();
+    
     /**
      * 
      * @return a non volitile version of this <code>Buffer</code> value
      */
-    Buffer asNonVolatile();
+    Buffer asNonVolatileBuffer();
 
     /**
      *
      * @return a readonly version of this <code>Buffer</code>.
      */
     Buffer asReadOnlyBuffer();
-    
+
+    /**
+     *
+     * @return an immutable version of this <code>Buffer</code>.
+     */
+    Buffer asImmutableBuffer();
+
+    /**
+     *
+     * @return an immutable version of this <code>Buffer</code>.
+     */
+    Buffer asMutableBuffer();
     
     /**
      * 
@@ -85,12 +108,6 @@ public interface Buffer
      */
     void compact();
     
-    /**
-     * 
-     * @return a <code>Buffer</code> duplicate.
-     */
-    Buffer duplicate();
-
     /**
      * Get the byte at the current getIndex and increment it.
      * @return The <code>byte</code> value from the current getIndex.
@@ -131,16 +148,25 @@ public interface Buffer
      */
     boolean isCaseSensitive();
 
+
     /**
      * 
-     * @return a <code>boolean</code> value true if the buffer is readonly
+     * @return a <code>boolean</code> value true if the buffer is immutable and that neither
+     * the buffer contents nor the indexes may be changed.
+     */
+    boolean isImmutable();
+    
+    /**
+     * 
+     * @return a <code>boolean</code> value true if the buffer is readonly. The buffer indexes may
+     * be modified, but the buffer contents may not.
      */
     boolean isReadOnly();
     
     /**
      * 
-     * @return a <code>boolean</code> value true if the buffer is expected to changed 
-     * outside of the current scope. 
+     * @return a <code>boolean</code> value true if the buffer contents may change 
+     * via alternate paths than this buffer. 
      */
     boolean isVolatile();
 
@@ -187,6 +213,16 @@ public interface Buffer
      * @return The <code>Buffer</code> value from the requested getIndex.
      */
     Buffer peek(int index, int length);
+
+    /**
+     * 
+     * @param index an <code>int</code> value
+     * @param b The byte array to peek into
+     * @param offset The offset into the array to start peeking
+     * @param length an <code>int</code> value
+     * @return The number of bytes actually peeked
+     */
+    int peek(int index, byte[] b, int offset, int length);
     
     /**
      * Put the contents of the buffer at the specific index.
@@ -291,8 +327,4 @@ public interface Buffer
     String toDetailString();
     
     
-    public final static boolean READONLY= true;   
-    public final static boolean READWRITE= false;
-    public final static boolean VOLATILE= true;   
-    public final static boolean NONVOLATILE= false;
 }

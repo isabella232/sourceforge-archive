@@ -102,11 +102,11 @@ public class BufferCacheTest extends TestCase
 			
 			assertEquals(S[i],b.toString());
 			if (i>0)
-				assertTrue(S[i]==b.toString());
+				assertTrue(""+i,S[i]==b.toString());
 			else
 			{
-                assertTrue(S[i]!=b.toString());
-                assertEquals(S[i],b.toString());
+                assertTrue(""+i,S[i]!=b.toString());
+                assertEquals(""+i,S[i],b.toString());
             } 
 		}
 	}

@@ -67,7 +67,6 @@ public class StreamEndPoint implements EndPoint
     }
 
     /* (non-Javadoc)
-     * The buffer is compacted before the fill if space is < 25% of capacity
      * @see org.mortbay.io.BufferIO#fill(org.mortbay.io.Buffer)
      */
     public int fill(Buffer buffer) throws IOException
@@ -77,17 +76,12 @@ public class StreamEndPoint implements EndPoint
             return 0;
             
     	int space=buffer.space();
-    	if (space<=buffer.capacity()/4)
-        {
-            buffer.compact();
-            space=buffer.space();
-            if (space<=0)
-            {
-                if (buffer.hasContent())
-                    return 0;
-                Portable.throwIllegalState("full");
-            }
-        }
+    	if (space<=0)
+    	{
+    	    if (buffer.hasContent())
+    	        return 0;
+    	    Portable.throwIO("FULL");
+    	}
         
 	    byte[] bytes = buffer.array();
 		int n=_in.read(bytes,buffer.putIndex(),space);

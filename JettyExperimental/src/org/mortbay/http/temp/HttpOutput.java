@@ -13,10 +13,15 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.http;
+package org.mortbay.http.temp;
 
 
 import java.io.IOException;
+
+import org.mortbay.http.HttpHeaderValues;
+import org.mortbay.http.HttpHeaders;
+import org.mortbay.http.HttpParser;
+import org.mortbay.http.HttpVersions;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.ByteArrayBuffer;

@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.http;
+package org.mortbay.http.temp;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -34,6 +34,11 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 
+import org.mortbay.http.HttpHeaderValues;
+import org.mortbay.http.HttpHeaders;
+import org.mortbay.http.HttpMethods;
+import org.mortbay.http.HttpStatus;
+import org.mortbay.http.HttpVersions;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.ByteArrayBuffer;

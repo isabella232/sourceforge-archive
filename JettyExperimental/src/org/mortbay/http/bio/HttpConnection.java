@@ -17,13 +17,13 @@ package org.mortbay.http.bio;
 
 import java.io.IOException;
 import java.net.Socket;
-import org.mortbay.http.HttpHeader;
 import org.mortbay.http.HttpHeaderValues;
 import org.mortbay.http.HttpHeaders;
 import org.mortbay.http.HttpMethods;
 import org.mortbay.http.HttpStatus;
 import org.mortbay.http.HttpVersions;
 import org.mortbay.http.handler.DumpHandler;
+import org.mortbay.http.temp.HttpHeader;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.ByteArrayBuffer;

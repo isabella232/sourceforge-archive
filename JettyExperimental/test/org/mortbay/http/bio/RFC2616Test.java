@@ -22,7 +22,7 @@ import java.util.List;
 
 import junit.framework.TestCase;
 
-import org.mortbay.http.HttpHeader;
+import org.mortbay.http.temp.HttpHeader;
 import org.mortbay.io.bio.StringEndPoint;
 
 /**

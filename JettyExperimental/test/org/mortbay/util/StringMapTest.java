@@ -210,11 +210,12 @@ public class StringMapTest extends TestCase
     public void testGetEntryBuffer()
     {
         Buffer xabcyz = new ByteArrayBuffer("xabcyz");
-        xabcyz=xabcyz.duplicate();
+        xabcyz=xabcyz.asMutableBuffer();
         xabcyz.setGetIndex(1);
         xabcyz.setPutIndex(4);
+        
         Buffer xaBcyz = new ByteArrayBuffer("xaBcyz");
-        xaBcyz=xaBcyz.duplicate();
+        xaBcyz=xaBcyz.asMutableBuffer();
         xaBcyz.setGetIndex(1);
         xaBcyz.setPutIndex(4);
         

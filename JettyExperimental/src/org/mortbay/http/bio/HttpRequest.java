@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 
-import org.mortbay.http.HttpHeader;
+import org.mortbay.http.temp.HttpHeader;
 import org.mortbay.io.Portable;
 
 /* ------------------------------------------------------------------------------- */

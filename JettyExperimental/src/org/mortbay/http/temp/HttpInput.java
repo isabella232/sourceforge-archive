@@ -13,9 +13,14 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.http;
+package org.mortbay.http.temp;
 
 import java.io.IOException;
+
+import org.mortbay.http.HttpMethods;
+import org.mortbay.http.HttpParser;
+import org.mortbay.http.HttpVersions;
+import org.mortbay.http.HttpParser.EventHandler;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.EndPoint;
@@ -161,52 +166,53 @@ public class HttpInput extends HttpParser.EventHandler
         _content = content;
     }
 
-    public void foundStartLineToken0(Buffer field)
+
+    public void parsedStartLine(Buffer tok0, Buffer tok1, Buffer tok2)
     {
         reset();
 
         // assume this is a request
         _request = true;
-        Buffer method = HttpMethods.CACHE.get(field);
+        Buffer method = HttpMethods.CACHE.get(tok0);
         if (method == null)
         {
             // maybe this is a response?
-            Buffer version = HttpVersions.CACHE.lookup(field);
+            Buffer version = HttpVersions.CACHE.lookup(tok0);
             if (version != null)
             {
                 _request = false;
                 _header.setVersion(version);
             }
             else
-                method = HttpMethods.CACHE.lookup(field).asReadOnlyBuffer();
+                method = HttpMethods.CACHE.lookup(tok0).asReadOnlyBuffer();
         }
         if (method != null) 
         _header.setMethod(method);
         _headerName = null;
-    }
-
-    public void foundStartLineToken1(Buffer field)
-    {
+     
+        // tok1
         if (_request)
-            _header.setURI(field.asReadOnlyBuffer());
+            // TODO Maybe a toString is better?
+            _header.setURI(tok1.asReadOnlyBuffer());
         else
-            _header.setStatus(BufferUtil.toInt(field));
+            _header.setStatus(BufferUtil.toInt(tok1));
+   
+        // tok2
+        if (tok2!=null)
+        {
+            if (_request)
+                _header.setVersion(HttpVersions.CACHE.lookup(tok2).asReadOnlyBuffer());
+            else
+                _header.setReason(tok2.asReadOnlyBuffer());
+        }
     }
 
-    public void foundStartLineToken2(Buffer field)
-    {
-        if (_request)
-            _header.setVersion(HttpVersions.CACHE.lookup(field).asReadOnlyBuffer());
-        else
-            _header.setReason(field.asReadOnlyBuffer());
-    }
-
-    public void foundHttpHeader(Buffer header)
+    public void parsedHeaderName(Buffer header)
     {
         _headerName = header.asReadOnlyBuffer();
     }
 
-    public void foundHttpValue(Buffer value)
+    public void parsedHeaderValue(Buffer value)
     {
         _header.add(_headerName, value);
     }

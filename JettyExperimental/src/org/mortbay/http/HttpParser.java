@@ -19,9 +19,11 @@ import java.io.IOException;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferCache;
+import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.Portable;
+import org.mortbay.io.View;
 
 /* ------------------------------------------------------------------------------- */
 /** 
@@ -79,6 +81,8 @@ public class HttpParser
     private boolean close=false;
     private boolean content=false;
     private EventHandler handler;
+    private View startTok0;
+    private View startTok1;
     
     /* ------------------------------------------------------------------------------- */
     /** Constructor. 
@@ -88,6 +92,10 @@ public class HttpParser
         this.buffer=buffer;
         this.endp=io;
         this.handler=handler;
+        startTok0=new View(buffer);
+        startTok1=new View(buffer);
+        startTok0.setPutIndex(startTok0.getIndex());
+        startTok1.setPutIndex(startTok1.getIndex());
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -153,7 +161,7 @@ public class HttpParser
     throws IOException
     {
         if (state == STATE_END) 
-        Portable.throwIllegalState("STATE_END");
+            Portable.throwIllegalState("STATE_END");
         if (state == STATE_CONTENT && contentPosition == contentLength)
         {
             state = STATE_END;
@@ -163,10 +171,55 @@ public class HttpParser
         if (buffer.length() == 0)
         {
             if (buffer.markIndex() == 0 && buffer.putIndex() == buffer.capacity()) 
-            throw new IllegalStateException("Buffer too small");
+                Portable.throwIO("Buffer too small");
             int filled = -1;
             if (endp != null) 
+            {
+                if (buffer.space()==0)
+                {
+                    if (state>=STATE_END || state==STATE_START || startTok0.length()==0)
+                    {
+                        buffer.compact();
+                    }
+                    else 
+                    {
+                        int m=buffer.markIndex();
+                        if (m<0)
+                            m=buffer.getIndex();
+                        
+                        if (m>startTok0.getIndex())
+                        {
+                            // TODO - maybe only do this before parsedStartLine call??
+                            // compact and adjust remembered tokens
+                            int mi = buffer.markIndex();
+                            m=startTok0.getIndex();
+                            buffer.setMarkIndex(m);
+                            buffer.compact();
+                            if (mi>=0)
+                                buffer.setMarkIndex(mi-m);
+                            else
+                                buffer.setMarkIndex(-1);
+                           
+                            startTok0.setMarkIndex(-1);
+                            if (startTok0.getIndex()>=m)
+                                startTok0.setGetIndex(startTok0.getIndex()-m);
+                            if (startTok0.putIndex()>=m)
+                                startTok0.setPutIndex(startTok0.putIndex()-m);
+                            startTok1.setMarkIndex(-1);
+                            if (startTok1.getIndex()>=m)
+                                startTok1.setGetIndex(startTok1.getIndex()-m);
+                            if (startTok1.putIndex()>=m)
+                                startTok1.setPutIndex(startTok1.putIndex()-m);
+                        }
+                        else
+                        {
+                            System.err.println(((ByteArrayBuffer)buffer).toDetailString());
+                            Portable.throwIO("Header too large");
+                        }
+                    }
+                }
                 filled = endp.fill(buffer);
+            }
             if (filled < 0 && state == STATE_EOF_CONTENT)
             {
                 state = STATE_END;
@@ -174,7 +227,7 @@ public class HttpParser
                 return;
             }
             if (filled < 0) 
-                throw new IOException("EOF");
+                Portable.throwIO("EOF");
         }
         byte ch;
 
@@ -202,7 +255,7 @@ public class HttpParser
               case STATE_FIELD0:
                 if (ch == SPACE)
                 {
-                    handler.foundStartLineToken0(buffer.sliceFromMark());
+                    startTok0.update(buffer.markIndex(),buffer.getIndex()-1);
                     state = STATE_SPACE1;
                     return;
                 }
@@ -225,14 +278,14 @@ public class HttpParser
               case STATE_FIELD1:
                 if (ch == SPACE)
                 {
-                    handler.foundStartLineToken1(buffer.sliceFromMark());
+                    startTok1.update(buffer.markIndex(),buffer.getIndex()-1);
                     state = STATE_SPACE2;
                     return;
                 }
                 else if (ch < SPACE)
                 {
                     // HTTP/0.9
-                    handler.foundStartLineToken1(buffer.sliceFromMark());
+                    handler.parsedStartLine(startTok0,buffer.sliceFromMark(),null);
                     handler.headerComplete();
                     state = STATE_END;
                     handler.messageComplete(contentPosition);
@@ -249,6 +302,7 @@ public class HttpParser
                 else if (ch < SPACE)
                 {
                     // HTTP/0.9
+                    handler.parsedStartLine(startTok0,startTok1,null);
                     handler.headerComplete();
                     state = STATE_END;
                     handler.messageComplete(contentPosition);
@@ -259,7 +313,7 @@ public class HttpParser
               case STATE_FIELD2:
                 if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                 {
-                    handler.foundStartLineToken2(buffer.sliceFromMark());
+                    handler.parsedStartLine(startTok0,startTok1,buffer.sliceFromMark());
                     eol = ch;
                     state = STATE_HEADER;
                     return;
@@ -316,7 +370,7 @@ public class HttpParser
                     if (length > 0)
                     {
                         header = HttpHeaders.CACHE.lookup(buffer.sliceFromMark(length));
-                        handler.foundHttpHeader(header);
+                        handler.parsedHeaderName(header);
                     }
                     eol = ch;
                     state = STATE_HEADER;
@@ -327,7 +381,7 @@ public class HttpParser
                     if (length > 0)
                     {
                         header = HttpHeaders.CACHE.lookup(buffer.sliceFromMark(length));
-                        handler.foundHttpHeader(header);
+                        handler.parsedHeaderName(header);
                     }
                     length = -1;
                     state = STATE_HEADER_VALUE;
@@ -382,7 +436,7 @@ public class HttpParser
                             content = true;
                             break;
                         }
-                        handler.foundHttpValue(value);
+                        handler.parsedHeaderValue(value);
                     }
                     eol = ch;
                     state = STATE_HEADER;
@@ -520,45 +574,31 @@ public class HttpParser
         length = 0;
         close=false;
         content=false;
+        startTok0.setPutIndex(startTok0.getIndex());
+        startTok1.setPutIndex(startTok1.getIndex());
+        
     }
 
-    public static class EventHandler
+    public static abstract class EventHandler
     {
 
         /**
          * This is the method called by parser when the HTTP request method or response version is
          * found
          */
-        public void foundStartLineToken0(Buffer ref)
-        {
-        }
-
-        /**
-         * This is the method called by parser when HTTP requestURI or response code is found
-         */
-        public void foundStartLineToken1(Buffer ref)
-        {
-        }
-
-        /**
-         * This is the method called by parser when HTTP request version or response reason is
-         * found
-         */
-        public void foundStartLineToken2(Buffer ref)
-        {
-        }
-
+        public abstract void parsedStartLine(Buffer tok0, Buffer tok1, Buffer tok2);
+        
         /**
          * This is the method called by parser when A HTTP Header name is found
          */
-        public void foundHttpHeader(Buffer ref)
+        public void parsedHeaderName(Buffer ref)
         {
         }
 
         /**
          * This is the method called by parser when a HTTP Header value is found
          */
-        public void foundHttpValue(Buffer ref)
+        public void parsedHeaderValue(Buffer ref)
         {
         }
 

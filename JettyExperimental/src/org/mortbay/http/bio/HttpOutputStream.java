@@ -19,8 +19,8 @@ package org.mortbay.http.bio;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.mortbay.http.HttpHeader;
-import org.mortbay.http.HttpOutput;
+import org.mortbay.http.temp.HttpHeader;
+import org.mortbay.http.temp.HttpOutput;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
 

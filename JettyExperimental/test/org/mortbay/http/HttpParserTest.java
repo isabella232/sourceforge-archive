@@ -260,44 +260,53 @@ public class HttpParserTest extends TestCase
                 http.length() - 2,
                 http.length() / 2,
                 http.length() / 3,
-                48,
-                24
+                64,
+                32
             };
-
+        
         for (int t= 0; t < tests.length; t++)
         {
             String tst="t"+tests[t];
-            ByteArrayBuffer buffer= new ByteArrayBuffer(tests[t]);
-            io.setInput(http);
-
-            Handler handler = new Handler();
-            HttpParser parser= new HttpParser(buffer,io, handler);
-            parser.parse();
-            assertEquals(tst,"GET", f0);
-            assertEquals(tst,"/", f1);
-            assertEquals(tst,"HTTP/1.0", f2);
-            assertEquals(tst,1, h);
-            assertEquals(tst,"Header1", hdr[0]);
-            assertEquals(tst,"value1", val[0]);
-            assertEquals(tst,"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", content);
-
-            parser.parse();
-            assertEquals(tst,"POST", f0);
-            assertEquals(tst,"/foo", f1);
-            assertEquals(tst,"HTTP/1.0", f2);
-            assertEquals(tst,1, h);
-            assertEquals(tst,"Header2", hdr[0]);
-            assertEquals(tst,"value2", val[0]);
-            assertEquals(tst,null, content);
-
-            parser.parse();
-            assertEquals(tst,"PUT", f0);
-            assertEquals(tst,"/doodle", f1);
-            assertEquals(tst,"HTTP/1.0", f2);
-            assertEquals(tst,1, h);
-            assertEquals(tst,"Header3", hdr[0]);
-            assertEquals(tst,"value3", val[0]);
-            assertEquals(tst,"0123456789", content);
+            try
+            {
+                ByteArrayBuffer buffer= new ByteArrayBuffer(tests[t]);
+                io.setInput(http);
+                
+                Handler handler = new Handler();
+                HttpParser parser= new HttpParser(buffer,io, handler);
+                parser.parse();
+                assertEquals(tst,"GET", f0);
+                assertEquals(tst,"/", f1);
+                assertEquals(tst,"HTTP/1.0", f2);
+                assertEquals(tst,1, h);
+                assertEquals(tst,"Header1", hdr[0]);
+                assertEquals(tst,"value1", val[0]);
+                assertEquals(tst,"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ", content);
+                
+                parser.parse();
+                assertEquals(tst,"POST", f0);
+                assertEquals(tst,"/foo", f1);
+                assertEquals(tst,"HTTP/1.0", f2);
+                assertEquals(tst,1, h);
+                assertEquals(tst,"Header2", hdr[0]);
+                assertEquals(tst,"value2", val[0]);
+                assertEquals(tst,null, content);
+                
+                parser.parse();
+                assertEquals(tst,"PUT", f0);
+                assertEquals(tst,"/doodle", f1);
+                assertEquals(tst,"HTTP/1.0", f2);
+                assertEquals(tst,1, h);
+                assertEquals(tst,"Header3", hdr[0]);
+                assertEquals(tst,"value3", val[0]);
+                assertEquals(tst,"0123456789", content);
+            }
+            catch(Exception e)
+            {
+                if (t+1 < tests.length)
+                    throw e;
+                assertTrue(e.toString().indexOf("FULL")>=0);
+            }
         }
     }
 
@@ -318,30 +327,28 @@ public class HttpParserTest extends TestCase
             content= content.substring(0, index) + ref;
         }
 
-        public void foundStartLineToken0(Buffer ref)
+
+        public void parsedStartLine(Buffer tok0, Buffer tok1, Buffer tok2)
         {
             h= -1;
             hdr= new String[9];
             val= new String[9];
-            f0= ref.toString();
+            f0= tok0.toString();
+            f1= tok1.toString();
+            if (tok2!=null)
+                f2= tok2.toString();
+            else
+                f2=null;
+            
+            // System.out.println(f0+" "+f1+" "+f2);
         }
 
-        public void foundStartLineToken1(Buffer ref)
-        {
-            f1= ref.toString();
-        }
-
-        public void foundStartLineToken2(Buffer ref)
-        {
-            f2= ref.toString();
-        }
-
-        public void foundHttpHeader(Buffer ref)
+        public void parsedHeaderName(Buffer ref)
         {
             hdr[++h]= ref.toString();
         }
 
-        public void foundHttpValue(Buffer ref)
+        public void parsedHeaderValue(Buffer ref)
         {
             if (val[h] == null)
                 val[h]= ref.toString();
