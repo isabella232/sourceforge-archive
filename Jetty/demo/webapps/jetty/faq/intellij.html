@@ -1,0 +1,54 @@
+SECTION: 950-IDEs
+TITLE: IntelliJ
+QUESTION: How do I run Jetty from IntelliJ IDEA?
+
+First set up a minimal jetty configuration in a directory in the source tree:
+
+<pre>
+<code>
+&lt;?xml version="1.0"?&gt;
+<!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure 1.2//EN" "http://jetty.mortbay.org/configure_1_2.dtd">
+&lt;Configure class="org.mortbay.jetty.Server"&gt;
+
+    &lt;Set name="Debug" class="org.mortbay.util.Code" type="boolean"&gt;false&lt;/Set&gt;
+    &lt;Call name="addListener"&gt;
+        &lt;Arg&gt;
+            &lt;New class="org.mortbay.http.SocketListener"&gt;
+                &lt;Set name="Port"&gt;
+                   &lt;SystemProperty name="jetty.port" default="8080"/&gt;
+                &lt;/Set&gt;
+            &lt;/New&gt;
+        &lt;/Arg&gt;
+    &lt;/Call&gt;
+
+    &lt;Call name="addWebApplication"&gt;
+        &lt;Arg&gt;/test&lt;/Arg&gt;
+        &lt;Arg&gt;
+           &lt;SystemProperty name="jetty.home" default="./"/&gt;src/webapp
+        &lt;/Arg&gt;
+        &lt;Set name="virtualHosts"&gt;
+           &lt; Array type="java.lang.String"&gt;
+               &lt;Item&gt;localhost&lt;/Item&gt;
+            &lt;/Array&gt;
+        &lt;/Set&gt;
+    &lt;/Call&gt;
+
+&lt;/Configure&gt;
+</code>
+</pre>
+<P>
+Be sure that the <code>Arg</code> that sets the path to the webapp in the call to <code>addWebApplication</code> matches the location of your webapp.
+<P>
+The next step is to configure IntelliJ IDEA. For this, add the Jetty and and Jasper classlibs to the set of application libraries and add a new starter entry for Jetty:
+
+<pre>
+<code>
+Main-Class: org.mortbay.jetty.Server
+Program parameters: path_to/jetty.xml
+Working Directory: /path_your_source_root
+</code>
+</pre>
+
+This is all that is neaded to make IDEA run Jetty. You can debug your application like any "normal" application and make use of the new "hotswap" feature.
+<P>
+<i>[Contributed by Philipp Meier 26-Mar-2004]</i>
