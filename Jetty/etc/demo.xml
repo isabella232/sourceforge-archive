@@ -42,7 +42,7 @@
       <Arg>
        <New class="org.mortbay.log.LogImpl">        
         <Call name="add">
-          <Arg><Ref id="demologger"/></Arg>
+          <Arg ref="demologger"/>
         </Call>
        </New>
       </Arg>

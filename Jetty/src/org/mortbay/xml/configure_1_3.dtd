@@ -20,7 +20,7 @@ $Id$
 -->
 
 <!ENTITY % CONFIG "Get|Set|Put|Call|New">
-<!ENTITY % VALUE "#PCDATA|Call|New|Get|Ref|SystemProperty|Array">
+<!ENTITY % VALUE "#PCDATA|Call|New|Get|SystemProperty|Array">
 
 <!ENTITY % TYPEATTR "type CDATA #IMPLIED " > <!-- String|Character|Short|Byte|Integer|Long|Boolean|Float|Double|char|short|byte|int|long|boolean|float|double|URL|InetAddress|InetAddrPort| #classname -->
 <!ENTITY % IMPLIEDCLASSATTR "class NMTOKEN #IMPLIED" >
@@ -28,6 +28,7 @@ $Id$
 <!ENTITY % NAMEATTR "name NMTOKEN #REQUIRED" >
 <!ENTITY % DEFAULTATTR "default CDATA #IMPLIED" >
 <!ENTITY % IDATTR "id NMTOKEN #IMPLIED" >
+<!ENTITY % REFATTR "ref NMTOKEN #IMPLIED" >
 <!--
 Configure Element.
 This is the root element that specifies the class of object that
@@ -38,7 +39,7 @@ can be configured:
 A Configure element can contain Set, Put or Call elements.
 -->
 <!ELEMENT Configure (%CONFIG;)* >
-<!ATTLIST Configure %CLASSATTR; >
+<!ATTLIST Configure %CLASSATTR; %IDATTR; >
 
 
 <!--
@@ -87,7 +88,7 @@ elements they are added as strings before being converted to any
 specified type.
 -->
 <!ELEMENT Put ( %VALUE; )* >
-<!ATTLIST Put %NAMEATTR; %TYPEATTR;>
+<!ATTLIST Put %NAMEATTR; %TYPEATTR; %REFATTR; >
 
 
 <!--
@@ -125,7 +126,7 @@ elements they are added as strings before being converted to any
 specified type.
 -->
 <!ELEMENT Arg ( %VALUE; )* >
-<!ATTLIST Arg %TYPEATTR; %IDATTR; >
+<!ATTLIST Arg %TYPEATTR; %REFATTR; >
 
 
 
@@ -187,7 +188,7 @@ elements they are added as strings before being converted to any
 specified type.
 -->
 <!ELEMENT Item ( %VALUE; )* >
-<!ATTLIST Item %TYPEATTR; >
+<!ATTLIST Item %TYPEATTR; %IDATTR; >
 
 
 <!--
@@ -206,9 +207,6 @@ This is equivalent to:
 -->
 <!ELEMENT SystemProperty EMPTY>
 <!ATTLIST SystemProperty %NAMEATTR; %DEFAULTATTR; %IDATTR;>
-
-
-
 
 
 

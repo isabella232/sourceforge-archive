@@ -439,6 +439,7 @@ public class XmlConfiguration
             oClass = obj.getClass();        
         
         String name=node.getAttribute("name");
+        String id=node.getAttribute("id");
         if(log.isDebugEnabled())log.debug("get "+name);
         
         try
@@ -464,6 +465,8 @@ public class XmlConfiguration
                 throw nsme;
             }
         }
+        if (id!=null)
+	  _idMap.put(id,obj);
         return obj;
     }
     
@@ -489,6 +492,7 @@ public class XmlConfiguration
                InvocationTargetException,
                IllegalAccessException
     {
+        String id=node.getAttribute("id");
         Class oClass = nodeClass(node);
         if (oClass!=null)
             obj=null;
@@ -544,6 +548,8 @@ public class XmlConfiguration
             {LogSupport.ignore(log,e);}
             if (called)
             {
+		if (id!=null)
+		  _idMap.put(id,obj);
                 configure(n,node,argi);
                 return n;
             }
@@ -629,26 +635,6 @@ public class XmlConfiguration
     }
 
     /* ------------------------------------------------------------ */
-    /* object reference.
-     *
-     * @param obj 
-     * @param node 
-     * @return the object
-     */
-    private Object ref(Object obj,XmlParser.Node node)
-        throws NoSuchMethodException,
-               ClassNotFoundException,
-               InvocationTargetException,
-               IllegalAccessException
-    {
-        String id=node.getAttribute("id");
-        Object n=_idMap.get(id);
-        System.err.println("Reference "+id+" == "+n);
-	configure(n,node,0);
-	return n;
-    }
-    
-    /* ------------------------------------------------------------ */
     /* Create a new array object.
      *
      * @param obj 
@@ -667,6 +653,7 @@ public class XmlConfiguration
         // Get the type
         Class aClass = java.lang.Object.class;
         String type = node.getAttribute("type");
+        String id=node.getAttribute("id");
         if (type!=null)
         {
             aClass=TypeUtil.fromName(type);
@@ -686,6 +673,8 @@ public class XmlConfiguration
         }
 
         Object array = Array.newInstance(aClass,node.size());
+        if (id!=null)
+	  _idMap.put(id,obj);
 
         for (int i=0;i<node.size();i++)
         {
@@ -695,9 +684,12 @@ public class XmlConfiguration
             XmlParser.Node item = (XmlParser.Node)o;
             if (!item.getTag().equals("Item"))
                 throw new IllegalStateException("Not an Item");
+            id=item.getAttribute("id");
             Object v=value(obj,item);
             if (v!=null)
                 Array.set(array,i,v);
+	    if (id!=null)
+	        _idMap.put(id,v);
         }
         
         return array;
@@ -717,73 +709,84 @@ public class XmlConfiguration
                InvocationTargetException,
                IllegalAccessException
     {
-        // Get the type
-        String type = node.getAttribute("type");
-        
-        // handle trivial case
-        if (node.size()==0)
-        {
-            if ("String".equals(type))
-                return "";
-            return null;
-        }
-
-        // Trim values
-        int first=0;
-        int last=node.size()-1;
-            
-        // Handle default trim type
-        if (type==null || !"String".equals(type))
-        {
-            // Skip leading white
-            Object item=null;
-            while(first<=last )
-            {
-                item=node.get(first);
-                if (!(item instanceof String))
-                    break;
-                item=((String)item).trim();
-                if (((String)item).length()>0)
-                    break;
-                first++;
-            }
-
-            // Skip trailing white
-            while(first<last)
-            {
-                item=node.get(last);
-                if (!(item instanceof String))
-                    break;
-                item=((String)item).trim();
-                if (((String)item).length()>0)
-                    break;
-                last--;
-            }
-
-            // All white, so return null
-            if (first>last)
-                return null;
-        }
-
         Object value=null;
-        
-        if (first==last)
-            //  Single Item value
-            value=itemValue(obj,node.get(first));
-        else
+
+	// Get the type
+	String type = node.getAttribute("type");
+
+        // Try a ref lookup
+        String ref = node.getAttribute("ref");
+        if (ref!=null)
         {
-            // Get the multiple items as a single string
-            StringBuffer buf = new StringBuffer();
-            synchronized(buf)
-            {
-                for (int i=first;i<=last;i++)
-                {
-                    Object item = node.get(i);
-                    buf.append(itemValue(obj,item));
-                }
-                value=buf.toString();
-            }
-        }
+           value=_idMap.get(ref);
+	}
+        else 
+	{
+	    
+	    // handle trivial case
+	    if (node.size()==0)
+	    {
+		if ("String".equals(type))
+		    return "";
+		return null;
+	    }
+
+	    // Trim values
+	    int first=0;
+	    int last=node.size()-1;
+		
+	    // Handle default trim type
+	    if (type==null || !"String".equals(type))
+	    {
+		// Skip leading white
+		Object item=null;
+		while(first<=last )
+		{
+		    item=node.get(first);
+		    if (!(item instanceof String))
+			break;
+		    item=((String)item).trim();
+		    if (((String)item).length()>0)
+			break;
+		    first++;
+		}
+
+		// Skip trailing white
+		while(first<last)
+		{
+		    item=node.get(last);
+		    if (!(item instanceof String))
+			break;
+		    item=((String)item).trim();
+		    if (((String)item).length()>0)
+			break;
+		    last--;
+		}
+
+		// All white, so return null
+		if (first>last)
+		    return null;
+	    }
+
+	    
+	    if (first==last)
+		//  Single Item value
+		value=itemValue(obj,node.get(first));
+	    else
+	    {
+		// Get the multiple items as a single string
+		StringBuffer buf = new StringBuffer();
+		synchronized(buf)
+		{
+		    for (int i=first;i<=last;i++)
+		    {
+			Object item = node.get(i);
+			buf.append(itemValue(obj,item));
+		    }
+		    value=buf.toString();
+		}
+	    }
+	}
 
         // Untyped or unknown
         if (value==null )
@@ -792,7 +795,6 @@ public class XmlConfiguration
                 return "";
             return null;
         }
-
         
         // Try to type the object
         if (type==null)
@@ -864,8 +866,6 @@ public class XmlConfiguration
             return get(obj,node);
         if ("New".equals(tag))
             return newObj(obj,node);
-        if ("Ref".equals(tag))
-            return ref(obj,node);
         if ("Array".equals(tag))
             return newArray(obj,node);
         
