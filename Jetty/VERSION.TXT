@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Set thread context classloader for webapp load-on-startup inits
+ + Added extract arg to addWebApplications
  + Fixed delayed response bug:
    Stopped HttpConnection consuming input from timedout connection.
  + DTD allows static "Get" and "Set" methods to be invoked.

@@ -427,8 +427,18 @@ public class WebApplicationContext extends ServletHttpContext
         
         // Initialize servlets
         if (_servletHandler!=null && _servletHandler.isStarted())
-            try{_servletHandler.initializeServlets();}
+        {
+            Thread thread = Thread.currentThread();
+            ClassLoader lastContextLoader=thread.getContextClassLoader();
+            
+            try{
+                if (getClassLoader()!=null)
+                    thread.setContextClassLoader(getClassLoader());
+                _servletHandler.initializeServlets();
+            }
             catch(Exception ex) { mex.add(ex); }
+            finally{thread.setContextClassLoader(lastContextLoader);}
+        }
 
         mex.ifExceptionThrow();
     }

@@ -192,7 +192,7 @@ public class Server extends HttpServer
     public WebApplicationContext[] addWebApplications(String webapps)
         throws IOException
     {
-        return addWebApplications(null,webapps);
+        return addWebApplications(null,webapps,false);
     }
     
     /* ------------------------------------------------------------ */
@@ -205,6 +205,23 @@ public class Server extends HttpServer
      * @exception IOException 
      */
     public WebApplicationContext[] addWebApplications(String host,String webapps)
+        throws IOException
+    {
+        return addWebApplications(host,webapps,false);
+    }
+        
+    /* ------------------------------------------------------------ */
+    /**  Add Web Applications.
+     * Add auto webapplications to the server.  The name of the
+     * webapp directory or war is used as the context name. If a
+     * webapp is called "root" it is added at "/".
+     * @param host Virtual host name or null
+     * @param webapps Directory file name or URL to look for auto
+     * webapplication.
+     * @param extract If true, extract war files
+     * @exception IOException 
+     */
+    public WebApplicationContext[] addWebApplications(String host,String webapps, boolean extract)
         throws IOException
     {
         ArrayList wacs = new ArrayList();
@@ -241,6 +258,7 @@ public class Server extends HttpServer
             WebApplicationContext wac= addWebApplication(host,
                                                          context,
                                                          app);
+            wac.setExtractWAR(extract);
             wacs.add(wac);
         }
 

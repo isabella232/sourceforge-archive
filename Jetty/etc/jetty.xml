@@ -29,6 +29,7 @@
   <Call name="addWebApplication">
     <Arg>/</Arg>
     <Arg>./webapps/root</Arg>
+    <Set name="extractWAR">false</Set>
   </Call>
   -->
 
@@ -37,22 +38,23 @@
   <!-- The webapplication deployed can use defaults or be configured   -->
   <!-- with:  java -Djetty.context=/context -Djetty.webapp=mywebapp    -->
   <!-- _______________________________________________________________ -->
+  <!-- Remove this comment to activate this section
   <Call name="addWebApplication">
     <Arg><SystemProperty name="jetty.context" default="/"/></Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/webapps/<SystemProperty name="jetty.webapp" default="root"/></Arg>
+    <Set name="extractWAR">false</Set>
   </Call>
-
+  -->
 
 
   <!-- =============================================================== -->
   <!-- Add a all web application within the webapps directory          -->
   <!-- _______________________________________________________________ -->
-  <!-- Remove this comment to activate this section
   <Call name="addWebApplications">
     <Arg></Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/webapps/</Arg>
+    <Arg type="boolean">true</Arg>
   </Call>
-  -->
 
   <!-- =============================================================== -->
   <!-- Add an extended NCSA request log                                -->
