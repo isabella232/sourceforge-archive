@@ -257,12 +257,16 @@ public class Dispatcher implements RequestDispatcher
                 request.setPathInfo(PathMap.pathInfo(_pathSpec,_path));
                 request.setQueryString(query);
                 _holder.handle(request,response);
+
+                
                 if (forward)
                 {
                     response.flushBuffer();
                     response.close();
                     servletHttpResponse.setOutputState(ServletHttpResponse.DISABLED);
                 }
+                else if (response.isFlushNeeded())
+                    response.flushBuffer();
             }
         }
         finally
@@ -503,6 +507,7 @@ public class Dispatcher implements RequestDispatcher
         private boolean _locked;
         private ServletOutputStream _out=null;
         private PrintWriter _writer=null;
+        private boolean _flushNeeded=false;
         
         /* ------------------------------------------------------------ */
         DispatcherResponse(HttpServletResponse response)
@@ -535,6 +540,7 @@ public class Dispatcher implements RequestDispatcher
                 catch(IllegalStateException e)
                 {
                     if (Code.debug()) Code.warning(e);
+                    _flushNeeded=true;
                     _out=new ServletOut(new WriterOutputStream(super.getWriter()));
                 }
             }
@@ -554,12 +560,19 @@ public class Dispatcher implements RequestDispatcher
                 try{_writer=super.getWriter();}
                 catch(IllegalStateException e)
                 {
-                    Code.warning(e);
+                    if (Code.debug()) Code.warning(e);
+                    _flushNeeded=true;
                     _writer = new ServletWriter(super.getOutputStream(),
                                                 getCharacterEncoding());
                 }
             }
             return _writer;
+        }
+
+        /* ------------------------------------------------------------ */
+        boolean isFlushNeeded()
+        {
+            return _flushNeeded;
         }
         
         /* ------------------------------------------------------------ */

@@ -62,6 +62,13 @@ public class SecurityHandler extends NullHandler
     /* ------------------------------------------------------------ */
     private static class BasicAuthenticator implements Authenticator
     {
+        /* ------------------------------------------------------------ */
+        /** 
+         * @return UserPrinciple if authenticated or null if not. If
+         * Authentication fails, then the authenticator may have committed
+         * the response as an auth challenge or redirect.
+         * @exception IOException 
+         */
         public UserPrincipal authenticated(UserRealm realm,
                                            String pathInContext,
                                            String pathParams,

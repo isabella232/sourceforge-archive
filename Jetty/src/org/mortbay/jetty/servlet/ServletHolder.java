@@ -324,7 +324,7 @@ public class ServletHolder extends Holder
             }
 
             servlet.service(request,response);
-            response.flushBuffer();
+            //response.flushBuffer();
             servlet_error=false;
         }
         catch(UnavailableException e)

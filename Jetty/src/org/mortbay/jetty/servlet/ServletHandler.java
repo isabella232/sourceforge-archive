@@ -27,6 +27,7 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -602,13 +603,13 @@ public class ServletHandler
             if (holder!=null)
             {
                 // service request
+                ServletResponse wrapper=response.getWrapper();
                 holder.handle(request.getWrapper(),response.getWrapper());
+                response.flushBuffer();
                 
                 // reset output
                 response.setOutputState(ServletHttpResponse.NO_OUT);
                 Code.debug("Handled by ",holder);
-                if (!httpResponse.isCommitted() && response.isWrapped())
-                    response.getWrapper().flushBuffer();
                 if (!httpResponse.isCommitted())
                     httpResponse.commit();
             }
@@ -787,7 +788,7 @@ public class ServletHandler
 
         // Handle paths
         String uri = pathInContext;
-        
+
         // Setup session 
         HttpSession session=request.getSession(true);             
         
@@ -837,6 +838,11 @@ public class ServletHandler
                 return user;
             }
         }
+        
+        // Don't authenticate authform or errorpage
+        if (pathInContext!=null &&
+            pathInContext.equals(_formErrorPage) || pathInContext.equals(_formLoginPage))
+            return null;
         
         // redirect to login page
         if (httpRequest.getQuery()!=null)

@@ -1,9 +1,12 @@
 Jetty Versions
 --------------
 
+Jetty-4.0.1RC1 - 
+ + Fixed FORM authentication auth of login page bug.
  + Fixed setTempDirectory creation bug
+ + Avoid flushes during RequestDispatcher.includes
  
-Jetty-4.0.1 - 18 April 2002
+Jetty-4.0.1RC0 - 18 April 2002
  + Updated Jasper to CVS snapshot from Apr 18 18:50:59 BST 2002
  + Pass pathParams via welcome file forward for jsessionid
  + Extended facade interfaces to HttpResponse.sendError

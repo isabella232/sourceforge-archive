@@ -289,7 +289,10 @@ public class SecurityConstraint
             {
                 UserPrincipal user = null;
                 if (authenticator==null)
+                {
+                    Code.warning("Mis-configured Authenticator for "+request.getPath());
                     response.sendError(HttpResponse.__500_Internal_Server_Error);
+                }
                 else
                     user=authenticator.authenticated(realm,
                                                      pathInContext,
