@@ -121,6 +121,7 @@ Other targets:
   <!-- Clean                                                                -->
   <!-- ==================================================================== -->
   <target name="clean" depends="clean.plus,clean.loadbalancer,clean.ftp,clean.jdk1.2,clean.j2ee">
+  <delete dir="${basedir}/lib"/>
   </target>
 
   <target name="clean.plus">

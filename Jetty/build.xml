@@ -141,6 +141,7 @@
     <delete file="${etc}/webdefault.xml" quiet="false"/>
     <delete file="${demo.webapps}/jetty/LICENSE.html" quiet="false"/>
     <delete file="${demo.webapps}/jetty/versions.txt" quiet="false"/>
+    <delete file="${webapps}/javadoc.war" quiet="false"/>
 
     <!--
     <delete quiet="false">
@@ -593,6 +594,8 @@
         <exclude name="**/CVS/**"/>
         <exclude name="**/logs/*.log"/>
         <exclude name="testdocs/**"/>
+        <exclude name=".classpath"/>
+        <exclude name=".project"/>
       </zipfileset>
     </zip>
 
