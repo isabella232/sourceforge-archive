@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
 Jetty-4.0.1RC1 - 29 April 2002
+ + Better handling if no realm configured.
  + Expand ByteBuffer full limit with capacity.
  + Fixed double filtering of welcome files.
  + Fixed FORM authentication auth of login page bug.

@@ -555,9 +555,14 @@ public class HttpResponse
     public void sendBasicAuthenticationChallenge(UserRealm realm)
         throws IOException
     {
-        setField(HttpFields.__WwwAuthenticate,
-                 "basic realm=\""+realm.getName()+'"');
-        sendError(__401_Unauthorized);
+        if (realm==null)
+            sendError(__500_Internal_Server_Error,"Realm Not Configured");
+        else
+        {
+            setField(HttpFields.__WwwAuthenticate,
+                     "basic realm=\""+realm.getName()+'"');
+            sendError(__401_Unauthorized);
+        }
     }
     
 }

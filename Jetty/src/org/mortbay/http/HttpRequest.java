@@ -991,6 +991,12 @@ public class HttpRequest
     public UserPrincipal basicAuthenticated(UserRealm realm)
         throws IOException
     {
+        if (realm==null)
+        {
+            Code.debug("Null realm");
+            return null;
+        }
+        
         String credentials = getField(HttpFields.__Authorization);
         
         if (credentials!=null )
@@ -1002,23 +1008,19 @@ public class HttpRequest
             String username = credentials.substring(0,i);
             String password = credentials.substring(i+1);
 
-            if (realm!=null)
+            UserPrincipal user = realm.getUser(username);
+            if (user!=null && user.authenticate(password,this))
             {
-                UserPrincipal user = realm.getUser(username);
-                if (user!=null && user.authenticate(password,this))
-                {
-                    setAttribute(__AuthType,"BASIC");
-                    setAttribute(__AuthUser,username);
-                    setAttribute(UserPrincipal.__ATTR,user);
-                    return user;
-                }
-                
-                Code.warning("AUTH FAILURE: user "+username);
+                setAttribute(__AuthType,"BASIC");
+                setAttribute(__AuthUser,username);
+                setAttribute(UserPrincipal.__ATTR,user);
+                return user;
             }
+            
+            Code.warning("AUTH FAILURE: user "+username);
         }
         
         Code.debug("Unauthorized in "+realm.getName());
-        
         return null;
     }
 }
