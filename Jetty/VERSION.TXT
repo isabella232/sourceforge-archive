@@ -2,13 +2,14 @@ Jetty Versions
 --------------
 
 Jetty-4.2.9
-
  + Work around URLClassloader not handling leading /
  + Dump servlet can load resources for testing now.
  + Added trust manager support to SunJsseListener.
  + Added support for client certs to AJP13.
  + Cleaned up includes
  + Removed checking for single valued headers.
+ + Optional 2.4 behaviour for sessionDestroyed notification.
+
 
 Jetty-4.2.8_01 - 18 February 2004
  + Patched first release of 4.2.8 with correct version number
