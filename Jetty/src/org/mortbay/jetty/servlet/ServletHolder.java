@@ -366,6 +366,7 @@ public class ServletHolder extends Holder
         }
         catch(Throwable e)
         {
+            log.warn(e);
             throw new UnavailableException(getName()+":"+e);
         }
         finally

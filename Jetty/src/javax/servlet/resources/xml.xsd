@@ -1,6 +1,6 @@
-<?xml version="1.0"?>
-<!DOCTYPE xs:schema PUBLIC "-//W3C//DTD XMLSCHEMA 200102//EN" "XMLSchema.dtd">
-<xs:schema targetNamespace="http://www.w3.org/XML/1998/namespace" xmlns:xs="http://www.w3.org/2001/XMLSchema" xml:lang="en" xmlns:xml="http://www.w3.org/XML/1998/namespace">
+<?xml version='1.0'?>
+<!DOCTYPE xs:schema PUBLIC "-//W3C//DTD XMLSCHEMA 200102//EN" "XMLSchema.dtd" >
+<xs:schema targetNamespace="http://www.w3.org/XML/1998/namespace" xmlns:xs="http://www.w3.org/2001/XMLSchema" xml:lang="en">
 
  <xs:annotation>
   <xs:documentation>
@@ -17,17 +17,17 @@
 
         To enable this, such a schema must import this schema
         for the XML namespace, e.g. as follows:
-        &lt;schema . . .&gt;
+        &lt;schema . . .>
          . . .
          &lt;import namespace="http://www.w3.org/XML/1998/namespace"
-                    schemaLocation="http://www.w3.org/2001/03/xml.xsd"/&gt;
+                    schemaLocation="http://www.w3.org/2001/03/xml.xsd"/>
 
         Subsequently, qualified reference to any of the attributes
         or the group defined below will have the desired effect, e.g.
 
-        &lt;type . . .&gt;
+        &lt;type . . .>
          . . .
-         &lt;attributeGroup ref="xml:specialAttrs"/&gt;
+         &lt;attributeGroup ref="xml:specialAttrs"/>
  
          will define a type which will schema-validate an instance
          element with any of those attributes</xs:documentation>

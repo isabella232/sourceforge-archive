@@ -532,7 +532,7 @@ public class ServletHandler extends AbstractHttpHandler
             while (th instanceof ServletException)
             {
                 Throwable cause=((ServletException)th).getRootCause();
-                if (cause==th)
+                if (cause==th || cause==null)
                     break;
                 th=cause;
             }

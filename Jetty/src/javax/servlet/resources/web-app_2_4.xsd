@@ -8,7 +8,7 @@
 	    version="2.4">
   <xsd:annotation>
     <xsd:documentation>
-      @(#)web-app_2_4.xsds	1.57 03/04/07
+      %W% %E%
     </xsd:documentation>
   </xsd:annotation>
 
@@ -126,7 +126,7 @@
       </xsd:documentation>
     </xsd:annotation>
 
-    <xsd:unique name="servlet-name-uniqueness">
+    <xsd:unique name="web-app-servlet-name-uniqueness">
       <xsd:annotation>
 	<xsd:documentation>
 
@@ -139,7 +139,7 @@
       <xsd:field    xpath="j2ee:servlet-name"/>
     </xsd:unique>
 
-    <xsd:unique name="filter-name-uniqueness">
+    <xsd:unique name="web-app-filter-name-uniqueness">
       <xsd:annotation>
 	<xsd:documentation>
 
@@ -152,7 +152,7 @@
       <xsd:field    xpath="j2ee:filter-name"/>
     </xsd:unique>
 
-    <xsd:unique name="ejb-local-ref-name-uniqueness">
+    <xsd:unique name="web-app-ejb-local-ref-name-uniqueness">
       <xsd:annotation>
 	<xsd:documentation>
 
@@ -170,7 +170,7 @@
       <xsd:field    xpath="j2ee:ejb-ref-name"/>
     </xsd:unique>
 
-    <xsd:unique name="ejb-ref-name-uniqueness">
+    <xsd:unique name="web-app-ejb-ref-name-uniqueness">
       <xsd:annotation>
 	<xsd:documentation>
 
@@ -188,7 +188,7 @@
       <xsd:field    xpath="j2ee:ejb-ref-name"/>
     </xsd:unique>
 
-    <xsd:unique name="resource-env-ref-uniqueness">
+    <xsd:unique name="web-app-resource-env-ref-uniqueness">
       <xsd:annotation>
 	<xsd:documentation>
 
@@ -204,7 +204,7 @@
       <xsd:field    xpath="j2ee:resource-env-ref-name"/>
     </xsd:unique>
 
-    <xsd:unique name="message-destination-ref-uniqueness">
+    <xsd:unique name="web-app-message-destination-ref-uniqueness">
       <xsd:annotation>
 	<xsd:documentation>
 
@@ -220,7 +220,7 @@
       <xsd:field    xpath="j2ee:message-destination-ref-name"/>
     </xsd:unique>
 
-    <xsd:unique name="res-ref-name-uniqueness">
+    <xsd:unique name="web-app-res-ref-name-uniqueness">
       <xsd:annotation>
 	<xsd:documentation>
 
@@ -235,7 +235,7 @@
       <xsd:field    xpath="j2ee:res-ref-name"/>
     </xsd:unique>
 
-    <xsd:unique name="env-entry-name-uniqueness">
+    <xsd:unique name="web-app-env-entry-name-uniqueness">
       <xsd:annotation>
 	<xsd:documentation>
 
@@ -251,7 +251,7 @@
       <xsd:field    xpath="j2ee:env-entry-name"/>
     </xsd:unique>
 
-    <xsd:key name="role-name-key">
+    <xsd:key name="web-app-role-name-key">
       <xsd:annotation>
 	<xsd:documentation>
 
@@ -264,8 +264,8 @@
       <xsd:field    xpath="j2ee:role-name"/>
     </xsd:key>
 
-    <xsd:keyref name="role-name-references"
-		refer="j2ee:role-name-key">
+    <xsd:keyref name="web-app-role-name-references"
+		refer="j2ee:web-app-role-name-key">
       <xsd:annotation>
 	<xsd:documentation>
 
@@ -639,39 +639,6 @@
 	<xsd:enumeration value="TRACE"/>
       </xsd:restriction>
     </xsd:simpleContent>
-  </xsd:complexType>
-
-<!-- **************************************************** -->
-
-  <xsd:complexType name="listenerType">
-    <xsd:annotation>
-      <xsd:documentation>
-
-	The listenerType indicates the deployment properties for a web
-	application listener bean.
-
-	Used in: web-app:listenerType
-
-      </xsd:documentation>
-    </xsd:annotation>
-
-    <xsd:sequence>
-      <xsd:group ref="j2ee:descriptionGroup"/>
-      <xsd:element name="listener-class"
-		   type="j2ee:fully-qualified-classType">
-	<xsd:annotation>
-	  <xsd:documentation>
-
-	    The listener-class element declares a class in the
-	    application must be registered as a web
-	    application listener bean. The value is the fully
-	    qualified classname of the listener class.
-
-	  </xsd:documentation>
-	</xsd:annotation>
-      </xsd:element>
-    </xsd:sequence>
-    <xsd:attribute name="id" type="xsd:ID"/>
   </xsd:complexType>
 
 <!-- **************************************************** -->
@@ -1247,7 +1214,7 @@
 
     <xsd:sequence>
       <xsd:element name="welcome-file"
-		   type="j2ee:string"
+		   type="xsd:string"
 		   maxOccurs="unbounded">
 	<xsd:annotation>
 	  <xsd:documentation>

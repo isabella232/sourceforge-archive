@@ -20,6 +20,14 @@ import org.mortbay.util.Loader;
  */
 public class ExServlet extends HttpServlet
 {
+    /* (non-Javadoc)
+     * @see javax.servlet.GenericServlet#init()
+     */
+    public void init() throws ServletException
+    {
+        throw new IllegalStateException("TEST");
+    }
+    
     /* ------------------------------------------------------------ */
     public void doGet(HttpServletRequest sreq, HttpServletResponse sres) 
         throws ServletException, IOException
