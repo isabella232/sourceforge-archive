@@ -34,11 +34,17 @@ grant codeBase "file:${jetty.home}/lib/-"
   permission java.security.SecurityPermission "insertProvider.SunJSSE";
   permission javax.security.auth.AuthPermission "createLoginContext.jdbc";
   permission java.lang.RuntimePermission "createClassLoader";
+  permission java.lang.RuntimePermission "getClassLoader";
   permission java.lang.RuntimePermission "setContextClassLoader";
   permission java.lang.RuntimePermission "accessDeclaredMembers";
   permission java.lang.RuntimePermission "shutdownHooks";
-  permission java.lang.RuntimePermission "setContextClassLoader";
   permission java.lang.RuntimePermission "accessClassInPackage.sun.tools.*";
+  permission java.lang.RuntimePermission "setIO";
+};
+
+grant codeBase "file:${jetty.home}/ext/-" 
+{
+  permission java.lang.RuntimePermission "setIO";
 };
 
 grant codeBase "file:${jetty.home}/extra/lib/org.mortbay.jaas.jar"
