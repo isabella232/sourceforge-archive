@@ -197,6 +197,13 @@
       <Arg><New class="org.mortbay.http.handler.ProxyHandler"></New></Arg>
     </Call>
 
+    <Call name="addHandler">
+      <Arg><New class="org.mortbay.http.handler.ForwardHandler">
+        <Call name="addForward"><Arg>/forward/*</Arg><Arg>/dump</Arg></Call>
+        <Call name="setRootForward"><Arg>/dump/rootForward</Arg></Call>
+      </New></Arg>
+    </Call>
+
     <!-- Disabled as is not working in 4.2
     <Call name="addHandler">
       <Arg><New class="org.mortbay.http.handler.ContentEncodingHandler">
