@@ -34,15 +34,15 @@ buildJetty:
 	echo "class BuildJetty{" > src/BuildJetty.java
 	echo "Class[] classes={" >> src/BuildJetty.java
 	find src \( -name '*.java' -o -name 'Jetty/etc' -prune \) -print |\
-	xargs egrep 'public.*class' | cut -d: -f1 | uniq |\
+	xargs egrep 'public.*class' | cut -d: -f1 | sort -u |\
 	sed -e 's/^src./    /' -e 's/\//./g' -e 's/.java$$/.class,/' >> src/BuildJetty.java
 	echo "};}" >> src/BuildJetty.java
 
 buildContrib:
 	echo "class BuildContrib{" > contrib/BuildContrib.java
 	echo "Class[] classes={" >> contrib/BuildContrib.java
-	find contrib -name '*.java' -o \( -name 'etc' -prune \) |\
-	xargs egrep 'public.*class' | cut -d: -f1 | uniq |\
+	find contrib -name '*.java' |\
+	xargs egrep 'public.*class' | cut -d: -f1 | sort -u |\
 	sed -e 's/^contrib./    /' -e 's/\//./g' -e 's/.java$$/.class,/' >> contrib/BuildContrib.java
 	echo "};}" >> contrib/BuildContrib.java
 
