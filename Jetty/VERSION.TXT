@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
-
+ + fixed bug with URL encoded sessionid. 
+ + Moved unused classes from com.mortbay.Util to com.mortbay.Tools in 
+   new distribution package.
  + Handle mime suffixes containing dots. 
  + Added gz tgz tar.gz .z mime mappings.
  + Fixed default mimemap initialization bug

@@ -321,69 +321,62 @@ class ServletRequest
     }
     
     /* ------------------------------------------------------------ */
-    public String getRequestedSessionId()
+    String setSessionId(String pathInContext)
     {
-        if (_sessionIdState == __SESSIONID_NOT_CHECKED)
-        {          
-            // Then try cookies
-            if (_sessionId == null)
+        _sessionId=null;
+        
+        // try cookies first
+        Cookie[] cookies=_httpRequest.getCookies();
+        if (cookies!=null && cookies.length>0)
+        {
+            for (int i=0;i<cookies.length;i++)
             {
-                Cookie[] cookies=_httpRequest.getCookies();
-                if (cookies!=null && cookies.length>0)
+                if (Context.__SessionId.equals(cookies[i].getName()))
                 {
-                    for (int i=0;i<cookies.length;i++)
-                    {
-                        if (Context.__SessionId.equals(cookies[i].getName()))
-                        {
-                            _sessionId=cookies[i].getValue();
-                            break;
-                        }
-                    }
-                    
-                    if (_sessionId!=null && _sessionId.length()>0)
-                    {
-                        _sessionIdState = __SESSIONID_COOKIE;
-                        Code.debug("Got Session ",_sessionId," from cookie");
-                    }
+                    _sessionId=cookies[i].getValue();
+                    _sessionIdState = __SESSIONID_COOKIE;
+                    Code.debug("Got Session ",_sessionId," from cookie");
+                    break;
                 }
             }
+        }
             
-            // check if there is a url encoded session param.
-            String path = _servletPath;
-            int prefix=path.indexOf(Context.__SessionUrlPrefix);
-            if (prefix!=-1)
+        // check if there is a url encoded session param.
+        int prefix=pathInContext.indexOf(Context.__SessionUrlPrefix);
+        if (prefix!=-1)
+        {
+            String id =
+                pathInContext.substring(prefix+Context.__SessionUrlPrefix.length());
+            pathInContext=pathInContext.substring(0,prefix);
+            Code.debug("Got Session ",id," from URL");
+            
+            try
             {
-                String id =
-                    path.substring(prefix+Context.__SessionUrlPrefix.length());
-                    
-                Code.debug("Got Session ",id," from URL");
-                    
-                try
+                Long.parseLong(id,36);
+                if (_sessionId==null)
                 {
-                    Long.parseLong(id,36);
-                    if (_sessionIdState==__SESSIONID_NOT_CHECKED)
-                    {
-                        _sessionId=id;
-                        _sessionIdState = __SESSIONID_URL;
-                    }
-                    else if (!id.equals(_sessionId))
-                        Code.warning("Mismatched session IDs");
-                    
-                    // translate our path to drop the prefix off.
-                    _servletPath = path.substring(0,prefix);
-                    
-                    Code.debug("Translated servlet path="+_servletPath);
+                    _sessionId=id;
+                    _sessionIdState = __SESSIONID_URL;
                 }
-                catch(NumberFormatException e)
-                {
-                    Code.ignore(e);
-                }
+                else if (!id.equals(_sessionId))
+                    Code.warning("Mismatched session IDs");
+                
             }
-            
-            if (_sessionId == null)
-                _sessionIdState = __SESSIONID_NONE;
+            catch(NumberFormatException e)
+            {
+                Code.ignore(e);
+            }
         }
         
+        if (_sessionId == null)
+            _sessionIdState = __SESSIONID_NONE;
+        
+        return pathInContext;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String getRequestedSessionId()
+    {
         return _sessionId;
     }
     
@@ -410,9 +403,7 @@ class ServletRequest
     
     /* ------------------------------------------------------------ */
     public HttpSession getSession(boolean create)
-    {
-        Code.debug("getSession(",new Boolean(create),")");
-        
+    {        
         if (_session != null && _context.isValid(_session))
             return _session;
         

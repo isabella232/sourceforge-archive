@@ -36,8 +36,8 @@ import java.util.StringTokenizer;
  * Note that this is a very different mapping to that provided by PathMap
  * in Jetty2.
  * <P>
- * Note that exact matches can be terminated my the ; or # characters as
- * used in servlet session rewriting and targets
+ * Note that exact matches can be terminated my the ; character as
+ * used in servlet session rewriting.
  *
  * @version $Id$
  * @author Greg Wilkins (gregw)
@@ -170,24 +170,9 @@ public class PathMap extends HashMap
         }
 
         // try exact match upto ';'
-        prefix=path;
-        while((i=prefix.lastIndexOf(';'))>0)
-        {
-            prefix=prefix.substring(0,i);
-            entry=_entryMap.get(prefix);
-            if (entry!=null)
-                return (Map.Entry) entry;
-        }
-        
-        // try exact match upto '#'
-        prefix=path;
-        while((i=prefix.lastIndexOf('#'))>0)
-        {
-            prefix=prefix.substring(0,i);
-            entry=_entryMap.get(prefix);
-            if (entry!=null)
-                return (Map.Entry) entry;
-        }
+        i=path.lastIndexOf(';');
+        if (i>0)
+            return getMatch(path.substring(0,i));        
         
         // Default
         return (Map.Entry) _entryMap.get("/");
@@ -209,26 +194,6 @@ public class PathMap extends HashMap
         if (entry!=null)
             entries.add(entry);
         
-        // exact upto ; search
-        String prefix=path;
-        int i;
-        while((i=prefix.lastIndexOf(';'))>0)
-        {
-            prefix=prefix.substring(0,i);
-            entry=_entryMap.get(prefix);
-            if (entry!=null)
-                entries.add(entry);
-        }
-        
-        // exact upto # search
-        prefix=path;
-        while((i=prefix.lastIndexOf('#'))>0)
-        {
-            prefix=prefix.substring(0,i);
-            entry=_entryMap.get(prefix);
-            if (entry!=null)
-                entries.add(entry);
-        }
         
         // try exact prefix prefix search
         entry=_prefixMap.get(path);
@@ -236,7 +201,8 @@ public class PathMap extends HashMap
             entries.add(entry);
         
         // prefix search
-        prefix=path;
+        String prefix=path;
+        int i;
         while((i=prefix.lastIndexOf('/'))>0)
         {
             prefix=prefix.substring(0,i);
@@ -255,6 +221,15 @@ public class PathMap extends HashMap
                 entries.add(entry);
         }
 
+
+        // try exact match upto ';'
+        i=path.lastIndexOf(';');
+        if (i>0)
+        {
+            entries.addAll(getMatches(path.substring(0,i)));        
+            return entries;
+        }
+        
         // Default
         entry=_entryMap.get("/");
         if (entry!=null)
@@ -308,9 +283,7 @@ public class PathMap extends HashMap
                 pathSpec.regionMatches(0,path,0,pathSpec.length()-2))
                 return path.substring(0,pathSpec.length()-2);
             
-            if (path.startsWith(pathSpec) &&
-                (path.charAt(pathSpec.length())==';' ||
-                 path.charAt(pathSpec.length())=='#'))
+            if (path.startsWith(pathSpec) && path.charAt(pathSpec.length())==';')
                 return path;
             
             throw new IllegalArgumentException("PathSpec does not match path");
@@ -346,9 +319,7 @@ public class PathMap extends HashMap
                 return path.substring(pathSpec.length()-2);
             }
 
-            if (path.startsWith(pathSpec) &&
-                (path.charAt(pathSpec.length())==';' ||
-                 path.charAt(pathSpec.length())=='#'))
+            if (path.startsWith(pathSpec) && path.charAt(pathSpec.length())==';')
                 return null;
                 
             throw new IllegalArgumentException("PathSpec does not match path");

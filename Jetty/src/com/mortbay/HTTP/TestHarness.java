@@ -419,7 +419,23 @@ public class TestHarness
                           null,
                           "; in path info");
             
-            t.checkEquals(p.getMatch("/animal/path#extra").getValue(),"5",
+            t.checkEquals(p.getMatch("/animal;extra").getValue(),"5",
+                          "; in path");
+            t.checkEquals(p.pathInfo("/animal/*","/animal;extra"),";extra",
+                          "; in path");
+            t.checkEquals(p.pathMatch("/animal/*","/animal;extra"),"/animal",
+                          "; in path");
+            t.checkEquals(p.getMatch("/animal/;extra").getValue(),"5",
+                          "; in path");
+            t.checkEquals(p.pathInfo("/animal/*","/animal/;extra"),"/;extra",
+                          "; in path");
+            t.checkEquals(p.pathMatch("/animal/*","/animal/;extra"),"/animal",
+                          "; in path");
+            t.checkEquals(p.getMatch("/animal/xx;extra").getValue(),"5",
+                          "; in path");
+            t.checkEquals(p.pathInfo("/animal/*","/animal/xx;extra"),"/xx;extra",
+                          "; in path");
+            t.checkEquals(p.pathMatch("/animal/*","/animal/xx;extra"),"/animal",
                           "; in path");
         }
         catch(Exception e)

@@ -240,6 +240,13 @@ public class ServletHandler extends NullHandler
             ServletResponse response =
                 new ServletResponse(request,httpResponse);
 
+            // Check session stuff
+            pathInContext=request.setSessionId(pathInContext);
+            HttpSession session=null;
+            if ((session=request.getSession(false))!=null)
+                Context.access(session);
+
+            // handle
             handle(pathInContext,request,response);
         }
         catch(Exception e)
@@ -324,11 +331,6 @@ public class ServletHandler extends NullHandler
                                                pathInContext),
                              PathMap.pathInfo(servletPathSpec,
                                               pathInContext));
-            
-            // Check session stuff
-            HttpSession session=null;
-            if ((session=request.getSession(false))!=null)
-                Context.access(session);
             
             // service request
             holder.handle(request,response);
