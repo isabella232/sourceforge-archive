@@ -23,6 +23,7 @@ ROOTNAME := .
 SUBDIRS := \
     src \
     contrib/org/gjt/jsp \
+    contrib/org/gjt/jsp10 \
     contrib/au/com/forge/Protekt/Jetty \
     contrib/com/mortbay/HTTP/Handler
 
