@@ -282,7 +282,14 @@ following jetty utility class:<BR>
        org.mortbay.util.PKCS12Import jetty.pkcs12 keystore</b>
 </PRE></TD></TR></TABLE></UL>
 
+If you have a chain of certificates, because your CA is an intermediary,
+build the pkcs12 file like this:
 
+# cat example.crt intermediate.crt [intermediate2.crt]... rootCA.crt > cert-chain.txt
+# openssl pkcs12 -export -inkey example.key -in cert-chain.txt -out example.pkcs12
+
+The order of certificates must be from server to rootCA, as per RFC2246
+section 7.4.2.
 
 
 
