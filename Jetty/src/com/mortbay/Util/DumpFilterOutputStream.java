@@ -10,7 +10,7 @@ import java.io.OutputStream;
 /** Filtered OutputStream that summarized throughput on stderr
  * <p>
  *
- * @see filterOutputStream
+ * @see FilterOutputStream
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

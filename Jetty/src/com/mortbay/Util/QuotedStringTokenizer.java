@@ -17,7 +17,7 @@ import java.util.StringTokenizer;
  * Delimiters within quotes are not considered delimiters.
  * Quotes can be escaped with '\'.
  *
- * @see java.util.Stringtokenizer
+ * @see java.util.StringTokenizer
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

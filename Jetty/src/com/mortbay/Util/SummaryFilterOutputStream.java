@@ -13,7 +13,7 @@ import java.io.PrintStream;
 /** Filtered OutputStream that summarized throughput on stderr
  * <p>
  *
- * @see filterOutputStream
+ * @see FilterOutputStream
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
