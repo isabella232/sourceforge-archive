@@ -438,7 +438,7 @@ public class HttpFields
                     while (i<_fields.size())
                     {
                         Field t=(Field)_fields.get(i++);
-                        if (t!=null && t._prev==null)
+                        if (t!=null && t._info!=null && t._prev==null)
                         {
                             f=t;
                             return true;

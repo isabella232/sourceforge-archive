@@ -1,7 +1,9 @@
 Jetty Versions
 --------------
 
- + Implemented 2.3 security constraint semantics
+ + Fixed HttpFields remove bug
+ + Implemented 2.3 clarifications to security constraint semantics
+   PLEASE REVIEW YOUR SECURITY CONSTRAINTS (see README).
  + Set Listeners default scheme 
  + LineInput can handle any sized marks
  + HttpResponse.sendError makes a better attempt at finding an error page.
