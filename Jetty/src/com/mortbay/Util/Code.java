@@ -709,6 +709,31 @@ public class Code
      * <strong>Do not rely on side-effects</strong>
      * @param ex The Throwable to print the full stack trace of
      */
+    public static void debug(Object o1,long i)
+    {
+        Code code = instance();
+        if (code._debugOn)
+        {
+            Frame frame = new Frame(1,true);
+            if (code.isDebugOnFor(frame))
+            {
+                frame.complete();
+                StringBuffer buf = new StringBuffer(256);
+                synchronized(buf)
+                {   
+                    formatObject(buf,o1);
+                    formatObject(buf,new Long(i));
+                }
+                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+            }
+        }
+    }
+    
+    /*-------------------------------------------------------------------*/
+    /** As debug(String)
+     * <strong>Do not rely on side-effects</strong>
+     * @param ex The Throwable to print the full stack trace of
+     */
     public static void debug(Object o1,Object o2,Object o3)
     {
         Code code = instance();
@@ -751,6 +776,33 @@ public class Code
                     formatObject(buf,o2);
                     formatObject(buf,o3);
                     formatObject(buf,o4);
+                }
+                Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+            }
+        }
+    }
+    
+    /*-------------------------------------------------------------------*/
+    /** As debug(String)
+     * <strong>Do not rely on side-effects</strong>
+     * @param ex The Throwable to print the full stack trace of
+     */
+    public static void debug(Object o1,long l1,Object o2, long l2)
+    {
+        Code code = instance();
+        if (code._debugOn)
+        {
+            Frame frame = new Frame(1,true);
+            if (code.isDebugOnFor(frame))
+            {
+                frame.complete();
+                StringBuffer buf = new StringBuffer(256);
+                synchronized(buf)
+                {   
+                    formatObject(buf,o1);
+                    formatObject(buf,new Long(l1));
+                    formatObject(buf,o2);
+                    formatObject(buf,new Long(l2));
                 }
                 Log.message(Log.CODE_DEBUG, buf.toString(),frame);
             }

@@ -27,6 +27,13 @@ public class FileLogSink extends LogSink
     private String _fileName=null;
     
     /* ------------------------------------------------------------ */
+    public FileLogSink()
+	throws IOException
+    {
+    	this(System.getProperty("LOG_FILE","log.txt"));
+    }
+    
+    /* ------------------------------------------------------------ */
     public FileLogSink(String filename)
 	throws IOException
     {
