@@ -140,6 +140,16 @@ public class DateCache
                 
         return lastResult;
     }
+
+    /* ------------------------------------------------------------ */
+    /** Format to string buffer. 
+     * @param inDate Date the format
+     * @param buffer StringBuffer
+     */
+    public void format(long inDate, StringBuffer buffer)
+    {
+        buffer.append(format(inDate));
+    }
     
     /* ------------------------------------------------------------ */
     /** Get the format.

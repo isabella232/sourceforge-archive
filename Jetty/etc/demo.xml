@@ -220,6 +220,7 @@ $Id$
       <Set name="RetainDays">90</Set>
       <Set name="Append">true</Set>
       <Set name="flushOn">false</Set>
+      <Set name="logDateFormat">dd/MMM/yyyy:HH:mm:ss</Set>
     </New>
   </Set>
 

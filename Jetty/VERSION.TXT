@@ -6,6 +6,7 @@ Jetty Versions
  + Fixed FORM Authentication username.
  + Fixed servlet handling of non session url params.
  + Fixed attr handling in XmlParser.toString
+ + Fixed request log date formatting
  + Added ServletHandler.sessionCount()
  + Change JSESSIONID to jsessionid
  + Log OK state after thread low warnings.

@@ -9,6 +9,7 @@ import org.mortbay.http.handler.ResourceHandler;
 import org.mortbay.http.handler.SecurityHandler;
 import org.mortbay.http.handler.ForwardHandler;
 import org.mortbay.util.Code;
+import org.mortbay.util.DateCache;
 import org.mortbay.util.Log;
 import org.mortbay.util.IO;
 import org.mortbay.util.LogSink;
@@ -20,6 +21,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -108,7 +110,8 @@ public class HandlerContext implements LifeCycle
     private Map _errorPages;
 
     private PermissionCollection _permissions;
-
+    private DateCache _logDateCache;
+    
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param httpServer 
@@ -1091,9 +1094,11 @@ public class HandlerContext implements LifeCycle
     {
         if (_httpServer==null)
             throw new IllegalStateException("No server for "+this);
-        
+
+        // Prepare a multi exception
         MultiException mx = new MultiException();
 
+        // Start the log sink
         if (_logSink==null)
             _useLogSink=_httpServer.getLogSink();
         else
@@ -1105,8 +1110,26 @@ public class HandlerContext implements LifeCycle
                 catch(Exception e){mx.add(e);}
             }
         }
-        _started=true;
 
+        // Setup the log date formatter.
+        if (_useLogSink!=null)
+        {
+            String logDateFormat="dd/MMM/yyyy:HH:mm:ss";
+            try
+            {
+                // XXX - this shows that the design of LogSink is WRONG!
+                Method gldf = _useLogSink.getClass().getMethod("getLogDateFormat",null);
+                logDateFormat=(String)gldf.invoke(_useLogSink,null);
+            }
+            catch(Exception e)
+            {
+                Code.ignore(e);
+            }
+            _logDateCache=new DateCache(logDateFormat);
+        }    
+
+        // start the context itself
+        _started=true;
         getMimeMap();
         getEncodingMap();
 
@@ -1414,7 +1437,7 @@ public class HandlerContext implements LifeCycle
                 String user = (String)request.getAttribute(HttpRequest.__AuthUser);
                 buf.append((user==null)?"-":user);
                 buf.append(" [");
-                buf.append(response.getField(HttpFields.__Date));
+                _logDateCache.format(System.currentTimeMillis(),buf);
                 buf.append("] \"");
                 request.appendRequestLine(buf);
                 buf.append("\" ");
