@@ -403,14 +403,6 @@ public class NCSARequestLog implements RequestLog
         }
     }
     
-    /* ------------------------------------------------------------ */
-    /**
-     * @param buf
-     * @param request
-     */
-    private void appendCookies(StringBuffer buf, HttpRequest request)
-    {
-    }
 
     /* ------------------------------------------------------------ */
     /** Log Extended fields.
