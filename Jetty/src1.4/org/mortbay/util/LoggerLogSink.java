@@ -12,7 +12,7 @@ import java.util.logging.LogRecord;
 /** JDK 1.4 Logger LogSink
  * This implementation of LogSink can be used to direct messages to
  * the JDK 1.4 log mechanism.
- * @version 1.0 Tue Feb 19 2002
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class LoggerLogSink

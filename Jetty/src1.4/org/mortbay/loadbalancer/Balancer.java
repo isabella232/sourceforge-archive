@@ -15,7 +15,7 @@ import java.util.*;
 /* ------------------------------------------------------------ */
 /** TCP/IP connection load balancer
  *
- * @version 1.0 Sat Mar  9 2002
+ * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public class Balancer 
