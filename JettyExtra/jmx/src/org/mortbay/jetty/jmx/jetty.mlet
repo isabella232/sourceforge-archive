@@ -10,27 +10,31 @@ The __JETTY_JMX_HOME__ and __JETTY_HOME__ tags must be expanded
 </MLET>
 
 <MLET 
- CODE="org.mortbay.jetty.jmx.DebugMBean"
- ARCHIVE="org.mortbay.jetty.jar"
+ CODE="org.mortbay.util.jmx.CodeMBean"
+ ARCHIVE="org.mortbay.jetty.jmx.jar"
  CODEBASE="file:__JETTY_JMX_HOME__/lib">
 </MLET>
 
 <MLET 
- CODE="org.mortbay.jetty.jmx.LogMBean"
- ARCHIVE="org.mortbay.jetty.jar"
+ CODE="org.mortbay.util.jmx.LogMBean"
+ ARCHIVE="org.mortbay.jetty.jmx.jar"
  CODEBASE="file:__JETTY_JMX_HOME__/lib">
 </MLET>
 
 <MLET 
- CODE="org.mortbay.jetty.jmx.JettyServerMBean"
+ CODE="org.mortbay.jetty.jmx.ServerMBean"
  ARCHIVE="org.mortbay.jetty.jar"
  CODEBASE="file:__JETTY_JMX_HOME__/lib">
 <ARG type="java.lang.String" value="__JETTY_HOME__/etc/admin.xml">
 </MLET>
 
 <MLET 
- CODE="org.mortbay.jetty.jmx.JettyServerMBean"
+ CODE="org.mortbay.jetty.jmx.ServerMBean"
  ARCHIVE="org.mortbay.jetty.jmx.jar"
  CODEBASE="file:__JETTY_JMX_HOME__/lib">
 <ARG type="java.lang.String" value="__JETTY_HOME__/etc/demo.xml">
 </MLET>
+
+
+
+

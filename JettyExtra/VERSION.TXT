@@ -1,6 +1,7 @@
 JettyExtra Versions
 --------------------
 
+  + New JMX package structure for autodiscovery
   + postUnregister destroys mbean
   + Use Jetty4 eventlistener
   + adjust to new API names.  
