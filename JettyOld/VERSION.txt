@@ -15,6 +15,7 @@ Release 2.1.5 - 15 March 1999
     Thus debug does not need to be turned on to see servlet logs.
   + Fixed alignment bug in TableForm
   + Removed RFCs from package
+  + Fixed bug in ServletDispatch for null pathInfo
 
 Release 2.1.4 - 26 March 1999
   + Fixed problem compiling PathMap under some JDKs.
