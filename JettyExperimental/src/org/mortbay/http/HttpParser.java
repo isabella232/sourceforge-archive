@@ -16,6 +16,7 @@ public class HttpParser
 {
     // Terminal symbols.
     static final byte COLON= (byte)':';
+    static final byte SEMI_COLON= (byte)';';
     static final byte SPACE= 0x20;
     static final byte CARRIAGE_RETURN= 0x0D;
     static final byte LINE_FEED= 0x0A;
@@ -35,7 +36,9 @@ public class HttpParser
     public static final int STATE_EOF_CONTENT= 1;
     public static final int STATE_CONTENT= 2;
     public static final int STATE_CHUNKED_CONTENT= 3;
-    public static final int STATE_CHUNK= 4;
+    public static final int STATE_CHUNK_SIZE= 4;
+    public static final int STATE_CHUNK_PARAMS= 5;
+    public static final int STATE_CHUNK= 6;
 
     public static final int CHUNKED_CONTENT= -2;
     public static final int EOF_CONTENT= -1;
@@ -97,13 +100,15 @@ public class HttpParser
         if (ctx == null)
             ctx= new Context();
 
+        byte ch;
+
         // Handler header
         while (ctx.state < STATE_END && source.available() > 0)
         {
-            byte ch= source.get();
+            ch= source.get();
             if (ctx.eol == CARRIAGE_RETURN && ch == LINE_FEED)
             {
-            	ctx.eol=LINE_FEED;
+                ctx.eol= LINE_FEED;
                 continue;
             }
             ctx.eol= 0;
@@ -256,13 +261,13 @@ public class HttpParser
         // Handle content
         Buffer chunk;
         while (ctx.state > STATE_END && source.available() > 0)
-        {
+        {	
             if (ctx.eol == CARRIAGE_RETURN && source.peek() == LINE_FEED)
             {
-				ctx.eol=source.get();
+                ctx.eol= source.get();
                 continue;
             }
-			ctx.eol= 0;
+            ctx.eol= 0;
 
             switch (ctx.state)
             {
@@ -273,26 +278,94 @@ public class HttpParser
                     break;
 
                 case STATE_CONTENT :
-                    int length= source.available();
-                    int remaining= ctx.contentLength - ctx.contentOffset;
-                    if (remaining == 0)
                     {
-                        ctx.state= STATE_END;
-                        break;
+                        int length= source.available();
+                        int remaining= ctx.contentLength - ctx.contentOffset;
+                        if (remaining == 0)
+                        {
+                            ctx.state= STATE_END;
+                            handler.messageComplete(ctx.contentOffset);
+                            break;
+                        }
+                        else if (length > remaining)
+                            length= remaining;
+                        chunk= source.get(length);
+                        handler.foundContent(ctx.contentOffset, chunk);
+                        ctx.contentOffset += chunk.length();
                     }
-                    else if (length > remaining)
-                        length= remaining;
-                    System.err.println(length);
-                    chunk= source.get(length);
-                    handler.foundContent(ctx.contentOffset, chunk);
-                    ctx.contentOffset += chunk.length();
-
                     break;
 
                 case STATE_CHUNKED_CONTENT :
+                    ch= source.peek();
+                    if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
+                        ctx.eol= source.get();
+                    else if (ch <= SPACE)
+                        source.get();
+                    else
+                    {
+						ctx.chunkLength=0;
+						ctx.chunkOffset=0;
+                        ctx.state= STATE_CHUNK_SIZE;
+                    }
+                    break;
+
+                case STATE_CHUNK_SIZE :
+                    ch= source.get();
+                    if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
+                    {
+                        ctx.eol= ch;
+						if (ctx.chunkLength==0)
+						{
+							ctx.state=STATE_END;
+							handler.messageComplete(ctx.contentOffset);
+						}
+						else
+							ctx.state= STATE_CHUNK;
+                    }
+                    else if (ch <= SPACE || ch == SEMI_COLON)
+                        ctx.state= STATE_CHUNK_PARAMS;
+                    else if (ch >= '0' && ch <= '9')
+                        ctx.chunkLength= ctx.chunkLength * 16 + (ch - '0');
+                    else if (ch >= 'a' && ch <= 'f')
+                        ctx.chunkLength= ctx.chunkLength * 16 + (10+ch - 'a');
+                    else if (ch >= 'A' && ch <= 'F')
+                        ctx.chunkLength= ctx.chunkLength * 16 + (10+ch - 'A');
+                    else
+                        Portable.throwRuntime("bad chunk char: " + ch);
+                        
+                    break;
+
+                case STATE_CHUNK_PARAMS :
+                    ch= source.get();
+                    if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
+                    {
+                        ctx.eol= ch;
+                        if (ctx.chunkLength==0)
+                        {
+                        	ctx.state=STATE_END;
+                        	handler.messageComplete(ctx.contentOffset);
+                        }
+                        else
+	                        ctx.state= STATE_CHUNK;
+                    }
                     break;
 
                 case STATE_CHUNK :
+                    {
+                        int length= source.available();
+                        int remaining= ctx.chunkLength - ctx.chunkOffset;
+                        if (remaining == 0)
+                        {
+                            ctx.state= STATE_CHUNKED_CONTENT;
+                            break;
+                        }
+                        else if (length > remaining)
+                            length= remaining;
+                        chunk= source.get(length);
+                        handler.foundContent(ctx.contentOffset, chunk);
+                        ctx.contentOffset += chunk.length();
+                        ctx.chunkOffset += chunk.length();
+                    }
                     break;
             }
         }
@@ -305,6 +378,8 @@ public class HttpParser
         public int trimLength;
         public int contentLength;
         public int contentOffset;
+        public int chunkLength;
+        public int chunkOffset;
 
         private String toString(BufferView buf)
         {

@@ -57,7 +57,11 @@ public class HttpParserTest extends TestCase implements HttpParser.Handler
 		"Header4 \015\012" + 
 		"  value4\015\012" + 
 		"\015\012"+
-		"0123456789\015\012";
+		"a;\015\012"+
+		"0123456789\015\012"+
+		"1a\015\012"+
+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ\015\012"+
+		"0\015\012";
 		ByteArrayBuffer buffer = new ByteArrayBuffer(http.getBytes());
 		BufferView view = new BufferView(buffer);
 		HttpParser.parse(this,view);
@@ -116,7 +120,7 @@ public class HttpParserTest extends TestCase implements HttpParser.Handler
      */
     public int getContentLength()
     {
-        return 10;
+        return HttpParser.CHUNKED_CONTENT;
     }
 
     /**

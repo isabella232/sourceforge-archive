@@ -160,7 +160,7 @@ public class ByteArrayBuffer implements Buffer
 		if (!_mutable)
 			Portable.throwIllegalState("immutable");
 		if (offset>=capacity())
-			Portable.throwIllegalArgument("offset>=capacity");
+			Portable.throwIllegalArgument("offset>=capacity: "+offset+">="+capacity());
 		if (newOffset+length>capacity())
 			Portable.throwIllegalArgument("newOffset+length>capacity");
 		if (length>0)

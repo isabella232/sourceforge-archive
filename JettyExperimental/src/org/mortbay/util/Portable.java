@@ -29,4 +29,9 @@ public class Portable
 	{
 		throw new IllegalStateException(msg);
 	}
+	
+	public static void throwRuntime(String msg)
+	{
+		throw new RuntimeException(msg);
+	}
 }

@@ -41,7 +41,7 @@ public class BufferView
 		int s= _mark >= 0 ? _mark : _position;
 		int length=_buffer.limit()-s;
 		int offset= _buffer.offset()-s;
-		if (offset<0)
+		if (offset<0 && length>0)
 		{
 			_buffer.move(s,_buffer.offset(),length);
 			if (_mark > 0)
