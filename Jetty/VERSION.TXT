@@ -11,11 +11,14 @@ Jetty-5.0.0RC0
  + Fixed DOS problem
  + Worked around bad jboss URL handler in XMLParser
  + Forced close of connections over stop/start
+ + ProxiedFor field support added to NCSARequestLog
+ + Updated mx4j to V2
 
 Jetty-4.2.20pre0
  + Worked around bad jboss URL handler in XMLParser
  + Forced close of connections over stop/start
  + HttpFields protected headers
+ + ProxiedFor field support added to NCSARequestLog
 
 Jetty-4.2.19 - 19 Mar 2004
  + Fixed DOS attack problem

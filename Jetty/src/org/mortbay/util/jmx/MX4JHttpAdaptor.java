@@ -8,7 +8,7 @@ package org.mortbay.util.jmx;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
-import mx4j.adaptor.http.HttpAdaptor;
+import mx4j.tools.adaptor.http.HttpAdaptor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,7 +38,7 @@ public class MX4JHttpAdaptor extends HttpAdaptor
     {
         name=super.preRegister(server,name);
         ObjectName processorName = new ObjectName(name+",processor=XSLT");
-        server.createMBean("mx4j.adaptor.http.XSLTProcessor", processorName, null);
+        server.createMBean("mx4j.tools.adaptor.http.XSLTProcessor", processorName, null);
         setProcessorName(processorName);
         return name;
     }

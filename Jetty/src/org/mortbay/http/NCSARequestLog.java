@@ -38,6 +38,7 @@ public class NCSARequestLog implements RequestLog
     private boolean _buffered;
     private int _retainDays;
     private boolean _closeOut;
+    private boolean _preferProxiedForAddress;
     private String _logDateFormat="dd/MMM/yyyy:HH:mm:ss ZZZ";
     private Locale _logLocale=Locale.getDefault();
     private String _logTimeZone=TimeZone.getDefault().getID();
@@ -246,6 +247,21 @@ public class NCSARequestLog implements RequestLog
     }
     
     /* ------------------------------------------------------------ */
+    /**
+    * Prefer to log the proxied-for IP address (if present in
+    * the request header) over the native requester IP address.
+    * Useful in reverse-proxy situations when you'd rather see
+    * the IP address of the host before the most recent proxy
+    * server, as opposed to your own proxy server(s) every time.
+    *
+    * jlrobins@socialserve.com, March 2004.
+    **/
+    public void setPreferProxiedForAddress(boolean value)
+    {
+       _preferProxiedForAddress = value;
+    }
+    
+    /* ------------------------------------------------------------ */
     public void start()
         throws Exception
     {
@@ -318,7 +334,16 @@ public class NCSARequestLog implements RequestLog
 
             StringBuffer buf = new StringBuffer(160);
             
-            buf.append(request.getRemoteAddr());
+            String addr = null;
+            if(_preferProxiedForAddress)
+            {
+                // If header is not present, addr will remain null ...
+                addr = request.getField(HttpFields.__XForwardedFor);
+            }
+            if(addr == null)
+                addr = request.getRemoteAddr();
+            buf.append(addr);
+            
             buf.append(" - ");
             String user = request.getAuthUser();
             buf.append((user==null)?"-":user);
