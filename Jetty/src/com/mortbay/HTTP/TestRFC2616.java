@@ -11,6 +11,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.zip.*;
+import com.mortbay.HTTP.Handler.*;
 
 /* ------------------------------------------------------------ */
 /** Test against RFC 2616
@@ -30,6 +31,12 @@ public class TestRFC2616
     {
         super("Test",1,10,30000);
         _server=new HttpServer();
+        HttpHandler teHandler=new TestTEHandler();
+        HttpHandler dumpHandler=new DumpHandler();
+        _server.mapHandler("/",teHandler);
+        _server.mapHandler("/",dumpHandler);
+        teHandler.start();
+        dumpHandler.start();
     }
 
     /* ------------------------------------------------------------ */
@@ -443,7 +450,6 @@ public class TestRFC2616
             String response;
             int offset=0;
 
-            
             // Expect Failure
             offset=0;
             response=listener.getResponses("GET /R1 HTTP/1.1\n"+
@@ -456,6 +462,7 @@ public class TestRFC2616
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 417","8.2.3 expect failure")+1;
 
+            
             // No Expect
             offset=0;
             response=listener.getResponses("GET /R1 HTTP/1.1\n"+
@@ -469,6 +476,7 @@ public class TestRFC2616
             t.checkEquals(response.indexOf("HTTP/1.1 100"),-1,
                           "8.2.3 no expect no 100");
 
+            
             // Expect with body
             offset=0;
             response=listener.getResponses("GET /R1 HTTP/1.1\n"+

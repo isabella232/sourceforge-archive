@@ -38,9 +38,16 @@ A HTTP server can be run with
  
   java com.mortbay.HTTP.HttpServer
 
-It always runs at port 8080 and serves files or does a simple request dump 
-if a file is not found.  If run from the install directory, a set of
-simple demo pages are served.
+By default it runs on port 8080 and serves files and simple request dumps. 
+If run from the install directory, a set of simple demo pages are served.
+The server can be run at one or more specific addresses by using the options:
+
+  -a [<addr>:]port    - listen on a port
+  -d <path>           - DumpHandler at path
+  -f <path>=<dir>     - FileHandler at path
+
+The default is equivalent to
+  java com.mortbay.HTTP.HttpServer -a 8080 -f /=. -d /
 
 
 Distribution

@@ -5,6 +5,11 @@ Jetty-3.0.A0 -
    + Added parameters to HttpRequest
    + Quick port of FileHandler
    + Setup demo pages.
+   + Added PathMap implementing mapping as defined in the 2.2 API
+     specification (ie. /exact, /prefix/*, *.extention & default ).
+   + Added HttpHandler interface with start/stop/destroy lifecycle
+   + Updated HttpListener is start/stop/destroy lifecycle.
+   + Implemented simple extension architecture in HttpServer.
 
 Jetty-3.0.A0 - 9 Oct 1999
    + Started fresh repository in CVS

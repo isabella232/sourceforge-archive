@@ -26,11 +26,11 @@ public class SocketListener
     private HttpServer _server;
     
     /* ------------------------------------------------------------------- */
-    SocketListener(InetAddrPort address)
-        throws IOException, InterruptedException
+    SocketListener(HttpServer server, InetAddrPort address)
+        throws IOException
     {
         super(address,1,5,30000);
-        _server=new HttpServer();
+        _server=server;
     }
 
     /* ------------------------------------------------------------ */
@@ -62,6 +62,21 @@ public class SocketListener
     {
         super.start();
         Log.event("Started SocketListener on "+getInetAddrPort());
+    }
+    
+    /* --------------------------------------------------------------- */
+    public void stop()
+        throws InterruptedException
+    {
+        Log.event("Stopping SocketListener on "+getInetAddrPort());
+        super.stop();
+    }
+    
+    /* --------------------------------------------------------------- */
+    public void destroy()
+    {
+        Log.event("Destroy SocketListener on "+getInetAddrPort());
+        super.destroy();
     }
     
     /* ------------------------------------------------------------ */

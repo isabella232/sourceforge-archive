@@ -10,9 +10,11 @@ import com.sun.java.util.collections.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import com.mortbay.HTTP.Handler.*;
 
 /* ------------------------------------------------------------ */
-/** XXX Place holder for something a bit better...
+/** HTTP Server.
+ *
  *
  * @see
  * @version 1.0 Thu Oct  7 1999
@@ -21,10 +23,137 @@ import java.util.*;
 public class HttpServer
 {
     /* ------------------------------------------------------------ */
-    com.mortbay.HTTP.Handler.FileHandler _fileHandler;
+    HashMap _listeners = new HashMap(7);
+    PathMap _handlerMap = new PathMap();
+    HashMap _fileMap = new HashMap(7);
     
     /* ------------------------------------------------------------ */
-    /** XXX 
+    /** Constructor. 
+     */
+    public HttpServer()
+    {}
+    
+    /* ------------------------------------------------------------ */
+    public void startListener(InetAddrPort address)
+        throws IOException
+    {
+        HttpListener listener = (HttpListener)_listeners.get(address);
+        if (listener==null)
+        {
+            listener=new SocketListener(this,address);
+            _listeners.put(address,listener);
+        }
+
+        listener.start();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void stopListener(InetAddrPort address)
+        throws InterruptedException
+    {
+        HttpListener listener = (HttpListener)_listeners.get(address);
+        if (listener!=null)
+            listener.stop();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void destroyListener(InetAddrPort address)
+    {
+        HttpListener listener = (HttpListener)_listeners.remove(address);
+        if (listener!=null)
+            listener.destroy();
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Collection of all listeners.
+     */
+    public Collection getListeners()
+    {
+        return _listeners.values();
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /** Map a handler to a path specification.
+     * Requests with paths matching the path specification are passed
+     * to the handle method of the handler. All matching handlers
+     * are offered the request, starting with the best match, until
+     * the request is handled.
+     *
+     * Multiple handlers can be mapped to the same pathSpec and
+     * requests are passed to the handlers in the order they
+     * were registered.
+     * @param pathSpec 
+     * @param handler 
+     */
+    public void mapHandler(String pathSpec, HttpHandler handler)
+    {
+        List list=(List)_handlerMap.get(pathSpec);
+        if (list==null)
+        {
+            list=new ArrayList(8);
+            _handlerMap.put(pathSpec,list);
+        }
+        if (!list.contains(handler))
+            list.add(handler);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Unmap a handler from a path specification.
+     * @param pathSpec 
+     * @param handler 
+     */
+    public void unmapHandler(String pathSpec, HttpHandler handler)
+    {
+        List list=(List)_handlerMap.get(pathSpec);
+        if (list!=null)
+            list.remove(handler);
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /** Converniance method for adding FileHandlers.
+     * A single FileHandler instance is maintained for each
+     * mapped filename and can be mapped to multiple path specifications.
+     * @param pathSpec 
+     * @param filename 
+     */
+    public void mapFiles(String pathSpec, String filename)
+    {
+        FileHandler fileHandler = (FileHandler)_fileMap.get(filename);
+        if (fileHandler==null)
+        {
+            fileHandler = new FileHandler(filename,
+                                          "index.html",
+                                          true, // dir OK
+                                          false,// put !OK
+                                          false,// delete !OK
+                                          64,   // cached files
+                                          40960 // cached file size
+                                          );
+            _fileMap.put(filename,fileHandler);
+            fileHandler.start();
+        }
+        mapHandler(pathSpec,fileHandler);
+    }
+    
+    
+    
+    /* ------------------------------------------------------------ */
+    /** Service a request.
+     * Handle the request by passing it to mapped HttpHandlers.
+     * Requests with paths matching a handlers mapped path specification
+     * are passed to the handle method of the handler. All matching handlers
+     * are offered the request, starting with the best match, until
+     * the request is handled.
+     *
+     * Multiple handlers can be mapped to the same pathSpec and
+     * requests are passed to the handlers in the order they
+     * were registered.
+     *
+     * If no handler handles the request, 404 Not Found is returned.
+     *
      * @param request 
      * @param response 
      * @exception IOException 
@@ -33,97 +162,42 @@ public class HttpServer
     public void service(HttpRequest request,HttpResponse response)
         throws IOException, HttpException
     {
-        if (request.getQuery()!=null)
+        // find all matching handlers.
+        List matches = (List)_handlerMap.getMatches(request.getPath());
+
+        // Try handlers, starting from best match.
+        if (matches==null)
+            response.sendError(response.__404_Not_Found);
+        else
         {
-            if (request.getQuery().indexOf("gzip")>=0)
+            Iterator i1=matches.iterator();
+            while (!request.isHandled() && i1.hasNext())
             {
-                response.setField(HttpFields.__TransferEncoding,"gzip");
-                response.addField(HttpFields.__TransferEncoding,"chunked");
-            }
-            if (request.getQuery().indexOf("deflate")>=0)
-            {
-                response.setField(HttpFields.__TransferEncoding,"deflate");
-                response.addField(HttpFields.__TransferEncoding,"chunked");
-            }
-        }
-        
-
-        if (_fileHandler!=null)
-            _fileHandler.handle(request,response);
-        if (response.getState()==response.__MSG_EDITABLE)
-            dump(request,response);
-    }
-
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @param request 
-     * @param response 
-     * @exception IOException 
-     * @exception HttpException 
-     */
-    public void dump(HttpRequest request,HttpResponse response)
-        throws IOException, HttpException
-    {
-        response.setField(HttpFields.__ContentType,
-                          HttpFields.__TextHtml);
-        ChunkableOutputStream out = response.getOutputStream();
-
-        out.println("<HTML><H1>HTTP Request Dump</H1>");
-        out.println("<H3>Header:</H3><PRE>");
-        out.print(request.toString());
-        out.println("</PRE><H3>Parameters:</H3><PRE>");
-        Set names=request.getParameterNames();
-        Iterator iter = names.iterator();
-        while(iter.hasNext())
-        {
-            String name=iter.next().toString();
-            List values=request.getParameterValues(name);
-            if (values==null || values.size()==0)
-            {
-                out.print(name);
-                out.println("=");
-            }
-            else if (values.size()==1)
-            {
-                out.print(name);
-                out.print("=");
-                out.println(values.get(0));
-            }
-            else
-            {
-                for (int i=0; i<values.size(); i++)
+                com.sun.java.util.collections.Map$Entry entry=
+                    (com.sun.java.util.collections.Map$Entry)i1.next();
+                String pathSpec=(String)entry.getKey();
+                List handlers = (List)entry.getValue();
+                
+                Iterator i2=handlers.iterator();
+                while (!request.isHandled() && i2.hasNext())
                 {
-                    out.print(name);
-                    out.print("["+i+"]=");
-                    out.println(values.get(i));
+                    HttpHandler handler = (HttpHandler)i2.next();
+                    handler.handle(pathSpec,request,response);
                 }
             }
-        }
-            
-        out.println("</PRE><H3>Content:</H3><PRE>");
-        byte[] buf= new byte[4096];
-        int len;
-        InputStream in=request.getInputStream();
-        while((len=in.read(buf))>=0)
-            out.write(buf,0,len);
-        out.println("</PRE><H3>Response:</H3><PRE>");
-        out.print(response.toString());
-        out.println("</PRE></HTML>");
 
-        // You wouldn't normally set a trailer like this, but
-        // we don't want to commit the output to force trailers as
-        // it makes test harness messy
-        request.getAcceptableTransferCodings();
-        if (response.acceptTrailer())
-            response.getTrailer().put("TestTrailer","Value");
+            if (!request.isHandled())
+                response.sendError(response.__404_Not_Found);
+        }
     }
 
+
     /* ------------------------------------------------------------ */
-    /** XXX 
+    /** Enable a transfer encoding.
+     * Enable a transfer encoding on a ChunkableInputStream.
      * @param in 
-     * @param coding 
-     * @param parameters 
+     * @param coding Coding name 
+     * @param parameters Coding parameters or null
      * @exception HttpException 
      */
     public void enableEncoding(ChunkableInputStream in,
@@ -166,10 +240,11 @@ public class HttpServer
     }
     
     /* ------------------------------------------------------------ */
-    /** XXX 
-     * @param in 
-     * @param coding 
-     * @param parameters 
+    /** Enable a transfer encoding.
+     * Enable a transfer encoding on a ChunkableOutputStream.
+     * @param out
+     * @param coding Coding name 
+     * @param parameters Coding parameters or null
      * @exception HttpException 
      */
     public void enableEncoding(ChunkableOutputStream out,
@@ -218,16 +293,73 @@ public class HttpServer
      */
     public static void main(String[] args)
     {
+        if (args.length==0)
+        {
+            String[] newArgs= {"-a","8080","-f","/=.","-d","/"};
+            args=newArgs;
+        }
+        else if (args.length%2==1)
+        {
+            System.err.println
+                ("Usage - java com.mortbay.HTTP.HttpServer [ -a <value> ... ]");
+            System.err.println
+                (" -a [<addr>:]<port>  - Listen on [ address & ] port");
+            System.err.println
+                (" -f <path>=<dir>     - File handler at path Spec to file/directory");
+            System.err.println
+                (" -d <path>           - Dump handler at path Spec");
+            System.err.println
+                ("Default options: -a 8080 -f /=. -d /");
+            
+            System.exit(1);
+        }
+        
         try{
-            InetAddrPort address = new InetAddrPort(8080);
-            SocketListener listener = new SocketListener(address);
-            listener.getServer()._fileHandler =
-                new com.mortbay.HTTP.Handler.FileHandler(".",
-                                                         "index.html",
-                                                         true,
-                                                         true,
-                                                         true);
-            listener.start();
+            // Create the server
+            HttpServer server = new HttpServer();
+
+            // Parse arguments
+            for (int i=0;i<args.length;i++)
+            {
+                try
+                {
+                    // Look for listener
+                    if ("-a".equals(args[i]))
+                    {
+                        // Add listener.
+                        i++;
+                        InetAddrPort address = new InetAddrPort(args[i]);
+                        server.startListener(address);
+                    }
+
+                    // Look for dump handler
+                    if ("-d".equals(args[i]))
+                    {
+                        i++;
+                        HttpHandler handler=new DumpHandler();
+                        server.mapHandler(args[i],handler);
+                        handler.start();
+                    }
+                    
+                    // Look for file handler
+                    if ("-f".equals(args[i]))
+                    {
+                        i++;
+                        String spec=args[i];
+                        int e=spec.indexOf("=");
+                        if (e>0)
+                        {
+                            String pathSpec=spec.substring(0,e);
+                            String file=spec.substring(e+1);
+                            server.mapFiles(pathSpec,file);
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Code.warning(e);
+                }
+            }
         }
         catch (Exception e)
         {
@@ -235,9 +367,3 @@ public class HttpServer
         }
     }
 };
-
-
-
-
-
-

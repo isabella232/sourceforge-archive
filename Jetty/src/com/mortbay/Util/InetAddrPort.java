@@ -123,6 +123,36 @@ public class InetAddrPort
     {
         return new InetAddrPort(this);
     }
+
+    /* ------------------------------------------------------------ */
+    /** Hash Code.
+     * @return hash Code.
+     */
+    public int hashCode()
+    {
+        return _port+((_addr==null)?0:_addr.hashCode());
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Equals
+     * @param o 
+     * @return True if is the same address and port.
+     */
+    public boolean equals(Object o)
+    {
+        if (o==null)
+            return false;
+        if (o==this)
+            return true;
+        if (o instanceof InetAddrPort)
+        {
+            InetAddrPort addr=(InetAddrPort)o;
+            return addr._port==_port &&
+                ( addr._addr==_addr ||
+                  addr._addr!=null && addr._addr.equals(_addr));
+        }
+        return false;
+    }
 }
 
     

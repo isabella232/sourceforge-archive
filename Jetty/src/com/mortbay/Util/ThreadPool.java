@@ -56,7 +56,7 @@ public class ThreadPool
     private long _maxIdleTimeMs=0;
     private String _name="ThreadPool";
     private int _threadId=0;
-    private int _idleThreads=0;
+    private HashSet _idleSet=new HashSet();
     private boolean _running=false;
     private Class _threadClass;
     private Constructor _constructThread;
@@ -259,15 +259,45 @@ public class ThreadPool
             newThread();
     }
 
-    
     /* ------------------------------------------------------------ */
     /** Stop the ThreadPool.
+     * New jobs are no longer accepted, idle threads are interrupted
+     * and the pool is joined until all jobs are completed.
+     */
+    public void stop()
+        throws InterruptedException
+    {
+        Code.debug("Stop Pool ",_name);
+        _running=false;
+        
+        while(_idleSet!=null && _idleSet.size()>0)
+        {
+            Thread thread=null;
+            synchronized(this)
+            {
+                Iterator iter=_threadSet.iterator();
+                while(iter.hasNext())
+                {
+                    thread=(Thread)iter.next();
+                    thread.interrupt();
+                }
+            }
+            
+            if (thread!=null)
+                thread.join();
+        }
+        join();
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /** Destroy the ThreadPool.
      * All threads are interrupted and if they do not terminate after
      * a short delay, they are stopped.
      */
-    synchronized public void stop() 
+    synchronized public void destroy() 
     {
-        Code.debug("Stop Pool ",_name);
+        Code.debug("Destroy Pool ",_name);
 
         if (_threadSet==null)
             return;
@@ -456,7 +486,7 @@ public class ThreadPool
                     try 
                     {
                         // increment accepting count
-                        synchronized(this){_idleThreads++;}               
+                        synchronized(this){_idleSet.add(thread);}
                     
                         // wait for a job
                         job=getJob(_maxIdleTimeMs);
@@ -466,10 +496,10 @@ public class ThreadPool
                         {
                             if (Code.verbose(99))
                                 Code.debug("Threads="+_threadSet.size()+
-                                           " idle="+_idleThreads);
+                                           " idle="+_idleSet.size());
                         
                             if (_threadSet.size()>_minThreads &&
-                                _idleThreads>1)
+                                _idleSet.size()>1)
                             {
                                 // interrupt was due to accept timeout
                                 // Kill thread if it is in excess of the minimum.
@@ -489,9 +519,9 @@ public class ThreadPool
                     {
                         synchronized(this)
                         {
-                            _idleThreads--;
+                            _idleSet.remove(thread);
                             // If not more threads accepting - start one
-                            if (_idleThreads==0 &&
+                            if (_idleSet.size()==0 &&
                                 _running &&
                                 job!=null &&
                                 _threadSet.size()<_maxThreads)
@@ -540,9 +570,3 @@ public class ThreadPool
         }
     }
 };
-
-
-
-
-
-    

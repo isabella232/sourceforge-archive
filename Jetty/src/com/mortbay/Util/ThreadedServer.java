@@ -84,7 +84,7 @@ abstract public class ThreadedServer extends ThreadPool
                           int minThreads, 
                           int maxThreads,
                           int maxIdleTime) 
-         throws IOException, InterruptedException
+         throws IOException
     {
         super(address.toString(),minThreads,maxThreads,maxIdleTime);
         setAddress(address);

@@ -1091,7 +1091,7 @@ public class TestHarness
             test.checkEquals(server._jobs,4,"max thread");
             test.checkEquals(server.getSize(),4,"max thread");
 
-            server.stop();
+            server.destroy();
             server.join();
             test.check(!server.isRunning(),"Stopped");
             test.checkEquals(server.getSize(),0,"No Threads");

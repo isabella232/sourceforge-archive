@@ -11,7 +11,7 @@ import java.net.*;
 import java.util.*;
 
 /* ------------------------------------------------------------ */
-/** XXX
+/** HTTP Listener
  *
  * @see HttpConnection
  * @version 1.0 Sat Oct  2 1999
@@ -23,7 +23,31 @@ public interface HttpListener
     public abstract String getDefaultScheme();
     public abstract String getHost();
     public abstract int getPort();
+    
+
+    /* ------------------------------------------------------------ */
+    /** Start the listener.
+     * All requests are ignored until start is called.
+     */
+    public abstract void start();
+    
+    /* ------------------------------------------------------------ */
+    /** Stop the listener.
+     * New requests are refused and the handler may attempt to wait
+     * for existing requests to complete. The caller may interrupt
+     * the stop call is waiting is taking too long.
+     */
+    public abstract void stop()
+        throws InterruptedException;
+    
+    /* ------------------------------------------------------------ */
+    /** Destroy the handler.
+     * New requests are refused and all current requests are immediately
+     * terminated.
+     */
+    public abstract void destroy();
 };
+
 
 
 

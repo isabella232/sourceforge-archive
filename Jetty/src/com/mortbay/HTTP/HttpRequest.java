@@ -1,3 +1,4 @@
+
 // ===========================================================================
 // Copyright (c) 1996 Mort Bay Consulting Pty. Ltd. All rights reserved.
 // $Id$
@@ -45,6 +46,7 @@ public class HttpRequest extends HttpMessage
     private int _port;
     private List _te;
     private MultiMap _parameters;
+    private boolean _handled;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -72,9 +74,32 @@ public class HttpRequest extends HttpMessage
             return null;
         return _connection.getResponse();
     }
+
+    /* ------------------------------------------------------------ */
+    /** Is the request handled.
+     * @return True if the request has been set to handled or the
+     * associated response is not editable.
+     */
+    public boolean isHandled()
+    {
+        if (_handled)
+            return true;
+
+        HttpResponse response= getResponse();
+        return (response!=null && response.getState()!=response.__MSG_EDITABLE);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set the handled status
+     * @param handled true or false
+     */
+    public void setHandled(boolean handled)
+    {
+        _handled=handled;
+    }
     
     /* ------------------------------------------------------------ */
-    /** XXX
+    /** Read the request line and header.
      * @param in 
      * @exception IOException 
      */
@@ -102,7 +127,8 @@ public class HttpRequest extends HttpMessage
             _version=__HTTP_1_0;
         else if (__HTTP_0_9.equals(_version))
             _version=__HTTP_0_9;
-        
+
+        _handled=false;
         _state=__MSG_RECEIVED;
     }
     

@@ -293,7 +293,19 @@ public class HttpConnection
             // Complete the request
             if (_persistent)
             {
-                while(_inputStream.skip(4096)>0 || _inputStream.read()>=0);
+                try{
+                    // Read remaining input
+                    while(_inputStream.skip(4096)>0 || _inputStream.read()>=0);
+                }
+                catch(IOException e)
+                {
+                    if (_inputStream.getContentLength()>0)
+                        _inputStream.setContentLength(0);
+                    throw new HttpException(_response.__400_Bad_Request,
+                                            "Missing Content");
+                }
+
+                // Check for no more content
                 if (_inputStream.getContentLength()>0)
                 {
                     _inputStream.setContentLength(0);
@@ -301,6 +313,7 @@ public class HttpConnection
                                             "Missing Content");
                 }
 
+                // Commit the response
                 _response.commit();
                 _inputStream.resetStream();
                 if (_outputStream.isChunking())
@@ -340,7 +353,9 @@ public class HttpConnection
             if (Code.debug())
                 Code.warning(e);
             else
-                Code.warning(e.toString());
+                // XXX    Code.warning(e.toString());
+                Code.warning(e);
+            
             _persistent=false;
             if (!_outputStream.isCommitted())
             {
