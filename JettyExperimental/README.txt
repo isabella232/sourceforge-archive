@@ -10,12 +10,16 @@ taken from Jetty 5, so that 8 years of cruft can be removed.
 It is also trying to be IO nuetral so that NIO buffering and non-blocking
 approaches can be used. 
 
+It currently implements most of HTTP/1.1 in a jar of approx 110k, with
+no other jars required.
 
 Very little doco at the moment, but the things you need to know are:
 
  + it is built with maven
 
      maven jar:jar
+
+ + eclipse project files are checked in.
 
  + You can run it with
 
@@ -30,4 +34,19 @@ Very little doco at the moment, but the things you need to know are:
 
  + Test harnesses are currently covering about 60% of the code.
 
+
+TODO:
+
+ + Lots more javadoc
+ + NIO implementation of Buffers.
+ + Optional of DirectBuffers for constants and memory buffers.
+ + Buffer bypass handling so that large writes can be written directly
+ + Proper threadpool or equiv
+ + Move more behaviour from blocking HttpConnection to HttpInput and HttpOutput
+ + Nonblocking implementations of HttpInput, HttpOutput and HttpConnection.
+ + A Connector architecture (same as Jetty)
+ + A Handler architecture (probably nested as with tomcat)
+ + A resource handler
+ + Contentlets
+ + Benchmarking
 

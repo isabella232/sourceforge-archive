@@ -13,7 +13,6 @@ import java.net.Socket;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.stream.InputStreamBuffer;
 import org.mortbay.io.stream.OutputStreamBuffer;
-import org.mortbay.util.StringUtil;
 
 
 /* ------------------------------------------------------------------------------- */
@@ -26,6 +25,7 @@ public class HttpConnection
     protected HttpInputStream _in;
     protected HttpOutputStream _out;
     private HttpHeader _outHeader;
+    private Handler _handler;
     
     public HttpConnection(Socket socket)
         throws IOException
@@ -44,6 +44,16 @@ public class HttpConnection
         _outHeader=_out.getHttpHeader();
     }
     
+    public void setHandler(Handler handler)
+    {
+        _handler=handler;
+    }
+    
+    public Handler getHandler()
+    {
+        return _handler;
+    }
+    
     public void run() throws IOException
     {
         while (_out.isPersistent())
@@ -55,9 +65,11 @@ public class HttpConnection
 
     public boolean runNext() throws IOException
     {
+        if (_handler==null)
+            _handler=new DumpHandler();
+            
         try
         {
-            System.out.println();
             HttpHeader request= _in.readHeader();
             if (request == null)
                 return false;
@@ -100,49 +112,67 @@ public class HttpConnection
             }
 
             System.out.println(request.getMethod() + " " + request.getUri());
-
             _out.setHeadResponse(HttpMethods.HEAD_BUFFER.equals(request.getMethod()));
 
-            StringBuffer content=new StringBuffer();
-            byte data[]= new byte[4096];
-            int length= 0;
-            int len;
-            while ((len= _in.read(data, 0, 4096)) > 0)
-            {
-                System.out.println("read " + len + " bytes");
-                length += len;
-                if (len>0)
-                    content.append(new String(data,0,len));
-            }
-
-            System.out.println("total " + length + " bytes");
-
-            _outHeader.setStatus(200);
-            _outHeader.put(HttpHeaders.CONTENT_TYPE_BUFFER, HttpHeaderValues.TEXT_HTML_BUFFER);
-            _outHeader.put(
-                HttpHeaders.CONNECTION_BUFFER,
-                request.get(HttpHeaders.CONNECTION_BUFFER));
-
-            _out.write("<html><h1>Test Server</h1>".getBytes());
-            _out.write(("<p>Request content read = " + length + "</p>").getBytes());
-            _out.write("<h3>Request:</h3><pre>".getBytes());
-            _out.write(request.toString().getBytes());
-            _out.write("</pre>".getBytes());
-            _out.write(("<form method=\"POST\" action=\"" + request.getUri() + "\">").getBytes());
-            _out.write("<textarea name=\"text\">Test input</textarea>".getBytes());
-            _out.write("<br/><input type=\"Submit\"></form>\n".getBytes());
-
-            _out.write("<h3>Content:</h3><pre>".getBytes());
-            _out.write(content.toString().getBytes());
-            _out.write("</pre></html>\n".getBytes());
-            
-            _out.close();
+            _handler.handle(request,_outHeader,_in,_out);
             return true;
         }
         finally
         {
             _in.resetStream();
             _out.resetStream();
+        }
+    }
+    
+    /** A temporary interface for extending the HttpConnection handling */
+    public static interface Handler
+    {
+        public void handle(HttpHeader request, 
+                           HttpHeader response,
+                           HttpInputStream in,
+                           HttpOutputStream out)
+            throws IOException;
+    }
+    
+    public static class DumpHandler implements Handler
+    {
+        public void handle(HttpHeader request, 
+                           HttpHeader response,
+                           HttpInputStream in, 
+                           HttpOutputStream out)
+            throws IOException
+        {
+            StringBuffer content=new StringBuffer();
+            byte data[]= new byte[4096];
+            int length= 0;
+            int len;
+            while ((len= in.read(data, 0, 4096)) > 0)
+            {
+                length += len;
+                if (len>0)
+                    content.append(new String(data,0,len));
+            }
+            
+            response.setStatus(200);
+            response.put(HttpHeaders.CONTENT_TYPE_BUFFER, HttpHeaderValues.TEXT_HTML_BUFFER);
+            response.put(
+                HttpHeaders.CONNECTION_BUFFER,
+                request.get(HttpHeaders.CONNECTION_BUFFER));
+
+            out.write("<html><h1>Test Server</h1>".getBytes());
+            out.write(("<p>Request content read = " + length + "</p>").getBytes());
+            out.write("<h3>Request:</h3><pre>".getBytes());
+            out.write(request.toString().getBytes());
+            out.write("</pre>".getBytes());
+            out.write(("<form method=\"POST\" action=\"" + request.getUri() + "\">").getBytes());
+            out.write("<textarea name=\"text\">Test input</textarea>".getBytes());
+            out.write("<br/><input type=\"Submit\"></form>\n".getBytes());
+
+            out.write("<h3>Content:</h3><pre>".getBytes());
+            out.write(content.toString().getBytes());
+            out.write("</pre></html>\n".getBytes());
+            
+            out.close();
         }
     }
 }

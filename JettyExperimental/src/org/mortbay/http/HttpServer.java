@@ -11,58 +11,92 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-
 /**
  * Temporary Servler class to get things running.
  */
-
 public class HttpServer
 {
-    public static void main(String[] args)
-        throws Exception
-    {   
-        ServerSocket ss = new ServerSocket(8080);
-        System.out.println("listening on "+ss);
-        while(true)
+    int port= 8080;
+
+    HttpServer()
+    {
+    }
+
+    /**
+     * @return
+     */
+    public int getPort()
+    {
+        return port;
+    }
+
+    /**
+     * @param p
+     */
+    public void setPort(int p)
+    {
+        port= p;
+    }
+
+    public void run() throws IOException
+    {
+        ServerSocket ss= new ServerSocket(8080);
+
+        try
         {
-            final Socket socket=ss.accept();
-        
-            try
+
+            System.out.println("listening on " + ss);
+            while (true)
             {
-                new Thread(new Runnable()
+                final Socket socket= ss.accept();
+
+                try
                 {
-                    public void run()
+                    // TODO poor substitute for a thread pool
+                    new Thread(new Runnable()
                     {
-                        try
+                        public void run()
                         {
-                            System.out.println("Open connection: "+socket);
-                            HttpConnection connection=
-                            new HttpConnection(socket);
-                            connection.run();
-                        }
-                        catch(IOException e)
-                        {
-                            e.printStackTrace();
-                        }
-                        finally
-                        {
-                            System.out.println("Close connection: "+socket);
                             try
                             {
-                                socket.close();
+                                System.out.println("Open connection: " + socket);
+                                HttpConnection connection= new HttpConnection(socket);
+                                connection.run();
                             }
-                            catch(IOException e)
+                            catch (IOException e)
                             {
                                 e.printStackTrace();
-                            } 
-                        }  
-                    }   
-                }).start();  
-            }
-            catch(Exception e)
-            {
-                e.printStackTrace();
+                            }
+                            finally
+                            {
+                                System.out.println("Close connection: " + socket);
+                                try
+                                {
+                                    socket.close();
+                                }
+                                catch (IOException e)
+                                {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+                    }).start();
+                }
+                catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
             }
         }
-    }   
+        finally
+        {
+            ss.close();
+        }
+    }
+
+    public static void main(String[] args) throws Exception
+    {
+        new HttpServer().run();
+    }
+
 }
