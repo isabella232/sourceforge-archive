@@ -222,7 +222,7 @@ public class JDBCUserRealm extends HashUserRealm
                 connectDatabase();
             
             if (null==_con)
-                return;
+                throw new SQLException("Can't connect to database");
             
             PreparedStatement stat = _con.prepareStatement(_userSql);
             stat.setObject(1, username);
