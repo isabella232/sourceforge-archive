@@ -109,8 +109,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     public synchronized void start()
         throws MultiException
     {
-        Log.event("start HttpServer version "+Version.__VersionImpl);
-
+        Log.event("Starting "+Version.__VersionImpl);
         MultiException mex = new MultiException();
         
         if (Code.verbose(99))
@@ -120,8 +119,13 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
         }   
 
         if (_logSink!=null && !_logSink.isStarted())
-            try{_logSink.start();}catch(Exception e){mex.add(e);}
-        
+        {
+            try{
+                _logSink.start();
+                Log.event("Started "+_logSink);
+            }
+            catch(Exception e){mex.add(e);}
+        }
         
         Iterator contexts = getHandlerContexts().iterator();
         while(contexts.hasNext())
@@ -139,6 +143,8 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
             if (!listener.isStarted())
                 try{listener.start();}catch(Exception e){mex.add(e);}
         }
+
+        Log.event("Started "+this);
 
         mex.ifExceptionThrowMulti();
     }
@@ -203,7 +209,11 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
         }
 
         if (_logSink!=null)
+        {
             _logSink.stop();
+            Log.event("Stopped "+_logSink);
+        }
+        Log.event("Stopped "+this);
     }
 
     

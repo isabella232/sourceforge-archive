@@ -553,7 +553,7 @@ public class OutputStreamLogSink
 
     
     /* ------------------------------------------------------------ */
-    /** Stop a log sink.
+    /** Start a log sink.
      * The default implementation does nothing 
      */
     public synchronized void start()
@@ -572,13 +572,27 @@ public class OutputStreamLogSink
      * An opportunity for subclasses to clean up. The default
      * implementation does nothing 
      */
-    public void stop()
+    public synchronized void stop()
     {
         _started=false;
+
+        if (_rollover!=null)
+            _rollover.interrupt();
+        _rollover=null;
+        
         if (_out!=null)
         {
-            try{_out.flush();}
+            try
+            {
+                if (_buffer.length()>0)
+                {
+                    _buffer.writeTo(_out);
+                    _buffer.reset();
+                }
+                _out.flush();
+            }
             catch(Exception e){Code.ignore(e);}
+            Thread.yield();
         }
         
         if (_out!=null && _out!=System.err && _filename!=null)
@@ -586,9 +600,6 @@ public class OutputStreamLogSink
             try{_out.close();}
             catch(Exception e){Code.ignore(e);}
         }       
-        if (_rollover!=null)
-            _rollover.interrupt();
-        _rollover=null;
     }
 
     /* ------------------------------------------------------------ */
