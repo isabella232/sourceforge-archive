@@ -8,7 +8,7 @@ import java.util.Vector;
 
 /* -------------------------------------------------------------------- */
 /** A simple block of straight text.
- * <p> DEPRECIATED, all Composites now take Strings direct.
+ * @deprecated all Composites now take Strings direct.
  */
 public class Text extends Composite
 {
