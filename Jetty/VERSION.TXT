@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Init classloader for JspServlet
+ + Slightly more agressive eating unused input from non persistent connection.
 
 Jetty-4.0.B1 - 13 Feb 2002
  + WriterOutputStream so JSPs can include static resources.

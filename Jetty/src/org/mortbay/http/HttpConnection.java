@@ -981,8 +981,7 @@ public class HttpConnection
                 {
                     // half hearted attempt to eat any remaining input
                     try{
-                        while(_inputStream.available()>0 &&
-                              (_inputStream.skip(4096)>0 ||_inputStream.read()>=0));
+                        while(_inputStream.skip(4096)>0 ||_inputStream.read()>=0);
                     }
                     catch(IOException e){Code.ignore(e);}
                 

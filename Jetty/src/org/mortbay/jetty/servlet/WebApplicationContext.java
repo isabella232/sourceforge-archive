@@ -792,7 +792,10 @@ public class WebApplicationContext extends ServletHttpContext
     
     /* ------------------------------------------------------------ */
     private void initServlet(XmlParser.Node node)
-        throws ClassNotFoundException, UnavailableException
+        throws ClassNotFoundException,
+               UnavailableException,
+               IOException,
+               MalformedURLException
     {
         String name=node.getString("servlet-name",false,true);
         String className=node.getString("servlet-class",false,true);
@@ -814,6 +817,13 @@ public class WebApplicationContext extends ServletHttpContext
             name=className;
         
         ServletHolder holder = _servletHandler.newServletHolder(name,className,jspFile);
+
+        // handle JSP classpath
+        if (jspFile!=null)
+        {
+            initClassLoader();
+            holder.setInitParameter("classpath",getFileClassPath());
+        }
         
         Iterator iter= node.iterator("init-param");
         while(iter.hasNext())
