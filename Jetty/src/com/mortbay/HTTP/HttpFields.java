@@ -496,22 +496,16 @@ public class HttpFields extends HashMap
     /* -------------------------------------------------------------- */
     /** Read HttpHeaders from inputStream.
      */
-    public void read(InputStream in)
+    public void read(LineInput in)
     throws IOException
-    {
-        ChunkableInputStream cin;
-        if (in instanceof ChunkableInputStream)
-            cin=(ChunkableInputStream)in;
-        else
-            cin=new ChunkableInputStream(in);
-        
+    {   
         String last=null;
         char[] buf=null;
         int size=0;
         char[] lbuf=null;
         com.mortbay.Util.LineInput$LineBuffer line_buffer;
         
-        while ((line_buffer=cin.readLine(cin.__maxLineLength))!=null)
+        while ((line_buffer=in.readLineBuffer())!=null)
         {
             // check space in the lowercase buffer
             buf=line_buffer.buffer;
@@ -628,6 +622,7 @@ public class HttpFields extends HashMap
     protected void write(OutputStream out, HttpFields extra)
         throws IOException
     {
+        // XXX use a UTF8 writer
         synchronized(out)
         {
             int size=_names.size();

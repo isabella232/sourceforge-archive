@@ -156,6 +156,8 @@ public class HttpResponse extends HttpMessage
     public synchronized  void writeHeader(OutputStream out) 
         throws IOException
     {
+        // XXX use a UTF8 writer.
+        
         if (_state!=__MSG_EDITABLE)
             throw new IllegalStateException(__state[_state]+
                                             " is not EDITABLE");

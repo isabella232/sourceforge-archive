@@ -60,17 +60,7 @@ public class TestHarness
 
             test.checkEquals(cin.getTrailer().get("some-trailer"),
                              "some-value","Trailer fields");
-  
-            fin= new FileInputStream("TestData/test.chunkIn");
-            cin = new ChunkableInputStream(fin);
-            cin.__maxLineLength=8;
-//              test.checkEquals(cin.readLine().length(),8,
-//                               "line length limited");
-//              test.checkEquals(cin.readLine().length(),8,
-//                               "line length limited");
-//              test.checkEquals(cin.readLine().length(),4,
-//                               "line length limited");
-            cin.__maxLineLength=8192;
+            
         }
         catch(Exception e)
         {
@@ -85,6 +75,7 @@ public class TestHarness
         Test test = new Test("com.mortbay.HTTP.ChunkableOutputStream");
 
         try{
+            
             FileOutputStream fout = new FileOutputStream("TestData/tmp.chunkOut");
             ChunkableOutputStream cout = new ChunkableOutputStream(fout);
             cout.setChunking();
@@ -121,7 +112,7 @@ public class TestHarness
             test.checkEquals(b[0],'b',"b in 2");
             test.checkEquals(b[1],'c',"c in 3");
 
-            LineInput lin = new LineInput(cin);
+            LineInput lin = new LineInput(cin);            
             String line=lin.readLine();
             
             test.checkEquals(line.length(),33,"def...");
@@ -220,17 +211,17 @@ public class TestHarness
         
 
         ByteArrayInputStream bais = new ByteArrayInputStream(h1.getBytes());
-        ChunkableInputStream cis = new ChunkableInputStream(bais);
+        LineInput lis = new LineInput(bais);
 
 
         Test t = new Test("com.mortbay.HTTP.HttpFields");
         try
         {    
             HttpFields f = new HttpFields();
-            f.read(cis);
+            f.read(lis);
 
             byte[] b = "xxxxxxxxxxxcl".getBytes();
-            t.checkEquals(cis.read(b),13,"Read other");
+            t.checkEquals(lis.read(b),13,"Read other");
             t.checkEquals(new String(b,0,11),
                           "Other Stuff","Read other");
         
@@ -372,9 +363,3 @@ public class TestHarness
         }
     }
 };
-
-
-
-
-
-

@@ -403,6 +403,7 @@ abstract public class HttpMessage
      */
     public String getCharacterEncoding()
     {
+        // XXX simplify
         String encoding = _header.get(HttpFields.__ContentType);
         if (encoding==null || encoding.length()==0)
             return "ISO-8859-1";

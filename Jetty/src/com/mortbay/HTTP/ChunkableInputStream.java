@@ -149,13 +149,16 @@ public class ChunkableInputStream extends FilterInputStream
         return _realIn.getByteLimit();
     }
 
+    /* ------------------------------------------------------------ */
+    /** XXX 
+     */
     public com.mortbay.Util.LineInput$LineBuffer readLine(int maxLen)
         throws IOException,
                IllegalStateException
     {
         if (_chunking || _filters>0)
             throw new IllegalStateException("Chunking or filters");
-        return _realIn.readLine(maxLen);
+        return _realIn.readLineBuffer(maxLen);
     }
 
     /* ------------------------------------------------------------ */
@@ -288,14 +291,18 @@ public class ChunkableInputStream extends FilterInputStream
 
             // Get next non blank line
             com.mortbay.Util.LineInput$LineBuffer line_buffer
-                =_realIn.readLine(64);
+                =_realIn.readLineBuffer();
             while(line_buffer!=null && line_buffer.size==0)
-                line_buffer=_realIn.readLine(64);
-            String line= new String(line_buffer.buffer,0,line_buffer.size);
+                line_buffer=_realIn.readLineBuffer();
             
             // Handle early EOF or error in format
-            if (line==null)
+            if (line_buffer==null)
+            {
+                Code.warning("EOF");
                 return -1;
+            }
+            String line= new String(line_buffer.buffer,0,line_buffer.size);
+            
         
             // Get chunksize
             int i=line.indexOf(';');

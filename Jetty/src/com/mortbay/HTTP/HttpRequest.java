@@ -92,7 +92,7 @@ public class HttpRequest extends HttpMessage
         decodeRequestLine(line_buffer.buffer,line_buffer.size);
         
         // Read headers
-        _header.read(in);
+        _header.read((LineInput)in.getRawStream());
 
         // Handle version
         if (__HTTP_1_1.equals(_version))

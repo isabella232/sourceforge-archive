@@ -397,11 +397,6 @@ public class HttpConnection
         String host=_request.getField(HttpFields.__Host);
         if (host==null || host.length()==0)
             throw new HttpException(_response.__400_Bad_Request);
-        if (!host.equals(_request.getHost()))
-        {
-            Code.warning("XXX Host field does not match URI");
-            Code.debug(_request);
-        }
         
         // check and enable requests transfer encodings.
         boolean _inputEncodings=false;

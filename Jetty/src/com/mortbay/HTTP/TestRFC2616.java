@@ -190,7 +190,6 @@ public class TestRFC2616
             offset = t.checkContains(response,offset,"123456","3.6.1 Chunking");
             offset = t.checkContains(response,offset,"/R2","3.6.1 Chunking")+10;
 
-
             // gzip encoding
             offset=0;
             ByteArrayOutputStream bout1 = new ByteArrayOutputStream();
@@ -234,9 +233,10 @@ public class TestRFC2616
                                                  "\n").getBytes());
             Code.debug("RESPONSE: ",new String(rbytes));
             ByteArrayInputStream bin = new ByteArrayInputStream(rbytes);
-            HttpFields header = new HttpFields();
-            header.read(bin);
             ChunkableInputStream cin = new ChunkableInputStream(bin);
+            HttpFields header = new HttpFields();
+            header.read((LineInput)cin.getRawStream());
+            Code.debug("HEADER:\n",header);
             cin.setChunking();
             GZIPInputStream gin = new GZIPInputStream(cin);
             ByteArrayOutputStream bout3 = new ByteArrayOutputStream();

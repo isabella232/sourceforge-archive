@@ -579,63 +579,166 @@ public class TestHarness
         try
         {
             String data=
-                "aaaa"+__CRLF+
-                "b"+__CRLF+
-                ""+__CRLF+
-                "cccc"+__CRLF;
+                "abcd\015\012"+
+                "E\012"+
+                "\015"+
+                "fghi";
             
             ByteArrayInputStream dataStream;
             LineInput in;
+
             dataStream=new ByteArrayInputStream(data.getBytes());
             in = new LineInput(dataStream);
+            
+            test.checkEquals(in.readLine(),"abcd","1 read first line");
+            test.checkEquals(in.readLine(),"E","1 read line");
+            test.checkEquals(in.readLine(),"","1 blank line");
+            test.checkEquals(in.readLine(),"fghi","1 read last line");
+            test.checkEquals(in.readLine(),null,"1 read EOF");
+            test.checkEquals(in.readLine(),null,"1 read EOF again");
 
-            test.checkEquals(in.readLine(),"aaaa","read first line");
-            test.checkEquals(in.readLine(),"b","read line");
-            test.checkEquals(in.readLine(),"","blank line");
-            test.checkEquals(in.readLine(),"cccc","read last line");
+            int bs=7;
+            dataStream=new ByteArrayInputStream(data.getBytes());
+            in = new LineInput(dataStream,bs);
+            test.checkEquals(in.readLine(),"abcd","1."+bs+" read first line");
+            test.checkEquals(in.readLine(),"E","1."+bs+" read line");
+            test.checkEquals(in.readLine(),"","1."+bs+" blank line");
+            test.checkEquals(in.readLine(),"fghi","1."+bs+" read last line");
+            test.checkEquals(in.readLine(),null,"1."+bs+" read EOF");
+            test.checkEquals(in.readLine(),null,"1."+bs+" read EOF again");
+            
+            bs=6;
+            dataStream=new ByteArrayInputStream(data.getBytes());
+            in = new LineInput(dataStream,bs);
+            test.checkEquals(in.readLine(),"abcd","1."+bs+" read first line");
+            test.checkEquals(in.readLine(),"E","1."+bs+" read line");
+            test.checkEquals(in.readLine(),"","1."+bs+" blank line");
+            test.checkEquals(in.readLine(),"fghi","1."+bs+" read last line");
+            test.checkEquals(in.readLine(),null,"1."+bs+" read EOF");
+            test.checkEquals(in.readLine(),null,"1."+bs+" read EOF again");
+            
+            bs=5;
+            dataStream=new ByteArrayInputStream(data.getBytes());
+            in = new LineInput(dataStream,bs);
+            test.checkEquals(in.readLine(),"abcd","1."+bs+" read first line");
+            test.checkEquals(in.readLine(),"","1."+bs+" blank line");
+            test.checkEquals(in.readLine(),"E","1."+bs+" read line");
+            test.checkEquals(in.readLine(),"","1."+bs+" blank line");
+            test.checkEquals(in.readLine(),"fghi","1."+bs+" read last line");
+            test.checkEquals(in.readLine(),null,"1."+bs+" read EOF");
+            test.checkEquals(in.readLine(),null,"1."+bs+" read EOF again");
+            
+            bs=4;
+            dataStream=new ByteArrayInputStream(data.getBytes());
+            in = new LineInput(dataStream,bs);
+            test.checkEquals(in.readLine(),"abcd","1."+bs+" read first line");
+            test.checkEquals(in.readLine(),"","1."+bs+" blank line");
+            test.checkEquals(in.readLine(),"E","1."+bs+" read line");
+            test.checkEquals(in.readLine(),"","1."+bs+" blank line");
+            test.checkEquals(in.readLine(),"fghi","1."+bs+" read last line");
+            test.checkEquals(in.readLine(),null,"1."+bs+" read EOF");
+            test.checkEquals(in.readLine(),null,"1."+bs+" read EOF again");
+            
+            bs=3;
+            dataStream=new ByteArrayInputStream(data.getBytes());
+            in = new LineInput(dataStream,bs);
+            test.checkEquals(in.readLine(),"abc","1."+bs+" read first line");
+            test.checkEquals(in.readLine(),"d","1."+bs+" remainder line");
+            test.checkEquals(in.readLine(),"E","1."+bs+" read line");
+            test.checkEquals(in.readLine(),"","1."+bs+" blank line");
+            test.checkEquals(in.readLine(),"fgh","1."+bs+" read last line");
+            test.checkEquals(in.readLine(),"i","1."+bs+" remainder line");
+            test.checkEquals(in.readLine(),null,"1."+bs+" read EOF");
+            test.checkEquals(in.readLine(),null,"1."+bs+" read EOF again");
+            
+            bs=2;
+            dataStream=new ByteArrayInputStream(data.getBytes());
+            in = new LineInput(dataStream,bs);
+            test.checkEquals(in.readLine(),"ab","1."+bs+" read first line");
+            test.checkEquals(in.readLine(),"cd","1."+bs+" remainder line");
+            test.checkEquals(in.readLine(),"","1."+bs+" blank line");
+            test.checkEquals(in.readLine(),"E","1."+bs+" read line");
+            test.checkEquals(in.readLine(),"","1."+bs+" blank line");
+            test.checkEquals(in.readLine(),"fg","1."+bs+" read last line");
+            test.checkEquals(in.readLine(),"hi","1."+bs+" remainder line");
+            test.checkEquals(in.readLine(),null,"1."+bs+" read EOF");
+            test.checkEquals(in.readLine(),null,"1."+bs+" read EOF again");
+            
+            bs=1;
+            dataStream=new ByteArrayInputStream(data.getBytes());
+            in = new LineInput(dataStream,bs);
+            test.checkEquals(in.readLine(),"a","1."+bs+" read first line");
+            test.checkEquals(in.readLine(),"b","1."+bs+" remainder line");
+            test.checkEquals(in.readLine(),"c","1."+bs+" remainder line");
+            test.checkEquals(in.readLine(),"d","1."+bs+" remainder line");
+            test.checkEquals(in.readLine(),"","1."+bs+" blank line");
+            test.checkEquals(in.readLine(),"","1."+bs+" blank line");
+            test.checkEquals(in.readLine(),"E","1."+bs+" read line");
+            test.checkEquals(in.readLine(),"","1."+bs+" blank line");
+            test.checkEquals(in.readLine(),"","1."+bs+" blank line");
+            test.checkEquals(in.readLine(),"f","1."+bs+" read last line");
+            test.checkEquals(in.readLine(),"g","1."+bs+" remainder line");
+            test.checkEquals(in.readLine(),"h","1."+bs+" remainder line");
+            test.checkEquals(in.readLine(),"i","1."+bs+" remainder line");
+            test.checkEquals(in.readLine(),null,"1."+bs+" read EOF");
+            test.checkEquals(in.readLine(),null,"1."+bs+" read EOF again");
+            
+
+
+            dataStream=new ByteArrayInputStream(data.getBytes());
+            in = new LineInput(dataStream);
+            char[] b = new char[8];
+            test.checkEquals(in.readLine(b,0,8),4,"2 read first line");
+            test.checkEquals(in.readLine(b,0,8),1,"2 read line");
+            test.checkEquals(in.readLine(b,0,8),0,"2 blank line");
+            test.checkEquals(in.readLine(b,0,8),4,"2 read last line");
+            test.checkEquals(in.readLine(b,0,8),-1,"2 read EOF");
+            test.checkEquals(in.readLine(b,0,8),-1,"2 read EOF again");
+
+            
+            dataStream=new ByteArrayInputStream(data.getBytes());
+            in = new LineInput(dataStream);
+            test.checkEquals(in.readLineBuffer().size,4,"3 read first line");
+            test.checkEquals(in.readLineBuffer().size,1,"3 read line");
+            test.checkEquals(in.readLineBuffer().size,0,"3 blank line");
+            test.checkEquals(in.readLineBuffer().size,4,"3 read last line");
+            test.checkEquals(in.readLineBuffer(),null,"3 read EOF");
+            test.checkEquals(in.readLineBuffer(),null,"3 read EOF again");
+            
+            dataStream=new ByteArrayInputStream(data.getBytes());
+            in = new LineInput(dataStream);
+            test.checkEquals(in.readLineBuffer(2).size,2,"4 read first line");
+            test.checkEquals(in.readLineBuffer(2).size,2,"4 read rest of first line");
+            test.checkEquals(in.readLineBuffer(2).size,1,"4 read line");
+            test.checkEquals(in.readLineBuffer(2).size,0,"4 blank line");
+            test.checkEquals(in.readLineBuffer(2).size,2,"4 read last line");
+            test.checkEquals(in.readLineBuffer(2).size,2,"4 read rest of last line");
+            test.checkEquals(in.readLineBuffer(2),null,"4 read EOF");
+            test.checkEquals(in.readLineBuffer(2),null,"4 read EOF again");
+            
+            dataStream=new ByteArrayInputStream(data.getBytes());
+            in = new LineInput(dataStream);
+            in.setByteLimit(8);
+            test.checkEquals(in.readLine(),"abcd","read first line");
+            test.checkEquals(in.readLine(),"E","read line");
             test.checkEquals(in.readLine(),null,"read EOF");
             test.checkEquals(in.readLine(),null,"read EOF again");
             
             dataStream=new ByteArrayInputStream(data.getBytes());
             in = new LineInput(dataStream);
-            char[] b = new char[8];
-            test.checkEquals(in.readLine(b,0,8),4,"read first line");
-            test.checkEquals(in.readLine(b,0,8),1,"read line");
-            test.checkEquals(in.readLine(b,0,8),0,"blank line");
-            test.checkEquals(in.readLine(b,0,8),4,"read last line");
-            test.checkEquals(in.readLine(b,0,8),-1,"read EOF");
-            test.checkEquals(in.readLine(b,0,8),-1,"read EOF again");
+            test.checkEquals(in.readLine(),"abcd","1 read first line");
+            in.setByteLimit(0);
+            test.checkEquals(in.skip(4096),0,"bytelimit==0");
+            in.setByteLimit(-1);
+            test.checkEquals(in.readLine(),"E","1 read line");
+            test.checkEquals(in.readLine(),"","1 blank line");
+            in.setByteLimit(1);
+            test.checkEquals(in.skip(4096),1,"bytelimit==1");
+            in.setByteLimit(-1);
+            test.checkEquals(in.readLine(),"ghi","1 read last line");
+            test.checkEquals(in.readLine(),null,"1 read EOF");
+            test.checkEquals(in.readLine(),null,"1 read EOF again");
 
-            dataStream=new ByteArrayInputStream(data.getBytes());
-            in = new LineInput(dataStream);
-            test.checkEquals(in.readLine(8).size,4,"read first line");
-            test.checkEquals(in.readLine(8).size,1,"read line");
-            test.checkEquals(in.readLine(8).size,0,"blank line");
-            test.checkEquals(in.readLine(8).size,4,"read last line");
-            test.checkEquals(in.readLine(8),null,"read EOF");
-            test.checkEquals(in.readLine(8),null,"read EOF again");
-            
-            dataStream=new ByteArrayInputStream(data.getBytes());
-            in = new LineInput(dataStream);
-            test.checkEquals(in.readLine(2).size,2,"read first line");
-            test.checkEquals(in.readLine(2).size,2,"read rest of first line");
-            test.checkEquals(in.readLine(2).size,0,"blank line");
-            test.checkEquals(in.readLine(2).size,1,"read line");
-            test.checkEquals(in.readLine(2).size,0,"blank line");
-            test.checkEquals(in.readLine(2).size,2,"read last line");
-            test.checkEquals(in.readLine(2).size,2,"read rest of last line");
-            test.checkEquals(in.readLine(2).size,0,"blank line");
-            test.checkEquals(in.readLine(2),null,"read EOF");
-            test.checkEquals(in.readLine(2),null,"read EOF again");
-            
-            dataStream=new ByteArrayInputStream(data.getBytes());
-            in = new LineInput(dataStream);
-            in.setByteLimit(7);
-            test.checkEquals(in.readLine(8).size,4,"read first line");
-            test.checkEquals(in.readLine(8).size,1,"read line");
-            test.checkEquals(in.readLine(8),null,"read EOF");
-            test.checkEquals(in.readLine(8),null,"read EOF again");
-            
         }
         catch(Exception e)
         {
@@ -1006,15 +1109,14 @@ public class TestHarness
      */
     public static void main(String[] args)
     {
-        try{
-            testQuotedStringTokenizer();
-            
+        try
+        {
+            testQuotedStringTokenizer();            
             testDateCache();
             testTest();
             testLog();
             testFrame();
             testCode();
-            
             testDataHelper();
             testBlockingQueue();
             testIO();
@@ -1023,10 +1125,8 @@ public class TestHarness
             testLineInput();
             testThreadPool();
             testThreadedServer();
-
             PropertyTreeTest.test();
             DictionaryConverterTest.test();
-            
         }
         catch(Throwable th)
         {

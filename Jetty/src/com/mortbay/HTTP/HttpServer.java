@@ -41,6 +41,11 @@ public class HttpServer
             response.setField(HttpFields.__TransferEncoding,"gzip");
             response.addField(HttpFields.__TransferEncoding,"chunked");
         }
+        if (request.getPath().indexOf("deflate")>=0)
+        {
+            response.setField(HttpFields.__TransferEncoding,"deflate");
+            response.addField(HttpFields.__TransferEncoding,"chunked");
+        }
         
         out.println("<HTML><H1>HTTP Request Dump</H1>");
         out.println("<H3>Header</H3><PRE>");
