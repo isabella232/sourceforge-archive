@@ -853,7 +853,6 @@ public class WebApplicationContext
             name=className;
         
         FilterHolder holder = _webAppHandler.defineFilter(name,className);
-        holder.addAppliesTo("REQUEST");
         Iterator iter= node.iterator("init-param");
         while(iter.hasNext())
         {

@@ -40,17 +40,17 @@
   <!-- The default port can be changed using: java -Djetty.port=80     -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- UNCOMMENT TO ACTIVATE
+  -->
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.nio.SocketChannelListener">
         <Set name="Port">8888</Set>
-        <Set name="MinThreads">2</Set>
-        <Set name="MaxThreads">5</Set>
+        <Set name="MinThreads">4</Set>
+        <Set name="MaxThreads">10</Set>
         <Set name="SslPort">8443</Set>
       </New>
     </Arg>
   </Call>
-  -->
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Add a HTTPS SSL listener on port 8443                           --> 

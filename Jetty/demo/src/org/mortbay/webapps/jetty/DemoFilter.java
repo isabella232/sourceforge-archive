@@ -12,6 +12,10 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,11 +24,15 @@ import org.apache.commons.logging.LogFactory;
 public  class DemoFilter implements Filter
 {
     private static Log log = LogFactory.getLog(DemoFilter.class);
+    private String type="Unknown";
+    private boolean wrap;
 
     public void init(FilterConfig filterConfig)
         throws ServletException
     {
         if(log.isDebugEnabled())log.debug("init:"+filterConfig);
+        type=filterConfig.getInitParameter("type");
+        wrap=new Boolean(filterConfig.getInitParameter("wrap")).booleanValue();
     }
 
     /* ------------------------------------------------------------ */
@@ -33,17 +41,22 @@ public  class DemoFilter implements Filter
                          FilterChain chain)
 	throws IOException, ServletException
     {
-        if(log.isDebugEnabled())log.debug("doFilter:"+request);
+        if(log.isDebugEnabled())log.debug("doFilter["+type+"]:"+((HttpServletRequest)request).getRequestURI());
         synchronized(this)
         {
-            Integer called = (Integer)request.getAttribute("DemoFilter called");
+            Integer called = (Integer)request.getAttribute("DemoFilter-"+type);
             if (called==null)
                 called=new Integer(1);
             else
                 called=new Integer(called.intValue()+1);
-            request.setAttribute("DemoFilter called",called);
+            request.setAttribute("DemoFilter-"+type,called);
         }
-        chain.doFilter(request, response);
+        
+        if (wrap)
+            chain.doFilter(new HttpServletRequestWrapper((HttpServletRequest)request),
+                                       new HttpServletResponseWrapper((HttpServletResponse)response));
+        else                               
+            chain.doFilter(request, response);
     }
 
     public void destroy()

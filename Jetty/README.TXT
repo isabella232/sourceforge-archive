@@ -556,9 +556,8 @@ constraints within a web.xml file:
     </security-constraint>
 
 
- + On platforms without the / file separator or when the system parameter
-   org.mortbay.util.FileResource.checkAliases is true, then the
-   FileResouce class compares the absolutePath and canonicalPath and
+ + By default or when the org.mortbay.util.FileResource.checkAliases is not false, 
+   then the FileResouce class compares the absolutePath and canonicalPath and
    treats the resource as not found if they do not match.  THIS means
    that win32 platforms need to exactly match the case of drive letters
    and filenames.

@@ -22,7 +22,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.StringUtil;
 
-
 /* ------------------------------------------------------------ */
 /** Test Servlet RequestDispatcher.
  * 
@@ -31,193 +30,196 @@ import org.mortbay.util.StringUtil;
  */
 public class RequestDispatchTest extends HttpServlet
 {
-    private static Log log = LogFactory.getLog(RequestDispatchTest.class);
+    private static Log log= LogFactory.getLog(RequestDispatchTest.class);
 
     /* ------------------------------------------------------------ */
     String pageType;
 
     /* ------------------------------------------------------------ */
-    public void init(ServletConfig config)
-         throws ServletException
+    public void init(ServletConfig config) throws ServletException
     {
         super.init(config);
     }
 
     /* ------------------------------------------------------------ */
-    public void doPost(HttpServletRequest sreq, HttpServletResponse sres) 
-        throws ServletException, IOException
+    public void doPost(HttpServletRequest sreq, HttpServletResponse sres) throws ServletException, IOException
     {
-        doGet(sreq,sres);
+        doGet(sreq, sres);
     }
-    
+
     /* ------------------------------------------------------------ */
-    public void doGet(HttpServletRequest sreq, HttpServletResponse sres) 
-        throws ServletException, IOException
+    public void doGet(HttpServletRequest sreq, HttpServletResponse sres) throws ServletException, IOException
     {
-        sreq=new HttpServletRequestWrapper(sreq);
-        sres=new HttpServletResponseWrapper(sres);
-        
-        String prefix = sreq.getContextPath()!=null
-            ? sreq.getContextPath()+sreq.getServletPath()
-            : sreq.getServletPath();
-        
+        if (sreq.getParameter("wrap") != null)
+        {
+            sreq= new HttpServletRequestWrapper(sreq);
+            sres= new HttpServletResponseWrapper(sres);
+        }
+
+        String prefix=
+            sreq.getContextPath() != null ? sreq.getContextPath() + sreq.getServletPath() : sreq.getServletPath();
+
         sres.setContentType("text/html");
 
-        String info ;
+        String info;
 
-        if (sreq.getAttribute("javax.servlet.include.servlet_path")!=null)
-            info=(String)sreq.getAttribute("javax.servlet.include.path_info");
+        if (sreq.getAttribute("javax.servlet.include.servlet_path") != null)
+            info= (String)sreq.getAttribute("javax.servlet.include.path_info");
         else
-            info=sreq.getPathInfo();
-        
-        if (info==null)
-            info="NULL";
+            info= sreq.getPathInfo();
+
+        if (info == null)
+            info= "NULL";
 
         if (info.startsWith("/include/"))
         {
-            info=info.substring(8);
-            if (info.indexOf('?')<0)
-                info+="?Dispatch=include";
+            info= info.substring(8);
+            if (info.indexOf('?') < 0)
+                info += "?Dispatch=include";
             else
-                info+="&Dispatch=include";
+                info += "&Dispatch=include";
 
-            
-            if (System.currentTimeMillis()%2==0)
+            if (System.currentTimeMillis() % 2 == 0)
             {
-                PrintWriter pout=null;
-                pout = sres.getWriter();
-                pout.write("<H1>Include: "+info+"</H1><HR>");
-                
-                RequestDispatcher dispatch = getServletContext()
-                    .getRequestDispatcher(info);
-                if (dispatch==null)
+                PrintWriter pout= null;
+                pout= sres.getWriter();
+                pout.write("<H1>Include: " + info + "</H1><HR>");
+
+                RequestDispatcher dispatch= getServletContext().getRequestDispatcher(info);
+                if (dispatch == null)
                 {
-                    pout = sres.getWriter();
+                    pout= sres.getWriter();
                     pout.write("<H1>Null dispatcher</H1>");
                 }
                 else
-                    dispatch.include(sreq,sres);
-                
+                    dispatch.include(sreq, sres);
+
                 pout.write("<HR><H1>-- Included (writer)</H1>");
             }
-            else 
+            else
             {
-                OutputStream out=null;
-                out = sres.getOutputStream();
-                out.write(("<H1>Include: "+info+"</H1><HR>").getBytes(StringUtil.__ISO_8859_1));   
+                OutputStream out= null;
+                out= sres.getOutputStream();
+                out.write(("<H1>Include: " + info + "</H1><HR>").getBytes(StringUtil.__ISO_8859_1));
 
-                RequestDispatcher dispatch = getServletContext()
-                    .getRequestDispatcher(info);
-                if (dispatch==null)
+                RequestDispatcher dispatch= getServletContext().getRequestDispatcher(info);
+                if (dispatch == null)
                 {
-                    out = sres.getOutputStream();
+                    out= sres.getOutputStream();
                     out.write("<H1>Null dispatcher</H1>".getBytes(StringUtil.__ISO_8859_1));
                 }
                 else
-                    dispatch.include(sreq,sres);
-                
+                    dispatch.include(sreq, sres);
+
                 out.write("<HR><H1>-- Included (outputstream)</H1>".getBytes(StringUtil.__ISO_8859_1));
             }
         }
-        else if (info.startsWith("/forward/"))
-        {
-            info=info.substring(8);
-            if (info.indexOf('?')<0)
-                info+="?Dispatch=forward";
-            else
-                info+="&Dispatch=forward";
-            RequestDispatcher dispatch =
-                getServletContext().getRequestDispatcher(info);
-            if (dispatch!=null)
-                dispatch.forward(sreq,sres);
-            else
-            {
-                PrintWriter pout = sres.getWriter();
-                pout.write("<H1>No dispatcher for: "+info+"</H1><HR>");
-                pout.flush();
-            }
-        }
-        else if (info.startsWith("/forwardC/"))
-        {
-            info=info.substring(9);
-            if (info.indexOf('?')<0)
-                info+="?Dispatch=forward";
-            else
-                info+="&Dispatch=forward";
-
-            String cpath=info.substring(0,info.indexOf('/',1));
-            info=info.substring(cpath.length());
-
-            ServletContext context=getServletContext().getContext(cpath);
-            RequestDispatcher dispatch =context.getRequestDispatcher(info);
-            
-            if (dispatch!=null)
-            {
-                dispatch.forward(sreq,sres);
-            }
-            else
-            {
-                PrintWriter pout = sres.getWriter();
-                pout.write("<H1>No dispatcher for: "+cpath+"/"+info+"</H1><HR>");
-                pout.flush();
-            }
-        }
-        else if (info.startsWith("/includeN/"))
-        {
-            info=info.substring(10);
-            if (info.indexOf("/")>=0)
-                info=info.substring(0,info.indexOf("/"));
-            
-            PrintWriter pout;
-            if (info.startsWith("/null"))
-                info=info.substring(5);
-            else
-            {
-                pout = sres.getWriter();
-                pout.write("<H1>Include named: "+info+"</H1><HR>");
-            }
-            
-            RequestDispatcher dispatch = getServletContext()
-                .getNamedDispatcher(info);
-            if (dispatch!=null)
-                dispatch.include(sreq,sres);
-            else
-            {
-                pout = sres.getWriter();
-                pout.write("<H1>No servlet named: "+info+"</H1>");
-            }
-            
-            pout = sres.getWriter();
-            pout.write("<HR><H1>Included ");
-        }
-        else if (info.startsWith("/forwardN/"))
-        {
-            info=info.substring(10);
-            if (info.indexOf("/")>=0)
-                info=info.substring(0,info.indexOf("/"));
-            RequestDispatcher dispatch = getServletContext()
-                .getNamedDispatcher(info);
-            if (dispatch!=null)
-                dispatch.forward(sreq,sres);
-            else
-            {
-                PrintWriter pout = sres.getWriter();
-                pout.write("<H1>No servlet named: "+info+"</H1>");
-                pout.flush();
-            }
-        }
         else
-        {
-            PrintWriter pout = sres.getWriter();
-            pout.write("<H1>Dispatch URL must be of the form: </H1>"+
-                       "<PRE>"+prefix+"/include/path\n"+
-                       prefix+"/forward/path\n"+
-                       prefix+"/includeN/name\n"+
-                       prefix+"/forwardN/name\n"+
-                       prefix+"/forwardC/context/path</PRE>"
-                       );
-            pout.flush();
-        }
+            if (info.startsWith("/forward/"))
+            {
+                info= info.substring(8);
+                if (info.indexOf('?') < 0)
+                    info += "?Dispatch=forward";
+                else
+                    info += "&Dispatch=forward";
+                RequestDispatcher dispatch= getServletContext().getRequestDispatcher(info);
+                if (dispatch != null)
+                    dispatch.forward(sreq, sres);
+                else
+                {
+                    PrintWriter pout= sres.getWriter();
+                    pout.write("<H1>No dispatcher for: " + info + "</H1><HR>");
+                    pout.flush();
+                }
+            }
+            else
+                if (info.startsWith("/forwardC/"))
+                {
+                    info= info.substring(9);
+                    if (info.indexOf('?') < 0)
+                        info += "?Dispatch=forward";
+                    else
+                        info += "&Dispatch=forward";
+
+                    String cpath= info.substring(0, info.indexOf('/', 1));
+                    info= info.substring(cpath.length());
+
+                    ServletContext context= getServletContext().getContext(cpath);
+                    RequestDispatcher dispatch= context.getRequestDispatcher(info);
+
+                    if (dispatch != null)
+                    {
+                        dispatch.forward(sreq, sres);
+                    }
+                    else
+                    {
+                        PrintWriter pout= sres.getWriter();
+                        pout.write("<H1>No dispatcher for: " + cpath + "/" + info + "</H1><HR>");
+                        pout.flush();
+                    }
+                }
+                else
+                    if (info.startsWith("/includeN/"))
+                    {
+                        info= info.substring(10);
+                        if (info.indexOf("/") >= 0)
+                            info= info.substring(0, info.indexOf("/"));
+
+                        PrintWriter pout;
+                        if (info.startsWith("/null"))
+                            info= info.substring(5);
+                        else
+                        {
+                            pout= sres.getWriter();
+                            pout.write("<H1>Include named: " + info + "</H1><HR>");
+                        }
+
+                        RequestDispatcher dispatch= getServletContext().getNamedDispatcher(info);
+                        if (dispatch != null)
+                            dispatch.include(sreq, sres);
+                        else
+                        {
+                            pout= sres.getWriter();
+                            pout.write("<H1>No servlet named: " + info + "</H1>");
+                        }
+
+                        pout= sres.getWriter();
+                        pout.write("<HR><H1>Included ");
+                    }
+                    else
+                        if (info.startsWith("/forwardN/"))
+                        {
+                            info= info.substring(10);
+                            if (info.indexOf("/") >= 0)
+                                info= info.substring(0, info.indexOf("/"));
+                            RequestDispatcher dispatch= getServletContext().getNamedDispatcher(info);
+                            if (dispatch != null)
+                                dispatch.forward(sreq, sres);
+                            else
+                            {
+                                PrintWriter pout= sres.getWriter();
+                                pout.write("<H1>No servlet named: " + info + "</H1>");
+                                pout.flush();
+                            }
+                        }
+                        else
+                        {
+                            PrintWriter pout= sres.getWriter();
+                            pout.write(
+                                "<H1>Dispatch URL must be of the form: </H1>"
+                                    + "<PRE>"
+                                    + prefix
+                                    + "/include/path\n"
+                                    + prefix
+                                    + "/forward/path\n"
+                                    + prefix
+                                    + "/includeN/name\n"
+                                    + prefix
+                                    + "/forwardN/name\n"
+                                    + prefix
+                                    + "/forwardC/context/path</PRE>");
+                            pout.flush();
+                        }
     }
 
     /* ------------------------------------------------------------ */
@@ -231,5 +233,5 @@ public class RequestDispatchTest extends HttpServlet
     {
         log.debug("Destroyed");
     }
-    
+
 }

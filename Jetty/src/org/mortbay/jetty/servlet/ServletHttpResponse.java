@@ -366,12 +366,12 @@ public class ServletHttpResponse implements HttpServletResponse
         }
         else
         {
-	    if (message == null)
-	    {
-		message = (String)HttpResponse.__statusMsg.get(TypeUtil.newInteger(status));
-		if (message==null)
-		    message=""+status;
-	    }
+            if (message == null)
+            {
+                message= (String)HttpResponse.__statusMsg.get(TypeUtil.newInteger(status));
+                if (message == null)
+                    message= "" + status;
+            }
 
             // handle error page
             ServletHolder holder = _servletHttpRequest.getServletHolder();

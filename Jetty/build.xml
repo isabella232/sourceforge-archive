@@ -95,7 +95,6 @@
     <mkdir dir="${javadoc}" />
     <mkdir dir="${classes}" />
     <mkdir dir="${lib}" />
-    <mkdir dir="${logs}" />
     <mkdir dir="${etc}/dtd" />
     <copy todir="${etc}/dtd">
       <fileset dir="${src}/org/mortbay/xml/" includes="*.dtd"/>
@@ -128,7 +127,6 @@
      description="Remove generated files">
     <delete dir="${jetty.webapp.classes}" quiet="false"/>
     <delete dir="${etc}/dtd" quiet="false"/>
-    <delete dir="${logs}" quiet="false"/>
     <delete file="${jetty.jar}" quiet="false"/>
     <delete file="${mortbay.jmx.jar}" quiet="false"/>
     <delete file="${servlet.jar}" quiet="false"/> 

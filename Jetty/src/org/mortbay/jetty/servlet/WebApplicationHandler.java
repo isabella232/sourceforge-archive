@@ -30,6 +30,7 @@ import javax.servlet.http.HttpSessionListener;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.util.LazyList;
@@ -376,8 +377,9 @@ public class WebApplicationHandler extends ServletHandler
                 && pathInContext != null
                 && pathInContext.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
             {
-                ServletHttpRequest servletHttpRequest= (ServletHttpRequest)request;
-                ServletHttpResponse servletHttpResponse= (ServletHttpResponse)response;
+                ServletHttpRequest servletHttpRequest=
+                    (ServletHttpRequest)context.getHttpConnection().getRequest().getWrapper();
+                ServletHttpResponse servletHttpResponse= servletHttpRequest.getServletHttpResponse();
                 ServletHttpContext servletContext= (ServletHttpContext)context;
 
                 if (!servletContext
@@ -388,20 +390,13 @@ public class WebApplicationHandler extends ServletHandler
                     return;
             }
 
-            // Forward or include
+            // Forward or error
             requestType= ((Dispatcher.DispatcherRequest)request).getFilterType();
-            if (requestType == FilterHolder.__FORWARD)
-            {
-                // Error
-                requestType= FilterHolder.__ERROR;
-            }
         }
         else
         {
-            // Error or request
             ServletHttpRequest servletHttpRequest= (ServletHttpRequest)request;
-            ServletHttpResponse servletHttpResponse= (ServletHttpResponse)response;
-            HttpResponse httpResponse= servletHttpResponse.getHttpResponse();
+            ServletHttpResponse servletHttpResponse= (ServletHttpResponse)response;  
 
             // Request
             requestType= FilterHolder.__REQUEST;
@@ -418,7 +413,7 @@ public class WebApplicationHandler extends ServletHandler
                 .checkSecurityConstraints(
                     pathInContext,
                     servletHttpRequest.getHttpRequest(),
-                    httpResponse))
+                    servletHttpResponse.getHttpResponse()))
                 return;
         }
 

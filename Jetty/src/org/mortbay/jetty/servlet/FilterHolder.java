@@ -120,7 +120,7 @@ public class FilterHolder
      */
     public boolean appliesTo(int type)
     {
-        return  (_appliesTo&type)!=0 || _appliesTo==0&&type==__REQUEST ;
+        return (_appliesTo&type)!=0 || (_appliesTo==0&&type==__REQUEST) ;
     }
     
     /* ------------------------------------------------------------ */
@@ -132,7 +132,7 @@ public class FilterHolder
     public boolean appliesTo(String path, int type)
     {
         return
-            ((_appliesTo&type)!=0 || _appliesTo==0&&type==__REQUEST ) &&
+            ((_appliesTo&type)!=0 || (_appliesTo==0&&type==__REQUEST) ) &&
             _pathSpecs!=null &&
             _pathSpecs.getMatch(path)!=null;
     }

@@ -137,6 +137,7 @@ public class SocketChannelOutputStream extends OutputStream
                             _selector=Selector.open();
                             _channel.register(_selector,SelectionKey.OP_WRITE);
                      }
+
                      _selector.select();
                 }
             }

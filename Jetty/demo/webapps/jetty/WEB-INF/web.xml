@@ -21,22 +21,59 @@ xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j
     <param-value>/</param-value>
   </context-param>
 
-
+  <!-- Uncomment to demo listeners
   <listener>
     <listener-class>org.mortbay.webapps.jetty.DemoListener</listener-class>
   </listener>
-
+  -->
+  
   <filter>
-    <filter-name>Demo Filter</filter-name>
+    <filter-name>Demo REQUEST Filter</filter-name>
     <filter-class>org.mortbay.webapps.jetty.DemoFilter</filter-class>
+    <init-param><param-name>type</param-name><param-value>REQUEST</param-value></init-param>
+    <init-param><param-name>wrap</param-name><param-value>TRUE</param-value></init-param>
+  </filter>
+  
+  <filter>
+    <filter-name>Demo FORWARD Filter</filter-name>
+    <filter-class>org.mortbay.webapps.jetty.DemoFilter</filter-class>
+    <init-param><param-name>type</param-name><param-value>FORWARD</param-value></init-param>
+  </filter>
+  
+  <filter>
+    <filter-name>Demo INCLUDE Filter</filter-name>
+    <filter-class>org.mortbay.webapps.jetty.DemoFilter</filter-class>
+    <init-param><param-name>type</param-name><param-value>INCLUDE</param-value></init-param>
+  </filter>
+  
+  <filter>
+    <filter-name>Demo ERROR Filter</filter-name>
+    <filter-class>org.mortbay.webapps.jetty.DemoFilter</filter-class>
+    <init-param><param-name>type</param-name><param-value>ERROR</param-value></init-param>
   </filter>
 
-
   <filter-mapping>
-      <filter-name>Demo Filter</filter-name>
+      <filter-name>Demo REQUEST Filter</filter-name>
       <url-pattern>/*</url-pattern>
       <dispatcher>REQUEST</dispatcher>
+  </filter-mapping>
+
+  <filter-mapping>
+      <filter-name>Demo FORWARD Filter</filter-name>
+      <url-pattern>/*</url-pattern>
       <dispatcher>FORWARD</dispatcher>
+  </filter-mapping>
+  
+  <filter-mapping>
+      <filter-name>Demo INCLUDE Filter</filter-name>
+      <url-pattern>/*</url-pattern>
+      <dispatcher>INCLUDE</dispatcher>
+  </filter-mapping>
+  
+  <filter-mapping>
+      <filter-name>Demo ERROR Filter</filter-name>
+      <url-pattern>/*</url-pattern>
+      <dispatcher>ERROR</dispatcher>
   </filter-mapping>
 
   <!--

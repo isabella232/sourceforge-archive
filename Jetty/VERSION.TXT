@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-5.0.beta2 
+Jetty-5.0.beta2 - 11 Feb 2004
  + Added skeleton JMX MBean for jetty plus
  + Fixed HEAD with empty chunk bug.
  + Fixed jetty.home/work handling
@@ -16,6 +16,8 @@ Jetty-5.0.beta2
  + Reorganized ServletHolder init
  + Added log4j context repository to jettyplus
  + NPE guard for no-listener junit deployment
+ + Added experimental NIO listeners again.
+ + fixed filter dispatch configuration.
 
 Jetty-4.2.17 - 1 Feb 2004
  + Fixed busy loop in threadpool run  
