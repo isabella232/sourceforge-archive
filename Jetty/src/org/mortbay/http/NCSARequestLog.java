@@ -251,7 +251,7 @@ public class NCSARequestLog implements RequestLog
     /**
      * @return Returns the logCookies.
      */
-    boolean getLogCookies()
+    public boolean getLogCookies()
     {
         return _logCookies;
     }
@@ -259,7 +259,7 @@ public class NCSARequestLog implements RequestLog
     /**
      * @param logCookies The logCookies to set.
      */
-    void setLogCookies(boolean logCookies)
+    public void setLogCookies(boolean logCookies)
     {
         _logCookies = logCookies;
     }

@@ -43,8 +43,6 @@ public class FilterHolderMBean extends HolderMBean
     protected void defineManagedResource()
     {
         super.defineManagedResource();
-        defineAttribute("paths");
-        defineAttribute("servlets");
         _holder=(FilterHolder)getManagedResource();
     }
     

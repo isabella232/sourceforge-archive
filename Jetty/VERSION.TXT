@@ -1,6 +1,11 @@
 Jetty Versions
 --------------
 
+Jetty-5.1.3rc3
+ + removed accidental enablement of DEBUG for JettyPlus jndi in log4j.properties
+ + fixed "No getter or setter found" mbean errors
+
+
 Jetty-5.1.3rc2 - 16 March 2005
  + Updated JSR154Filter for ERROR dispatch
  + Fixed context to _context refactory error
