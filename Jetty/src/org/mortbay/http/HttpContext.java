@@ -94,6 +94,8 @@ public class HttpContext implements LifeCycle,
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
+    // These attributes are serialized by WebApplicationContext, which needs
+    // to be updated if you add to these
     private String _contextPath;
     private List _hosts=new ArrayList(2);
     private List _handlers=new ArrayList(3);
@@ -104,6 +106,7 @@ public class HttpContext implements LifeCycle,
     private boolean _dirAllowed=true;
     private boolean _statsOn=false;
     private PermissionCollection _permissions;
+    private boolean _classLoaderJava2Compliant;
 
     /* ------------------------------------------------------------ */
     private String _name;
@@ -1005,6 +1008,32 @@ public class HttpContext implements LifeCycle,
     }
 
     /* ------------------------------------------------------------ */
+    /** Get Java2 compliant classloading.
+     * @return If true, the class loader will conform to the java 2
+     * specification and delegate all loads to the parent classloader. If
+     * false, the context classloader only delegate loads for system classes
+     * or classes that it can't find itself.
+     */
+    public boolean isClassLoaderJava2Compliant()
+    {
+        return _classLoaderJava2Compliant;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set Java2 compliant classloading.
+     * @param compliant If true, the class loader will conform to the java 2
+     * specification and delegate all loads to the parent classloader. If
+     * false, the context classloader only delegate loads for system classes
+     * or classes that it can't find itself.
+     */
+    public void setClassLoaderJava2Compliant(boolean compliant)
+    {
+        _classLoaderJava2Compliant = compliant;
+        if (_loader!=null && (_loader instanceof ContextLoader))
+            ((ContextLoader)_loader).setJava2Compliant(compliant);
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Set temporary directory for context.
      * The javax.servlet.context.tempdir attribute is also set.
      * @param dir Writable temporary directory.
@@ -1209,7 +1238,11 @@ public class HttpContext implements LifeCycle,
                        ", ",_parent," for ",this);
 
             if (forceContextLoader || _classPath!=null || _permissions!=null)
-                _loader=new ContextLoader(this,_classPath,_parent,_permissions);
+            {
+                ContextLoader loader=new ContextLoader(this,_classPath,_parent,_permissions);
+                loader.setJava2Compliant(_classLoaderJava2Compliant);
+                _loader=loader;
+            }
             else
                 _loader=_parent;
         }

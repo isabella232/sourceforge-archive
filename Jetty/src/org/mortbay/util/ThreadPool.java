@@ -669,6 +669,9 @@ public class ThreadPool
             try{
                 while(_running) 
                 {
+                    // clear interrupts
+                    Thread.interrupted();
+                    
                     _job=null;
                     try 
                     {
@@ -733,7 +736,7 @@ public class ThreadPool
                                 if (Code.verbose(99))
                                     Code.debug("Handling ",_job);
                             }
-
+                            
                             // handle the job
                             handle(_job);
                         }

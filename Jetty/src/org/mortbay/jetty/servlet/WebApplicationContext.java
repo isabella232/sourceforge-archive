@@ -135,6 +135,7 @@ public class WebApplicationContext
         out.writeBoolean(isDirAllowed());
         out.writeBoolean(getStatsOn());
         out.writeObject(getPermissions());
+        out.writeBoolean(isClassLoaderJava2Compliant());
         
         out.writeObject(_deploymentDescriptor);
         out.writeObject(_defaultsDescriptor);

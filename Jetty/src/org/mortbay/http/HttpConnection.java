@@ -237,7 +237,7 @@ public class HttpConnection
         }
         finally
         {
-            if (_handlingThread!=null)
+            if (_handlingThread!=null && Thread.currentThread()!=_handlingThread)
                 _handlingThread.interrupt();
         }
     }

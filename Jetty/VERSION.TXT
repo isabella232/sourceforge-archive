@@ -1,6 +1,10 @@
 Jetty Versions
 --------------
 
+ + Conveninace setClassLoaderJava2Compliant method.
+ + Clear interrupted status in ThreadPool
+
+
 Jetty-4.1.0RC1 - 11 August 2002
  + Fixed forward query string handling
  + Fixed setCharacterEncoding to work with getReader

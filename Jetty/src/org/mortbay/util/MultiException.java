@@ -99,5 +99,14 @@ public class MultiException extends Exception
                 LazyList.getList(nested);
         return "org.mortbay.util.MultiException[]";
     }
+
+    /* ------------------------------------------------------------ */
+    public void printStackTrace()
+    {
+        super.printStackTrace();
+        for (int i=0;i<LazyList.size(nested);i++)
+            ((Throwable)LazyList.get(nested,i)).printStackTrace();
+    }
+    
     
 }
