@@ -12,6 +12,9 @@ import com.mortbay.HTTP.HttpException;
 import com.mortbay.HTTP.HttpRequest;
 import com.mortbay.HTTP.HttpResponse;
 import com.mortbay.HTTP.PathMap;
+import com.mortbay.HTTP.Handler.SecurityHandler;
+import com.mortbay.HTTP.UserRealm;
+import com.mortbay.HTTP.UserPrincipal;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.IO;
 import com.mortbay.Util.Log;
@@ -36,6 +39,7 @@ import java.util.Set;
 import javax.servlet.http.HttpSession;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
+import java.security.Principal;
 
 
 /* --------------------------------------------------------------------- */
@@ -46,13 +50,21 @@ import javax.servlet.UnavailableException;
  * @version $Id$
  * @author Greg Wilkins
  */
-public class ServletHandler extends NullHandler 
+public class ServletHandler
+    extends NullHandler
+    implements SecurityHandler.FormAuthenticator
 {
     /* ------------------------------------------------------------ */
     public final static String __JSP_SERVLET="org.apache.jasper.servlet.JspServlet";
-    public final static String __SERVLET_REQUEST="com.mortbay.Jetty.Servlet.ServletRequest";
-    public final static String __SERVLET_RESPONSE="com.mortbay.Jetty.Servlet.ServletResponse";
-    public final static String __SERVLET_HOLDER="com.mortbay.Jetty.Servlet.ServletHolder";
+    public final static String __SERVLET_REQUEST="com.mortbay.J.S.Request";
+    public final static String __SERVLET_RESPONSE="com.mortbay.J.S.Response";
+    public final static String __SERVLET_HOLDER="com.mortbay.J.S.Holder";
+    public final static String __SERVLET_PATH="com.mortbay.J.S.Path";
+    public final static String __J_SECURITY_CHECK="j_security_check";
+    public final static String __J_USERNAME="j_username";
+    public final static String __J_PASSWORD="j_password";
+    public final static String __J_URI="com.mortbay.J.S.URI";
+    public final static String __J_AUTHENTICATED="com.mortbay.J.S.Auth";
     
     /* ------------------------------------------------------------ */
     private PathMap _servletMap=new PathMap();
@@ -280,7 +292,7 @@ public class ServletHandler extends NullHandler
     
     
     /* ----------------------------------------------------------------- */
-    /**
+    /** Handle request.
      * @param contextPath 
      * @param pathInContext 
      * @param httpRequest 
@@ -293,13 +305,14 @@ public class ServletHandler extends NullHandler
          throws IOException
     {
         try
-        {            
-            // Build servlet request and response
+        {
+            // Look for a previously built servlet request.
             ServletRequest request = (ServletRequest)
                 httpRequest.getAttribute(ServletHandler.__SERVLET_REQUEST);
             ServletResponse response;
             if (request==null)
             {
+                // Build servlet request and response
                 request  = new ServletRequest(_context,httpRequest);
                 response = new ServletResponse(request,httpResponse);
                 // Check session stuff
@@ -311,6 +324,9 @@ public class ServletHandler extends NullHandler
             else
             {
                 response=(ServletResponse)request.getAttribute(ServletHandler.__SERVLET_RESPONSE);
+                String pic = (String)request.getAttribute(ServletHandler.__SERVLET_PATH);
+                if (pic!=null)
+                    pathInContext=pic;
             }
 
             // handle
@@ -541,4 +557,77 @@ public class ServletHandler extends NullHandler
         return __JSP_SERVLET;
     }
     
+    /* ------------------------------------------------------------ */
+    /** Perform form authentication.
+     * Called from SecurityHandler.
+     * @return true if authenticated.
+     */
+    public boolean formAuthenticated(SecurityHandler shandler,
+                                     String pathInContext,
+                                     HttpRequest httpRequest,
+                                     HttpResponse httpResponse)
+        throws IOException
+    {
+        // Look for a previously built servlet request.
+        ServletRequest request = (ServletRequest)
+            httpRequest.getAttribute(ServletHandler.__SERVLET_REQUEST);
+        ServletResponse response;
+        if (request==null)
+        {
+            // Build servlet request and response
+            request  = new ServletRequest(_context,httpRequest);
+            response = new ServletResponse(request,httpResponse);
+            request.setAttribute(ServletHandler.__SERVLET_REQUEST,request);
+            request.setAttribute(ServletHandler.__SERVLET_RESPONSE,response);
+        }
+        else
+        {
+            response=(ServletResponse)request.getAttribute(ServletHandler.__SERVLET_RESPONSE);
+        }
+
+        // Handle paths
+        pathInContext = request.setSessionId(pathInContext); 
+        request.setAttribute(ServletHandler.__SERVLET_PATH,pathInContext);
+        String uri = request.setSessionId(httpRequest.getURI().toString());
+        
+        // Setup session 
+        HttpSession session=request.getSession(true);             
+        
+        // Handle a request for authentication.
+        if ( uri.substring(uri.lastIndexOf("/")+1).startsWith(__J_SECURITY_CHECK) )
+        {
+            // Check the session object for login info. 
+            String username = request.getParameter(__J_USERNAME);
+            String password = request.getParameter(__J_PASSWORD);
+            
+            UserPrincipal user =
+                shandler.getUserRealm().getUser(username,request.getHttpRequest());
+            if (user!=null && user.authenticate(password))
+            {
+                Code.debug("Form authentication OK for ",username);
+                request.setAttribute(HttpRequest.__AuthType,"FORM");
+                request.setAttribute(HttpRequest.__AuthUser,username);
+                request.setAttribute(UserPrincipal.__ATTR,user);
+                session.setAttribute(__J_AUTHENTICATED,__J_AUTHENTICATED);
+                String nuri=(String)session.getValue(__J_URI);
+                response.sendRedirect(nuri==null?shandler.getErrorPage():nuri);
+            }
+            else
+            {
+                Code.debug("Form authentication FAILED for ",username);
+                response.sendRedirect(shandler.getErrorPage());
+            }
+            
+            // Security check is always false, only true after final redirection.
+            return false;
+        }
+
+        // Check if the session is already authenticated.
+        if (session.getAttribute(__J_AUTHENTICATED).equals(__J_AUTHENTICATED))
+            return true;
+
+        // redirect to login page
+        response.sendRedirect(shandler.getLoginPage());
+        return false;
+    }
 }

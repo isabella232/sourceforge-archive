@@ -12,6 +12,7 @@ import com.mortbay.HTTP.HttpResponse;
 import com.mortbay.HTTP.PathMap;
 import com.mortbay.HTTP.SecurityConstraint;
 import com.mortbay.HTTP.HashUserRealm;
+import com.mortbay.HTTP.HttpHandler;
 import com.mortbay.HTTP.UserRealm;
 import com.mortbay.HTTP.UserPrincipal;
 import com.mortbay.Util.B64Code;
@@ -21,12 +22,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Collection;
 import java.util.Iterator;
-
+import java.lang.reflect.Method;
 
 /* ------------------------------------------------------------ */
 /** Handler to enforce SecurityConstraints.
@@ -36,17 +38,40 @@ import java.util.Iterator;
  */
 public class SecurityHandler extends NullHandler
 {
+    
     public final static String __BASIC_AUTH="BASIC";
     public final static String __FORM_AUTH="FORM";
+    public final static String __ATTR="com.mortbay.J.H.SecurityHandler";
 
     PathMap _constraintMap=new PathMap();
     String _authMethod=__BASIC_AUTH;
     Map _authRealmMap;
     String _realmName ;
     UserRealm _realm ;
+
+    
+    /* ------------------------------------------------------------ */
+    public interface FormAuthenticator
+    {
+        /* ------------------------------------------------------------ */
+        /** 
+         * @param shandler 
+         * @param pathInContext 
+         * @param request 
+         * @param response 
+         * @return True if the request has been authenticated. 
+         * @exception IOException 
+         */
+        public boolean formAuthenticated(SecurityHandler shandler,
+                                         String pathInContext,
+                                         HttpRequest request,
+                                         HttpResponse response)
+        throws IOException;
+    };
     String _formLoginPage;
     String _formErrorPage;
-
+    FormAuthenticator _formAuthenticator;
+    
     /* ------------------------------------------------------------ */
     public UserRealm getUserRealm()
     {        
@@ -62,6 +87,8 @@ public class SecurityHandler extends NullHandler
     /* ------------------------------------------------------------ */
     public void setRealmName(String realmName)
     {
+        if (isStarted())
+            throw new IllegalStateException("Handler started");
         _realmName=realmName;
     }
     
@@ -74,6 +101,8 @@ public class SecurityHandler extends NullHandler
     /* ------------------------------------------------------------ */
     public void setAuthMethod(String method)
     {
+        if (isStarted())
+            throw new IllegalStateException("Handler started");
         if (!__BASIC_AUTH.equals(method) && !__FORM_AUTH.equals(method))
             throw new IllegalArgumentException("Not supported: "+method);
         _authMethod = method;
@@ -88,25 +117,25 @@ public class SecurityHandler extends NullHandler
     /* ------------------------------------------------------------ */
     public void setLoginPage(String page)
     {
-      if ( ! page.startsWith("/") )
-        page = "/" + page;
-      _formLoginPage = page;
+        if ( ! page.startsWith("/") )
+            page = "/" + page;
+        _formLoginPage = page;
     }
 
     /* ------------------------------------------------------------ */
     public String getErrorPage()
     {
-      return _formErrorPage;
+        return _formErrorPage;
     }
-
+    
     /* ------------------------------------------------------------ */
     public void setErrorPage(String page)
     {
-      if ( ! page.startsWith("/") )
-        page = "/" + page;
-      _formErrorPage = page;
+        if ( ! page.startsWith("/") )
+            page = "/" + page;
+        _formErrorPage = page;
     }
-
+    
     /* ------------------------------------------------------------ */
     public void addSecurityConstraint(String pathSpec,
                                       SecurityConstraint sc)
@@ -126,6 +155,43 @@ public class SecurityHandler extends NullHandler
     public void start()
         throws Exception
     {
+        // If method is FORM
+        if (__FORM_AUTH.equals(_authMethod))
+        {
+            // Make sure that we have both login and error page set
+            // before handling any form login requests
+            if ( _formLoginPage == null || _formLoginPage.equals("") ||
+                 _formErrorPage == null || _formErrorPage.equals("") ||
+                 _realm==null)
+            {
+                Code.warning("Form realm, login and/or error page not set correctly");
+            }
+            else
+            {
+                // look for ServletHandler
+                try
+                {
+                    Iterator iter = getHandlerContext().getHandlers().iterator();
+                    while (iter.hasNext())
+                    {
+                        HttpHandler handler=(HttpHandler)iter.next();
+                        if (handler instanceof FormAuthenticator)
+                        {
+                            _formAuthenticator=(FormAuthenticator)handler;
+                            break;
+                        }
+                    }
+                }
+                catch(Exception e)
+                {
+                    Code.warning("Failed to initialize FORM auth",e);
+                }
+                if (_formAuthenticator==null)
+                    Code.warning("FormAuthenticator HttpHandler is required for FORM authentication");
+            }
+        }
+
+        // Check there is a realm
         if (_realmName!=null && _realmName.length()>0)
         {
             _realm = getHandlerContext().getHttpServer()
@@ -134,6 +200,7 @@ public class SecurityHandler extends NullHandler
             if (_realm==null)
                 Code.warning("Unknown realm: "+_realmName+" for "+this);
         }
+        // Or that we have some contraints.
         else if (_constraintMap.size()>0)
         {
             Iterator i = _constraintMap.values().iterator();
@@ -188,12 +255,11 @@ public class SecurityHandler extends NullHandler
                     // Does this forbid everything?
                     if (!sc.isAuthenticated() && !sc.hasDataConstraint())    
                         response.sendError(HttpResponse.__403_Forbidden);
-
                     
                     // Does it fail a role check?
                     if (sc.isAuthenticated() &&
                         !sc.hasRole(SecurityConstraint.NONE) &&
-                        authenticatedInRole(request,response,sc.roles()))
+                        !authenticatedInRole(pathInContext,request,response,sc.roles()))
                         // return as an auth challenge will have been set
                         return;
                     
@@ -212,9 +278,10 @@ public class SecurityHandler extends NullHandler
 
     /* ------------------------------------------------------------ */
     /** 
-     * @return 
+     * @return True if request is authenticated in the role.
      */
-    private boolean authenticatedInRole(HttpRequest request,
+    private boolean authenticatedInRole(String pathInContext,
+                                        HttpRequest request,
                                         HttpResponse response,
                                         Iterator roles)
         throws IOException
@@ -224,7 +291,14 @@ public class SecurityHandler extends NullHandler
         if (__BASIC_AUTH.equals(_authMethod))
             userAuth=basicAuthenticated(request,response);
         else if (__FORM_AUTH.equals(_authMethod))
-            userAuth=formAuthenticated(request, response);
+        {
+            if (_formAuthenticator==null)
+            {
+                response.sendError(HttpResponse.__500_Internal_Server_Error);
+                return false;
+            }
+            return _formAuthenticator.formAuthenticated(this,pathInContext,request,response);
+        }
         else
         {
             response.setField(HttpFields.__WwwAuthenticate,
@@ -260,10 +334,11 @@ public class SecurityHandler extends NullHandler
             }
             else if (__FORM_AUTH.equals(_authMethod))
             {
-              response.sendRedirect(_formErrorPage);
+                response.sendRedirect(_formErrorPage);
             }
             else
                 response.sendError(HttpResponse.__403_Forbidden);
+            return false;
         }
         
         return userAuth && inRole;
@@ -313,64 +388,6 @@ public class SecurityHandler extends NullHandler
         response.sendError(HttpResponse.__401_Unauthorized);
         return false;
     }
-
-     /* ------------------------------------------------------------ */
-     /**
-     * @return
-     */
-    private boolean formAuthenticated(HttpRequest request,
-                                       HttpResponse response)
-        throws IOException
-    {
-        /* Check the session object for login info. If user is
-         * already logged in then just return true;
-         */
-
-        String uri = request.getURI().toString();
-        /*** STORE ORIGINAL REQUEST URI SOMEWHERE... *******/
-
-        if ( uri.substring(uri.lastIndexOf("/")+1).equals("j_security_check") )
-        {
-          String username = request.getParameter("j_username");
-          String password = request.getParameter("j_password");
-
-          if (_realm!=null)
-          {
-                  UserPrincipal user = _realm.getUser(username,request);
-                  if (user!=null && user.authenticate(password))
-                  {
-                      request.setAttribute(HttpRequest.__AuthType,"FORM");
-                      request.setAttribute(HttpRequest.__AuthUser,username);
-                      request.setAttribute(UserPrincipal.__ATTR,user);
-
-                      // Store user login info in session object
-
-                      // response.sendRedirect( /**** WHERE IS THE OLD URI STORED? **********/);
-
-                      return true;
-                  }
-
-                  Code.warning("AUTH FAILURE: user "+username);
-          }
-        }
-
-        Code.debug("Unauthorized in "+_realmName);
-
-        // Make sure that we have both login and error page set
-        // before handling any form login requests
-        if ( _formLoginPage == null || _formLoginPage.equals("")
-            || _formErrorPage == null || _formErrorPage.equals("") )
-        {
-          response.sendError(HttpResponse.__404_Not_Found);
-          Code.debug("Form login and/or error page not set correctly");
-        }
-
-        // OK, user has not logged in. Send login page.
-        response.sendRedirect(_formLoginPage);
-
-        return false;
-    }
-
 
 
     /* ------------------------------------------------------------ */
