@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
@@ -624,8 +625,8 @@ public class ResourceHandler extends NullHandler
         //
         //  see if there are any range headers
         //
-        List reqRanges = request.getFieldValues(HttpFields.__Range);
-        if ( reqRanges == null || reqRanges.size()==0)
+        Enumeration reqRanges = request.getFieldValues(HttpFields.__Range);
+        if ( reqRanges == null || !reqRanges.hasMoreElements())
         {
             // 
             //  if there were no ranges, send entire entity

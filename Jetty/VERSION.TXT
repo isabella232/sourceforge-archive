@@ -1,5 +1,10 @@
 Jetty3 Versions
 --------------
+
+Jetty-3.1.rc7 -
+ + Added UML diagrams to Jetty architecture documentation.
+ + Use Enumerations to reduce conversions for servlet API.
+ + Optimized HttpField handling to reduce object creatiyon.
  + ServletRequest SSL attributes in line with 2.2 and 2.3 specs.
  + Dump Servlet displays cert chains
  + Fixed redirect handling by the CGI Servlet.

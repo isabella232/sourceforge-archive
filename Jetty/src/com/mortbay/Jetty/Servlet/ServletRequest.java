@@ -59,6 +59,9 @@ public class ServletRequest
         __SESSIONID_COOKIE = "cookie",
         __SESSIONID_NONE = "none";
 
+    private static final Enumeration __emptyEnum =  
+        Collections.enumeration(Collections.EMPTY_LIST);
+    
     private HttpRequest _httpRequest;
     private ServletResponse _servletResponse;
 
@@ -161,18 +164,16 @@ public class ServletRequest
     /* ------------------------------------------------------------ */
     public Enumeration getLocales()
     {
-        List acceptLanguage =
+        Enumeration enum =
             _httpRequest.getHeader().getValues(HttpFields.__AcceptLanguage,
                                                HttpFields.__separators);
 
         // handle no locale
-        if (acceptLanguage == null || acceptLanguage.size()==0)
-            return
-                Collections.enumeration(Collections.singleton(Locale.getDefault()));
-        
+        if (enum == null || !enum.hasMoreElements())
+            return Collections.enumeration(Collections.singleton(Locale.getDefault()));
         
         // sort the list in quality order
-        acceptLanguage = HttpFields.qualityList(acceptLanguage);
+        List acceptLanguage = HttpFields.qualityList(enum);
         
         if (acceptLanguage.size()==0)
             return
@@ -228,7 +229,7 @@ public class ServletRequest
     /* ------------------------------------------------------------ */
     public Enumeration getHeaderNames()
     {
-        return Collections.enumeration(_httpRequest.getFieldNames());
+        return _httpRequest.getFieldNames();
     }
     
     /* ------------------------------------------------------------ */
@@ -240,10 +241,10 @@ public class ServletRequest
     /* ------------------------------------------------------------ */
     public Enumeration getHeaders(String s)
     {
-        List list=_httpRequest.getFieldValues(s);
-        if (list==null)
-            return Collections.enumeration(Collections.EMPTY_LIST);
-        return Collections.enumeration(list);
+        Enumeration enum=_httpRequest.getFieldValues(s);
+        if (enum==null)
+            return __emptyEnum;
+        return enum;
     }
     
     /* ------------------------------------------------------------ */

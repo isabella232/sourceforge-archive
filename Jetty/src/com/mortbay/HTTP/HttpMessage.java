@@ -11,7 +11,9 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.List;
@@ -163,13 +165,28 @@ abstract public class HttpMessage
     /** Get field names.
      * @return 
      */
-    public Collection getFieldNames()
+    public Enumeration getFieldNames()
     {
         if (_header!=null && _trailer==null)
             return _header.getFieldNames();
-        HashSet fns=new HashSet(_header.getFieldNames());
-        fns.addAll(_trailer.getFieldNames());
-        return fns;
+        final Enumeration e1=_header.getFieldNames();
+        final Enumeration e2=_trailer.getFieldNames();
+        return new Enumeration()
+            {
+                public boolean hasMoreElements()
+                {
+                    return (e1.hasMoreElements() ||
+                            e2.hasMoreElements());
+                }
+                   
+                public Object nextElement()
+                    throws NoSuchElementException
+                {
+                    if (e1.hasMoreElements())
+                        return e1.nextElement();
+                    return e2.nextElement();
+                }
+            };
     }
 
     /* ------------------------------------------------------------ */
@@ -205,14 +222,14 @@ abstract public class HttpMessage
      * Get a field from a message header. If no header field is found,
      * trailer fields are searched.
      * @param name The field name
-     * @return field value or null
+     * @return Enumeration of field values or null
      */
-    public List getFieldValues(String name)
+    public Enumeration getFieldValues(String name)
     {
-        List field = _header.getValues(name);
-        if (field==null && _trailer!=null)
-            field=_trailer.getValues(name);
-        return field;
+        Enumeration enum = _header.getValues(name);
+        if (enum==null && _trailer!=null)
+            enum=_trailer.getValues(name);
+        return enum;
     }
     
     /* ------------------------------------------------------------ */
@@ -221,14 +238,14 @@ abstract public class HttpMessage
      * trailer fields are searched.
      * @param name The field name
      * @param separators String of separators.
-     * @return field value or null
+     * @return Enumeration of field values or null
      */
-    public List getFieldValues(String name,String separators)
+    public Enumeration getFieldValues(String name,String separators)
     {
-        List field = _header.getValues(name,separators);
-        if (field==null && _trailer!=null)
-            field=_trailer.getValues(name,separators);
-        return field;
+        Enumeration enum = _header.getValues(name,separators);
+        if (enum==null && _trailer!=null)
+            enum=_trailer.getValues(name,separators);
+        return enum;
     }
 
     /* ------------------------------------------------------------ */
@@ -322,13 +339,11 @@ abstract public class HttpMessage
      * @exception IllegalStateException Not editable or sending 1.1
      *                                  with trailers
      */
-    public List setField(String name, List value)
+    public void setField(String name, List value)
         throws IllegalStateException
     {
         HttpFields fields=setFields();
-        List old = fields.getValues(name);
         fields.put(name,value);
-        return old;
     }
     
     /* ------------------------------------------------------------ */
@@ -655,13 +670,7 @@ abstract public class HttpMessage
             return;
         
         if (Code.verbose(99))
-        {
-            if (Code.verbose(9999))
-                Code.debug("commit from "+__state[_state]+": ",
-                           new Throwable());
-            else
-                Code.debug("commit from "+__state[_state]);
-        }
+            Code.debug("commit from "+__state[_state]);
         
         ChunkableOutputStream out = getOutputStream();
         

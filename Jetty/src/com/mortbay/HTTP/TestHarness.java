@@ -16,6 +16,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Enumeration;
 import java.util.List;
 
 /* ------------------------------------------------------------ */
@@ -241,7 +242,7 @@ public class TestHarness
             "    Value  " + CRLF +
             "L1: V1  " + CRLF +
             "L1: V2  " + CRLF +
-            "L1: 'V,3'  " + CRLF +
+            "L1: V,3  " + CRLF +
             "L2: V1, V2, 'V,3'" + CRLF +
             CRLF +
             "Other Stuff"+ CRLF;
@@ -302,13 +303,27 @@ public class TestHarness
             t.checkEquals(f.get("D1"),f.get("D2"),
                           "setDateHeader12");
 
-            List l = f.getValues("L1",", \t");
-            t.checkEquals(l.get(0),"V1","getValues");
-            t.checkEquals(l.get(1),"V2","getValues");
-            t.checkEquals(l.get(2),"V,3","getValues");
-            f.put("L1","V1");
-            f.add("L1","V2");
-            f.add("L1","V,3"); 
+            Enumeration e = f.getValues("L1");
+            t.check(e.hasMoreElements(),"getValues L1[0]");
+            if (e.hasMoreElements())
+                t.checkEquals(e.nextElement(),"V1","getValues L1[0]==");
+            t.check(e.hasMoreElements(),"getValues L1[1]");
+            if (e.hasMoreElements())
+                t.checkEquals(e.nextElement(),"V2","getValues L1[1]==");
+            t.check(e.hasMoreElements(),"getValues L1[2]");
+            if (e.hasMoreElements())
+                t.checkEquals(e.nextElement(),"V,3","getValues L1[2]==");
+            
+            e = f.getValues("L2",", \t");
+            t.check(e.hasMoreElements(),"getValues L2[0]");
+            if (e.hasMoreElements())
+                t.checkEquals(e.nextElement(),"V1","getValues L2[0]==");
+            t.check(e.hasMoreElements(),"getValues L2[1]");
+            if (e.hasMoreElements())
+                t.checkEquals(e.nextElement(),"V2","getValues L2[1]==");
+            t.check(e.hasMoreElements(),"getValues L2[2]");
+            if (e.hasMoreElements())
+                t.checkEquals(e.nextElement(),"V,3","getValues L2[2]==");
             
             String h3 = f.toString();
             t.checkEquals(h2,h3,"toString");
@@ -493,15 +508,16 @@ public class TestHarness
     /* ------------------------------------------------------------ */
     public static void main(String[] args)
     {
-        try{
-            chunkInTest();
-            chunkOutTest();
-            filters();
-            httpFields();
-            pathMap();
+        try
+        {
+              chunkInTest();
+              chunkOutTest();
+              filters();
+              httpFields();
+              pathMap();
 
-            TestRequest.test();
-            TestRFC2616.test();
+              TestRequest.test();
+              TestRFC2616.test();
         }
         catch(Throwable e)
         {

@@ -2,6 +2,7 @@ package com.mortbay.HTTP;
 
 import com.mortbay.Util.Code;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.StringTokenizer;
@@ -50,17 +51,16 @@ public class InclusiveByteRange {
         return last;
     }    
 
-    public static List parseRangeHeaders(List reqRangeHeaders)
+    public static List parseRangeHeaders(Enumeration rit)
     {
-        ListIterator rit = reqRangeHeaders.listIterator();
         List validRanges = new ArrayList();
         List headerRanges = new ArrayList();
         
         // walk through all Range headers
     headers:
-        while (rit.hasNext())
+        while (rit.hasMoreElements())
         {
-            String header = (String) rit.next();
+            String header = (String) rit.nextElement();
             StringTokenizer tok = new StringTokenizer(header,"=,",false);
             headerRanges.clear();
             try{
@@ -76,7 +76,7 @@ public class InclusiveByteRange {
                     {           
                         if ("bytes".equals(t))
                             continue;
-                        Code.warning("Bad range format: "+t+" in "+reqRangeHeaders);
+                        Code.warning("Bad range format: "+t);
                         continue headers;
                     }
                     else if (d==0)
@@ -85,7 +85,7 @@ public class InclusiveByteRange {
                             last = Long.parseLong(t.substring(d+1).trim());
                         else
                         {
-                            Code.warning("Bad range format: "+t+" in "+reqRangeHeaders);
+                            Code.warning("Bad range format: "+t);
                             continue headers;
                         }
                     }

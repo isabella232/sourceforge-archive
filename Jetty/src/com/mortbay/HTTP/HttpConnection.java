@@ -13,8 +13,10 @@ import java.io.OutputStream;
 import java.io.BufferedOutputStream;
 import java.io.InterruptedIOException;
 import java.net.InetAddress;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -53,6 +55,8 @@ public class HttpConnection
     private InetAddress _remoteAddr;
     private HttpServer _httpServer;
     private Object _connection;
+    private HashMap _codingParams;
+    private ArrayList _codings;
 
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -70,6 +74,7 @@ public class HttpConnection
                           OutputStream out,
                           Object connection)
     {
+        Code.debug("new HttpConnection: ",connection);
         _listener=listener;
         _remoteAddr=remoteAddr;
         _inputStream=new ChunkableInputStream(in);
@@ -265,6 +270,14 @@ public class HttpConnection
                     _request.readHeader(getInputStream());
                     _listener.customizeRequest(this,_request);
                 }
+                catch(InterruptedIOException e)
+                {
+                    Code.debug(e.toString());
+                    _persistent=false;
+                    _response.destroy();
+                    _response=null;
+                    return;
+                }
                 catch(HttpException e){throw e;}
                 catch(IOException e)
                 {
@@ -303,24 +316,23 @@ public class HttpConnection
                 _response.setField(HttpFields.__ServletEngine,Version.__ServletEngine);
             
                 // Handle Connection header field
-                List connectionValues =
+                Enumeration connectionValues =
                     _request.getFieldValues(HttpFields.__Connection,
                                             HttpFields.__separators);
                 if (connectionValues!=null)
                 {
-                    Iterator iter = connectionValues.iterator();
-                    while (iter.hasNext())
+                    while (connectionValues.hasMoreElements())
                     {
-                        String token=
-                            StringUtil.asciiToLowerCase(iter.next().toString());
+                        String token=connectionValues.nextElement().toString();
                         // handle close token
-                        if (token.equals(HttpFields.__Close))
+                        if (token.equalsIgnoreCase(HttpFields.__Close))
                         {
                             _close=true;
                             _response.setField(HttpFields.__Connection,
                                                HttpFields.__Close);
                         }
-                        else if (token.equals(HttpFields.__KeepAlive) && _dotVersion==0)
+                        else if (token.equalsIgnoreCase(HttpFields.__KeepAlive) &&
+                                 _dotVersion==0)
                             _keepAlive=true;
                             
                         // Remove headers for HTTP/1.0 requests
@@ -414,10 +426,9 @@ public class HttpConnection
                 }
 
                 // Check response length
-                if (Code.debug())
-                    Code.debug("RESPONSE:\n",_response);
                 if (_response!=null)
                 {
+                    Code.debug("RESPONSE:\n",_response);
                     if (content_length>=0 && bytes_written>0 && content_length!=bytes_written)
                     {
                         Code.warning("Invalid length: Content-Length="+content_length+
@@ -465,21 +476,26 @@ public class HttpConnection
     private void exception(Throwable e)
     {
 	try{
-	    String reqString
-		= (_request == null) ? null : _request.toString();
-
 	    boolean pendingIOException = false;
 	    if (e instanceof IOException)
 	    {
                 // Assume it was the browser closing early
 		if (Code.debug())
+                {
+                    String reqString
+                        = (_request == null) ? null : _request.toString();
 		    Code.debug(reqString,e);
-		else
+		}
+                else
 		    pendingIOException = true;
 	    }
 	    else
+            {
+                String reqString
+                    = (_request == null) ? null : _request.toString();  
                 Code.warning(reqString,e);
-
+            }
+            
 	    _persistent=false;
 	    if (_response != null && !_response.isCommitted())
 	    {
@@ -491,8 +507,12 @@ public class HttpConnection
 		_response.sendError(HttpResponse.__500_Internal_Server_Error,e);
 		
 		if (pendingIOException)
+                {
 		    // Not a browser disconnect if we reach here.
+                    String reqString
+                        = (_request == null) ? null : _request.toString();
 		    Code.warning(reqString,e);
+                }
 	    }
 	}
         catch(Exception ex)
@@ -540,9 +560,9 @@ public class HttpConnection
             // XXX - can't do this check because IE does this after
             // a redirect.
             // Can't have content without a content length
-//              String content_type=_request.getField(HttpFields.__ContentType);
-//              if (content_type!=null && content_type.length()>0)
-//                  throw new HttpException(_response.__411_Length_Required);
+            // String content_type=_request.getField(HttpFields.__ContentType);
+            // if (content_type!=null && content_type.length()>0)
+            //     throw new HttpException(_response.__411_Length_Required);
             _inputStream.setContentLength(0);
         }
 
@@ -564,46 +584,54 @@ public class HttpConnection
             throw new HttpException(_response.__400_Bad_Request);
         
         // check and enable requests transfer encodings.
-        boolean _inputEncodings=false;
-        List transfer_coding=_request.getFieldValues(HttpFields.__TransferEncoding,
-                                                     HttpFields.__separators);
+        Enumeration transfer_coding=_request.getFieldValues(HttpFields.__TransferEncoding,
+                                                            HttpFields.__separators);
+        boolean input_encodings=false;
         if (transfer_coding!=null)
         {
-            HashMap coding_params = new HashMap(7);
-            for (int i=transfer_coding.size(); i-->0;)
+            if (_codingParams==null)
             {
-                coding_params.clear();
-                String coding =
-                    HttpFields.valueParameters(transfer_coding.get(i).toString(),
-                                               coding_params);
-                coding=StringUtil.asciiToLowerCase(coding);
+                _codingParams=new HashMap(7);
+                _codings=new ArrayList(4);
+            }
+            else
+            {
+                _codingParams.clear();
+                _codings.clear();
+            }
+            
+            while(transfer_coding.hasMoreElements())
+                _codings.add(transfer_coding.nextElement());
 
-                // Ignore identity coding
-                if (HttpFields.__Identity.equals(coding))
-                    continue;
-
-                // We have none identity encodings
-                _inputEncodings=true;
+            for(int i=_codings.size();i-->0;)
+            {        
+                String value=_codings.get(i).toString();
+                String coding=HttpFields.valueParameters(value,_codingParams);
                 
-                // Handle Chunking
-                if (HttpFields.__Chunked.equals(coding))
+                if (HttpFields.__Identity.equalsIgnoreCase(coding))
+                    continue;
+                
+                input_encodings=true;
+                
+                if (HttpFields.__Chunked.equalsIgnoreCase(coding))
                 {
                     // chunking must be last and have no parameters
-                    if (i+1!=transfer_coding.size() ||
-                        coding_params.size()>0)
-                        throw new HttpException(_response.__400_Bad_Request);
+                    if (i+1<_codings.size() || _codingParams.size()>0)
+                        throw new HttpException(HttpResponse.__400_Bad_Request);
                     _inputStream.setChunking();
                 }
                 else
+                {
                     getHttpServer().getHttpEncoding()
-                        .enableEncoding(_inputStream,coding,coding_params);
+                        .enableEncoding(_inputStream,coding,_codingParams);
+                }
             }
         }
         
         // Check input content length can be determined
         int content_length=_request.getIntField(HttpFields.__ContentLength);
         String content_type=_request.getField(HttpFields.__ContentType);
-        if (_inputEncodings)
+        if (input_encodings)
         {
             // Must include chunked
             if (!_inputStream.isChunking())
@@ -721,9 +749,9 @@ public class HttpConnection
         
         // Determine how to limit content length and
         // enable output transfer encodings 
-        List transfer_coding=_response.getFieldValues(HttpFields.__TransferEncoding,
-                                                      HttpFields.__separators);
-        if (transfer_coding==null || transfer_coding.size()==0)
+        Enumeration transfer_coding=_response.getFieldValues(HttpFields.__TransferEncoding,
+                                                             HttpFields.__separators);
+        if (transfer_coding==null || !transfer_coding.hasMoreElements())
         {
             switch(_dotVersion)
             {
@@ -777,26 +805,39 @@ public class HttpConnection
         }
         else
         {
-            // Examine and apply transfer encodings
-            HashMap coding_params = new HashMap(7);
-            for (int i=transfer_coding.size();i-->0;)
+            // Use transfer encodings to determine length
+            _response.removeField(HttpFields.__ContentLength);
+            
+            if (_codingParams==null)
             {
-                coding_params.clear();
-                String coding =
-                    HttpFields.valueParameters(transfer_coding.get(i).toString(),
-                                               coding_params);
-                coding=StringUtil.asciiToLowerCase(coding);
+                _codingParams=new HashMap(7);
+                _codings=new ArrayList(4);
+            }
+            else
+            {
+                _codingParams.clear();
+                _codings.clear();
+            }
+            
+            while(transfer_coding.hasMoreElements())
+                _codings.add(transfer_coding.nextElement());
+            for(int i=_codings.size();i-->0;)
+            {        
+                String value=_codings.get(i).toString();
+                String coding=HttpFields.valueParameters(value,_codingParams);
+                
+                if (HttpFields.__Identity.equalsIgnoreCase(coding))
+                    continue;                
 
                 // Ignore identity coding
-                if (HttpFields.__Identity.equals(coding))
+                if (HttpFields.__Identity.equalsIgnoreCase(coding))
                     continue;
                 
                 // Handle Chunking
-                if (HttpFields.__Chunked.equals(coding))
+                if (HttpFields.__Chunked.equalsIgnoreCase(coding))
                 {
                     // chunking must be last and have no parameters
-                    if (i+1!=transfer_coding.size() ||
-                        coding_params.size()>0)
+                    if (i+1<_codings.size() || _codingParams.size()>0)
                         throw new HttpException(_response.__400_Bad_Request,
                                                 "Missing or incorrect chunked transfer-encoding");
                     _outputStream.setChunking();
@@ -810,10 +851,9 @@ public class HttpConnection
                                                 "User agent does not accept "+
                                                 coding+
                                                 " transfer-encoding");
-
                     // Set coding
                     getHttpServer().getHttpEncoding()
-                        .enableEncoding(_outputStream,coding,coding_params);
+                        .enableEncoding(_outputStream,coding,_codingParams);
                 }
             }
         }

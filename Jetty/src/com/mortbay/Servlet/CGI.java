@@ -245,10 +245,10 @@ public class CGI extends HttpServlet
       }
       
       // copy remaining headers into response...
-      List headers = fields.getFieldNames();
-      for (int i = 0, size=headers.size(); i<size; i++)
+      Enumeration headers = fields.getFieldNames();
+      while (headers.hasMoreElements())
       {
-        String key = headers.get(i).toString();
+        String key = headers.nextElement().toString();
         String val = fields.get(key).toString();
         res.setHeader(key,val);
       }

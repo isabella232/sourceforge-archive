@@ -6,16 +6,16 @@
 package com.mortbay.HTTP;
 
 import com.mortbay.Util.Code;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Enumeration;
 
 public class HttpEncoding
 {
     /* ------------------------------------------------------------ */
-    /** Enable a transfer encoding.
-     * Enable a transfer encoding on a ChunkableInputStream.
+    /** Enable transfer encodings.
      * @param in 
-     * @param coding Coding name 
-     * @param parameters Coding parameters or null
+     * @param coding Coding enumeration
      * @exception HttpException 
      */
     public void enableEncoding(ChunkableInputStream in,
@@ -25,7 +25,7 @@ public class HttpEncoding
     {
         try
         {
-            if ("gzip".equals(coding))
+            if ("gzip".equalsIgnoreCase(coding))
             {
                 if (parameters!=null && parameters.size()>0)
                     throw new HttpException(HttpResponse.__501_Not_Implemented,
@@ -34,7 +34,7 @@ public class HttpEncoding
                                 .getConstructor(ChunkableInputStream.__filterArg),
                                 null);
             }
-            else if ("deflate".equals(coding))
+            else if ("deflate".equalsIgnoreCase(coding))
             {
                 if (parameters!=null && parameters.size()>0)
                     throw new HttpException(HttpResponse.__501_Not_Implemented,
@@ -43,8 +43,8 @@ public class HttpEncoding
                                 .getConstructor(ChunkableInputStream.__filterArg),
                                 null);
             }
-            else if (!HttpFields.__Identity.equals(coding))
-                throw new HttpException(HttpResponse.__501_Not_Implemented);
+            else throw new
+                HttpException(HttpResponse.__501_Not_Implemented);   
         }
         catch (HttpException e)
         {
@@ -72,7 +72,7 @@ public class HttpEncoding
     {
         try
         {
-            if ("gzip".equals(coding))
+            if ("gzip".equalsIgnoreCase(coding))
             {
                 if (parameters!=null && parameters.size()>0)
                     throw new HttpException(HttpResponse.__501_Not_Implemented,
@@ -81,7 +81,7 @@ public class HttpEncoding
                                  .getConstructor(ChunkableOutputStream.__filterArg),
                                  null);
             }
-            else if ("deflate".equals(coding))
+            else if ("deflate".equalsIgnoreCase(coding))
             {
                 if (parameters!=null && parameters.size()>0)
                     throw new HttpException(HttpResponse.__501_Not_Implemented,
@@ -90,7 +90,7 @@ public class HttpEncoding
                                  .getConstructor(ChunkableOutputStream.__filterArg),
                                 null);
             }
-            else if (!HttpFields.__Identity.equals(coding))
+            else
                 throw new HttpException(HttpResponse.__501_Not_Implemented);
         }
         catch (HttpException e)

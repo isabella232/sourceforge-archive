@@ -1,30 +1,36 @@
 <BR><B><FONT SIZE="+2">Jetty Architecture</FONT></B><HR>
-These are just notes.  A nice annotated diagram is on its way...
+<IMG SRC="jettyUML.png">
+<BR>
+<UL>
+<LI>The com.mortbay.HTTP.HttpServer class provides the core HTTP server.
+<LI>The com.mortbay.Jetty.Server class extends HttpServer with XML configuration and servlet support.
 <BR><BR>
-<UL><LI> JVM contains one or more HttpServer instances.
+<LI> A JVM may contain one or more HttpServer instances.
+<LI> A HttpServer may contain one or more HttpListener instances.
+<LI> A HttpServer may contain one or more HandlerContext instances.
+<LI> A HttpServer may contain zero or more UserRealm instances.
 <BR><BR>
-</LI><LI> HttpServer contains one or more HttpListener instances.
-</LI><LI> HttpServer contains one or more HandlerContext instances organized as an
-  ordered list at each context path.
-</LI><LI> HttpServer contains zero or more UserRealm instances.
+<LI> SocketListener is the basic implementation of HttpListener that accepts HTTP connections
+on a normal socket.
+<LI> JsseListener is an extension of SocketListener that accepts HTTPS connections using a 
+JSSE SSL implementation.
+<LI>HttpListener implementations create HttpConnection instances.
+<LI>A HttpConnection instance manages one or more requests received over a connection.
 <BR><BR>
-</LI><LI> HandlerContext is registered at one and only one context pattern (eg.   
-  /context/*).
-</LI><LI> HandlerContext contains one or more HttpHandler instances organized
-  in the order they were added.
+<LI> A HandlerContext has attributes for class path, class loader and resource base, which apply to all the HttpHandlers it contains.
+<LI> A HandlerContext is registered in the HttpServer at one and only one context pattern (eg.   
+  /context/*) and for zero or more virtual hosts.
+<LI> A HandlerContext contains one or more implementation of HttpHandler, in the order they
+are added.
 <BR><BR>
-</LI><LI> ResourceHandler is a HttpHandler that serves files.
-</LI><LI> ServletHandler is a HttpHandler that serves configured Servlets by mapping
-  a pathspec within the context (eg *.xxx, / or /XX/* ) to a ServletHolder
-</LI><LI> DynamicHandler is a ServletHandler that uses class names in URLs to
-  configure servlets.
-</LI><LI> SecurityHandler is a HttpHandler that is mapped to UserRealm by name. 
+<LI> ResourceHandler is an implementation of HttpHandler that serves static content from the resource base of the HandlerContext.
+<LI> ServletHandler is an implementation of HttpHandler that serves Servlets by mapping
+  a pathspec within the context (eg *.xxx, / or /XX/* ) to a Servlet instance. Dynamic servlets include the class name in the URL, configured servlets have explicit path to class mappings.
 <BR><BR>
-</LI><LI> A WebApplication is a HandlerContext that uses a web.xml file to 
-  initialize a ResourceHandler and a ServletHandler.
-<BR><BR>
-</LI><LI> A ServletContext is mapped to the HandlerContext, thus context
-  initParams and attributes are in a context scope. </LI></UL><HR>
+<LI> A WebApplication is a specialization of HandlerContext that uses a web.xml file to 
+  configure the context, including a ResourceHandler and a ServletHandler.
+</UL>
+<HR>
 Return to <A HREF="index.html">JettyDoc</A>&nbsp;<!-- widget ref --><HR>
 <BR><BR>
 </BODY>

@@ -21,6 +21,7 @@ import java.net.UnknownHostException;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,7 +83,8 @@ public class HttpRequest extends HttpMessage
     /** Constructor. 
      */
     public HttpRequest()
-    {}
+    {
+    }
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -146,12 +148,11 @@ public class HttpRequest extends HttpMessage
         do
         {
             line_buffer=line_input.readLineBuffer();
+            if (line_buffer==null)
+                throw new InterruptedIOException("EOF");
         }
-        while(line_buffer!=null && line_buffer.size==0);
+        while(line_buffer.size==0);
         
-        
-        if (line_buffer==null)
-            throw new InterruptedIOException("EOF");
         if (line_buffer.size==in.__maxLineLength)
             throw new HttpException(HttpResponse.__414_Request_URI_Too_Large);
         decodeRequestLine(line_buffer.buffer,line_buffer.size);
@@ -427,6 +428,8 @@ public class HttpRequest extends HttpMessage
     {
         if (_port>0)
             return _port;
+        if (_host!=null)
+            return 0;
         if (_uri.isAbsolute())
             _port=_uri.getPort();
         else if (_connection!=null)
@@ -656,13 +659,13 @@ public class HttpRequest extends HttpMessage
             return _te;
         
         // Decode any TE field
-        List te = getFieldValues(HttpFields.__TE,
-                                 HttpFields.__separators);
+        Enumeration tenum = getFieldValues(HttpFields.__TE,
+                                           HttpFields.__separators);
         
-        if (te!=null && te.size()>0)
+        if (tenum!=null)
         {
             // Sort the list
-            te=HttpFields.qualityList(te);
+            List te=HttpFields.qualityList(tenum);
 
             // remove trailer and chunked items.
             ListIterator iter = te.listIterator();
@@ -832,12 +835,12 @@ public class HttpRequest extends HttpMessage
             int version=0;
             Cookie cookie=null;
 
-            Iterator iter =_header.getValues(HttpFields.__Cookie,";").iterator();            
-            while (iter.hasNext())
+            Enumeration enum =_header.getValues(HttpFields.__Cookie,";");            
+            while (enum.hasMoreElements())
             {
                 try
                 {
-                    String c = iter.next().toString().trim();
+                    String c = enum.nextElement().toString().trim();
                     int e = c.indexOf('=');
                     String n;
                     String v;

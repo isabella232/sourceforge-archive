@@ -27,6 +27,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.ServerSocket;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -397,9 +398,9 @@ public class TestRFC2616
             Code.debug("RESPONSE: ",response);
             offset = t.checkContains(response,offset,"HTTP/1.1 200","gzip in")+10;
             offset = t.checkContains(response,offset,"1234567890","gzip in");
-
             
             // output gzip
+            Code.setDebug(false);
             offset=0;
             byte[] rbytes=listener.getResponses(("GET /R1?gzip HTTP/1.1\n"+
                                                  "Host: localhost\n"+
@@ -421,11 +422,12 @@ public class TestRFC2616
         }
         catch(Exception e)
         {
-            Code.warning(e);
+            Code.warning("FAIL: ",e);
             t.check(false,e.toString());
             if (response!=null)
                 Code.warning(response);
         }
+
     }
    
     
@@ -437,15 +439,21 @@ public class TestRFC2616
         {
             HttpFields fields = new HttpFields();
 
-            fields.put("Q","bbb;q=0.5,aaa,ccc;q=0.001,d;q=0,e;q=0.0001");
-            List list = fields.getValues("Q",", \t");
-            list=HttpFields.qualityList(list);
+            fields.put("Q","bbb;q=0.5,aaa,ccc;q=0.002,d;q=0,e;q=0.0001,ddd;q=0.001,aa2,abb;q=0.7");
+            Enumeration enum = fields.getValues("Q",", \t");
+            List list=HttpFields.qualityList(enum);
             t.checkEquals(HttpFields.valueParameters(list.get(0).toString(),null),
                           "aaa","Quality parameters");
             t.checkEquals(HttpFields.valueParameters(list.get(1).toString(),null),
-                          "bbb","Quality parameters");
+                          "aa2","Quality parameters");
             t.checkEquals(HttpFields.valueParameters(list.get(2).toString(),null),
+                          "abb","Quality parameters");
+            t.checkEquals(HttpFields.valueParameters(list.get(3).toString(),null),
+                          "bbb","Quality parameters");
+            t.checkEquals(HttpFields.valueParameters(list.get(4).toString(),null),
                           "ccc","Quality parameters");
+            t.checkEquals(HttpFields.valueParameters(list.get(5).toString(),null),
+                          "ddd","Quality parameters");
         }
         catch(Exception e)
         {
@@ -1375,7 +1383,7 @@ public class TestRFC2616
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200","TE: coding")+1;
             offset=t.checkContains(response,offset,
-                                   "Transfer-Encoding: gzip,chunked","TE: coding")+1;
+                                   "Transfer-Encoding: gzip","TE: coding")+1;
 
             // Gzip not accepted
             offset=0;
