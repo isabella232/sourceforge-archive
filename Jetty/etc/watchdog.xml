@@ -24,7 +24,7 @@
   </Call>
 
   <Set name="LogSink">
-    <New class="com.mortbay.Util.RolloverFileLogSink">
+    <New class="com.mortbay.Util.OutputStreamLogSink">
       <Set name="LogDir">./logs</Set>
       <Set name="RetainDays">90</Set>
       <Set name="MultiDay">false</Set>

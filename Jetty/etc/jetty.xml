@@ -104,7 +104,7 @@ $Id$
   </Call>
 
   <Set name="LogSink">
-    <New class="com.mortbay.Util.WriterLogSink">
+    <New class="com.mortbay.Util.OutputStreamLogSink">
       <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.request.log</Arg>
       <Set name="retainDays">90</Set>
       <Set name="append">true</Set>
