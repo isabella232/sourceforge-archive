@@ -1,9 +1,10 @@
 Jetty Versions
 --------------
 
-
+ + RolleverFileOutputStream manages Rollover thread.
  + New look and feel for www site.
  + Fixed table refs in JDBCUserRealm.
+ + Allow params in form auth URLs
 
 Jetty-4.2.9 - 19 March 2003
  + Conditional headers check after /dir to /dir/ redirection.
