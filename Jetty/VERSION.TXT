@@ -1,7 +1,8 @@
 Jetty Versions
 --------------
 
-Jetty-5.1.3rc2 - 15 March 2005
+Jetty-5.1.3rc2 - 16 March 2005
+ + Updated JSR154Filter for ERROR dispatch
  + Fixed context to _context refactory error
 
 Jetty-5.1.3rc1 - 13 March 2005
