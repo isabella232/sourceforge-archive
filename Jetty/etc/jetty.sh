@@ -193,5 +193,12 @@ echo JAVACMD=$JAVACMD
 echo CLASSPATH=$CP
 
 
+RUNCMD="$JAVACMD -cp "$CP" $JVMARGS com.mortbay.Jetty.Server $SERVERS"
+
 # Run jetty
-$JAVACMD -cp "$CP" $JVMARGS com.mortbay.Jetty.Server $SERVERS
+if [ "$1" = "start" ] ;
+then
+  ${RUNCMD} &
+else
+  $RUNCMD ;
+fi
