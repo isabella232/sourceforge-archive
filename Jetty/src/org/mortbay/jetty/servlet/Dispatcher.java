@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+import javax.servlet.http.HttpUtils;
 import org.mortbay.http.ChunkableOutputStream;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpFields;
@@ -315,6 +316,21 @@ public class Dispatcher implements RequestDispatcher
         boolean isForwarded()
         {
             return _forwarded;
+        }
+
+        /* ------------------------------------------------------------ */
+        public String getRequestURI()
+        {
+            if (!_forwarded)
+                return super.getRequestURI();
+
+            return _path;
+        }
+        
+        /* ------------------------------------------------------------ */
+        public StringBuffer getRequestURL()
+        {
+            return HttpUtils.getRequestURL(this);
         }
         
         /* ------------------------------------------------------------ */

@@ -470,7 +470,7 @@ public class WebApplicationContext extends ServletHttpContext
         if (_contextListeners!=null && _servletHandler!=null)
         {
             ServletContextEvent event = new ServletContextEvent(getServletContext());
-            for (int i=0;i<_contextListeners.size();i++)
+            for (int i=_contextListeners.size();i-->0;)
                 ((ServletContextListener)_contextListeners.get(i))
                     .contextDestroyed(event);
         }

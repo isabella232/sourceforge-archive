@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+ + Reversed order of ServletContextListener.contextDestroyed calls
+ + Fixed getRequestURI for RD.forward to return new URI.
+
 Jetty-4.0.4 - 23 June 2002
  + Back out change: Don't chunk 30x empty responses.
  + Conditional header tested against welcome file not directory.
