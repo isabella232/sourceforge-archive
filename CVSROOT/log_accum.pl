@@ -256,7 +256,7 @@ sub change_summary {
 		}
 		else {
 		    open(DIFF, "-|")
-			|| exec "$CVSBIN/cvs", '-Qn', 'diff', '-u',
+			|| exec "$CVSBIN/cvs", '-Qn', 'diff', '-kk', '-u',
 			      "-r$prev_rev", "-r$rev", $file;
 		}
 
