@@ -238,9 +238,6 @@ public class Default extends HttpServlet
             _servletHandler.notFound(request,response);
         else
         {
-            // Check modified dates
-            if (!passConditionalHeaders(request,response,resource))
-                return;
 
             // check if directory
             if (resource.isDirectory())
@@ -279,11 +276,22 @@ public class Default extends HttpServlet
                     return;
                 }
 
+                // Check modified dates
+                if (!passConditionalHeaders(request,response,resource))
+                    return;
+            
                 // If we got here, no forward to index took place
                 sendDirectory(request,response,resource,pathInContext.length()>1);
             }
-            else // just send it
+            else
+            {
+                // Check modified dates
+                if (!passConditionalHeaders(request,response,resource))
+                    return;
+                
+                // just send it
                 sendData(request,response,pathInContext,resource);
+            }
         }
     }
     
