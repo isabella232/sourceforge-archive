@@ -175,9 +175,8 @@ public class JDBCUserRealm extends HashUserRealm
         }
         catch(SQLException e)
         {
-            e.printStackTrace(System.err);
-            if(log.isDebugEnabled())log.debug("UserRealm " + getName()
-                      + " could not connect to database; will try later");
+            log.warn("UserRealm " + getName()
+                      + " could not connect to database; will try later", e);
         }
     }
     
@@ -219,6 +218,12 @@ public class JDBCUserRealm extends HashUserRealm
     {
         try
         {
+            if (null==_con)
+                connectDatabase();
+            
+            if (null==_con)
+                return;
+            
             PreparedStatement stat = _con.prepareStatement(_userSql);
             stat.setObject(1, username);
             ResultSet rs = stat.executeQuery();
@@ -241,9 +246,8 @@ public class JDBCUserRealm extends HashUserRealm
         }
         catch (SQLException e)
         {
-            e.printStackTrace(System.err);
-            if(log.isDebugEnabled())log.debug("UserRealm " + getName()
-                      + " could not load user information from database");
+            log.warn("UserRealm " + getName()
+                      + " could not load user information from database", e);
             connectDatabase();
         }
     }
