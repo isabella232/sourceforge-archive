@@ -35,6 +35,12 @@ import javax.servlet.ServletException;
  */
 public class Dispatcher implements RequestDispatcher
 {
+    public final static String __REQUEST_URI= "javax.servlet.include.request_uri";
+    public final static String __SERVLET_PATH= "javax.servlet.include.servlet_path";
+    public final static String __CONTEXT_PATH= "javax.servlet.include.context_path";
+    public final static String __QUERY_STRING= "javax.servlet.include.query_string";
+    public final static String __PATH_INFO= "javax.servlet.include.path_info";
+    
     Context _context;
     HandlerContext _handlerContext;
     ServletHolder _holder=null;
@@ -163,11 +169,12 @@ public class Dispatcher implements RequestDispatcher
         servletResponse.setOutputState(-1);
         
         // Remove any evidence of previous include
-        httpRequest.removeAttribute( "javax.servlet.include.request_uri");
-        httpRequest.removeAttribute( "javax.servlet.include.servlet_path");
-        httpRequest.removeAttribute( "javax.servlet.include.context_path");
-        httpRequest.removeAttribute( "javax.servlet.include.query_string");
-        httpRequest.removeAttribute( "javax.servlet.include.path_info");
+        httpRequest.removeAttribute(__REQUEST_URI);
+        httpRequest.removeAttribute(__SERVLET_PATH);
+        httpRequest.removeAttribute(__CONTEXT_PATH);
+        httpRequest.removeAttribute(__QUERY_STRING);
+        httpRequest.removeAttribute(__PATH_INFO);
+        httpRequest.removeAttribute(ServletHandler.__SERVLET_PATH);
         
         // merge query params
         if (_query!=null && _query.length()>0)
@@ -210,8 +217,8 @@ public class Dispatcher implements RequestDispatcher
             }
             
             // Forward request
-            httpRequest.setAttribute(ServletHandler.__SERVLET_REQUEST,request);
-            httpRequest.setAttribute(ServletHandler.__SERVLET_RESPONSE,response);
+            //httpRequest.setAttribute(ServletHandler.__SERVLET_REQUEST,request);
+            //httpRequest.setAttribute(ServletHandler.__SERVLET_RESPONSE,response);
             httpRequest.setAttribute(ServletHandler.__SERVLET_HOLDER,_holder);
             _context.getHandlerContext().handle(_path,httpRequest,httpResponse);
         }
@@ -292,29 +299,29 @@ public class Dispatcher implements RequestDispatcher
         
         // javax.servlet.include.request_uri
         Object old_request_uri =
-            request.getAttribute("javax.servlet.include.request_uri");
-        httpRequest.setAttribute("javax.servlet.include.request_uri",
-                                    servletRequest.getRequestURI());
+            request.getAttribute(__REQUEST_URI);
+        httpRequest.setAttribute(__REQUEST_URI,
+                                 servletRequest.getRequestURI());
         
         // javax.servlet.include.context_path
         Object old_context_path =
-            request.getAttribute("javax.servlet.include.context_path");
-        httpRequest.setAttribute("javax.servlet.include.context_path",
-                                    servletRequest.getContextPath());
+            request.getAttribute(__CONTEXT_PATH);
+        httpRequest.setAttribute(__CONTEXT_PATH,
+                                 servletRequest.getContextPath());
         
         // javax.servlet.include.query_string
         Object old_query_string =
-            request.getAttribute("javax.servlet.include.query_string");
-        httpRequest.setAttribute("javax.servlet.include.query_string",
-                                    _query);
+            request.getAttribute(__QUERY_STRING);
+        httpRequest.setAttribute(__QUERY_STRING,
+                                 _query);
         
         // javax.servlet.include.servlet_path
         Object old_servlet_path =
-            request.getAttribute("javax.servlet.include.servlet_path");
+            request.getAttribute(__SERVLET_PATH);
         
         // javax.servlet.include.path_info
         Object old_path_info =
-            request.getAttribute("javax.servlet.include.path_info");
+            request.getAttribute(__PATH_INFO);
 
         // Try each holder until handled.
         try
@@ -323,9 +330,9 @@ public class Dispatcher implements RequestDispatcher
             // context must be the same, info is recalculate.
             Code.debug("Include request to ",_holder,
                        " at ",_pathSpec);
-            httpRequest.setAttribute("javax.servlet.include.servlet_path",
+            httpRequest.setAttribute(__SERVLET_PATH,
                                  PathMap.pathMatch(_pathSpec,_path));
-            httpRequest.setAttribute("javax.servlet.include.path_info",
+            httpRequest.setAttribute(__PATH_INFO,
                                  PathMap.pathInfo(_pathSpec,_path));
                 
             // try service request
@@ -338,16 +345,11 @@ public class Dispatcher implements RequestDispatcher
             servletResponse.setOutputState(old_output_state);
             if (_query!=null && _query.length()>0)
                 servletRequest.popParameters();
-            httpRequest.setAttribute("javax.servlet.include.request_uri",
-                                 old_request_uri);
-            httpRequest.setAttribute("javax.servlet.include.context_path",
-                                 old_context_path);
-            httpRequest.setAttribute("javax.servlet.include.query_string",
-                                 old_query_string);
-            httpRequest.setAttribute("javax.servlet.include.servlet_path",
-                                 old_servlet_path);
-            httpRequest.setAttribute("javax.servlet.include.path_info",
-                                 old_path_info);
+            httpRequest.setAttribute(__REQUEST_URI,old_request_uri);
+            httpRequest.setAttribute(__CONTEXT_PATH,old_context_path);
+            httpRequest.setAttribute(__QUERY_STRING,old_query_string);
+            httpRequest.setAttribute(__SERVLET_PATH,old_servlet_path);
+            httpRequest.setAttribute(__PATH_INFO,old_path_info);
         }
     }
 };
