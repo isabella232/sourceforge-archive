@@ -302,29 +302,10 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
-  <target name="testUtil_JUnit" depends="jars">
-    <mkdir dir="${test.classes}" />
-    <javac srcdir="${test.src}"
-           destdir="${test.classes}"
-           debug="true"
-           optimize="fale"
-           deprecation="${javac.deprecation}"
-           >
-       <classpath>
-         <path refid="classpath" />
-         <pathelement path="${junit.jar}" />     
-       </classpath>
-       <include name="**/*.java"/>
-    </javac>
-    <junit fork="no" haltonerror="yes" haltonfailure="yes" >
-      <formatter type="brief" usefile="false" />                  
-      <classpath> 
-         <path refid="classpath" />
-         <pathelement path="${junit.jar}" />     
-         <pathelement path="${test.classes}" />     
-      </classpath>        
-      <test name="org.mortbay.util.JUnitTestHarness"  />
-    </junit>
+  <target name="junit_test" depends="jars">
+    <ant antfile="${test}/build.xml" inheritAll="true" >
+      <property name="java.class.path" value="${java.class.path};${junit.jar}" />                  
+    </ant>
   </target>
 
   <!-- ==================================================================== -->

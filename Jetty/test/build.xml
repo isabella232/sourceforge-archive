@@ -84,6 +84,7 @@ the Ant optional tasks from:
 
   <!-- ==================================================================== -->
   <target name="compile" depends="prepare">
+    <echo message="${java.class.path}" />
     <javac srcdir="${test.src}"
            destdir="${test.classes}"
            debug="true"
