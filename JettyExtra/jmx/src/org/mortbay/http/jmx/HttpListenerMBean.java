@@ -46,8 +46,8 @@ public class HttpListenerMBean
     {
         super.defineManagedResource();
         defineAttribute("defaultScheme");
-        defineAttribute("lowOnResources");
-        defineAttribute("outOfResources");
+        defineAttribute("lowOnResources",false);
+        defineAttribute("outOfResources",false);
         defineAttribute("confidentialPort");
         defineAttribute("confidentialScheme");
         defineAttribute("integralPort");
