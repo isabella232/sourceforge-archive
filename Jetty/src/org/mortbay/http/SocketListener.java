@@ -42,7 +42,6 @@ public class SocketListener
     private int _bufferReserve=512;
 
     private transient HttpServer _server;
-    private transient int _throttled=0;
     private transient boolean _isLow=false;
     private transient boolean _isOut=false;
     private transient long _warned=0;
@@ -166,7 +165,7 @@ public class SocketListener
     /* ------------------------------------------------------------ */
     /** Handle Job.
      * Implementation of ThreadPool.handle(), calls handleConnection.
-     * @param job A Connection.
+     * @param socket A Connection.
      */
     public void handleConnection(Socket socket)
         throws IOException
@@ -254,7 +253,7 @@ public class SocketListener
      * timeout is set to lowResourcePersistTimeMs.  The
      * customizeRequest method is used to reset this to the normal
      * value after a request has been read.
-     * @param connection.
+     * @param connection The HttpConnection to use.
      */
     public void persistConnection(HttpConnection connection)
     {

@@ -5,7 +5,6 @@
 
 package org.mortbay.http.jmx;
 
-import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
@@ -14,7 +13,7 @@ import org.mortbay.util.Code;
 import org.mortbay.util.jmx.LifeCycleMBean;
 
 /* ------------------------------------------------------------ */
-/** 
+/**
  *
  * @version $Revision$
  * @author Greg Wilkins (gregw)
@@ -22,16 +21,15 @@ import org.mortbay.util.jmx.LifeCycleMBean;
 public class HttpContextMBean extends LifeCycleMBean
 {
     private HttpContext _httpContext;
-    
+
     /* ------------------------------------------------------------ */
-    /** Constructor. 
-     * @exception MBeanException 
-     * @exception InstanceNotFoundException 
+    /** Constructor.
+     * @exception MBeanException
      */
     public HttpContextMBean()
         throws MBeanException
     {}
-    
+
     /* ------------------------------------------------------------ */
     protected void defineManagedResource()
     {
@@ -40,14 +38,14 @@ public class HttpContextMBean extends LifeCycleMBean
         defineAttribute("virtualHosts");
         defineAttribute("hosts");
         defineAttribute("contextPath");
-        
+
         defineAttribute("handlers",READ_ONLY,ON_MBEAN);
 
         defineAttribute("classPath");
-        
+
         defineAttribute("realm");
         defineAttribute("realmName");
-        
+
         defineAttribute("redirectNullPath");
         defineAttribute("resourceBase");
         defineAttribute("maxCachedFileSize");
@@ -57,7 +55,7 @@ public class HttpContextMBean extends LifeCycleMBean
         defineOperation("getResource",
                         new String[] {STRING},
                         IMPACT_ACTION);
-        
+
         defineAttribute("welcomeFiles");
         defineOperation("addWelcomeFile",
                         new String[] {STRING},
@@ -65,7 +63,7 @@ public class HttpContextMBean extends LifeCycleMBean
         defineOperation("removeWelcomeFile",
                         new String[] {STRING},
                         IMPACT_INFO);
-        
+
         defineAttribute("mimeMap");
         defineOperation("setMimeMapping",new String[] {STRING,STRING},IMPACT_ACTION);
 
@@ -80,12 +78,12 @@ public class HttpContextMBean extends LifeCycleMBean
         defineAttribute("responses3xx");
         defineAttribute("responses4xx");
         defineAttribute("responses5xx");
-        
+
         defineOperation("stop",new String[] {"java.lang.Boolean.TYPE"},IMPACT_ACTION);
-        
+
         defineOperation("destroy",
                         IMPACT_ACTION);
-        
+
         defineOperation("setInitParameter",
                         new String[] {STRING,STRING},
                         IMPACT_ACTION);
@@ -95,20 +93,20 @@ public class HttpContextMBean extends LifeCycleMBean
         defineOperation("getInitParameterNames",
                         NO_PARAMS,
                         IMPACT_INFO);
-        
+
         defineOperation("setAttribute",new String[] {STRING,OBJECT},IMPACT_ACTION);
         defineOperation("getAttribute",new String[] {STRING},IMPACT_INFO);
         defineOperation("getAttributeNames",NO_PARAMS,IMPACT_INFO);
         defineOperation("removeAttribute",new String[] {STRING},IMPACT_ACTION);
-        
+
         defineOperation("addHandler",new String[] {INT,"org.mortbay.http.HttpHandler"},IMPACT_ACTION);
         defineOperation("removeHandler",new String[] {INT},IMPACT_ACTION);
-        
+
 
         _httpContext=(HttpContext)getManagedResource();
     }
-    
-    
+
+
     /* ------------------------------------------------------------ */
     protected ObjectName newObjectName(MBeanServer server)
     {
@@ -120,7 +118,7 @@ public class HttpContextMBean extends LifeCycleMBean
         catch(Exception e){Code.warning(e);}
         return oName;
     }
-    
+
     /* ------------------------------------------------------------ */
     public void postRegister(Boolean ok)
     {
@@ -128,21 +126,20 @@ public class HttpContextMBean extends LifeCycleMBean
         if (ok.booleanValue())
             getHandlers();
     }
-    
-    
+
     /* ------------------------------------------------------------ */
     public void postDeregister()
     {
         _httpContext=null;
         super.postDeregister();
     }
-    
+
     /* ------------------------------------------------------------ */
     public ObjectName[] getHandlers()
     {
         return getComponentMBeans(_httpContext.getHandlers(),null);
     }
-    
+
 }
 
 

@@ -26,7 +26,6 @@ public class TestHarness
     public static String __userDir =
         System.getProperty("user.dir",".");
     public static URL __userURL=null;
-    private static String __relDir="";
     static
     {
         try{
@@ -39,8 +38,6 @@ public class TestHarness
                 FilePermission perm = (FilePermission)
                     __userURL.openConnection().getPermission();
                 __userDir=new File(perm.getName()).getCanonicalPath();
-                __relDir="test/src/org/mortbay/xml/".replace('/',
-                                                             File.separatorChar);
             }                
         }
         catch(Exception e)

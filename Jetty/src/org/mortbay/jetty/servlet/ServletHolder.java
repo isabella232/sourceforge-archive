@@ -232,7 +232,7 @@ public class ServletHolder extends Holder
         }
 
         if (_run_as!=null)
-            _realm=((ServletHandler)_httpHandler).getHttpContext().getRealm();
+            _realm=_httpHandler.getHttpContext().getRealm();
         
     }
 

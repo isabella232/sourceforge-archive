@@ -207,7 +207,7 @@ abstract public class ThreadedServer extends ThreadPool
     
     /* ------------------------------------------------------------ */
     /** Set Max Read Time.
-     * @deprecated. maxIdleTime is used instead.
+     * @deprecated maxIdleTime is used instead.
      */
     public void setMaxReadTimeMs(int ms)
     {
@@ -225,7 +225,7 @@ abstract public class ThreadedServer extends ThreadPool
     
     /* ------------------------------------------------------------ */
     /** 
-     * @param sec seconds to linger or -1 to disable linger.
+     * @param ls seconds to linger or -1 to disable linger.
      */
     public void setLingerTimeSecs(int ls)
     {
@@ -496,8 +496,6 @@ abstract public class ThreadedServer extends ThreadPool
         public void run()
         {
             ThreadedServer threadedServer = ThreadedServer.this;
-            Thread acceptor = Thread.currentThread();
-            int priority=Thread.currentThread().getPriority();
             try
             {
                 this.setName("Acceptor "+_listen);
