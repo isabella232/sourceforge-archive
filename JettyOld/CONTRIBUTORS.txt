@@ -17,6 +17,7 @@ Authors & Testers:
   Juancarlo Añez <juancarlo@modelistica.com>
   Nikos Anerousis <nikos@research.att.com>
   Donovan Kolbly <kolbly@mcc.com>
+  plus a few more in the pipe line ...
 
 Sponsors:
   Mort Bay Consulting.   http://www.mortbay.com
