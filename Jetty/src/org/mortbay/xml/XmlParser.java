@@ -522,18 +522,18 @@ public class XmlParser
             {
                 buf.append("<");
                 buf.append(_tag);
-            }
             
-            if (_attrs!=null)
-            {
-                for (int i=0;i<_attrs.length;i++)
-                {
-                    buf.append(' ');
-                    buf.append(_attrs[i].getName());
-                    buf.append("=\"");
-                    buf.append(_attrs[i].getValue());
-                    buf.append("\"");
-                }
+		if (_attrs!=null)
+		{
+		    for (int i=0;i<_attrs.length;i++)
+		    {
+			buf.append(' ');
+			buf.append(_attrs[i].getName());
+			buf.append("=\"");
+			buf.append(_attrs[i].getValue());
+			buf.append("\"");
+		    }
+		}
             }
 
             if (_list!=null)

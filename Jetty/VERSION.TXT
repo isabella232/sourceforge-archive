@@ -1,6 +1,7 @@
 Jetty3 Versions
 --------------
 
+ + Fix attr handling in XmlPArser.toString
 
 Jetty-3.1.1 - 27 Sep 2001
  + Fixed jar manifest format - patched 28 Sep 2001
