@@ -290,6 +290,7 @@ public class SecurityHandler extends NullHandler
                     
                     // Does it fail a data constraint
                     if (sc.hasDataConstraint() &&
+                        sc.getDataConstraint() > SecurityConstraint.DC_NONE &&
                         !"https".equalsIgnoreCase(request.getScheme()))   
                     {
                         response.sendError(HttpResponse.__403_Forbidden);

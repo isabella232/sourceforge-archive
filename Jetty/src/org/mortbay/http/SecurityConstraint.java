@@ -24,9 +24,11 @@ public class SecurityConstraint
 {
     /* ------------------------------------------------------------ */
     public final static int
+        DC_NOT_SET=-1,
         DC_NONE=0,
         DC_INTEGRAL=1,
         DC_CONFIDENTIAL=2;
+    
     /* ------------------------------------------------------------ */
     public final static String NONE="NONE";
     
@@ -36,7 +38,7 @@ public class SecurityConstraint
     private List _umMethods;
     private List _roles;
     private List _umRoles;
-    private int _dataConstraint=DC_NONE;
+    private int _dataConstraint=DC_NOT_SET;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -175,7 +177,7 @@ public class SecurityConstraint
      */
     public boolean hasDataConstraint()
     {
-        return _dataConstraint!=DC_NONE;
+        return _dataConstraint>DC_NOT_SET;
     }
     
     
