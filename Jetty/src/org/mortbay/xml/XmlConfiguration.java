@@ -85,7 +85,9 @@ public class XmlConfiguration
         __parser.redirectEntity("configure.dtd",config13URL);
         __parser.redirectEntity("configure_1_3.dtd",config13URL);
         __parser.redirectEntity("http://jetty.mortbay.org/configure_1_3.dtd", config13URL);
+        __parser.redirectEntity("http://jetty.mortbay.org/configure.dtd", config13URL);
         __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure 1.3//EN", config13URL);
+        __parser.redirectEntity("-//Mort Bay Consulting//DTD Configure//EN", config13URL);
 
         URL config12URL=XmlConfiguration.class.getClassLoader()
             .getResource("org/mortbay/xml/configure_1_2.dtd");

@@ -1,11 +1,11 @@
 Jetty Versions
 --------------
 
-Jetty-5.1.2
+Jetty-5.1.2 - 16 January 2005
  + Added id and ref support to XmlConfiguration
  + Cleaned up AbstractSessionManager synchronization.
 
-Jetty-4.2.23
+Jetty-4.2.23 - 16 January 2005
  + Cleaned up AbstractSessionManager synchronization.
 
 Jetty-5.1.2pre0 - 22 December 2004
