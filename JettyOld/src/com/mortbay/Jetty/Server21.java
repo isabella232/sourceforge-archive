@@ -153,7 +153,7 @@ public class Server21 extends BaseConfiguration
 			   String name,
 			   String servlet,
 			   String paramFile)
-	throws IOException, ServletException
+	throws IOException, ServletException, ClassNotFoundException
     {
 	Code.debug(serverName,".addServlet: ",servlet," at ",path);
 		   
@@ -516,7 +516,7 @@ public class Server21 extends BaseConfiguration
 	    {
 		server.addProxy(stack);
 	    }
-	    else if (HttpConfiguration.DefaultSessionMaxIdleTime.equals(type))
+	    else if ("DefaultSessionMaxIdleTime".equals(type))
 	    {
 		    // Maximum idle time for HttpSessions before they are timed out, in SECONDS
 		    int maxIdleTime = 0;
@@ -525,9 +525,9 @@ public class Server21 extends BaseConfiguration
 		    } catch (NumberFormatException nfe) {
 		    	Code.warning(nfe);
 		    }
-		    if (maxIdleTime > 0) {
-		    	server.attributes.put(HttpConfiguration.DefaultSessionMaxIdleTime, new Integer(maxIdleTime));
-		    }
+		    if (maxIdleTime > 0) 
+		    	server.attributes.put(HttpConfiguration.SessionMaxInactiveInterval,
+					      new Integer(maxIdleTime));
 	    }
 	    else
 		Code.warning("Unknown property: "+
