@@ -71,8 +71,7 @@ public class BasicAuthHandler extends NullHandler
 	    
 	    Code.debug("Unauthorized in "+realm.name());
 
-	    response.setStatus(HttpResponse.SC_UNAUTHORIZED,
-			       "Authentication Failed");
+	    response.setStatus(HttpResponse.SC_UNAUTHORIZED);
 	    response.setHeader(HttpHeader.WwwAuthenticate,
 			       "basic realm=\""+realm.name()+'"');
 	    response.writeHeaders();	    

@@ -28,6 +28,7 @@ public class SessionHandler extends NullHandler
     {
 	HttpSession session = request.getSession(false);
 	if (session!=null)
+	    // XXX - Will have to use private interface?
 	    SessionContext.access(session);
     }
 

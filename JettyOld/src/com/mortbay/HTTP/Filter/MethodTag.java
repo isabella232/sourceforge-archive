@@ -115,7 +115,14 @@ public class MethodTag
 		      if (namedArgs!=null)
 			  a = namedArgs.get(tok.sval);
 		      if (a==null && request!=null)
-			  a = request.getParameter(tok.sval);
+		      {
+			  String[] aa = request.getParameterValues(tok.sval);
+			  if (aa!=null && aa.length>=1)
+			      // XXX - should handle long arrays
+			      a=aa[0];
+			  else
+			      a="";
+		      }
 		      if (a==null && tok.sval.equals(nullArg))
 			  a=nullArg;
 		      if (a==null)

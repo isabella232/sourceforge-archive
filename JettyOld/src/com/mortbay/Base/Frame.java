@@ -123,7 +123,17 @@ public class Frame
     void complete()
     {
 	// trim stack
-	_stack = _stack.substring(_lineStart);
+	// XXX - Need to handle Java2 correctly
+	if (_stack != null) {
+	    _stack = _stack.substring(_lineStart);
+	} else {
+	    // Handle nulls
+	    if (_method==null)
+		_method= "unknownMethod";
+	    if (_file==null)
+		_file= "UnknownFile";
+	    return;
+	}
 	
 	// calculate stack depth
 	int i=0;

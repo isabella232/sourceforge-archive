@@ -32,18 +32,13 @@ public class DefaultExceptionHandler implements ExceptionHandler
 	try{
 	    throw exception;
 	}
-	catch (Exception e){
+	catch (Exception e)
+	{
 	    // Send exception response
-
-	    if (!response.headersWritten())
-	    {
-		response.setStatus(HttpResponse.SC_INTERNAL_SERVER_ERROR,
-				   e.toString());
-		response.setContentType("text/html");
-		response.writeHeaders();
-	    }
 	    try
 	    {
+		if (!response.headersWritten())
+		    response.setStatus(HttpResponse.SC_INTERNAL_SERVER_ERROR);
 		OutputStream out = response.getOutputStream();
 		out.write("<HTML><HEAD><TITLE>Exception</TITLE>".getBytes());
 		out.write("<BODY><H2>".getBytes());

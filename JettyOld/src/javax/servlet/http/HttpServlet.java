@@ -675,6 +675,9 @@ class NoBodyResponse implements HttpServletResponse {
     public boolean containsHeader (String name)
       { return resp.containsHeader (name); }
 
+    /**
+     * @deprecated
+     */
     public void setStatus (int sc, String sm)
       { resp.setStatus (sc, sm); }
 

@@ -110,7 +110,9 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	reason = "OK";
 	setContentType("text/html");
 	setHeader(MIME_Version,"1.0");
-	setHeader(Server,"MortBay-Jetty-2 ");
+	
+	// XXX - need to automate setting this with getServerInfo
+	setHeader(Server,"MortBay-Jetty-2.1.B0");
 	setDateHeader(Date,System.currentTimeMillis());
 
 	if (HttpHeader.Close.equals(request.getHeader(HttpHeader.Connection)))
@@ -388,11 +390,14 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
      * Sets the status code and message for this response.
      * @param code the status code
      * @param msg the status message
+     * @deprecated
      */
     public void setStatus(int code,String msg)
     {
 	status=Integer.toString(code);
-	reason=msg;
+	reason=(String)__errorCodeMap.get(new Integer(code));
+	if (reason==null)
+	    reason=msg;
     }
 
     /* ------------------------------------------------------------- */
@@ -403,7 +408,8 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     public void setStatus(int code)
     {
 	status=Integer.toString(code);
-	reason=status;
+	String msg = (String)__errorCodeMap.get(new Integer(code));
+	reason=(msg!=null)?msg:status;
     }
       
     /* ------------------------------------------------------------- */
@@ -475,8 +481,11 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	    cookies=new Cookies();
 	cookies.setCookie(cookie);
     }
-	
+
     /* -------------------------------------------------------------- */
+    /**
+     * @deprecated
+     */
     public java.lang.String encodeRedirectUrl(java.lang.String url)
     {
 	//XXX - Dont support rewriting
@@ -484,7 +493,24 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     }
     
     /* -------------------------------------------------------------- */
+    /**
+     * @deprecated
+     */
     public java.lang.String encodeUrl(java.lang.String url)
+    {
+	//XXX - Don't support rewriting
+	return url;
+    }
+    
+    /* -------------------------------------------------------------- */
+    public java.lang.String encodeRedirectURL(java.lang.String url)
+    {
+	//XXX - Dont support rewriting
+	return url;
+    }
+    
+    /* -------------------------------------------------------------- */
+    public java.lang.String encodeURL(java.lang.String url)
     {
 	//XXX - Don't support rewriting
 	return url;

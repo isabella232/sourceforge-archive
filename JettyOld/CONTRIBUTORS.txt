@@ -10,7 +10,10 @@ Authors & Testers:
   Simon Ritchie <sritchie@amo.com>
   Thomas Beyer <Thomas.Beyer@mch.sni.de>
   Tobias Miller <millert@informatik.tu-muenchen.de>
-  
+  Daniel Eriksson <daniel.eriksson@softapp.se>
+  John Bergman <JohnB@ImageX.com>
+  Søren Hilmer <sh@itplus.dk> 
+
 Sponsors:
   Mort Bay Consulting.   http://www.mortbay.com
   Optimus http://www.optimus.com.au

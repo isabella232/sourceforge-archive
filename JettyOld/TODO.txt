@@ -1,6 +1,15 @@
- + Implement general handling of parameters in HTTP headers
 
  + Update this todo list 
+
+ + Fix fileupload 
+
+ + Resource URL methods for JSDK2.1
+
+ + Cleanup sessions for JSDK2.1
+
+ + URL session encoding
+
+ + Implement general handling of parameters in HTTP headers
 
  + Use Java 1.2 features. (Mostly replace JDBC connection
    cache with weak references).
@@ -21,4 +30,10 @@
  + Convert Servlets to use get & post methods
 
  + Implement encrypted password realm storage
+
+ + Debug work under Java2
+
+ + Find XMLServlet and make it work
+
+ + HTTP-DAV????
 

@@ -326,7 +326,7 @@ public class HttpServer implements ServletContext
 		else
 		{
 		    Code.warning("request not handled: "+request);
-		    response.setStatus(response.SC_NOT_FOUND,"Not Found");
+		    response.setStatus(response.SC_NOT_FOUND);
 		}
 	    }
 	}
@@ -347,6 +347,7 @@ public class HttpServer implements ServletContext
      * @param name the name of the servlet
      * @return the Servlet, or null if not found
      * @exception ServletException if the servlet could not be initialized
+     * @deprecated
      */
     public Servlet getServlet(String name)
     {
@@ -379,9 +380,66 @@ public class HttpServer implements ServletContext
     }
     
     /* ---------------------------------------------------------------- */
+    /**
+     * @deprecated
+     */
     public Enumeration getServletNames()
     {
 	return servletHandlerMap.keys();
+    }
+
+    /* ---------------------------------------------------------------- */
+    public ServletContext getContext(String url)
+    {
+	// XXX - This is almost certainly wrong
+	return this;
+    }
+
+    /* ---------------------------------------------------------------- */
+    public int getMajorVersion()
+    {
+	return 2;
+    }
+    
+    /* ---------------------------------------------------------------- */
+    public int getMinorVersion()
+    {
+	return 1;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Not implemented
+     * @param path URL path of resource
+     * @return null
+     * @exception MalformedURLException 
+     */
+    public  URL getResource(String path)
+	throws MalformedURLException
+    {
+	Code.notImplemented();
+	return null;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Not implemented
+     * @param path URL path of resource
+     * @return null 
+     */
+    public InputStream getResourceAsStream(String path)
+    {
+	Code.notImplemented();
+	return null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Not implemented
+     * @param path URL path of resource 
+     * @return null
+     */
+    public RequestDispatcher getRequestDispatcher(String path)
+    {
+	Code.notImplemented();
+	return null;
     }
     
     /* ---------------------------------------------------------------- */
@@ -396,8 +454,21 @@ public class HttpServer implements ServletContext
     
     /* ---------------------------------------------------------------- */
     /**
+     * Writes a message to the servlet log file.
+     * @param message the message to be written
+     * @param th Throwable 
+     */
+    public void log(String message, Throwable th)
+    {
+	// XXX - this needs to be improved
+	Code.warning(message,th);
+    }
+    
+    /* ---------------------------------------------------------------- */
+    /**
      * Writes an exception & message to the servlet log file.
      * @param message the message to be written
+     * @deprecated
      */
     public void log(Exception e, String message)
     {
@@ -436,7 +507,8 @@ public class HttpServer implements ServletContext
      */
     public String getServerInfo()
     {
-	return "$Id$";
+	// XXX - need to automate setting this
+	return "MortBay-Jetty-2.1.B0";
     }
 
     /* ---------------------------------------------------------------- */
@@ -452,6 +524,28 @@ public class HttpServer implements ServletContext
     public Object getAttribute(String name)
     {
 	return config.getAttribute(name);
+    }
+    
+    /* ---------------------------------------------------------------- */
+    public Enumeration getAttributeNames()
+    {
+	// XXX
+	Code.notImplemented();
+	return null;
+    }
+    
+    /* ---------------------------------------------------------------- */
+    public void setAttribute(String name, Object value)
+    {
+	// XXX
+	Code.notImplemented();
+    }
+    
+    /* ---------------------------------------------------------------- */
+    public void removeAttribute(String name)
+    {
+	// XXX
+	Code.notImplemented();
     }
 
     

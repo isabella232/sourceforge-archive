@@ -15,6 +15,7 @@ import javax.servlet.http.*;
  *
  * @version $Revision$ $Date$
  * @author Greg Wilkins (gregw)
+ * @deprecated
  */
 public class SessionContext extends Hashtable
     implements javax.servlet.http.HttpSessionContext	    
@@ -91,11 +92,21 @@ public class SessionContext extends Hashtable
 	}
 	
 	/* ------------------------------------------------------------- */
+	public int getMaxInactiveInterval()
+	{
+	    Code.warning("MaxInactiveInterval not implemented");
+	    return 0;
+	}
+	
+	/* ------------------------------------------------------------- */
+	/**
+	 * @deprecated
+	 */   
 	public HttpSessionContext getSessionContext()
 	    throws IllegalStateException
 	{
 	    if (invalid) throw new IllegalStateException();
-	    return HttpSessionContext.this;
+	    return SessionContext.this;
 	}
 	
 	/* ------------------------------------------------------------- */
@@ -120,6 +131,12 @@ public class SessionContext extends Hashtable
 		    a[i++]=(String)e.nextElement();
 		return a;
 	    }
+	}
+	
+	/* ------------------------------------------------------------- */
+	public void setMaxInactiveInterval(int i)
+	{
+	    Code.warning("MaxInactiveInterval not implemented");
 	}
 	
 	/* ------------------------------------------------------------- */
@@ -164,12 +181,18 @@ public class SessionContext extends Hashtable
     };
 
     /* ------------------------------------------------------------ */
+    /**
+     * @deprecated
+     */   
     public Enumeration getIds()
     {
 	return keys();
     }
     
     /* ------------------------------------------------------------ */
+    /**
+     * @deprecated
+     */   
     public HttpSession getSession(String id)
     {
 	return (HttpSession)get(id);

@@ -1,9 +1,6 @@
 ROOTNAME := com
 TESTS := Select.java TestHarness.java
-JAVACOPTIONS := 
 JAVAOPTIONS := $(JAVAOPTIONS) -DMSQL2
-EXCLUDE := 
-BINFILES := 
 
 
 include $(JETTY_HOME)/etc/Global.mk

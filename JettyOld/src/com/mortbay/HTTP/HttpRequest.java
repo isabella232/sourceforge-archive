@@ -47,6 +47,8 @@ public class HttpRequest extends HttpHeader
 
     private static final SessionContext sessions =
 	new SessionContext();
+
+    private static final Enumeration __NoAttributes = new Vector().elements();
     
     /* -------------------------------------------------------------- */
     public String method=null;
@@ -550,6 +552,7 @@ public class HttpRequest extends HttpHeader
      * corresponding real path. getRealPath("/") is the document root.
      * It returns null if the translation cannot be performed.
      * @param path the path to be translated
+     * @deprecated
      */  
     public String getRealPath(String path)
     {
@@ -671,11 +674,16 @@ public class HttpRequest extends HttpHeader
     }
     
     /* -------------------------------------------------------------- */
+    /** Returns the scheme of the URL used in this request, for
+     * example "http", "https"
+     */
+    public String getScheme()
+    {
+	return "http";
+    }
+    
+    /* -------------------------------------------------------------- */
     /**
-     * Returns an attribute of the request given the specified key name.
-     * This allows access to request information not already provided by
-     * the other methods in this interface. Key names beginning with
-     * 'COM.sun.*' are reserved.
      * @param name the attribute name
      * @return the value of the attribute, or null if not defined
      */
@@ -685,12 +693,14 @@ public class HttpRequest extends HttpHeader
     }
     
     /* -------------------------------------------------------------- */
-    /** Returns the scheme of the URL used in this request, for
-     * example "http", "https"
-     */
-    public String getScheme()
+    public Enumeration getAttributeNames()
     {
-	return "http";
+	return __NoAttributes;
+    }
+    
+    /* -------------------------------------------------------------- */
+    public void setAttribute(String name, Object o)
+    {
     }
 
 
@@ -839,6 +849,12 @@ public class HttpRequest extends HttpHeader
     }
     
     /* -------------------------------------------------------------- */
+    public HttpSession getSession()
+    {
+	return getSession(true);
+    }
+    
+    /* -------------------------------------------------------------- */
     public HttpSession getSession(boolean create)
     {
 	HttpSession session=null;
@@ -887,7 +903,16 @@ public class HttpRequest extends HttpHeader
     }
     
     /* -------------------------------------------------------------- */
+    /**
+     * @deprecated
+     */
     public boolean isRequestedSessionIdFromUrl()
+    {
+	return false;
+    }
+    
+    /* -------------------------------------------------------------- */
+    public boolean isRequestedSessionIdFromURL()
     {
 	return false;
     }

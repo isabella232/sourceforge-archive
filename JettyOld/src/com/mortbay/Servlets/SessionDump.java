@@ -79,7 +79,8 @@ public class SessionDump extends HttpServlet
 		table.newRow();
 		table.addHeading(name+":&nbsp;").cell().right().top();
 		Object value = session.getValue(name);
-		
+
+		// XXX - Get rid of session context ????
 		if (name.equals(SessionContext.SessionStatus))
 		{
 		    if (value.equals(SessionContext.NewSession))

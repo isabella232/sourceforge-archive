@@ -1,3 +1,13 @@
+Release 2.1.B0 - xx January 1999
+  + Uses JSDK2.1 API, but not all methods implemented.
+  + Added support for PUT, MOVE, DELETE in filehandler
+  + FileHandler now sets content length.
+  + Added plug gateway classes com.mortbay.Util.Gateway
+  + Fixed command line bug with SimpleServletConfig
+  + Minor changes to support MS J++ and its non standard 
+    language extensions - MMMmmm should have left it unchanged!
+  + Somehow broke File upload???
+
 Release 2.0.5 - 15 December 1998
   + Temp fix to getCharacterEncoding
   + added getHeaderNoParams
