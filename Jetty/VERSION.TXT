@@ -10,7 +10,7 @@ Jetty-5
  + FORM auth redirects to context on a re-auth
  + Handle multiple virutal hosts from JBoss 3.2.4RC2
 
-Jetty-4
+Jetty-4.2.20 - 22 May 2004
  + maxFormContentLength may be unlimited with <0 value
  + Fixed HTTP tunnel timeout setting.
  + Improved handling of exception from servlet init.
