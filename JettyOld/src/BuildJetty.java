@@ -135,6 +135,7 @@ class BuildJetty { Class[] classes = {
     com.mortbay.Util.ArrayConverter.class,
     com.mortbay.Util.BlockingQueue.class,
     com.mortbay.Util.ContainerIteratorTransformer.class,
+    com.mortbay.Util.Code.class,
     com.mortbay.Util.ConvertFail.class,
     com.mortbay.Util.ConverterSet.class,
     com.mortbay.Util.DataClass.class,

@@ -1,6 +1,7 @@
 class BuildContrib { Class[] classes = {
     com.mortbay.HTTP.Handler.ServletRunnerHandler.class,
     com.mortbay.Jetty.SetUID.class,
+    com.mortbay.Servlets.PackageIndex.PackageIndex.class,
     org.gjt.jsp.HttpJspPageImpl.class,
     org.gjt.jsp.HttpJspPageUtil.class,
     org.gjt.jsp.JspConfig.class,

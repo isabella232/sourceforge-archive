@@ -1,7 +1,7 @@
 #
 # Java makefile.
 #
-# Copyright (c) 2000 Analytech Pty. Ltd.
+# Copyright (c) 2000 Mortbay Consulting
 # $Id$
 #
 
@@ -9,4 +9,4 @@ TESTS :=
 SUBDIRS := 
 ROOTNAME := com
 
-include ${MKFILEPATH}/Global.mk
+include ${JETTY_HOME}/etc/Global.mk
