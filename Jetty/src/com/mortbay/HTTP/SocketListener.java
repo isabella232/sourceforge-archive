@@ -222,7 +222,7 @@ public class SocketListener
             getThreads()==getMaxThreads() &&
             getIdleThreads()<getMinThreads();
         if (low && !_lastLow)
-            Log.event("LOW ON RESOURCES: "+this);
+            Log.event("LOW ON THREADS: "+this);
         _lastLow=low;
         return low;
     }
@@ -237,7 +237,7 @@ public class SocketListener
             getThreads()==getMaxThreads() &&
             getIdleThreads()==0;
         if (out && !_lastOut)
-            Code.warning("OUT OF RESOURCES: "+this);
+            Code.warning("OUT OF THREADS: "+this);
         _lastOut=out;
         return out;
     }
