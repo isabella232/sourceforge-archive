@@ -198,7 +198,7 @@ public class UnixCrypt extends Object
             }
             perm[i] = (byte)k;
         }
-        init_perm(PC1ROT, perm, 8, 8);
+        init_perm(PC1ROT, perm, 8);
 
         // PC2ROT - PC2 inverse, then Rotate, then PC2
         for (int j=0; j<2; j++) {
@@ -215,7 +215,7 @@ public class UnixCrypt extends Object
                 perm[i] = temp[k];
             }
 
-            init_perm(PC2ROT[j], perm, 8, 8);
+            init_perm(PC2ROT[j], perm, 8);
         }
 
         // Bit reverse, intial permupation, expantion
@@ -233,7 +233,7 @@ public class UnixCrypt extends Object
             }
         }
 
-        init_perm(IE3264, perm, 4, 8);
+        init_perm(IE3264, perm, 8);
 
         // Compression, final permutation, bit reverse
         for (int i=0; i<64; i++) {
@@ -246,7 +246,7 @@ public class UnixCrypt extends Object
             perm[k-1] = (byte)(i+1);
         }
 
-        init_perm(CF6464, perm, 8, 8);
+        init_perm(CF6464, perm, 8);
 
         // SPE table
         for (int i=0; i<48; i++)
@@ -318,7 +318,7 @@ public class UnixCrypt extends Object
     private static long perm3264(int c, long[][]p) {
         long out = 0L;
         for (int i=4; --i>=0; ) {
-            int t = (int)(0x00ff & c);
+            int t = (0x00ff & c);
             c >>= 8;
             long tp = p[i<<1][t&0x0f];
             out |= tp;
@@ -403,7 +403,7 @@ public class UnixCrypt extends Object
     /**
      * Initializes the given permutation table with the mapping table.
      */
-    private static void init_perm(long[][] perm, byte[] p, int chars_in, int chars_out) {
+    private static void init_perm(long[][] perm, byte[] p,int chars_out) {
         for (int k=0; k<chars_out*8; k++) {
 
             int l = p[k] - 1;
@@ -440,7 +440,7 @@ public class UnixCrypt extends Object
         for (int i=2; --i>=0;) {
             char c = (i < setting.length())? setting.charAt(i): '.';
             cryptresult[i] = (byte)c;
-            salt = (salt<<6) | (int)(0x00ff&A64TOI[c]);
+            salt = (salt<<6) | (0x00ff&A64TOI[c]);
         }
 
         long rsltblock = des_cipher(constdatablock, salt, 25, KS);
