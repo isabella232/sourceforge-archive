@@ -760,6 +760,125 @@ public class Code
 	}
     }
     
+    /*-------------------------------------------------------------------*/
+    /** As debug(String)
+     * <strong>Dont rely on side-effects</strong>
+     * @param ex The Throwable to print the full stack trace of
+     */
+    public static void debug(Object o1,Object o2,Object o3, Object o4,
+			     Object o5)
+    {
+	Code code = instance();
+	if (code._debugOn)
+	{
+	    Frame frame = new Frame(1,true);
+	    if (code.isDebugOnFor(frame))
+	    {
+		frame.complete();
+		StringBuffer buf = new StringBuffer();
+		synchronized(buf)
+		{   
+		    formatObject(buf,o1);
+		    formatObject(buf,o2);
+		    formatObject(buf,o3);
+		    formatObject(buf,o4);
+		    formatObject(buf,o5);
+		}
+		Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+	    }
+	}
+    }
+    /*-------------------------------------------------------------------*/
+    /** As debug(String)
+     * <strong>Dont rely on side-effects</strong>
+     * @param ex The Throwable to print the full stack trace of
+     */
+    public static void debug(Object o1,Object o2,Object o3, Object o4,
+			     Object o5,Object o6)
+    {
+	Code code = instance();
+	if (code._debugOn)
+	{
+	    Frame frame = new Frame(1,true);
+	    if (code.isDebugOnFor(frame))
+	    {
+		frame.complete();
+		StringBuffer buf = new StringBuffer();
+		synchronized(buf)
+		{   
+		    formatObject(buf,o1);
+		    formatObject(buf,o2);
+		    formatObject(buf,o3);
+		    formatObject(buf,o4);
+		    formatObject(buf,o5);
+		    formatObject(buf,o6);
+		}
+		Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+	    }
+	}
+    }
+    /*-------------------------------------------------------------------*/
+    /** As debug(String)
+     * <strong>Dont rely on side-effects</strong>
+     * @param ex The Throwable to print the full stack trace of
+     */
+    public static void debug(Object o1,Object o2,Object o3, Object o4,
+			     Object o5,Object o6,Object o7)
+    {
+	Code code = instance();
+	if (code._debugOn)
+	{
+	    Frame frame = new Frame(1,true);
+	    if (code.isDebugOnFor(frame))
+	    {
+		frame.complete();
+		StringBuffer buf = new StringBuffer();
+		synchronized(buf)
+		{   
+		    formatObject(buf,o1);
+		    formatObject(buf,o2);
+		    formatObject(buf,o3);
+		    formatObject(buf,o4);
+		    formatObject(buf,o5);
+		    formatObject(buf,o6);
+		    formatObject(buf,o7);
+		}
+		Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+	    }
+	}
+    }
+    /*-------------------------------------------------------------------*/
+    /** As debug(String)
+     * <strong>Dont rely on side-effects</strong>
+     * @param ex The Throwable to print the full stack trace of
+     */
+    public static void debug(Object o1,Object o2,Object o3,Object o4,
+			     Object o5,Object o6,Object o7,Object o8)
+    {
+	Code code = instance();
+	if (code._debugOn)
+	{
+	    Frame frame = new Frame(1,true);
+	    if (code.isDebugOnFor(frame))
+	    {
+		frame.complete();
+		StringBuffer buf = new StringBuffer();
+		synchronized(buf)
+		{   
+		    formatObject(buf,o1);
+		    formatObject(buf,o2);
+		    formatObject(buf,o3);
+		    formatObject(buf,o4);
+		    formatObject(buf,o5);
+		    formatObject(buf,o6);
+		    formatObject(buf,o7);
+		    formatObject(buf,o8);
+		}
+		Log.message(Log.CODE_DEBUG, buf.toString(),frame);
+	    }
+	}
+    }
+    
     
     /*-------------------------------------------------------------------*/
     /** Ignore an exception

@@ -20,7 +20,10 @@ public class InetAddrPort
     public InetAddrPort()
     {}
 
-    /* ------------------------------------------------------------------- */
+    /* ------------------------------------------------------------ */
+    /** Constructor for a port on all local host address.
+     * @param port 
+     */
     public InetAddrPort(int port)
     {
 	try{
@@ -33,16 +36,38 @@ public class InetAddrPort
 	this.port=port;
     }
     
-    /* ------------------------------------------------------------------- */
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param addr 
+     * @param port 
+     */
     public InetAddrPort(InetAddress addr, int port)
     {
 	this.inetAddress=addr;
 	this.port=port;
     }
     
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param inetAddrPort String of the form "addr:port"
+     */
+    public InetAddrPort(String inetAddrPort)
+	throws java.net.UnknownHostException
+    {
+	int c = inetAddrPort.indexOf(":");
+	Code.assert(c>0,"Badly formatted InetAddrPort");
+
+	String addr=inetAddrPort.substring(0,c);
+	if (addr.length()>0 && ! "0.0.0.0".equals(addr))
+	    this.inetAddress=InetAddress.getByName(addr);
+	this.port = Integer.parseInt(inetAddrPort.substring(c+1));	
+    }
+    
     /* ------------------------------------------------------------------- */
     public String toString()
     {
+	if (inetAddress==null)
+	    return "0.0.0.0:"+port;
 	return inetAddress.toString()+':'+port;
     }
 }

@@ -7,6 +7,7 @@ package com.mortbay.HTTP;
 
 import com.mortbay.Base.*;
 import java.util.*;
+import java.net.MalformedURLException;
 
 
 /* ------------------------------------------------------------------- */
@@ -261,6 +262,31 @@ public class PathMap extends Dictionary
 	       
 	}
 	return null;
+    }
+    
+    /* --------------------------------------------------------------- */
+    /** Return the portion of a path that is after a path spec (with %$|/ etc.)
+     * @return The path info string
+     */
+    public static String pathInfo(String pathSpec, String path)
+	throws MalformedURLException
+    {
+	switch (pathSpec.charAt(pathSpec.length()-1))
+	{
+	  case '|':
+	  case '%':
+	  case '$':
+	      pathSpec=pathSpec.substring(0,pathSpec.length()-1);
+	      break;
+	  default:
+	      break;
+	}
+	
+	if (!path.startsWith(pathSpec))
+	    throw new MalformedURLException("Bad PathSpec '"+
+					    pathSpec+"' for "+path);
+
+	return path.substring(pathSpec.length());
     }
     
     /* --------------------------------------------------------------- */

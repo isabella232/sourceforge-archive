@@ -8,18 +8,20 @@ files or system and only the handler required for a particular site need to
 be included, so a server can be as efficient or as powerful as required. 
 
 <P><B>Configuration Decoupling</B><BR>
-In Jetty's previous life as MBServler, serveral configuration file formats
-were used trialed.  However, regardless of the merits of the actual
-format and package used, the main problem for WWW developers was that it
-was just another format, different to those used by the rest of their
-applications.
+While the Jetty Server has a configuration file, it is only a
+one of the ways to configure Jetty.  Regardless of the merits of the actual
+configuration file format and package used, the main problem for developers
+is that any WWW server configuration files are in addition to those that they
+may wish to use for their own applications and often impose location
+restrictions on the runtime.
 <p>
-Thus configuration has been abstracted to a Java interface, of which multiple
-implementations can be developed.  An implementation of the interface
+Thus configuration for Jetty has been abstracted to a Java interface,
+of which multiple implementations can be developed.  An implementation
+of the interface
 <A HREF=/javadoc/com.mortbay.HTTP.HttpConfiguration.html>com.mortbay.HTTP.HttpConfiguration</A>
-must be passed to an instance of 
+must be passed to the constructor of 
 <A HREF=/javadoc/com.mortbay.HTTP.HttpServer.html>com.mortbay.HTTP.HttpServer</A>
-in order to configure a Jetty deployment.  The implementation of
+in order to configure a Jetty server.  The implementation of
 HttpConfiguration may:<UL>
   <LI>Read configuration information from a custom file or database.
   <LI>Read configuration information from a config file format of another
@@ -28,16 +30,18 @@ HttpConfiguration may:<UL>
   <LI>Parameterize a particulare subset of configurations
   <LI>Map some other configuration mechanism.
 </UL>
-Two HttpConfiguration implementations are included with the Jetty
+Several HttpConfiguration implementations are included with the Jetty
 distribution:<BR>
 <A HREF=/javadoc/com.mortbay.HTTP.Configure.SimpleServletConfig.html>com.mortbay.HTTP.Configure.SimpleServletConfig</A>
 provides a simple configuration where a single servlet may be configured and
 served from command line options.<BR>
+<A HREF=/javadoc/com.mortbay.HTTP.Configure.FileServer.html>com.mortbay.HTTP.Configure.FileServer</A>
+configures a HTTP server to serve files from the current directory.<BR>
+<A HREF=/javadoc/com.mortbay.Jetty.Server.html>com.mortbay.Jetty.Server</A>
+is configuration that can programmatically be added to, or configured from
+a Java properties file.<BR>
 <A HREF=/javadoc/com.mortbay.Jetty.Demo.html>com.mortbay.Jetty.Demo</A>
-is a hard coded configuration for the Jetty demonstration site.
-<p>
-Implementations of HttpConfiguration will soon be available that map to
-the ISS-Util configuration files used by MBServler.
+is a specific instance of com.mortbay.Jetty.Server.
 
 <P><B>Handler Stacks</B><BR>
 The functionality of Jetty is provided by the combination of individual

@@ -40,12 +40,10 @@ public class FileServer extends BaseConfiguration
     public FileServer(int port)
 	 throws IOException
     {
-	System.err.println("Configuring HTTP FileServer...");
-	
 	// Listen at a single port on the localhost
 	addresses=new InetAddrPort[1];
 	addresses[0]=new InetAddrPort();
-	addresses[0].inetAddress = InetAddress.getLocalHost();
+	addresses[0].inetAddress=null;
 	addresses[0].port=port;
 
 	// Configure handlers

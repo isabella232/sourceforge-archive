@@ -98,10 +98,9 @@ public class HttpListener extends ThreadedServer
 		}
 	    }
 	}
-	
-	catch (IOException e)
+	catch (Exception e)
 	{
-	    Code.warning("Request problem:",e);
+	    Code.debug("Request problem:",e);
 	}
 	finally
 	{

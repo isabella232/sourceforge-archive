@@ -40,16 +40,31 @@ public class IndexServlet extends HttpServlet
     String helpUri = "";
 
     /* ------------------------------------------------------------ */
+    public IndexServlet()
+    {
+    }
+
+    /* ------------------------------------------------------------ */
+    protected IndexServlet(PathMap index)
+    {
+	this.index=index;
+    }
+    
+    /* ------------------------------------------------------------ */
     public void init(ServletConfig config)
 	 throws ServletException
     {
 	super.init(config);
+
+	if (index==null)
+	{
+	    String indexName = getInitParameter("indexAttr");
+	    Code.assert(indexName!=null,"indexAttr not set in init Params");
+	    index = (PathMap)getServletContext().getAttribute(indexName);
+	}
 	
-	String indexName = getInitParameter("indexAttr");
-	Code.assert(indexName!=null,"indexAttr not set in init Params");
-	index = (PathMap)getServletContext().getAttribute(indexName);
-	Code.assert(index!=null,indexName+" not set in server attributes");
-	Code.debug("IndexServlet configured with "+index);
+	Code.assert(index!=null,"Index not set in constructor or server attributes");
+	Code.debug("IndexServlet configured with ",index);
 	
 	pageType = getInitParameter("PageType");
 	if (pageType ==null)

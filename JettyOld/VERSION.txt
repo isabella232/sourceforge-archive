@@ -9,13 +9,19 @@ This is a combined release of Jetty and the MortBay utility packages:
      com/mortbay/Servlets
      com/mortbay/Jetty
 
+Release 2.0.Beta3   Sep 1998
+  + Send 301 for directories without trailing / in FileHandler
+  + Ignore exception from HttpListener
+  + Properly implemented multiple listening addresses
+  + Added com.mortbay.Jetty.Server (see README.Jetty)
+  + Demo converted to an instance of com.mortbay.Jetty.Server
+  + Fixed Log Handler again.
 
-Release 2.0Beta2
+Release 2.0Beta2 July 1998
   + Fixed Log Handler for HTTP/1.1
   + Slight improvement in READMEs
 
-
-Release 2.0Beta1
+Release 2.0Beta1 June 1998
   + Improved performance of Code.debug() calls, significantly
     in the case of non matching debug patterns.
   + Fixed bug with calls to service during initialization of servlet
@@ -26,7 +32,7 @@ Release 2.0Beta1
   + Improved performance with special asciiToLowerCase
   + Warn if MSIE used for multi part MIME.
 
-Release 2.0Alpha2
+Release 2.0Alpha2 May 1998
   + JDK1.2 javax.servlet API
   + Added date format to Log
   + Added timezome to Log
@@ -38,7 +44,7 @@ Release 2.0Alpha2
   + Handle Single Threaded servlets with servlet pool
 
 
-Release 1.3.5
+Release 1.3.5 May 1998
   + Fixed socket inet bug in FTP
   + Debug triggers added to com.mortbay.Base.Code
   + Added date format to Log

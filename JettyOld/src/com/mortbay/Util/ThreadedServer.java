@@ -42,11 +42,11 @@ abstract public class ThreadedServer implements Runnable
     public ThreadedServer(int port)
 	 throws java.io.IOException
     {
-	setAddress(InetAddress.getLocalHost(),port);
+	setAddress(null,port);
     }
     
     /* ------------------------------------------------------------------- */
-    /** Construct for specific port
+    /** Construct for specific address and port
      */
     public ThreadedServer(InetAddress address, int port) 
 	 throws java.io.IOException
@@ -111,8 +111,6 @@ abstract public class ThreadedServer implements Runnable
 					int port) 
 	 throws java.io.IOException
     {
-	if (address==null)
-	    address=InetAddress.getLocalHost();
 	this.address = address;
 	this.port = port;
 	if (serverThread!=null && serverThread.isAlive())
@@ -128,12 +126,11 @@ abstract public class ThreadedServer implements Runnable
     final public void start()
 	 throws java.io.IOException
     {
-	if (!InetAddress.getLocalHost().equals(address))
-	    Code.warning("JDK1.0.2 does not support listening on address");
-
 	Code.debug( "Start Listener for " + address + ":" + port );
 	
-	listen = new ServerSocket( port );
+	listen = address==null
+	    ? new ServerSocket( port )
+	    : new ServerSocket( port, 50, address);
 	port = listen.getLocalPort();
 	    
 	if( serverThread == null )

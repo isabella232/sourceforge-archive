@@ -11,7 +11,7 @@ import java.io.*;
 import java.util.*;
 import javax.servlet.http.*;
 import javax.servlet.*;
-
+import java.text.DateFormat;
 
 /* --------------------------------------------------------------------- */
 /** FileHandler
@@ -27,11 +27,11 @@ import javax.servlet.*;
 public class FileHandler extends NullHandler 
 {
     /* ----------------------------------------------------------------- */
-    String fileBase;
+    PathMap dirMap;
     String indexFile;
 
     /* ----------------------------------------------------------------- */
-    /** Construct a FileHandler at the given fileBase
+    /** Construct a FileHandler at "/" for the given fileBase
      */
     public FileHandler(String fileBase)
     {
@@ -45,27 +45,57 @@ public class FileHandler extends NullHandler
     public FileHandler(String fileBase,
 		       String indexFile)
     {
-	this.fileBase = fileBase;
+	dirMap = new PathMap();
+	dirMap.put("/",fileBase);
 	this.indexFile = indexFile;
     }
+    
+    /* ----------------------------------------------------------------- */
+    /** Construct a FileHandler
+     * @param directoryMap PathMap of pathname to directory name
+     */
+    public FileHandler(PathMap directoryMap)
+    {
+	dirMap=directoryMap;
+	this.indexFile = indexFile;
+	Code.debug(dirMap);
+    }
 
+    
     /* ----------------------------------------------------------------- */
     public void handle(HttpRequest request,
 		       HttpResponse response)
 	 throws Exception
-    {	
-	String filename = request.getRequestPath();
-	
-	if (filename.endsWith("/"))
-	   filename = filename.substring(0,filename.length()-1);
-
-	if (filename.indexOf("..")>=0)
+    {
+	// Extract and check filename
+	String uri = request.getRequestPath();
+	if (uri.indexOf("..")>=0)
 	{
 	    Code.warning("Path with .. not handled");
 	    return;
 	}
 	
-	filename = fileBase + filename;
+	// Find path
+	String path=dirMap.longestMatch(uri);
+	if (path==null)
+	    return;
+	String pathInfo = PathMap.pathInfo(path,uri);
+	String filename = dirMap.get(path)+
+	    (pathInfo.startsWith("/")?"":"/")+
+	    pathInfo;
+	
+	Code.debug("URI=",uri,
+		   " PATH=",path,
+		   " PATHINFO=",pathInfo,
+		   " FILENAME=",filename);
+	
+	// check filename
+	boolean endsWithSlash= filename.endsWith("/");
+	if (endsWithSlash)
+	    filename = filename.substring(0,filename.length()-1);
+	endsWithSlash=endsWithSlash || path.endsWith("/");
+	
+	Code.debug("Looking for ",uri," in ",filename);
 	
 	File file = new File(filename);
 	if (file.exists())
@@ -92,12 +122,31 @@ public class FileHandler extends NullHandler
 	    // check if directory
 	    if (file.isDirectory())
 	    {
+		if (!endsWithSlash)
+		{
+		    int port=request.getServerPort();
+		    String q=request.getQueryString();
+		    if (q!=null&&q.length()==0)
+			q=null;
+		    response.setHeader(HttpResponse.Location,
+				       "http://"+
+				       request.getServerName()+
+				       (port==80?"":(":"+port))+
+				       request.getRequestPath()+"/"+
+				       (q==null?"":("?"+q)));
+		    response.sendError(301,"Moved Permanently");
+		    return;
+		}
+
+		// See if index file exists
 		File index = new File(filename+"/"+indexFile);
 		if (index.isFile())
 		    sendFile(request,response,index);
 		else
-		    sendDirectory(request,response,file);
+		    sendDirectory(request,response,file,
+				  !("/".equals(pathInfo)||pathInfo.length()==0));
 	    }
+	    
 	    // check if it is a file
 	    else if (file.isFile())
 	    {
@@ -127,7 +176,8 @@ public class FileHandler extends NullHandler
     /* ------------------------------------------------------------------- */
     void sendDirectory(HttpRequest request,
 		       HttpResponse response,
-		       File file)
+		       File file,
+		       boolean parent)
 	 throws Exception
     {
 	Code.debug("sendDirectory: "+file);
@@ -137,17 +187,30 @@ public class FileHandler extends NullHandler
 	
 	response.setContentType("text/html");
 
-	Page page = new Page("Directory");
-	List list = new List(List.Unordered);
-
-	if (base.length()>1)
-	    list.add(new Link(base+"..",
-			      new Text("..")));
+	String title = "Directory: "+base;
 	
+	Page page = new Page(title);
+	page.add(new Heading(1,title));
+	Table table = new Table(0);
+	page.add(table);
+
+	if (parent)
+	{
+	    table.newRow();
+	    table.addCell(new Link(base+"..","Parent Directory"));
+	}
+	
+	DateFormat dfmt=DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
+						       DateFormat.MEDIUM);
 	String[] ls = file.list();
 	for (int i=0 ; i< ls.length ; i++)
-	    list.add(new Link(base+ls[i],ls[i]));
-	page.add(list);
+	{
+	    File item = new File(file.getPath()+File.separator+ls[i]);
+	    table.newRow();
+	    table.addCell(new Link(base+ls[i],ls[i])+"&nbsp;");
+	    table.addCell(item.length()+"bytes&nbsp;").cell().right();
+	    table.addCell(dfmt.format(new Date(item.lastModified())));
+	}
 	
 	page.write(response.getOutputStream());
     }

@@ -7,7 +7,7 @@
 
 #JAVAOPTIONS := 
 #JAVACOPTIONS :=
-TESTS :=
+TESTS := Server.java
 ROOTNAME := com
 
 UUFILES := \
@@ -16,6 +16,11 @@ UUFILES := \
 
 INSTALLPATH := .
 INSTALLFILES := \
+	JettyServer.prp \
+	etc/RealmDemo.prp \
+	etc/RealmOther.prp \
+	etc/ParamDemo.prp \
+	etc/JettyDemo.prp \
         classes/HelloWorldServlet.class \
 	$(wildcard FileBase/Images/*.gif) \
 	$(wildcard FileBase/*.txt) \

@@ -177,7 +177,6 @@ public class HttpServer implements ServletContext
 	    try{
 		listeners[a] = new HttpListener(addresses[a],this);
 		listeners[a].start();
-		System.err.println("HttpServer listening on "+addresses[a]);
 	    }
 	    catch (java.io.IOException ioe){
 		Code.warning("HttpServer couldn't listen on "+addresses[a],

@@ -266,18 +266,11 @@ public class Log
 
 	    
 	    // Determine the indent string for the message
-	    String indent = "\n  ";
-	    if (_logOneLine)
-	    {
-		__stringBuffer.append(' ');
-		indent = "\\n";
-	    }
-	    else
-		__stringBuffer.append("\n");
-	    
+	    String indent = _logOneLine?"\\n ":"\n  ";
 	    if (_logStackSize)
 		indent += __indent.substring(0,frame._depth)+" ";
-
+	    __stringBuffer.append(indent);
+	    
 	    // Add stack frame to message
 	    if (_logStackTrace)
 		msg = msg + "\n" + frame._stack;

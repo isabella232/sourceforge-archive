@@ -5,6 +5,7 @@
 
 package com.mortbay.HTTP.Handler;
 import java.util.*;
+import java.io.*;
 
 /* --------------------------------------------------------------------- */
 /** Basic Authentication realm.<p>
@@ -14,13 +15,24 @@ import java.util.*;
  * @version $Id$
  * @author Greg Wilkins
  */
-public class BasicAuthRealm extends Hashtable
+public class BasicAuthRealm extends Properties
 {
     /* ----------------------------------------------------------------- */
     private String name =null;
     
     /* ----------------------------------------------------------------- */
-    /** Construct the realm
+    /** Construct realm from property file
+     * @param name The name of the realm
+     */
+    public BasicAuthRealm(String name,String filename)
+	throws IOException
+    {
+	this.name=name;
+	load(new FileInputStream(filename));
+    }
+    
+    /* ----------------------------------------------------------------- */
+    /** Construct empty realm
      * @param name The name of the realm
      */
     public BasicAuthRealm(String name)

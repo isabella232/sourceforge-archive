@@ -7,8 +7,8 @@
      - Timeout connection
      - Handle termination of multipart mime server push.
 
- + Detect MSIE and complain for server push.
-
  + Convert Servlets to use get & post methods
 
  + Check head method against Head exception
+
+ + Implement encrypted password realm storage.

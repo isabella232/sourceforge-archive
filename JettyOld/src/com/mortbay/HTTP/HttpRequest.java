@@ -119,13 +119,18 @@ public class HttpRequest extends HttpHeader
 		slash=0;
 	    else
 		slash+=2;
-	    slash=requestURI.indexOf("/",slash);
-	    protocolHostPort=requestURI.substring(0,slash);
-	    requestURI=requestURI.substring(slash);
+	    if (slash<requestURI.length())
+	    {
+		slash=requestURI.indexOf("/",slash);
+		if (slash>0)
+		{
+		    protocolHostPort=requestURI.substring(0,slash);
+		    requestURI=requestURI.substring(slash);
+		}
+	    }
 	}
-	else
+	if (protocolHostPort==null)
 	    protocolHostPort="";
-	
 
 	// Build URI
 	uri = new URI(requestURI);
@@ -444,8 +449,7 @@ public class HttpRequest extends HttpHeader
      * </PRE>
      */
     public String getServerName()
-    {
-	
+    {	
 	if (serverName==null)
 	{
 	    serverName=getHeader(Host);
@@ -462,7 +466,7 @@ public class HttpRequest extends HttpHeader
 		else
 		    serverPort=80;
 	    }
-	    else
+	    else if (address.inetAddress!=null)
 		serverName = address.inetAddress.getHostName();
 	    
 	    if (serverName==null)
