@@ -293,6 +293,9 @@ public abstract class AbstractSessionManager implements SessionManager
     public void addEventListener(EventListener listener)
         throws IllegalArgumentException
     {
+        
+        // TODO - this needs to be checked.
+         
         boolean known =false;
         if (listener instanceof HttpSessionAttributeListener)
         {
