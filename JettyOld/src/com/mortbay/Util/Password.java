@@ -8,7 +8,7 @@ import com.mortbay.Base.*;
 import java.io.*;
 
 /* ------------------------------------------------------------ */
-/** Get a password 
+/** Get a password
  *
  * This utility class gets a password or pass phrase either by:<PRE>
  *  + Password is set as a system property.
@@ -29,19 +29,19 @@ public class Password
 {
     private String pw;
     private char[] pwc;
-    
+
     /* ------------------------------------------------------------ */
-    /** Constructor. 
-     * @param name 
+    /** Constructor.
+     * @param name
      */
     public Password(String name)
     {
 	this(name,"",null);
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** Constructor. 
-     * @param name 
+    /** Constructor.
+     * @param name
      */
     public Password(String name,String dft,String promptDft)
     {
@@ -76,9 +76,9 @@ public class Password
     }
 
     /* ------------------------------------------------------------ */
-    /* 
-     * @param pass 
-     * @return 
+    /*
+     * @param pass
+     * @return
      */
     private String expand(String name, String pass)
     {
@@ -105,13 +105,13 @@ public class Password
 	System.err.println("PW="+pass);
 	return pass;
     }
-    
+
     /* ------------------------------------------------------------ */
     public String toString()
     {
 	return pw;
     }
-    
+
     /* ------------------------------------------------------------ */
     public String toStarString()
     {
@@ -128,20 +128,19 @@ public class Password
     public void zero()
     {
 	pw=null;
-	java.util.Arrays.fill(pwc,'\0');
 	pwc=null;
     }
 
     /* ------------------------------------------------------------ */
-    /* 
-     * @param s 
-     * @return 
+    /*
+     * @param s
+     * @return
      */
     private static String obfiscate(String s)
     {
 	StringBuffer buf = new StringBuffer();
 	byte[] b = s.getBytes();
-	
+
 	synchronized(buf)
 	{
 	    buf.append("OBF:");
@@ -165,17 +164,17 @@ public class Password
 	    return buf.toString();
 	}
     }
-    
+
     /* ------------------------------------------------------------ */
-    /* 
-     * @param s 
-     * @return 
+    /*
+     * @param s
+     * @return
      */
     private static String deobfiscate(String s)
     {
 	if (s.startsWith("OBF:"))
 	    s=s.substring(4);
-	
+
 	byte[] b=new byte[s.length()/2];
 	int l=0;
 	for (int i=0;i<s.length();i+=4)
@@ -190,17 +189,17 @@ public class Password
 	return new String(b,0,l);
     }
 
-    
+
     /* ------------------------------------------------------------ */
-    /** 
-     * @param arg 
+    /**
+     * @param arg
      */
     public static void main(String[] arg)
     {
 	Password pw = new Password("password");
 	System.err.println(obfiscate(pw.toString()));
     }
-    
+
 }
 
 
