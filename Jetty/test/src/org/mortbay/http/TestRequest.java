@@ -14,6 +14,7 @@ import java.util.Set;
 import org.mortbay.util.Code;
 import org.mortbay.util.TestCase;
 import org.mortbay.util.URI;
+import org.mortbay.util.LineInput;
 
 /* ------------------------------------------------------------ */
 /** Test HTTP Request.
@@ -39,7 +40,7 @@ public class TestRequest
         HttpConnection connection = new HttpConnection(null,null,in,out,null);
         
         HttpRequest request = new HttpRequest(connection);
-        request.readHeader(connection.getInputStream());
+        request.readHeader((LineInput)((ChunkableInputStream)connection.getInputStream()).getRawStream());
         return request;
     }
     

@@ -179,19 +179,17 @@ public class HttpRequest extends HttpMessage
      * @param in 
      * @exception IOException 
      */
-    public void readHeader(ChunkableInputStream in)
+    public void readHeader(LineInput in)
         throws IOException
     {
         _state=__MSG_BAD;
-
-        LineInput line_input = (LineInput)in.getRawStream();
         
         // Get start line
         org.mortbay.util.LineInput.LineBuffer line_buffer;
 
         do
         {
-            line_buffer=line_input.readLineBuffer();
+            line_buffer=in.readLineBuffer();
             if (line_buffer==null)
                 throw new InterruptedIOException("EOF");
         }
@@ -206,7 +204,7 @@ public class HttpRequest extends HttpMessage
         {
             _dotVersion=1;
             _version=__HTTP_1_1;
-            _header.read(line_input);
+            _header.read(in);
             setMimeAndEncoding(_header.get(HttpFields.__ContentType));
         }
         else if (__HTTP_0_9.equals(_version))
@@ -218,7 +216,7 @@ public class HttpRequest extends HttpMessage
         {
             _dotVersion=0;
             _version=__HTTP_1_0;
-            _header.read(line_input);
+            _header.read(in);
             setMimeAndEncoding(_header.get(HttpFields.__ContentType));
         }
 

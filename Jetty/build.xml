@@ -66,6 +66,7 @@ Other targets:
   <property name="jasper.jar"     value="${lib}/org.apache.jasper.jar"/>
   <property name="jaxp.jar"       value="${lib}/javax.xml.jaxp.jar"/>
   <property name="xml.jar"        value="${lib}/org.apache.crimson.jar"/>
+  <property name="jdom.jar"       value="${lib}/jdom.jar"/>
   <property name="jsse.jar"       value="${lib}/com.sun.net.ssl.jar"/>
   <property name="junit.jar"      value="${test.lib}/junit-3.7.jar"/>
 
@@ -73,6 +74,7 @@ Other targets:
     <pathelement path="${jsse.jar}" />
     <pathelement path="${jaxp.jar}" />
     <pathelement path="${xml.jar}" />
+    <pathelement path="${jdom.jar}" />
   </path>
 
   <path id="classpath">

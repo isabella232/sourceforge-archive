@@ -20,6 +20,7 @@ import org.mortbay.util.LifeCycle;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.ThreadPool;
 import org.mortbay.util.ThreadPool.PoolThread;
+import org.mortbay.util.LineInput;
 
 
 /* ------------------------------------------------------------ */
@@ -818,7 +819,7 @@ public class HttpConnection
                 _outputSetup=false;
                 if (poolThread!=null)
                     poolThread.setActive(false);
-                _request.readHeader(getInputStream());
+                _request.readHeader((LineInput)((ChunkableInputStream)_inputStream).getRawStream());
                 if (poolThread!=null)
                     poolThread.setActive(true);
                 _listener.customizeRequest(this,_request);
