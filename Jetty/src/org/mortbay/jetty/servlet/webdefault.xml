@@ -13,14 +13,15 @@
 <!-- If the version in $JETTY_HOME/etc/ is to be used, then the            -->
 <!-- setDefaultsDescriptor method must be called on each context,          -->
 <!-- giving the location of the default web.xml file to use.               -->
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-<!-- eg of settig the defaultsDescriptor.
+<!-- eg of setting the defaultsDescriptor in jetty.xml:
+
     <Call name="addWebApplication">
       <Arg>/mycontext</Arg>
       <Arg><SystemProperty name="jetty.home" default=".">/webapps/mywebapp</Arg>
       <Set name="defaultsDescriptor"><SystemProperty name="jetty.home" default=".">/etc/webdefault.xml</Set>
     </Call>
-  -->
+                                                                           -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 
 <!-- ===================================================================== -->

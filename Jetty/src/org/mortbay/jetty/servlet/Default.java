@@ -240,7 +240,8 @@ public class Default extends HttpServlet
     {
         Code.debug("handlePut ",resource);
 
-        if (resource!=null && resource.exists() && !passConditionalHeaders(request,response,resource))
+        boolean exists=resource!=null && resource.exists();
+        if (exists && !passConditionalHeaders(request,response,resource))
             return;
 
         try
@@ -253,17 +254,17 @@ public class Default extends HttpServlet
             else
                 IO.copy(in,out);
             out.close();
-            response.sendError(HttpResponse.__204_No_Content);
-        }
-        catch (SecurityException sex)
-        {
-            Code.warning(sex);
-            response.sendError(HttpResponse.__403_Forbidden,
-                               sex.getMessage());
+
+            response.setStatus(exists
+                               ?HttpResponse.__200_OK
+                               :HttpResponse.__201_Created);
+            response.flushBuffer();
         }
         catch (Exception ex)
         {
             Code.warning(ex);
+            response.sendError(HttpResponse.__403_Forbidden,
+                               ex.getMessage());
         }
     }
     

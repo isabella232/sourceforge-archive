@@ -201,12 +201,13 @@ public class WebApplicationHandler extends ServletHandler
         }
         finally
         {
+            if (!httpRequest.isHandled())
+                httpResponse.sendError(HttpResponse.__404_Not_Found);            
             httpRequest.setHandled(true);
             if (!httpResponse.isCommitted())
                 httpResponse.commit();
         }
     }
-    
     
     /* ------------------------------------------------------------ */
     void dispatch(String pathInContext,

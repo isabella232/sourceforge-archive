@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Improved the return codes for PUT
  + Made HttpServer serializable
  + Updated international URI doco
  + Updated jasper to CVS snapshot 200208011920

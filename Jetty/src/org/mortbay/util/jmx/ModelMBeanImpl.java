@@ -167,14 +167,16 @@ public class ModelMBeanImpl
 
                 try{
                     Class mClass=loader.loadClass(mName);
+		    if (Code.verbose())Code.debug("mbeanFor ",o," mClass=",mClass);
                     mbean=(ModelMBean)mClass.newInstance();
                     mbean.setManagedResource(o,"objectReference");
+		    Code.debug("mbeanFor ",o," is ",mbean);
                     return mbean;
                 }
                 catch(ClassNotFoundException e)
                 {
                     if (e.toString().endsWith("MBean"))
-                        Code.ignore(e);
+		    { if (Code.verbose()) Code.debug(e.toString());}
                     else
                         Code.warning(e);
                 }
@@ -945,10 +947,10 @@ public class ModelMBeanImpl
                         if (description!=null && description.length()>0)
                             return description;
                     }
-                    catch(Exception e) { Code.ignore(e); }
+                    catch(Exception e) { if(Code.verbose())Code.debug(e.toString()); }
                 }
             }
-            catch(Exception e) { Code.ignore(e); }
+            catch(Exception e) { if(Code.verbose())Code.debug(e.toString()); }
 
             lookIn=lookIn.getSuperclass();
         }

@@ -103,6 +103,11 @@ public class ServerMBean extends HttpServerMBean
         
         defineOperation("addWebApplication",
                         new String[]{"java.lang.String",
+                                     "java.lang.String"},
+                        IMPACT_ACTION);
+
+        defineOperation("addWebApplication",
+                        new String[]{"java.lang.String",
                                      "java.lang.String",
                                      "java.lang.String"},
                         IMPACT_ACTION);

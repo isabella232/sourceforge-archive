@@ -320,7 +320,8 @@ public class ResourceHandler extends AbstractHttpHandler
     {
         Code.debug("PUT ",pathInContext," in ",resource);
 
-        if (resource.exists() &&
+        boolean exists=resource!=null && resource.exists();
+        if (exists &&
             !passConditionalHeaders(request,response,resource))
             return;
         
@@ -335,17 +336,16 @@ public class ResourceHandler extends AbstractHttpHandler
                 IO.copy(in,out);
             out.close();
             request.setHandled(true);
-            response.sendError(response.__204_No_Content);
-        }
-        catch (SecurityException sex)
-        {
-            Code.warning(sex);
-            response.sendError(response.__403_Forbidden,
-                               sex.getMessage());
+            response.setStatus(exists
+                               ?HttpResponse.__200_OK
+                               :HttpResponse.__201_Created);
+            response.commit();
         }
         catch (Exception ex)
         {
             Code.warning(ex);
+            response.sendError(response.__403_Forbidden,
+                               ex.getMessage());
         }
     }
 

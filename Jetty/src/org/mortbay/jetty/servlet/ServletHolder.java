@@ -350,7 +350,7 @@ public class ServletHolder extends Holder
                 user=_realm.pushRole(http_request.getUserPrincipal(),_run_as);
                 http_request.setUserPrincipal(user);
             }
-
+            
             servlet.service(request,response);
             servlet_error=false;
         }

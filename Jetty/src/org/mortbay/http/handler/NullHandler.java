@@ -29,9 +29,7 @@ import org.mortbay.util.ByteArrayISO8859Writer;
  * @author Greg Wilkins (gregw)
  */
 abstract public class NullHandler extends AbstractHttpHandler
-{
-    private NullHandler(){}
-}
+{}
 
 
 
