@@ -319,6 +319,7 @@ public class WebApplicationContext
         Thread thread = Thread.currentThread();
         ClassLoader lastContextLoader=thread.getContextClassLoader();
 
+        MultiException mex=null;
         try
         {            
             // Get parser
@@ -338,34 +339,7 @@ public class WebApplicationContext
             // Get the handler
             getServletHandler();
             
-            // Do the default configuration
-            try
-            {
-                if (_defaultsDescriptor!=null && _defaultsDescriptor.length()>0)
-                {
-                    Resource dftResource= Resource.newSystemResource(_defaultsDescriptor);
-                    if (dftResource==null)
-                        dftResource= Resource.newResource(_defaultsDescriptor);
-                    
-                    _defaultsDescriptor=dftResource.toString();
-                    XmlParser.Node defaultConfig =
-                        xmlParser.parse(dftResource.getURL().toString());
-                    initialize(defaultConfig);
-                }
-            }
-            catch(IOException e)
-            {
-                Code.warning("Parse error on "+_war,e);
-                throw e;
-            }	
-            catch(Exception e)
-            {
-                Code.warning("Configuration error "+_war,e);
-                throw new IOException("Parse error on "+_war+
-                                      ": "+e.toString());
-            }
-            
-            // Do we have a WEB-INF
+            // Add WEB-INF classes and lib classpaths
             if (_webInf!=null && _webInf.isDirectory())
             {
                 // Look for classes directory
@@ -378,11 +352,28 @@ public class WebApplicationContext
                 // Look for jars
                 Resource lib = _webInf.addPath("lib/");
                 super.setClassPaths(lib,true);
+            }
+          
+            // initialize the classloader
+            initClassLoader(true);
+            thread.setContextClassLoader(getClassLoader());
+            
+            // Do the default configuration
+            if (_defaultsDescriptor!=null && _defaultsDescriptor.length()>0)
+            {
+                Resource dftResource= Resource.newSystemResource(_defaultsDescriptor);
+                if (dftResource==null)
+                    dftResource= Resource.newResource(_defaultsDescriptor);
                 
-                // setup classloader
-                initClassLoader(true);
-                thread.setContextClassLoader(getClassLoader());
-                
+                _defaultsDescriptor=dftResource.toString();
+                XmlParser.Node defaultConfig =
+                    xmlParser.parse(dftResource.getURL().toString());
+                initialize(defaultConfig);
+            }
+
+            // handle any WEB-INF descriptors
+            if (_webInf!=null && _webInf.isDirectory())
+            {
                 // do web.xml file
                 Resource web = _webInf.addPath("web.xml");
                 if (!web.exists())
@@ -392,27 +383,9 @@ public class WebApplicationContext
                 else
                 {
                     XmlParser.Node config=null;
-                    try 
-                    {
-                        _deploymentDescriptor=web.toString();
-                        config = xmlParser.parse(web.getURL().toString());
-                    }
-                    catch(IOException e)
-                    {
-                        Code.warning("Parse error on "+_war,e);
-                        throw e;
-                    }
-                    
-                    try
-                    {
-                        initialize(config);
-                    }
-                    catch(Exception e)
-                    {
-                        Code.warning("Configuration error "+_war,e);
-                        throw new IOException("Initialization failed for "+_war+
-                                              ": "+e.toString());
-                    }
+                    _deploymentDescriptor=web.toString();
+                    config = xmlParser.parse(web.getURL().toString());
+                    initialize(config);
                 }
                 
                 // do jetty.xml file
@@ -421,30 +394,12 @@ public class WebApplicationContext
                     jetty = _webInf.addPath("jetty-web.xml");
                 if (!_ignorewebjetty && jetty.exists())
                 {
-                    try
-                    {
-                        Code.debug("Configure: "+jetty);
-                        XmlConfiguration jetty_config=new
-                            XmlConfiguration(jetty.getURL());
-                        jetty_config.configure(this);
-                    }
-                    catch(IOException e)
-                    {
-                        Code.warning("Parse error on "+_war,e);
-                        throw e;
-                    }	
-                    catch(Exception e)
-                    {
-                        Code.warning("Configuration error "+_war,e);
-                        throw new IOException("Parse error on "+_war+
-                                              ": "+e.toString());
-                    }
+                    Code.debug("Configure: "+jetty);
+                    XmlConfiguration jetty_config=new
+                        XmlConfiguration(jetty.getURL());
+                    jetty_config.configure(this);
                 }
             }
-            
-            // initialize the classloader (if it has not been so already)
-            initClassLoader(true);
-            thread.setContextClassLoader(getClassLoader());
             
             // Set classpath for Jasper.
             Map.Entry entry = _webAppHandler.getHolderEntry("test.jsp");
@@ -462,12 +417,10 @@ public class WebApplicationContext
             // If we have servlets, don't init them yet
             _webAppHandler.setAutoInitializeServlets(false);
             
-            MultiException mex = new MultiException();
-            
             // Start handlers
-            try { super.start(); }
-            catch(Exception ex) { mex.add(ex); }
-            
+            super.start();
+
+            mex = new MultiException();
             // If it actually started
             if (super.isStarted())
             {            
@@ -490,15 +443,21 @@ public class WebApplicationContext
                 }
                 catch(Exception ex) { mex.add(ex); }
             }
-            
-            mex.ifExceptionThrow();
-            
+        }	
+        catch(Exception e)
+        {
+            Code.warning("Configuration error on "+_war,e);
+            throw e;
         }
         finally
         {
             thread.setContextClassLoader(lastContextLoader);
-        }    
+        }
+        
+        if (mex!=null)
+            mex.ifExceptionThrow();
     }
+
     
     /* ------------------------------------------------------------ */
     /** Stop the web application.

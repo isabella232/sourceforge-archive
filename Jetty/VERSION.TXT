@@ -2,8 +2,10 @@ Jetty Versions
 --------------
 
 
+Jetty-4.2.9rc2
  + Fixed build.xml for source release
  + Made rfc2068 PUT/POST Continues support optional.
+ + Defaults descriptor has context classloader set.
 
 Jetty-4.2.9rc1 - 6 March 2003
  + Work around URLClassloader not handling leading /
