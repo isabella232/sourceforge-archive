@@ -142,7 +142,6 @@ public class FormAuthenticator implements Authenticator
                 }
                 else
                 {
-                    session.removeAttribute(__J_URI); // Remove popped return URI.
                     response.sendError(HttpResponse.__403_Forbidden);
                 }
             }
