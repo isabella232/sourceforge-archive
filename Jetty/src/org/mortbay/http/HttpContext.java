@@ -47,7 +47,7 @@ import org.mortbay.util.URI;
  * that share the same path prefix, filebase, resourcebase and/or
  * classpath.
  * <p>
- * A HttpContext is analageous to a ServletContext in the
+ * A HttpContext is analagous to a ServletContext in the
  * Servlet API, except that it may contain other types of handler
  * other than servlets.
  * <p>
