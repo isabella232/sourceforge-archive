@@ -16,7 +16,7 @@ Other targets:
 
 -->
 
-<project name="JettyPlus" default="jars" basedir=".">
+<project name="JettyPlus" default="all" basedir=".">
 
   <!-- ==================================================================== -->
   <property name="package"          value="jetty.plus" />
@@ -316,6 +316,12 @@ Other targets:
     <ant antfile="${test}/build.xml" inheritAll="false" target="test"/>
   </target>
 
+
+  <!-- ==================================================================== -->
+  <!-- all                                                                  -->
+  <!-- ==================================================================== -->
+  <target name="webapps" depends="build.jaas.webapp, build.jettyplus.webapp" description="build webapps">
+  </target>
 
   <!-- ==================================================================== -->
   <!-- all                                                                  -->
