@@ -4,6 +4,10 @@ Jetty Versions
 Jetty-5.1.3rc1 - 
  + Fixed typo in context-param handling.
  + update to demo site look and feel.
+ + Fixed principal naming in FormAuthenticator
+
+Jetty-4.2.24rc1 
+ + Fixed principal naming in FormAuthenticator
 
 Jetty-5.1.3rc0 - 8 March 2005
  + Flush filter chain caches on servlet/filter change

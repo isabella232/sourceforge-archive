@@ -249,7 +249,7 @@ public class FormAuthenticator implements Authenticator
             {
                 form_cred=new FormCredential();
                 form_cred._userPrincipal=request.getUserPrincipal();
-                form_cred._jUserName=form_cred._userPrincipal.toString();
+                form_cred._jUserName=form_cred._userPrincipal.getName();
                 if (cred!=null)
                     form_cred._jPassword=cred.toString();
                 if(log.isDebugEnabled())log.debug("SSO for "+form_cred._userPrincipal);
