@@ -383,16 +383,21 @@ abstract public class ThreadedServer extends ThreadPool
         catch(SocketException e){Code.warning(e);}
         try {super.stop();}
         finally
-        {    
-            if (_listen!=null)
-            {
-                try{
-                    _listen.close();
-                }
-                catch(IOException e){Code.warning(e);}
-                _listen=null;
-            }
+        {
+            try{if (_listen!=null) _listen.close();}
+            catch(IOException e){Code.warning(e);}
+            _listen=null;
         }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Force a stop by closing the socket.
+     * called from stop if interrupt is not enough
+     */
+    protected void forceStop()
+    {
+        try{if (_listen!=null) _listen.close();}
+        catch(IOException e){Code.warning(e);}
     }
     
     /* --------------------------------------------------------------- */

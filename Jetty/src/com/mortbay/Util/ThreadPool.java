@@ -299,6 +299,7 @@ public class ThreadPool
         
         while (_threadSet!=null && !_threadSet.isEmpty())
         {
+            int size = _threadSet.size();
             synchronized(this)
             {
                 Object[] threads=_threadSet.toArray();
@@ -310,9 +311,22 @@ public class ThreadPool
             }
             Thread.yield();
             if (_threadSet.size()>0)
+            {
                 Thread.sleep(200);
+                if (_threadSet.size()==size)
+                    forceStop();
+            }
         }
     }
+
+
+    /* ------------------------------------------------------------ */
+    /** Take forceful stop actions.
+     * This method is called if interrupt is not stopping the
+     * threads.
+     */
+    protected void forceStop()
+    {}
     
     
     /* ------------------------------------------------------------ */
