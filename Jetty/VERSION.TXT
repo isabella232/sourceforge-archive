@@ -1,11 +1,14 @@
 Jetty Versions
 --------------
 
- + Race in HttpFields cache???
+ + Removed support for HTTP trailers
  + PathMap uses own Map.Entry impl for IBM JVMs 
  + Use ${jetty.home}/work or WEB-INF/work for temp directories if present
  + Protect ThreadPool.run() from interrupted exceptions
  + Added org.mortbay.http.ErrorHandler for error pages.
+ + Fixed init race in HttpFields cache
+ + Allow per listener handlers
+ + Added MsieSslHandler to handle browsers that don't grok persistent SSL (msie 5)
 
 Jetty-5.0.beta0 
  + respect content length when decoding form content.
