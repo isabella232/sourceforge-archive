@@ -54,7 +54,7 @@ Jetty-3.1.rc5 - 1 May 2001
  + Fixed ResourceHandler handling of ;JSESSIONID
  + Fixed forwarding to null pathInfo requests.
  + Fixed handling of multiple cookies.
- + Fixed EOF handlding in MultiPartRequest.
+ + Fixed EOF handling in MultiPartRequest.
  + Fixed sync of ThreadPool idleSet.
  + Fixed jetty.bat classpath problems.
  
