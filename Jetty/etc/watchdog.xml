@@ -72,6 +72,13 @@ Instructions for running Watchdog on Linux
   </Call>
 
   <Call name="addWebApplication">
+    <Arg>/servlet-compat/*</Arg>
+    <Arg>webapps/servlet-compat.war</Arg>
+    <Arg>etc/webdefault.xml/</Arg>
+    <Arg type="boolean">true</Arg>
+  </Call>
+
+  <Call name="addWebApplication">
     <Arg></Arg>
     <Arg>/jsp-tests/*</Arg>
     <Arg>webapps/jsp-tests.war</Arg>

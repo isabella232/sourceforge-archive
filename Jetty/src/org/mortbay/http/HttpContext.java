@@ -444,7 +444,7 @@ public class HttpContext implements LifeCycle
         catch(Exception e)
         {
             _tmpDir=null;
-            Code.warning(e);
+            Code.ignore(e);
         }    
         
         if (_tmpDir==null)

@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Updated crimson to 1.1.3
+ + Added hack for compat tests in watchdog for old tomcat stuff 
  + Added AbstractSessionManager
  + Support Random Session IDs in HashSessionManager.
  + Common handling of TRACE 

@@ -256,6 +256,13 @@ public class ServletHandler
                                           String servletName)
     {
         ServletHolder holder =(ServletHolder)_nameMap.get(servletName);
+
+        if (!pathSpec.startsWith("/") && !pathSpec.startsWith("*"))
+        {
+            Code.warning("pathSpec must start with '/' or '*' : "+pathSpec);
+            pathSpec="/"+pathSpec;
+        }
+        
         if (holder==null)
             throw new IllegalArgumentException("Unknown servlet: "+servletName);
         _servletMap.put(pathSpec,holder);
