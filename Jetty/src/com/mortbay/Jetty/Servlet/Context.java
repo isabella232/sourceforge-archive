@@ -604,10 +604,8 @@ public class Context implements ServletContext, HttpSessionContext
             {
                 do
                 {
-                    // XXX This needs to be much better!
-                    long idtmp = __nextSessionId;
-                    __nextSessionId+=created%4096;
-                    long newId=idtmp ^(created<<8);
+                    long newId = __nextSessionId;
+                    __nextSessionId+=this.hashCode();
                     if (newId<0)newId=-newId;
                     this.id=Long.toString(newId,30+(int)(created%7));
                 }

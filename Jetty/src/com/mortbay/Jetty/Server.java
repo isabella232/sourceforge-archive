@@ -11,6 +11,8 @@ import com.mortbay.Jetty.Servlet.WebApplicationContext;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.Runtime;
 import java.net.URL;
 import org.xml.sax.SAXException;
 import java.util.List;
@@ -218,17 +220,47 @@ public class Server extends HttpServer
             System.err.println("Using default configuration: etc/jetty.xml");
             arg=dftConfig;
         }
-        
+
+        final Server[] servers=new Server[arg.length];
+
+        // create and start the servers.
         for (int i=0;i<arg.length;i++)
         {
             try
             {
-                new Server(arg[i]).start();
+                servers[i] = new Server(arg[i]);
+                servers[i].start();
             }
             catch(Exception e)
             {
                 Code.warning(e);
             }
+        }
+
+        // Create and add a shutdown hook
+        Thread hook =
+            new Thread() {
+                    public void run() {
+                        Code.warning("Shutdown hook executing");
+                        for (int i=0;i<servers.length;i++)
+                        {
+                            try{servers[i].stop();}
+                            catch(Exception e){Code.warning(e);}
+                        }
+                    }
+                };
+
+        try
+        {
+            Method shutdownhook=
+                java.lang.Runtime.class.getMethod("addShutdownHook",new
+                    Class[] {java.lang.Thread.class});
+            shutdownhook.invoke(Runtime.getRuntime(),
+                                new Object[]{hook});
+        }
+        catch(Exception e)
+        {
+            Code.debug("No shutdown hook",e);
         }
     }
 }
