@@ -72,13 +72,13 @@ public class B64Code
             switch(n++)
             {
               case 0:
-                  nibble = b>>2;
+                  nibble = (b&0xfc)>>2;
                   encode[e++]=nibble2code[nibble];
                   nibble = (b&0x3)<<4;
                   break;
                 
               case 1:
-                  nibble += b>>4;
+                  nibble += (b&0xf0)>>4;
                   encode[e++]=nibble2code[nibble];
                   nibble = (b&0xf)<<2;
                   break;
@@ -86,7 +86,7 @@ public class B64Code
               case 2:
               default:
                   n=0;
-                  nibble += b>>6;
+                  nibble += (b&0xc0)>>6;
                   encode[e++]=nibble2code[nibble];
                   nibble = (b&0x3f);
                   encode[e++]=nibble2code[nibble];
