@@ -3,6 +3,7 @@ Jetty Versions
 
 Jetty-4.2.8_01 - 18 February 2004
  + Patched first release of 4.2.8 with correct version number
+ + Fixed CGI servlet to handle multiple headers.
  + Added a SetResponseHeadersHandler, can set P3P headers etc.
  + ProxyHandler can handle multiple cookies.
  + Fixed AdminServlet to handle changed getServletPath better.

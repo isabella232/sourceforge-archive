@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -1409,25 +1410,26 @@ public class HttpFields
      * return an iterator for field name:value pairs
      * @return an HttpFields.Iterator
      */
+    public Iterator iterator() {return new EntryIterator();}
 
-  public Iterator iterator() {return new Iterator();}
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public class Entry
+    {
+        protected int _i;
+        
+        Entry(int i) {_i=i;}
+        public String getKey() {return ((Field)_fields.get(_i)).getDisplayName();}
+        public String getValue() {return ((Field)_fields.get(_i))._value;}
+    }
 
-  public class
-    Entry
-  {
-    protected int _i;
-    
-    Entry(int i) {_i=i;}
-    public String getKey() {return ((Field)_fields.get(_i)).getDisplayName();}
-    public String getValue() {return ((Field)_fields.get(_i))._value;}
-  }
-
-  public class
-    Iterator
-  {
-    protected int _i=0;
-
-    public boolean hasNext() {return (_i<_fields.size());}
-    public Entry next() {return new Entry(_i++);}
-  }
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class EntryIterator implements Iterator
+    {
+        protected int _i=0;
+        public boolean hasNext() {return (_i<_fields.size());}
+        public Object next() {return new Entry(_i++);}
+        public void remove() { throw new UnsupportedOperationException();}
+    }
 }

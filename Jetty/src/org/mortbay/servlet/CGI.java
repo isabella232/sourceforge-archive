@@ -21,13 +21,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.mortbay.http.HttpFields.Entry;
-import org.mortbay.http.HttpFields.Iterator;
 import org.mortbay.http.HttpFields;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
@@ -284,10 +284,10 @@ public class CGI extends HttpServlet
             }
 
             // copy remaining headers into response...
-	    for (HttpFields.Iterator i=fields.iterator(); i.hasNext();)
+	    for (Iterator i=fields.iterator(); i.hasNext();)
             {
-	      HttpFields.Entry e=i.next();
-	      res.addHeader(e.getKey(),e.getValue());
+                HttpFields.Entry e=(HttpFields.Entry)i.next();
+                res.addHeader(e.getKey(),e.getValue());
             }
 
             if (status==null && redirect != null)
