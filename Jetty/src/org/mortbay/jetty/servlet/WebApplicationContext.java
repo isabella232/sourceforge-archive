@@ -91,13 +91,7 @@ public class WebApplicationContext extends ServletHttpContext
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
-     * @param httpServer The HttpServer for this context
-     * @param contextPathSpec The context path spec. Which must be of
-     * the form / or /path/*
      * @param webApp The Web application directory or WAR file.
-     * @param defaults The defaults xml filename or URL which is
-     * loaded before any in the web app. Must respect the web.dtd.
-     * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
      * @exception IOException 
      */
     public WebApplicationContext(String webApp)

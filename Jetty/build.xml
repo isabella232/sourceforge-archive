@@ -250,8 +250,6 @@ Other targets:
   <!-- ==================================================================== -->
   <target name="mortbay.jmx.jar" depends="classes">
     <copy file="${src}/org/mortbay/jetty/jmx/demo.mlet" tofile="${etc}/demo.mlet" />
-    <replace file="${etc}/demo.mlet" token="__JETTY_JMX_HOME__" value="${basedir}" />
-    <replace file="${etc}/demo.mlet" token="__JETTY_HOME__" value="${basedir}" />
     <jar jarfile="${mortbay.jmx.jar}">
        <fileset dir="${classes}">
          <include name="org/mortbay/**/jmx/**"/>

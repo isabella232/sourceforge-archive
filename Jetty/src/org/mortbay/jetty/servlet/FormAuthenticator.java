@@ -9,6 +9,7 @@ import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.SecurityConstraint;
@@ -103,16 +104,18 @@ public class FormAuthenticator implements Authenticator
                 session.setAttribute(__J_AUTHENTICATED,user);
                 String nuri=(String)session.getAttribute(__J_URI);
                 if (nuri==null)
-                    response.sendRedirect(URI.addPaths(request.getContextPath(),
-                                                       _formErrorPage));
-                else
-                    response.sendRedirect(nuri);
+                    nuri=URI.addPaths(request.getContextPath(),_formErrorPage);
+
+                response.setHeader(HttpFields.__Location,nuri);
+                response.sendError(HttpResponse.__303_See_Other);
             }
             else
             {
                 Code.debug("Form authentication FAILED for ",username);
-                response.sendRedirect(URI.addPaths(request.getContextPath(),
-                                                   _formErrorPage));
+                response.setHeader(HttpFields.__Location,
+                                   URI.addPaths(request.getContextPath(),
+                                                _formErrorPage));
+                response.sendError(HttpResponse.__303_See_Other);
             }
             
             // Security check is always false, only true after final redirection.

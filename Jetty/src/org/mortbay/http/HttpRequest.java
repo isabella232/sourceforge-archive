@@ -1041,6 +1041,8 @@ public class HttpRequest extends HttpMessage
         _cookies=null;
         _timeStamp=0;
         _timeStampStr=null;
+        _authUser=null;
+        _authType=null;
         _userPrincipal=null;
         super.recycle(connection);
     }
@@ -1059,6 +1061,8 @@ public class HttpRequest extends HttpMessage
         _cookies=null;
         _timeStampStr=null;
         _userPrincipal=null;
+        _authUser=null;
+        _authUser=null;
         if (_attributes!=null)
             _attributes.clear();
         super.destroy();
