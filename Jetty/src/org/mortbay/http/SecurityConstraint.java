@@ -343,10 +343,15 @@ public class SecurityConstraint
                           break;
 
                       if (listener.getIntegralPort()>0)
-                          response.sendRedirect(listener.getIntegralScheme()+
-                                                "://"+request.getHost()+
-                                                ":"+listener.getIntegralPort()+
-                                                request.getPath());
+                      {
+                          String url=listener.getIntegralScheme()+
+                              "://"+request.getHost()+
+                              ":"+listener.getIntegralPort()+
+                              request.getPath();
+                          if (request.getQuery()!=null)
+                              url+="?"+request.getQuery();
+                          response.sendRedirect(url);
+                      }
                       else
                           response.sendError(HttpResponse.__403_Forbidden);                   
                       return -1;
@@ -356,10 +361,15 @@ public class SecurityConstraint
                           break;
 
                       if (listener.getConfidentialPort()>0)
-                          response.sendRedirect(listener.getConfidentialScheme()+
-                                                "://"+request.getHost()+
-                                                ":"+listener.getConfidentialPort()+
-                                                request.getPath());
+                      {
+                          String url=listener.getConfidentialScheme()+
+                              "://"+request.getHost()+
+                              ":"+listener.getConfidentialPort()+
+                              request.getPath();
+                          if (request.getQuery()!=null)
+                              url+="?"+request.getQuery();
+                          response.sendRedirect(url);
+                      }
                       else
                           response.sendError(HttpResponse.__403_Forbidden);
                       return -1;
