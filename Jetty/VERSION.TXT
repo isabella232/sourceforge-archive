@@ -3,6 +3,7 @@ Jetty Versions
 
  + Allow AJP13 buffers to be resized.
  + Fixed LineInput problem with expanded buffers.
+ + ClientCertAuthentication updates request.
 
 Jetty-4.2.5 - 14 January 2003
  + Fixed pathParam bug for ;jsessionid

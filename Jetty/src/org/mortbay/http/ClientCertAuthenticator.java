@@ -102,7 +102,10 @@ public class ClientCertAuthenticator implements Authenticator
         UserPrincipal user =
             realm.authenticate(principal==null?"clientcert":principal.getName(),
                                certs,request);
-            
+        
+        request.setAuthType(SecurityConstraint.__CERT_AUTH);
+        request.setAuthUser(user.getName());
+        request.setUserPrincipal(user);                
         return user;
     }
     
