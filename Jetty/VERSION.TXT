@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Fixed some typos
+ + Added links to Jetty Powered page
  + Clean up of ThreadedServer.stop()
 
 Jetty-4.2.2 - 20 November 2002
