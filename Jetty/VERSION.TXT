@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+
+Jetty-4.2.6
+ + Improved synchronization on AbstractSessionManager.
  + Allow AJP13 buffers to be resized.
  + Fixed LineInput problem with expanded buffers.
  + ClientCertAuthentication updates request.
