@@ -16,8 +16,14 @@ public class GenerateServlet extends HttpServlet
 	list.add("Host = "+request.getRemoteHost());
 	list.add("Date = "+new java.util.Date());
 
-	Form form = new Form("/Dump");
-	form.add(new Input(Input.Text,"Text").size(60));
+	TableForm form = new TableForm("/Dump");
+	form.addTextField("Text","Text",25,"");
+	form.addSelect("Select","Select",false,1)
+	    .add("Yes").add("No").add("Maybe");
+	form.addColumn(15);
+	form.addCheckbox("Check","Check",true);
+	form.addButtonArea("Button");
+	form.addButton("Button","Dump");
 	
 	Table table = new Table(2);
 	table.newRow();

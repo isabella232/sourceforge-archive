@@ -90,7 +90,7 @@ public class FileHandler extends NullHandler
 	    Code.debug("HIT: ",filename);
 	    response.setContentType(encoding);
 	    response.setContentLength(bytes.length);
-	    response.setDateHeader("Last-Modified",lastModified);
+	    response.setDateHeader(response.LastModified,lastModified);
 	    return bytes;
 	}
 
@@ -692,7 +692,9 @@ public class FileHandler extends NullHandler
 	    response.setContentType(encoding);
 	    len = (int)file.length();
 	    response.setContentLength(len);
-	    response.setDateHeader("Last-Modified", file.lastModified());
+	    
+	    response.setDateHeader(response.LastModified,
+				   file.lastModified());
 	    in = new FileInputStream(file);
 
 	    try

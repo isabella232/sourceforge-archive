@@ -276,6 +276,12 @@ public class TableForm extends Form
     public Table table(){
 	return column;
     }
+    
+    // ------------------------------------------------------------
+    /** Get the internal table */
+    public Table outerTable(){
+	return table;
+    }
 
     /* ----------------------------------------------------------- */
     /** Extend the usage of the current row in the form.  The next
@@ -339,15 +345,42 @@ public class TableForm extends Form
     {
 	table.addCell("&nbsp","WIDTH="+spacing);
 	column = new Table(0);
-	table.addCell(column).top();
+	table.addCell(column);
+	table.cell().top();
 	columns++;
     }
     
+    /* ------------------------------------------------------------ */
+    /** Add a new sections of columns.
+     */
+    public void newColumns()
+    {
+	column = new Table(0);
+	columns = 1;
+	table.newRow();
+	table.addCell(column);
+	table.cell().top();
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set the column span of the current column.
+     * This call is needed for forms that have varying numbers
+     * of columns in different sections. NB. and column spacing
+     * counts as a column.
+     * @param span 
+     */
+    public void setColumnSpan(int span)
+    {
+	table.cell().attribute("COLSPAN",""+span);
+    }
+    
     /* ----------------------------------------------------------- */
-    /** Start using a new Table. Anything added to the Composite parent of
+    /** Start using a new Table.
+     * Anything added to the Composite parent of
      * this object before this is called will be added between the two
      * tables. */
-    public void newTable(){
+    public void newTable()
+    {
 	table = new Table(0);
 	column = new Table(0);
 	columns = 1;

@@ -9,6 +9,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.lang.InterruptedException;
+import java.lang.reflect.Constructor;
 
 
 /* ======================================================================= */
@@ -36,6 +37,11 @@ abstract public class ThreadedServer
     static int __minThreads =
 	Integer.getInteger("THREADED_SERVER_MIN_THREADS",1).intValue();
 
+    /* ------------------------------------------------------------ */
+    String __threadClass =
+	System.getProperty("THREADED_SERVER_THREAD_CLASS",
+			   "java.lang.Thread");
+    
     /* ------------------------------------------------------------------- */
     private InetAddrPort address = null;    
     ServerSocket listen = null;
@@ -49,17 +55,40 @@ abstract public class ThreadedServer
     private int _accepting=0;
     private boolean _running=false;
     
+    /**
+     *  P.Mclachlan: Allow the class of thread used
+     *  to change (to any subclass of 'java.lang.Thread').  This
+     *  can be useful in certain embedded webserver circumstances.
+     */
+    private Class _threadClass;
+    private Constructor _constructThread;
+    private Object[] _constructThis;
+
     /* ------------------------------------------------------------------- */
-    /* Construct on any free port.
+    /* Construct
      */
     public ThreadedServer() 
-    {}
+    {
+	try
+	{
+	    _threadClass = Class.forName( __threadClass );
+	    Code.debug("Using thread class '", _threadClass.getName(),"'");
+	}
+	catch( Exception e )
+	{
+	    Code.warning( "Invalid thread class (ignored) ",e );
+	    _threadClass = java.lang.Thread.class;
+	}
+
+	setThreadClass(_threadClass);
+    }
     
     /* ------------------------------------------------------------------- */
-    /* Construct on any free port.
+    /* Construct
      */
     public ThreadedServer(String name) 
     {
+	this();
 	_name=name;
     }
 
@@ -69,6 +98,7 @@ abstract public class ThreadedServer
     public ThreadedServer(int port)
 	 throws java.io.IOException
     {
+	this();
 	setAddress(new InetAddrPort(null,port));
     }
     
@@ -78,6 +108,7 @@ abstract public class ThreadedServer
     public ThreadedServer(InetAddress address, int port) 
 	 throws java.io.IOException
     {
+	this();
 	setAddress(new InetAddrPort(address,port));
     }
     
@@ -87,6 +118,7 @@ abstract public class ThreadedServer
     public ThreadedServer(InetAddrPort address) 
 	 throws java.io.IOException
     {
+	this();
 	setAddress(address);
     }
     
@@ -104,10 +136,43 @@ abstract public class ThreadedServer
 			  int maxIdleTime) 
 	 throws java.io.IOException
     {
+	this();
 	_minThreads=minThreads==0?1:minThreads;
 	_maxThreads=maxThreads==0?__maxThreads:maxThreads;
 	_maxIdleTimeMs=maxIdleTime;
 	setAddress(address);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the Thread class.
+     * Sets the class used for threads in the thread pool. The class
+     * must have a constractor taking a Runnable.
+     * @param threadClass 
+     */
+    public void setThreadClass(Class threadClass) 
+    {
+	_threadClass=threadClass;
+		
+	if( _threadClass == null || !Thread.class.isAssignableFrom( _threadClass ) )
+	{
+	    Code.warning( "Invalid thread class (ignored) "+
+			  _threadClass.getName() );
+	    _threadClass = java.lang.Thread.class;
+	}
+
+	try
+	{
+	    Class[] args ={java.lang.Runnable.class};
+	    _constructThread = _threadClass.getConstructor(args);
+	}
+	catch(Exception e)
+	{
+	    Code.warning("Invalid thread class (ignored)",e);
+	    setThreadClass(java.lang.Thread.class);
+	}
+
+	Object[] args = {this};
+	_constructThis=args;
     }
     
     /* ------------------------------------------------------------------- */
@@ -305,9 +370,26 @@ abstract public class ThreadedServer
     /* ------------------------------------------------------------------- */
     private synchronized void newThread()
     {
-	Thread thread=new Thread( this, _name+"-"+(_threadId++));
-	_threadSet.put(thread,thread);
-	thread.start();
+	try
+	{
+	    Thread thread=
+		(Thread)_constructThread.newInstance(_constructThis);
+	    thread.setName(_name+"-"+(_threadId++));
+	    _threadSet.put(thread,thread);
+	    thread.start();
+	}
+	catch( java.lang.reflect.InvocationTargetException e )
+	{
+	    Code.fail(e);
+	}
+	catch( IllegalAccessException e )
+	{
+	    Code.fail(e);
+	}
+	catch( InstantiationException e )
+	{
+	    Code.fail(e);
+	}
     }
     
     /* ------------------------------------------------------------------- */

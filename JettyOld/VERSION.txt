@@ -1,3 +1,10 @@
+  + ThreadedServer can use subclasses of Thread.
+  + Better help on Jetty.Server
+  + HttpRequests may be passed to HttpFilter constructors.
+  + HtmlFilter blanks IfModifiedSince headers on construction
+  + Fixed bugs in HtmlFilter parser and added TestHarness.
+  + Improved cfg RCS script.
+
 Release 2.2.3 - 27 July 1999
   + Fixed parser bug in HtmlFilter
   + Made setInitialize public in ServletHolder

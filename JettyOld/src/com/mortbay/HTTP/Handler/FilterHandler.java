@@ -27,13 +27,18 @@ import java.util.*;
  * <P>
  * If the path matches a request, new filter instances are added to the
  * response. These will only be activated if their content types match
- * that of the response (which may be set later).
+ * that of the response (which may be set later).  If the filter class
+ * has a constructor that take a HttpRequest then the request is passed,
+ * otherwise the default constructor is used.
  * 
  * @version $Id$
  * @author Greg Wilkins
  */
 public class FilterHandler extends NullHandler
 {
+    /* ----------------------------------------------------------------- */
+    static Class[] __requestArg = {com.mortbay.HTTP.HttpRequest.class};
+	
     /* ----------------------------------------------------------------- */
     PathMap filterMap = null;
     
@@ -58,6 +63,7 @@ public class FilterHandler extends NullHandler
     {
 	this.filterMap = filterMap;
 
+	// check the filters exists
 	try{
 	    Enumeration k = filterMap.keys();
 	    while(k.hasMoreElements())
@@ -68,10 +74,10 @@ public class FilterHandler extends NullHandler
 		{
 		    Enumeration f = ((Vector)filter).elements();
 		    while (f.hasMoreElements())
-			newFilter(f.nextElement().toString());
+			newFilter(f.nextElement().toString(),null);
 		}
 		else
-		    newFilter(filter.toString());
+		    newFilter(filter.toString(),null);
 	    }
 	}
 	catch (Exception e){
@@ -131,22 +137,38 @@ public class FilterHandler extends NullHandler
 	    {
 		Enumeration f = ((Vector)filter).elements();
 		while (f.hasMoreElements())
-		    response.addObserver(newFilter(f.nextElement().toString()));
+		    response.addObserver(newFilter(f.nextElement().toString(),
+						   request));
 	    }
 	    else
-		response.addObserver(newFilter(filter.toString()));
+		response.addObserver(newFilter(filter.toString(),
+					       request));
 	}
     }
     
     /* ----------------------------------------------------------------- */
-    HttpFilter newFilter(String className)
-	 throws ClassNotFoundException,
-	ClassCastException,
-	IllegalAccessException,
-	InstantiationException
+    HttpFilter newFilter(String className,HttpRequest request)
+	throws ClassNotFoundException,
+	       ClassCastException,
+	       IllegalAccessException,
+	       InstantiationException
     {
 	Class filterClass = Class.forName(className);
-	HttpFilter filter = (HttpFilter)filterClass.newInstance();
+	
+	HttpFilter filter = null;
+	try
+	{
+	    java.lang.reflect.Constructor c =
+		filterClass.getConstructor(__requestArg);
+	    Object[] args= {request};
+	    filter=(HttpFilter)c.newInstance(args);
+	}
+	catch(Exception e)
+	{
+	    Code.debug(e);
+	    filter=(HttpFilter)filterClass.newInstance();
+	}
+	
 	return filter;
     }
 }

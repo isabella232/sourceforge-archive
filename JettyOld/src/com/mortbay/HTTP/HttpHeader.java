@@ -31,6 +31,7 @@ public class HttpHeader
     public final static String UserAgent="User-Agent";
     public final static String IfModifiedSince="If-Modified-Since";
     public final static String IfUnmodifiedSince="If-Unmodified-Since";
+    public final static String LastModified="Last-Modified";
     public final static String[] SingleValued=
     {
 	"age", "authorization", "content-length", "content-location", "content-md5",

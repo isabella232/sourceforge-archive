@@ -50,17 +50,41 @@ public class HtmlFilter extends HttpFilter
     int state=0;
     StringBuffer tagBuf = new StringBuffer(128);
     byte[] ba={0};
+    protected Hashtable info = null;
 
+
+    /* ------------------------------------------------------------ */
+    /** Constructor.
+     * The If-Modified-Since and If-Unmodified-since headers are
+     * blanked as it is possible for this filter to modify the
+     * content, even if it has not changed at source.
+     * @param request The Request.
+     */
+    public HtmlFilter(HttpRequest request)
+    {
+	super(request);
+	if (request!=null)
+	{
+	    request.setHeader(HttpHeader.IfUnmodifiedSince, null);
+	    request.setHeader(HttpHeader.IfModifiedSince, null);
+	}
+    }
+    
     
     /* ------------------------------------------------------------- */
     /** Modify response on activation.
-     * Remove content length and last modified headers, as they
+     * Remove content length and reset the last modified headers, as they
      * are possibly incorrect after filtering.
      */
     protected void activate()
     {
-	response.setHeader(HttpHeader.ContentLength, null);
-	response.setHeader("Last-Modified", null);
+	info = new Hashtable();
+	if(response!=null)
+	{
+	    response.setDateHeader(HttpHeader.LastModified,
+				   System.currentTimeMillis());
+	    response.setHeader(HttpHeader.ContentLength, null);
+	}
     }
 
     /* ------------------------------------------------------------- */
@@ -87,19 +111,42 @@ public class HtmlFilter extends HttpFilter
 	    switch(c)
 	    {
 	      case '<':
-		  state=(state==0)?1:state;
+		  switch(state)
+		  {
+		    case 0:case 5:state=1;break;
+		    case 3: case 4: state=4;break;
+		    default:state=0;
+		  }
 		  break;
 	      case '!':
-		  state=(state==1)?2:state;
+		  switch(state)
+		  {
+		    case 1: state=2; break;
+		    case 3: case 4: state=4;break;
+		    default: state=0;
+		  }
 		  break;
 	      case '=':
-		  state=(state==2)?3:state;
+		  switch(state)
+		  {
+		    case 2: state=3; break;
+		    case 3: case 4: state=4;break;
+		    default: state=0;
+		  }
 		  break;
 	      case '>':
-		  state=(state==4)?5:state;
+		  switch(state)
+		  {
+		    case 3: case 4: state=5; break;
+		    default: state=0;
+		  }
 		  break;
 	      default:
-		  state=(state==3||state==4)?4:0;
+		  switch(state)
+		  {
+		    case 3: case 4: state=4;break;
+		    default: state=0;
+		  }
 	    }
 
 	    switch(state)
@@ -132,6 +179,8 @@ public class HtmlFilter extends HttpFilter
 		  off=i+1;
 		  tag=tagBuf.toString();
 		  tagBuf.setLength(0);
+		  if (tag==null ||tag.length()==0)
+		      break;
 		  
 		  Code.debug("Found tag "+tag);
 		  Hashtable named = new Hashtable(10);
@@ -139,7 +188,8 @@ public class HtmlFilter extends HttpFilter
 		  named.put("data",info);
 		  named.put("info",info);
 		  named.put("out",out);
-		  named.put("request",request);
+		  if(request!=null)
+		      named.put("request",request);
 
 		  // Special case handling
 		  if ("SESSION".equals(tag))

@@ -288,12 +288,13 @@ public class Server extends BaseConfiguration
      *
      * Currently the following properties are defined for the
      * server property instance:<PRE>
-     * SessionMaxInactiveInterval : Max idle time Ms before session death
+     * SessionMaxInactiveInterval : Max idle time MS before session death
      * MinListenerThreads	  : Min listener threads per listener
      * MaxListenerThreads	  : Max listener threads per listener
      * MaxListenerThreadIdleMs	  : Max idle time Ms before listen thread
      *                              death
      * MimeMap		          : Property file of MIME mappings
+     *
      * </PRE>
      * Note that if this method is called from buildServer, then all
      * properties in the original file will be prefixed with
@@ -588,11 +589,21 @@ public class Server extends BaseConfiguration
 		filename = args[0];
 	    else if ( ! new File(filename).exists())
 		filename = "etc/JettyServer.prp";
-
-	    loadConfigurationFile(filename);
+	    loadConfigurationFile(filename);  
+	}
+	catch(Throwable e)
+	{
+	    Code.warning(e);
+	    System.err.println("Usage - java com.mortbay.Jetty.Server [config.prp]");
+		System.err.println("Default config files are \"JettyServer.prp\", \"etc/JettyServer.prp\".");
+		System.exit(1);
+	}
+	
+	try{
 	    startAll();
 	}
-	catch(Throwable e){
+	catch(Throwable e)
+	{
 	    Code.warning(e);
 	}
     }

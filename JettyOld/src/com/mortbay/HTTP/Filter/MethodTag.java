@@ -73,7 +73,18 @@ public class MethodTag
     Object invoke()
 	 throws InvocationTargetException,IllegalAccessException
     {
-	return tagMethod.invoke(null,tagArgs);
+	if (tagMethod==null)
+	    return null;
+
+	try
+	{
+	    return tagMethod.invoke(null,tagArgs);
+	}
+	catch(IllegalArgumentException e)
+	{
+	    Code.warning(com.mortbay.Util.DataClass.toString(tagArgs));
+	    throw e;
+	}
     }
 
     /* ----------------------------------------------------------------- */
@@ -136,12 +147,9 @@ public class MethodTag
 		      tmpArgs.addElement(a);
 		      break;
 		      
-		  case '"':
+		  default:
 		      tmpArgs.addElement(tok.sval);
 		      break;
-
-		  default:
-		      Code.warning(tok.toString());
 		}
 
 		tagArgs = new Object[tmpArgs.size()];
@@ -160,9 +168,9 @@ public class MethodTag
 	    if (tagArgs==null)
 		tagArgs = new Object[0];
 	}
-	catch(IOException ioe){
-	    Code.debug("Bad method format",ioe);
-	    throw new RuntimeException("Bad method format");
+	catch(Exception e)
+	{
+	    Code.warning("Bad method format",e);
 	}	
     }
     
@@ -170,6 +178,9 @@ public class MethodTag
     void resolve()
 	 throws ClassNotFoundException,NoSuchMethodException
     {
+	if (tagClassName==null || tagClassName.length()==0)
+	    return;
+	
 	tagClass = Class.forName(tagClassName);
 
 	Method[] methods = tagClass.getMethods();
@@ -181,8 +192,8 @@ public class MethodTag
 		    tagMethod=methods[i];
 		else
 		{
+		    Code.warning("Two tag methods of same name. Very unlikely that this can be resolved");
 		    // two methods, use params to resolve
-		    
 		    Class[] paramTypes = new Class[tagArgs.length];
 		    for (int j=0;j<tagArgs.length;j++)
 		    {
@@ -204,53 +215,6 @@ public class MethodTag
 		    "Can only call statics");
     }
 
-    /* ----------------------------------------------------------------- */
-    public static void test(String zero, Double one, String two, String three)
-    {
-	Code.debug("CALLED test("+zero+
-		   ","+one+
-		   ","+two+
-		   ","+three+
-		   ")");
-    }
 
-    /* ----------------------------------------------------------------- */
-    public static void test()
-    {
-	Code.debug("CALLED test()");
-    }
-
-    /* ----------------------------------------------------------------- */
-    public static void uniqTest(Hashtable zero,Double one,String two,String three)
-    {
-	Code.debug("CALLED uniqTest("+zero+
-		   ","+one+
-		   ","+two+
-		   ","+three+
-		   ")");
-    }
-    
-    /* ----------------------------------------------------------------- */
-    public static void main(String[] args)
-    {
-	try {    
-	    Hashtable named = new Hashtable();
-	    named.put("three","three");
-	    new MethodTag
-		("com.mortbay.HTTP.Filter.MethodTag.test(null ,  1,\"arg ,()\\\"2\\\"\",three);",
-		 named,null).invoke();
-
-	
-	    new MethodTag("com.mortbay.HTTP.Filter.MethodTag.test();",
-			  named,null).invoke();
-	    
-	    new MethodTag
-		("com.mortbay.HTTP.Filter.MethodTag.uniqTest(null ,  1,\"arg ,()\\\"2\\\"\",three);",
-		 named,null).invoke();
-	}
-	catch(Exception e){
-	    Code.warning("Failure",e);
-	}	
-    }
 }
 

@@ -29,12 +29,20 @@ public class HttpFilter extends FilterOutputStream
     /* ----------------------------------------------------------------- */
     protected HttpRequest request=null;
     protected HttpResponse response=null;
-    protected Hashtable info = null;
     
     /* ----------------------------------------------------------------- */
     public HttpFilter()
     {
 	super(System.err);
+    }
+    
+    /* ----------------------------------------------------------------- */
+    public HttpFilter(HttpRequest request)
+    {
+	super(System.err);
+	this.request=request;
+	if(request!=null)
+	    this.response=request.getHttpResponse();
     }
     
     /* ----------------------------------------------------------------- */
@@ -62,13 +70,21 @@ public class HttpFilter extends FilterOutputStream
 	    Code.debug("Activate HttpFilter "+this); 
 	    this.request=response.getRequest();
 	    this.response=response;
-	    info = new Hashtable();
 	    HttpOutputStream httpOut = response.getHttpOutputStream();
 	    super.out = httpOut.replaceOutputStream(this);
 	    activate();
 	}
 	else
 	    Code.debug("Can't activate HttpFilter "+this); 
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set output stream for testing purposes. 
+     * @param out OutputStream
+     */
+    public void test(OutputStream out)
+    {
+	super.out=out;
     }
     
     /* ----------------------------------------------------------------- */
@@ -78,8 +94,12 @@ public class HttpFilter extends FilterOutputStream
     {}
     
     /* ----------------------------------------------------------------- */
-    /** Observer update
-     * arg must be at HttpResponse and activate is called.
+    /** Observer update.
+     * This method is called as part of the Observer pattern to notify
+     * the filter that headers are about to be written. The call is
+     * delegated to activateOn(HttpResponse).
+     * @param o ignored
+     * @param arg The HttpResponse.
      */
     public void update(Observable o, Object arg)
     {

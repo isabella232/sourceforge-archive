@@ -259,12 +259,13 @@ public class ServletHolder implements ServletConfig
     
     /* ---------------------------------------------------------------- */
     /** Set server.
+     * Called during initialization by ServletHandler
      */
-    void setServer(HttpServer server)
-	 throws ServletException,
-	     ClassNotFoundException,
-	     IllegalAccessException,
-	     InstantiationException
+    public void setServer(HttpServer server)
+	throws ServletException,
+	       ClassNotFoundException,
+	       IllegalAccessException,
+	       InstantiationException
     {
 	Code.assert(this.server==null || this.server==server,
 		    "Can't put ServletHolder in multiple servers");

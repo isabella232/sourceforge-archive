@@ -7,7 +7,8 @@
 
 #JAVAOPTIONS := 
 #JAVACOPTIONS :=
-TESTS := 
+TESTS := TestHarness.java
+EXCLUDECLASSES := TestHarness.class
 ROOTNAME := com
 BINFILES := 
 CFGFILES := 
