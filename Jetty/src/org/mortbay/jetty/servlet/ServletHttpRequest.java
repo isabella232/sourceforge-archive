@@ -763,23 +763,17 @@ public class ServletHttpRequest
     
     /* -------------------------------------------------------------- */
     public BufferedReader getReader()
+    	throws UnsupportedEncodingException
     {
         if (_inputState!=0 && _inputState!=2)
             throw new IllegalStateException();
         if (_reader==null)
         {
-            try
-            {
-                String encoding=getCharacterEncoding();
-                if (encoding==null)
-                    encoding=StringUtil.__ISO_8859_1;
-                _reader=new BufferedReader(new InputStreamReader(getInputStream(),encoding));
-            }
-            catch(UnsupportedEncodingException e)
-            {
-                log.warn(LogSupport.EXCEPTION,e);
-                _reader=new BufferedReader(new InputStreamReader(getInputStream()));
-            }
+            String encoding=getCharacterEncoding();
+            if (encoding==null)
+                encoding=StringUtil.__ISO_8859_1;
+            _reader=new BufferedReader(new InputStreamReader(getInputStream(),encoding));
+            
         }
         _inputState=2;
         return _reader;
