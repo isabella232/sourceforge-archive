@@ -1,4 +1,4 @@
-Release 2.3.0A -
+Release 2.3.0A - 22 Sep 1999  -  LATEST
   + Added GNUJSP 1.0 for the JSP 1.0 API.
   + Added "Powered by Jetty" button.
   + ServerContext available to HtmlFilters via context param
@@ -6,7 +6,7 @@ Release 2.3.0A -
   + Added BuildJetty.java file.
   + Expanded tabs to spaces in source.
 
-Release 2.2.8 - 15 Sep 1999
+Release 2.2.8 - 15 Sep 1999  -  STABLE
   + Fixed bug in Element.attribute with empty string values.
   + Made translation of getRequestURI() optional.
   + Removed recursion from TranslationHandler
