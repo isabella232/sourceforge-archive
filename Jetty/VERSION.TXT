@@ -1,9 +1,11 @@
 Jetty Versions
 --------------
 
+Jetty-5.0.alpha3
  + Use File.toURI().toURL() when jdk 1.2 alternative is available.
  + Priority added to ThreadPool
  + replaced win32 service with http://wrapper.tanukisoftware.org
+ + FileClassPath derived from walk of classloader hierarchy.
 
 Jetty-5.0.alpha2 - 19 September 2003
  + Use commons logging.

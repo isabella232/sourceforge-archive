@@ -12,6 +12,8 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.net.UnknownHostException;
 import java.security.Permission;
 import java.security.PermissionCollection;
@@ -24,9 +26,12 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.StringTokenizer;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.SecurityConstraint.Authenticator;
@@ -148,12 +153,13 @@ public class HttpContext implements LifeCycle,
     private transient ClassLoader _loader;
     private transient HttpServer _httpServer;
     private transient File _tmpDir;
-    private transient Map _cache=new HashMap();
-    private transient int _cacheSize;
-    private transient CachedMetaData _mostRecentlyUsed;
-    private transient CachedMetaData _leastRecentlyUsed;
     private transient HttpHandler[] _handlersArray;
     private transient String[] _vhostsArray;
+
+	protected transient Map _cache=new HashMap();
+	protected transient int _cacheSize;
+	protected transient CachedMetaData _mostRecentlyUsed;
+	protected transient CachedMetaData _leastRecentlyUsed;
 
     /* ------------------------------------------------------------ */
     transient Object _statsLock=new Object[0];
@@ -969,16 +975,84 @@ public class HttpContext implements LifeCycle,
     public String getFileClassPath()
         throws IllegalStateException
     {
+	
         ClassLoader loader = getClassLoader();
         if (loader==null)
             throw new IllegalStateException("Context classloader not initialized");
-        String fileClassPath =
-            ((loader instanceof ContextLoader)
-             ? ((ContextLoader)loader).getFileClassPath()
-             : getClassPath())+
-            System.getProperty("path.separator")+
-            System.getProperty("java.class.path");
-        return fileClassPath;
+            
+        LinkedList paths =new LinkedList();
+        LinkedList loaders=new LinkedList();
+        
+        // Walk the loader hierarchy
+       	while (loader !=null)
+       	{
+       		loaders.add(0,loader);
+			loader = loader.getParent();
+       	}
+       	
+       	// Try to handle java2compliant modes
+       	loader=getClassLoader();
+       	if (loader instanceof ContextLoader && !((ContextLoader)loader).isJava2Compliant())
+       	{
+       		loaders.remove(loader);
+       		loaders.add(0,loader);
+       	}
+			
+		for (int i=0;i<loaders.size();i++)
+		{
+			loader=(ClassLoader)loaders.get(i);
+		
+			if (log.isDebugEnabled()) log.debug("extract paths from "+loader);
+       		if (loader instanceof URLClassLoader)
+       		{
+       			URL[] urls = ((URLClassLoader)loader).getURLs();
+       			for (int j=0;j<urls.length;j++)
+       			{
+       				try
+       				{
+       					Resource path = Resource.newResource(urls[j]);
+						if (log.isTraceEnabled()) log.trace("path "+path);
+       					File file = path.getFile();
+       					if (file!=null)
+       						paths.add(file.getAbsolutePath());
+       				}
+       				catch(Exception e)
+       				{
+       					log.trace(LogSupport.IGNORED,e);
+       				}
+       			}	
+       		}	
+       	}
+       	
+		// Add the system classpath elements from property.
+		String jcp=System.getProperty("java.class.path");
+		if (jcp!=null)
+		{
+			StringTokenizer tok=new StringTokenizer(jcp,File.pathSeparator);
+			while (tok.hasMoreTokens())
+			{
+				String path=tok.nextToken();
+				if (!paths.contains(path))
+				{
+					log.trace("PATH="+path);
+					paths.add(path);
+				}
+				else
+					log.trace("done="+path);			
+			}
+		}
+            
+        StringBuffer buf = new StringBuffer();
+        Iterator iter = paths.iterator();
+        while(iter.hasNext())
+        {
+        	if (buf.length()>0)
+        		buf.append(File.pathSeparator);
+        	buf.append(iter.next().toString());
+        }
+
+		if (log.isDebugEnabled()) log.debug("fileClassPath="+buf);
+        return buf.toString();
     }
 
     /* ------------------------------------------------------------ */

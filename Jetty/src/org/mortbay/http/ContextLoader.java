@@ -43,7 +43,6 @@ public class ContextLoader extends URLClassLoader
     private ClassLoader _parent;
     private PermissionCollection _permissions;
     private String _urlClassPath;
-    private String _fileClassPath;
     private boolean _fileClassPathWarning=false;
     
     /* ------------------------------------------------------------ */
@@ -54,9 +53,9 @@ public class ContextLoader extends URLClassLoader
      * @exception IOException
      */
     public ContextLoader(HttpContext context,
-                         String classPath,
-                         ClassLoader parent,
-                         PermissionCollection permisions)
+                         		 String classPath,
+                                 ClassLoader parent,
+                                 PermissionCollection permisions)
         throws MalformedURLException, IOException
     {
         super(new URL[0],parent);
@@ -68,7 +67,6 @@ public class ContextLoader extends URLClassLoader
         if (classPath==null)
         {
             _urlClassPath="";
-            _fileClassPath="";
         }
         else
         {
@@ -83,10 +81,7 @@ public class ContextLoader extends URLClassLoader
                 File file=resource.getFile();
                 
                 if (file!=null)
-                {
-                    _fileClassPath=(_fileClassPath==null)
-                        ?file.getCanonicalPath()
-                        :(_fileClassPath+File.pathSeparator+file.getCanonicalPath());    
+                {  
                     URL url = resource.getURL();
                     addURL(url);
                     _urlClassPath=(_urlClassPath==null)
@@ -114,9 +109,6 @@ public class ContextLoader extends URLClassLoader
                         FileOutputStream out = new FileOutputStream(jar);
                         IO.copy(in,out);
                         out.close();
-                        _fileClassPath=(_fileClassPath==null)
-                        ?jar.getCanonicalPath()
-                            :(_fileClassPath+File.pathSeparator+jar.getCanonicalPath());
                         URL url = jar.toURL();
                         addURL(url);
                         _urlClassPath=(_urlClassPath==null)
@@ -135,10 +127,10 @@ public class ContextLoader extends URLClassLoader
             }
         }
         
+        
         if (log.isDebugEnabled())
         {
             if(log.isDebugEnabled())log.debug("ClassPath="+_urlClassPath);
-            if(log.isDebugEnabled())log.debug("FileClassPath="+_fileClassPath);
             if(log.isDebugEnabled())log.debug("Permissions="+_permissions);
             if(log.isDebugEnabled())log.debug("URL="+Arrays.asList(getURLs()));
         }
@@ -160,28 +152,12 @@ public class ContextLoader extends URLClassLoader
     }
     
     /* ------------------------------------------------------------ */
-    public String getFileClassPath()
-    {
-        if (_fileClassPathWarning)
-        {
-            _fileClassPathWarning=false;
-            if (_fileClassPath==null)
-                log.info("No File Classpath derived from URL path \""+
-                             _urlClassPath+"\"");
-            else
-                log.info("Incomplete File Classpath \""+ _fileClassPath+
-                             "\" derived from URL path \""+
-                             _urlClassPath+"\"");
-        }
-        
-        return _fileClassPath;
-    }
-    
-    /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "org.mortbay.http.ContextLoader("+
-            _urlClassPath+") / "+_parent.toString();
+    	if (log.isDebugEnabled())
+	        return "ContextLoader@"+hashCode()+"("+
+    	        _urlClassPath+") / "+_parent.toString();
+		return "ContextLoader@"+hashCode();
     }
     
     /* ------------------------------------------------------------ */
