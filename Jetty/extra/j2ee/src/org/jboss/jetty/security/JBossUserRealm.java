@@ -220,6 +220,8 @@ public class JBossUserRealm
 
     public boolean isAuthenticated()
       {
+
+          // TODO I'm dubious if this is correct???
 	_logRef.debug("JBossUserRealm::isAuthenticated called");
 	return true;
       }
@@ -296,6 +298,14 @@ public class JBossUserRealm
     return user;
   }
 
+  public Principal getPrincipal(String username)
+  {
+      return (Principal)_users.get(username);
+  }
+
+  /**
+   * @deprecated
+   */
   public Principal getUserPrincipal(String username)
   {
       return (Principal)_users.get(username);
@@ -332,6 +342,14 @@ public class JBossUserRealm
     return user;
   }
 
+  public boolean reauthenticate(Principal user)
+  {
+    return ((JBossUserPrincipal)user).isAuthenticated();
+  }
+
+    /**
+     * @deprecated Use reauthenticate
+     */  
   public boolean isAuthenticated(Principal user)
   {
     return ((JBossUserPrincipal)user).isAuthenticated();
@@ -408,7 +426,12 @@ public class JBossUserRealm
     // removed from this thread.
     return user;
   }
-
+    
+  public void logout(Principal user)
+  {
+      // TODO
+  }
+    
   public String
     getName()
   {
