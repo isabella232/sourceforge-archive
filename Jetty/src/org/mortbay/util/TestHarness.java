@@ -1794,12 +1794,16 @@ public class TestHarness
 
             MultiMap m2=(MultiMap)mm.clone();
             m2.add("K1","V3");
+            
             t.checkEquals(mm.getValues("K1").size(),2,"unchanged List");
             t.checkEquals(mm.getValues("K1").get(0),"V1","unchanged List");
             t.checkEquals(mm.getValues("K1").get(1),"V2","unchanged List");
             t.checkEquals(m2.getValues("K1").get(0),"V1","clone List");
             t.checkEquals(m2.getValues("K1").get(1),"V2","clone List");
             t.checkEquals(m2.getValues("K1").get(2),"V3","clone List");
+            t.checkEquals(m2.getValue("K1",0),"V1","clone List");
+            t.checkEquals(m2.getValue("K1",1),"V2","clone List");
+            t.checkEquals(m2.getValue("K1",2),"V3","clone List");            
         }
         catch(Exception e)
         {

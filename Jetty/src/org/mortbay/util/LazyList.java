@@ -6,6 +6,7 @@
 package org.mortbay.util;
 import java.util.AbstractList;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
@@ -41,7 +42,9 @@ import java.util.NoSuchElementException;
  * @author Greg Wilkins (gregw)
  */
 public class LazyList extends AbstractList
+                              implements Cloneable
 {
+    private static final String[] __EMTPY_STRING_ARRAY = new String[0];
     private Object _first;
     private List _list;
 
@@ -49,6 +52,12 @@ public class LazyList extends AbstractList
     private LazyList(Object first)
     {
         _first=first;
+    }
+    
+    /* ------------------------------------------------------------ */
+    private LazyList(List list)
+    {
+        _list=list;
     }
     
     /* ------------------------------------------------------------ */
@@ -71,7 +80,23 @@ public class LazyList extends AbstractList
         list._list=new ArrayList();
         list._list.add(list._first);
         list._list.add(item);
+        list._first=null;
+        
         return list;    
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Add an item to a LazyList 
+     * @param list The list to add to or null if none yet created.
+     * @param item The item to add.
+     * @return The lazylist created or added to.
+     */
+    public static LazyList add(LazyList list, Collection collection)
+    {
+        Iterator i=collection.iterator();
+        while(i.hasNext())
+            list=LazyList.add(list,i.next());
+        return list;
     }
 
     /* ------------------------------------------------------------ */
@@ -98,6 +123,24 @@ public class LazyList extends AbstractList
         return list;    
     }
 
+    /* ------------------------------------------------------------ */
+    public static LazyList remove(LazyList list, Object o)
+    {
+        if (list==null)
+            return null;
+
+        if (list._first!=null && list._first.equals(o))
+            return null;
+
+        list._list.remove(o);
+        if (list._list.size()==1)
+        {
+            list._first=list._list.get(0);
+            list._list=null;
+        }
+        return list;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Get the real List from a LazyList.
      * 
@@ -127,6 +170,26 @@ public class LazyList extends AbstractList
         if (list._list==null)
             return list;
         return list._list;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public static String[] toStringArray(LazyList list)
+    {
+        if (list==null)
+            return __EMTPY_STRING_ARRAY;
+        if (list._list!=null)
+        {
+            String[] a = new String[list._list.size()];
+            for (int i=list._list.size();i-->0;)
+            {
+                Object o=list._list.get(i);
+                if (o!=null)
+                    a[i]=o.toString();
+            }
+            return a;
+        }
+        
+        return new String[] {list._first==null?null:list._first.toString()};
     }
 
 
@@ -164,9 +227,7 @@ public class LazyList extends AbstractList
             
         return list._list.get(i);
     }
-
-
-
+    
     /* ------------------------------------------------------------ */
     public Object get(int i)
     {
@@ -184,7 +245,7 @@ public class LazyList extends AbstractList
             return _list.size();
         return 1;
     }
-
+    
     /* ------------------------------------------------------------ */
     public ListIterator listIterator()
     {
@@ -209,6 +270,14 @@ public class LazyList extends AbstractList
         return new SIterator();
     }
 
+    /* ------------------------------------------------------------ */
+    public Object clone()
+    {
+        if (_list!=null)
+            return new LazyList(new ArrayList(_list));
+        return new LazyList(_first);
+    }
+    
     /* ------------------------------------------------------------ */
     private class SIterator implements ListIterator
     {

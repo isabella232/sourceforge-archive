@@ -772,10 +772,7 @@ public class HttpRequest extends HttpMessage
         if (_paramsExtracted)
             return;
         _paramsExtracted=true;
-        if (_parameters==null)
-            _parameters=new MultiMap(_uri.getUnmodifiableParameters());
-        else
-            _parameters.putAll(_uri.getUnmodifiableParameters());
+        _parameters=_uri.cloneParameters();
         
         if (_state==__MSG_RECEIVED)
         {
@@ -880,7 +877,17 @@ public class HttpRequest extends HttpMessage
             extractParameters();
         return _parameters.getValues(name);
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Parameters as a map of String arrays
+     */
+    public Map getParameterStringArrayMap()
+    {
+        if (!_paramsExtracted)
+            extractParameters();
+        return _parameters.toStringArrayMap();
+    }
 
     /* -------------------------------------------------------------- */
     /** Extract received cookies from a header.

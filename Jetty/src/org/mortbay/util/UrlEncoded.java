@@ -312,6 +312,7 @@ public class UrlEncoded extends MultiMap
         return new UrlEncoded(this);
     }
 
+    /* ------------------------------------------------------------ */
     public static void main(String[] a)
     {
 	System.err.println(encodeString(a[0]));

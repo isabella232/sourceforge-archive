@@ -1,7 +1,6 @@
 Jetty Versions
 --------------
 
-Jetty-4.0.D1 - 12 Nov 2001
  + New Dispatcher implementation
  + Added Context and Session Event Handling
  + Added FilterHolder
@@ -9,6 +8,7 @@ Jetty-4.0.D1 - 12 Nov 2001
  + Changed HandlerContext to HttpContext
  + Simplified ServletHandler
  + Removed destroy methods
+ + Simplified MultiMap
 
 Jetty-4.0.D0 - 06 Nov 2001
  + Branched from Jetty_3_1 == Jetty_3_1_4

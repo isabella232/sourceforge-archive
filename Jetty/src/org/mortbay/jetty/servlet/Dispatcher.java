@@ -430,9 +430,19 @@ public class Dispatcher implements RequestDispatcher
         /* -------------------------------------------------------------- */
         public Map getParameterMap()
         {
-            // XXX
-            Code.notImplemented();
-            return null;
+            if (_parameters==null)
+                return super.getParameterMap();
+            Map m0 = _parameters.toStringArrayMap();
+            Map m1 = super.getParameterMap();
+            
+            Iterator i = m1.entrySet().iterator();
+            while(i.hasNext())
+            {
+                Map.Entry entry = (Map.Entry)i.next();
+                if (!m0.containsKey(entry.getKey()))
+                    m0.put(entry.getKey(),entry.getValue());
+            }
+            return m0;
         }
 
         /* ------------------------------------------------------------ */

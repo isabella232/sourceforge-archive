@@ -331,6 +331,15 @@ public class URI
     
     /* ------------------------------------------------------------ */
     /** Get the uri query _parameters.
+     * @return the URI query _parameters
+     */
+    public MultiMap cloneParameters()
+    {
+        return (MultiMap)_parameters.clone();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the uri query _parameters.
      * @return the URI query _parameters in an unmodifiable map.
      */
     public Map getUnmodifiableParameters()

@@ -589,11 +589,14 @@ public class ServletHttpRequest
     }
     
     /* -------------------------------------------------------------- */
+    /**
+     * This method is not recommended as it forces the generation of a
+     * non-optimal data structure.
+     * @return 
+     */
     public Map getParameterMap()
     {
-        // XXX
-        Code.notImplemented();
-        return null;
+        return Collections.unmodifiableMap(_httpRequest.getParameterStringArrayMap());
     }
     
     /* -------------------------------------------------------------- */
