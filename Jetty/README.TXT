@@ -155,7 +155,7 @@ Distribution
 Jetty distributions and information is available from:
 
    http://jetty.mortbay.com
-   http://sourceforge.net/project/jetty
+   http://sourceforge.net/projects/jetty
    ftp://jetty.mortbay.com/pub
    
 
