@@ -341,9 +341,11 @@ public class JettyPage extends Page
             _table.add("<FORM method=GET action=http://www.google.com/custom><small><A HREF=http://www.google.com/search><IMG SRC=http://www.google.com/logos/Logo_40wht.gif border=0 ALT=Google align=middle></A><BR><INPUT TYPE=text name=q size=14 maxlength=255 value=\"\"><BR><INPUT type=hidden name=cof VALUE=\"LW:468;L:http://jetty.mortbay.org/jetty/images/jetty_banner.gif;LH:60;AH:center;S:http://jetty.mortbay.org;AWFID:1e76608d706e7dfc;\"><input type=hidden name=domains value=\"mortbay.com;mortbay.org\"><input type=radio name=sitesearch value=\"mortbay.org\" checked> mortbay.org<br><input type=radio name=sitesearch value=\"mortbay.com\"> mortbay.com<br><INPUT type=submit name=sa VALUE=\"Google Search\"><BR></small></form>");
 
             
-            _table.add("<A HREF=\"http://www.jboss.org\"><IMG SRC=\""+_context+"/images/jboss.gif\" WIDTH=134 HEIGHT=60 BORDER=0 ALT=\"JBoss Group\"></A><P>\n");
+            _table.add("<A HREF=\"http://www.coredevelopers.net\"><IMG SRC=\""+_context+"/images/coredev.gif\" WIDTH=81 HEIGHT=81 BORDER=0 ALT=\"CoreDev\"></A><P>\n");
+            _table.add("<A HREF=\"http://sourceforge.net/projects/jboss/\"><IMG SRC=\""+_context+"/images/jboss.gif\" WIDTH=134 HEIGHT=60 BORDER=0 ALT=\"JBoss\"></A><P>\n");
             
             _table.add("<A HREF=\"http://www.inetu.com\"><IMG SRC=\""+_context+"/images/inetu.gif\" WIDTH=121 HEIGHT=52 BORDER=0 ALT=\"InetU\"></A><P>\n");
+            _table.add("<A HREF=\"http://sourceforge.net/projects/jetty/\">");
             if (__realSite)
                 _table.add("<IMG src=\"http://sourceforge.net/sflogo.php?group_id=7322\" width=\"88\" height=\"31\" border=\"0\" alt=\"SourceForge\">");
             else
