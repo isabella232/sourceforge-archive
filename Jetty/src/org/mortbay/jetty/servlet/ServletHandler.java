@@ -631,7 +631,7 @@ public class ServletHandler
             
             UserPrincipal user =
                 shandler.getUserRealm().getUser(username);
-            if (user!=null && user.authenticate(password))
+            if (user!=null && user.authenticate(password,httpRequest))
             {
                 Code.debug("Form authentication OK for ",username);
                 httpRequest.setAttribute(HttpRequest.__AuthType,"FORM");

@@ -204,7 +204,7 @@ public class HashUserRealm extends HashMap
         }
         
         /* -------------------------------------------------------- */
-        public boolean authenticate(String password)
+        public boolean authenticate(String password, HttpRequest request)
         {
             return _pw!=null && _pw.check(password);
         }

@@ -21,7 +21,27 @@ public interface UserPrincipal extends Principal
 {
     static public String __ATTR="org.mortbay.http.UserPrincipal";
     
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return The Realm for this user. 
+     */
     public UserRealm getUserRealm();
-    public boolean authenticate(String password);
+    
+    /* ------------------------------------------------------------ */
+    /** Authenticate the users credentials 
+     * @param credentials The user credentials, normally a password. 
+     * @param request The request to be authenticated. Additional
+     * parameters may be extracted or set on this request as needed
+     * for the authentication mechanism (none required for BASIC and
+     * FORM authentication).
+     * @return True if the user credentials are OK.
+     */
+    public boolean authenticate(String credentials, HttpRequest request);
+
+    /* ------------------------------------------------------------ */
+    /** Check if the user is in a role. 
+     * @param role A role name.
+     * @return True if the user can act in that role.
+     */
     public boolean isUserInRole(String role);
 }

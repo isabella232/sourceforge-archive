@@ -397,7 +397,7 @@ public class SecurityHandler extends NullHandler
             if (_realm!=null)
             {
                 UserPrincipal user = _realm.getUser(username);
-                if (user!=null && user.authenticate(password))
+                if (user!=null && user.authenticate(password,request))
                 {
                     request.setAttribute(HttpRequest.__AuthType,"BASIC");
                     request.setAttribute(HttpRequest.__AuthUser,username);
