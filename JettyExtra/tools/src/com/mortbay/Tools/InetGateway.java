@@ -112,6 +112,7 @@ public class InetGateway extends ThreadedServer
                 for (int f=l2rFilters.length;f-->0;)
                 {
                     filter=(String)l2rFilters[f];
+                    System.out.println("Filter="+filter);
                     Class c = Class.forName(filter);
                     if(!java.io.FilterOutputStream.class.isAssignableFrom(c))
                         throw new IOException("Filter "+ filter +
@@ -226,7 +227,8 @@ public class InetGateway extends ThreadedServer
                         { if (Code.verbose())Code.debug(e); }
                         finally
                         {
-                            try { localOut.close() ; }
+                            Code.debug("Finished"); 
+                            try { localOut.close(); }
                             catch(Exception e) { Code.ignore(e); }
                         }       
                     }
@@ -317,9 +319,13 @@ public class InetGateway extends ThreadedServer
                 if (l2r!=null)
                 {
                     local2remote=new Vector();
-                    StringTokenizer tok = new StringTokenizer(l2r,",    ");
+                    StringTokenizer tok = new StringTokenizer(l2r,":;, \t");
                     while (tok.hasMoreTokens())
-                        local2remote.addElement(tok.nextToken());
+                    {
+                        String filterClassName = tok.nextToken();
+                        System.out.println("GOT l2r:" + filterClassName);
+                        local2remote.addElement(filterClassName);
+                    }
                 }
                 // Find r2l filter classes
                 Vector remote2local=null;
@@ -328,17 +334,24 @@ public class InetGateway extends ThreadedServer
                 if (r2l!=null)
                 {
                     remote2local=new Vector();
-                    StringTokenizer tok = new StringTokenizer(r2l,",    ");
+                    StringTokenizer tok = new StringTokenizer(r2l,":;, \t");
                     while (tok.hasMoreTokens())
-                        remote2local.addElement(tok.nextToken());
+                    {
+                        String filterClassName = tok.nextToken();
+                        System.out.println("GOT r2l:" + filterClassName);
+                        remote2local.addElement(filterClassName);
+                    }
                 }
                 
                 try
                 {
-                    String[] r2la = new String[local2remote.size()];
-                    local2remote.copyInto(r2la);
-                    String[] l2ra = new String[remote2local.size()];
+                    String[] l2ra = new String[local2remote.size()];
+                    local2remote.copyInto(l2ra);
+                    String[] r2la = new String[remote2local.size()];
                     remote2local.copyInto(r2la);
+                    System.out.println("local2remote[0]="+local2remote.elementAt(0));
+                    System.out.println("l2ra[0]="+l2ra[0]);
+
                     new InetGateway(localAddr,remoteAddr,
                                     l2ra,r2la).start();
                 }
