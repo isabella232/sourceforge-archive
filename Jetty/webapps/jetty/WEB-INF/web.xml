@@ -12,7 +12,7 @@
 
   <servlet>
     <servlet-name>Jetty Demo Page</servlet-name>
-    <servlet-class>com.mortbay.Jetty.JettyServlet</servlet-class>
+    <servlet-class>com.mortbay.webapps.jetty.JettyServlet</servlet-class>
     <load-on-startup>0</load-on-startup>
   </servlet>
 

@@ -53,6 +53,11 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     /* ------------------------------------------------------------ */
     private static ArrayList __servers = new ArrayList(3);
     private static List __roServers = Collections.unmodifiableList(__servers);
+
+    static
+    {
+        Log.event("HttpServer version "+Version.__VersionImpl);
+    }
     
     /* ------------------------------------------------------------ */
     private HashMap _listeners = new HashMap(3);
@@ -767,12 +772,12 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
         {
             if (_notFoundContext==null)
             {
-                _notFoundContext=getContext(null,"/");
+                _notFoundContext=addContext(null,"/");
                 Log.event("Adding NotFoundHandler to "+_notFoundContext);
                 _notFoundContext.addHandler(new NotFoundHandler());
                 _notFoundContext.start();
+               
             }
-
             if (!_notFoundContext.handle(request,response))
                 response.sendError(response.__404_Not_Found);
         }

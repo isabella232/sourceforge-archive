@@ -21,7 +21,7 @@ any Java application.
   <LI><A HREF="#Efficient">Small & Efficient</A>
   <LI><A HREF="#Config">Flexible Configuration</A>
   <LI><A HREF="#HTML">HTML Generation</A>.
-  <LI><A HREF="#EJB">EJB Integration</A>.
+  <LI><A HREF="#EJB">EJB & JMX Integration</A>.
 </UL>
 </TD></TR>
 </TABLE>
@@ -50,6 +50,15 @@ License, derived from the Artistic License. Full source code is included in
 the release. <B><A HREF=LICENSE.html>The License</A></B> puts few restrictions on usage of Jetty.
 
 
+<A NAME="HTTP11"></A>
+<BR>&nbsp;<H3>HTTP/1.1 Protocol</H3>
+Jetty supports the HTTP/1.0 and HTTP/1.1 protocols. The 1.1 protocol offers
+much greater network performance.  Furthermore, as the HTTP server and the
+Servlet container and in the same JVM, this gives simpler configuration, 
+much greater performance and full access to all server resources from 
+within servlets.
+
+
 <A NAME="Servlets"></A>
 <BR>&nbsp;<H3>Serving Servlets</H3>
 Jetty supports the javax.servlet. API defined by
@@ -62,13 +71,20 @@ request-response paradigm. </I> [Javasoft's Java Servlet API White Paper]
 </BLOCKQUOTE>
 Jetty 2 uses the 2.1 Servlet API and Jetty 3 uses the 2.2 Servlet API.
 
-<A NAME="HTTP11"></A>
-<BR>&nbsp;<H3>HTTP/1.1 Protocol</H3>
-Jetty supports the HTTP/1.0 and HTTP/1.1 protocols. The 1.1 protocol offers
-much greater network performance.  Furthermore, as the HTTP server and the
-Servlet container and in the same JVM, this gives simpler configuration, 
-much greater performance and full access to all server resources from 
-within servlets.
+
+<A NAME="JSP"></A>
+<BR>&nbsp;<H3>Java Server Pages</H3>
+Jetty includes a JSP package, which implements Java Server Pages, a method
+for adding dynamic content to HTML pages. Currently this is the Jasper JSP
+engine from apache.
+
+
+<A NAME="SSL"></A>
+<BR>&nbsp;<H3>SSL Support</H3>
+Jetty has a <A HREF="/jetty/JsseSSL.html">SunJsseListener</A> which uses Sun's JSSE reference implementation to provide support for HTTPS. It is even possible to use the same pair of public/private keys as a pre-existing apache server by using the KeyPairTool to load the private key and its certificate into a keystore for JSSE.
+
+<p> If the use of a commercial SSL implementation is required, <A HREF=http://www.forge.com.au>FORGE</A> have contributed a listener which allows their Protekt product to be used as an SSL provider. A similar approach may be used to integrate other SSL implementations.
+
 
 <A NAME="Modular"></A>
 <BR>&nbsp;<H3>Modular Architecture</H3>
@@ -99,18 +115,6 @@ easily be embedded in such applications and products without adopting a
 WWW centric application architecture. A good example of this style of usage
 is in a distributed system, where each process runs it's own Jetty server
 in order to present a managment and monitoring Web interface. 
-
-<A NAME="JSP"></A>
-<BR>&nbsp;<H3>Java Server Pages</H3>
-Jetty includes a JSP package, which implements Java Server Pages, a method
-for adding dynamic content to HTML pages. Currently this is the Jasper JSP
-engine from apache.
-
-<A NAME="SSL"></A>
-<BR>&nbsp;<H3>SSL Support</H3>
-Jetty has a <A HREF="/jetty/JsseSSL.html">SunJsseListener</A> which uses Sun's JSSE reference implementation to provide support for HTTPS. It is even possible to use the same pair of public/private keys as a pre-existing apache server by using the KeyPairTool to load the private key and its certificate into a keystore for JSSE.
-
-<p> If the use of a commercial SSL implementation is required, <A HREF=http://www.forge.com.au>FORGE</A> have contributed a listener which allows their Protekt product to be used as an SSL provider. A similar approach may be used to integrate other SSL implementations.
 
 <A NAME="Efficient"></A>
 <BR>&nbsp;<H3>Small & Efficient</H3>
@@ -146,7 +150,8 @@ templated look and feel is a key element of this package.
 
 <A NAME="EJB"></A>
 <BR>&nbsp;<H3>EJB Integration</H3>
-Jetty has been wrapped as a JMX module for the <A HREF="http://www.jboss.org">JBoss</A> EJB 
+Jetty has been instrumented as JMX model MBeans which allows it
+to be seamlessly integrated into the <A HREF="http://www.jboss.org">JBoss</A> EJB 
 application server. This gives a complete J2EE container with 
 HTTP, Servlets, JSPs and EJBs all within a single JVM.
 

@@ -377,8 +377,6 @@ public class ServletHandler extends NullHandler
                 
                 Code.debug("Dynamic path=",path);
                 
-                
-                
                 // make a holder
                 ServletHolder holder=newServletHolder(servletClass);
                 
@@ -391,14 +389,21 @@ public class ServletHandler extends NullHandler
                 // Check that the class was intended as a dynamic
                 // servlet
                 if (!_serveDynamicSystemServlets &&
-                    _loader!=null && _loader!=this.getClass().getClassLoader())
+                    _loader!=null &&
+                    _loader!=this.getClass().getClassLoader())
                 {
                     // This context has a specific class loader.
                     if (servlet.getClass().getClassLoader()!=_loader)
                     {
-                        Code.warning("Attempted to load non-context servlet as dynamic: "+
-                                     servletClass);
-                        return null;
+                        new Throwable().printStackTrace();
+                        holder.destroy();
+                        String msg = "Dynamic servlet "+
+                            servletClass+
+                            " is not in context: "+
+                            getContext().getHandlerContext().getContextPath();
+                        
+                        Code.warning(msg);
+                        throw new UnavailableException(msg);
                     }
                 }
                 

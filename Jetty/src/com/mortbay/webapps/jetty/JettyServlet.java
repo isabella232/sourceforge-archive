@@ -3,7 +3,7 @@
 // $Id$
 // ---------------------------------------------------------------------------
 
-package com.mortbay.Jetty;
+package com.mortbay.webapps.jetty;
 import com.mortbay.HTML.Include;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.IO;

@@ -143,7 +143,12 @@ public class ContextLoader extends URLClassLoader
     {
         if (Code.verbose())
             Code.debug("findClass(",name,") from ",_path);
-        return super.findClass(name);
+        try { return super.findClass(name);}
+        catch(RuntimeException e)
+        {
+            Code.warning("Could not find class : "+name,e);
+            throw e;
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -152,8 +157,13 @@ public class ContextLoader extends URLClassLoader
     {
         if (Code.verbose())
             Code.debug("loadClass(",name,","+resolve,") from ",_path);
-         
-         return super.loadClass(name,resolve);   
+
+        try { return super.loadClass(name,resolve);}
+        catch(RuntimeException e)
+        {
+            Code.warning("Could not load class : "+name,e);
+            throw e;
+        }
     }
 
     /* ------------------------------------------------------------ */

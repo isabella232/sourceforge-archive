@@ -380,8 +380,9 @@ is:
      $JMX_HOME/lib/jmxri.jar:\
      $JMX_HOME/lib/jmxtools.jar
 
-The Jetty JMX classes are in the com.mortbay.Jetty.JMX package and are listed in the
-$JETTY_HOME/etc/jetty.mlet file.
+There is an ant target jmx which can be used to build Jetty with jmx support.
+The Jetty JMX classes are in the com.mortbay.Jetty.JMX package.  A JMX startup script
+is in $JETTY_HOME/etc/jetty.mlet file.
 
 This file can be run with the following command:
 

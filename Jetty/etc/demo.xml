@@ -160,7 +160,7 @@ $Id$
       </Arg>
     </Call>
     <Call name="getServletHandler">
-      <Set name="ServeDynamicSystemServlets" type="boolean">TRUE</Set>
+      <Set name="ServeDynamicSystemServlets" type="boolean">FALSE</Set>
     </Call>
   </Call>
 

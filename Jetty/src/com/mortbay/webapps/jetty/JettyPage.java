@@ -3,7 +3,7 @@
 // $Id$
 // ---------------------------------------------------------------------------
 
-package com.mortbay.Jetty;
+package com.mortbay.webapps.jetty;
 
 import com.mortbay.HTML.Block;
 import com.mortbay.HTML.Composite;
@@ -41,7 +41,7 @@ public class JettyPage extends Page
         try
         {
             ResourceBundle index =
-                ResourceBundle.getBundle("com.mortbay.Jetty.JettyIndex");
+                ResourceBundle.getBundle("com.mortbay.webapps.jetty.JettyIndex");
             
             String key=i+"."+j;
             String value=index.getString(key);    
