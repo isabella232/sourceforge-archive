@@ -279,21 +279,26 @@ public class WebApplicationContext extends ServletHttpContext
             }
             else
             {
-                try
+                XmlParser.Node config=null;
+                try 
                 {
                     _deploymentDescriptor=web.toString();
-                    XmlParser.Node config = xmlParser.parse(web.getURL().toString());
-                    initialize(config);
+                    config = xmlParser.parse(web.getURL().toString());
                 }
                 catch(IOException e)
                 {
                     Code.warning("Parse error on "+_war,e);
                     throw e;
-                }	
+                }
+
+                try
+                {
+                    initialize(config);
+                }
                 catch(Exception e)
                 {
                     Code.warning("Configuration error "+_war,e);
-                    throw new IOException("Parse error on "+_war+
+                    throw new IOException("Initialization failed for "+_war+
                                           ": "+e.toString());
                 }
             }

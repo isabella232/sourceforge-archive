@@ -22,6 +22,7 @@ import org.mortbay.util.Log;
 import org.mortbay.util.LogSink;
 import org.mortbay.util.OutputStreamLogSink;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 
@@ -88,8 +89,9 @@ public class LogMBean extends ModelMBeanImpl
     public void preDeregister()
     {
         super.preDeregister();
-        
-        Iterator iter=_sinks.keySet().iterator();
+
+        ArrayList sinkKeys= new ArrayList(_sinks.keySet());
+        Iterator iter=sinkKeys.iterator();
         while(iter.hasNext())
         {
             try

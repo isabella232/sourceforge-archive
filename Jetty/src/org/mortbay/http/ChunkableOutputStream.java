@@ -374,7 +374,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     public void write(int b) throws IOException
     {
 	if (out==null)
-	    return;
+	    throw new IOException("closed");
 
         if (!_written)
         {
@@ -399,7 +399,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     public void write(byte b[], int off, int len) throws IOException
     {        
 	if (out==null)
-	    return;
+	    throw new IOException("closed");
 
         if (!_written)
         {
@@ -587,5 +587,4 @@ public class ChunkableOutputStream extends FilterOutputStream
     {
         IO.copy(in,this,len);
     }
-    
 }
