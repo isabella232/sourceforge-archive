@@ -37,6 +37,9 @@ public class HttpServer implements LifeCycle
     // HandlerContext[List[HttpHandler]]
     HashMap _hostMap = new HashMap(7);
     private HttpEncoding _httpEncoding ;
+    private LogSink _logSink;
+    private DateCache _dateCache=
+	new DateCache("dd/MMM/yyyy:HH:mm:ss");
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -155,6 +158,8 @@ public class HttpServer implements LifeCycle
 		catch(Exception e){Code.warning(e);}
 	    }
         }
+
+	setLogSink(null);
     }
 
     
@@ -480,8 +485,43 @@ public class HttpServer implements LifeCycle
         }
         return set;
     }
-    
 
+    /* ------------------------------------------------------------ */
+    /** Set the request log.
+     * Set the LogSink to be used for the request log.
+     * @param logSink 
+     */
+    public synchronized void setLogSink(LogSink logSink)
+    {
+	if (_logSink!=null)
+	{
+	    try{
+		_logSink.stop();
+	    }
+	    catch(InterruptedException e)
+	    {
+		Code.ignore(e);
+	    }
+	    finally
+	    {
+		_logSink.destroy();
+	    }
+	}	
+	    
+	_logSink=logSink;
+	if (_logSink!=null)
+	    _logSink.start();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the request log date format.
+     * @param format 
+     */
+    public synchronized void setLogDateFormate(String format)
+    {
+	_dateCache=new DateCache(format);
+    }
+	
     /* ------------------------------------------------------------ */
     /** Service a request.
      * Handle the request by passing it to the HttpHandler contained in
@@ -528,31 +568,13 @@ public class HttpServer implements LifeCycle
 				(HandlerContext)contextList.get(j);
 			    
 			    if (Code.debug())
-				Code.debug("Try context [",contextPathSpec,
-					   ",",new Integer(j),
-					   "]=",context);
+				Code.debug("Try ",context,
+					   ",",new Integer(j));
 
-			    List handlers=context.getHandlers();
-			    for (int k=0;k<handlers.size();k++)
-			    {
-				HttpHandler handler =
-				    (HttpHandler)handlers.get(k);
-	    
-				if (Code.debug())
-				    Code.debug("Try handler ",handler);
-				
-				handler.handle(contextPathSpec,
+			    if (context.handle(contextPathSpec,
 					       request,
-					       response);
-
-				if (request.isHandled())
-				{
-				    if (Code.debug())
-					Code.debug("Handled by ",handler);
-				    response.complete();
-				    return;
-				}
-			    }
+					       response))
+				return;
 			}
 		    }   
 		}
@@ -562,11 +584,59 @@ public class HttpServer implements LifeCycle
             if (request.isHandled() || host==null)
 		break;
 	    host=null;
-	}
-	
+	}	
 
 	response.sendError(response.__404_Not_Found);
 	
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Log a request and response.
+     * @param request 
+     * @param response 
+     */
+    public synchronized void log(HttpRequest request,HttpResponse response)
+    {
+	// Log request - XXX should be in HttpHandler
+	if (_logSink!=null && request!=null && response!=null)
+	{
+	    int length =
+		response.getIntField(HttpFields.__ContentLength);
+	    String bytes = ((length>=0)?Long.toString(length):"-");
+	    String user = (String)request.getAttribute(HttpRequest.__AuthUser);
+	    if (user==null)
+		user = "-";
+	    
+	    String referer = request.getField(HttpFields.__Referer);
+	    if (referer==null)
+		referer="-";
+	    else
+		referer="\""+referer+"\"";
+	    
+	    String agent = request.getField(HttpFields.__UserAgent);
+	    if (agent==null)
+		agent="-";
+	    else
+		agent="\""+agent+"\"";	    
+	    
+	    String log= request.getRemoteAddr() +
+		" - "+
+		user +
+		" [" +
+		_dateCache.format(System.currentTimeMillis())+
+		"] \""+
+		request.getRequestLine()+
+		"\" "+
+		response.getStatus()+
+		" " +
+		bytes +
+		" " +
+		referer +
+		" " +
+		agent;
+
+	    _logSink.log(log);
+	}
     }
     
     /* ------------------------------------------------------------ */
@@ -748,16 +818,3 @@ public class HttpServer implements LifeCycle
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -21,11 +21,10 @@ import java.text.*;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class FileLogSink extends LogSink
+public class FileLogSink extends WriterLogSink
 {
     /*-------------------------------------------------------------------*/
     private String _fileName=null;
-    private PrintWriter _myOut = null;
     
     /* ------------------------------------------------------------ */
     public FileLogSink()
@@ -39,14 +38,13 @@ public class FileLogSink extends LogSink
 	throws IOException
     {
 	super(new PrintWriter(new FileWriter(filename)));
-	_myOut = _out;
 	_fileName=filename;
     }
     
     /* ------------------------------------------------------------ */
     public void stop()
     {
-	_myOut.close();
+	_out.close();
     }
 }
 

@@ -240,10 +240,30 @@ public class WebApplicationContext extends HandlerContext
 	}
 
 	XmlParser.Node startup = node.get("load-on-startup");
-	if (startup!=null &&
-	    startup.toString(false).trim().toLowerCase().startsWith("t"))
-	    holder.setInitOnStartup(true);
-	
+	if (startup!=null)
+	{
+	    String s=startup.toString(false).trim().toLowerCase();
+	    if (s.startsWith("t"))
+		holder.setInitOnStartup(true);
+	    else
+	    {
+		try
+		{
+		    int order=Integer.parseInt(s);
+		    if (order>0)
+		    {
+			holder.setInitOnStartup(true);
+			if (order>1)
+			    Code.warning("Startup ordering not implemented");
+		    }
+		}
+		catch(Exception e)
+		{
+		    Code.ignore(e);
+		}
+	    }
+	}
+    
 	XmlParser.Node securityRef = node.get("security-role-ref");
 	if (securityRef!=null)
 	{

@@ -205,6 +205,25 @@ public class ServletHandler extends NullHandler
 		contextPath=PathMap.pathMatch(contextPathSpec,path);
 		path=PathMap.pathInfo(contextPathSpec,path);
 	    }	    
+
+	    if (path==null)
+	    {
+		// XXX - this should be done at a higher level.
+		StringBuffer buf=httpRequest.getRequestURL();
+		buf.append("/");
+		String q=httpRequest.getQuery();
+		if (q!=null&&q.length()!=0)
+		    buf.append("?"+q);
+		httpResponse.setField(HttpFields.__Location,
+				      buf.toString());
+		if (Code.debug())
+		    Code.warning("Context "+contextPathSpec+
+				 " consumed all of path "+
+				 httpRequest.getPath()+
+				 ", redirect to "+buf.toString());
+		httpResponse.sendError(302);
+		return;
+	    }	    
 	    
 	    // Build servlet request and response
 	    ServletRequest request =

@@ -126,13 +126,15 @@ $ID: $
       <Arg><New class="com.mortbay.HTTP.Handler.NotFoundHandler"/></Arg>
     </Call>
   </Call>
+
+  <Set name="LogSink">
+    <New class="com.mortbay.Util.RolloverFileLogSink">
+      <Set name="LogDir">./logs</Set>
+      <Set name="RetainDays">90</Set>
+      <Set name="MultiDay">false</Set>
+      <Set name="Append">true</Set>
+    </New>
+  </Set>
+
 </Configure>
-
-
-
-
-
-
-
-
 

@@ -113,15 +113,17 @@ public class Log
 						"yyyyMMdd HHmmss.SSS zzz ");
 		timezone = System.getProperty("LOG_TIMEZONE","GMT");
 	    }
-	    catch (Throwable ex){
+	    catch (Throwable ex)
+	    {
 		System.err.println("Exception from getProperty - probably running in applet\nUse Log.initParamsFromApplet or Log.setOptions to control debug output.");
 	    }
 		    
-	    String sinkClasses = System.getProperty("LOG_CLASSES", "com.mortbay.Util.LogSink");
+	    String sinkClasses = System.getProperty("LOG_CLASSES", "com.mortbay.Util.WriterLogSink");
 	    StringTokenizer sinkTokens = new StringTokenizer(sinkClasses, ";");
 		    
 	    LogSink sink= null;
-	    while (sinkTokens.hasMoreTokens()) {
+	    while (sinkTokens.hasMoreTokens())
+	    {
 		String sinkClassName = sinkTokens.nextToken();
 		    	
 		try{
@@ -175,14 +177,14 @@ public class Log
 	    try
 	    {
 		if(logFile==null)
-		    sink=new LogSink();
+		    sink=new WriterLogSink();
 		else
 		    sink=new FileLogSink(logFile);
 	    }
 	    catch(IOException e)
 	    {
 		e.printStackTrace();
-		sink=new LogSink();
+		sink=new WriterLogSink();
 	    }
 	
 	    sink.setOptions((dateFormat!=null)
@@ -239,7 +241,15 @@ public class Log
     {
 	if (_sinks!=null) {
 	    for (int s=_sinks.length;s-->0;)
-		_sinks[s].stop();
+	    {
+		try{
+		    _sinks[s].stop();
+		}
+		catch(InterruptedException e)
+		{
+		    Code.ignore(e);
+		}
+	    }
 	    _sinks=null;
 	}
     }
@@ -271,7 +281,11 @@ public class Log
 	if (_sinks==null)
 	    return;
 	for (int s=_sinks.length;s-->0;)
+	{
+	    if (!_sinks[s].isStarted())
+		_sinks[s].start();
 	    _sinks[s].log(tag,msg,frame,time);
+	}
     }
 
     /* ------------------------------------------------------------ */

@@ -1,6 +1,12 @@
 Stable 2.4.6
 Dev    3.0.B02
 
+Jetty-3.0.B03 - ???????????????????????????????
+
+ + Parse but not handler startup ordering in web applications.
+ + Send request log via a LogSink
+ + Made LogSink a Lifecycle interface 
+ + Improved handler toString
  + Redirect context only paths.
  + Pass object to LogSink
  + Implemented request dispatching.

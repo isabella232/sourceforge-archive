@@ -42,11 +42,7 @@ public class HttpConnection
     private HttpResponse _response;
     private Thread _handlingThread;
     private InetAddress _remoteAddr;
-
-    /* ------------------------------------------------------------ */
-    private static final DateCache __dateCache=
-	new DateCache("dd/MMM/yyyy:HH:mm:ss");
-
+    private HttpServer _httpServer;
 
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -148,7 +144,9 @@ public class HttpConnection
      */
     public HttpServer getHttpServer()
     {
-        return _listener.getHttpServer();
+	if (_httpServer==null)
+	    _httpServer=_listener.getHttpServer();
+	return _httpServer;
     }
 
     /* ------------------------------------------------------------ */
@@ -234,10 +232,11 @@ public class HttpConnection
     protected void service(HttpRequest request, HttpResponse response)
         throws HttpException, IOException
     {
-	HttpServer server= getHttpServer();
-        if (server==null)
+	if (_httpServer==null)
+	    getHttpServer();
+        if (_httpServer==null)
                 throw new HttpException(response.__503_Service_Unavailable);
-        server.service(request,response);
+        _httpServer.service(request,response);
     }
     
     /* ------------------------------------------------------------ */
@@ -463,55 +462,8 @@ public class HttpConnection
 	}
         finally
         {
-	    // Log request - XXX should be in HttpHandler
-	    if (logRequest && _request!=null && _response!=null)
-	    {
-		int length =
-		    _response.getIntField(HttpFields.__ContentLength);
-		String bytes = ((length>=0)?Long.toString(length):"-");
-		String user = (String)_request.getAttribute(HttpRequest.__AuthUser);
-		if (user==null)
-		    user = "-";
-
-		String referer = _request.getField(HttpFields.__Referer);
-		if (referer==null)
-		    referer="-";
-		else
-		    referer="\""+referer+"\"";
-		
-		String agent = _request.getField(HttpFields.__UserAgent);
-		if (agent==null)
-		agent="-";
-		else
-		    agent="\""+agent+"\"";
-
-		String addr="127.0.0.1";
-		if (_remoteAddr!=null)
-		    addr=_remoteAddr.getHostAddress();
-		
-		String log= addr +
-		    " - "+
-		    user +
-		    " [" +
-		    __dateCache.format(System.currentTimeMillis())+
-		    "] \""+
-		    _request.getRequestLine()+
-		    "\" "+
-		    _response.getStatus()+
-		    " " +
-		    bytes +
-		    " " +
-		    referer +
-		    " " +
-		    agent;
-
-		synchronized(Log.instance())
-		{
-		    System.out.println(log);
-		}
-	    }
-	    
-
+	    if (logRequest)
+		_httpServer.log(_request,_response);
 	    
             if (_request!=null)
                 _request.destroy();

@@ -19,22 +19,39 @@ package com.mortbay.Util;
  * are rolled over every day and old files are deleted.
  *
  * The default constructor looks for these System properties:
- * ROLLOVER_LOG_DIR			The path to the directory containing the logs
+ * ROLLOVER_LOG_DIR		The path to the directory containing the logs
  * ROLLOVER_LOG_RETAIN_DAYS	The number of days to retain logs
  * ROLLOVER_LOG_EXTENSION	The file extension for log files
- * ROLLOVER_LOG_STOP_TIMEOUT How long to wait to kill the cleanup thread
- * ROLLOVER_LOG_TIMER_INTERVAL How long the cleanup thread sleeps
- * ROLLOVER_LOG_MULT_DAY If true, Jetty will keep multiple log files for same day,
- *                       if server is halted and restored.  Useful for debugging 
- *                       server crashes.
+ * ROLLOVER_LOG_STOP_TIMEOUT    How long to wait to kill the cleanup thread
+ * ROLLOVER_LOG_TIMER_INTERVAL  How long the cleanup thread sleeps
+ * ROLLOVER_LOG_MULT_DAY        If true, Jetty will keep multiple log files
+ *                              for same day if server is halted and restored.
+ * ROLLOVER_LOG_APPEND          If true and not multi-day, append to existing
+ *                              log files.
  *
  * @version $Id$
  * @author V. Lipovetsky
  * @author Kent Johnson
  */
 public class RolloverFileLogSink 
-	extends LogSink implements Runnable
+	extends WriterLogSink implements Runnable
 {
+    private boolean created = false;    
+    private java.io.PrintWriter logWriter;
+    private java.io.File logFile;
+    private Thread clearThread;
+    private ThreadEvent threadEvent = new ThreadEvent();
+    private java.text.SimpleDateFormat fileDateFormat = 
+	new java.text.SimpleDateFormat("yyyy_MM_dd");
+    private boolean multDay;
+    private boolean append;
+
+    private java.io.File logDir = new java.io.File("./");
+    private String logExt = ".log";
+    private long timerInterval = 20*1000;
+    private long threadStopTimeout = 20*1000;
+    private int retainDays = 1;
+
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -62,8 +79,9 @@ public class RolloverFileLogSink
     	Integer timerInterval = Integer.getInteger("ROLLOVER_LOG_TIMER_INTERVAL");
     	if (timerInterval != null)
 	    setTimerInterval(timerInterval.intValue());
-    		
-	start();
+
+	multDay = Boolean.getBoolean("ROLLOVER_LOG_MULT_DAY");
+	append = Boolean.getBoolean("ROLLOVER_LOG_APPEND");
     }
 
 
@@ -88,23 +106,45 @@ public class RolloverFileLogSink
     	setLogExt(newLogExt);
 	setTimerInterval(newTimerInterval);
 	setThreadStopTimeout(newThreadStopTimeout);
-
-	start();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param newLogDir 
+     * @param newRetainDays 
+     * @param newLogExt 
+     * @param newThreadStopTimeout 
+     * @param newTimerInterval 
+     * @param multiDay 
+     * @exception java.io.IOException 
+     */
+    public RolloverFileLogSink(String newLogDir)
+	throws java.io.IOException
+    {
+    	setLogDir(newLogDir);
+	setMultiDay(true);
     }
 	
     /* ------------------------------------------------------------ */
     /* 
      * @exception java.io.IOException 
      */
-    private void start()
-	throws java.io.IOException
+    public void start()
     {
-	// Set new log file to name of current date
-	setLogNameToDate(new java.util.Date());
-	clearOldLogFiles(new java.util.Date());
-	startClearThread();
-
-      	setCreated(true);
+	try{
+	    // Set new log file to name of current date
+	    setLogNameToDate(new java.util.Date());
+	    clearOldLogFiles(new java.util.Date());
+	    startClearThread();
+	    
+	    setCreated(true);
+	    super.start();
+	}
+	catch(java.io.IOException e)
+	{
+	    Code.warning(e);
+	}
+	
     }//start
     
     
@@ -112,6 +152,7 @@ public class RolloverFileLogSink
     public void stop()
     {
     	cleanup();
+	super.stop();
     }
 
 
@@ -124,33 +165,43 @@ public class RolloverFileLogSink
     	throws java.io.IOException
     {
 	java.io.File newLogFile = 
-	    new java.io.File(logDir, fileDateFormat.format(curDate) + logExt);
+	    new java.io.File(logDir, fileDateFormat.format(curDate) +
+			     logExt);
 
 	//** If new name eq old do nothing
 	if (newLogFile.equals(logFile)) return;
             
 	// Make sure we start fresh if multDay option not set
-	if (!multDay && newLogFile.exists()){
-	    newLogFile.delete();
+	if (!multDay && newLogFile.exists())
+	{
+	    if (!append)
+		newLogFile.delete();
 	}
-	// Make additional files appended with _num2, _num3, etc.
-	else{
+	else
+	{
+	    // Make additional files appended with _n2, _n3, etc.
 	    int num = 1;
-	    while (newLogFile.exists()){
+	    while (newLogFile.exists())
+	    {
 		num++;
-		newLogFile = new java.io.File(logDir, 
-					      fileDateFormat.format(curDate) + "_num" + num + logExt);
+		newLogFile =
+		    new java.io.File(logDir, 
+				     fileDateFormat.format(curDate) +
+				     "_n" + num + logExt);
 	    }
 	}
 	logFile = newLogFile;
 
 	//** Open new log file
-	java.io.PrintWriter newLogWriter = new java.io.PrintWriter(
-								   new java.io.FileWriter(logFile.getPath(), true), true);
+	java.io.PrintWriter newLogWriter =
+	    new java.io.PrintWriter(new java.io.FileWriter(logFile.getPath(),
+							   true), true);
 
 	long now = System.currentTimeMillis();
-	if (logWriter != null) {
-	    synchronized (logWriter) {
+	if (logWriter != null)
+	{
+	    synchronized (logWriter)
+	    {
 				//** Close old log file
 		logWriter.close();
 		logWriter = newLogWriter;
@@ -159,7 +210,8 @@ public class RolloverFileLogSink
 		super.setWriter(logWriter);
 	    }
 	}
-	else {
+	else
+	{
 	    logWriter = newLogWriter;
 	    super.setWriter(logWriter);
 	}
@@ -173,13 +225,16 @@ public class RolloverFileLogSink
      */
     private synchronized void clearOldLogFiles(java.util.Date curDate)
     {
-	String[] logFileList = logDir.list(
-					   new java.io.FilenameFilter() {
-						   public boolean accept(java.io.File dir, String n) {
-						       return n.indexOf(logExt) != -1;
-						   }//accept
-					       }//FilenameFilter
-					   );
+	String[] logFileList =
+	    logDir.list(
+			new java.io.FilenameFilter() {
+				public boolean accept(java.io.File dir,
+						      String n)
+				{
+				    return n.indexOf(logExt) != -1;
+				}//accept
+			    }//FilenameFilter
+			);
 
 	//** Compute Border date
 	java.util.Calendar calendar = java.util.Calendar.getInstance();
@@ -190,7 +245,8 @@ public class RolloverFileLogSink
 	int borderMonth = calendar.get(java.util.Calendar.MONTH) + 1;
 	int borderDay = calendar.get(java.util.Calendar.DAY_OF_MONTH);
 			
-	for (int i = 0; i < logFileList.length; i++) {
+	for (int i = 0; i < logFileList.length; i++)
+	{
 	    java.io.File logFile = new java.io.File(logDir, logFileList[i]);
 	    java.util.StringTokenizer st = 
 		new java.util.StringTokenizer(logFile.getName(), "_.");
@@ -213,7 +269,8 @@ public class RolloverFileLogSink
      */
     private synchronized void startClearThread()
     {
-	if (clearThread == null) {
+	if (clearThread == null)
+	{
 	    clearThread = new Thread(this);
 	    clearThread.setDaemon(true);
 	    clearThread.start();
@@ -227,17 +284,21 @@ public class RolloverFileLogSink
      */
     private synchronized void stopClearThread(long timeout)
     {
-	if (clearThread != null) {
-				//** Send signal about exit from program
+	if (clearThread != null)
+	{
+	    //** Send signal about exit from program
 	    threadEvent.setOn(true);
 
-				//** wait unitl thread is stopped
+	    //** wait unitl thread is stopped
 	    try {
 		clearThread.join(timeout);
 	    }
-	    catch (java.lang.InterruptedException ignored) { Code.ignore(ignored); }
+	    catch (java.lang.InterruptedException ignored)
+	    { Code.ignore(ignored); }
+	    
 	    //** if timeout is out time let's interrupt thread
-	    if (clearThread.isAlive()) {
+	    if (clearThread.isAlive())
+	    {
         	clearThread.interrupt();
 	    }//if
 	    clearThread = null;
@@ -246,16 +307,16 @@ public class RolloverFileLogSink
 
 
     /* ------------------------------------------------------------ */
-    public void run( )
+    public void run()
     {
 	try {
-
-	    while(true) {
-
-		synchronized(threadEvent) {
+	    while(true)
+	    {
+		synchronized(threadEvent)
+		{
 		    threadEvent.wait(timerInterval);
-
-		    if (threadEvent.isOn()) {
+		    if (threadEvent.isOn())
+		    {
 			break;
 		    }//if
 
@@ -288,16 +349,13 @@ public class RolloverFileLogSink
      */
     public synchronized void cleanup()
     {
-	if (isCreated()) {
+	if (isCreated())
+	{
 	    stopClearThread(threadStopTimeout);
 	    logWriter.close();
 	    setCreated(false);
 	}//if
     }
-
-
-    /* ------------------------------------------------------------ */
-    private java.io.File logDir = new java.io.File("./");
 
     /* ------------------------------------------------------------ */
     /** 
@@ -310,9 +368,6 @@ public class RolloverFileLogSink
         logDir = new java.io.File(newValue);
         logDir.mkdirs();	// Make sure it exists
     }
-
-    /* ------------------------------------------------------------ */
-    private String logExt = ".log";
 
     /* ------------------------------------------------------------ */
     /** 
@@ -331,13 +386,11 @@ public class RolloverFileLogSink
     }
     
     /* ------------------------------------------------------------ */
-    private int retainDays = 1;
-
-    /* ------------------------------------------------------------ */
     /** 
      * @return 
      */
-    public int getRetainDays() {
+    public int getRetainDays()
+    {
         return retainDays;
     }
 
@@ -351,13 +404,11 @@ public class RolloverFileLogSink
     }
 
     /* ------------------------------------------------------------ */
-    private long threadStopTimeout = 20*1000;
-
-    /* ------------------------------------------------------------ */
     /** 
      * @return 
      */
-    public long getThreadStopTimeout() {
+    public long getThreadStopTimeout()
+    {
         return threadStopTimeout;
     }
 
@@ -365,27 +416,50 @@ public class RolloverFileLogSink
     /** 
      * @param newValue 
      */
-    public void setThreadStopTimeout(long newValue) {
-        threadStopTimeout = newValue;
+    public void setThreadStopTimeout(long newValue)
+    {
+        threadStopTimeout = newValue==0?20000L:newValue;
     }
     
-    /* ------------------------------------------------------------ */
-    private long timerInterval = 20*1000;
 
     /* ------------------------------------------------------------ */
-    public long getTimerInterval() {
+    public long getTimerInterval()
+    {
         return timerInterval;
     }
 
     /* ------------------------------------------------------------ */
     /** 
-     * @param newValue 
+     * @param newValue TimerInterval or 0 for default
      */
     public void setTimerInterval(long newValue)
     {
-        timerInterval = newValue;
+        timerInterval = (newValue==0)?20000L:newValue;
     }
 
+    /* ------------------------------------------------------------ */
+    public boolean isMultiDay()
+    {
+	return multDay;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setMultiDay(boolean md)
+    {
+	multDay=md;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean isAppend()
+    {
+	return append;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setAppend(boolean a)
+    {
+	append=a;
+    }
     
     /* ------------------------------------------------------------ */
     /** 
@@ -404,17 +478,6 @@ public class RolloverFileLogSink
     {
   	created = newValue;
     }
-
-    private boolean created = false;
-    
-    // add your data members here
-    private java.io.PrintWriter logWriter;
-    private java.io.File logFile;
-    private Thread clearThread;
-    private ThreadEvent threadEvent = new ThreadEvent();
-    private java.text.SimpleDateFormat fileDateFormat = 
-	new java.text.SimpleDateFormat("yyyy_MM_dd");
-    private boolean multDay;
 
 
     /* ------------------------------------------------------------ */

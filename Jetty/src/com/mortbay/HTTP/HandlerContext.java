@@ -183,7 +183,7 @@ public class HandlerContext
     }
     
     /* ------------------------------------------------------------ */
-    /** 
+    /** Set a handler.
      * @param i 
      * @param handler 
      */
@@ -265,7 +265,6 @@ public class HandlerContext
     public boolean isServingServlets()
     {
 	return getServletHandler()!=null;
-	
     }
     
     /* ------------------------------------------------------------ */
@@ -603,7 +602,46 @@ public class HandlerContext
 	getMimeByExtension("default");
 	_mimeMap.put(extension,type);
     }
-     
+
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param contextPathSpec 
+     * @param request 
+     * @param response 
+     * @exception HttpException 
+     * @exception IOException 
+     */
+    public boolean handle(String contextPathSpec,
+			  HttpRequest request,
+			  HttpResponse response)
+        throws HttpException, IOException
+    {
+	List handlers=getHandlers();
+	for (int k=0;k<handlers.size();k++)
+	{
+	    HttpHandler handler =
+		(HttpHandler)handlers.get(k);
+	    
+	    if (Code.debug())
+		Code.debug("Try handler ",handler);
+				
+	    handler.handle(contextPathSpec,
+			   request,
+			   response);
+
+	    if (request.isHandled())
+	    {
+		if (Code.debug())
+		    Code.debug("Handled by ",handler);
+		response.complete();
+		return true;
+	    }
+	}
+	return false;
+    }
+    
+    
     /* ------------------------------------------------------------ */
     public String toString()
     {

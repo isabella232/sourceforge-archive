@@ -171,7 +171,7 @@ public class ResourceHandler extends NullHandler
      * @param path 
      * @return 
      */
-    private Resource resource(String pathSpec,String path)
+    private Resource makeresource(String pathSpec,String path)
 	throws MalformedURLException,IOException
     {
 	Resource resourceBase=getHandlerContext().getResourceBase();
@@ -185,7 +185,7 @@ public class ResourceHandler extends NullHandler
     }
  
     /* ------------------------------------------------------------ */
-    public void handle(String pathSpec,
+    public void handle(String contextPathSpec,
 		       HttpRequest request,
 		       HttpResponse response)
 	throws HttpException, IOException
@@ -198,10 +198,35 @@ public class ResourceHandler extends NullHandler
 	if (path.indexOf("..")>=0)
 	    throw new HttpException(HttpResponse.__403_Forbidden);
 	
-	Resource resource = resource(pathSpec,path);
+	Resource resourceBase=getHandlerContext().getResourceBase();
+	if (resourceBase==null)
+	    return;
+	
+	String info=PathMap.pathInfo(contextPathSpec,path);
+	if (info==null)
+	{
+	    // XXX - this should be done at a higher level.
+	    StringBuffer buf=request.getRequestURL();
+	    buf.append("/");
+	    String q=request.getQuery();
+	    if (q!=null&&q.length()!=0)
+		buf.append("?"+q);
+	    response.setField(HttpFields.__Location,
+				  buf.toString());
+	    if (Code.debug())
+		Code.warning("Context "+contextPathSpec+
+			     " consumed all of path "+
+			     request.getPath()+
+			     ", redirect to "+buf.toString());
+	    response.sendError(302);
+	    return;
+	}
+	
+	Resource resource = resourceBase.addPath(info);
+	
 	try
 	{
-	    Code.debug("PATHSPEC=",pathSpec,
+	    Code.debug("PATHSPEC=",contextPathSpec,
 		       "\nPATH=",path,
 		       "\nRESOURCE=",resource);
 	    
@@ -219,7 +244,7 @@ public class ResourceHandler extends NullHandler
 	    else if (method.equals(HttpRequest.__OPTIONS))
 		handleOptions(response);
 	    else if (method.equals(HttpRequest.__MOVE))
-		handleMove(request, response, pathSpec, path, resource);
+		handleMove(request, response, contextPathSpec, path, resource);
 	    else
 	    {
 		Code.debug("Unknown action:"+method);

@@ -297,7 +297,7 @@ public class HttpResponse extends HttpMessage
 		 " "+reason+
 		 "</TITLE>\n<BODY>\n<H2>HTTP ERROR: "+code+
 		 " "+reason+
-		 "</H2>\n"+message+
+		 "</H2>\n"+(message==null?"":message)+
 		 "\n</BODY>\n</HTML>\n").getBytes("ISO-8859-1");
 	    
 	    _header.putIntField(HttpFields.__ContentLength,buf.length);
@@ -337,7 +337,7 @@ public class HttpResponse extends HttpMessage
 		 " "+reason+
 		 "</TITLE>\n<BODY>\n<H2>HTTP ERROR: "+code+
 		 " "+reason+
-		 "</H2>\n"+message+
+		 "</H2>\n"+(message==null?"":message)+
 		 "\n</BODY>\n</HTML>\n").getBytes("ISO-8859-1");
 	    
 	    _header.putIntField(HttpFields.__ContentLength,buf.length);

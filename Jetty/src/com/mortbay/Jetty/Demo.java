@@ -63,7 +63,15 @@ public class Demo
 	    
 	    context=server.getContext(null,"/");
 	    context.addHandler(new NotFoundHandler());
-	    
+
+	    // Logger
+	    RolloverFileLogSink log = new RolloverFileLogSink();
+	    log.setLogDir("./logs");
+	    log.setRetainDays(90);
+	    log.setMultiDay(false);
+	    log.setAppend(true);
+	    server.setLogSink(log);
+			      
 	    // Start handlers and listener
 	    server.start();
 	}
@@ -73,4 +81,6 @@ public class Demo
 	}
     }
 }
+
+
 

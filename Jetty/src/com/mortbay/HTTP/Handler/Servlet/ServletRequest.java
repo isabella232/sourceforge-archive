@@ -611,14 +611,7 @@ class ServletRequest
     /* -------------------------------------------------------------- */
     public String getRemoteAddr()
     {
-        HttpConnection connection = _httpRequest.getConnection();
-        if (connection!=null)
-        {
-            InetAddress addr = connection.getRemoteAddr();
-            if (addr!=null)
-                return addr.getHostAddress();
-        }
-        return "127.0.0.1";
+	return _httpRequest.getRemoteAddr();
     }
     
     /* -------------------------------------------------------------- */

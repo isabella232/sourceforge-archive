@@ -1,4 +1,3 @@
-
 // ===========================================================================
 // Copyright (c) 1996 Mort Bay Consulting Pty. Ltd. All rights reserved.
 // $Id$
@@ -472,6 +471,19 @@ public class HttpRequest extends HttpMessage
         _uri.setQuery(query);
     }
 
+    /* ------------------------------------------------------------ */
+    public String getRemoteAddr()
+    {
+        HttpConnection connection = getConnection();
+        if (connection!=null)
+        {
+            InetAddress addr = connection.getRemoteAddr();
+            if (addr!=null)
+                return addr.getHostAddress();
+        }
+        return "127.0.0.1";
+    }
+    
     /* ------------------------------------------------------------ */
     /** Decode HTTP request line
      * @param buf Character buffer
