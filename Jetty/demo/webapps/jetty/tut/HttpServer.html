@@ -64,6 +64,8 @@ might match  the request, and in this case, all HttpContexts  are tried <i>
  in the order  in which they were registered with the server</i>    until
 the request is  marked as having been handled.<br>
                <br>
+Note that in Jetty 3.1 and previous releases, the HttpContext class was called HandlerContext.<br>
+               <br>
        The trivial code snippet from the Introduction to the HttpServer can 
  then   be represented as:<br>
                 <br>

@@ -1,0 +1,28 @@
+<HR><B><FONT SIZE="+2">Virtual Hosts</FONT></B><HR>
+<BR><BR>
+Jetty supports the virtual host mechanism of HTTP.  The methods to add a WebApplication or
+a HttpContext all take an optional virtualhost argument.  In the jetty.xml file, this can be
+done with:
+<UL><TT><PRE>
+  &lt;Call name="addWebApplication"&gt;
+    &lt;Arg&gt;virtual.host.name&lt;/arg&gt;
+    &lt;Arg&gt;/context&lt;/Arg&gt;
+    &lt;Arg&gt;&lt;SystemProperty name="jetty.home" default="."/&gt; "/webapps/myapp"&lt;/Arg&gt;
+    &lt;Arg&gt;&lt;SystemProperty name="jetty.home" default="."/&gt; "/etc/webdefaults.xml" &lt;/Arg&gt;
+    &lt;Arg type="boolean"&gt;false&lt;/Arg&gt;
+  &lt;/Call&gt;
+</PRE></TT></UL>
+If you want more than one virtual1 name for the webapp, you can add aliases with
+
+<UL><TT><PRE>
+  &lt;Call name="addHostAlias"&gt;
+   &lt;Arg&gt;virtual.host.name&lt;/arg&gt;
+   &lt;Arg&gt;othername&lt;/arg&gt;
+  &lt;/Call&gt;
+
+  &lt;Call name="addHostAlias"&gt;
+   &lt;Arg&gt;virtual.host.name&lt;/arg&gt;
+   &lt;Arg&gt;192.168.0.1&lt;/arg&gt;
+  &lt;/Call&gt;
+</PRE></TT></UL>
+<HR>

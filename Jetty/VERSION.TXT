@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+
+Jetty-4.0.B1 - 13 Feb 2002
  + WriterOutputStream so JSPs can include static resources.
  + Suppress error only for IOExceptions not derivitives.
  + HttpConnection always eats unused bodies
