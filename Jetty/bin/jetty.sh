@@ -1,23 +1,71 @@
-#!/bin/sh
+#!/bin/sh 
 #
-# Startup script for Jetty - Java HTTP Servlet Server
+# Startup script for jetty under *nix systems (it works under NT/cygwin too).
 #
-# This script is controlled by the following environment variables:
+# Configuration files
+#
+# $HOME/.jettyrc
+#   This is read at the start of script. It may perform any sequence of
+#   shell commands, like setting relevant environment variables.
+#
+# /etc/jetty.conf
+#   If found, and no configurations were given on the command line,
+#   the file will be used as this script's configuration. 
+#   Each line in the file may contain:
+#     - A comment denoted by the pound (#) sign as first non-blank character.
+#     - The path to a regular file, which will be passed to jetty as a 
+#       config.xml file.
+#     - The path to a directory. Each *.xml file in the directory will be
+#       passed to jetty as a config.xml file.
+#
+#   The files will be checked for existence before being passed to jetty.
+#
+# $JETTY_HOME/etc/jetty.conf
+#   If found, used as this script's configuration file, but only if
+#   /etc/jetty.conf was not present. See above.
+#   
 # 
-# JAVA       - executable JVM
-# JAVA_HOME  - Home of java, specifically $JAVA_HOME/lib/tools.jar
-# JETTY_HOME - Home of jetty
-# JETTY_ETC  - Jetty configuration file directory
-# JETTY_RUN  - Directory for jetty pid file
-# JETTY_LOG  - Directory for jetty output log
+# Configuration variables
 #
-# If any of these variables are not set, then frantic searches are made
-# of likely locations to try and set them.
+# JAVA_HOME  
+#   Home of Java installation. This needs to be set as this script 
+#   will not look for it.
 #
+# JAVA
+#   Command to invoke Java. If not set, $JAVA_HOME/bin/java will be
+#   used.
+#
+# JETTY_HOME 
+#   Where Jetty is installed. If not set, the script will try go
+#   guess it by first looking at the invocation path for the script,
+#   and then by looking in standard locations as $HOME/opt/jetty
+#   and /opt/jetty. The java system property "jetty.home" will be
+#   set to this value for use by configure.xml files, f.e:
+#
+#    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/jetty.war</Arg>
+#
+# JETTY_LOG 
+#   Where jetty logs should be stored. The only effect of this 
+#   variable is to set the "jetty.log" java system property so
+#   configure.xml files can use it, f.e.:
+#
+#     <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.request.log</Arg>
+#
+#   This variable will be tipically set to something like /var/log/jetty. If
+#   not set, it will default to $JETTY_HOME/logs
+#
+# JETTY_RUN
+#   Where the jetty.pid file should be stored. It defaults to the
+#   first available of /var/run, /usr/var/run, and /tmp if not set.
+#   
 
-# Temp file
-TMPJ=/tmp/jetty$$
-trap "rm -f $TMPJ" 0
+##################################################
+# Get the action & configs
+##################################################
+ACTION=$1
+shift
+ARGS="$*"
+CONFIGS=""
 
 ##################################################
 # Find directory function
@@ -35,21 +83,220 @@ findDirectory()
 
 
 ##################################################
-# Determine which JVM of version >1.2
-# Try to use JAVA_HOME
+# See if there's a user-specific configuration file
 ##################################################
-if [ "$JAVA" = "" -a "$JAVA_HOME" != "" ]
+if [ -f $HOME/.jettyrc ] ; then 
+  . $HOME/.jettyrc
+fi
+
+
+##################################################
+# Jetty's hallmark
+##################################################
+JETTY_JAR="lib/com.mortbay.jetty.jar"
+
+
+##################################################
+# Try to determine JETTY_HOME if not set
+##################################################
+if [ -z $JETTY_HOME ] ;
 then
-    [ -x $JAVA_HOME/bin/jre -a ! -d $JAVA_HOME/bin/jre ] && JAVA=$JAVA_HOME/bin/jre
-    [ -x $JAVA_HOME/bin/java -a ! -d $JAVA_HOME/bin/java ] && JAVA=$JAVA_HOME/bin/java
+  JETTY_HOME_1=`dirname "$0"`/..
+  echo "** WARNING: Guessing JETTY_HOME from jetty.sh to ${JETTY_HOME_1}" 
+  if [ -f "${JETTY_HOME_1}/${JETTY_JAR}" ] ; 
+  then 
+     JETTY_HOME=${JETTY_HOME_1} 
+     echo "Setting JETTY_HOME to $JETTY_HOME" ;
+  fi
+fi
+
+
+##################################################
+# if no JETTY_HOME, search likely locations.
+##################################################
+if [ "$JETTY_HOME" = "" ] ; then
+  STANDARD_LOCATIONS="           \
+        $HOME                    \
+        ${HOME}/opt/             \
+        /opt                     \
+        /usr/share               \
+        /usr/share/java          \
+        /usr/local               \
+        /usr/local/share         \
+        /usr/local/share/java    \
+        /home                    \
+        "
+  JETTY_DIR_NAMES="              \
+        jetty                    \
+        Jetty                    \
+        jetty3                   \
+        Jetty3                   \
+        "
+        
+  JETTY_HOME=
+  for L in $STANDARD_LOCATIONS ;
+  do
+     for N in $JETTY_DIR_NAMES ;
+     do
+         if [ -d "$L/$N" ] && [ -f "$L/${N}/${JETTY_JAR}" ] ; 
+         then 
+            JETTY_HOME="$L/$N"
+            echo "Defaulting JETTY_HOME to $JETTY_HOME"
+            break
+         fi
+     done
+     [ ! -z "$JETTY_HOME" ] && break
+  done
 fi
 
 ##################################################
-# If still no JAVA, do a search and test the version of each JVM found
+# No JETTY_HOME yet? We're out of luck!
 ##################################################
-if [ "$JAVA" = "" ]
+if [ -z "$JETTY_HOME" ] ; then
+    echo "** ERROR: JETTY_HOME not set, you need to set it or install in a standard location" ;
+    exit 1
+else
+    if [ ! -r $JETTY_HOME/$JETTY_JAR ] ;
+    then
+       echo "** ERROR: Oops! $JETTY_HOME/$JETTY_JAR is not readable!" ;
+       exit 1
+    fi
+fi
+
+###########################################################
+# Get the list of config.xml files from the command line.
+###########################################################
+if [ ! -z "$ARGS" ] ;
 then
-    JAVA_HOME=
+  for A in $ARGS ;
+  do
+    if [ -f $A ] ;
+    then
+       CONF="$A" ;
+    elif [ -f $JETTY_HOME/etc/$A ] ;
+    then
+       CONF="$JETTY_HOME/etc/$A" ;
+    elif [ -f ${A}.xml ] ;
+    then
+       CONF="${A}.xml" ;
+    elif [ -f $JETTY_HOME/etc/${A}.xml ] ;
+    then
+       CONF="$JETTY_HOME/etc/${A}.xml" ;
+    else
+       echo "** ERROR: Cannot find configuration '$A' specified in the command line." ;
+       exit 1
+    fi
+    if [ ! -r $CONF ] ;
+    then
+       echo "** ERROR: Cannot read configuration '$A' specified in the command line." ;
+       exit 1
+    fi
+    CONFIGS="$CONFIGS $CONF"
+  done
+fi
+
+
+##################################################
+# Try to find this script's configuration file,
+# but only if no configurations were given on the
+# command line.
+##################################################
+if [ -z "$JETTY_CONF" ] ;
+then
+  if [ -f /etc/jetty.conf ];
+  then
+     JETTY_CONF=/etc/jetty.conf;
+  else
+     JETTY_CONF="${JETTY_HOME}/etc/jetty.conf;"
+  fi
+fi
+
+##################################################
+# Read the configuration file if one exists
+##################################################
+CONFIG_LINES=
+if [ -z "$CONFIGS" ] && [ -f "$JETTY_CONF" ] && [ -r "$JETTY_CONF" ] ;
+then
+  CONFIG_LINES=`cat $JETTY_CONF | grep -v "^[:space:]*#" | tr "\n" " "` ;
+fi
+
+##################################################
+# Get the list of config.xml files from jetty.conf
+##################################################
+if [ ! -z "${CONFIG_LINES}" ] ;
+then
+  for CONF in ${CONFIG_LINES} ;
+  do
+    if [ ! -r "$CONF" ] ;
+    then
+      echo "** WARNING: Cannot read '$CONF' specified in '$JETTY_CONF'" ;
+    elif [ -f "$CONF" ] ;
+    then
+      # assume it's a configure.xml file
+      CONFIGS="$CONFIGS $CONF" ;
+    elif [ -d "$CONF" ] ;
+    then
+      # assume it's a directory with configure.xml files
+      # for example: /etc/jetty.d/
+      # sort the files before adding them to the list of CONFIGS
+      XML_FILES=`ls ${CONF}/*.xml | sort | tr "\n" " "` 
+      for CONF in ${XML_FILES} ;
+      do
+         if [ -r "$CONF" ] && [ -f "$CONF" ] ;
+         then
+            CONFIGS="$CONFIGS $CONF" ;
+         else
+           echo "** WARNING: Cannot read '$CONF' specified in '$JETTY_CONF'" ;
+         fi
+      done
+    else
+      echo "** WARNING: Don''t know what to do with '$CONF' specified in '$JETTY_CONF'" ;
+    fi
+  done
+fi
+
+#####################################################
+# Run the demo server if there's nothing else to run
+#####################################################
+if [ -z "$CONFIGS" ] ;
+then
+  CONFIGS="${JETTY_HOME}/etc/demo.xml ${JETTY_HOME}/etc/admin.xml";
+fi
+
+
+#####################################################
+# Check if the admin servlet was added. 
+# Add it if not. 
+# It will be needed to stop jetty cleanly.
+#####################################################
+HAS_ADMIN=`cat $CONFIGS | grep "admin.xml"`
+if [ -z "$HAS_ADMIN" ]  ;
+then
+  CONFIGS="${CONFIGS} ${JETTY_HOME}/etc/admin.xml"
+fi
+
+#####################################################
+# Check where logs should go.
+#####################################################
+if [ -z "$JETTY_LOG" ] ;
+then
+  JETTY_LOG="${JETTY_HOME}/logs"
+fi
+
+#####################################################
+# Find a location for the pid file
+#####################################################
+if [  -z "$JETTY_RUN" ] ;
+then
+  JETTY_RUN=`findDirectory -w /var/run /usr/var/run /tmp` ;
+fi
+
+
+##################################################
+# Check for JAVA_HOME
+##################################################
+if [ -z "$JAVA_HOME" ]
+then
     # If a java runtime is not defined, search the following
     # directories for a JVM and sort by version. Use the highest
     # version number.
@@ -90,105 +337,66 @@ then
     [ "$JAVA_HOME" = "" ] && JAVA_HOME=
 fi
 
-
 ##################################################
-# if no JETTY_HOME, search likely locations allowing for versions.
+# Determine which JVM of version >1.2
+# Try to use JAVA_HOME
 ##################################################
-if [ "$JETTY_HOME" = "" ]
+if [ "$JAVA" = "" -a "$JAVA_HOME" != "" ]
 then
-    # If no JETTY_HOME defined search the following locations
-    # for a jetty release.  Use the most recently modified.
-
-    # Jetty search path
-    JETTY_LOCATIONS="\
-        $HOME \
-        /usr/share/java \
-        /usr/local/share/java \
-        /usr/local/jetty \
-    " 
-    for L in $JETTY_LOCATIONS ; do
-        [ -d $L ] || continue ;
-        find $L -name "[jJ]etty*" -type d | while read J ; do
-            [ -f $J/lib/com.mortbay.jetty.jar ] || continue ;
-            echo $J
-        done
-    done | xargs ls -dt1 | head -1 > $TMPJ
-  
-    JETTY_HOME=`cat $TMPJ`
+  if [ ! -z "$JAVACMD" ] ;
+  then
+     JAVA="$JAVACMD" ;
+  else
+    [ -x $JAVA_HOME/bin/jre -a ! -d $JAVA_HOME/bin/jre ] && JAVA=$JAVA_HOME/bin/jre
+    [ -x $JAVA_HOME/bin/java -a ! -d $JAVA_HOME/bin/java ] && JAVA=$JAVA_HOME/bin/java
+  fi
 fi
 
-##################################################
-# Find the easy directories
-##################################################
-[ "$JETTY_ETC" = "" ] && JETTY_ETC=`findDirectory -d /etc/jetty /usr/local/etc/jetty $JETTY_HOME/etc`
-[ "$JETTY_RUN" = "" ] && JETTY_RUN=`findDirectory -w /var/run /usr/var/run /tmp`
-[ "$JETTY_LOG" = "" ] && JETTY_LOG=`findDirectory -w /var/log /usr/var/log $JETTY_HOME/logs /tmp`
 
-##################################################
-# Set the classpath
-##################################################
-echo `ls $JETTY_HOME/lib/*.jar` | tr ' ' : > $TMPJ
-if [ "$CLASSPATH" = "" ]
+#####################################################
+# Are we running on Windows? Could be, with Cygwin/NT.
+#####################################################
+if [ -z "$WINBOOTDIR" ] ;
 then
-    CLASSPATH=`cat $TMPJ`
+  PATH_SEPARATOR=":" ;
 else
-    CLASSPATH=`cat $TMPJ`:$CLASSPATH
-fi
-if [ "$JAVA_HOME" = "" ] ; then
-    echo "WARNING: JAVA_HOME not set, so cannot locate tools.jar for JSP compilation" >&2
-else
-    CLASSPATH=$CLASSPATH:$JAVA_HOME/lib/tools.jar
-fi
-export CLASSPATH
-
-
-
-##################################################
-# Get the action & configs
-##################################################
-ACTION=$1
-shift
-CONFIGS="$*"
-
-
-##################################################
-# define function to locate configure xml files
-##################################################
-XmlConfigures()
-{
-    for C in $1/*.xml ; do
-        LC=`head -3 $C | egrep Configure | wc -l`
-        [ $LC = 0 ] && continue;
-        echo $C
-    done | sort
-}
-
-##################################################
-# Work out what to start
-##################################################
-if [ "$CONFIGS" = "" ]
-then
-    CONFIGS=`XmlConfigures $JETTY_ETC`
-else
-    CTMP=$CONFIGS
-    CONFIGS=
-    for C in $CTMP ; do
-        if [ -f $JETTY_ETC/$C ] ; then
-            CONFIGS="$CONFIGS $JETTY_ETC/$C"
-        elif  [ -f $JETTY_ETC/$C.xml ] ; then
-            CONFIGS="$CONFIGS $JETTY_ETC/$C.xml"
-        fi
-    done
+  PATH_SEPARATOR=";" ;
 fi
 
-echo "JAVA       = $JAVA - version $JVERSION"
-echo "JAVA_HOME  = $JAVA_HOME"
-echo "JETTY_HOME = $JETTY_HOME"
-echo "JETTY_ETC  = $JETTY_ETC"
-echo "JETTY_RUN  = $JETTY_RUN"
-echo "JETTY_LOG  = $JETTY_LOG"
-echo "CONFIGS    = `echo $CONFIGS`"
-echo "CLASSPATH  = $CLASSPATH"
+
+#####################################################
+# Build the classpath with Jetty's bundled libraries.
+#####################################################
+CP=`ls $JETTY_HOME/lib/*.jar | tr "\n" "$PATH_SEPARATOR"`
+CLASSPATH="$CP $CLASPATH"
+
+#####################################################
+# Add jetty properties to Java VM options.
+#####################################################
+JAVA_OPTIONS="-Djetty.home=$JETTY_HOME -Djetty.log=$JETTY_LOG $JAVA_OPTIONS"
+
+#####################################################
+# This is how the Jetty server will be started
+#####################################################
+RUN_CMD="$JAVA -cp $CLASSPATH $JAVA_OPTIONS com.mortbay.Jetty.Server $CONFIGS"
+
+
+#####################################################
+# Comment these out after you're happy with what 
+# the script is doing.
+#####################################################
+echo "JETTY_HOME     =  $JETTY_HOME"
+echo "JETTY_CONF     =  $JETTY_CONF"
+echo "JETTY_LOG      =  $JETTY_LOG"
+echo "JETTY_RUN      =  $JETTY_RUN"
+echo "CONFIGS        =  $CONFIGS"
+echo "PATH_SEPARATOR =  $PATH_SEPARATOR"
+echo "JAVA_OPTIONS   =  $JAVA_OPTIONS"
+echo "JAVA           =  $JAVA"
+echo "CLASSPATH      =  $CLASSPATH"
+echo "RUN_CMD        =  $RUN_CMD"
+
+
 
 ##################################################
 # Do the action
@@ -203,10 +411,8 @@ case "$ACTION" in
             exit 1
         fi
 
-        cd $JETTY_HOME
-       
         echo "STARTED `date`" >>$JETTY_LOG/jetty.out
-        nohup $JAVA $JAVA_OPTIONS com.mortbay.Jetty.Server $CONFIGS >>$JETTY_LOG/jetty.out 2>&1 &
+        nohup $RUN_CMD >>$JETTY_LOG/jetty.out 2>&1 &
         echo $! > $JETTY_RUN/jetty.pid
         ;;
 
@@ -225,9 +431,30 @@ case "$ACTION" in
         sleep 5
         $0 start $*
         ;;
-  *)
-        echo "Usage: $0 {start|stop|restart} [ servers ... ] "
+
+  run)
+        echo -n "Running Jetty: "
+
+        if [ -f $JETTY_RUN/jetty.pid ]
+        then
+            echo "Already Running!!"
+            exit 1
+        fi
+
+        echo "STARTED `date`" >>$JETTY_LOG/jetty.out
+        $RUN_CMD
+        ;;
+
+  check)
+        echo -n "Checking arguments to Jetty: "
+        # do nothing 
+        ;;
+
+*)
+        echo "Usage: $0 {start|stop|run|restart|check} [ CONFIGS ... ] "
         exit 1
 esac
 
 exit 0
+
+

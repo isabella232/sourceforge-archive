@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Startup script for Jetty, the Apache Servlet Engine
+# SysVinit script for the Jetty Web Server and Servlet Engine
 #
 # chkconfig: 345 85 15
 # description: Jetty web, servlet, and JSP server.
@@ -25,13 +25,13 @@ export PATH=$PATH:$JAVA_HOME/bin:$JAVA_HOME/jre/bin
 case "$1" in
   start)
 	echo -n "Starting jetty: "
-	daemon $JETTY_HOME/etc/jetty.sh start
+	daemon $JETTY_HOME/bin/jetty.sh start
 	echo
 	touch /var/lock/subsys/jetty
 	;;
   stop)
 	echo -n "Shutting down jetty: "
-	daemon $JETTY_HOME/etc/jetty.sh stop
+	daemon $JETTY_HOME/bin/jetty.sh stop
 	echo
 	rm -f /var/lock/subsys/jetty
 	rm -f /var/run/jetty.pid
