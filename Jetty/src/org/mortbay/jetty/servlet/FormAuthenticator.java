@@ -1,5 +1,5 @@
 // ===========================================================================
-// Copyright (c) 1996-2002 Mort Bay Consulting Pty. Ltd. All rights reserved.
+// Copyright (c) 1996-2003 Mort Bay Consulting Pty. Ltd. All rights reserved.
 // $Id$
 // ---------------------------------------------------------------------------
 
@@ -166,6 +166,7 @@ public class FormAuthenticator implements Authenticator
                 }
 
                 // Redirect to original request
+                response.setContentLength(0);
                 response.sendRedirect(response.encodeRedirectURL(nuri));
             }
             else
@@ -173,6 +174,7 @@ public class FormAuthenticator implements Authenticator
                 Code.debug("Form authentication FAILED for ",form_cred._jUserName);
                 if (_formErrorPage!=null)
                 {
+                    response.setContentLength(0);
                     response.sendRedirect(response.encodeRedirectURL
                                           (URI.addPaths(request.getContextPath(),
                                                         _formErrorPage)));
@@ -264,9 +266,11 @@ public class FormAuthenticator implements Authenticator
                                  "://" + request.getServerName() +
                                  ":" + request.getServerPort() +
                                  URI.addPaths(request.getContextPath(),uri));
+            response.setContentLength(0);
             response.sendRedirect(response.encodeRedirectURL(URI.addPaths(request.getContextPath(),
                                                                           _formLoginPage)));
         }
+
         return null;
     }
 

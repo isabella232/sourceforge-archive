@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+Jetty-5.0.alpha1
  + Switched to mx4j
  + Improve combinations of Security Constraints
  + Implemented locale encoding mapping.
@@ -14,7 +15,12 @@ Jetty-5.0.alpha0 - 16 Jul 2003
  + Implemented filter-mapping <dispatcher> element
  + Implemented Dispatcher forward attributes.
 
-Jetty-4.2.x
+Jetty-4.2.12
+ + restore max inactive interval for session manager
+ + Removed protection of org.mortbay.http attributes
+ + Fixed parameter ordering for a forward request.
+ + Fixed up HTAccessHandler
+ + Improved error messages from ProxyHandler
  + Added missing S to some OPTIONS strings
  + Added open method to threaded server.
 

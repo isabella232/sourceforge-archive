@@ -140,6 +140,35 @@
 	}
 %>
 
+
+<%
+	e = request.getAttributeNames();
+	if(e != null && e.hasMoreElements()) {
+%>
+<H2>Request Attributes</H2>
+<TABLE>
+<TR valign=top>
+	<TH align=left>Attribute:</TH>
+	<TH align=left>Value:</TH>
+</TR>
+<%
+		while(e.hasMoreElements()) {
+			String k = (String) e.nextElement();
+			Object val = request.getAttribute(k);
+%>
+<TR valign=top>
+	<TD><%= k %></TD>
+	<TD><%= val %></TD>
+</TR>
+<%
+		}
+%>
+</TABLE>
+<%
+	}
+%>
+
+
 <%
 	e = getServletConfig().getInitParameterNames();
 	if(e != null && e.hasMoreElements()) {

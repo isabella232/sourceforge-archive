@@ -1,5 +1,5 @@
 // ========================================================================
-// Copyright (c) 1999 Mort Bay Consulting (Australia) Pty. Ltd.
+// Copyright (c) 1999-2003 Mort Bay Consulting (Australia) Pty. Ltd.
 // $Id$
 // ========================================================================
 
@@ -399,7 +399,6 @@ public class HttpResponse extends HttpMessage
                 _characterEncoding=null;
                 ByteArrayISO8859Writer writer =
                     new ByteArrayISO8859Writer(((HttpOutputStream)getOutputStream()).getBufferSize());
-                
                 writeErrorPage(writer,code,message);
                 writer.flush();
                 setContentLength(writer.size());
@@ -431,20 +430,21 @@ public class HttpResponse extends HttpMessage
         uri=StringUtil.replace(uri,"<","&lt;");
         uri=StringUtil.replace(uri,">","&gt;");
         
-        writer.write("<HTML>\n<HEAD>\n<TITLE>Error ");
+        writer.write("<html>\n<head>\n<title>Error ");
         writer.write(Integer.toString(code));
         writer.write(' ');
         writer.write(message);
-        writer.write("</TITLE>\n<BODY>\n<H2>HTTP ERROR: ");
+        writer.write("</title>\n<BODY>\n<h2>HTTP ERROR: ");
         writer.write(Integer.toString(code));
         writer.write(' ');
         writer.write(message);
-        writer.write("</H2>\n");
+        writer.write("</h2>\n");
         writer.write("RequestURI=");
         writer.write(uri);
+        writer.write("<p><i><small><a href=\"http://jetty.mortbay.org\">Powered by Jetty://</a></small></i></p>");
         for (int i=0;i<20;i++)
             writer.write("\n                                                ");
-        writer.write("\n</BODY>\n</HTML>\n");
+        writer.write("\n</body>\n</html>\n");
     }
     
     

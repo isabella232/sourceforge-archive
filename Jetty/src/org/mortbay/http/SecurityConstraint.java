@@ -1,5 +1,5 @@
 // ========================================================================
-// Copyright (c) 2000 Mort Bay Consulting (Australia) Pty. Ltd.
+// Copyright (c) 2000-2003 Mort Bay Consulting (Australia) Pty. Ltd.
 // $Id$
 // ========================================================================
 
@@ -341,6 +341,7 @@ public class SecurityConstraint
             {
                 if (sc.getAuthenticate())
                 {
+
                     // XXX - this is as per spec - but it sucks!
 //                     if (roles!=ANY_ROLE)
 //                     {
@@ -411,6 +412,7 @@ public class SecurityConstraint
                             request.getPath();
                         if (request.getQuery()!=null)
                             url+="?"+request.getQuery();
+                        response.setContentLength(0);
                         response.sendRedirect(url);
                     }
                     else
@@ -429,6 +431,8 @@ public class SecurityConstraint
                             request.getPath();
                         if (request.getQuery()!=null)
                             url+="?"+request.getQuery();
+                        
+                        response.setContentLength(0);
                         response.sendRedirect(url);
                     }
                     else

@@ -13,7 +13,8 @@ import org.mortbay.util.LifeCycle;
 
     
 /* --------------------------------------------------------------------- */
-/**
+/** Session Manager.
+ * The API required to manage sessions for a servlet context.
  *
  * @version $Id$
  * @author Greg Wilkins
@@ -73,6 +74,9 @@ public interface SessionManager extends LifeCycle, Serializable
     
     /* ------------------------------------------------------------ */
     public HttpSession newHttpSession(HttpServletRequest request);
+
+    /* ------------------------------------------------------------ */
+    public int getMaxInactiveInterval();
 
     /* ------------------------------------------------------------ */
     public void setMaxInactiveInterval(int seconds);

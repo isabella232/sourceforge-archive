@@ -28,11 +28,7 @@ import org.mortbay.util.TypeUtil;
  * header fields, content and optional trailer fields, while managing the
  * state of the message.
  *
-<<<<<<< HttpMessage.java
  * @version $Id$
-=======
- * @version $Id$
->>>>>>> 1.26.2.1
  * @author Greg Wilkins (gregw)
  */
 

@@ -1,5 +1,5 @@
 // ===========================================================================
-// Copyright (c) 1996-2002 Mort Bay Consulting Pty. Ltd. All rights reserved.
+// Copyright (c) 1996-2003 Mort Bay Consulting Pty. Ltd. All rights reserved.
 // $Id$
 // ---------------------------------------------------------------------------
 
@@ -213,11 +213,11 @@ public class Default extends HttpServlet
                 method.equals(HttpRequest.__POST) ||
                 method.equals(HttpRequest.__HEAD))
                 handleGet(request, response,pathInContext,resource,endsWithSlash);   
-            else if (method.equals(HttpRequest.__PUT))
+            else if (_putAllowed && method.equals(HttpRequest.__PUT))
                 handlePut(request, response, pathInContext, resource); 
-            else if (method.equals(HttpRequest.__DELETE))
+            else if (_delAllowed && method.equals(HttpRequest.__DELETE))
                 handleDelete(request, response, pathInContext, resource); 
-            else if (method.equals(HttpRequest.__MOVE))
+            else if (_putAllowed && _delAllowed && method.equals(HttpRequest.__MOVE))
                 handleMove(request, response, pathInContext, resource);
             else if (method.equals(HttpRequest.__OPTIONS))
                 handleOptions(request, response);
@@ -277,6 +277,7 @@ public class Default extends HttpServlet
                         buf.append('?');
                         buf.append(q);
                     }
+                    response.setContentLength(0);
                     response.sendRedirect(response.encodeRedirectURL(URI.addPaths(buf.toString(),"/")));
                     return;
                 }
@@ -289,6 +290,7 @@ public class Default extends HttpServlet
                     if (_redirectWelcomeFiles)
                     {
                         // Redirect to the index
+                        response.setContentLength(0);
                         response.sendRedirect(URI.addPaths( _httpContext.getContextPath(),ipath));
                     }
                     else

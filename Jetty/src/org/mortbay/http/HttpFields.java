@@ -1,5 +1,5 @@
 // ===========================================================================
-// Copyright (c) 1996 Mort Bay Consulting Pty. Ltd. All rights reserved.
+// Copyright (c) 1996-2003 Mort Bay Consulting Pty. Ltd. All rights reserved.
 // $Id$
 // ---------------------------------------------------------------------------
 

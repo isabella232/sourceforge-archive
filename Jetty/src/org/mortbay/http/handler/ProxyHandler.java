@@ -1,5 +1,5 @@
 // ========================================================================
-// Copyright (c) 1999 Mort Bay Consulting (Australia) Pty. Ltd.
+// Copyright (c) 1999-2003 Mort Bay Consulting (Australia) Pty. Ltd.
 // $Id$
 // ========================================================================
 
@@ -174,7 +174,12 @@ public class ProxyHandler extends AbstractHttpHandler
             // Do we proxy this?
             URL url=isProxied(uri);
             if (url==null)
+            {
+                if (isForbidden(uri))
+                    sendForbid(request,response,uri);
                 return;
+            }
+            
             Code.debug("PROXY URL=",url);
 
             URLConnection connection = url.openConnection();
@@ -338,25 +343,22 @@ public class ProxyHandler extends AbstractHttpHandler
                 _proxyHostsWhiteList!=null && !_proxyHostsWhiteList.contains(host) ||
                 _proxyHostsBlackList!=null && _proxyHostsBlackList.contains(host))
             {
-                response.setStatus(HttpResponse.__404_Not_Found);
+                sendForbid(request,response,uri);
             }
             else
             {
                 Socket socket = new Socket(addrPort.getInetAddress(),addrPort.getPort());
                 request.getHttpConnection().setHttpTunnel(new HttpTunnel(socket));
                 response.setStatus(HttpResponse.__200_OK);
+                response.setContentLength(0);
+                request.setHandled(true);
             }
         }
         catch (Exception e)
         {
             Code.ignore(e);
-            response.setStatus(HttpResponse.__405_Method_Not_Allowed);
+            response.sendError(HttpResponse.__500_Internal_Server_Error);
         }
-        finally
-        {
-            response.setContentLength(0);
-            request.setHandled(true);
-        }    
     }
     
         
@@ -379,18 +381,33 @@ public class ProxyHandler extends AbstractHttpHandler
      * to where.
      * @param uri The requested URI, which should include a scheme, host and port.
      * @return The URL to proxy to, or null if the passed URI should not be proxied.
-     * The default implementation returns the passed uri if it has a schema
-     * that is in the _ProxySchemes map. If a proxy host black list is set,
-     * the URI host must not be in the list. If aproxy host white list is
-     * set, then the URI host must be in the list.
-     * The port is also check that it is either 80, 443, >1024 or one of the 
-     * allowed CONNECT ports.
+     * The default implementation returns the passed uri if isForbidden() returns true.
      */
     protected URL isProxied(URI uri)
         throws MalformedURLException
     {
         // Is this a proxy request?
-        String scheme=uri.getScheme();
+        if (isForbidden(uri))
+            return null;
+        
+        // OK return URI as untransformed URL.
+        return new URL(uri.toString());
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    /** Is URL Forbidden.
+     * 
+     * @return True if the URL is not forbidden: if it has a schema
+     * that is in the _ProxySchemes map. If a proxy host black list is set,
+     * the URI host must not be in the list. If aproxy host white list is
+     * set, then the URI host must be in the list.
+     * The port is also checked that it is either 80, 443, >1024 or one of the 
+     * allowed CONNECT ports.
+     */
+    protected boolean isForbidden(URI uri)
+    {
+        // Is this a proxy request?
         String host=uri.getHost();
 
         // check port
@@ -399,22 +416,33 @@ public class ProxyHandler extends AbstractHttpHandler
         {
             Integer p = new Integer(port);
             if (!_allowedConnectPorts.contains(p))
-                return null;
+                return true;
         }
 
         // Must be a scheme that can be proxied.
+        String scheme=uri.getScheme();
         if (scheme==null || !_ProxySchemes.containsKey(scheme))
-            return null;
+            return true;
 
         // Must be in any defined white list
         if (_proxyHostsWhiteList!=null && !_proxyHostsWhiteList.contains(host))
-            return null;
+            return true;
 
         // Must not be in any defined black list
         if (_proxyHostsBlackList!=null && _proxyHostsBlackList.contains(host))
-            return null;
-        
-        // OK return URI as untransformed URL.
-        return new URL(uri.toString());
-    }    
+            return true;
+
+        return false;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Send Forbidden.
+     * Method called to send forbidden response. Default implementation calls
+     * sendError(403)
+     */
+    protected void sendForbid(HttpRequest request, HttpResponse response, URI uri)
+        throws IOException
+    {
+        response.sendError(HttpResponse.__403_Forbidden,"Forbidden for Proxy");
+    }
 }

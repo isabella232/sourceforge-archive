@@ -1,5 +1,5 @@
 // ===========================================================================
-// Copyright (c) 1996-2002 Mort Bay Consulting Pty. Ltd. All rights reserved.
+// Copyright (c) 1996-2003 Mort Bay Consulting Pty. Ltd. All rights reserved.
 // $Id$
 // ---------------------------------------------------------------------------
 
@@ -124,6 +124,9 @@ public class ServletHandler extends AbstractHttpHandler
         if (isStarted())
             throw new IllegalStateException("Started");
 
+        int mii=0;
+        boolean setMii=false;
+ 
         if (getHttpContext()!=null && _sessionManager!=null)
 	{
             _sessionManager.initialize(null);
@@ -135,6 +138,8 @@ public class ServletHandler extends AbstractHttpHandler
                     _sessionManager.removeEventListener(listener);
                 }
             }
+            mii=_sessionManager.getMaxInactiveInterval();
+            setMii=true;
 	}
 
         _sessionManager=sm;
@@ -150,7 +155,11 @@ public class ServletHandler extends AbstractHttpHandler
                 }
             }
 	    if (_sessionManager!=null)
+            {
                 _sessionManager.initialize(this);
+                if (setMii)
+                    _sessionManager.setMaxInactiveInterval(mii);
+            } 
         }
     }
     
@@ -1093,11 +1102,6 @@ public class ServletHandler extends AbstractHttpHandler
          */
         public void setAttribute(String name, Object value)
         {
-            if (name.startsWith("org.mortbay.http"))
-            {
-                Code.warning("Servlet attempted update of "+name);
-                return;
-            }
             getHttpContext().setAttribute(name,value);
         }
 
@@ -1108,11 +1112,6 @@ public class ServletHandler extends AbstractHttpHandler
          */
         public void removeAttribute(String name)
         {
-            if (name.startsWith("org.mortbay.http"))
-            {
-                Code.warning("Servlet attempted update of "+name);
-                return;
-            }
             getHttpContext().removeAttribute(name);
         }
     

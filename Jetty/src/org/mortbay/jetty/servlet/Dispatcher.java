@@ -1,5 +1,5 @@
 // ===========================================================================
-// Copyright (c) 1996 Mort Bay Consulting Pty. Ltd. All rights reserved.
+// Copyright (c) 1996-2003 Mort Bay Consulting Pty. Ltd. All rights reserved.
 // $Id$
 // ---------------------------------------------------------------------------
 
@@ -192,20 +192,13 @@ public class Dispatcher implements RequestDispatcher
             String oldQ=httpServletRequest.getQueryString();
             if (oldQ!=null && oldQ.length()>0)
             {
-                if (parameters!=null)
-                {
-                    UrlEncoded encoded = new UrlEncoded(oldQ);
-                    Iterator iter = parameters.entrySet().iterator();
-                    while(iter.hasNext())
-                    {
-                        Map.Entry entry=(Map.Entry)iter.next();
-                        encoded.addValues(entry.getKey(),
-                                          LazyList.getList(entry.getValue(),true));
-                    }
-                    query=encoded.encode();
-                }
-                else 
+                System.err.println("query="+query);
+                System.err.println("oldQ="+oldQ);
+
+                if (query==null)
                     query=oldQ;
+                else
+                    query=query+"&"+oldQ;
             }
             
             
@@ -390,24 +383,22 @@ public class Dispatcher implements RequestDispatcher
         /* -------------------------------------------------------------- */
         public String[] getParameterValues(String name)
         {
-            String[] v0=super.getParameterValues(name);
-            if (_parameters==null)
-                return v0;
-            List v1=_parameters.getValues(name);
+            List v0=_parameters==null?null:_parameters.getValues(name);
+            String[] v1=super.getParameterValues(name);
 
             if (v0==null && v1==null)
                 return null;
             
-            String[] a=new String[(v0==null?0:v0.length)+(v1==null?0:v1.size())];
-            if (v0==null || v0.length==0)
-                return (String[])v1.toArray(a);
-            if (v1==null || v1.size()==0)
-                return v0;
+            String[] a=new String[(v0==null?0:v0.size())+(v1==null?0:v1.length)];
+            if (v0==null || v0.size()==0)
+                return v1;
+            if (v1==null || v1.length==0)
+                return (String[])v0.toArray(a);
             
-            for (int i=0;i<v0.length;i++)
-                a[i]=v0[i];
-            for (int i=0;i<v1.size();i++)
-                a[v0.length+i]=(String)v1.get(i);
+            for (int i=0;i<v0.size();i++)
+                a[i]=(String)v0.get(i);
+            for (int i=0;i<v1.length;i++)
+                a[v0.size()+i]=v1[i];
             return a;
         }
         
