@@ -50,7 +50,6 @@ import java.util.ListIterator;
  * @author Greg Wilkins (gregw)
  */
 public class LazyList
-    implements Cloneable, Serializable
 {
     private static final String[] __EMTPY_STRING_ARRAY = new String[0];
     

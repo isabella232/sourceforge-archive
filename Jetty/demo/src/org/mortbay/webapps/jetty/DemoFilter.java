@@ -32,7 +32,7 @@ public  class DemoFilter implements Filter
     {
         if(log.isDebugEnabled())log.debug("init:"+filterConfig);
         type=filterConfig.getInitParameter("type");
-        wrap=new Boolean(filterConfig.getInitParameter("wrap")).booleanValue();
+        wrap=Boolean.valueOf(filterConfig.getInitParameter("wrap")).booleanValue();
     }
 
     /* ------------------------------------------------------------ */

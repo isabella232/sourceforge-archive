@@ -89,13 +89,10 @@ public class URLResource extends Resource
     {
         try
         {
-            if (checkConnection() && _in==null )
+            synchronized(this)
             {
-                synchronized(this)
-                {
-                    if ( _in==null )
-                        _in = _connection.getInputStream();
-                }
+                if (checkConnection() && _in==null )
+                    _in = _connection.getInputStream();
             }
         }
         catch (IOException e)

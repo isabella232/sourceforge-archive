@@ -114,7 +114,7 @@ public class TempByteHolder {
         _window_high = _window_size-offset;
     }
     
-    public void finalize() {
+    protected void finalize() {
         try {
             close();
         } catch (IOException e) {

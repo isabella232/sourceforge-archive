@@ -219,9 +219,9 @@ public class HTAccessHandler extends AbstractHttpHandler
     public void setAccessFile(String anArg)
     {
         if (anArg==null)
-            _accessFile=new String(".htaccess");
+            _accessFile=".htaccess";
         else
-            _accessFile=new String(anArg);
+            _accessFile=anArg;
     }
 
     /* ------------------------------------------------------------ */

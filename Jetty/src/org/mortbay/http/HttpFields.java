@@ -498,6 +498,12 @@ public class HttpFields
         }
 
         /* ------------------------------------------------------------ */
+        public int hashcode()
+        {
+            return _info.hashCode()*_version;
+        }
+        
+        /* ------------------------------------------------------------ */
         void clear()
         {
             _version=-1;
@@ -1551,7 +1557,7 @@ public class HttpFields
     {
         protected int _i=0;
         public boolean hasNext() {return (_i<_fields.size());}
-        public Object next() {return new Entry(_i++);}
+        public Object next() throws NoSuchElementException {return new Entry(_i++);}
         public void remove() { throw new UnsupportedOperationException();}
     }
 

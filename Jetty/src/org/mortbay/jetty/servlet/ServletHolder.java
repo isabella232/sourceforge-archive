@@ -155,6 +155,12 @@ public class ServletHolder extends Holder
         return compareTo(o)==0;
     }
 
+    /* ------------------------------------------------------------ */
+    public int hashcode()
+    {
+        return _name.hashCode();
+    }
+
     /* ---------------------------------------------------------------- */
     public ServletContext getServletContext()
     {

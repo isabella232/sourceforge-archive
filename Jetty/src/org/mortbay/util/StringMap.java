@@ -481,7 +481,7 @@ public class StringMap extends AbstractMap implements Externalizable
         }
 
         if (ni>0) return null;
-        if (node!=null && node._key==null)
+        if (node==null || node._key==null)
             return null;
         
         Object old = node._value;

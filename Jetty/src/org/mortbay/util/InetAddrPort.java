@@ -21,8 +21,7 @@ import java.net.InetAddress;
 /* ======================================================================== */
 /** InetAddress and Port.
  */
-public class InetAddrPort implements Cloneable,
-                                     Serializable
+public class InetAddrPort implements Serializable
 {
     /* ------------------------------------------------------------ */
     public final static String __0_0_0_0 = "0.0.0.0";

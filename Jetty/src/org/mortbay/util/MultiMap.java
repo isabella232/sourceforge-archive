@@ -32,8 +32,7 @@ import java.util.Map;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class MultiMap extends HashMap
-    implements Cloneable
+public class MultiMap extends HashMap implements Cloneable
 {
     /* ------------------------------------------------------------ */
     /** Constructor. 

@@ -248,7 +248,7 @@ public class ByteArrayISO8859Writer extends Writer
     }
 
     /* ------------------------------------------------------------ */
-    public void finalize()
+    protected void finalize()
     {
         ByteArrayPool.returnByteArray(_buf);
     }

@@ -1002,8 +1002,9 @@ public class HttpRequest extends HttpMessage
                 while (tok.hasMoreElements())
                 {
                     String c=(String)tok.nextElement();
-                    if (c!=null)
-                        c=c.trim();
+                    if (c==null)
+                        continue;
+                    c=c.trim();
                     
                     try
                     {                   
