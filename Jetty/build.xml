@@ -297,6 +297,8 @@
          <exclude name="org/mortbay/start/**" />
          <exclude name="**/jmx/**" />
          <exclude name="**/MANIFEST.MF" />
+         <exclude name="org/mortbay/util/Frame.class"/>
+         <exclude name="org/mortbay/util/FileResource.class"/>
        </fileset>
        <fileset dir="${classes1.4}">
          <include name="org/mortbay/**"/>
