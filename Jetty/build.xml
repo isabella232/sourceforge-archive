@@ -21,7 +21,7 @@ jetty       - Builds the Jetty library.
 libs        - Builds all libraries.
 dist        - Constructs a distribution file with all the source.
 webapp      - Builds the demo web application.
-run.demo    - Runs the demo web application. 
+demo        - Runs the demo web application. 
 test        - Runs the Jetty test harness.
 release     - Cleanup for release
 
