@@ -54,7 +54,6 @@ public class ResourceHandler extends NullHandler
 {
     /* ----------------------------------------------------------------- */
     private boolean _acceptRanges=true;
-    private int _welcomeRedirectionIndex=0;
     private String[] _methods=null;
     private String _allowed;
     private StringMap _methodMap = new StringMap();
@@ -140,17 +139,6 @@ public class ResourceHandler extends NullHandler
     public void setAcceptRanges(boolean ar)
     {
         _acceptRanges=ar;
-    }
-    
-
-    /* ------------------------------------------------------------ */
-    /** Set WelcomeIndex.
-     * The index of the handler to redirect welcome requests to.
-     * Needed to avoid double filtering of welcome files. Temp hack!
-     */
-    public void setWelcomeRedirectionIndex(int i)
-    {
-        _welcomeRedirectionIndex=i;
     }
     
  
@@ -269,8 +257,7 @@ public class ResourceHandler extends NullHandler
                     String ipath=URI.addPaths(pathInContext,welcome);
                     URI uri=request.getURI();
                     uri.setPath(URI.addPaths(uri.getPath(),welcome));
-                    getHttpContext().handle(_welcomeRedirectionIndex,
-                                            ipath,pathParams,request,response);
+                    getHttpContext().handle(0,ipath,pathParams,request,response);
                     return;
                 }
 

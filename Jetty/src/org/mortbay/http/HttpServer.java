@@ -208,12 +208,13 @@ public class HttpServer implements LifeCycle
      * @exception IllegalArgumentException If the listener is not for this
      * server.
      */
-    public void addListener(HttpListener listener)
+    public HttpListener addListener(HttpListener listener)
         throws IllegalArgumentException
     {
         listener.setHttpServer(this);        
         _listeners.add(listener);
         addComponent(listener);
+        return listener;
     }
     
     /* ------------------------------------------------------------ */
@@ -288,7 +289,7 @@ public class HttpServer implements LifeCycle
     /** Add a context.
      * @param context 
      */
-    public void addContext(HttpContext context)
+    public HttpContext addContext(HttpContext context)
     {
         if (context.getContextPath()==null ||
             context.getContextPath().length()==0)
@@ -300,6 +301,7 @@ public class HttpServer implements LifeCycle
             addComponent(context);
         }
         addMappings(context);
+        return context;
     }
 
 
@@ -329,12 +331,13 @@ public class HttpServer implements LifeCycle
      * @param virtualHost The virtual host or null for all hosts.
      * @param context 
      */
-    public void addContext(String virtualHost,
-                           HttpContext context)
+    public HttpContext addContext(String virtualHost,
+                                  HttpContext context)
     {
         if (virtualHost!=null)
             context.addVirtualHost(virtualHost);
         addContext(context);
+        return context;
     }
 
 

@@ -43,12 +43,12 @@ context   and  handler entities and the relationships between them.<br>
                The <a href="/javadoc/org/mortbay/http/HttpServer.html">org.mortbay.http.HttpServer</a>
               class provides a linkage between a collection of request listeners 
     and  collections of request handlers:               
-<table align="center" width="80%" cellpadding="2" cellspacing="0" border="0">
+<table align="center" width="90%" cellpadding="2" cellspacing="0" border="0">
    <tbody>
    <tr>
-   <td>      <tt>               
-      <pre>HttpListener <sup>n</sup>--&gt;<sup>1</sup> HttpServer <sup>1</sup>--&gt;<sup>n</sup> HttpContext <sup>1</sup>--&gt;<sup> n</sup> HttpHandler<br></pre>
-   </tt>             <br>
+   <td><small><pre>
+HttpListener&nbsp;<sup>n</sup>--&gt;<sup>1</sup>&nbsp;HttpServer&nbsp;<sup>1</sup>--&gt;<sup>n</sup>&nbsp;HttpContext&nbsp;<sup>1</sup>--&gt;<sup>n</sup>&nbsp;HttpHandler</pre>
+</small>
                <b>Diagram: HttpServer&nbsp;relationship model </b><br>
    </td>
    </tr>
@@ -65,17 +65,16 @@ might match  the request, and in this case, all HttpContexts  are tried <i>
 the request is  marked as having been handled.<br>
                <br>
        The trivial code snippet from the Introduction to the HttpServer can 
- then   be represented as:<br>
-                <br>
-                                                                        
+ then   be represented as:                                             
                 
-<table align="center" width="80%" cellpadding="2" cellspacing="0" border="0">
+<table align="center" width="90%" cellpadding="2" cellspacing="0" border="0">
    <tbody>
    <tr>
-   <td>      <tt>               
-      <pre>SocketListener <sup>1</sup>--&gt;<sup>1</sup> HttpServer <sup>1</sup>--&gt;<sup>1</sup> HttpContext <sup>1</sup>--&gt;<sup> 1</sup> ResourceHandler<br>port: 8080 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;"/"&nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;"./docroot"<br></pre>
-   </tt>                      <b><br>
-        Diagram: &nbsp;Trivial file server object relationships</b><br>
+   <td><small><pre>
+SocketListener<sup>1</sup>--&gt;<sup>1</sup>HttpServer<sup>1</sup>--&gt;<sup>1</sup>HttpContext<sup>1</sup>--&gt;<sup>1</sup>ResourceHandler
+port:8080                        "/"             "./docroot"<br></pre>
+   </small>                      
+   <b>Diagram: Trivial file server object relationships</b><br>
    </td>
    </tr>
          
@@ -101,33 +100,42 @@ single   handler which returns static content from the directory <tt>./docroot</
                                     
 <p> Multiple listeners may be used to listen on different    ports and/or
  on specific   IP addresses.  This is most frequently used with  SSL or with
- multi-hosting:</p>
-                                                                        
+ multi-hosting:
+                                                                     
       
-<table align="center" width="80%" cellpadding="2" cellspacing="0" border="0">
+<table align="center" width="90%" cellpadding="2" cellspacing="0" border="0">
    <tbody>
    <tr>
-   <td>      <tt>               
-      <pre>SocketListener -+<br>port: 80        |<br>                |<br>JSSEListener   -+&gt; HttpServer --&gt; HttpContext --&gt;   ResourceHandler<br>port: 443       |                "/"                "./docroot"<br>                |<br>SocketListener -+<br>host: 1.2.3.4<br>port: 80                            <br>                             <br><br>      </pre>
-   </tt>                              <b>Diagram: &nbsp;Multiple listeners
- with multihosting</b> </td>
+   <td><small><pre>
+SocketListener -+
+port:80         |
+                |
+JSSEListener   -+&gt; HttpServer --&gt; HttpContext --&gt; ResourceHandler
+port:443        |                 "/"             "./docroot"
+                |
+SocketListener -+
+host:1.2.3.4
+port: 80           
+</pre></small>
+<b>Diagram: &nbsp;Multiple listeners with multihosting</b> </td>
    </tr>
-         
   </tbody>   
 </table>
-     <br>
-   <br>
-         Listeners are configured via <tt>set</tt> methods.  Listeners can
- be  created    by  using the HttpServer as a factory to create a standard
+<P>
+Listeners are configured via <tt>set</tt> methods.  Listeners can
+be  created    by  using the HttpServer as a factory to create a standard
  type  of listener:          <br>
                                                                         
                                                       
-<table align="center" width="80%" cellpadding="2" cellspacing="0" border="0">
+<table align="center" width="90%" cellpadding="2" cellspacing="0" border="0">
    <tbody>
    <tr>
-   <td>      <tt>               
-      <pre>HttpServer server = new HttpServer();<br>HttpListener listener = <br>    &nbsp; server.addListener ( new InetAddrPort( "myhost",8080 ) );<br></pre>
-   </tt> <b>     Code Example: &nbsp;Convenience methods for adding standard
+   <td><pre><tt>
+HttpServer server=new HttpServer();
+HttpListener listener=
+    server.addListener(new InetAddrPort("myhost",8080));
+</pre></tt> 
+<b>     Code Example: &nbsp;Convenience methods for adding standard
  listeners</b> </td>
    </tr>
          
@@ -139,12 +147,18 @@ single   handler which returns static content from the directory <tt>./docroot</
 more   common    to create  the listener directly and then add it to the
 HttpServer:                                                             
                 
-<table align="center" width="80%" cellpadding="2" cellspacing="0" border="0">
+<table align="center" width="90%" cellpadding="2" cellspacing="0" border="0">
    <tbody>
    <tr>
-   <td> <tt>               
-      <pre>HttpServer server = new HttpServer ();<br>SocketListener listener = new  SocketListener ();<br>listener.setHost ( "myhost" );<br>listener.setPort ( 8080 );<br>listener.setMinThreads ( 5 );<br>listener.setMaxThreads( 250 );<br>server.addListener ( listener );<br></pre>
-   </tt>                <b>Code Example: Configuring a listener</b> </td>
+   <td> <tt><pre>
+HttpServer server = new HttpServer();
+SocketListener listener = new SocketListener();
+listener.setHost("myhost");
+listener.setPort(8080);<br>listener.setMinThreads(5);
+listener.setMaxThreads(250);
+server.addListener(listener);
+</pre></tt>                
+<b>Code Example: Configuring a listener</b> </td>
    </tr>
          
   </tbody>   
@@ -155,12 +169,24 @@ HttpServer:
      so most implementations are extensions of the  <a href="/javadoc/org/mortbay/util/ThreadedServer.html">
              org.mortbay.util.ThreadedServer</a> or <a href="/javadoc/org/mortbay/util/ThreadPool.html">
              org.mortbay.util.ThreadPool</a>. Thus attributes such as min/max 
-  threads,     min/max idle times etc are also set via the API.  <br>
-                                             
-<pre><br><br></pre>
-                                                                        
-                                                                        
-                                                                        
+  threads,     min/max idle times etc are also set via the API. 
+<P>
+Jetty has several type of HttpListeners including:<UL>
+<LI><a href="/javadoc/org/mortbay/http/SocketListener.html">org.mortbay.http.SocketListener</a>
+for normal http connections.
+<LI><a href="/javadoc/org/mortbay/http/JsseListener.html">org.mortbay.http.JsseListener</a>
+for SSL https connections using JSSE provider.
+<LI><a href="/javadoc/org/mortbay/http/SunJsseListener.html">org.mortbay.http.SunJsseListener</a>
+for SSL https connections using Suns JSSE provider.
+<LI><a href="/javadoc/org/mortbay/http/SocketChannelListener.html">org.mortbay.http.SocketChannelListener</a>
+for normal http connections using the java.nio library for non-blocking idle connections.
+<LI><a href="/javadoc/org/mortbay/http/ajp/AJP13Listener.html">org.mortbay.http.ajp.AJP13Listener</a>
+for integration with apache, IIS etc. See <a href="../doc/JettyWithApache.html">FAQ</a>.
+</UL>                                             
+                     
+
+<p>&nbsp;
+                                                                                                       
                                            
 <p> <font size="+1"><b><a name="Contexts"></a><big>      HttpContext</big></b></font></p>
                                                                         
@@ -180,17 +206,19 @@ Note that in Jetty 3.1 and previous releases, the HttpContext class was called H
 </i></td></tr></table>                                                                                                  
                             
 <p>A typical a context might have handlers for security,  servlets  and static
- resources:  </p>
-                                                                        
-                                                                        
+ resources:                                                                                                                 
        
-<table align="center" width="80%" cellpadding="2" cellspacing="0" border="0">
+<table align="center" width="90%" cellpadding="2" cellspacing="0" border="0">
    <tbody>
    <tr>
-   <td>      <tt>               
-      <pre>                                                   +-&gt; SecurityHandler<br>                                                   |<br>SocketListener --&gt; HttpServer --&gt; HttpContext +-&gt; ServletHandler<br>port: 80   &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;"/" &nbsp; &nbsp; &nbsp; &nbsp;       |<br>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp;    +-&gt; ResourceHandler<br></pre>
-   </tt> <br>
-   <b> Diagram: &nbsp;Single context, multiple handlers </b> </td>
+   <td><small><tt><pre>
+                                              +-&gt; SecurityHandler
+                                              |
+SocketListener --&gt; HttpServer --&gt; HttpContext +-&gt; ServletHandler
+port: 80                          "/"         |
+                                              +-&gt; ResourceHandler
+</pre></tt></small>
+   <b> Diagram: Single context, multiple handlers </b> </td>
       </tr>
        
   </tbody>   
@@ -203,14 +231,13 @@ Note that in Jetty 3.1 and previous releases, the HttpContext class was called H
               <li>Initialization parameters </li>
                <li>An optional virtual host name for the context </li>
                <li>A path prefix for the context </li>
-               <li>A resource base for loading static resources (files) </li>
+               <li>A resource base for loading static resources (files/urls) </li>
+               <li>Amemory cache of resources (files/urls) </li>
                <li>A ClassLoader and set of Java permissions </li>
                <li>A request log </li>
                <li>Statistics </li>
                <li>Error page mappings </li>
                <li>MIME type suffix maps  </li>
-                                                                        
-     
 </ul>
                                                                         
                                             <br>
@@ -219,12 +246,16 @@ typically    used to serve several applications  from  the same port(s) using
 URL mappings:<br>
                                                                         
      
-<table align="center" width="80%" cellpadding="2" cellspacing="0" border="0">
+<table align="center" width="90%" cellpadding="2" cellspacing="0" border="0">
    <tbody>
    <tr>
-   <td>      <tt>               
-      <pre>SocketListener --&gt; HttpServer +-&gt; HttpContext --&gt; HttpHandler(s)<br>port:   80                    |        path: "/alpha/*"<br>                              |<br>                              +-&gt; HttpContext --&gt; HttpHandler(s)<br>                                       path: "/beta/*"<br></pre>
-   </tt> <br>
+   <td><small><tt><pre>
+SocketListener --&gt; HttpServer +-&gt; HttpContext --&gt; HttpHandler(s)
+port:80                       |   path:"/alpha/*"
+                              |
+                              +-&gt; HttpContext --&gt; HttpHandler(s)
+                                  path:"/beta/*"
+</pre></tt></small>
        <b>Diagram: &nbsp;Multiple contexts with URL mapping</b> </td>
    </tr>
          
@@ -234,12 +265,18 @@ URL mappings:<br>
        Alternatively,&nbsp; different applications can be served from the 
 same   port using virtual hosts:                                         
          
-<table align="center" width="80%" cellpadding="2" cellspacing="0" border="0">
+<table align="center" width="90%" cellpadding="2" cellspacing="0" border="0">
    <tbody>
    <tr>
-   <td>      <tt>               
-      <pre>                                                                        <br>SocketListener --&gt; HttpServer +-&gt; HttpContext --&gt; HttpHandler(s)<br>port: 80                         |      host: www.acme.com<br>                                 |      path: "/"<br>                                 |<br>                                 +-&gt; HttpContext --&gt; HttpHandler(s)<br>                                        host: www.myacme.org<br>                                        path: "/"<br></pre>
-   </tt> <br>
+   <td><small><tt><pre>
+SocketListener --&gt; HttpServer +-&gt; HttpContext --&gt; HttpHandler(s)
+port:80                       |   vhost: www.alpha.com
+                              |   path: "/"
+                              |
+                              +-&gt; HttpContext --&gt; HttpHandler(s)
+                                  vhost: www.beta.com
+                                  path: "/"
+</pre></tt></small>
        <b>Diagram:  Multiple contexts with virtual hosts</b> </td>
    </tr>
          
@@ -251,12 +288,18 @@ same   port using virtual hosts:
        IP addresses, then it is possible to give each context its own HttpServer: 
                                           <br>
       
-<table align="center" width="80%" cellpadding="2" cellspacing="0" border="0">
+<table align="center" width="90%" cellpadding="2" cellspacing="0" border="0">
    <tbody>
    <tr>
-   <td>      <tt>               
-      <pre>                                                                        <br>SocketListener --&gt; HttpServer --&gt; HttpContext --&gt; HttpHandler(s)<br>host: www.acme.com                  path: "/"<br>port: 80 <br>                                                                        <br>SocketListener --&gt; HttpServer --&gt; HttpContext --&gt; HttpHandler(s)<br>host: www.myacme.org                path: "/"<br>port: 80                              <br></pre>
-   </tt>                                                                
+   <td><small><tt><pre>
+SocketListener --&gt; HttpServer --&gt; HttpContext --&gt; HttpHandler(s)
+host:www.alpha.com                path:"/"
+port:80
+
+SocketListener --&gt; HttpServer --&gt; HttpContext --&gt; HttpHandler(s)
+host:www.beta.com                 path: "/"
+port:80
+</pre></tt></small>                                                                
                                   <b> Diagram: &nbsp;Multiple servers</b>
        </td>
    </tr>
@@ -265,17 +308,18 @@ same   port using virtual hosts:
 </table>
    <br>
    <br>
-       HttpContexts cannot be instantiated other than by method calls to
-a  HttpServer   instance. Each call to <code>addContext()</code> will create
- new HttpContext    instance:<br>
+
+HttpContexts can be instantiated  by the HttpServer as part of a
+ call to <code>addContext()</code> with context args:<br>
                                                                         
-     
-<table align="center" width="80%" cellpadding="2" cellspacing="0" border="0">
+<table align="center" width="90%" cellpadding="2" cellspacing="0" border="0">
    <tbody>
    <tr>
-   <td>      <tt>               
-      <pre>HttpContext context = server.addContext("/mydocs/*");<br>context.setResourceBase("./docroot/");<br></pre>
-   </tt> <b> Code Example: &nbsp;Creating a context</b>  </td>
+   <td><small><pre>
+HttpContext context = server.addContext("/mydocs/*");
+context.setResourceBase("./docroot/");
+</pre></small>
+<b> Code Example: &nbsp;Implied context creation</b>  </td>
    </tr>
          
   </tbody>   
@@ -292,52 +336,41 @@ use the
 if one with the same specification does not already exist:<br>
                                                                         
      
-<table align="center" width="80%" cellpadding="2" cellspacing="0" border="0">
+<table align="center" width="90%" cellpadding="2" cellspacing="0" border="0">
    <tbody>
    <tr>
-   <td>      <tt>               
-      <pre>HttpContext context = server.getContext("myhost","/mydocs/*");<br>context.setResourceBase("./docroot/");<br></pre>
-   </tt>                                                                
-   <b> Code Example: &nbsp;Safe way to  create a context</b> </td>
+   <td><small><pre>
+HttpContext context = server.getContext("myhost","/mydocs/*");
+context.setResourceBase("./docroot/");
+</pre></small>                                                                
+   <b> Code Example: &nbsp;Lazy context creation</b> </td>
    </tr>
          
   </tbody>   
 </table>
    <br>
    <br>
-       The previous example highlights that it is possible specify a virtual
-  host  as well as the context path. A single context may be registered with
-  different  virtual hosts:                                       <br>
+The previous example highlights that it is possible specify a virtual
+ host  as well as the context path. A single context may be registered with
+ different  virtual hosts.  Once context configuration becomes complex, it
+is best to take explicit control over context creation:<br>
                                                                         
      
-<table align="center" width="80%" cellpadding="2" cellspacing="0" border="0">
+<table align="center" width="90%" cellpadding="2" cellspacing="0" border="0">
    <tbody>
-   <tr>
-   <td>      <tt>               
-      <pre>HttpContext context = server.getContext("myhost1","/context/*");<br>context.setResourceBase("./docroot/");<br>server.addContext("myhost2",context);<br></pre>
-   </tt> <b> Code Example: &nbsp;Creating a single context with multiple
+   <tr><td><small><pre>
+HttpContext context = new HttpContext();
+context.setContextPath("/context/*");
+context.setVirtualHosts(new String[]{"alpa.com","beta.com"});
+context.setResourceBase("./docroot/");
+server.addContext(context);
+</pre></small> 
+<b> Code Example: &nbsp;Creating a context with multiple
 virtual  hosts</b> </td>
    </tr>
          
   </tbody>   
 </table>
-    <br>
-   <br>
-       This can also be acheived by using virtual host aliases :        
-                              <br>
-      
-<table align="center" width="80%" cellpadding="2" cellspacing="0" border="0">
-   <tbody>
-   <tr>
-   <td>      <tt>               
-      <pre>HttpContext context = server.addContext("myhost","/context/*");<br>server.addHostAlias("myhost","myhost.com");<br>server.addHostAlias("myhost","www.myhost.com");<br>server.addHostAlias("myhost","1.2.3.4");<br></pre>
-   </tt> <b> Code Example: &nbsp;Using aliases to associate a single context
- with multiple virtual hosts</b> </td>
-   </tr>
-         
-  </tbody>   
-</table>
-   <br>
                                                             <br>
                                                                       
 <table border=1><tr><td><i>  
@@ -374,7 +407,7 @@ a  specialization      of HttpContext that configures the handlers by looking
                                                                         
                                                                         
                                                                         
-                                                                        
+                                                                      
                                                                         
                                                           
 <p>            The <a href="/javadoc/org/mortbay/http/HttpHandler.html">org.mortbay.http.HttpHandler</a>
@@ -421,7 +454,7 @@ Headers   may be modified or OutputStream filters added. </li>
               The handlers provided with the <a href="/javadoc/org/mortbay/http/handler/package-summary.html">
              org.mortbay.http.handler</a> package are:                  
        
-<table border="0" width="70%" cellpadding="2" cellspacing="10">
+<table border="0" width="90%" cellpadding="2" cellspacing="10">
    <tbody>
    <tr>
    <td align="left" valign="top"><a href="/javadoc/org/mortbay/http/handler/ResourceHandler.html">
@@ -494,7 +527,7 @@ then finally  dropping through to an error page generator if no handler marks
 the request  as handled:</p>
                                                                         
       
-<table align="center" width="80%" cellpadding="2" cellspacing="0" border="0">
+<table align="center" width="90%" cellpadding="2" cellspacing="0" border="0">
    <tbody>
    <tr>
    <td>      <tt>               
@@ -511,31 +544,14 @@ of handler ordering</b> </td>
    <br>
                                                                         
      <font size="+1"><b><br>
-   Resource Handler</b></font><br>
-                                                                        
-                                                                        
-                                                                        
-                                                                        
-                                                                        
-                                                                        
-                                                                        
-                                                                        
-                                                                        
+   Resource Handler</b></font><br>                                    
                                                                   
 <p>    One of the most common things for a HttpServer to do is to serve static 
   content  from a base  directory or URL. The <a href="/javadoc/org/mortbay/http/handler/ResourceHandler.html">
           org.mortbay.http.handler.ResourceHandler</a>    implementation
 of  HttpHandler    is provided for this purpose.   Its features   include:</p>
                                                                         
-                                                                        
-                                                                        
-                                                                        
-                                                                        
-                                                                        
-                                                                        
-                                                                        
-                                                                        
-                                                                        
+                                                                    
                                      
 <ul>
               <li>Support for GET, PUT, MOVE, DELETE, HEAD and OPTIONS methods. 
@@ -543,14 +559,12 @@ of  HttpHandler    is provided for this purpose.   Its features   include:</p>
                                                                         
                                                                         
                                                                        </li>
-               <li>LRU Memory cache. </li>
                <li>Handling of IfModified headers. </li>
                <li>HTTP/1.1 Range support for partial content serving. </li>
                <li>Index/welcome files. </li>
                <li>Generation of directory listings. </li>
                                                                         
                                                                         
- 
 </ul>
                                                                         
                                                                         
@@ -560,59 +574,22 @@ of  HttpHandler    is provided for this purpose.   Its features   include:</p>
                                                                          
                                                                       <tt>
       "./docroot/"</tt>:<br>
-                                                                        
-                                                                        
-                                                                        
-      
-<table align="center" width="80%" cellpadding="2" cellspacing="0" border="0">
+                   
+<table align="center" width="90%" cellpadding="2" cellspacing="0" border="0">
    <tbody>
    <tr>
-   <td>      <tt>               
-      <pre>HttpContext context = server.addContext("/context/*");<br>context.setResourceBase("./docroot/");<br>context.add(new ResourceHandler());<br></pre>
-   </tt>                                                                
-                <b> Code Example: &nbsp;Setting the resource base for a context</b>
-   </td>
-   </tr>
-         
-  </tbody>   
-</table>
-    <br>
-   <br>
-                                As this is a frequent configuration option,
- a convenience    method   is provided that creates the ResourceHandler transparently:
-                                                                        
-                                                                        
-                                    <br>
-                                                                        
-     
-<table align="center" width="80%" cellpadding="2" cellspacing="0" border="0">
-   <tbody>
-   <tr>
-   <td>      <tt>               
-      <pre>HttpContext context = server.addContext("/context/*");<br>context.setResourceBase("./docroot/");<br>context.setServingResources(true);<br></pre>
-   </tt>                                                                
-                        <b> Code Example: &nbsp;Using the convenience methods
- to set up a ResourceHandler</b> </td>
-   </tr>
-         
-  </tbody>   
-</table>
-                                                                        
-                  <br>
-                  <br>
-      If you need to configure multiple attributes of a ResourceHandler,
-construct     it  directly and then add it to the context:              
-                                                                        
-                                                                        
-                     <br>
-                                                                        
-     
-<table align="center" width="80%" cellpadding="2" cellspacing="0" border="0">
-   <tbody>
-   <tr>
-   <td>      <tt>               
-      <pre>ResourceHandler handler = new ResourceHandler();<br>handler.setDirAllowed(true);<br>handler.setPutAllowed(false);<br>handler.setDelAllowed(false);<br>handler.setAcceptRanges(true);<br>handler.addIndexFile("index.html");<br>handler.se tMaxCachedFiles(200);<br>handler.setMaxCachedFileSize(32000);<br>context.addHandler(handler);<br></pre>
-   </tt>                                                                
+   <td><small><pre>
+HttpContext context = server.getContext("/context/*");
+context.setResourceBase("./docroot/");
+ResourceHandler handler = new ResourceHandler();
+handler.setDirAllowed(true);
+handler.setPutAllowed(false);
+handler.setDelAllowed(false);
+handler.setAcceptRanges(true);
+context.addHandler(handler);
+context.addHandler(new NotFoundHandler());
+</pre>
+   </small>                                                                
                                                                         
     <b> Code Example: &nbsp;Detailed configuration of a  ResourceHandler</b>
     </td>
@@ -620,21 +597,75 @@ construct     it  directly and then add it to the context:
          
   </tbody>   
 </table>
+<br>
+The <tt>NotFoundHandler</tt> is added to generate a 404 for requests for
+resources that don't exist.  The <tt>ResourceHandler</tt> lets requests that
+it cannot handle fall through to the next handler.
+<P>                                           
+<table border=1><tr><td><i>  
+<b> Developers  Note:</b><br>
+HttpHandlers ARE ORDER DEPENDANT!.   If in the above example the <tt>NotFoundHandler</tt>
+had been added to the context before the <tt>ResourceHandler</tt>, then all
+requests would be 404'd and resources would not be served.   It is a common
+mistake to put a <tt>ResourceHandler</tt> before a 
+<tt>ServletHandler</tt> with the JSPServlet, so jsp source code is served
+rather than the dynamic content from the JSPServlet.
+</i></td></tr></table>
+
+
+
     <br>
    <br>
    <big><big><b><a name="together"></a>Putting It All Together</b></big></big>
      
 <p> Finally, here is a fully worked code example to configure a server on
  port <tt>8181</tt> serving static content and a dump servlet at <tt>"/mystuff/"</tt>
-  :</p>
- 
-<p>    
-<table align="center" width="80%" cellpadding="2" cellspacing="0" border="0">
+  :  
+<table align="center" width="90%" cellpadding="2" cellspacing="0" border="0">
    <tbody>
    <tr>
-   <td>             <tt>        
-      <pre>import java.io.*;<br>import java.net.*;<br>import org.mortbay.util.*;<br>import org.mortbay.http.*;<br>import org.mortbay.jetty.servlet.*;<br>import org.mortbay.http.handler.*;<br>import org.mortbay.servlet.*;<br>      <br>      <br>      <br>public class SimpleServer<br>{<br>      <br>&nbsp;&nbsp;&nbsp; public static void main (String[] args)<br>&nbsp;&nbsp;&nbsp; {<br>&nbsp;&nbsp;&nbsp; &nbsp; try<br>&nbsp;&nbsp;&nbsp; &nbsp; {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; // Create the server<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; HttpServer server = new HttpServer();<br>      <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; // Create a port listener<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; HttpListener listener = server.addListener(new InetAddrPort (8181));<br>      <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; // Create a context <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; HttpContext context = server.getContext(null,"/mystuff/*");<br>      <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; // Serve static content from the context<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; String home = System.getProperty ("jetty.home", ".");<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; context.setResourceBase(home+"/demo/webapps/jetty/tut/");<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; context.setServingResources (true);<br>      <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; // Create a servlet container<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; ServletHandler handler = new ServletHandler();<br>      <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; // Map a servlet onto the container<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; handler.addServlet ("Dump", "/Dump", "org.mortbay.servlet.Dump");<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; context.addHttpHandler (handler);<br>      <br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; // Start the http server<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; server.start ();<br>&nbsp;&nbsp;&nbsp; &nbsp; }<br>&nbsp;&nbsp;&nbsp; &nbsp; catch (Exception e)<br>&nbsp;&nbsp;&nbsp; &nbsp; {<br>&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; e.printStackTrace();<br>&nbsp;&nbsp;&nbsp; &nbsp; }<br>&nbsp;&nbsp;&nbsp; }<br>};<br></pre>
-  </tt>       
+   <td><small><pre>   
+import java.io.*;
+import java.net.*;
+import org.mortbay.util.*;
+import org.mortbay.http.*;
+import org.mortbay.jetty.servlet.*;
+import org.mortbay.http.handler.*;
+import org.mortbay.servlet.*;     
+      
+public class SimpleServer
+{
+  public static void main (String[] args)
+    throws Exception
+  {
+    // Create the server
+    HttpServer server=new HttpServer();
+      
+    // Create a port listener
+    SocketListener listener=new SocketListener();
+    listener.setPort(8181);
+
+    // Create a context 
+    HttpContext context = new HttpContext();
+    context.setContextPath("/mystuff/*");
+      
+    // Create a servlet container
+    ServletHandler servlets = new ServletHandler();
+    context.addHttpHandler(servlets);
+
+    // Map a servlet onto the container
+    servlets.addServlet("Dump","/Dump/*","org.mortbay.servlet.Dump");
+      
+    // Serve static content from the context
+    String home = System.getProperty("jetty.home",".");
+    context.setResourceBase(home+"/demo/webapps/jetty/tut/");
+    context.addHandler(new ResourceHandler());
+      
+    // Start the http server
+    server.start ();
+  }
+}
+</pre></small>       
 </td>
 </tr>
 <tr>

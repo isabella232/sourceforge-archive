@@ -71,15 +71,13 @@ it will start on port 8888. To login to it, use username   <tt>admin</tt>
                  
 <p>   </p>
                  
-<p> <big><font size="+1"><big><b><a name="requests"></a>Logging</b></big></font><b><big>
-        Requests</big></b></big></p>
-             
-<p align="center"><font color="#ff0000">&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;!This
-  section is under construction!&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;</font></p>
-          <font size="+1"><b><br>
-    <br>
-       <big><br>
-       <a name="debugging"></a>Debugging</big></b></font><br>
+<p> <big><big><b><a name="requests"></a>Logging Requests</b></big></big></p>
+
+See <a href="/javadoc/org/mortbay/http/RequestLog.html">RequestLog</a> and 
+<a href="/javadoc/org/mortbay/http/NCSARequestLog.html">NCSARequestLog</a>.
+<p>         
+       <big><big><br>
+       <a name="debugging"></a><b>Debugging</b></big></big></b></font><br>
        <br>
           Debugging information is logged via the collection of&nbsp;<a href="/javadoc/org/mortbay/util/LogSink.html">
          org.mortbay.util.LogSink</a> instances configured   into the  static 
@@ -90,15 +88,15 @@ it will start on port 8888. To login to it, use username   <tt>admin</tt>
      For example, to configure a debug log file that will be rolled over
 (as   indicated by the <tt>yyyy_mm_dd</tt> suffix indicates this):<br>
                
-<table align=center border=0 cellpadding=2 cellspacing=0 width="70%">
+<table align=center border=0 cellpadding=2 cellspacing=0 width="90%">
 <tbody>
 <tr>
 <td>
-<tt>
+<small>
 <pre>
 java -DDEBUG -DLOG_FILE=./logs/debug_yyyy_mm_dd.log org.mortbay.jetty.Server
 </pre>
-</tt>
+</small>
              <b>Example: &nbsp; Setting the debug log file</b>
 </td>
 </tr>
@@ -214,11 +212,11 @@ settings:<br>
  "ThreadedServer"  at a high level of verbosity :<br>
              <br>
                                                  
-<table align=center border=0 cellpadding=2 cellspacing=0 width="70%">
+<table align=center border=0 cellpadding=2 cellspacing=0 width="90%">
 <tbody>
 <tr>
 <td>
-<tt>
+<small>
 <pre>
 java -DDEBUG \
 &nbsp; &nbsp; &nbsp;-DLOG_FILE=./logs/debug_yyyy_mm_dd.log \
@@ -226,7 +224,7 @@ java -DDEBUG \
 &nbsp; &nbsp; &nbsp;-DDEBUG_PATTERNS="SocketListener,ThreadedServer"\
 org.mortbay.jetty.Server
 </pre>
-</tt>
+</small>
                      <b> Example: &nbsp;Debug system properties</b>
 </td>
 </tr>
@@ -238,15 +236,34 @@ org.mortbay.jetty.Server
 same   example above can be presented as:                               
                                                           
                                                   
-<table align=center border=0 cellpadding=2 cellspacing=0 width="70%">
+<table align=center border=0 cellpadding=2 cellspacing=0 width="90%">
 <tbody>
 <tr>
 <td>
-<tt>
+<small>
 <pre>
-&lt;Set name="Debug" class="org.mortbay.util.Code" type="boolean"&gt;true&lt;/Set&gt;<br>  &lt;Set name="Verbose" class="org.mortbay.util.Code" type="int"&gt;99&lt;/Set&gt;<br>  &lt;Set name="DebugPatterns" class="org.mortbay.util.Code" type="String"&gt;"SocketListener,ThreadedServer"&lt;/Set&gt;<br><br>  &lt;Call name="instance" class="org.mortbay.util.Log"&gt;<br>    &lt;Call name="disableLog"/&gt;<br>    &lt;Call name="add"&gt; <br>      &lt;Arg&gt;<br>        &lt;New class="org.mortbay.util.WriterLogSink"&gt;<br>          &lt;Arg&gt;&lt;SystemProperty name="jetty.log" default="./logs"/&gt;/debug_yyyy_mm_dd.log&lt;/Arg&gt;<br>          &lt;Set name="RetainDays"&gt;90&lt;/Set&gt;<br>          &lt;Set name="Append"&gt;true&lt;/Set&gt;<br>          &lt;Call name="start"/&gt; <br>        &lt;/New&gt;<br>      &lt;/Arg&gt;<br>    &lt;/Call&gt;<br>  &lt;/Call&gt;
+&lt;Set name="Debug" class="org.mortbay.util.Code"
+type="boolean"&gt;true&lt;/Set&gt;
+  &lt;Set name="Verbose" class="org.mortbay.util.Code"
+  type="int"&gt;99&lt;/Set&gt;
+  &lt;Set name="DebugPatterns" class="org.mortbay.util.Code"
+   type="String"&gt;"SocketListener,ThreadedServer"&lt;/Set&gt;
+  &lt;Call name="instance" class="org.mortbay.util.Log"&gt;
+    &lt;Call name="disableLog"/&gt;
+    &lt;Call name="add"&gt; 
+      &lt;Arg&gt;
+        &lt;New class="org.mortbay.util.WriterLogSink"&gt;
+          &lt;Arg&gt;&lt;SystemProperty name="jetty.log" 
+                default="./logs"/&gt;/debug_yyyy_mm_dd.log&lt;/Arg&gt;
+          &lt;Set name="RetainDays"&gt;90&lt;/Set&gt;
+          &lt;Set name="Append"&gt;true&lt;/Set&gt;
+          &lt;Call name="start"/&gt;
+        &lt;/New&gt;
+      &lt;/Arg&gt;
+    &lt;/Call&gt;
+  &lt;/Call&gt;
 </pre>
-</tt>
+</small>
 </td>
 </tr>
 <tr>

@@ -58,7 +58,7 @@ import org.mortbay.util.ByteArrayISO8859Writer;
  * The MOVE method is allowed if PUT and DELETE are allowed             
  *
  * @version $Id$
- * @author Greg W ilkins (gregw)
+ * @author Greg Wilkins (gregw)
  */
 public class Default extends HttpServlet
 {

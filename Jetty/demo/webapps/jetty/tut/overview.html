@@ -63,8 +63,7 @@ that  listens on  specified ports and accepts and handles requests.  </p>
        
 <p align="left">The server is configured by method calls on the&nbsp;<a href="/javadoc/org/mortbay/http/package-summary.html">
         Java API</a> . This code example creates a simple server listening
- on port 8080 and serving static files from the location .<font face="Courier New, Courier, monospace">
-   /docroot</font>:</p>
+ on port 8080 and serving static resources (files) from the location <font face="Courier New, Courier, monospace">./docroot</font>:</p>
        
 <p align="left"> </p>
        
@@ -72,19 +71,18 @@ that  listens on  specified ports and accepts and handles requests.  </p>
        
 <p align="left">  </p>
                
-<blockquote>         
-  <blockquote>               
-    <blockquote>                     </blockquote>
-      </blockquote>
-      </blockquote>
-      <table cellpadding="2" cellspacing="2" border="0" width="50%" align="center">
+      <table cellpadding="2" cellspacing="2" border="0" width="80%" align="center">
         <tbody>
           <tr>
             <td valign="top"><tt>HttpServer server = new HttpServer();</tt><br>
-            <tt>       server.addListener(new InetAddrPort(8080));</tt><br>
-            <tt>       HttpContext context = server.addContext("/");</tt><br>
+            <tt>       SocketListener listener = new SocketListener();</tt><br>
+            <tt>       listener.setPort(8080);</tt><br>
+            <tt>       server.addListener(listener);</tt><br><br>
+            <tt>       HttpContext context = new HttpContext();</tt><br>
+            <tt>       context.setContextPath("/");</tt><br>
             <tt>       context.setResourceBase("./docroot/");</tt><br>
-            <tt>       context.setServingResources(true);</tt><br>
+            <tt>       context.addHandler(new ResourceHandler());</tt><br>
+            <tt>       server.addContext(context);</tt><br><br>
             <tt>       server.start();</tt><br>
             <br>
             <b>Code Example: Creating a trivial HTTP server</b><br>
@@ -95,28 +93,22 @@ that  listens on  specified ports and accepts and handles requests.  </p>
       <tt><br>
       </tt><br>
       <br>
-                           The server is made stand-alone by placing the
+The server is made stand-alone by placing the
 above code in the body of  a <tt>main</tt> method (the HttpServer class itself
 has a <tt>main</tt>  that  can be used as an example). To use the server
 as a component within an application,  include the above lines at an appropriate
-location within the application  code.<br>
-    <br>
+location within the application  code.
+    <p>
     The HttpServer provides a flexible mechanism for extending the capabilities
   of the server called "HttpHandlers". &nbsp;The server selects an appropriate
   HttpHandler to generate a response to an incoming request. The release
 includes   handlers for static content, authentication and a Servlet Container.
-&nbsp;Serlvets   are the standard method for generating dynamic content,
+<P>
+Serlvets   are the standard method for generating dynamic content,
 however the server   can also be extended by writing custom HttpHandlers
-if servlets are insufficient   or too heavyweight for your application.<br>
-         <br>
- In the example above, convenience methods on the <tt>HttpContext</tt> object 
-are used to quickly and easily set up static content serving. The <tt>setServingResources()</tt>
-  method hides the instantiation of an <tt>HttpHandler</tt> instance (actually 
-a subclass of <tt>HttpHandler</tt> called <tt>ResourceHandler</tt>) to perform 
-the file serving.<br>
-         <br>
-<I>Note that in this tutorial, Jetty4 is used for the examples.  In Jetty 3.1 and prior releases, the HttpContext class was named HandlerContext.</I>
-<br><br>
+if servlets are insufficient   or too heavyweight for your application.
+         
+         <P>
     More detailed information on the HttpServer class, including setting
 up  port listeners, contexts and handlers is to be found in the section <a href="HttpServer.html">
     HTTP Server</a>.<br>
@@ -140,11 +132,13 @@ the Web Application Server</big></b></font></p>
                                                                         
                                        <tt><br>
       </tt>
-      <table cellpadding="2" cellspacing="2" border="0" width="50%" align="center">
+      <table cellpadding="2" cellspacing="2" border="0" width="80%" align="center">
         <tbody>
           <tr>
             <td valign="top"><tt>Server server = new Server();<br>
-       server.addListener(new InetAddrPort(8080));<br>
+       SocketListener listener = new SocketListener();<br>
+       listener.setPort(8080);
+       server.addListener(listener);<br>
        server.addWebApplication("/","./webapps/myapp/");<br>
        server.start();<br>
             </tt><br>
@@ -158,70 +152,54 @@ the Web Application Server</big></b></font></p>
                                               
       <p>As mentioned previously, the Jetty Server is able to be  configured
 via XML as an alternative to cutting code. The same web application  as coded
-above can be deployed by this XML configuration file:<br>
-                   </p>
-      <table cellpadding="2" cellspacing="2" border="0" width="50%" align="center">
+above can be deployed by this XML configuration file:
+      <table cellpadding="2" cellspacing="2" border="0" width="80%" align="center">
         <tbody>
           <tr>
-            <td valign="top"><font size="-1"><big>&lt;?xml version="1.0"
- encoding="ISO-8859-1"?&gt; </big></font><br>
-            <tt><font size="-1"><big>    &lt;!DOCTYPE  Configure PUBLIC </big></font><font size="-1"><big>
-"-//Mort Bay Consulting//DTD  Configure 1.2//EN" </big></font><font size="-1"><big>
-"http://jetty.mortbay.org/configure_1_2.dtd"&gt;</big></font></tt><br>
-            <tt><br>
-            <font size="-1"><big>    &lt;Configure class="org.mortbay.jetty.Server"&gt;</big></font><br>
-            <br>
-            <font size="-1"><big>      &lt;Call name="addListener"&gt;</big></font><br>
-            <font size="-1"><big>&nbsp; &lt;Arg&gt;&lt;New  class="org.mortbay.util.InetAddrPort&gt;</big></font><br>
-            <font size="-1"><big>&nbsp; &nbsp; &nbsp;  &nbsp;&lt;Arg&gt;8080&lt;/Arg&gt;</big></font><br>
-            <font size="-1"><big>&nbsp; &nbsp; &nbsp;  &nbsp;&lt;/New&gt;<br>
-   &nbsp; &lt;/Arg&gt;</big></font><br>
-            <font size="-1"><big>      &lt;/Call&gt;</big></font><br>
-            <br>
-            <font size="-1"><big>      &lt;Call name="addWebApplication"&gt;</big></font><br>
-            <font size="-1"><big>&nbsp; &lt;Arg&gt;/&lt;/Arg&gt;</big></font><br>
-            <font size="-1"><big>&nbsp; &lt;Arg&gt;./webapps/myapp/&lt;/Arg&gt;</big></font><br>
-            <font size="-1"><big>      &lt;/Call&gt;</big></font><br>
-            <br>
-            <font size="-1"><big>    &lt;/Configure&gt;</big></font><br>
-            <br>
-            </tt><b>Example: Web App Configuration via  XML</b><br>
+            <td valign="top"><small><PRE>
+
+&lt;?xml version="1.0" encoding="ISO-8859-1"?&gt;
+&lt;!DOCTYPE Configure PUBLIC 
+ "-//Mort Bay Consulting//DTD Configure 1.2//EN" 
+ "http://jetty.mortbay.org/configure_1_2.dtd"&gt;
+
+&lt;Configure class="org.mortbay.jetty.Server"&gt;
+
+  &lt;Call name="addListener"&gt;
+    &lt;Arg&gt;
+      &lt;New class="org.mortbay.http.SocketListener"&gt;
+        &lt;Set name"port"&gt;8080&lt;/Set&gt;
+      &lt;/New&gt;
+    &lt;/Arg&gt;
+  &lt;/Call&gt;
+
+  &lt;Call name="addWebApplication"&gt;
+    &lt;Arg&gt;/&lt;/Arg&gt;
+    &lt;Arg&gt;./webapps/myapp/&lt;/Arg&gt;
+  &lt;/Call&gt;
+
+&lt;/Configure&gt;
+
+              </PRE></small>
+            <b>XML Example: Configuring a Web Application Server</b><br>
             </td>
           </tr>
         </tbody>
       </table>
-      <br>
                                                                         
-         <br>
-                                                                        
-                                   To run Jetty with this XML file, execute
+To run Jetty with this XML file, execute
 this command:                                                           
-                                            
-      <blockquote>                                                      
-                                                  
-        <blockquote>                                                    
-                                                          
-          <blockquote>                                                  
+                                                                   
                                                                   
-            <blockquote><tt>java org.mortbay.jetty.Server  myserver.xml<br>
-                                           <br>
+            <blockquote><tt>java&nbsp;-jar&nbsp;org.mortbay.jetty.jar&nbsp;myserver.xml<br>
                                            </tt></blockquote>
-                                           </blockquote>
-                                           </blockquote>
-                                           </blockquote>
    To read more about Jetty as a web application server, click <a href="Server.html">
    here</a>.<br>
-                                           <br>
    To skip to more information on the XML file format click <a href="XmlConfiguration.html">
    here</a>.<br>
                                                                         
                                                                 
-              <p>  </p>
-                                                                        
-                                                    
-              <p><br>
-        <br>
-        </p>
+              <p> 
                                                                         
                                                               
               <table cellpadding="0" cellspacing="8" border="0" width="20%">
