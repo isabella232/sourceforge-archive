@@ -4,6 +4,7 @@ Jetty Versions
 Jetty-4.2.0pre0 - 13 October 2002
  + New ThreadPool implementation.
  + New Buffering implementation.
+ + New AJP13 implementation.
  + Removed Dispatcher dependancy on ServletHttpContext
  + getNamedDispatcher(null) returns containers default servlet.
  + unquote charset in content type
@@ -13,8 +14,12 @@ Jetty-4.2.0pre0 - 13 October 2002
  + Fixed bad log dir detection
  + Fix Session invalidation bug
  + Build without jmx
+ + 404 instead of 403 for WEB-INF requests
+ + FORM authentication sets 403 error page
+ + Allow %3B encoded ; in URLs
 
-Jetty-4.1.2 - 13 OCtober 2002
+Jetty-4.1.2rc0 - 13 October 2002
+ + Some AJP13 optimizations.
  + getNamedDispatcher(null) returns containers default servlet.
  + unquote charset in content type
  + Stop/Start filters in declaration order.
@@ -23,7 +28,9 @@ Jetty-4.1.2 - 13 OCtober 2002
  + Fixed bad log dir detection
  + Fix Session invalidation bug
  + Build without jmx
- + Some AJP13 optimizations.
+ + 404 instead of 403 for WEB-INF requests
+ + FORM authentication sets 403 error page
+ + Allow %3B encoded ; in URLs
 
 Jetty-4.1.1 - 30 September 2002
  + Fixed client scripting vulnerability with jasper2.

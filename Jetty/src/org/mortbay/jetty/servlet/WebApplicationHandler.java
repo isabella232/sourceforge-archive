@@ -226,7 +226,7 @@ public class WebApplicationHandler extends ServletHandler
                 if (StringUtil.startsWithIgnoreCase(pathInContext,"/web-inf")  ||
                     StringUtil.startsWithIgnoreCase(pathInContext,"/meta-inf"))
                 {
-                    response.sendError(HttpResponse.__403_Forbidden);
+                    response.sendError(HttpResponse.__404_Not_Found);
                     return;
                 }
                 
