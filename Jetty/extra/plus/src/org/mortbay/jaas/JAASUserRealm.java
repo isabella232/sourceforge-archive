@@ -91,7 +91,7 @@ public class JAASUserRealm implements UserRealm
             //user has been previously authenticated, but
             //re-authentication has been requested, so remove them
             if (userPrincipal != null)
-                userMap.remove(userPrincipal);
+                userMap.remove(username);
                 
             
             if (callbackHandler == null)
