@@ -39,7 +39,8 @@ public class DigestAuthenticator implements Authenticator
     static Log log = LogFactory.getLog(DigestAuthenticator.class);
 
     private long maxNonceAge=0;
-    private long nonceSecret=this.hashCode();
+    private long nonceSecret=this.hashCode() ^ System.currentTimeMillis();
+    private boolean useStale=false;
     
     
     /* ------------------------------------------------------------ */
@@ -56,6 +57,7 @@ public class DigestAuthenticator implements Authenticator
         throws IOException
     {
         // Get the user if we can
+        boolean stale=false;
         Principal user=null;
         String credentials = request.getField(HttpFields.__Authorization);
         
@@ -112,8 +114,11 @@ public class DigestAuthenticator implements Authenticator
                 }
             }            
 
-            if (checkNonce(digest.nonce,request))
+            int n=checkNonce(digest.nonce,request);
+            if (n>0)
                 user = realm.authenticate(digest.username,digest,request);
+            else if (n==0)
+                stale = true;
             
             if (user==null)
                 log.warn("AUTH FAILURE: user "+digest.username);
@@ -127,7 +132,7 @@ public class DigestAuthenticator implements Authenticator
 
         // Challenge if we have no user
         if (user==null && response!=null)
-            sendChallenge(realm,request,response);
+            sendChallenge(realm,request,response,stale);
         
         return user;
     }
@@ -141,16 +146,18 @@ public class DigestAuthenticator implements Authenticator
     /* ------------------------------------------------------------ */
     public void sendChallenge(UserRealm realm,
                               HttpRequest request,
-                              HttpResponse response)
+                              HttpResponse response,
+                              boolean stale)
         throws IOException
     {
         response.setField(HttpFields.__WwwAuthenticate,
-			    "digest realm=\""+realm.getName()+
+			    "Digest realm=\""+realm.getName()+
 			    "\", domain=\""+
-			    "/"+ // request.getContextPath()+
+			    response.getHttpContext().getContextPath() +
 			    "\", nonce=\""+newNonce(request)+
-			    "\""
+			    "\", algorithm=MD5, qop=\"auth\"" + (useStale?(" stale="+stale):"")
                           );
+        
         response.sendError(HttpResponse.__401_Unauthorized);
     }
 
@@ -192,14 +199,19 @@ public class DigestAuthenticator implements Authenticator
         return new String(B64Code.encode(nounce));
     }
 
+    /**
+     * @param nonce
+     * @param request
+     * @return -1 for a bad nonce, 0 for a stale none, 1 for a good nonce
+     */
     /* ------------------------------------------------------------ */
-    public boolean checkNonce(String nonce, HttpRequest request)
+    public int checkNonce(String nonce, HttpRequest request)
     {
         try
         {
             byte[] n = B64Code.decode(nonce.toCharArray());
             if (n.length!=24)
-                return false;
+                return -1;
             
             long ts=0;
             long sk=nonceSecret;
@@ -213,9 +225,7 @@ public class DigestAuthenticator implements Authenticator
             }
             
             long age=request.getTimeStamp()-ts;
-            
-            if(maxNonceAge>0 && (age<0 || age>maxNonceAge))
-                return false;
+	    if (log.isDebugEnabled()) log.debug("age="+age);
             
             byte[] hash=null;
             try
@@ -232,15 +242,18 @@ public class DigestAuthenticator implements Authenticator
             
             for (int i=0;i<16;i++)
                 if (n[i+8]!=hash[i])
-                    return false;
+                    return -1;
                 
-            return true;
+            if(maxNonceAge>0 && (age<0 || age>maxNonceAge))
+                return 0; // stale
+            
+            return 1;
         }
         catch(Exception e)
         {
             log.debug("",e);
         }
-        return false;
+        return -1;
     }
 
     /* ------------------------------------------------------------ */
@@ -290,10 +303,25 @@ public class DigestAuthenticator implements Authenticator
                 md.update(uri.getBytes(StringUtil.__ISO_8859_1));
                 byte[] ha2=md.digest();
                 
+                
+                
+                
+                
                 // calc digest
+                // request-digest  = <"> < KD ( H(A1), unq(nonce-value) ":" nc-value ":" unq(cnonce-value) ":" unq(qop-value) ":" H(A2) ) <">
+                // request-digest  = <"> < KD ( H(A1), unq(nonce-value) ":" H(A2) ) > <">
+
+                
+                
                 md.update(TypeUtil.toString(ha1,16).getBytes(StringUtil.__ISO_8859_1));
                 md.update((byte)':');
                 md.update(nonce.getBytes(StringUtil.__ISO_8859_1));
+                md.update((byte)':');
+                md.update(nc.getBytes(StringUtil.__ISO_8859_1));
+                md.update((byte)':');
+                md.update(cnonce.getBytes(StringUtil.__ISO_8859_1));
+                md.update((byte)':');
+                md.update(qop.getBytes(StringUtil.__ISO_8859_1));
                 md.update((byte)':');
                 md.update(TypeUtil.toString(ha2,16).getBytes(StringUtil.__ISO_8859_1));
                 byte[] digest=md.digest();
@@ -340,6 +368,16 @@ public class DigestAuthenticator implements Authenticator
     public void setNonceSecret(long nonceSecret)
     {
         this.nonceSecret = nonceSecret;
+    }
+
+    public void setUseStale(boolean us)
+    {
+	this.useStale=us;
+    }
+
+    public boolean getUseStale()
+    {
+	return useStale;
     }
 }
     

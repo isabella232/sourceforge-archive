@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
- + DIGEST auth maxNonceAge.
+ + DIGEST auth handles qop, stale and maxNonceAge.
 
 Jetty-5.0.RC2 - 2 July 2004
  + Fixed DIGEST challenge delimiters
