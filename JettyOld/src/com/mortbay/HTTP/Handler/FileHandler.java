@@ -459,18 +459,11 @@ public class FileHandler extends NullHandler
     {	
         if (!request.getMethod().equals(HttpRequest.HEAD))
         {
-	    request.dump();
-	    System.err.println(file.lastModified()+" <= "+request.getHeader(HttpHeader.IfModifiedSince));
-	    
-	    
-	    
             // check any modified headers.
             long date=0;
             if ((date=request.
                  getDateHeader(HttpHeader.IfModifiedSince))>0)
             {
-		System.err.println(file.lastModified()+" <= "+date);
-		
                 if (file.lastModified() <= date)
                 {
                     response.sendError(response.SC_NOT_MODIFIED);

@@ -58,6 +58,10 @@ public class HttpTests
             "C1: Continuation Value" + CRLF +
             CRLF;
         
+        String h3 =
+            "Not a header line" + CRLF +
+            "Blah Blah Blah" + CRLF ;
+	
 
         ByteArrayInputStream bais = new ByteArrayInputStream(h1.getBytes());
         HttpInputStream his = new HttpInputStream(bais);
@@ -94,11 +98,17 @@ public class HttpTests
         t.checkEquals(h.getHeader("D1"),h.getHeader("D2"),
                       "setDateHeader12");
 
-        String h3 = h.toString();
-        t.checkEquals(h2,h3,"toString");
+        String h4 = h.toString();
+        t.checkEquals(h2,h4,"toString");
 
 	t.checkEquals(h.getHeader("D-5"),"Tue Feb 29 2000 12:00:00","hyphen");
-        
+
+	bais = new ByteArrayInputStream(h1.getBytes());
+        his = new HttpInputStream(bais);
+	h = new HttpHeader();
+        h.read(his);
+
+	
     }
     
     /* --------------------------------------------------------------- */
