@@ -1,0 +1,123 @@
+
+<H1>Review of Servlet Engines and Servlet Plugins</H1>
+The German computer 
+"<A HREF=http://www.heise.de/ix>iX Magazine</A>" did a testing on 6 servlet
+engines and servlet plugins. The candidates were:
+<UL>
+<LI> ServletExec 2.2 (with Apache 1.3.9)
+<LI> Jetty 2.2.4
+<LI> Java Webserver 2.0
+<LI> Jserv 1.0 (with Apache 1.3.6)
+<LI> Jigsaw 2.0.3
+<LI> JRun Pro 2.3.2 (with Apache 1.3.6)
+</UL>
+The article was written by <a href="mailto:hs@tagtraum.com">Hendrik Schreiber
+&lt;hs@tagtraum.com&gt;</a> whose site is 
+<a HREF="http://www.tagtraum.com">http://www.tagtraum.com</a>. Hendrik developed
+the Jo java WWW server.
+<P>
+For the testing 3 different servlets were used and 4 different clients.
+<h3>Servlets:</h3>
+<NL>
+<LI>	A simple file servlet that is using the content-length header field
+when serving files. The served files were of different sizes: 1 Byte,
+100  Byte and 1, 10, 100, 1000 kByte. The number of requests for the
+different file sizes were chosen in a realistic distribution (0-1kByte
+35%, 1-10kByte 50%, 10-100kByte 14%, 100-1Mbyte 1%).
+<LI>	A "hello world" servlet (no content-length header)
+<LI>	A more complex servlet that is using most of the Servlet API 2.0
+methods (setting headers, cookies but no sessions).
+</NL>
+You will find the source code under: 
+<A HREF=ftp://ftp.heise.de/pub/ix/ix_listings/2000/01/>ftp://ftp.heise.de/pub/ix/ix_listings/2000/01/</A>
+<H3>Clients:</h3>
+<NL>
+<LI>	A basic HTTP 1.0 client
+<LI>	HTTP 1.0 with "Keep-Alive" (like Netscape 4.6)
+<LI>	HTTP 1.1 without Pipelining (IE 5.0)
+<LI>	HTTP 1.1 with Pipelining
+</NL>
+<h3>Hardware:</h3>
+4 clients, 1 server, 1 controller all the same hardware:
+PII 400MHz, 128Mbyte, Asus P2B, 100Mbit, NT4 SP5 
+
+<h3>Software:</h3>
+Sun's JDK 1.2.2 with JIT, restricted to 100 handler threads per machine. Unlike many other vendor benchmarks the test aimed at a high level of concurrency of up to 400 concurrent requests, in order to not only measure isolated, sequential roundtrip times, but a more realistic heavyload situation.
+
+
+<H3>Results:</h3>
+Results are the max requests per second reached, regardless of the used protocol. FileServlet results were weighed according to a real world distribution, APIMethodTest was only tested with a simple HTTP/1.0 client.
+<BR>
+<TABLE BORDER=1 CELLPADDING=1 CELLSPACING=0 WIDTH=600>
+<TR>
+<TH ALIGN=left VALIGN=top WIDTH=150>Server</TH>
+<TH ALIGN=left VALIGN=top WIDTH=105>FileServlet with Content-Length set</TH>
+<TH ALIGN=left VALIGN=top WIDTH=115>FileServlet without Content-Length header</TH>
+<TH ALIGN=left VALIGN=top WIDTH=135>HelloWorld servlet</TH>
+<TH ALIGN=left VALIGN=top WIDTH=98>APIMethodTest Servlet</TH>
+</TR>
+<TR>
+<TD>Jetty 2.2.4</TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=95 BGCOLOR=red>189</TD></TR></TABLE></TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=105 BGCOLOR=red>210</TD></TR></TABLE></TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=125 BGCOLOR=red>250</TD></TR></TABLE></TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=88 BGCOLOR=red>175</TD></TR></TABLE></TD>
+</TR>
+<TR>
+<TD>Jigsaw 2.0.3</TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=91 BGCOLOR=#A0A0FF>181</TD></TR></TABLE></TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=92 BGCOLOR=#A0A0FF>184</TD></TR></TABLE></TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=131 BGCOLOR=#A0A0FF>262</TD></TR></TABLE></TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=69 BGCOLOR=#A0A0FF>137</TD></TR></TABLE></TD>
+</TR>
+<TR>
+<TD>Java Webserver 2.0</TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=83 BGCOLOR=#A0FFA0>166</TD></TR></TABLE></TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=76 BGCOLOR=#A0FFA0>152</TD></TR></TABLE></TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=52 BGCOLOR=#A0FFA0>105</TD></TR></TABLE></TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=87 BGCOLOR=#A0FFA0>174</TD></TR></TABLE></TD>
+</TR>
+<TR>
+<TD>JSERV 1.0</TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=46 BGCOLOR=#FFA0A0>93</TD></TR></TABLE></TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=45 BGCOLOR=#FFA0A0>91</TD></TR></TABLE></TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=51 BGCOLOR=#FFA0A0>104</TD></TR></TABLE></TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=49 BGCOLOR=#FFA0A0>99</TD></TR></TABLE></TD>
+</TR>
+<TR>
+<TD>JRUN PRO 2.3.2</TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=34 BGCOLOR=#FFA0FF>68</TD></TR></TABLE></TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=36 BGCOLOR=#FFA0FF>72</TD></TR></TABLE></TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=57 BGCOLOR=#FFA0FF>115</TD></TR></TABLE></TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=36 BGCOLOR=#FFA0FF>72</TD></TR></TABLE></TD>
+</TR>
+<TR>
+<TD>Servlet Exec 2.2</TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=27 BGCOLOR=#FFFFA0>54</TD></TR></TABLE></TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=26 BGCOLOR=#FFFFA0>53</TD></TR></TABLE></TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=35 BGCOLOR=#FFFFA0>70</TD></TR></TABLE></TD>
+<TD ALIGN=left> <TABLE CELLPADDING=1 CELLSPACING=0><TR><TD WIDTH=33 BGCOLOR=#FFFFA0>67</TD></TR></TABLE></TD>
+</TR>
+</TABLE>
+
+<h3>Discussion:</h3>
+In the end the pure java servers were twice as fast as the plugins.
+Jetty was the fastest servlet engine (Jigsaw was a bit faster with the
+"Hello world"). 
+Jigsaw had problems with the URL-rewriting the RequestDispatcher .
+Every call to encodeURL() did create a session-that leads to a memory
+hole and the machines crashed.
+Jetty's implementation of HTTP 1.1 was criticised. IE 5.0 sometimes did
+not get a response and Pipelining did not work properly. Additionally 
+Jetty wrote some content in the language of the installed JDK, so the
+tests on the German installation with GET and the "If-Modified" header
+failed too.
+<P>
+<I>
+<h3>Jetty's Reply</h3>
+The bugs reported with If-Modified and interworking with IE 5.0 have
+been found and fixed as of Jetty-2.3.5.   The alpha releases of Jetty-3
+have complete implementation of HTTP/1.1 which is tested against
+RFC2616. Once Jetty-3 is integrated with a servlet engine in early 2000, it
+will provide even greater performance and flexibility than Jetty-2.
+</I>
