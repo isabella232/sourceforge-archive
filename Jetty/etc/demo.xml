@@ -65,7 +65,7 @@ $Id$
     </Arg>
   </Call>
 
-<!--  Uncomment this to add an SSL listener. 
+<!--  Uncomment this to add an SSL listener.
   <Call name="addListener">
     <Arg>
       <New class="com.mortbay.HTTP.SunJsseListener">
@@ -81,6 +81,21 @@ $Id$
   </Call>
 
 -->
+   <!-- Begin SASL Listener -->
+
+   <Call name="addListener">
+     <Arg>
+       <New class="com.mortbay.HTTP.SaslListener">
+         <Set name="Port">8100</Set>
+         <Set name="MinThreads">5</Set>
+         <Set name="MaxThreads">255</Set>
+         <Set name="MaxIdleTimeMs">60000</Set>
+         <Set name="MaxReadTimeMs">60000</Set>
+       </New>
+     </Arg>
+   </Call>
+
+   <!-- End SASL Listener -->
 
   <Call name="addWebApplication">
     <Arg>/jetty/*</Arg>
