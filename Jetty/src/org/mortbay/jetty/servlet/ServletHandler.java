@@ -162,8 +162,9 @@ public class ServletHandler extends AbstractHttpHandler
                     EventListener listener=(EventListener)i.next();
                     _sessionManager.addEventListener(listener);
                 }
-                _sessionManager.initialize(this);
             }
+	    if (_sessionManager!=null)
+		_sessionManager.initialize(this);
         }
     }
     
