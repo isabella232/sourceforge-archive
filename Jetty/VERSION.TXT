@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Don't process conditional headers and ranges for includes
+
 Jetty-4.2.4 - 4 January 2003
  + Fixed stop/start handling of servlet context
  + Reuse empty LogSink slots.

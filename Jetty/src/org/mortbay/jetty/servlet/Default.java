@@ -245,7 +245,7 @@ public class Default extends HttpServlet
                 sendDirectory(request,response,resource,pathInContext.length()>1);
             }
             else // just send it
-                sendData(request,response,pathInContext,resource,true);
+                sendData(request,response,pathInContext,resource);
         }
     }
     
@@ -404,11 +404,12 @@ public class Default extends HttpServlet
     /* Check modification date headers.
      */
     protected boolean passConditionalHeaders(HttpServletRequest request,
-                                           HttpServletResponse response,
-                                           Resource resource)
+                                             HttpServletResponse response,
+                                             Resource resource)
         throws IOException
     {
-        if (!request.getMethod().equals(HttpRequest.__HEAD))
+        if (!request.getMethod().equals(HttpRequest.__HEAD)  &&
+            request.getAttribute(Dispatcher.__REQUEST_URI)==null)
         {
             // If we have meta data for the file
             // Try a direct match for most common requests. Avoids
@@ -499,20 +500,21 @@ public class Default extends HttpServlet
     protected void sendData(HttpServletRequest request,
                             HttpServletResponse response,
                             String pathInContext,
-                            Resource resource,
-                            boolean writeHeaders)
+                            Resource resource)
         throws IOException
     {
         long resLength=resource.length();
+
+        boolean include = request.getAttribute(Dispatcher.__REQUEST_URI)!=null;
         
         //  see if there are any range headers
-        Enumeration reqRanges = request.getHeaders(HttpFields.__Range);
+        Enumeration reqRanges = include?null:request.getHeaders(HttpFields.__Range);
         
-        if (!writeHeaders || reqRanges == null || !reqRanges.hasMoreElements())
+        if ( reqRanges == null || !reqRanges.hasMoreElements())
         {
             //  if there were no ranges, send entire entity
             Resource data=resource;
-            if (writeHeaders)
+            if (!include)
             {
                 // look for a gziped content.
                 if (_minGzipLength>0)

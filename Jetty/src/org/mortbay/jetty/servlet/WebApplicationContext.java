@@ -179,6 +179,8 @@ public class WebApplicationContext
     /* ------------------------------------------------------------ */
     public WebApplicationHandler getWebApplicationHandler()
     {
+        if (_webAppHandler==null)
+            getServletHandler();
         return _webAppHandler;
     }
     
