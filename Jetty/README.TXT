@@ -269,8 +269,10 @@ To use the JDK logger:
 To use log4j:
   java -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger -jar start.jar
 
-Note that any jetty logging config should be removed from the configuration files before using
-another log mechanism
+Note that any jetty logging config should be removed from the configuration files before using another log mechanism
+
+For more information see the Jetty Tutorial
+http://jetty.mortbay.org/jetty/tut/logging.html
 
 
 Package contents

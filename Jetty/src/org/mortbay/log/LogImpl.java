@@ -13,14 +13,14 @@ import org.mortbay.util.Loader;
 /** A Commons Log implementation for Jetty logs.
  * 
  * The log can contain multiple log syncs.
- * The following system properties can be used to control the configuration:
+ * The following system properties can be used to control the configuration:<pre>
  *   DEBUG - if set debugging is output is enabled.
- *   DEBUG_PATTERMS - A list of substring patterns used to match against log information for
+ *   DEBUG_PATTERNS - A list of substring patterns used to match against log information for
  *                    fine grained control of debug logging.
  *   DEBUG_VERBOSE - If set to a positive integer, trace and info are enabled.
  *                   If set to zero, then info is enabled.
  *   LOG_SINKS - List of class names used to instantiate the log sinks.
- * 
+ * </pre> 
  * This logger can be configured with the org.mortbay.log.Factory
  * 
  * @see org.mortbay.log.Factory
