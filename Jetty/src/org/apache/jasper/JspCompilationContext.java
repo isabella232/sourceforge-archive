@@ -330,10 +330,10 @@ public class JspCompilationContext {
         String outputDir = getOutputDir();
         servletJavaFileName = getServletClassName() + ".java";
  	if (outputDir != null && !outputDir.equals("")) {
-            if( outputDir.endsWith("/" ) ) {
+            if( outputDir.endsWith( java.io.File.separator ) ) {
                 servletJavaFileName = outputDir + servletJavaFileName;
             } else {
-                servletJavaFileName = outputDir + "/" + servletJavaFileName;
+                servletJavaFileName = outputDir + java.io.File.separator + servletJavaFileName;
             }
         }
 	return servletJavaFileName;
