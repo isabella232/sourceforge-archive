@@ -99,12 +99,14 @@ public class ServletHandler
     public ServletHandler()
     {
         _context=new Context();
-        _sessionManager = new HashSessionManager(this);
     }
     
     /* ------------------------------------------------------------ */
     public void initialize(HttpContext context)
     {
+        if (_sessionManager==null)
+            _sessionManager = new HashSessionManager(this);
+        
         super.initialize(context);
         if (context instanceof ServletHttpContext)
         {
@@ -123,6 +125,8 @@ public class ServletHandler
     /* ------------------------------------------------------------ */
     public SessionManager getSessionManager()
     {
+        if (_sessionManager==null)
+            _sessionManager = new HashSessionManager(this);
         return _sessionManager;
     }
     
