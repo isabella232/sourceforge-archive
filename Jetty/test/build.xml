@@ -20,6 +20,7 @@ the Ant optional tasks from:
 
    http://jakarta.apache.org/ant
 -->
+
 <project name="Jetty HTTP Server Tests" default="test" basedir="..">
   <property environment="env"/>
   <property name="src"            value="${basedir}/src" />
@@ -29,7 +30,8 @@ the Ant optional tasks from:
   <property name="javadoc"        value="${basedir}/javadoc"/>
   <property name="logs"           value="${basedir}/logs"/>
   <property name="webapps"        value="${basedir}/webapps"/>
-  <property name="webappsrc"      value="${basedir}/webappsrc"/>
+  <property name="demo.webapps"   value="${basedir}/demo/webapps"/>
+  <property name="demo.src"       value="${basedir}/demo/src"/>
   <property name="test"           value="${basedir}/test"/>
   <property name="test.lib"       value="${test}/lib"/>
   <property name="test.src"       value="${test}/src"/>
@@ -57,13 +59,17 @@ the Ant optional tasks from:
   <property name="jsse.jar"       value="${lib}/com.sun.net.ssl.jar"/>
   <property name="junit.jar"      value="${test.lib}/junit-3.7.jar"/>
 
+  <path id="external.classpath">
+    <pathelement path="${jsse.jar}" />
+    <pathelement path="${jaxp.jar}" />
+    <pathelement path="${xml.jar}" />
+  </path>
+
   <path id="classpath">
     <pathelement path="${jetty.jar}" />
     <pathelement path="${jasper.jar}" />
     <pathelement path="${servlet.jar}" />
-    <pathelement path="${jsse.jar}" />
-    <pathelement path="${jaxp.jar}" />
-    <pathelement path="${xml.jar}" />
+    <path refid="external.classpath" />
   </path>
 
   <!-- ==================================================================== -->
@@ -76,15 +82,12 @@ the Ant optional tasks from:
     <delete dir="${test.classes}" quiet="true"/>
   </target>
 
-
   <!-- ==================================================================== -->
   <target name="clean" depends="tidy">
   </target>
 
-
   <!-- ==================================================================== -->
-  <target name="compile" depends="prepare">
-    <echo message="${java.class.path}" />
+  <target name="classes" depends="prepare">
     <javac srcdir="${test.src}"
            destdir="${test.classes}"
            debug="true"
@@ -100,16 +103,60 @@ the Ant optional tasks from:
   </target>
 
   <!-- ==================================================================== -->
-  <target name="test" depends="compile">
+  <target name="test" depends="junit,testUtil,testXML,testHTTP"/>
+
+  <!-- ==================================================================== -->
+  <target name="junit" depends="classes">
     <junit fork="no" haltonerror="yes" haltonfailure="yes" >
       <formatter type="brief" usefile="false" />                  
       <classpath> 
          <path refid="classpath" />
-         <pathelement path="${junit.jar}" />     
-         <pathelement path="${test.classes}" />     
+         <pathelement location="${junit.jar}" />     
+         <pathelement location="${test.classes}" />     
       </classpath>        
       <test name="org.mortbay.util.JUnitTestHarness"  />
     </junit>
+  </target>
+
+
+  <!-- ==================================================================== -->
+  <target name="testUtil" depends="classes">
+    <java classname="org.mortbay.util.TestHarness"
+          fork="yes"
+          failonerror="yes"
+          >                
+        <classpath>  
+          <pathelement location="${test.classes}" /> 
+          <pathelement location="${classes}" />     
+       </classpath>
+     </java>        
+  </target>
+
+
+  <!-- ==================================================================== -->
+  <target name="testXML" depends="classes">
+    <java classname="org.mortbay.xml.TestHarness"
+          fork="yes"
+          failonerror="yes">
+      <classpath> 
+          <pathelement location="${test.classes}" /> 
+          <pathelement location="${classes}" />
+          <path refid="external.classpath" />   
+      </classpath>
+    </java>
+  </target>
+
+  <!-- ==================================================================== -->
+  <target name="testHTTP" depends="classes">
+    <java classname="org.mortbay.http.TestHarness"
+          fork="yes"
+          failonerror="yes">
+      <classpath>
+          <pathelement location="${test.classes}" /> 
+          <pathelement location="${classes}" />
+          <path refid="external.classpath" />  
+      </classpath>
+    </java>
   </target>
 
 

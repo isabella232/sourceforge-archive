@@ -520,11 +520,19 @@ abstract public class ThreadedServer extends ThreadPool
                     {
                         Code.warning(e);
                     }
+                    catch(Error e)
+                    {
+                        Code.warning(e);
+                        break;
+                    }
                 }
             }
             finally
             {
-                Log.event("Stopping "+this.getName());
+                if (_running)
+                    Code.warning("Stopping "+this.getName());
+                else
+                    Log.event("Stopping "+this.getName());
                 try{if (_listen!=null)_listen.close();}
                 catch (IOException e) {Code.ignore(e);}
                 synchronized(ThreadedServer.this)

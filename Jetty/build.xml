@@ -38,7 +38,8 @@ Other targets:
   <property name="javadoc"        value="${basedir}/javadoc"/>
   <property name="logs"           value="${basedir}/logs"/>
   <property name="webapps"        value="${basedir}/webapps"/>
-  <property name="webappsrc"      value="${basedir}/webappsrc"/>
+  <property name="demo.webapps"   value="${basedir}/demo/webapps"/>
+  <property name="demo.src"       value="${basedir}/demo/src"/>
   <property name="test"           value="${basedir}/test"/>
   <property name="test.lib"       value="${test}/lib"/>
   <property name="test.src"       value="${test}/src"/>
@@ -52,8 +53,8 @@ Other targets:
   <property name="javac.deprecation"       value="off" />
 
   <property name="jetty.home"             value="${basedir}" />
-  <property name="jetty.webapp"           value="${webapps}/jetty"/>
-  <property name="jetty.war"              value="${webapps}/jetty.war"/>
+  <property name="jetty.webapp"           value="${demo.webapps}/jetty"/>
+  <property name="jetty.war"              value="${demo.webapps}/jetty.war"/>
   <property name="jetty.webapp.webinf"    value="${jetty.webapp}/WEB-INF"/>
   <property name="jetty.webapp.classes"   value="${jetty.webapp.webinf}/classes"/>
 
@@ -66,14 +67,19 @@ Other targets:
   <property name="jsse.jar"       value="${lib}/com.sun.net.ssl.jar"/>
   <property name="junit.jar"      value="${test.lib}/junit-3.7.jar"/>
 
-  <path id="classpath">
-    <pathelement path="${jetty.jar}" />
-    <pathelement path="${jasper.jar}" />
-    <pathelement path="${servlet.jar}" />
+  <path id="external.classpath">
     <pathelement path="${jsse.jar}" />
     <pathelement path="${jaxp.jar}" />
     <pathelement path="${xml.jar}" />
   </path>
+
+  <path id="classpath">
+    <pathelement path="${jetty.jar}" />
+    <pathelement path="${jasper.jar}" />
+    <pathelement path="${servlet.jar}" />
+    <path refid="external.classpath" />
+  </path>
+
 
   <!-- ==================================================================== -->
   <target name="prepare">
@@ -88,7 +94,7 @@ Other targets:
     <copy file="${src}/javax/servlet/resources/web-app_2_2.dtd" tofile="${etc}/dtd/web-app_2_2.dtd" />
     <copy file="${src}/javax/servlet/resources/web-app_2_3.dtd" tofile="${etc}/dtd/web-app_2_3.dtd" />
     <copy file="${src}/javax/servlet/resources/web-app_2_3.dtd" tofile="${etc}/dtd/web.dtd" />
-    <copy todir="${webapps}/root">
+    <copy todir="${demo.webapps}/root">
       <fileset dir="${etc}/dtd">
         <include name="*.dtd"/>
       </fileset>
@@ -100,6 +106,7 @@ Other targets:
     <delete dir="${classes}" quiet="true"/>
     <delete dir="${test.classes}" quiet="true"/>
     <delete file="${mini.http.jar}" quiet="true"/>
+    <ant antfile="${test}/build.xml" inheritAll="true" target="tidy"/>
   </target>
 
 
@@ -112,15 +119,16 @@ Other targets:
     <delete file="${servlet.jar}" quiet="true"/>
     <delete file="${jasper.jar}" quiet="true"/>
     <delete quiet="true">
-      <fileset dir="${webapps}/examples">
+      <fileset dir="${demo.webapps}/examples">
         <include name="**/*.class"/>
       </fileset>
     </delete>
     <delete quiet="true">
-      <fileset dir="${webapps}/root">
+      <fileset dir="${demo.webapps}/root">
         <include name="*.dtd"/>
       </fileset>
     </delete>
+    <ant antfile="${test}/build.xml" inheritAll="true" target="clean"/>
   </target>
 
 
@@ -141,21 +149,6 @@ Other targets:
            >
        <classpath refid="classpath" />
        <include name="**/*.java"/>
-       <exclude name="**/nbio/*.java"/>
-       <exclude name="com/**/*.java"/>
-    </javac>
-  </target>
-
-  <!-- ==================================================================== -->
-  <target name="nbio" depends="classes">
-    <javac srcdir="${src}"
-           destdir="${classes}"
-           debug="${javac.debug}"
-           optimize="${javac.optimize}"
-           deprecation="${javac.deprecation}"
-           >
-       <classpath refid="classpath" />
-       <include name="**/NBIO/*.java"/>
     </javac>
   </target>
 
@@ -171,18 +164,10 @@ Other targets:
     <delete file="${mini.http.jar}" quiet="true"/>
     <jar jarfile="${jetty.jar}" basedir="${classes}" manifest="${src}/org/mortbay/MANIFEST.MF" >
        <include name="org/mortbay/**"  />
-       <exclude name="org/mortbay/**/TestHarness*.class" />
-       <exclude name="org/mortbay/util/DataClass/*" />
-       <exclude name="org/mortbay/util/TestConfiguration.class" />
-       <exclude name="org/mortbay/util/PropertyTreeTest.class" />
-       <exclude name="org/mortbay/util/DictionaryConverterTest*.class" />
-       <exclude name="org/mortbay/http/**/Test*.class" />
-       <exclude name="org/mortbay/http/Http10TestClient.class" />
-       <exclude name="org/mortbay/html/Test*.class" />
-       <exclude name="org/mortbay/jetty/**/Test*.class" />
     </jar>
   </target>
 
+  <!-- ==================================================================== -->
   <target name="mini.http.jar" depends="classes,servlet.jar">
     <delete file="${jetty.jar}" quiet="true"/>
     <delete file="${servlet.jar}" quiet="true"/>
@@ -192,8 +177,6 @@ Other targets:
        <include name="org/mortbay/http/**" />
        <include name="javax/servlet/http/Cookie.class" />
        <include name="javax/servlet/http/LocalStrings*.properties" />
-       <exclude name="org/mortbay/**/*Test*" />
-       <exclude name="org/mortbay/util/DataClass/*" />
        <exclude name="org/mortbay/http/JsseListener.class" />
        <exclude name="org/mortbay/http/SunJsseListener.class" />
        <exclude name="org/mortbay/util/Converter" />
@@ -221,35 +204,15 @@ Other targets:
   <!-- ==================================================================== -->
   <target name="webapp.jetty" depends="jars">
     <copy todir="${jetty.webapp.classes}">
-      <fileset dir="${webappsrc}">
-        <include name="org/mortbay/webapps/jetty/defaultManifest.mf" />
-        <include name="org/mortbay/webapps/jetty/*.properties" />
+      <fileset dir="${demo.src}">
+        <include name="**/defaultManifest.mf" />
+        <include name="**/*.properties" />
       </fileset>
     </copy>
     <copy file="${jetty.webapp.classes}/org/mortbay/webapps/jetty/JettyIndex.properties"
         tofile="${jetty.webapp.classes}/org/mortbay/webapps/jetty/JettyIndex_en.properties" />
-    <javac srcdir="${webappsrc}"
+    <javac srcdir="${demo.src}"
            destdir="${jetty.webapp.classes}"
-           debug="${javac.debug}"
-           optimize="${javac.optimize}"
-           deprecation="${javac.deprecation}"
-           >
-      <classpath>
-        <pathelement path="${servlet.jar}" />
-        <pathelement path="${jetty.jar}"   />
-      </classpath>
-      <include name="org/**/*.java" />
-    </javac>
-
-    <copy file="LICENSE.html" tofile="${jetty.webapp}/LICENSE.html" />
-    <copy file="VERSION.TXT" tofile="${jetty.webapp}/versions.txt" />
-    <!-- jar jarfile="${jetty.war}" basedir="${jetty.webapp}"/ -->
-  </target>
-
-  <!-- ==================================================================== -->
-  <target name="webapp.examples" depends="jars">
-    <javac srcdir="${webapps}/examples/WEB-INF/classes"
-           destdir="${webapps}/examples/WEB-INF/classes"
            debug="${javac.debug}"
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}"
@@ -260,8 +223,28 @@ Other targets:
       </classpath>
       <include name="**/*.java" />
     </javac>
-    <javac srcdir="${webapps}/examples/jsp/plugin/applet"
-           destdir="${webapps}/examples/jsp/plugin/applet"
+
+    <copy file="LICENSE.html" tofile="${jetty.webapp}/LICENSE.html" />
+    <copy file="VERSION.TXT" tofile="${jetty.webapp}/versions.txt" />
+    <!-- jar jarfile="${jetty.war}" basedir="${jetty.webapp}"/ -->
+  </target>
+
+  <!-- ==================================================================== -->
+  <target name="webapp.examples" depends="jars">
+    <javac srcdir="${demo.webapps}/examples/WEB-INF/classes"
+           destdir="${demo.webapps}/examples/WEB-INF/classes"
+           debug="${javac.debug}"
+           optimize="${javac.optimize}"
+           deprecation="${javac.deprecation}"
+           >
+      <classpath>
+        <pathelement path="${servlet.jar}" />
+        <pathelement path="${jetty.jar}"   />
+      </classpath>
+      <include name="**/*.java" />
+    </javac>
+    <javac srcdir="${demo.webapps}/examples/jsp/plugin/applet"
+           destdir="${demo.webapps}/examples/jsp/plugin/applet"
            debug="${javac.debug}"
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}"
@@ -292,52 +275,9 @@ Other targets:
   </target>
 
   <!-- ==================================================================== -->
-  <target name="testUtil" depends="jars">
-    <property name="classpath" value="${jetty.jar};${servlet.jar}" />
-    <java classname="org.mortbay.util.TestHarness"
-          classpath="${classes}"
-          fork="yes"
-          failonerror="yes"
-          />
+  <target name="test" depends="jars">
+    <ant antfile="${test}/build.xml" inheritAll="true" target="test"/>
   </target>
-
-  <!-- ==================================================================== -->
-  <target name="junit_test" depends="jars">
-    <ant antfile="${test}/build.xml" inheritAll="true" >
-      <property name="java.class.path" value="${java.class.path};${junit.jar}" />                  
-    </ant>
-  </target>
-
-  <!-- ==================================================================== -->
-  <target name="testXML" depends="jars">
-    <property name="classpath" value="${jetty.jar};${servlet.jar}" />
-    <java classname="org.mortbay.xml.TestHarness"
-          fork="yes"
-          failonerror="yes">
-      <classpath>
-        <pathelement location="${classes}" />
-        <pathelement path="${xml.jar}" />
-        <pathelement path="${jaxp.jar}"   />
-      </classpath>
-    </java>
-  </target>
-
-  <!-- ==================================================================== -->
-  <target name="testHTTP" depends="jars">
-    <property name="classpath" value="${jetty.jar};${servlet.jar}" />
-    <java classname="org.mortbay.http.TestHarness"
-          fork="yes"
-          failonerror="yes">
-      <classpath>
-        <pathelement location="${classes}" />
-        <pathelement path="${xml.jar}" />
-        <pathelement path="${jaxp.jar}" />
-      </classpath>
-    </java>
-  </target>
-
-  <!-- ==================================================================== -->
-  <target name="test" depends="testUtil,testXML,testHTTP" />
 
   <!-- ==================================================================== -->
   <target name="all" depends="prepare,jars,webapps,javadoc,test"/>

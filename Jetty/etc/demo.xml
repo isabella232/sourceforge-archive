@@ -61,21 +61,21 @@
 
   <Call name="addWebApplication">
     <Arg>/</Arg>
-    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/root</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/root</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
     <Arg type="boolean">false</Arg> <!-- dont expand war -->
   </Call>
 
   <Call name="addWebApplication">
     <Arg>/jetty/*</Arg>
-    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/jetty</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/jetty</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
     <Arg type="boolean">false</Arg> <!-- dont expand war -->
   </Call>
 
   <Call name="addWebApplication">
     <Arg>/examples/*</Arg>
-    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/examples</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/examples</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
     <Arg type="boolean">false</Arg> <!-- dont expand war -->
   </Call>
