@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-5
+Jetty-5.1.RC0
  + LineInput handles readers with small internal buffer
  + Added LogStream to capture stderr and stdout to logging
  + Fixed many minor issues from J2EE 1.4 TCK testing
@@ -12,7 +12,7 @@ Jetty-5
  + Refactored webapp context configurations
  + Added LifeCycle events and generic container.
  + Upgraded to ant-1.6 for jasper
-
+ + Fixed HTAccessHandler
 
 Jetty-4
  + LineInput handles readers with small internal buffer
