@@ -149,7 +149,7 @@ public class Dispatcher implements RequestDispatcher
 
         // Is this being dispatched to a different context?
         _xContext=
-            httpServletRequest.getContextPath()!=_servletHandler.getHttpContext().getContextPath();
+            servletHttpRequest.getServletHandler()!=_servletHandler;
 
         // wrap the request and response
         DispatcherRequest request = new DispatcherRequest(httpServletRequest);
