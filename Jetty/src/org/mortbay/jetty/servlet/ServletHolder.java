@@ -335,12 +335,7 @@ public class ServletHolder extends Holder
         {
             _servlet=null;
             _config=null;
-            _unavailableEx=e;
-            _unavailable=-1;
-            if (_unavailableEx.getUnavailableSeconds()>0)
-                _unavailable=System.currentTimeMillis()+
-                    1000*_unavailableEx.getUnavailableSeconds();
-            throw _unavailableEx;
+            return makeUnavailable(e);
         }
         catch(ServletException e)
         {
@@ -354,6 +349,15 @@ public class ServletHolder extends Holder
             _config=null;
             throw new ServletException("init",e);
         }    
+    }
+
+    private Servlet makeUnavailable(UnavailableException e) throws UnavailableException {
+        _unavailableEx=e;
+        _unavailable=-1;
+        if (_unavailableEx.getUnavailableSeconds()>0)
+            _unavailable=System.currentTimeMillis()+
+                1000*_unavailableEx.getUnavailableSeconds();
+        throw _unavailableEx;
     }
 
     /* ------------------------------------------------------------ */
@@ -417,7 +421,7 @@ public class ServletHolder extends Holder
         {
             if (_servlets!=null && servlet!=null)
                 stop();
-            throw e;
+            makeUnavailable(e);
         }
         finally
         {
