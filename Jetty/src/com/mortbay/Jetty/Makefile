@@ -30,10 +30,6 @@ install: JettyServlet.class JettyPage.class
 	done
 	cp $(INSTALLROOT)/LICENSE.html $(INSTALLROOT)/webapps/$(WEBAPP)/LICENSE.html
 	cp $(INSTALLROOT)/VERSION.TXT $(INSTALLROOT)/webapps/$(WEBAPP)/versions.txt
-	cp jetty.dtd $(INSTALLROOT)/etc
-
-
-
 
 
 
