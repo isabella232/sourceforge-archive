@@ -339,17 +339,20 @@ public class ServletRequest
         _sessionId=null;
         
         // try cookies first
-        Cookie[] cookies=_httpRequest.getCookies();
-        if (cookies!=null && cookies.length>0)
+        if (_context.getServletHandler().isUsingCookies())
         {
-            for (int i=0;i<cookies.length;i++)
+            Cookie[] cookies=_httpRequest.getCookies();
+            if (cookies!=null && cookies.length>0)
             {
-                if (Context.__SessionId.equals(cookies[i].getName()))
+                for (int i=0;i<cookies.length;i++)
                 {
-                    _sessionId=cookies[i].getValue();
-                    _sessionIdState = __SESSIONID_COOKIE;
-                    Code.debug("Got Session ",_sessionId," from cookie");
-                    break;
+                    if (Context.__SessionId.equals(cookies[i].getName()))
+                    {
+                        _sessionId=cookies[i].getValue();
+                        _sessionIdState = __SESSIONID_COOKIE;
+                        Code.debug("Got Session ",_sessionId," from cookie");
+                        break;
+                    }
                 }
             }
         }

@@ -7,7 +7,7 @@ Jetty3 Versions
    we run out of threads.
  + Patched Jasper to 3.2.3.
  + Added handlerContext.setClassPaths
-
+ + Fixed bug with non cookie sessions.
 
 Jetty-3.1.rc8 - 22 Aug 2001
  + Support WEB-INF/web-jetty.xml configuration extension for webapps
