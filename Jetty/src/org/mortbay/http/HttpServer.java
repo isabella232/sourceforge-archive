@@ -1268,6 +1268,7 @@ public class HttpServer implements LifeCycle
      */
     public void destroy()
     {
+        __servers.remove(this);
         if (isStarted())
             throw new IllegalStateException("Started");
         if (_listeners!=null)
@@ -1318,4 +1319,5 @@ public class HttpServer implements LifeCycle
             _eventListeners.clear();
         _eventListeners=null;
     }
+    
 }

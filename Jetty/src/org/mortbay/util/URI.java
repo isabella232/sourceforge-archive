@@ -126,7 +126,7 @@ public class URI
                   case 2: // Get port & look for path
                       if (c=='/')
                       {
-                          _port=Integer.parseInt(uri.substring(mark,i));
+                          _port=TypeUtil.parseInt(uri,mark,i-mark,10);
                           mark=i;
                           state=3;
                       }
@@ -166,7 +166,7 @@ public class URI
                   _dirty=true;
                   _encodedPath="/";
                   _path=_encodedPath;
-                  _port=Integer.parseInt(uri.substring(mark));
+                  _port=TypeUtil.parseInt(uri,mark,-1,10);
                   break;
               case 3:
                   _dirty=(mark==maxi);
@@ -561,7 +561,7 @@ public class URI
             if (c=='%' && (i+2)<len)
             {
                 noDecode=false;
-                b=(byte)(0xff&Integer.parseInt(path.substring(i+1,i+3),16));
+                b=(byte)(0xff&TypeUtil.parseInt(path,i+1,2,16));
                 i+=2;
             }
             else if (bytes==null)

@@ -20,7 +20,7 @@ class ServletOut extends ServletOutputStream
     {
         _out=out;
     }
-
+    
     /* ------------------------------------------------------------ */
     public void write(int ch)
         throws IOException
@@ -53,6 +53,7 @@ class ServletOut extends ServletOutputStream
     public void close()
         throws IOException
     {
+        super.close();
         _out.close();
     }
     

@@ -31,6 +31,7 @@ import org.mortbay.util.LineInput;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringMap;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.TypeUtil;
 import org.mortbay.util.URI;
 import org.mortbay.util.UrlEncoded;
 
@@ -424,8 +425,7 @@ public class HttpRequest extends HttpMessage
                 if (colon<_host.length())
                 {
                     try{
-                        _port=Integer
-                            .parseInt(_host.substring(colon+1));
+                        _port=TypeUtil.parseInt(_host,colon+1,-1,10);
                     }
                     catch(Exception e)
                     {Code.ignore(e);}

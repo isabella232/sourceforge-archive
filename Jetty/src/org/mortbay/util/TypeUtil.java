@@ -49,4 +49,40 @@ public class TypeUtil
         return Integer.toString(i);
     }
 
+
+    /* ------------------------------------------------------------ */
+    /** Parse an int from a substring.
+     * Negative numbers are not handled.
+     * @param s String
+     * @param offset Offset within string
+     * @param length Length of integer or -1 for remainder of string
+     * @param base base of the integer
+     * @exception NumberFormatException 
+     */
+    public static int parseInt(String s, int offset, int length, int base)
+        throws NumberFormatException
+    {
+        int value=0;
+
+        if (length<0)
+            length=s.length()-offset;
+
+        for (int i=0;i<length;i++)
+        {
+            char c=s.charAt(offset+i);
+            
+            int digit=c-'0';
+            if (digit<0 || digit>=base || digit>=10)
+            {
+                digit=10+c-'A';
+                if (digit<10 || digit>=base)
+                    digit=10+c-'a';
+            }
+            if (digit<0 || digit>=base)
+                throw new NumberFormatException(s.substring(offset,offset+length));
+            value=value*base+digit;
+        }
+        return value;
+    }
+    
 }

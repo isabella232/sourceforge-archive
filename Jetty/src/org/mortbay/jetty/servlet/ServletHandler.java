@@ -886,18 +886,17 @@ public class ServletHandler
         
         try
         {
-            String pathInContext=uriInContext;
             String query=null;
             int q=0;
-            if ((q=pathInContext.indexOf('?'))>0)
+            if ((q=uriInContext.indexOf('?'))>0)
             {
-                pathInContext=uriInContext.substring(0,q);
                 query=uriInContext.substring(q+1);
+                uriInContext=uriInContext.substring(0,q);
             }
 
             return new Dispatcher(ServletHandler.this,
                                   _resourceHandler,
-                                  pathInContext,query);
+                                  uriInContext,query);
         }
         catch(Exception e)
         {

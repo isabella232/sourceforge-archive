@@ -99,41 +99,61 @@ class ServletWriter extends PrintWriter
     
     public void write(int c)
     {
-        written=true;
-        try{out.write(c);}
+        try
+        {
+            if (out==null)
+                throw new IOException("closed");
+            written=true;
+            out.write(c);
+        }
         catch (IOException e){Code.ignore(e);setError();}
     }
     
     public void write(char[] cbuf, int off, int len)
     {
-        written=true;
-        try{out.write(cbuf,off,len);}
+        try
+        {
+            if (out==null)
+                throw new IOException("closed");
+            written=true;
+            out.write(cbuf,off,len);
+        }
         catch (IOException e){Code.ignore(e);setError();}
     }
     
     public void write(char[] cbuf)
     {
-        written=true;
-        try{out.write(cbuf,0,cbuf.length);}
+        try
+        {
+            if (out==null)
+                throw new IOException("closed");
+            written=true;
+            out.write(cbuf,0,cbuf.length);
+        }
         catch (IOException e){Code.ignore(e);setError();}
     }
 
     public void write(String s, int off, int len)
     {
-        written=true;
-        try{out.write(s,off,len);}
+        try
+        {
+            if (out==null)
+                throw new IOException("closed");
+            written=true;
+            out.write(s,off,len);
+        }
         catch (IOException e){Code.ignore(e);setError();}
     }
 
     public void write(String s)
     {
-        written=true;
-        try{out.write(s,0,s.length());}
+        try
+        {
+            if (out==null)
+                throw new IOException("closed");
+            written=true;
+            out.write(s,0,s.length());
+        }
         catch (IOException e){Code.ignore(e);setError();}
     }
 }
-
-
-
-
-

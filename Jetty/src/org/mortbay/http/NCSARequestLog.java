@@ -11,6 +11,7 @@ import org.mortbay.util.RolloverFileOutputStream;
 import org.mortbay.util.DateCache;
 import org.mortbay.util.ByteArrayISO8859Writer;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Locale;
 
@@ -29,8 +30,23 @@ public class NCSARequestLog implements RequestLog
     private boolean _extended;
     private boolean _append;
     private int _retainDays;
-    private RolloverFileOutputStream _fileOut;
+    private OutputStream _fileOut;
+    private boolean _closeFileOut;
     private ByteArrayISO8859Writer _buf=new ByteArrayISO8859Writer();
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor.
+     * @exception IOException
+     */
+    public NCSARequestLog()
+        throws IOException
+    {
+        _logDateCache=new DateCache("dd/MMM/yyyy:HH:mm:ss ZZZ",Locale.US);
+        _logDateCache.setTimeZoneID(TimeZone.getDefault().getID());
+        _extended=true;
+        _append=true;
+        _retainDays=31;
+    }
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -42,13 +58,10 @@ public class NCSARequestLog implements RequestLog
     public NCSARequestLog(String filename)
         throws IOException
     {
-        _filename=filename;
-        _logDateCache=new DateCache("dd/MMM/yyyy:HH:mm:ss ZZZ",Locale.US);
-        _logDateCache.setTimeZoneID(TimeZone.getDefault().getID());
-        _extended=true;
-        _append=true;
-        _retainDays=31;
+        this();
+        setFilename(filename);
     }
+
 
     /* ------------------------------------------------------------ */
     public void setFilename(String filename)
@@ -71,9 +84,9 @@ public class NCSARequestLog implements RequestLog
     /* ------------------------------------------------------------ */
     public String getDatedFilename()
     {
-        if (_fileOut==null)
-            return null;
-        return _fileOut.getDatedFilename();
+        if (_fileOut instanceof RolloverFileOutputStream)
+            return ((RolloverFileOutputStream)_fileOut).getDatedFilename();
+        return null;
     }
     
     /* ------------------------------------------------------------ */
@@ -142,7 +155,13 @@ public class NCSARequestLog implements RequestLog
     public void start()
         throws Exception
     {
-        _fileOut=new RolloverFileOutputStream(_filename,_append,_retainDays);
+        if (_filename != null)
+        {
+            _fileOut=new RolloverFileOutputStream(_filename,_append,_retainDays);
+            _closeFileOut=true;
+        }
+        else
+            _fileOut=System.err;
     }
 
     /* ------------------------------------------------------------ */
@@ -154,9 +173,10 @@ public class NCSARequestLog implements RequestLog
     /* ------------------------------------------------------------ */
     public void stop()
     {
-        if (_fileOut!=null)
+        if (_fileOut!=null && _closeFileOut)
             try{_fileOut.close();}catch(IOException e){Code.ignore(e);}
         _fileOut=null;
+        _closeFileOut=false;
     }
     
     /* ------------------------------------------------------------ */

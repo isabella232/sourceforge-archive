@@ -61,7 +61,7 @@ public class Version
 
     static
     {
-        System.err.println(__notice);
+        // System.err.println(__notice);
     }
     
 }
