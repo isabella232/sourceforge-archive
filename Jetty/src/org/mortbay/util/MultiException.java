@@ -5,6 +5,8 @@
 // ========================================================================
 
 package org.mortbay.util;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.List;
 
 
@@ -107,6 +109,28 @@ public class MultiException extends Exception
         for (int i=0;i<LazyList.size(nested);i++)
             ((Throwable)LazyList.get(nested,i)).printStackTrace();
     }
-    
-    
+   
+
+    /* ------------------------------------------------------------------------------- */
+    /**
+     * @see java.lang.Throwable#printStackTrace(java.io.PrintStream)
+     */
+    public void printStackTrace(PrintStream out)
+    {
+        super.printStackTrace(out);
+        for (int i=0;i<LazyList.size(nested);i++)
+            ((Throwable)LazyList.get(nested,i)).printStackTrace(out);
+    }
+
+    /* ------------------------------------------------------------------------------- */
+    /**
+     * @see java.lang.Throwable#printStackTrace(java.io.PrintWriter)
+     */
+    public void printStackTrace(PrintWriter out)
+    {
+        super.printStackTrace(out);
+        for (int i=0;i<LazyList.size(nested);i++)
+            ((Throwable)LazyList.get(nested,i)).printStackTrace(out);
+    }
+
 }

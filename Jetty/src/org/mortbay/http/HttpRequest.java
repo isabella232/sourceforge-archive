@@ -829,10 +829,6 @@ public class HttpRequest extends HttpMessage
                     {
                         try
                         {
-                            // Read the content
-                            ByteArrayOutputStream2 bout =
-                                new ByteArrayOutputStream2(content_length>0?content_length:4096);
-                            InputStream in = getInputStream();
                             int max=content_length;
                             if (max<0)
                                 max=__maxFormContentSize;
@@ -841,6 +837,11 @@ public class HttpRequest extends HttpMessage
                                 log.warn("Form content truncated");
                                 max=__maxFormContentSize;
                             }
+
+                            // Read the content
+                            ByteArrayOutputStream2 bout =
+                                new ByteArrayOutputStream2(max>0?max:4096);
+                            InputStream in = getInputStream();
 
                             // Copy to a byte array.
                             // TODO - this is very inefficient and we could
