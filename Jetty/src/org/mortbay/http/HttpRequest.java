@@ -894,19 +894,27 @@ public class HttpRequest extends HttpMessage
             {
                 try
                 {
-                    String c = enum.nextElement().toString().trim();
-                    int e = c.indexOf('=');
+                    String c = enum.nextElement().toString();
                     String n;
                     String v;
-                    if (e>0)
+                    if (c.startsWith("JSESSION_ID="))
                     {
-                        n=c.substring(0,e).trim();
-                        v=c.substring(e+1).trim();
+                        n="JSESSION_ID";
+                        v=c.substring(12);    
                     }
                     else
                     {
-                        n=c.trim();
-                        v="";
+                        int e = c.indexOf('=');
+                        if (e>0)
+                        {
+                            n=c.substring(0,e);
+                            v=c.substring(e+1);
+                        }
+                        else
+                        {
+                            n=c;
+                            v="";
+                        }
                     }
                     
                     // Handle quoted values
@@ -924,16 +932,16 @@ public class HttpRequest extends HttpMessage
                                 version=Integer.parseInt
                                     (StringUtil.unquote(v.substring(0,comma)));
                                 v=v.substring(comma+1);
-                                e=v.indexOf('=');
+                                int e=v.indexOf('=');
                                 if (e>0)
                                 {
-                                    n=v.substring(0,e).trim();
-                                    v=v.substring(e+1).trim();
+                                    n=v.substring(0,e);
+                                    v=v.substring(e+1);
                                     v=StringUtil.unquote(v);
                                 }
                                 else
                                 {
-                                    n=v.trim();
+                                    n=v;
                                     v="";
                                 }
                             }

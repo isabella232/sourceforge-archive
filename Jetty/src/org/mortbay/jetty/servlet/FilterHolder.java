@@ -44,7 +44,7 @@ public class FilterHolder
     
     /* ------------------------------------------------------------ */
     private PathMap _pathSpecs;
-    private int _applyTo;
+    private int _appliesTo;
 
     private transient Filter _filter;
     private transient Config _config;
@@ -67,18 +67,18 @@ public class FilterHolder
     /** Add a type that this filter applies to.
      * @param type Of __REQUEST, __FORWARD, __INCLUDE or __ERROR
      */
-    public void applyTo(int type)
+    public void addAppliesTo(int type)
     {
-        _applyTo|=type;
+        _appliesTo|=type;
     }
 
     /* ------------------------------------------------------------ */
     /** Add a type that this filter applies to.
      * @param type "REQUEST", "FORWARD", "INCLUDE" or "ERROR"
      */
-    public void applyTo(String type)
+    public void addAppliesTo(String type)
     {
-        _applyTo|=type(type);
+        _appliesTo|=type(type);
     }
 
     
@@ -106,7 +106,7 @@ public class FilterHolder
      */
     public boolean appliesTo(int type)
     {
-        return(_applyTo&type)!=0 ;
+        return  (_appliesTo&type)!=0 || _appliesTo==0&&type==__REQUEST ;
     }
     
     /* ------------------------------------------------------------ */
@@ -118,7 +118,7 @@ public class FilterHolder
     public boolean appliesTo(String path, int type)
     {
         return
-            (_applyTo&type)!=0 &&
+            ((_appliesTo&type)!=0 || _appliesTo==0&&type==__REQUEST ) &&
             _pathSpecs!=null &&
             _pathSpecs.getMatch(path)!=null;
     }

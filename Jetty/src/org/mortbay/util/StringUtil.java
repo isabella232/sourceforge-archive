@@ -225,4 +225,15 @@ public class StringUtil
         return s;
     }
     
+    /* ------------------------------------------------------------ */
+    public static boolean equals(String s,char[] buf, int offset, int length)
+    {
+        if (s.length()!=length)
+            return false;
+        for (int i=0;i<length;i++)
+            if (buf[offset+i]!=s.charAt(i))
+                return false;
+        return true;
+    }
+    
 }

@@ -350,11 +350,14 @@ public class TestHarness
             "D3: Fri Dec 31 23:59:59 1999" + CRLF +
             "D4: Mon Jan 1 2000 00:00:01" + CRLF +
             "D5: Tue Feb 29 2000 12:00:00" + CRLF +
-            "C1: Continuation Value" + CRLF +
+            "C1: VC1" + CRLF +
             "L1: V1" + CRLF +
             "L1: V2" + CRLF +
             "L1: V,3" + CRLF +
             "L2: V1, V2, 'V,3'" + CRLF +
+            "U1: VU1" + CRLF +
+            "U2: VU2" + CRLF +
+            "U1: VU2" + CRLF +
             CRLF;
 
         ByteArrayInputStream bais = new ByteArrayInputStream(h1.getBytes());
@@ -366,7 +369,7 @@ public class TestHarness
         {    
             HttpFields f = new HttpFields();
             f.read(lis);
-
+            
             byte[] b = "xxxxxxxxxxxcl".getBytes();
             t.checkEquals(lis.read(b),13,"Read other");
             t.checkEquals(new String(b,0,11),
@@ -377,7 +380,18 @@ public class TestHarness
             f.put(HttpFields.__ContentType,"pqy");
             t.checkEquals(f.get(HttpFields.__ContentType),
                           "pqy","setHeader");
-        
+            
+            f.put("U1","VU1");
+            t.checkEquals(f.get("U1"),"VU1","put1");
+            f.remove("C1");
+            t.checkEquals(f.get("C1"),null,"remove");
+            f.put("U2","VU2");
+            t.checkEquals(f.get("U2"),"VU2","put2");
+            f.add("C1","VC1");
+            t.checkEquals(f.get("C1"),"VC1","add2");
+            f.add("U1","VU2");
+            t.checkEquals(f.get("U1"),"VU1","add2");
+            
             t.checkEquals(f.getIntField("I1"),42,"getIntHeader");
             f.putIntField("I1",-33);
             t.checkEquals(f.getIntField("I1"),-33,"setIntHeader");
@@ -432,6 +446,9 @@ public class TestHarness
             t.checkEquals(params.get("p3"),null,"p3=null");
             t.check(params.containsKey("p3"),"p3");
             t.checkEquals(params.get("p4"),"v4=;","p4=v4=;");
+
+
+            
 
         }
         catch(Exception e)

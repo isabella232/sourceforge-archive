@@ -250,7 +250,6 @@ public class HttpFields
         new FieldInfo(__ETag,true,false);
         new FieldInfo(__RetryAfter,true,false);
 
-        __values.put(__KeepAlive,__KeepAlive);
         
     }
     
@@ -283,6 +282,21 @@ public class HttpFields
     public final static String __WwwFormUrlEncode =
         "application/x-www-form-urlencoded";
     public static final String __ExpectContinue="100-continue";
+
+    static
+    {
+        __values.put(__KeepAlive,__KeepAlive);
+        __values.put(__Chunked,__Chunked);
+        __values.put(__Close,__Close);
+        __values.put(__TextHtml,__TextHtml);
+        __values.put(__MessageHttp,__MessageHttp);
+        __values.put(__WwwFormUrlEncode,__WwwFormUrlEncode);
+        __values.put(__ExpectContinue,__ExpectContinue);
+        __values.put("max-age=0","max-age=0");
+        __values.put("no-cache","no-cache");
+        __values.put("300","300");
+        __values.put("ISO-8859-1, utf-8;q=0.66, *;q=0.66","ISO-8859-1, utf-8;q=0.66, *;q=0.66");
+    }
     
     /* ------------------------------------------------------------ */
     public final static String __separators = ", \t";    
@@ -354,6 +368,7 @@ public class HttpFields
         String _value;
         Field _next;
         Field _prev;
+        boolean _valid;
 
         /* ------------------------------------------------------------ */
         Field(FieldInfo info, String value)
@@ -362,38 +377,77 @@ public class HttpFields
             _value=value;
             _next=null;
             _prev=null;
+            _valid=true;
         }
         
+        /* ------------------------------------------------------------ */
+        Field(FieldInfo info, char[] buf, int offset, int length)
+        {
+            Map.Entry valueEntry=__values.getEntry(buf,offset,length);
+            String value=null;
+            if (valueEntry!=null)
+                value=(String)valueEntry.getKey();
+            else
+                value=new String(buf,offset,length);
+            
+            _info=info;
+            _value=value;
+            _next=null;
+            _prev=null;
+            _valid=true;
+        }
         
         /* ------------------------------------------------------------ */
         public boolean equals(Object o)
         {
-            return (o instanceof Field) && o==this;
+            return (o instanceof Field) && o==this && _valid;
         }
 
         /* ------------------------------------------------------------ */
         void clear()
         {
+            _valid=false;
+        }
+        
+        /* ------------------------------------------------------------ */
+        void destroy()
+        {
             _info=null;
             _value=null;
             _next=null;
             _prev=null;
+            _valid=false;
         }
         
         /* ------------------------------------------------------------ */
-        void reset(FieldInfo info, String value)
+        void reset(String value)
         {
-            _info=info;
             _value=value;
-            _next=null;
-            _prev=null;
+            _valid=true;
         }
         
         /* ------------------------------------------------------------ */
-        public void write(Writer writer)
+        void reset(char[] buf, int offset, int length)
+        {  
+            _valid=true;
+            if (!StringUtil.equals(_value,buf,offset,length))
+            {
+                Map.Entry valueEntry=__values.getEntry(buf,offset,length);
+                String value=null;
+                if (valueEntry!=null)
+                    value=(String)valueEntry.getKey();
+                else
+                    value=new String(buf,offset,length);
+                _value=value;
+            }
+        }
+
+        
+        /* ------------------------------------------------------------ */
+        void write(Writer writer)
             throws IOException
         {
-            if (_info==null)
+            if (_info==null || !_valid)
                 return;
             if (_info._inlineValues)
             {
@@ -422,17 +476,19 @@ public class HttpFields
         }
 
         /* ------------------------------------------------------------ */
-        public String getDisplayName()
+        String getDisplayName()
         {
-            return _info==null?"NULLED":_info._name;
+            return _valid?_info._name:"INVALID";
         }
         
         /* ------------------------------------------------------------ */
         public String toString()
         {
-            return (_prev==null?"[":("["+_prev.getDisplayName()+"<- "))+
-                getDisplayName()+": "+_value+
-                (_next==null?"]":(" ->"+_next.getDisplayName())+"]");
+            return (_valid?"(":"[")+
+                (_prev==null?"":"<-")+
+                getDisplayName()+"="+_value+
+                (_next==null?"":"->")+
+                (_valid?")":"]");
         }
     }
     
@@ -463,6 +519,7 @@ public class HttpFields
     
     /* -------------------------------------------------------------- */
     private ArrayList _fields=new ArrayList(15);
+    private int _size;
     private int[] _index=new int[__maxCacheSize];
 
     /* ------------------------------------------------------------ */
@@ -473,10 +530,11 @@ public class HttpFields
         Arrays.fill(_index,-1);
     }
 
+    
     /* ------------------------------------------------------------ */
     public int size()
     {
-        return _fields.size();
+        return _size;
     }
     
     /* -------------------------------------------------------------- */
@@ -489,18 +547,18 @@ public class HttpFields
         return new Enumeration()
             {
                 int i=0;
-                Field f=null;
+                Field field=null;
 
                 public boolean hasMoreElements()
                 {
-                    if (f!=null)
+                    if (field!=null)
                         return true;
                     while (i<_fields.size())
                     {
-                        Field t=(Field)_fields.get(i++);
-                        if (t!=null && t._info!=null && t._prev==null)
+                        Field f=(Field)_fields.get(i++);
+                        if (f!=null && f._valid && f._prev==null)
                         {
-                            f=t;
+                            field=f;
                             return true;
                         }
                     }
@@ -510,10 +568,10 @@ public class HttpFields
                 public Object nextElement()
                     throws NoSuchElementException
                 {
-                    if (f!=null || hasMoreElements())
+                    if (field!=null || hasMoreElements())
                     {
-                        String n=f._info._name;
-                        f=null;
+                        String n=field._info._name;
+                        field=null;
                         return n;
                     }
                     throw new NoSuchElementException();
@@ -525,46 +583,40 @@ public class HttpFields
     Field getField(String name)
     {       
         FieldInfo info=getFieldInfo(name);
-        return getField(info);
+        return getField(info,true);
     }
         
     /* ------------------------------------------------------------ */
-    Field getField(FieldInfo info)
+    Field getField(FieldInfo info, boolean getValid)
     {
         int hi=info.hashCode();
         
         if (hi<_index.length)
         {
             if (_index[hi]>=0)
-                return (Field)(_fields.get(_index[hi]));
+            {
+                Field field=(Field)(_fields.get(_index[hi]));
+                
+                return (field!=null && (!getValid||field._valid))?field:null;
+            }
         }
         else
         {    
             for (int i=0;i<_fields.size();i++)
             {
-                Field f=(Field)_fields.get(i);
-                if (info.equals(f._info))
-                    return f;
+                Field field=(Field)_fields.get(i);
+                if (info.equals(field._info) && (!getValid||field._valid))
+                    return field;
             }
         }
         return null;
-    }
+    }    
     
     /* ------------------------------------------------------------ */
     public boolean containsKey(String name)
     {
         FieldInfo info=getFieldInfo(name);
-        int hi=info.hashCode();
-        if (hi<_index.length)
-            return _index[hi]>=0;
-
-        for (int i=0;i<_fields.size();i++)
-        {
-            Field f=(Field)_fields.get(i);
-            if (info.equals(f._info))
-                return true;
-        }
-        return false;
+        return getField(info,true)!=null;
     }
     
     /* -------------------------------------------------------------- */
@@ -576,7 +628,7 @@ public class HttpFields
     public String get(String name)
     {
         FieldInfo info=getFieldInfo(name);
-        Field field=getField(info);
+        Field field=getField(info,true);
         if (field!=null)
             return field._value;
         return null;
@@ -590,7 +642,7 @@ public class HttpFields
     public Enumeration getValues(String name)
     {
         FieldInfo info=getFieldInfo(name);
-        final Field field=getField(info);
+        final Field field=getField(info,true);
 
         if (field!=null)
         {            
@@ -600,6 +652,8 @@ public class HttpFields
                     
                     public boolean hasMoreElements()
                     {
+                        while (f!=null && !f._valid)
+                            f=f._next;
                         return f!=null;
                     }
                         
@@ -609,7 +663,7 @@ public class HttpFields
                         if (f==null)
                             throw new NoSuchElementException();
                         Field n=f;
-                        f=f._next;
+                        do f=f._next; while (f!=null && !f._valid);
                         return n._value;
                     }
                 };
@@ -661,7 +715,6 @@ public class HttpFields
             };
     }
     
-        
     /* -------------------------------------------------------------- */
     /** Set a field.
      * @param name the name of the field
@@ -673,21 +726,18 @@ public class HttpFields
             return remove(name);
         
         FieldInfo info=getFieldInfo(name);
-        Field field=getField(info);
+        Field field=getField(info,false);
         // Look for value to replace.
         if (field!=null)
         {
-            String old=field._value;
-            field._value=value;
+            String old=field._valid?field._value:null;
+            field.reset(value);
 
-            Field last=field;
-            field=last._next;
-            last._next=null;
+            field=field._next;
             while(field!=null)
             {
-                last=field;
+                field.clear();
                 field=field._next;
-                last.clear();
             }
             return old;    
         }
@@ -703,76 +753,39 @@ public class HttpFields
         }
     }
     
-
+        
     /* -------------------------------------------------------------- */
-    /** Set a multi value field.
-     * If the field is allowed to have multiple values.
+    /** Set a field.
      * @param name the name of the field
-     * @param value the list of values of the field. If null the field is cleared.
+     * @param value the value of the field. If null the field is cleared.
      */
-    public void put(String name,List value)
+    public void put(String name,List list)
     {
-        FieldInfo info=getFieldInfo(name);
-        if (info._singleValued)
-            throw new IllegalArgumentException("Field "+name+" must be single valued");
-        Field field = getField(info);        
-        if (field!=null)
+        if (list==null || list.size()==0)
         {
-            while(field!=null)
-            {
-                Field last=field;
-                field=field._next;
-                last.clear();
-            }
+            remove(name);
+            return;
         }
         
-        Field last=null;
-        Iterator iter = value.iterator();
-        while (iter.hasNext())
-        {
-            field=new Field(info,iter.next().toString());
-            if (last==null)
+        Object v=list.get(0);
+        if (v!=null)
+            put(name,v.toString());
+        else
+            remove(name);
+        
+        if (list.size()>1)
+        {    
+            Iterator iter = list.iterator();
+            iter.next();
+            while(iter.hasNext())
             {
-                int hi = info.hashCode();
-                if (hi<_index.length)
-                    _index[hi]=_fields.size();
-            }
-            else
-            {
-                field._prev=last;
-                last._next=field;
-            }
-            _fields.add(field);
-            last=field;
-        }        
-    }
-
-
-    /* ------------------------------------------------------------ */
-    /** Add fields from another HttpFields instance.
-     * Single valued fields are replaced, while all others are added.
-     * @param fields 
-     */
-    public void add(HttpFields fields)
-    {
-        if (fields==null)
-            return;
-
-        Enumeration enum = fields.getFieldNames();
-        while( enum.hasMoreElements() )
-        {
-            String name = (String)enum.nextElement();
-            FieldInfo info=getFieldInfo(name);
-            if( info._singleValued ) 
-                put(name,fields.get(name));
-            else
-            {
-                Enumeration values = fields.getValues(name);
-                while(values.hasMoreElements())
-                    add(name,(String)values.nextElement());
+                v=iter.next();
+                if (v!=null)
+                    add(name,v.toString());
             }
         }
     }
+
     
     /* -------------------------------------------------------------- */
     /** Add to or set a field.
@@ -790,26 +803,38 @@ public class HttpFields
             throw new IllegalArgumentException("null value");
         
         FieldInfo info=getFieldInfo(name);
-        Field last=getField(info);
-        if (last!=null)
+        Field field=getField(info,false);
+        Field last=null;
+        if (field!=null)
         {
-            if (info._singleValued)
-                throw new IllegalArgumentException("Field "+name+" must be single valued");            
-            while(last._next!=null)
-                last=last._next;
+            while(field!=null && field._valid)
+            {
+                if (info._singleValued)
+                    throw new IllegalArgumentException("Field "+
+                                                       name+
+                                                       " must be single valued");
+                last=field;
+                field=field._next;
+            }
         }
-        else if (info.hashCode()<_index.length)
-            _index[info.hashCode()]=_fields.size();
-            
-        // create the field
-        Field field=new Field(info,value);
-        _fields.add(field);
-        
-        // look for chain to add too
-        if(last!=null)
+
+        if (field!=null)    
+            field.reset(value);
+        else
         {
-            field._prev=last;
-            last._next=field;    
+            // create the field
+            field=new Field(info,value);
+            
+            // look for chain to add too
+            if(last!=null)
+            {
+                field._prev=last;
+                last._next=field;    
+            }
+            else if (info.hashCode()<_index.length)
+                _index[info.hashCode()]=_fields.size();
+            
+            _fields.add(field);
         }
     }
     
@@ -821,23 +846,15 @@ public class HttpFields
     {
         String old=null;
         FieldInfo info=getFieldInfo(name);
-        int hi=info.hashCode();
-        for (int i=0;i<_fields.size();i++)
+        Field field=getField(info,true);
+
+        if (field!=null)
         {
-            Field field=(Field)_fields.get(i);
-            if (field!=null && info.equals(field._info))
+            old=field._value;
+            while(field!=null)
             {
-                old=field._value;
-                _fields.set(i,null);
-                if (hi<_index.length)
-                    _index[hi]=-1;
-                
-                while(field!=null)
-                {
-                    Field last=field;
-                    field=field._next;
-                    last.clear();
-                }
+                field.clear();
+                field=field._next;
             }
         }
         
@@ -969,6 +986,7 @@ public class HttpFields
         org.mortbay.util.LineInput.LineBuffer line_buffer;
         synchronized(in)
         {
+            line:
             while ((line_buffer=in.readLineBuffer())!=null)
             {
                 // check space in the lowercase buffer
@@ -1041,56 +1059,41 @@ public class HttpFields
 
                 // create the field.
                 FieldInfo info = getFieldInfo(buf,name_i,name_l);
-                Map.Entry valueEntry=__values.getEntry(buf,i1,i2-i1+1);
-                String value=null;
-                if (valueEntry!=null)
-                    value=(String)valueEntry.getKey();
-                else
+                Field field=getField(info,false);
+                last=null;
+                if (field!=null)
                 {
-                    value=new String(buf,i1,i2-i1+1);
-
-                    if (__values.size()<__maxCacheSize &&
-                        (info._name==__UserAgent ||
-                         info._name==__Accept ||
-                         info._name==__AcceptEncoding ||
-                         info._name==__AcceptCharset))
+                    while(field!=null && field._valid)
                     {
-                        synchronized(__values)
+                        if (info._singleValued)
                         {
-                            __values.put(value,value);
+                            Code.debug("Ignored duplicate single value header: ",field);
+                            continue line;
                         }
+                        last=field;
+                        field=field._next;
                     }
                 }
                 
-                
-                Field field=new Field(info,value);
-                Field link=getField(info);
-                if (link==null)
-                {
-                    // new field so index if we can
-                    int hi =info.hashCode();
-                    if (hi<_index.length)
-                        _index[hi]=_fields.size();                        
-                }
+                if (field!=null)    
+                    field.reset(buf,i1,i2-i1+1);
                 else
                 {
-                    // existing field, check if we handle duplicates
-                    if (info._singleValued)
+                    // create the field
+                    field=new Field(info,buf,i1,i2-i1+1);
+                    
+                    // look for chain to add too
+                    if(last!=null)
                     {
-                        Code.debug("Ignored duplicate single value header: ",field);
-                        continue;
+                        field._prev=last;
+                        last._next=field; 
+                          
                     }
-                    else
-                    {
-                        // yes so link it in
-                        while(link._next!=null)
-                            link=link._next;
-                        field._prev=link;
-                        link._next=field;
-                    }
+                    else if (info.hashCode()<_index.length)
+                        _index[info.hashCode()]=_fields.size(); 
+                    _fields.add(field);
                 }
                 
-                _fields.add(field);
                 last=field;
             }
         }
@@ -1132,7 +1135,6 @@ public class HttpFields
 
     /* ------------------------------------------------------------ */
     /** Clear the header.
-     * Remove all entries.
      */
     public void clear()
     {        
@@ -1142,8 +1144,6 @@ public class HttpFields
             if (field!=null)
                 field.clear();
         }
-        _fields.clear();
-        Arrays.fill(_index,-1);
     }
     
     /* ------------------------------------------------------------ */
@@ -1151,8 +1151,13 @@ public class HttpFields
      * Help the garbage collector by null everything that we can.
      */
     public void destroy()
-    {
-        clear();
+    {   
+        for (int i=_fields.size();i-->0;)
+        {
+            Field field=(Field)_fields.get(i);
+            if (field!=null)
+                field.destroy();
+        }
         _fields=null;
     }
     
