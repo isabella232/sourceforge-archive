@@ -95,40 +95,9 @@ public class ProxyHandler extends AbstractHttpHandler
         // Is this a CONNECT request?
         if (HttpRequest.__CONNECT.equalsIgnoreCase(request.getMethod()))
         {
-            try
-            {
-                Code.debug("CONNECT: ",uri);
-                InetAddrPort addrPort=new InetAddrPort(uri.toString());
-
-                Integer port = new Integer(addrPort.getPort());
-                if (!_allowedConnectPorts.contains(port))
-                    response.setStatus(HttpResponse.__403_Forbidden);
-                else
-                {
-                    Socket socket = new Socket(addrPort.getInetAddress(),addrPort.getPort());
-                    request.getHttpConnection().setHttpTunnel(new HttpTunnel(socket));
-                    response.setStatus(HttpResponse.__200_OK);
-                }
-            }
-            catch (Exception e)
-            {
-                Code.ignore(e);
-                response.setStatus(HttpResponse.__405_Method_Not_Allowed);
-            }
-            finally
-            {
-                response.setContentLength(0);
-                request.setHandled(true);
-            }
-            
+            handleConnect(pathInContext,pathParams,request,response);
             return;
         }
-        
-        
-        // Is this a proxy request?
-        String scheme=uri.getScheme();
-        if (scheme==null || !_ProxySchemes.containsKey(scheme))
-            return;
 
         // Do we proxy this?
         if (!isProxied(uri))
@@ -178,6 +147,9 @@ public class ProxyHandler extends AbstractHttpHandler
                 (cache_control.indexOf("no-cache")>=0 ||
                  cache_control.indexOf("no-store")>=0))
                 connection.setUseCaches(false);
+
+            // customize Connection
+            customizeConnection(pathInContext,pathParams,request,connection);
             
             try
             {    
@@ -249,8 +221,66 @@ public class ProxyHandler extends AbstractHttpHandler
         
     }
     
+    /* ------------------------------------------------------------ */
+    public void handleConnect(String pathInContext,
+                              String pathParams,
+                              HttpRequest request,
+                              HttpResponse response)
+        throws HttpException, IOException
+    {
+        URI uri = request.getURI();
+        
+        try
+        {
+            Code.debug("CONNECT: ",uri);
+            InetAddrPort addrPort=new InetAddrPort(uri.toString());
+            
+            Integer port = new Integer(addrPort.getPort());
+            if (!_allowedConnectPorts.contains(port))
+                response.setStatus(HttpResponse.__403_Forbidden);
+            else
+            {
+                Socket socket = new Socket(addrPort.getInetAddress(),addrPort.getPort());
+                request.getHttpConnection().setHttpTunnel(new HttpTunnel(socket));
+                response.setStatus(HttpResponse.__200_OK);
+            }
+        }
+        catch (Exception e)
+        {
+            Code.ignore(e);
+            response.setStatus(HttpResponse.__405_Method_Not_Allowed);
+        }
+        finally
+        {
+            response.setContentLength(0);
+            request.setHandled(true);
+        }    
+    }
+    
+        
+    /* ------------------------------------------------------------ */
+    /** Customize proxy connection.
+     * Method to allow derived handlers to customize the connection.
+     */
+    protected void customizeConnection(String pathInContext,
+                                       String pathParams,
+                                       HttpRequest request,
+                                       URLConnection connection)
+        throws IOException
+    {
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /** Is URL Proxied.
+     * Method to allow derived handlers to select which URIs are proxied.
+     * @return Default implementation returns true if the URI has a schema
+     * and it is in the _ProxySchemes map.
+     */
     protected boolean isProxied(URI uri)
     {
-        return true;
+        // Is this a proxy request?
+        String scheme=uri.getScheme();
+        return  (scheme!=null && _ProxySchemes.containsKey(scheme));
     }    
 }
