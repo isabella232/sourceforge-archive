@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Worked around JVM1.3 bug for JSPs
+
 Jetty-4.2.0rc1 - 2 November 2002
  + Support default mime mapping defined by *
  + Recycling of HttpFields class.
