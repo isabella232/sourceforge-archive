@@ -727,7 +727,7 @@ public class HandlerContext implements LifeCycle
     /* ------------------------------------------------------------ */
     /** Get the context SecurityHandler.
      * Conveniance method. If no SecurityHandler exists, a new one is added to
-     * the context.
+     * the context at position 0.
      * @return SecurityHandler
      */
     public SecurityHandler getSecurityHandler()
@@ -737,7 +737,7 @@ public class HandlerContext implements LifeCycle
         if (securityHandler==null)
         {
             securityHandler=new SecurityHandler();
-            addHandler(securityHandler);
+            addHandler(0,securityHandler);
         }
         return securityHandler;
     }

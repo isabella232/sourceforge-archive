@@ -2,6 +2,8 @@ Jetty Versions
 --------------
 
 Jetty-3.0.0 - 
+ + Jetty.Server catches init exceptions per server
+ + getSecurityHandler creates handler at position 0.
  + SysV unix init script
  + Improved exit admin handling
  + Change PathMap handling of /* to give precedence over suffix mapping.

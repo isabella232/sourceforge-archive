@@ -94,14 +94,16 @@ public class Server extends HttpServer
             arg=dftConfig;
         }
         
-        try
+        for (int i=0;i<arg.length;i++)
         {
-            for (int i=0;i<arg.length;i++)
+            try
+            {
                 new Server(arg[i]).start();
-        }
-        catch(Exception e)
-        {
-            Code.warning(e);
+            }
+            catch(Exception e)
+            {
+                Code.warning(e);
+            }
         }
     }
 }
