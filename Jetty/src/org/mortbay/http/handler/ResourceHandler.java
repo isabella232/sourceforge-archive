@@ -62,6 +62,7 @@ public class ResourceHandler extends NullHandler
     private Resource _baseResource=null;
     private boolean _handleGeneralOptionsQuery=true;
     private boolean _acceptRanges=true;
+    private int _welcomeRedirectionIndex=0;
     
     /* ------------------------------------------------------------ */
     List _indexFiles =new ArrayList(4);
@@ -145,7 +146,17 @@ public class ResourceHandler extends NullHandler
             Code.warning("Invalid index file: "+indexFile);
         _indexFiles.add(indexFile);
     }
- 
+
+    /* ------------------------------------------------------------ */
+    /** Set WelcomeIndex.
+     * The index of the handler to redirect welcome requests to.
+     * Needed to avoid double filtering of welcome files. Temp hack!
+     */
+    public void setWelcomeRedirectionIndex(int i)
+    {
+        _welcomeRedirectionIndex=i;
+    }
+    
     /* ------------------------------------------------------------ */
     public int getMaxCachedFiles()
     {
@@ -372,8 +383,9 @@ public class ResourceHandler extends NullHandler
                         String ipath=URI.addPaths(pathInContext,(String)_indexFiles.get(i));
                         URI uri=request.getURI();
                         uri.setPath(URI.addPaths(uri.getPath(),(String)_indexFiles.get(i)));
-                        
-                        getHttpContext().handle(0,ipath,pathParams,request,response);
+
+                        getHttpContext().handle(_welcomeRedirectionIndex,
+                                                ipath,pathParams,request,response);
                         return;
                     }
                 }

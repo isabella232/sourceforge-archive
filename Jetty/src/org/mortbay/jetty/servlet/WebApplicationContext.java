@@ -281,6 +281,11 @@ public class WebApplicationContext extends ServletHttpContext
         else
             removeHttpHandler(_notFoundHandler);
         addHttpHandler(_notFoundHandler);
+
+        // Handle welcome redirection index
+        if (_filterHandler!=null && _resourceHandler!=null)
+            _resourceHandler.setWelcomeRedirectionIndex
+                (getHttpHandlerIndex(_filterHandler)+1);
         
         // Do the default configuration
         try

@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
 Jetty-4.0.1RC1 - 
+ + Fixed double filtering of welcome files.
  + Fixed FORM authentication auth of login page bug.
  + Fixed setTempDirectory creation bug
  + Avoid flushes during RequestDispatcher.includes
