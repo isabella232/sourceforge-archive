@@ -422,6 +422,9 @@ public class XmlConfiguration
      * names and number of arguments.
      * Any object returned from the call is passed to the configure
      * method to consume the remaining elements.
+     * Note that if this is a static call we consider only methods
+     * declared directly in the given class. i.e. we ignore any static
+     * methods in superclasses.
      * @param obj 
      * @param node 
      * @return 
@@ -478,6 +481,8 @@ public class XmlConfiguration
                 continue;
             if (Modifier.isStatic(methods[c].getModifiers())!=(obj==null))
                 continue;
+	    if ((obj == null) && methods[c].getDeclaringClass()!=oClass)
+		continue;
             
             Object n=null;
             boolean called=false;
