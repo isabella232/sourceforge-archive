@@ -27,6 +27,7 @@ release     - Cleanup for release
 
 -->
 <project name="Jetty3 HTTP Server" default="webapp" basedir=".">
+  <property environment="env"/>
   <property name="src"            value="${basedir}/src" />
   <property name="etc"            value="${basedir}/etc" />
   <property name="lib"            value="${basedir}/lib"/>
@@ -193,7 +194,7 @@ release     - Cleanup for release
 
   <target name="demo" depends="webapp" >
     <java classname="com.mortbay.Jetty.Server"
-          classpath="${classpath}"
+          classpath="${env.CLASSPATH}:${classpath}"
           fork="yes"
           failonerror="yes"
           >

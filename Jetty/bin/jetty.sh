@@ -266,17 +266,6 @@ fi
 
 
 #####################################################
-# Check if the admin servlet was added. 
-# Add it if not. 
-# It will be needed to stop jetty cleanly.
-#####################################################
-HAS_ADMIN=`cat $CONFIGS | grep "admin.xml"`
-if [ -z "$HAS_ADMIN" ]  
-then
-  CONFIGS="${CONFIGS} ${JETTY_HOME}/etc/admin.xml"
-fi
-
-#####################################################
 # Check where logs should go.
 #####################################################
 if [ -z "$JETTY_LOG" ] 
