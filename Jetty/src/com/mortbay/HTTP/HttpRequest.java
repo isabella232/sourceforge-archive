@@ -116,8 +116,14 @@ public class HttpRequest extends HttpMessage
         LineInput line_input = (LineInput)in.getRawStream();
         
         // Get start line
-        com.mortbay.Util.LineInput$LineBuffer line_buffer
-            = line_input.readLineBuffer();
+        com.mortbay.Util.LineInput$LineBuffer line_buffer;
+
+        do
+        {
+            line_buffer=line_input.readLineBuffer();
+        }
+        while(line_buffer!=null && line_buffer.size==0);
+        
         
         if (line_buffer==null)
             throw new IOException("EOF");
