@@ -271,15 +271,6 @@ public class ServletHolder extends Holder
         
         try
         {
-            if (_servlet==null)
-                _servlet=(Servlet)newInstance();
-        
-            if (_config==null)
-            {
-                _config=new Config();
-                _servlet.init(_config);
-            }
-            
             if (_servlets!=null)
             {
                 Servlet servlet=null;
@@ -292,6 +283,15 @@ public class ServletHolder extends Holder
                     servlet = (Servlet)_servlets.pop();
 
                 return servlet;
+            }
+            
+            if (_servlet==null)
+                _servlet=(Servlet)newInstance();
+        
+            if (_config==null)
+            {
+                _config=new Config();
+                _servlet.init(_config);
             }
 
             return _servlet;
@@ -328,11 +328,7 @@ public class ServletHolder extends Holder
         if (_class==null)
             throw new UnavailableException("Servlet Not Initialized");
         
-        Servlet servlet=_servlet;
-        if (servlet==null || _servlets!=null)
-            servlet=getServlet();
-        
-        // Check that we got one in the end
+        Servlet servlet=(!_initOnStartup||_servlets!=null)?getServlet():_servlet;
         if (servlet==null)
             throw new UnavailableException("Could not instantiate "+_class);
 
