@@ -1,0 +1,35 @@
+SECTION: 200-General
+TITLE: HotDeploy
+QUESTION: Can Jetty Hot Deploy?
+
+<p>Jetty is fully hot deployable, but does not have any native hot deployers.
+What this means is that Jetty contexts, servlets and filters may be added, stopped, 
+started and reloaded dynamically, but that Jetty does not have any services that
+trigger these events.
+</p>
+<p>
+The reason that Jetty does not have any native hot deployers is that the requirements
+for hot deployment vary greatly depending on the environment and developers.
+For example, which files and/or directories should be watched to trigger a hot deployment?
+The WAR, the unpacked WAR directory, the web.xml, the class files for the servlets or
+every class file loaded by the context?
+</p>
+<p>
+Once the need for a hot deployment is detected, it is unclear what should be redeployed?
+Should just the servlets be reloaded? Should the context be stopped, totally reloaded and
+then restarted?  Should the listeners be stopped so that load balancers don't send
+request while redeployment is happening?
+</p>
+<p>
+There are answers to these questions, but they are very environment specific.  Thus 
+when Jetty is embedded in JBoss, it supports JBoss style hot deployment. Ditto for
+Geronimo and avalon.  If you want hot deployment for a stand-alone Jetty, it is not
+difficult to write code to detect your own hotdeployment criteria and then to stop/start
+the jetty components that you know are affected.
+</p>
+
+
+
+
+
+
