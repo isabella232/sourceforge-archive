@@ -1,6 +1,8 @@
 JettyExtra Versions
 --------------------
 
+  + New addWebApplication format
+
 JettyExtra-4.0.B1
   + More mbean meta info.
 
