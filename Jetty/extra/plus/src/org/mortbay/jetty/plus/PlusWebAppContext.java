@@ -207,7 +207,7 @@ public class PlusWebAppContext extends WebApplicationContext
     /* Removes context classloader from log4j repository
      */
     public void doStop()
-        throws InterruptedException
+        throws Exception
     {
         try { super.doStop(); }
         finally
