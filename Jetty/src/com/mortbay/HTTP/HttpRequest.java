@@ -5,12 +5,23 @@
 
 package com.mortbay.HTTP;
 import com.mortbay.Util.*;
+import com.sun.java.util.collections.*;
 
 import java.io.*;
 import java.net.*;
 import java.util.*;
 
 
+/* ------------------------------------------------------------ */
+/** HTTP Request.
+ * This class manages the headers, trailers and content streams
+ * of a HTTP request. It can be used for receiving or generating
+ * requests.
+ *
+ * @see HttpResponse
+ * @version 1.0 Thu Oct 5 1999
+ * @author Greg Wilkins (gregw)
+ */
 public class HttpRequest extends HttpMessage
 {
     /* ------------------------------------------------------------ */
@@ -32,6 +43,7 @@ public class HttpRequest extends HttpMessage
     private URI _uri=null;
     private String _host;
     private int _port;
+    private List _te;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -49,7 +61,19 @@ public class HttpRequest extends HttpMessage
     }
 
     /* ------------------------------------------------------------ */
-    /** 
+    /** Get the HTTP Response.
+     * Get the HTTP Response associated with this request.
+     * @return associated response
+     */
+    public HttpResponse getResponse()
+    {
+        if (_connection==null)
+            return null;
+        return _connection.getResponse();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** XXX
      * @param in 
      * @exception IOException 
      */
@@ -82,14 +106,6 @@ public class HttpRequest extends HttpMessage
     }
     
     /* -------------------------------------------------------------- */
-    /** Return the HTTP request line as it was received
-     */
-    public String getRequestLine()
-    {
-        return _method+" "+_uri+" "+_version;
-    }
-    
-    /* -------------------------------------------------------------- */
     /** Write the request header.
      * Places the message in __MSG_SENDING state.
      * @param out Chunkable output stream
@@ -116,6 +132,14 @@ public class HttpRequest extends HttpMessage
         _state=__MSG_SENDING;
     }
 
+    /* -------------------------------------------------------------- */
+    /** Return the HTTP request line as it was received
+     */
+    public String getRequestLine()
+    {
+        return _method+" "+_uri+" "+_version;
+    }
+    
     /* -------------------------------------------------------------- */
     /** Get the HTTP method for this request.
      * Returns the method with which the request was made. The returned
@@ -457,7 +481,83 @@ public class HttpRequest extends HttpMessage
         _uri= new URI(new String(buf,s3,e3-s3+1));
         
     }
+    
+    /* ------------------------------------------------------------ */
+    /** Force a removeField.
+     * This call ignores the message state and forces a field
+     * to be removed from the request.  It is required for the
+     * handling of the Connection field.
+     * @param name The field name
+     * @return The old value or null.
+     */
+    public synchronized Object forceRemoveField(String name)
+    {
+        Code.debug("force remove ",name);
+        int saved_state=_state;
+        try{
+            _state=__MSG_EDITABLE;
+            return removeField(name);
+        }
+        finally
+        {
+            _state=saved_state;
+        }
+    }
 
+
+    /* ------------------------------------------------------------ */
+    /** Get the acceptable transfer encodings.
+     * The TE field is used to construct a list of acceptable
+     * extension transfer codings in quality order.
+     * An empty list implies that only "chunked" is acceptable.
+     * A null list implies that no transfer coding can be applied.
+     *
+     * If the "trailer" coding is found in the TE field, then
+     * message trailers are enabled in any linked response.
+     * @return List of codings.
+     */
+    public List getAcceptableTransferCodings()
+    {
+        if (_version.equals(__HTTP_1_0))
+            return null;
+        if (_te!=null)
+            return _te;
+        
+        // Decode any TE field
+        List te = getFieldValues(HttpFields.__TE);
+        if (te!=null && te.size()>0)
+        {
+            // Sort the list
+            te=HttpFields.qualityList(te);
+
+            // remove trailer and chunked items.
+            ListIterator iter = te.listIterator();
+            while(iter.hasNext())
+            {
+                String coding= StringUtil.asciiToLowerCase
+                    (HttpFields.valueParameters(iter.next().toString(),null));
+                
+                iter.set(coding);
+                if ("trailer".equals(coding))
+                {
+                    // Allow trailers in the response
+                    HttpResponse response=getResponse();
+                    if (response!=null)
+                        response.setAcceptTrailer(true);
+                    iter.remove();
+                }
+                else if (HttpFields.__Chunked.equals(coding))
+                    iter.remove();
+            }
+            _te=te;
+        }
+        else
+            _te=Collections.EMPTY_LIST;
+
+        return _te;
+    }
+    
+    
     /* ------------------------------------------------------------ */
     /** Destroy the request.
      * Help the garbage collector by null everything that we can.

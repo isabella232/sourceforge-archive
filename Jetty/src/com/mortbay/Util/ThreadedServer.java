@@ -249,7 +249,8 @@ abstract public class ThreadedServer extends ThreadPool
         }
         catch(InterruptedIOException e)
         {
-            Code.ignore(e);
+            if (Code.verbose(99))
+                Code.ignore(e);
         }
         catch(IOException e)
         {

@@ -13,9 +13,12 @@ import java.lang.reflect.*;
 
 
 /* ------------------------------------------------------------ */
-/** 
+/** HTTP Request.
+ * This class manages the headers, trailers and content streams
+ * of a HTTP response. It can be used for receiving or generating
+ * requests.
  *
- * @see
+ * @see HttpRequest
  * @version 1.0 Tue Oct  5 1999
  * @author Greg Wilkins (gregw)
  */
@@ -123,31 +126,31 @@ public class HttpResponse extends HttpMessage
         _state=__MSG_EDITABLE;
     }
     
-    /* -------------------------------------------------------------- */
-    public int getStatus()
+
+    /* ------------------------------------------------------------ */
+    /** Get the HTTP Request.
+     * Get the HTTP Request associated with this response.
+     * @return associated request
+     */
+    public HttpRequest getRequest()
     {
-        return _status;
+        if (_connection==null)
+            return null;
+        return _connection.getRequest();
     }
     
-    /* -------------------------------------------------------------- */
-    public void setStatus(int status)
+    /* ------------------------------------------------------------ */
+    /** XXX
+     * @param in 
+     * @exception IOException 
+     */
+    public synchronized void readHeader(ChunkableInputStream in)
+        throws IOException
     {
-        _status=status;
+        _state=__MSG_BAD;
+        Code.notImplemented();
     }
     
-    /* -------------------------------------------------------------- */
-    public String getReason()
-    {
-        if (_reason!=null)
-            return _reason;
-        return (String)__statusMsg.get(new Integer(_status));
-    }
-    
-    /* -------------------------------------------------------------- */
-    public void setReason(String reason)
-    {
-        _reason=reason;
-    }
     
     /* -------------------------------------------------------------- */
     public synchronized  void writeHeader(OutputStream out) 
@@ -176,7 +179,86 @@ public class HttpResponse extends HttpMessage
         _state=__MSG_SENDING;
     }
     
+    /* -------------------------------------------------------------- */
+    public int getStatus()
+    {
+        return _status;
+    }
+    
+    /* -------------------------------------------------------------- */
+    public void setStatus(int status)
+    {
+        _status=status;
+    }
+    
+    /* -------------------------------------------------------------- */
+    public String getReason()
+    {
+        if (_reason!=null)
+            return _reason;
+        return (String)__statusMsg.get(new Integer(_status));
+    }
+    
+    /* -------------------------------------------------------------- */
+    public void setReason(String reason)
+    {
+        _reason=reason;
+    }
       
+    /* ------------------------------------------------------------ */
+    /* Which fields to set?
+     * Specialized HttpMessage.setFields to consult request TE field
+     * for a "trailer" token if state is SENDING.
+     * @return Header or Trailer fields
+     * @exception IllegalStateException Not editable or sending 1.1
+     *                                  with trailers
+     */
+    protected HttpFields setFields()
+        throws IllegalStateException
+    {
+        if (!_acceptTrailer &&
+            _state==__MSG_SENDING &&
+            _version.equals(__HTTP_1_1))
+        {
+            HttpRequest request=_connection.getRequest();
+            if (request!=null)
+                request.getAcceptableTransferCodings();
+        }
+
+        return super.setFields();
+    }
+    
+    /* ------------------------------------------------------------- */
+    /** Send Error Response.
+     * Sends an error response to the client using the specified status
+     * code and detail message.
+     * @param exception 
+     * @exception IOException If an I/O error has occurred.
+     */
+    public void sendError(HttpException exception) 
+        throws IOException
+    {
+        _header.put(HttpFields.__ContentType,HttpFields.__TextHtml);
+        String message=exception.getMessage();
+        String reason=exception.getReason();
+        
+        setStatus(exception.getCode());
+        setReason(reason);
+
+        ChunkableOutputStream out=getOutputStream();
+        synchronized(out)
+        {
+            out.print("<HTML>\n<HEAD>\n<TITLE>Error ");
+            out.print(exception.getCode()+" "+reason+"</TITLE>\n");
+            out.print("<BODY>\n<H2>HTTP ERROR: ");
+            out.println(exception.getCode() +" "+reason + "</H2>");
+            if (message!=null)
+                out.println(message);
+            out.print("</BODY>\n</HTML>\n");
+            out.flush();
+        }
+    }
+    
     /* ------------------------------------------------------------- */
     /** Send Error Response.
      * Sends an error response to the client using the specified status
@@ -234,7 +316,6 @@ public class HttpResponse extends HttpMessage
     {
         _header.put(HttpFields.__Location,location);
         setStatus(__307_Temporary_Redirect);
-        // XXX writeHeaders(out);
     }
     
     /* ------------------------------------------------------------ */

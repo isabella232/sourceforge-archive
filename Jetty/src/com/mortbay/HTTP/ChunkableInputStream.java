@@ -77,7 +77,7 @@ public class ChunkableInputStream extends FilterInputStream
         in=_deChunker;
         
         _chunking=true;
-        _deChunker._footer=null;
+        _deChunker._trailer=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -98,7 +98,7 @@ public class ChunkableInputStream extends FilterInputStream
         in=_realIn;
         _filters=0;
         if (_deChunker!=null)
-            _deChunker._footer=null;
+            _deChunker._trailer=null;
         _chunking=false;
         _realIn.setByteLimit(-1);
     }
@@ -159,9 +159,9 @@ public class ChunkableInputStream extends FilterInputStream
     }
 
     /* ------------------------------------------------------------ */
-    public HttpFields getFooter()
+    public HttpFields getTrailer()
     {
-        return _deChunker._footer;
+        return _deChunker._trailer;
     }
     
     /* ------------------------------------------------------------ */
@@ -172,7 +172,7 @@ public class ChunkableInputStream extends FilterInputStream
     {
         /* ------------------------------------------------------------ */
         int _chunkSize=0;
-        HttpFields _footer=null;
+        HttpFields _trailer=null;
         
         /* ------------------------------------------------------------ */
         /** Constructor
@@ -283,7 +283,7 @@ public class ChunkableInputStream extends FilterInputStream
             if (_chunkSize<0)
                 return -1;
         
-            _footer=null;
+            _trailer=null;
             _chunkSize=-1;
 
             // Get next non blank line
@@ -307,9 +307,9 @@ public class ChunkableInputStream extends FilterInputStream
             if (_chunkSize==0)
             {
                 _chunkSize=-1;
-                // Look for footers
-                _footer = new HttpFields();
-                _footer.read(_realIn);
+                // Look for trailers
+                _trailer = new HttpFields();
+                _trailer.read(_realIn);
             }
 
             return _chunkSize;

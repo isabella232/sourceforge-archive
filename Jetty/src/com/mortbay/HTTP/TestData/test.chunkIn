@@ -12,6 +12,6 @@ uvwxyz
 c;CRLF not in data
 567890abcdef
 0 ; The end
-some-footer: some-value
-another-footer: another-value
+some-trailer: some-value
+another-trailer: another-value
 

@@ -11,7 +11,7 @@ Jetty-3.0.A0
    + Added support for servlet 2.2 outbut buffer control.
    + Generalized notification of outputStream events.
    + Split HttpHeader into HttpFields and HttpMessage.
-   + HttpMessage supports chunked footers.
+   + HttpMessage supports chunked trailers.
    + HttpMessage supports message states.
    + Added generalized HTTP Connection.
    + Cleanup of HttpRequest and decoupled from Servlet API
@@ -19,10 +19,12 @@ Jetty-3.0.A0
    + ThreadedServer based on ThreadPool. 
    + Cleanup of HttpResponse and decoupled from Servlet API
    + Created RFC2616 test harness.
-   + Does gzip and deflate request transfer encodings
-
+   + gzip and deflate request transfer encodings
+   + TE field coding and trailer handler
+   + HttpExceptions now produce error pages with specific detail
+     of the exception.
 
 TODO NEXT
-   + content/transfer encoding
    + param decoding
    + cookies
+   + content encoding

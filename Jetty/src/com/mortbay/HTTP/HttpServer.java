@@ -36,6 +36,12 @@ public class HttpServer
                           HttpFields.__TextHtml);
         ChunkableOutputStream out = response.getOutputStream();
 
+        if (request.getPath().indexOf("gzip")>=0)
+        {
+            response.setField(HttpFields.__TransferEncoding,"gzip");
+            response.addField(HttpFields.__TransferEncoding,"chunked");
+        }
+        
         out.println("<HTML><H1>HTTP Request Dump</H1>");
         out.println("<H3>Header</H3><PRE>");
         out.print(request.toString());
@@ -45,7 +51,16 @@ public class HttpServer
         InputStream in=request.getInputStream();
         while((len=in.read(buf))>=0)
             out.write(buf,0,len);
+        out.println("</PRE><H3>Response</H3><PRE>");
+        out.print(response.toString());
         out.println("</PRE></HTML>");
+
+        // You wouldn't normally set a trailer like this, but
+        // we don't want to commit the output to force trailers as
+        // it makes test harness messy
+        request.getAcceptableTransferCodings();
+        if (response.acceptTrailer())
+            response.getTrailer().put("TestTrailer","Value");
     }
 
     /* ------------------------------------------------------------ */
@@ -91,6 +106,66 @@ public class HttpServer
         {
             Code.warning(e);
             throw new HttpException(HttpResponse.__500_Internal_Server_Error);
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** XXX 
+     * @param in 
+     * @param coding 
+     * @param parameters 
+     * @exception HttpException 
+     */
+    public void enableEncoding(ChunkableOutputStream out,
+                               String coding,
+                               Map parameters)
+        throws HttpException
+    {
+        try
+        {
+            if ("gzip".equals(coding))
+            {
+                if (parameters!=null && parameters.size()>0)
+                    throw new HttpException(HttpResponse.__501_Not_Implemented,
+                                            "gzip parameters");
+                out.insertFilter(java.util.zip.GZIPOutputStream.class
+                                 .getConstructor(ChunkableOutputStream.__filterArg),
+                                 null);
+            }
+            else if ("deflate".equals(coding))
+            {
+                if (parameters!=null && parameters.size()>0)
+                    throw new HttpException(HttpResponse.__501_Not_Implemented,
+                                            "deflate parameters");
+                out.insertFilter(java.util.zip.DeflaterOutputStream.class
+                                 .getConstructor(ChunkableOutputStream.__filterArg),
+                                null);
+            }
+            else if (!HttpFields.__Identity.equals(coding))
+                throw new HttpException(HttpResponse.__501_Not_Implemented);
+        }
+        catch (HttpException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            Code.warning(e);
+            throw new HttpException(HttpResponse.__500_Internal_Server_Error);
+        }
+    }
+
+
+    public static void main(String[] args)
+    {
+        try{
+            InetAddrPort address = new InetAddrPort(8080);
+            SocketListener listener = new SocketListener(address);
+            listener.start();
+        }
+        catch (Exception e)
+        {
+            Code.warning(e);
         }
     }
 };

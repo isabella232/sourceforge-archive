@@ -23,9 +23,10 @@ import java.io.*;
  * @version 1.0 Wed Oct  6 1999
  * @author Greg Wilkins (gregw)
  */
-abstract public class HttpConnection
+public class HttpConnection
     implements OutputObserver
 {
+    /* ------------------------------------------------------------ */
     private HttpListener _listener;
     private ChunkableInputStream _inputStream;
     private ChunkableOutputStream _outputStream;
@@ -71,6 +72,24 @@ abstract public class HttpConnection
     public ChunkableOutputStream getOutputStream()
     {
         return _outputStream;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get the request
+     * @return the request
+     */
+    public HttpRequest getRequest()
+    {
+        return _request;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the response
+     * @return the response
+     */
+    public HttpResponse getResponse()
+    {
+        return _response;
     }
     
     /* ------------------------------------------------------------ */
@@ -237,7 +256,7 @@ abstract public class HttpConnection
                 Iterator iter = connectionValues.iterator();
                 while (iter.hasNext())
                 {
-                    String token=iter.next().toString();
+                    String token=StringUtil.asciiToLowerCase(iter.next().toString());
                 
                     // handle close token
                     if (token.equals(HttpFields.__Close))
@@ -249,7 +268,7 @@ abstract public class HttpConnection
                     
                     // Remove headers for HTTP/1.0 requests
                     if (HttpMessage.__HTTP_1_0.equals(_version))
-                        _request.removeField(token);
+                        _request.forceRemoveField(token);
                 }
             }
             
@@ -305,22 +324,25 @@ abstract public class HttpConnection
             else
             {
                 _outputStream.resetBuffer();
+                _response.removeField(HttpFields.__TransferEncoding);
                 _response.setField(HttpFields.__Connection,
                                    HttpFields.__Close);
-                _response.sendError(e.getCode());
+                _response.sendError(e);
             }
         }
         catch (Exception e)
         {
             // Handle Exception by sending 500 error code (if output not
             // committed) and closing connection.
-            Code.debug(e);
-            _persistent=false;
-            if (_outputStream.isCommitted())
-                Code.warning(e.toString());
+            if (Code.debug())
+                Code.warning(e);
             else
+                Code.warning(e.toString());
+            _persistent=false;
+            if (!_outputStream.isCommitted())
             {
                 _outputStream.resetBuffer();
+                _response.removeField(HttpFields.__TransferEncoding);
                 _response.setField(HttpFields.__Connection,
                                   HttpFields.__Close);
                 _response.sendError(HttpResponse.__500_Internal_Server_Error);
@@ -466,15 +488,11 @@ abstract public class HttpConnection
                 .write(_response.__Continue);
             _outputStream.getRawStream()
                 .flush();
-        }  
-            
+        }            
              
         // Persistent unless requested otherwise
         _persistent=!_close;
-         
-        // XXX Should check TE header, but lets always chunk persistent connections
-        if (_persistent)
-            _outputStream.setChunking();  
+
     }
     
 
@@ -494,8 +512,69 @@ abstract public class HttpConnection
         {
           case OutputObserver.__FIRST_WRITE:
               Code.debug("notify FIRST_WRITE");
-              // XXX Output encodings
-              // XXX Install user filters
+
+              // enable output translation
+              List transfer_coding=_response.getFieldValues(HttpFields.__TransferEncoding);
+              if (transfer_coding==null || transfer_coding.size()==0)
+              {
+                  // Default to chunking for HTTP/1.1
+                  if (_http1_1)
+                  {
+                      _response.removeField(HttpFields.__ContentLength);
+                      _response.setField(HttpFields.__TransferEncoding,
+                                         HttpFields.__Chunked);
+                      _outputStream.setChunking();
+                  }
+              }
+              else if (_http1_0)
+              {
+                  // Error for transfer encoding to be set in HTTP/1.0
+                  _response.removeField(HttpFields.__TransferEncoding);
+                  throw new HttpException(_response.__501_Not_Implemented,
+                                          "Transfer-Encoding not supported in HTTP/1.0");
+              }
+              else
+              {
+                  // Examine and apply transfer encodings
+                  
+                  HashMap coding_params = new HashMap(7);
+                  for (int i=transfer_coding.size();i-->0;)
+                  {
+                      coding_params.clear();
+                      String coding =
+                          HttpFields.valueParameters(transfer_coding.get(i).toString(),
+                                                     coding_params);
+                      coding=StringUtil.asciiToLowerCase(coding);
+
+                      // Ignore identity coding
+                      if (HttpFields.__Identity.equals(coding))
+                          continue;
+                
+                      // Handle Chunking
+                      if (HttpFields.__Chunked.equals(coding))
+                      {
+                          // chunking must be last and have no parameters
+                          if (i+1!=transfer_coding.size() ||
+                              coding_params.size()>0)
+                              throw new HttpException(_response.__400_Bad_Request,
+                                                      "Missing or incorrect chunked transfer-encoding");
+                          out.setChunking();
+                      }
+                      else
+                      {
+                          // Check against any TE field
+                          List te = _request.getAcceptableTransferCodings();
+                          if (te==null || !te.contains(coding))
+                              throw new HttpException(_response.__501_Not_Implemented,
+                                                      "User agent does not accept "+
+                                                      coding+
+                                                      " transfer-encoding");
+
+                          // Set coding
+                          getServer().enableEncoding(out,coding,coding_params);
+                      }
+                  }
+              }
               break;
               
           case OutputObserver.__RESET_BUFFER:
@@ -517,6 +596,11 @@ abstract public class HttpConnection
               
           case OutputObserver.__CLOSING:
               Code.debug("notify CLOSING");
+
+              // Setup any trailers
+              HttpFields trailer=_response.getTrailer();
+              if (trailer!=null && trailer.size()>0 && _outputStream.isChunking())
+                  _outputStream.setTrailer(_response.getTrailer());
               break;
               
           case OutputObserver.__CLOSED:

@@ -14,7 +14,7 @@ import java.text.*;
 
 /* ------------------------------------------------------------ */
 /** HTTP Fields.
- * A collection of HTTP header and or Footer fields.
+ * A collection of HTTP header and or Trailer fields.
  * This class is not synchronized and needs to be protected from
  * concurrent access.
  * @see
@@ -103,7 +103,7 @@ public class HttpFields extends HashMap
      */    
     public final static String __Chunked = "chunked";
     public final static String __Close = "close";
-    public final static String __TextHtml = "test/html";
+    public final static String __TextHtml = "text/html";
     public final static String __WwwFormUrlEncode =
         "application/x-www-form-urlencoded";
     public static final String __ExpectContinue="100-continue";
@@ -705,5 +705,88 @@ public class HttpFields extends HashMap
         return value.substring(0,i).trim();
     }
 
+
+    /* ------------------------------------------------------------ */
+    /** List values in quality order.
+     * @param value List of values with quality parameters
+     * @return values in quality order.
+     */
+    public static List qualityList(List values)
+    {
+        values = new ArrayList(values);
+        QualityComparator compare = new QualityComparator();
+        Collections.sort(values, compare);
+        
+        Iterator iter = values.iterator();
+        while(iter.hasNext())
+        {
+            Object o=iter.next();
+            Float f=(Float)compare.getQuality(o);
+            if (f.floatValue()<0.001)
+                iter.remove();
+        }
+        return values;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Compare quality values.
+     * This comparitor caches quality values extracted from the
+     * valueParameters() method in a HashSet.
+     * @see Httpfields.qualityList(List values)
+     */
+    private static class QualityComparator
+        extends HashMap 
+        implements Comparator
+    {
+        private static Float __one = new Float("1.0");
+        private HashMap _params = new HashMap(7);
+        
+        /* ------------------------------------------------------------ */
+        QualityComparator()
+        {
+            super(7);
+        }
+
+        /* ------------------------------------------------------------ */
+        public synchronized int compare(Object o1, Object o2)
+        {
+            Float q1 = getQuality(o1);
+            Float q2 = getQuality(o2);
+            float f = q1.floatValue()-q2.floatValue();
+            if (f<=-0.0001)
+                return 1;
+            if (f>=0.0001)
+                return -1;
+            return 0;
+        }
+
+        /* ------------------------------------------------------------ */
+        Float getQuality(Object o)
+        {
+            Float q = (Float)this.get(o);
+            if (q==null)
+            {
+                _params.clear();
+                valueParameters(o.toString(),_params);
+                String qs=(String)_params.get("q");
+                if (qs==null)
+                    q=__one;
+                else
+                {
+                    try{q=new Float(qs);}
+                    catch(Exception e){q=__one;}
+                }
+                QualityComparator.this.put(o,q);
+            }
+            return q;
+        }
+        
+
+        /* ------------------------------------------------------------ */
+        public boolean equals(Object o)
+        {
+            return false;
+        }
+    }
 }
 

@@ -51,7 +51,7 @@ public class ChunkableOutputStream extends FilterOutputStream
     OutputStream _realOut;
     Buffer _buffer;
     byte[] _chunkSize;
-    HttpFields _footer;
+    HttpFields _trailer;
     boolean _committed;
     boolean _written;
     int _filters;
@@ -215,15 +215,18 @@ public class ChunkableOutputStream extends FilterOutputStream
         
         flush();
         
+        notify(OutputObserver.__CLOSING);
+        
         // send last chunk and revert to normal output
         _realOut.write(__CHUNK_EOF_B);
-        if (_footer!=null)
-            _footer.write(_realOut);
+        if (_trailer!=null)
+            _trailer.write(_realOut);
         else
             _realOut.write(__CRLF_B);
         _realOut.flush();
         _chunkSize=null;
         resetStream();
+        notify(OutputObserver.__CLOSED);
     }
     
     /* ------------------------------------------------------------ */
@@ -241,7 +244,7 @@ public class ChunkableOutputStream extends FilterOutputStream
         if (Code.verbose())
             Code.debug("resetStream()");
         
-        _footer=null;
+        _trailer=null;
         _committed=false;
         _written=false;
         _buffer.reset();
@@ -283,14 +286,14 @@ public class ChunkableOutputStream extends FilterOutputStream
     }
 
     /* ------------------------------------------------------------ */
-    /** Set the footer to send with a chunked close
-     * @param footer 
+    /** Set the trailer to send with a chunked close
+     * @param trailer 
      */
-    public void setFooter(HttpFields footer)
+    public void setTrailer(HttpFields trailer)
     {
         if (!isChunking())
             throw new IllegalStateException("Not Chunking");
-        _footer=footer;
+        _trailer=trailer;
     }
     
     /* ------------------------------------------------------------ */

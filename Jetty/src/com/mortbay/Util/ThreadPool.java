@@ -353,7 +353,7 @@ public class ThreadPool
      * Wait for all threads to complete.
      * @exception java.lang.InterruptedException 
      */
-    final synchronized public void join() 
+    final public void join() 
         throws java.lang.InterruptedException
     {
         while(_threadSet!=null && _threadSet.size()>0)
@@ -447,7 +447,8 @@ public class ThreadPool
             String name=thread.getName();
             int runs=0;
             
-            Code.debug( "Start thread in ", _name );
+            if (Code.verbose(9))
+                Code.debug( "Start thread in ", _name );
             try{
                 while(_running) 
                 {
@@ -463,15 +464,18 @@ public class ThreadPool
                         // If no job
                         if (job==null && _running)
                         {
-                            Code.debug("Threads="+_threadSet.size()+
-                                       " idle="+_idleThreads);
+                            if (Code.verbose(99))
+                                Code.debug("Threads="+_threadSet.size()+
+                                           " idle="+_idleThreads);
                         
                             if (_threadSet.size()>_minThreads &&
                                 _idleThreads>1)
                             {
                                 // interrupt was due to accept timeout
                                 // Kill thread if it is in excess of the minimum.
-                                Code.debug("Idle death: "+thread);
+                                
+                                if (Code.verbose(99))
+                                    Code.debug("Idle death: "+thread);
                                 _threadSet.remove(thread);
                                 break;
                             }
@@ -504,7 +508,7 @@ public class ThreadPool
                             if (Code.debug())
                             {
                                 thread.setName(name+"/"+runs++);
-                                if (Code.verbose())
+                                if (Code.verbose(99))
                                     Code.debug("Handling ",job);
                             }
 
@@ -530,7 +534,8 @@ public class ThreadPool
                         _threadSet.remove(Thread.currentThread());
                     notify();
                 }
-                Code.debug("Stopped thread in ", _name);
+                if (Code.verbose(9))
+                    Code.debug("Stopped thread in ", _name);
             }
         }
     }

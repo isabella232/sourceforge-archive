@@ -58,8 +58,8 @@ public class TestHarness
             test.checkEquals(cin.read(buf),-1,"Read EOF");
             test.checkEquals(cin.read(buf),-1,"Read EOF again");
 
-            test.checkEquals(cin.getFooter().get("some-footer"),
-                             "some-value","Footer fields");
+            test.checkEquals(cin.getTrailer().get("some-trailer"),
+                             "some-value","Trailer fields");
   
             fin= new FileInputStream("TestData/test.chunkIn");
             cin = new ChunkableInputStream(fin);
@@ -105,10 +105,10 @@ public class TestHarness
             byte[] eleven = "0123456789\n".getBytes();
             for (int i=0;i<400;i++)
                 cout.write(eleven);
-            HttpFields footer=new HttpFields();
-            footer.put("footer1","value1");
-            footer.put("footer2","value2");
-            cout.setFooter(footer);
+            HttpFields trailer=new HttpFields();
+            trailer.put("trailer1","value1");
+            trailer.put("trailer2","value2");
+            cout.setTrailer(trailer);
             cout.close();
             
             FileInputStream ftmp= new FileInputStream("TestData/tmp.chunkOut");

@@ -12,7 +12,13 @@ import java.util.*;
 import java.text.*;
 
 
-// ====================================================================
+/* ------------------------------------------------------------ */
+/** XXX
+ *
+ * @see
+ * @version 1.0 Thu Oct  7 1999
+ * @author Greg Wilkins (gregw)
+ */
 abstract public class HttpMessage
 {
     /* ------------------------------------------------------------ */
@@ -23,7 +29,7 @@ abstract public class HttpMessage
         __MSG_BAD=1,       // Bad message/
         __MSG_RECEIVED=2,  // Received from connection.
         __MSG_SENDING=3,   // Headers sent.
-        __MSG_SENT=4;      // Entity and footers sent.
+        __MSG_SENT=4;      // Entity and trailers sent.
 
     public final static String[] __state =
     {
@@ -44,7 +50,8 @@ abstract public class HttpMessage
     protected String _version;
     protected HttpFields _header;
     protected Map _cookies;
-    protected HttpFields _footer;
+    protected HttpFields _trailer;
+    protected boolean _acceptTrailer;
     protected HttpConnection _connection;
 
     /* ------------------------------------------------------------ */
@@ -105,7 +112,7 @@ abstract public class HttpMessage
      * __MSG_BAD      = 1 - Bad message or send failure.
      * __MSG_RECEIVED = 2 - Received from connection.
      * __MSG_SENDING  = 3 - Headers sent.
-     * __MSG_SENT     = 4 - Entity and footers sent.
+     * __MSG_SENT     = 4 - Entity and trailers sent.
      * </PRE>
      * @return the state.
      */
@@ -123,34 +130,33 @@ abstract public class HttpMessage
         return _version;
     }
 
-
     /* ------------------------------------------------------------ */
     /** Get a message field.
      * Get a field from a message header. If no header field is found,
-     * footer fields are searched.
+     * trailer fields are searched.
      * @param name The field name
      * @return field value or null
      */
     public String getField(String name)
     {
         String field = _header.get(name);
-        if (field==null && _footer!=null)
-            field=_footer.get(name);
+        if (field==null && _trailer!=null)
+            field=_trailer.get(name);
         return field;
     }
     
     /* ------------------------------------------------------------ */
     /** Get a multi valued message field.
      * Get a field from a message header. If no header field is found,
-     * footer fields are searched.
+     * trailer fields are searched.
      * @param name The field name
      * @return field value or null
      */
     public List getFieldValues(String name)
     {
         List field = _header.getValues(name);
-        if (field==null && _footer!=null)
-            field=_footer.getValues(name);
+        if (field==null && _trailer!=null)
+            field=_trailer.getValues(name);
         return field;
     }
 
@@ -158,19 +164,24 @@ abstract public class HttpMessage
     /* Which fields to set?
      * If the message is editable, then a header fields are returned.
      * Otherwise if the message is sending a HTTP/1.1 message,
-     * then a footer field is returned.
-     * @return Header or Footer fields
+     * then a trailer field is returned if it has been set.
+     * @return Header or Trailer fields
      * @exception IllegalStateException Not editable or sending 1.1
+     *                                  with trailers
      */
-    private HttpFields setFields()
+    protected HttpFields setFields()
+        throws IllegalStateException
     {
         if (_state==__MSG_EDITABLE)
             return _header;
-        else if (_state==__MSG_SENDING && _version.equals(__HTTP_1_1))
+
+        if (_acceptTrailer &&
+                 _state==__MSG_SENDING &&
+                 _version.equals(__HTTP_1_1))
         {
-            if (_footer==null)
-                _footer=new HttpFields();
-            return _footer;
+            if (_trailer==null)
+                _trailer=new HttpFields();
+            return _trailer;
         }
         
         throw new IllegalStateException("Can't set fields in "+
@@ -182,12 +193,13 @@ abstract public class HttpMessage
     /* ------------------------------------------------------------ */
     /** Set a field value.
      * If the message is editable, then a header field is set. Otherwise
-     * if the message is sending and a HTTP/1.1 version, then a footer
+     * if the message is sending and a HTTP/1.1 version, then a trailer
      * field is set.
      * @param name Name of field 
      * @param value New value of field
      * @return Old value of field
      * @exception IllegalStateException Not editable or sending 1.1
+     *                                  with trailers
      */
     public String setField(String name, String value)
         throws IllegalStateException
@@ -199,12 +211,13 @@ abstract public class HttpMessage
     /* ------------------------------------------------------------ */
     /** Set a multi-value field value.
      * If the message is editable, then a header field is set. Otherwise
-     * if the meesage is sending and a HTTP/1.1 version, then a footer
+     * if the meesage is sending and a HTTP/1.1 version, then a trailer
      * field is set.
      * @param name Name of field 
      * @param value New values of field
      * @return Old values of field
      * @exception IllegalStateException Not editable or sending 1.1
+     *                                  with trailers
      */
     public List setField(String name, List value)
         throws IllegalStateException
@@ -218,11 +231,12 @@ abstract public class HttpMessage
     /* ------------------------------------------------------------ */
     /** Add to a multi-value field value.
      * If the message is editable, then a header field is set. Otherwise
-     * if the meesage is sending and a HTTP/1.1 version, then a footer
+     * if the meesage is sending and a HTTP/1.1 version, then a trailer
      * field is set.
      * @param name Name of field 
      * @param value New value to add to the field
      * @exception IllegalStateException Not editable or sending 1.1
+     *                                  with trailers
      */
     public void addField(String name, String value)
         throws IllegalStateException
@@ -233,7 +247,7 @@ abstract public class HttpMessage
     
     /* -------------------------------------------------------------- */
     /** Get a field as an integer value.
-     * Look in header and footer fields.
+     * Look in header and trailer fields.
      * Returns the value of an integer field, or -1 if not found.
      * The case of the field name is ignored.
      * @param name the case-insensitive field name
@@ -241,17 +255,18 @@ abstract public class HttpMessage
     public int getIntField(String name)
     {
         int v=_header.getIntField(name);
-        if (v<0 && _footer!=null)
-            v=_footer.getIntField(name);
+        if (v<0 && _trailer!=null)
+            v=_trailer.getIntField(name);
         return v;
     }
     
     /* -------------------------------------------------------------- */
     /** Sets the value of an integer field.
-     * Header or Footer fields are set depending on message state.
+     * Header or Trailer fields are set depending on message state.
      * @param name the field name
      * @param value the field integer value
      * @exception IllegalStateException Not editable or sending 1.1
+     *                                  with trailers
      */
     public void setIntField(String name, int value)
         throws IllegalStateException
@@ -261,7 +276,7 @@ abstract public class HttpMessage
     
     /* -------------------------------------------------------------- */
     /** Get a header as a date value.
-     * Look in header and footer fields.
+     * Look in header and trailer fields.
      * Returns the value of a date field, or -1 if not found.
      * The case of the field name is ignored.
      * @param name the case-insensitive field name
@@ -269,18 +284,19 @@ abstract public class HttpMessage
     public long getDateField(String name)
     {
         long d=_header.getDateField(name);
-        if (d<0 && _footer!=null)
-            d=_footer.getDateField(name);
+        if (d<0 && _trailer!=null)
+            d=_trailer.getDateField(name);
         return d;
     }
     
 
     /* -------------------------------------------------------------- */
     /** Sets the value of a date field.
-     * Header or Footer fields are set depending on message state.
+     * Header or Trailer fields are set depending on message state.
      * @param name the field name
      * @param value the field date value
      * @exception IllegalStateException Not editable or sending 1.1
+     *                                  with trailers
      */
     public void setDateField(String name, Date date)
     {
@@ -289,10 +305,11 @@ abstract public class HttpMessage
     
     /* -------------------------------------------------------------- */
     /** Sets the value of a date field.
-     * Header or Footer fields are set depending on message state.
+     * Header or Trailer fields are set depending on message state.
      * @param name the field name
      * @param value the field date value
      * @exception IllegalStateException Not editable or sending 1.1
+     *                                  with trailers
      */
     public void setDateField(String name, long date)
     {
@@ -301,11 +318,12 @@ abstract public class HttpMessage
     
     /* -------------------------------------------------------------- */
     /** Sets the value of a date field to the current time.
-     * Header or Footer fields are set depending on message state.
+     * Header or Trailer fields are set depending on message state.
      * Uses efficient DateCache mechanism.
      * @param name the field name
      * @param value the field date value
      * @exception IllegalStateException Not editable or sending 1.1
+     *                                  with trailers
      */
     public void setCurrentTime(String name)
     {
@@ -315,11 +333,12 @@ abstract public class HttpMessage
     /* ------------------------------------------------------------ */
     /** Remove a field.
      * If the message is editable, then a header field is removed. Otherwise
-     * if the message is sending and a HTTP/1.1 version, then a footer
+     * if the message is sending and a HTTP/1.1 version, then a trailer
      * field is removed.
      * @param name Name of field 
      * @return Old value of field
      * @exception IllegalStateException Not editable or sending 1.1
+     *                                  with trailers
      */
     public String removeField(String name)
         throws IllegalStateException
@@ -338,7 +357,6 @@ abstract public class HttpMessage
         if (_state!=__MSG_EDITABLE)
             throw new IllegalStateException(__state[_state]+
                                             "is not EDITABLE");
-        
         version=version.toUpperCase();
         if (version.equals(__HTTP_1_1))
             _version=__HTTP_1_1;
@@ -346,6 +364,35 @@ abstract public class HttpMessage
             _version=__HTTP_1_0;
         else
             throw new IllegalArgumentException("Unknown version");
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get the HTTP chunked trailer (also called trailer).
+     * @return Trailer or null
+     */
+    public HttpFields getTrailer()
+    {
+        if (_acceptTrailer && _trailer==null)
+            _trailer=new HttpFields();
+        return _trailer;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set if trailers are accepted.
+     * @param acceptTrailer  If true, setField() may use trailers.
+     */
+    public void setAcceptTrailer(boolean acceptTrailer)
+    {
+        _acceptTrailer=acceptTrailer;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set if trailers are accepted.
+     * @param acceptTrailer  If true, setField() may use trailers.
+     */
+    public boolean acceptTrailer()
+    {
+        return _acceptTrailer;
     }
     
     /* -------------------------------------------------------------- */
@@ -384,10 +431,10 @@ abstract public class HttpMessage
     {
         if (_header!=null)
             _header.destroy();
-        if (_footer!=null)
-            _footer.destroy();
+        if (_trailer!=null)
+            _trailer.destroy();
         _header=null;
-        _footer=null;
+        _trailer=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -448,17 +495,3 @@ abstract public class HttpMessage
         _state=__MSG_SENT;
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -16,6 +16,11 @@ public class HttpException extends IOException
         return _code;
     }
     
+    public String getReason()
+    {
+        return (String)HttpResponse.__statusMsg.get(new Integer(_code));
+    }
+    
     public HttpException()
     {
         _code=HttpResponse.__400_Bad_Request ;
@@ -35,8 +40,7 @@ public class HttpException extends IOException
     public String toString()
     {
         String message=getMessage();
-        if (message==null)
-            message=(String)HttpResponse.__statusMsg.get(new Integer(_code));
-        return "HttpException("+_code+","+message+")";
+        String reason=getReason();
+        return "HttpException("+_code+","+reason+","+message+")";
     }
 };
