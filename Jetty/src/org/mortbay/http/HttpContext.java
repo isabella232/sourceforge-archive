@@ -2227,7 +2227,7 @@ public class HttpContext implements LifeCycle,
 
         public String getLastModified()
         {
-            return HttpFields.__dateSend.format(new Date(_resource.lastModified()));
+            return HttpFields.formatDate(_resource.lastModified(),false);
         }
 
         public String getEncoding()

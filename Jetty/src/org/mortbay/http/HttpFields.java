@@ -11,9 +11,11 @@ import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -303,20 +305,108 @@ public class HttpFields
     public final static char[] __CRLF = {'\015','\012'};
     public final static char[] __COLON = {':',' '};
 
+    /* ------------------------------------------------------------ */
+    private static String[] DAYS= { "Sat","Sun","Mon","Tue","Wed","Thu","Fri","Sat" };
+    private static String[] MONTHS= { "Jan","Feb","Mar","Apr","May","Jun",
+                                      "Jul","Aug","Sep","Oct","Nov","Dec","Jan" };
+
+
+    /* ------------------------------------------------------------ */
+    /** Format HTTP date
+     * "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or 
+     * "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for cookies
+     */
+    public static String formatDate(long date, boolean cookie)
+    {
+        StringBuffer buf = new StringBuffer(32);
+        GregorianCalendar gc = new GregorianCalendar(__GMT);
+        gc.setTimeInMillis(date);
+        formatDate(buf,gc,cookie);
+        return buf.toString();
+    } 
+
+    /* ------------------------------------------------------------ */
+    /** Format HTTP date
+     * "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or 
+     * "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for cookies
+     */
+    public static String formatDate(Calendar calendar, boolean cookie)
+    {
+        StringBuffer buf = new StringBuffer(32);
+        formatDate(buf,calendar,cookie);
+        return buf.toString();
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Format HTTP date
+     * "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or 
+     * "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for cookies
+     */
+    public static String formatDate(StringBuffer buf, long date, boolean cookie)
+    {
+        GregorianCalendar gc = new GregorianCalendar(__GMT);
+        gc.setTimeInMillis(date);
+        formatDate(buf,gc,cookie);
+        return buf.toString();
+    } 
+
+    /* ------------------------------------------------------------ */
+    /** Format HTTP date
+     * "EEE, dd MMM yyyy HH:mm:ss 'GMT'" or 
+     * "EEE, dd-MMM-yy HH:mm:ss 'GMT'"for cookies
+     */
+    public static void formatDate(StringBuffer buf,Calendar calendar, boolean cookie)
+    {
+        // "EEE, dd MMM yyyy HH:mm:ss 'GMT'"
+        // "EEE, dd-MMM-yy HH:mm:ss 'GMT'",     cookie
+        
+        int day_of_week  = calendar.get(Calendar.DAY_OF_WEEK);
+        int day_of_month = calendar.get(Calendar.DAY_OF_MONTH);
+        int month = calendar.get(Calendar.MONTH);
+        int year = calendar.get(Calendar.YEAR);
+        int century = year/100;
+        year=year%100;
+        
+        int epoch=(int)((calendar.getTimeInMillis()/1000) % (60*60*24));
+        int seconds=epoch%60;
+        epoch=epoch/60;
+        int minutes=epoch%60;
+        int hours=epoch/60;
+        
+        buf.append(DAYS[day_of_week]);
+        buf.append(',');
+        buf.append(' ');
+        StringUtil.append2digits(buf,day_of_month);
+        
+        if (cookie)
+        {
+            buf.append('-');
+            buf.append(MONTHS[month]);
+            buf.append('-');
+            StringUtil.append2digits(buf,year);
+        }
+        else
+        {
+            buf.append(' ');
+            buf.append(MONTHS[month]);
+            buf.append(' ');
+            StringUtil.append2digits(buf,century);
+            StringUtil.append2digits(buf,year);
+        }
+        buf.append(' ');
+        StringUtil.append2digits(buf,hours);
+        buf.append(':');
+        StringUtil.append2digits(buf,minutes);
+        buf.append(':');
+        StringUtil.append2digits(buf,seconds);
+        buf.append(" GMT");
+    }    
+
     /* -------------------------------------------------------------- */
+    public static TimeZone __GMT = TimeZone.getTimeZone("GMT");
     public final static DateCache __dateCache = 
         new DateCache("EEE, dd MMM yyyy HH:mm:ss 'GMT'",
-                      Locale.US);
-    public final static SimpleDateFormat __dateSend = 
-        new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'",
-                             Locale.US);
-
-    public final static SimpleDateFormat __dateCookie = 
-        new SimpleDateFormat("EEE, dd-MMM-yy HH:mm:ss 'GMT'",
-                             Locale.US);
-
-    public final static String __01Jan1970=
-        HttpFields.__dateSend.format(new Date(0));
+                      Locale.US);  
     
     /* ------------------------------------------------------------ */
     private final static String __dateReceiveFmt[] =
@@ -347,20 +437,21 @@ public class HttpFields
     public static SimpleDateFormat __dateReceive[];
     static
     {
-        TimeZone tz = TimeZone.getTimeZone("GMT");
-        tz.setID("GMT");
-        __dateSend.setTimeZone(tz);
-        __dateCache.setTimeZone(tz);
-        __dateCookie.setTimeZone(tz);
+        __GMT.setID("GMT");
+        __dateCache.setTimeZone(__GMT);
         
         __dateReceive = new SimpleDateFormat[__dateReceiveFmt.length];
         for(int i=0;i<__dateReceive.length;i++)
         {
             __dateReceive[i] =
                 new SimpleDateFormat(__dateReceiveFmt[i],Locale.US);
-            __dateReceive[i].setTimeZone(tz);
+            __dateReceive[i].setTimeZone(__GMT);
         }
     }
+                    
+    public final static String __01Jan1970=
+        HttpFields.formatDate(0,false);
+
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -943,7 +1034,7 @@ public class HttpFields
      */
     public void putDateField(String name, Date date)
     {
-        put(name, __dateSend.format(date));
+        put(name, formatDate(date.getTime(),false));
     }
     
     /* -------------------------------------------------------------- */
@@ -954,7 +1045,7 @@ public class HttpFields
      */
     public void addDateField(String name, Date date)
     {
-        add(name, __dateSend.format(date));
+        add(name, formatDate(date.getTime(),false));
     }
     
     /* -------------------------------------------------------------- */
@@ -965,7 +1056,7 @@ public class HttpFields
      */
     public void addDateField(String name, long date)
     {
-        add(name, __dateSend.format(new Date(date)));
+        add(name, formatDate(date,false));
     }
     
     /* -------------------------------------------------------------- */
@@ -976,7 +1067,7 @@ public class HttpFields
      */
     public void putDateField(String name, long date)
     {
-        put(name, __dateSend.format(new Date(date)));
+        put(name, formatDate(date,false));
     }
 
     /* -------------------------------------------------------------- */
@@ -1359,7 +1450,7 @@ public class HttpFields
                     if (maxAge==0)
                         buf.append(__01Jan1970);
                     else
-                        buf.append(HttpFields.__dateCookie.format(new Date(System.currentTimeMillis()+1000L*maxAge)));
+                        buf.append(formatDate(System.currentTimeMillis()+1000L*maxAge,true));
                 }
                 else
                 {

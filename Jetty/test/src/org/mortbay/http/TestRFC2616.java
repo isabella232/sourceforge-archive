@@ -94,7 +94,7 @@ public class TestRFC2616
                   this.resource = Resource.newResource(
                               new URL("file", "localhost", file.getAbsolutePath())
                   );
-                  this.modDate = HttpFields.__dateSend.format(new Date(resource.lastModified()));
+                  this.modDate = HttpFields.formatDate(resource.lastModified(),false);
                }
                catch (MalformedURLException mue) {  
                   Code.warning(mue);
