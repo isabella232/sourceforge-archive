@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Changed URI default charset back to ISO_8859_1
  + Restructured Password into Password and Credentials
  + Added DigestAuthenticator
  + Added link to a Jetty page in Korean.
