@@ -167,7 +167,7 @@ public class StringMap extends AbstractMap implements Externalizable
                 else
                 {
                     // Split the current node!
-                    Node split=node.split(this,ni);
+                    node.split(this,ni);
                     i--;
                     ni=-1;
                     continue charLoop;
@@ -256,7 +256,6 @@ public class StringMap extends AbstractMap implements Externalizable
         
         Node node = _root;
         int ni=-1;
-        Node parent = null;
 
         // look for best match
     charLoop:
@@ -267,7 +266,6 @@ public class StringMap extends AbstractMap implements Externalizable
             // Advance node
             if (ni==-1)
             {
-                parent=node;
                 ni=0;
                 node=(node._children==null)?null:node._children[c%_width];
             }
@@ -314,7 +312,6 @@ public class StringMap extends AbstractMap implements Externalizable
         
         Node node = _root;
         int ni=-1;
-        Node parent = null;
 
         // look for best match
     charLoop:
@@ -325,7 +322,6 @@ public class StringMap extends AbstractMap implements Externalizable
             // Advance node
             if (ni==-1)
             {
-                parent=node;
                 ni=0;
                 node=(node._children==null)?null:node._children[c%_width];
             }
@@ -373,7 +369,6 @@ public class StringMap extends AbstractMap implements Externalizable
         
         Node node = _root;
         int ni=-1;
-        Node parent = null;
 
         // look for best match
     charLoop:
@@ -384,7 +379,6 @@ public class StringMap extends AbstractMap implements Externalizable
             // Advance node
             if (ni==-1)
             {
-                parent=node;
                 ni=0;
                 node=(node._children==null)?null:node._children[c%_width];
             }
@@ -441,7 +435,6 @@ public class StringMap extends AbstractMap implements Externalizable
         
         Node node = _root;
         int ni=-1;
-        Node parent = null;
 
         // look for best match
     charLoop:
@@ -452,7 +445,6 @@ public class StringMap extends AbstractMap implements Externalizable
             // Advance node
             if (ni==-1)
             {
-                parent=node;
                 ni=0;
                 node=(node._children==null)?null:node._children[c%_width];
             }

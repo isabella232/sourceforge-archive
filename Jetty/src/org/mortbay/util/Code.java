@@ -421,7 +421,6 @@ public class Code
      */
     public static void fail(String m, Throwable ex) 
     {
-        Code code = instance();
         Log.message(Log.FAIL,
                     new LogMsg(new Object[]{m,ex}),
                     new Frame(1));
@@ -435,7 +434,6 @@ public class Code
      */
     public static void fail(Throwable ex) 
     {
-        Code code = instance();
         Log.message(Log.FAIL,
                     new LogMsg(ex),
                     new Frame(1));

@@ -233,7 +233,6 @@ public class UrlEncoded extends MultiMap
         {
             try
             {
-                int    pos = 0;
                 int    ix = 0;
                 int    ox = 0;
                 String key = null;

@@ -56,10 +56,7 @@ public class HTAccessHandler extends AbstractHttpHandler
     {
         String user = null;
         String password = null;
-        boolean doCheck = false;
         boolean IPValid = true;
-        boolean l_ret = false;
-        boolean _requireUser = false;
  
         Code.debug("HTAccessHandler pathInContext=",pathInContext);
  
@@ -164,7 +161,6 @@ public class HTAccessHandler extends AbstractHttpHandler
             if (!ht.checkAuth(user,password,getHttpContext(),request))
             {
                 Code.debug("Auth Failed");
-                _requireUser=true;
                 response.setField(HttpFields.__WwwAuthenticate,"basic realm="+ht.getName());
                 response.sendError(HttpResponse.__401_Unauthorized);
                 response.commit();

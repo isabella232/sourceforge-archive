@@ -104,7 +104,7 @@ public class Main
     {
         try
         {
-            Class check = Class.forName(classname);
+            Class.forName(classname);
             return true;
         }
         catch (ClassNotFoundException e)
@@ -113,7 +113,7 @@ public class Main
         ClassLoader loader=_classpath.getClassLoader();
         try
         {
-            Class check = loader.loadClass(classname);
+            loader.loadClass(classname);
             return true;
         }
         catch (ClassNotFoundException e)

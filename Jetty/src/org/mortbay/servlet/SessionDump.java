@@ -107,8 +107,6 @@ public class SessionDump extends HttpServlet
         {
             try
             {
-                String id = session.getId();
-            
                 tf.addText("ID",session.getId());
                 tf.addText("State",session.isNew()?"NEW":"Valid");
                 tf.addText("Creation",

@@ -142,8 +142,6 @@ public class Dispatcher implements RequestDispatcher
         ServletHttpRequest servletHttpRequest= (httpConnection!=null)
             ?(ServletHttpRequest)httpConnection.getRequest().getWrapper()
             :ServletHttpRequest.unwrap(servletRequest);
-        ServletHttpResponse servletHttpResponse=
-            servletHttpRequest.getServletHttpResponse();
 
         // wrap the request and response
         DispatcherRequest request = new DispatcherRequest(httpServletRequest);

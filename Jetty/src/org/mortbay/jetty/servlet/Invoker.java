@@ -104,7 +104,6 @@ public class Invoker extends HttpServlet
         
         int i0=servlet.charAt(0)=='/'?1:0;
         int i1=servlet.indexOf('/',i0);
-        String info=i1<0?null:servlet.substring(i1);
         servlet=i1<0?servlet.substring(i0):servlet.substring(i0,i1);
 
         // look for a named holder

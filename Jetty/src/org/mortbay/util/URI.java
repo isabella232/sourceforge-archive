@@ -726,8 +726,6 @@ public class URI
         }
         if (p2==null || p2.length()==0)
             return p1;
-
-        String p3=null;
         
         int split=p1.indexOf(';');
         if (split<0)

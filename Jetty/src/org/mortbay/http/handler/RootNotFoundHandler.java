@@ -63,7 +63,6 @@ public class RootNotFoundHandler extends NotFoundHandler
         for (int i=0;i<contexts.length;i++)
         {
             HttpContext context = contexts[i];
-            String[] hosts = context.getVirtualHosts();
             writer.write("<LI><A HREF=");
             writer.write(context.getContextPath());
             writer.write(">");

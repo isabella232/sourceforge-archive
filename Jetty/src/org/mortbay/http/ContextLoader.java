@@ -72,7 +72,6 @@ public class ContextLoader extends URLClassLoader
         {
             StringTokenizer tokenizer = new StringTokenizer(classPath,",;");
             
-            int i=0;
             while (tokenizer.hasMoreTokens())
             {
                 Resource resource = Resource.newResource(tokenizer.nextToken());

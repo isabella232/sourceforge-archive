@@ -192,7 +192,6 @@ public class ServletHttpRequest
         if (acceptLanguage.size()==0)
             return  Locale.getDefault();
 
-        LazyList langs = null;
         int size=acceptLanguage.size();
         
         // convert to locals

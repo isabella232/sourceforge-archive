@@ -822,7 +822,7 @@ public class HttpContext implements LifeCycle,
         }
 
         // Non cached response
-        ResourceMetaData md = new ResourceMetaData(resource);
+        new ResourceMetaData(resource);
         return resource;
     }
 
@@ -1624,12 +1624,8 @@ public class HttpContext implements LifeCycle,
             throw new HttpException(HttpResponse.__400_Bad_Request);
         }
 
-        String contextPath=null;
         if (_contextPath.length()>1)
-        {
-            contextPath=_contextPath;
             pathInContext=pathInContext.substring(_contextPath.length());
-        }
 
         if (_redirectNullPath && (pathInContext==null ||
                                   pathInContext.length()==0))

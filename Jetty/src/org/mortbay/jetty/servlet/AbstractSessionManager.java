@@ -36,7 +36,11 @@ import org.mortbay.util.LazyList;
  * on AbstractSessionManager need only implement the newSession method
  * to return a specialized version of the Session inner class that
  * provides an attribute Map.
- *
+ * <p>
+ * If the property
+ * org.mortbay.jetty.servlet.AbstractSessionManager.23Notifications is set to
+ * true, the 2.3 servlet spec notification style will be used.
+ * <p>
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -44,6 +48,10 @@ public abstract class AbstractSessionManager implements SessionManager
 {
     /* ------------------------------------------------------------ */
     public final static int __distantFuture = 60*60*24*7*52*20;
+
+    /* ------------------------------------------------------------ */
+    public final static boolean __24SessionDestroyed=
+        Boolean.getBoolean("org.mortbay.jetty.servlet.AbstractSessionManager.24SessionDestroyed");
     
     /* ------------------------------------------------------------ */
     // Setting of max inactive interval for new sessions
@@ -275,7 +283,6 @@ public abstract class AbstractSessionManager implements SessionManager
     /* ------------------------------------------------------------ */
     public void removeEventListener(EventListener listener)
     {
-        boolean known =false;
         if (listener instanceof HttpSessionAttributeListener)
             _sessionAttributeListeners.remove(listener);
         if (listener instanceof HttpSessionListener)
@@ -541,6 +548,15 @@ public abstract class AbstractSessionManager implements SessionManager
         {
             if (_invalid) throw new IllegalStateException();
 
+            
+            if(__24SessionDestroyed && _sessionListeners != null)
+            {        
+                HttpSessionEvent event = new HttpSessionEvent(this);
+                for(int i=0;i<_sessionListeners.size();i++)
+                    ((HttpSessionListener)_sessionListeners.get(i)).
+                        sessionDestroyed(event);
+            }
+                    
             if (_values!=null)
             {
                 Iterator iter = _values.keySet().iterator();
@@ -570,12 +586,15 @@ public abstract class AbstractSessionManager implements SessionManager
             {
                 _invalid=true;
                 _sessions.remove(_id);
-                HttpSessionEvent event = new HttpSessionEvent(this);
-                for(int i=0;i<_sessionListeners.size();i++)
-                    ((HttpSessionListener)_sessionListeners.get(i)).
-                        sessionDestroyed(event);       
-            }
-             
+                
+                if(!__24SessionDestroyed && _sessionListeners != null)
+                {
+                    HttpSessionEvent event = new HttpSessionEvent(this);
+                    for(int i=0;i<_sessionListeners.size();i++)
+                        ((HttpSessionListener)_sessionListeners.get(i)).
+                            sessionDestroyed(event);       
+                }
+            } 
         }
 
         /* ------------------------------------------------------------- */

@@ -19,7 +19,6 @@ import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.util.Code;
 import org.mortbay.util.LazyList;
@@ -197,7 +196,6 @@ public class WebApplicationHandler extends ServletHandler
             // Error or request
             ServletHttpRequest servletHttpRequest=(ServletHttpRequest)request;
             ServletHttpResponse servletHttpResponse=(ServletHttpResponse)response;
-            HttpRequest httpRequest=servletHttpRequest.getHttpRequest();
             HttpResponse httpResponse=servletHttpResponse.getHttpResponse();
 
             if (httpResponse.getStatus()!=HttpResponse.__200_OK)

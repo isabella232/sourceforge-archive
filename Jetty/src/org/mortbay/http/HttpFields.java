@@ -1383,7 +1383,6 @@ public class HttpFields
         while( enum.hasMoreElements() )
         {
             String name = (String)enum.nextElement();
-            FieldInfo info=getFieldInfo(name);
             Enumeration values = fields.getValues(name);
             while(values.hasMoreElements())
                 add(name,(String)values.nextElement());
