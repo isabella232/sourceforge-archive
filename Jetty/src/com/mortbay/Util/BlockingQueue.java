@@ -113,6 +113,7 @@ public class BlockingQueue
                 elements.wait();
             
             Object o = elements[head];
+            elements[head]=null;
             if(++head==maxSize)
                 head=0;
             if (size==maxSize)
@@ -141,6 +142,7 @@ public class BlockingQueue
                 return null;
             
             Object o = elements[head];
+            elements[head]=null;
             if(++head==maxSize)
                 head=0;
 

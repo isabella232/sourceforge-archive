@@ -533,7 +533,7 @@ public class ThreadPool
                     try 
                     {
                         // increment accepting count
-                        synchronized(this){_idleSet.add(thread);}
+                        synchronized(ThreadPool.this){_idleSet.add(thread);}
                     
                         // wait for a job
                         job=getJob(_maxIdleTimeMs);
@@ -572,7 +572,7 @@ public class ThreadPool
                     }
                     finally
                     {
-                        synchronized(this)
+                        synchronized(ThreadPool.this)
                         {
                             _idleSet.remove(thread);
                             // If not more threads accepting - start one

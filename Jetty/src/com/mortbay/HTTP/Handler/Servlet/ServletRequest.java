@@ -14,6 +14,7 @@ import com.mortbay.Util.Code;
 import com.mortbay.Util.MultiMap;
 import com.mortbay.Util.Resource;
 import com.mortbay.Util.StringUtil;
+import com.mortbay.Util.URI;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
@@ -124,10 +125,7 @@ public class ServletRequest
         _pathInfo=pathInfo;
         _query=query;
 
-        if (getContextPath()==null)
-            _uri=_servletPath+_pathInfo;
-        else
-            _uri=getContextPath()+_servletPath+_pathInfo;
+        _uri=URI.addPaths(getContextPath(),URI.addPaths(_servletPath,_pathInfo));
     }
     
     /* ------------------------------------------------------------ */
@@ -695,7 +693,7 @@ public class ServletRequest
 
         if (!url.startsWith("/"))
         {
-            String relTo=_servletPath+_pathInfo;
+            String relTo=URI.addPaths(_servletPath,_pathInfo);
             
             int slash=relTo.lastIndexOf("/");
             relTo=relTo.substring(0,slash);

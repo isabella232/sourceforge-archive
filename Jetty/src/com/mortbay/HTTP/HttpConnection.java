@@ -768,29 +768,48 @@ public class HttpConnection
         
         // if we have no content or encoding,
         // and no content length
-        // need to set content length (XXX or may just close connection?)
         if (!_outputStream.isWritten() &&
             !_response.containsField(HttpFields.__TransferEncoding) &&
             !_response.containsField(HttpFields.__ContentLength))
         {
             if(_persistent)
             {
-                _response.setIntField(HttpFields.__ContentLength,0);
-                if (_dotVersion==0)
+                switch (_dotVersion)
                 {
-                    // Netscape does not like empty responses with
-                    // keep-alive
-                    if (_response.getStatus()==200)
-                    {
-                        _close=true;
-                        _persistent=false;
-                        _response.setField(HttpFields.__Connection,
-                                           HttpFields.__Close);
-                    }
-                    else
-                        // Keep it alive
-                        _response.setField(HttpFields.__Connection,
-                                           HttpFields.__KeepAlive);
+                  case 0:
+                      {
+                          // Netscape does not like empty 200s with
+                          // keep-alive
+                          if (_response.getStatus()==200)
+                          {
+                              _close=true;
+                              _persistent=false;
+                              _response.setField(HttpFields.__Connection,
+                                                 HttpFields.__Close);
+                          }
+                          else
+                          {
+                              _response.setIntField(HttpFields.__ContentLength,0);
+                              // Keep it alive
+                              _response.setField(HttpFields.__Connection,
+                                                 HttpFields.__KeepAlive);
+                          }
+                      }
+                      break;
+                  case 1:
+                      {
+                          // force chunking on.
+                          _response.setField(HttpFields.__TransferEncoding,
+                                             HttpFields.__Chunked);
+                          _outputStream.setChunking();
+                      }
+                      break;
+                      
+                  default:
+                      _close=true;
+                      _response.setField(HttpFields.__Connection,
+                                         HttpFields.__Close);
+                      break;
                 }
             }
             else

@@ -279,7 +279,7 @@ public class MultiPartRequest
             }
             
             // boundary match
-            if (b>0)
+            if (b>0 || b==-1)
             {
                 if (b==_byteBoundary.length)
                     _lastPart=true;

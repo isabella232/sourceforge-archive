@@ -12,6 +12,7 @@
   <servlet-mapping>
     <servlet-name>JSP</servlet-name>
     <url-pattern>*.jsp,*.jsP,*.jSp,*.jSP,*.Jsp,*.JsP,*.JSp,*.JSP</url-pattern>
+    <load-on-startup>0</load-on-startup>
   </servlet-mapping>
 
   <session-config>

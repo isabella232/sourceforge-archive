@@ -11,6 +11,7 @@ import com.mortbay.HTTP.PathMap;
 import com.mortbay.HTTP.InclusiveByteRange;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.Log;
+import com.mortbay.Util.URI;
 import com.mortbay.Util.Resource;
 import com.mortbay.Util.StringUtil;
 import java.io.IOException;
@@ -322,10 +323,12 @@ public class ResourceHandler extends NullHandler
                     
                     String q=request.getQuery();
                     StringBuffer buf=request.getRequestURL();
-                    buf.append("/");
                     if (q!=null&&q.length()!=0)
-                        buf.append("?"+q);
-                    response.setField(HttpFields.__Location, buf.toString());
+                    {
+                        buf.append('?');
+                        buf.append(q);
+                    }
+                    response.setField(HttpFields.__Location, URI.addPaths(buf.toString(),"/"));
                     response.sendError(302);
                     return;
                 }
@@ -340,7 +343,8 @@ public class ResourceHandler extends NullHandler
                     {
                         // Forward to the index
                         int last=request.setState(HttpMessage.__MSG_EDITABLE);
-                        request.setPath(request.getPath()+_indexFiles.get(i));
+                        String ipath=URI.addPaths(request.getPath(),(String)_indexFiles.get(i));
+                        request.setPath(ipath);
                         request.setState(last);
                         getHandlerContext().handle(request,response);
                         return;
@@ -830,10 +834,7 @@ public class ResourceHandler extends NullHandler
             }
 
             Code.debug("sendDirectory: "+file);
-            String base = request.getPath();
-            if (!base.endsWith("/"))
-                base+="/";
-     
+            String base = URI.addPaths(request.getPath(),"/");
             response.setField(HttpFields.__ContentType,
                               "text/html");
             if (request.getMethod().equals(HttpRequest.__HEAD))
@@ -857,8 +858,8 @@ public class ResourceHandler extends NullHandler
             if (parent)
             {
                 out.print("<TR><TD><A HREF=");
-                out.print(padSpaces(base));
-                out.print("../>Parent Directory</A></TD><TD></TD><TD></TD></TR>\n");
+                out.print(padSpaces(URI.addPaths(base,"../")));
+                out.print(">Parent Directory</A></TD><TD></TD><TD></TD></TR>\n");
             }
      
             DateFormat dfmt=DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
@@ -868,9 +869,9 @@ public class ResourceHandler extends NullHandler
                 Resource item = file.addPath(ls[i]);
   
                 out.print("<TR><TD><A HREF=\"");
-                String path=base+ls[i];
+                String path=URI.addPaths(base,ls[i]);
                 if (item.isDirectory() && !path.endsWith("/"))
-                    path+="/";
+                    path=URI.addPaths(path,"/");
                 out.print(padSpaces(path));
                 out.print("\">");
                 out.print(ls[i]);

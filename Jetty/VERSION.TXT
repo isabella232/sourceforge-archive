@@ -1,19 +1,13 @@
 Jetty Versions
 --------------
 
- - Fixed ResourceHandler handling of ;JSESSIONID
- - Added query param handling to ForwardHandler
- - Fixed handling of empty responses at header commit.
- - Warn and close connections if content-length is incorrectly set.
- - Request log contains bytes actually returned.
- - Added ServletHandler().setUsingCookies().
- - Fixed forwarding to null pathInfo requests.
- - Fixed handling of multiple cookies.
- - Fixed EOF handlding in MultiPartRequest.
- - Fixed sync of ThreadPool idleSet.
- - Fixed jetty.bat classpath problems.
- - Load-on-startup the JspServlet so that precompiled servlets work.
- - Removed stray debug println from the Frame class.
+Jetty-3.0.6 - 26 Apr 2001
+ + Fixed handling of empty responses at header commit.
+ + Fixed ResourceHandler handling of ;JSESSIONID
+ + Fixed forwarding to null pathInfo requests.
+ + Fixed EOF handlding in MultiPartRequest.
+ + Fixed sync of ThreadPool idleSet.
+ + Load-on-startup the JspServlet so that precompiled servlets work.
 
 Jetty-3.1.rc4 - 14 April 2001
  + Include full versions of JAXP and Crimson
