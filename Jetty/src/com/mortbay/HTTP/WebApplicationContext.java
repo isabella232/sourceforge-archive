@@ -295,6 +295,12 @@ public class WebApplicationContext extends HandlerContext
             Code.debug("link role ",roleName," to ",roleLink," for ",this);
             holder.setUserRoleLink(roleName,roleLink);
         }
+
+        // add default mapping
+        String defaultPath="/servlet/"+holder.getServletName()+"/*";
+        
+        Code.debug("ServletMapping: ",holder.getServletName(),"=",defaultPath);
+        _servletHandler.addHolder(defaultPath,holder);
     }
 
     /* ------------------------------------------------------------ */

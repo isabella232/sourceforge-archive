@@ -227,7 +227,11 @@ public class Context implements ServletContext, HttpSessionContext
 
         try{
             Resource resource = resourceBase.addPath(path);
-            return resource.getName();
+            File file = resource.getFile();
+
+            return (file==null)
+                ?"null"
+                :(file.getAbsolutePath());
         }
         catch(IOException e)
         {
