@@ -157,21 +157,14 @@ public class ServletDispatch
 	if (path == null){
 	    path = new Vector();
 	    String pathi = req.getPathInfo();
-	    int last = 1; // skip first "/"
-	    int i = 0;
-	    for (i = 1; pathi != null && i < pathi.length(); i++){
-		if (pathi.charAt(i) == '/'){
-		    if (i - last > 0)
-			path.addElement((pathi.substring(last, i)));
-		    last = i+1;
-		}
-	    }
-	    if (i - last > 0)
-		path.addElement((pathi.substring(last, i)));
+	    StringTokenizer st = new StringTokenizer(pathi, "/");
+	    while (st.hasMoreTokens())
+		path.addElement(st.nextToken());
 	}
 	if (path.size() == 0) 
 	    return doDefaultDispatch(obj, null, context, req, res);
 	String funcName = path.firstElement().toString();
+	processedPath = processedPath + "/" + funcName;
 	path.removeElementAt(0);
 	Method[] methods = obj.getClass().getMethods();
 	int i;
