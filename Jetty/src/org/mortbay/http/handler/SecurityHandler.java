@@ -315,8 +315,7 @@ public class SecurityHandler extends NullHandler
         }
         
         // Handle form security check
-        if (_authenticator!=null &&
-            pathInContext.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
+        if (_authenticator!=null && pathInContext!=null && pathInContext.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
         {
             Code.debug("FORM j_security_check");
             _authenticator.authenticated(_realm,

@@ -1352,8 +1352,14 @@ public class HttpContext implements LifeCycle
                           HttpResponse response)
         throws HttpException, IOException
     {
-        pathInContext=URI.canonicalPath(pathInContext);
-        
+        if (pathInContext!=null)
+        {
+            pathInContext=URI.canonicalPath(pathInContext);
+            if (pathInContext==null)
+                // Must be a bad request.
+                throw new HttpException(response.__400_Bad_Request);
+        }
+                
         // Save the thread context loader
         Thread thread = Thread.currentThread();
         ClassLoader lastContextLoader=thread.getContextClassLoader();
