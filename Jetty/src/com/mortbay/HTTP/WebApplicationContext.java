@@ -34,6 +34,7 @@ public class WebApplicationContext extends HandlerContext
     private String _directoryName;
     private XmlParser.Node _web;
     private ServletHandler _servletHandler;
+    Context _context;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -83,7 +84,8 @@ public class WebApplicationContext extends HandlerContext
 	    // Add servlet Handler
 	    addHandler(new ServletHandler());
 	    _servletHandler = getServletHandler();
-
+	    _context=_servletHandler.getContext();
+	    
 	    // FileBase and ResourcePath
 	    setResourceBase(_directoryName);
 	    setServingResources(true);
@@ -134,10 +136,7 @@ public class WebApplicationContext extends HandlerContext
 	    else if ("servlet-mapping".equals(name))
 		initServletMapping(node);
 	    else if ("session-config".equals(name))
-	    {
-		Code.warning("Not implemented: "+name);
-		System.err.println(node);
-	    }
+		initSessionConfig(node);
 	    else if ("mime-mapping".equals(name))
 	    {
 		Code.warning("Not implemented: "+name);
@@ -241,6 +240,17 @@ public class WebApplicationContext extends HandlerContext
 	{
 	    Code.debug("ServletMapping: ",name,"=",pathSpec);
 	    _servletHandler.addHolder(pathSpec,holder);
+	}
+    }
+    
+    /* ------------------------------------------------------------ */
+    private void initSessionConfig(XmlParser.Node node)
+    {
+	XmlParser.Node tNode=node.get("session-timeout");
+	if(tNode!=null)
+	{
+	    int timeout = Integer.parseInt(tNode.toString(false));
+	    _context.setSessionTimeout(timeout);
 	}
     }
     

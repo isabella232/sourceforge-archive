@@ -1,4 +1,4 @@
-<?xml version="1.0"  encoding="ISO8859-1"?> 
+<?xml version="1.0"  encoding="ISO-8859-1"?> 
 <!DOCTYPE Configure SYSTEM "configure.dtd"> 
 
 <Configure class="com.mortbay.Util.TestConfiguration">
@@ -22,7 +22,7 @@
   <Put name="Object"><New class="java.lang.Double">
       <Arg>1.2345</Arg>
   </New></Put>
-
+ 
   <Put name="ObjectTrim">
     <New class="java.lang.Double">
       <Arg>1.2345</Arg>

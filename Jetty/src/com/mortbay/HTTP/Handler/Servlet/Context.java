@@ -378,11 +378,11 @@ public class Context implements ServletContext, HttpSessionContext
     
     /* -------------------------------------------------------------- */
     /** Set the default session timeout.
-     *  @param  default The default timeout in seconds
+     *  @param  default The timeout in minutes
      */
-    public void setMaxInactiveInterval(int defaultTime)
+    public void setSessionTimeout(int timeoutMinutes)
     {   
-        _defaultMaxIdleTime = defaultTime;
+        _defaultMaxIdleTime = timeoutMinutes*60;;
         
         // Start the session scavenger if we haven't already
         if (_scavenger == null)

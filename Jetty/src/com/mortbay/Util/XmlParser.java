@@ -9,7 +9,7 @@ import java.io.InputStream;
 import com.mortbay.Util.Code;
 
 import org.xml.sax.*;
-import javax.xml.parsers.*;
+import org.xml.sax.helpers.*;
 
 
 /*--------------------------------------------------------------*/
@@ -24,8 +24,7 @@ import javax.xml.parsers.*;
 public class XmlParser 
 {
     private Map _redirectMap = new HashMap();
-    private SAXParserFactory _spf;
-    private SAXParser _sp;
+    private Parser _parser;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -35,16 +34,11 @@ public class XmlParser
     {
 	try
 	{
-	    _spf = SAXParserFactory.newInstance();
-	    _spf.setValidating(true);
-	    _sp = _spf.newSAXParser ();
+	    _parser =ParserFactory.makeParser
+		(System.getProperty("org.xml.sax.parser",
+				    "com.microstar.xml.SAXDriver"));
 	}
-	catch(ParserConfigurationException e)
-	{
-	    Code.warning(e);
-	    throw new Error(e.toString());
-	}
-	catch(SAXException e)
+	catch(Exception e)
 	{
 	    Code.warning(e);
 	    throw new Error(e.toString());
@@ -62,12 +56,11 @@ public class XmlParser
     public synchronized Node parse(String url)
 	throws IOException,SAXException
     {
-	Parser parser=_sp.getParser();
 	Handler handler= new Handler();
-	parser.setDocumentHandler(handler);
-  	parser.setErrorHandler(handler);
-  	parser.setEntityResolver(handler);
-	parser.parse(url);
+	_parser.setDocumentHandler(handler);
+  	_parser.setErrorHandler(handler);
+  	_parser.setEntityResolver(handler);
+	_parser.parse(url);
 	if (handler._error!=null)
 	    throw handler._error;
 	Node doc=(Node)handler._top.get(0);

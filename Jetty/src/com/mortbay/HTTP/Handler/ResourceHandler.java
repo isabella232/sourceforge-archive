@@ -7,6 +7,7 @@ import java.util.*;
 import java.text.*;
 import java.io.*;
 import java.net.*;
+import javax.servlet.http.*;
 
 /* ------------------------------------------------------------ */
 /** Resource Handler
@@ -284,19 +285,16 @@ public class ResourceHandler extends NullHandler
 		if (!endsWithSlash && !path.equals("/"))
 		{
 		    Code.debug("Redirect to directory/");
-		    int port=request.getPort();
-		    String q=request.getQuery();
-		    if (q!=null&&q.length()==0)
-			q=null;
-		    response.setField(HttpFields.__Location,
-				      "http://"+
-				      request.getHost()+
-				      (port==0?"":(":"+port))+
-				      path+"/"+
-				      (q==null?"":("?"+q)));
-		    response.sendError(HttpResponse.__301_Moved_Permanently);
-		    return;
-		}
+		    
+                    String q=request.getQuery();
+		    StringBuffer buf=request.getRequestURL();
+		    buf.append("/");
+                    if (q!=null&&q.length()!=0)
+			buf.append("?"+q);
+                    response.setField(HttpFields.__Location, buf.toString());
+                    response.sendError(301,"Moved Permanently");
+                    return;
+                }
   
 		// See if index file exists
 		boolean indexSent=false;

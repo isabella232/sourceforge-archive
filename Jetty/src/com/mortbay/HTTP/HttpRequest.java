@@ -208,6 +208,48 @@ public class HttpRequest extends HttpMessage
             throw new IllegalStateException("Not EDITABLE");
         _method=method;
     }
+
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Reconstructs the URL the client used to make the request.
+     * The returned URL contains a protocol, server name, port
+     * number, and server path, but it does not include query
+     * string parameters.
+     * 
+     * <p>Because this method returns a <code>StringBuffer</code>,
+     * not a string, you can modify the URL easily, for example,
+     * to append query parameters.
+     *
+     * <p>This method is useful for creating redirect messages
+     * and for reporting errors.
+     *
+     * @return		a <code>StringBuffer</code> object containing
+     *			the reconstructed URL
+     *
+     */
+    public StringBuffer getRequestURL()
+    {
+	StringBuffer url = new StringBuffer ();
+	synchronized(url)
+	{
+	    String scheme = getScheme();
+	    int port = getPort();
+
+	    url.append (scheme);
+	    url.append ("://");
+	    url.append (getHost());
+	    if (port>0 && ((scheme.equals ("http") && port != 80)||
+			   (scheme.equals ("https") && port != 443)))
+	    {
+		url.append (':');
+		url.append (port);
+	    }
+	    url.append(getPath());
+	    return url;
+	}
+    }
+
     
     /* -------------------------------------------------------------- */
     /** Get the full URI.

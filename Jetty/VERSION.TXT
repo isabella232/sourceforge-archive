@@ -1,6 +1,13 @@
 Stable 2.4.5
 Dev    3.0.A99
 
+
+CustomizeRequest
+setScheme
+   + Switched to the aelfred parser from microstar, which is
+     only partially validating, but small and lightweight
+   + Implemented webapp session-config
+
 Jetty-3.0.A99 - 10 Aug 2000
    + Implemented jetty.xml configuration
    + Added Xmlconfiguration utility
