@@ -197,12 +197,14 @@
       <Arg><New class="org.mortbay.http.handler.ProxyHandler"></New></Arg>
     </Call>
 
+    <!-- Disabled as is not working in 4.2
     <Call name="addHandler">
       <Arg><New class="org.mortbay.http.handler.ContentEncodingHandler">
            <Call name="addPathSpec"><Arg>/images/*</Arg></Call>
            <Set name="minimumLength">512</Set>
       </New></Arg> 
     </Call>
+    -->
 
     <Call name="addHandler">
       <Arg><New class="org.mortbay.http.handler.HTAccessHandler">

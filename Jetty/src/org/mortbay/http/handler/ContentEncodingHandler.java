@@ -61,6 +61,12 @@ public class ContentEncodingHandler
     private HttpEncoding _httpEncoding;
     private int _minimumLength=512;
     private PathMap _pathMap;
+
+    /* ------------------------------------------------------------ */
+    public ContentEncodingHandler()
+    {
+        Code.fail("ContentEncodingHandler does not currently work with Jetty 4.2.");
+    }
     
     /* ------------------------------------------------------------ */
     public void start()

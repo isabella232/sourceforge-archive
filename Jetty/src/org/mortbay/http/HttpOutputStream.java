@@ -22,7 +22,7 @@ import java.io.OutputStreamWriter;
 
 /* ---------------------------------------------------------------- */
 /** HTTP Http OutputStream.
- * Acts as a BufferedOutputStream until setChunking(true) is called.
+ * Acts as a BufferedOutputStream until setChunking() is called.
  * Once chunking is enabled, the raw stream is chunk encoded as per RFC2616.
  *
  * Implements the following HTTP and Servlet features: <UL>
@@ -584,6 +584,18 @@ public class HttpOutputStream
             return getUTF8Writer();
 
         return new OutputStreamWriter(this,encoding);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        return super.toString() +
+            "\nout="+out+
+            "\nrealOut="+_realOut+
+            "\nnullableOut="+_nullableOut+
+            "\nheaderOut="+_headerOut+
+            "\nbufferedOut="+_bufferedOut+
+            "\nchunkingOut="+_chunkingOut;
     }
     
     
