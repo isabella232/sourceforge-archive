@@ -1093,11 +1093,6 @@ public class ServletHandler extends AbstractHttpHandler
          */
         public void setAttribute(String name, Object value)
         {
-            if (name.startsWith("org.mortbay.http"))
-            {
-                Code.warning("Servlet attempted update of "+name);
-                return;
-            }
             getHttpContext().setAttribute(name,value);
         }
 
@@ -1108,11 +1103,6 @@ public class ServletHandler extends AbstractHttpHandler
          */
         public void removeAttribute(String name)
         {
-            if (name.startsWith("org.mortbay.http"))
-            {
-                Code.warning("Servlet attempted update of "+name);
-                return;
-            }
             getHttpContext().removeAttribute(name);
         }
     

@@ -584,22 +584,12 @@ public class ServletHttpRequest
     /* -------------------------------------------------------------- */
     public void setAttribute(String name, Object value)
     {
-        if (name.startsWith("org.mortbay.http"))
-        {
-            Code.warning("Servlet attempted update of "+name);
-            return;
-        }
         _httpRequest.setAttribute(name,value);
     }
     
     /* -------------------------------------------------------------- */
     public void removeAttribute(String name)
     {
-        if (name.startsWith("org.mortbay.http"))
-        {
-            Code.warning("Servlet attempted update of "+name);
-            return;
-        }
         _httpRequest.removeAttribute(name);
     }
     
