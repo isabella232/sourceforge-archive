@@ -122,7 +122,7 @@ public class FrameSet extends Page
         }
         
         Frame frame = frames[col][row];
-        if (frame==null);
+        if (frame==null)
             frame = frames[col][row] = new Frame();
         
         if (frameMap.get(name)==null)

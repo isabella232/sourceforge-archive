@@ -156,7 +156,7 @@ public class ServletHolder extends Holder
     }
 
     /* ------------------------------------------------------------ */
-    public int hashcode()
+    public int hashCode()
     {
         return _name.hashCode();
     }
