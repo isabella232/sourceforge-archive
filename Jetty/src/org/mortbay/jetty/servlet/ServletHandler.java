@@ -339,6 +339,14 @@ public class ServletHandler
     }
     
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return Number of valid sessions 
+     */
+    public int sessionCount()
+    {
+        return _context.sessionCount();
+    }
     
     /* ----------------------------------------------------------------- */
     /** Handle request.

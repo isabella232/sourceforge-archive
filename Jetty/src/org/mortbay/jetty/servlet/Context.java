@@ -441,6 +441,15 @@ public class Context implements ServletContext, HttpSessionContext
     }
 
     /* ------------------------------------------------------------ */
+    /** 
+     * @return Number of valid sessions 
+     */
+    public int sessionCount()
+    {
+        return _sessions.size();
+    }
+    
+    /* ------------------------------------------------------------ */
     /**
      * @param id
      * @return
