@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + URI uses UTF8 for % encodings.
  + Added BlueRibbon campaign.
  + RequestDispatcher uses cached resources for include
  + Improved HttpResponsse.sendError error page matching.

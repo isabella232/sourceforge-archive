@@ -79,6 +79,14 @@ public class UrlEncoded extends MultiMap
     
     /* -------------------------------------------------------------- */
     /** Encode Hashtable with % encoding.
+     */
+    public String encode(String charset)
+    {
+        return encode(charset,false);
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Encode Hashtable with % encoding.
      * @param equalsForNullValue if True, then an '=' is always used, even
      * for parameters without a value. e.g. "blah?a=&b=&c=".
      */

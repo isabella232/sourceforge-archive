@@ -454,7 +454,7 @@ public class HashSessionManager implements SessionManager
         }
 
         /* ------------------------------------------------------------ */
-        public void setAttribute(String name, Object value)
+        public synchronized void setAttribute(String name, Object value)
         {
             if (_invalid) throw new IllegalStateException();
             Object oldValue = _values.put(name,value);
@@ -488,7 +488,7 @@ public class HashSessionManager implements SessionManager
         }
 
         /* ------------------------------------------------------------ */
-        public void removeAttribute(String name)
+        public synchronized void removeAttribute(String name)
         {
             if (_invalid) throw new IllegalStateException();
             Object old=_values.remove(name);

@@ -17,6 +17,8 @@ import java.util.Set;
  * It differs from the java.net.URL class as it does not provide
  * communications ability, but it does assist with query string
  * formatting.
+ * <P>UTF8 encoding is used by default for % encoded characters. This
+ * may be overridden with the org.mortbay.util.URI.encoding system property.
  * @see UrlEncoded
  * @version $Id$
  * @author Greg Wilkins (gregw)
@@ -24,6 +26,9 @@ import java.util.Set;
 public class URI
     implements Cloneable
 {
+    public static final String __CHARSET=
+        System.getProperty("org.mortbay.util.URI.charset","UTF8");
+    
     /* ------------------------------------------------------------ */
     private String _uri;
     private String _scheme;
@@ -172,7 +177,7 @@ public class URI
             }
         
             if (_query!=null && _query.length()>0)
-                _parameters.decode(_query);
+                _parameters.decode(_query,__CHARSET);
             else
                 _query=null;           
         }
@@ -279,7 +284,7 @@ public class URI
     {
         if (_dirty)
         {
-            _query = _parameters.encode();
+            _query = _parameters.encode(__CHARSET);
             if (_query!=null && _query.length()==0)
                 _query=null;
         }
@@ -540,7 +545,7 @@ public class URI
 
         try
         {    
-            return new String(bytes,0,n,StringUtil.__ISO_8859_1);
+            return new String(bytes,0,n,__CHARSET);
         }
         catch(UnsupportedEncodingException e)
         {
