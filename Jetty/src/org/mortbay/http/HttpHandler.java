@@ -59,10 +59,16 @@ public interface HttpHandler extends LifeCycle
     /* ------------------------------------------------------------ */
     /** Handle a request.
      *
+     * Note that Handlers are tried in order until one has handled the
+     * request. i.e. until request.isHandled() returns true.
+     *
+     * In broad terms this means, either a response has been commited
+     * or request.setHandled(true) has been called.
+     *
      * @param pathInContext The context path
      * @param pathParams Path parameters such as encoded Session ID
-     * @param request The request
-     * @param response The response.
+     * @param request The HttpRequest request
+     * @param response The HttpResponse response
      */
     public void handle(String pathInContext,
                        String pathParams,
