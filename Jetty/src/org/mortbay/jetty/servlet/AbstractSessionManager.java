@@ -426,10 +426,16 @@ public abstract class AbstractSessionManager implements SessionManager
             // Remove the stale sessions
             for (int i = LazyList.size(stale); i-->0;)
             {
-                ((Session)LazyList.get(stale,i)).invalidate();
-               int nbsess = this._sessions.size();
-               if (nbsess < this._minSessions)
-                  this._minSessions = nbsess;
+                // check it has not been accessed in the meantime
+                Session session=(Session)LazyList.get(stale,i);
+                long idleTime = session._maxIdleMs;
+                if (idleTime > 0 && session._accessed + idleTime < System.currentTimeMillis())    
+                {
+                    session.invalidate();
+                    int nbsess = this._sessions.size();
+                    if (nbsess < this._minSessions)
+                        this._minSessions = nbsess;
+                }
             }
         }
         finally
