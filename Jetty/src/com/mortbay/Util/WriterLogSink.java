@@ -440,7 +440,7 @@ public class WriterLogSink
             _out.flush();
         
         if (!on)
-            Code.warning("Using WriterLogSink. It is less efficient than StreamLogSink");
+            Code.warning("Using WriterLogSink. It is less efficient than OutputStreamLogSink");
     }
     
     /* ------------------------------------------------------------ */

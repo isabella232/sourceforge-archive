@@ -15,7 +15,7 @@ import com.mortbay.HTTP.SocketListener;
 import com.mortbay.Jetty.Servlet.ServletHandlerContext;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.InetAddrPort;
-import com.mortbay.Util.WriterLogSink;
+import com.mortbay.Util.OutputStreamLogSink;
 
 
 /* ------------------------------------------------------------ */
@@ -109,9 +109,10 @@ public class Demo
             context.setServingResources(true);
             
             // Logger
-            WriterLogSink log = new WriterLogSink("logs/yyyy_mm_dd.request.log");
+            OutputStreamLogSink log = new OutputStreamLogSink("logs/yyyy_mm_dd.request.log");
             log.setRetainDays(90);
             log.setAppend(true);
+            log.setFlushOn(false);
             server.setLogSink(log);
                               
             // Start handlers and listener

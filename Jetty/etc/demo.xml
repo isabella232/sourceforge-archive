@@ -212,7 +212,7 @@ $Id$
   </Call>
 
   <Set name="LogSink">
-    <New class="com.mortbay.Util.StreamLogSink">
+    <New class="com.mortbay.Util.OutputStreamLogSink">
       <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.request.log</Arg>
       <Set name="RetainDays">90</Set>
       <Set name="Append">true</Set>

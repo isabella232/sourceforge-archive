@@ -62,7 +62,7 @@ import java.util.GregorianCalendar;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class StreamLogSink
+public class OutputStreamLogSink
     implements LogSink
 {
     /*-------------------------------------------------------------------*/
@@ -122,18 +122,16 @@ public class StreamLogSink
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
-    public StreamLogSink()
+    public OutputStreamLogSink()
         throws IOException
     {
         _filename=System.getProperty("LOG_FILE");
         if (_filename==null)
             _out=System.err;
-
-        System.err.println("StreamLogSink");
     }
         
     /* ------------------------------------------------------------ */
-    public StreamLogSink(String filename)
+    public OutputStreamLogSink(String filename)
     {
         _filename=filename;
     }
@@ -533,7 +531,7 @@ public class StreamLogSink
     /* ------------------------------------------------------------ */
     /** Log a message.
      * The formatted log string is written to the log sink. The default
-     * implementation writes the message to a PrintWriter.
+     * implementation writes the message to an outputstream.
      * @param formattedLog 
      */
     public synchronized void log(String formattedLog)
@@ -566,7 +564,6 @@ public class StreamLogSink
             catch(IOException e){e.printStackTrace();}   
         }
         _started=true;
-        System.err.println("Started "+_out);
     }
     
     
@@ -623,7 +620,7 @@ public class StreamLogSink
     {
         Rollover()
         {
-            setName("Rollover: "+StreamLogSink.this.hashCode());
+            setName("Rollover: "+OutputStreamLogSink.this.hashCode());
         }
         
         public void run()

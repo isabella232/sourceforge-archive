@@ -13,7 +13,7 @@ Jetty-3.1.rc8 - 22 Aug 2001
    * URI pathAdd
    * StringMap
    * URI canonicalPath
-   * StreamLogSink replaces WriterLogSink
+   * OutputStreamLogSink replaces WriterLogSink
  + Separation of URL params in HttpHandler API.
  + Fixed handling of default mime types
  + Allow contextpaths without leading /
