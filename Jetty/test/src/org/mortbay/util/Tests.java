@@ -473,26 +473,26 @@ public class Tests extends junit.framework.TestCase
         String[][] canonical = 
         {
             {"/aaa/bbb/","/aaa/bbb/"},
-            {"/aaa//bbb/","/aaa/bbb/"},
-            {"/aaa///bbb/","/aaa/bbb/"},
+            {"/aaa//bbb/","/aaa//bbb/"},
+            {"/aaa///bbb/","/aaa///bbb/"},
             {"/aaa/./bbb/","/aaa/bbb/"},
             {"/aaa/../bbb/","/bbb/"},
             {"/aaa/./../bbb/","/bbb/"},
             {"/aaa/bbb/ccc/../../ddd/","/aaa/ddd/"},
             {"./bbb/","bbb/"},
             {"./aaa/../bbb/","bbb/"},
-            {"./",""},
-            {".//",""},
-            {".///",""},
+            {"./","./"},
+            {".//",".//"},
+            {".///",".///"},
             {"/.","/"},
-            {"//.","/"},
-            {"///.","/"},
+            {"//.","//"},
+            {"///.","///"},
             {"/","/"},
             {"aaa/bbb","aaa/bbb"},
             {"aaa/","aaa/"},
             {"aaa","aaa"},
             {"/aaa/bbb","/aaa/bbb"},
-            {"/aaa//bbb","/aaa/bbb"},
+            {"/aaa//bbb","/aaa//bbb"},
             {"/aaa/./bbb","/aaa/bbb"},
             {"/aaa/../bbb","/bbb"},
             {"/aaa/./../bbb","/bbb"},
@@ -514,13 +514,13 @@ public class Tests extends junit.framework.TestCase
             {"a/.","a/"},
             {"a/..",""},
             {"a/../..",null},
-            {"/foo/../bar//","/bar/"}
+            {"/foo/../bar//","/bar//"}
         };
 
         for (int t=0;t<canonical.length;t++)
             assertEquals( "canonical "+canonical[t][0],
-                          URI.canonicalPath(canonical[t][0]),
-                          canonical[t][1]
+                          canonical[t][1],
+                          URI.canonicalPath(canonical[t][0])
                           );
         
     }
