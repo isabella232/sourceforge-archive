@@ -211,7 +211,7 @@ public class Dispatcher implements RequestDispatcher
             MultiMap parameters=null;
             if (query!=null)
             {
-                // Add the parametes
+                // Add the parameters
                 parameters=new MultiMap();
                 UrlEncoded.decodeTo(query,parameters);
                 request.addParameters(parameters);
@@ -243,13 +243,14 @@ public class Dispatcher implements RequestDispatcher
             }
             else
             {
+                // path based dispatcher
                 request.setForwarded(forward);
                 request.setIncluded(!forward);
                 
                 // merge query string
                 String oldQ=httpServletRequest.getQueryString();
-                if (!isNamed() && !isResource() &&
-                    oldQ!=null && oldQ.length()>0)
+                if (oldQ!=null && oldQ.length()>0 &&
+                    parameters!=null)
                 {
                     UrlEncoded encoded = new UrlEncoded(oldQ);
                     Iterator iter = parameters.entrySet().iterator();
@@ -260,6 +261,7 @@ public class Dispatcher implements RequestDispatcher
                     }
                     query=encoded.encode(false);
                 }
+                
                 
                 // Adjust servlet paths
                 servletHttpRequest.setServletHandler(_servletHandler);
