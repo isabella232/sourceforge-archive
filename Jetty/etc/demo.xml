@@ -14,46 +14,46 @@
   <!-- Configure Logging                                               -->
   <!-- =============================================================== -->
 
-            <New id="demologger" class="org.mortbay.log.OutputStreamLogSink">
-              <Set name="filename"><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.demo.log</Set>
-              <Set name="retainDays">90</Set>
-              <Set name="append">true</Set>
-              <Set name="logLabels">true</Set>
-              <Set name="logStackSize">true</Set>
-              <Set name="logStackTrace">false</Set>
-              <Set name="logOneLine">false</Set>
-              <Set name="suppressStack">false</Set>
-              <Set name="logTimeZone">GMT</Set>
-            </New>
-
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Assume Commons logging is using Jetty log.  If not this section -->
   <!-- needs to be removed                                             -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+  <!-- Create a jetty commons logger logger for the demo web app-->
+  <!-- and map Context logger by display name to demo logger -->  
+  <!--
+  <New id="demologger" class="org.mortbay.log.LogImpl">        
+   <Call name="add">
+     <Arg>
+       <New class="org.mortbay.log.OutputStreamLogSink">
+	 <Set name="filename"><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.demo.log</Set>
+	 <Set name="retainDays">90</Set>
+	 <Set name="append">true</Set>
+	 <Set name="logLabels">true</Set>
+	 <Set name="logStackSize">true</Set>
+	 <Set name="logStackTrace">false</Set>
+	 <Set name="logOneLine">false</Set>
+	 <Set name="suppressStack">false</Set>
+	 <Set name="logTimeZone">GMT</Set>
+       </New>
+     </Arg>
+   </Call>
+  </New>
   <Call class="org.apache.commons.logging.LogFactory" name="getFactory">
-  
-  
-    <!-- Create a logger for the demo web app classes -->
-    <!-- and map Context logger by display name to demo logger -->  
-    <!--
-    -->
     <Call name="setAttribute">
       <Arg>org.mortbay.webapps.*</Arg>
-      <Arg>
-       <New class="org.mortbay.log.LogImpl">        
-        <Call name="add">
-          <Arg ref="demologger"/>
-        </Call>
-       </New>
-      </Arg>
+      <Arg ref="demologger"/>
     </Call>  
     <Call name="setAttribute">
       <Arg>Jetty Demo</Arg>
-      <Arg>org.mortbay.webapps.*</Arg>
+      <Arg ref="demologger"/>
     </Call>
-    
-    <!-- reconfigure the default logger -->
-    <!--
+  </Call>
+  -->  
+  
+  <!-- reconfigure the default logger to log to a file -->  
+  <!--
+  <Call class="org.apache.commons.logging.LogFactory" name="getFactory">
     <Call name="getInstance">
       <Arg/>
       <Call name="reset"/>
@@ -73,8 +73,8 @@
         </Arg>
       </Call>
     </Call>
-    -->
   </Call>
+  -->
   
   <!-- Uncomment to capture stderr and stdout to commons logging
   <Set class="org.mortbay.log.LogStream" name="logStdErr">true</Set>

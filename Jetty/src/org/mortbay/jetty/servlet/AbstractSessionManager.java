@@ -238,7 +238,7 @@ public abstract class AbstractSessionManager implements SessionManager
     /* ------------------------------------------------------------ */
     public HttpSession getHttpSession(String id)
     {
-        synchronized(__allSessions)
+        synchronized(this)
         {
             return (HttpSession)_sessions.get(id);
         }
@@ -251,10 +251,13 @@ public abstract class AbstractSessionManager implements SessionManager
         session.setMaxInactiveInterval(_dftMaxIdleSecs);
         synchronized(__allSessions)
         {
-            _sessions.put(session.getId(),session);
-            __allSessions.add(session.getId(), session);
-            if (_sessions.size() > this._maxSessions)
-                this._maxSessions = _sessions.size ();
+            synchronized(this)
+            {
+              _sessions.put(session.getId(),session);
+              __allSessions.add(session.getId(), session);
+              if (_sessions.size() > this._maxSessions)
+                  this._maxSessions = _sessions.size ();
+            }
         }
         
         HttpSessionEvent event=new HttpSessionEvent(session);
@@ -460,8 +463,6 @@ public abstract class AbstractSessionManager implements SessionManager
         return _scavenger!=null;
     }
     
-    
-    
     /* ------------------------------------------------------------ */
     public void start()
     throws Exception
@@ -529,9 +530,10 @@ public abstract class AbstractSessionManager implements SessionManager
             // we build a list of stale sessions, then go back and invalidate them
             Object stale=null;
             
-            // For each session
-            try
+
+            synchronized(AbstractSessionManager.this)
             {
+                // For each session
                 for (Iterator i = _sessions.values().iterator(); i.hasNext(); )
                 {
                     Session session = (Session)i.next();
@@ -541,24 +543,6 @@ public abstract class AbstractSessionManager implements SessionManager
                         stale=LazyList.add(stale,session);
                     }
                 }
-            }
-            catch(ConcurrentModificationException e)
-            {
-                LogSupport.ignore(log,e);
-                // Oops something changed while we were looking.
-                // Lock the context and try again.
-                // Set our priority high while we have the sessions locked
-                int oldPriority = Thread.currentThread().getPriority();
-                Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-                try
-                {
-                    synchronized(this)
-                    {
-                        stale=null;
-                        scavenge();
-                    }
-                }
-                finally {Thread.currentThread().setPriority(oldPriority);}
             }
             
             // Remove the stale sessions
@@ -765,17 +749,20 @@ public abstract class AbstractSessionManager implements SessionManager
                 // Remove session from context and global maps
                 synchronized (__allSessions)
                 {
-                    _invalid=true;
-                    _sessions.remove(getId());
-                    __allSessions.removeValue(getId(), this);
-                    
-                    if (isInvalidateGlobal())
+                    synchronized (_sessions)
                     {
-                        // Don't iterate as other sessions may also be globally invalidating
-                        while(__allSessions.containsKey(getId()))
+                        _invalid=true;
+                        _sessions.remove(getId());
+                        __allSessions.removeValue(getId(), this);
+                        
+                        if (isInvalidateGlobal())
                         {
-                            Session session=(Session)__allSessions.getValue(getId(),0);
-                            session.invalidate();
+                            // Don't iterate as other sessions may also be globally invalidating
+                            while(__allSessions.containsKey(getId()))
+                            {
+                                Session session=(Session)__allSessions.getValue(getId(),0);
+                                session.invalidate();
+                            }
                         }
                     }
                 }

@@ -703,142 +703,139 @@ public class XmlConfiguration
      * strings before being converted to any specified type.
      * @param node 
      */
-    private Object value(Object obj,XmlParser.Node node)
-        throws NoSuchMethodException,
-               ClassNotFoundException,
-               InvocationTargetException,
-               IllegalAccessException
+    private Object value(Object obj, XmlParser.Node node) throws NoSuchMethodException,
+            ClassNotFoundException, InvocationTargetException, IllegalAccessException
     {
-        Object value=null;
+        Object value = null;
 
-	// Get the type
-	String type = node.getAttribute("type");
+        // Get the type
+        String type = node.getAttribute("type");
 
         // Try a ref lookup
         String ref = node.getAttribute("ref");
-        if (ref!=null)
+        if (ref != null)
         {
-           value=_idMap.get(ref);
-	}
-        else 
-	{
-	    
-	    // handle trivial case
-	    if (node.size()==0)
-	    {
-		if ("String".equals(type))
-		    return "";
-		return null;
-	    }
+            value = _idMap.get(ref);
+        }
+        else
+        {
+            // handle trivial case
+            if (node.size() == 0)
+            {
+                if ("String".equals(type)) return "";
+                return null;
+            }
 
-	    // Trim values
-	    int first=0;
-	    int last=node.size()-1;
-		
-	    // Handle default trim type
-	    if (type==null || !"String".equals(type))
-	    {
-		// Skip leading white
-		Object item=null;
-		while(first<=last )
-		{
-		    item=node.get(first);
-		    if (!(item instanceof String))
-			break;
-		    item=((String)item).trim();
-		    if (((String)item).length()>0)
-			break;
-		    first++;
-		}
+            // Trim values
+            int first = 0;
+            int last = node.size() - 1;
 
-		// Skip trailing white
-		while(first<last)
-		{
-		    item=node.get(last);
-		    if (!(item instanceof String))
-			break;
-		    item=((String)item).trim();
-		    if (((String)item).length()>0)
-			break;
-		    last--;
-		}
+            // Handle default trim type
+            if (type == null || !"String".equals(type))
+            {
+                // Skip leading white
+                Object item = null;
+                while (first <= last)
+                {
+                    item = node.get(first);
+                    if (!(item instanceof String)) break;
+                    item = ((String) item).trim();
+                    if (((String) item).length() > 0) break;
+                    first++;
+                }
 
-		// All white, so return null
-		if (first>last)
-		    return null;
-	    }
+                // Skip trailing white
+                while (first < last)
+                {
+                    item = node.get(last);
+                    if (!(item instanceof String)) break;
+                    item = ((String) item).trim();
+                    if (((String) item).length() > 0) break;
+                    last--;
+                }
 
-	    
-	    if (first==last)
-		//  Single Item value
-		value=itemValue(obj,node.get(first));
-	    else
-	    {
-		// Get the multiple items as a single string
-		StringBuffer buf = new StringBuffer();
-		synchronized(buf)
-		{
-		    for (int i=first;i<=last;i++)
-		    {
-			Object item = node.get(i);
-			buf.append(itemValue(obj,item));
-		    }
-		    value=buf.toString();
-		}
-	    }
-	}
+                // All white, so return null
+                if (first > last) return null;
+            }
+
+            if (first == last)
+                //  Single Item value
+                value = itemValue(obj, node.get(first));
+            else
+            {
+                // Get the multiple items as a single string
+                StringBuffer buf = new StringBuffer();
+                synchronized (buf)
+                {
+                    for (int i = first; i <= last; i++)
+                    {
+                        Object item = node.get(i);
+                        buf.append(itemValue(obj, item));
+                    }
+                    value = buf.toString();
+                }
+            }
+        }
 
         // Untyped or unknown
-        if (value==null )
+        if (value == null)
         {
-            if ("String".equals(type))
-                return "";
+            if ("String".equals(type)) return "";
             return null;
         }
-        
+
         // Try to type the object
-        if (type==null)
+        if (type == null)
         {
-            if (value !=null && value instanceof String)
-                return ((String)value).trim();
+            if (value != null && value instanceof String) return ((String) value).trim();
             return value;
         }
 
-        if ("String".equals(type) || "java.lang.String".equals(type))
-            return value.toString();
+        if ("String".equals(type) || "java.lang.String".equals(type)) return value.toString();
 
         Class pClass = TypeUtil.fromName(type);
-        if (pClass!=null)
-            return TypeUtil.valueOf(pClass,value.toString());
-        
+        if (pClass != null) return TypeUtil.valueOf(pClass, value.toString());
+
         if ("URL".equals(type) || "java.net.URL".equals(type))
         {
-            if (value instanceof URL)
-                return value;
-            try{return new URL(value.toString());}
-            catch(MalformedURLException e)
-            {throw new InvocationTargetException(e);}
-        }
-        
-        if ("InetAddress".equals(type)|| "java.net.InetAddress".equals(type))
-        {
-            if (value instanceof InetAddress)
-                return value;
-            try {return InetAddress.getByName(value.toString());}
-            catch(UnknownHostException e)
-            {throw new InvocationTargetException(e);}
-        }
-        
-        if ("InetAddrPort".equals(type) || "org.mortbay.util.InetAddrPort".equals(type))
-        {
-            if (value instanceof InetAddrPort)
-                return value;
-            try{return new InetAddrPort(value.toString());}
-            catch(UnknownHostException e)
-            {throw new InvocationTargetException(e);}
+            if (value instanceof URL) return value;
+            try
+            {
+                return new URL(value.toString());
+            }
+            catch (MalformedURLException e)
+            {
+                throw new InvocationTargetException(e);
+            }
         }
 
-        throw new IllegalStateException("Unknown type "+type);
+        if ("InetAddress".equals(type) || "java.net.InetAddress".equals(type))
+        {
+            if (value instanceof InetAddress) return value;
+            try
+            {
+                return InetAddress.getByName(value.toString());
+            }
+            catch (UnknownHostException e)
+            {
+                throw new InvocationTargetException(e);
+            }
+        }
+
+        if ("InetAddrPort".equals(type) || "org.mortbay.util.InetAddrPort".equals(type))
+        {
+            if (value instanceof InetAddrPort) return value;
+            try
+            {
+                return new InetAddrPort(value.toString());
+            }
+            catch (UnknownHostException e)
+            {
+                throw new InvocationTargetException(e);
+            }
+        }
+
+        throw new IllegalStateException("Unknown type " + type);
     }
     
     /* ------------------------------------------------------------ */
