@@ -4,12 +4,13 @@
 // ========================================================================
 
 package com.mortbay.HTTP;
+//import com.sun.java.util.collections.*; XXX-JDK1.1
+import java.util.*; //XXX-JDK1.2
 
 import com.mortbay.Util.*;
-import java.util.*;
+import java.util.NoSuchElementException;
 import java.io.*;
 import java.net.*;
-import java.util.*;
 import com.mortbay.HTTP.Handler.*;
 import com.mortbay.HTTP.Handler.Servlet.*;
 import java.lang.reflect.*;

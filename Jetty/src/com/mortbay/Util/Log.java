@@ -113,7 +113,7 @@ public class Log
 						"yyyyMMdd HHmmss.SSS zzz ");
 		timezone = System.getProperty("LOG_TIMEZONE","GMT");
 	    }
-	    catch (Exception ex){
+	    catch (Throwable ex){
 		System.err.println("Exception from getProperty - probably running in applet\nUse Log.initParamsFromApplet or Log.setOptions to control debug output.");
 	    }
 		    

@@ -4,7 +4,7 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.HTTP;
-import java.util.*;
+//import com.sun.java.util.collections.*; XXX-JDK1.1
 import java.util.Vector;
 import com.mortbay.Util.*;
 import java.io.*;

@@ -4,10 +4,10 @@
 // ---------------------------------------------------------------------------
 
 package com.mortbay.Jetty;
+//import com.sun.java.util.collections.*; XXX-JDK1.1
 import com.mortbay.Util.*;
 import com.mortbay.HTML.*;
 import com.mortbay.HTTP.*;
-
 import java.io.*;
 import java.util.*;
 

@@ -4,10 +4,10 @@
 // ========================================================================
 
 package com.mortbay.HTTP.Handler;
+//import com.sun.java.util.collections.*; XXX-JDK1.1
 
 import com.mortbay.HTTP.*;
 import com.mortbay.Util.*;
-import java.util.*;
 import java.util.*;
 import java.text.*;
 import java.io.*;

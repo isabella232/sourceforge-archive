@@ -1,6 +1,9 @@
 Stable 2.4.5
 Dev    3.0.A98
 
+   + Make it compile cleanly with jikes.
+   + Re-added commented out imports for JDK-1.1 compile
+  
 Jetty-3.0.A98 - 20 July 2000
    + Implemented Jetty demos and Site as Web Application.
    + Implemented WebApplicationContext

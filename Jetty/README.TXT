@@ -25,6 +25,9 @@ so the following CLASSPATH is required (or the non unix equivalent):
 
   CLASSPATH=$JETTY3_HOME/lib/com.mortbay.jetty.jar:$JETTY3_HOME/lib/jaxp.jar:$JETTY3_HOME/lib/parser.jar:$JETTY3_HOME/lib/javax.servlet.jar
 
+Most of Jetty can be built with JDK1.1 using the 1.1 collection jar,
+if the commented XXX-JDK1.1 and XXX-JDK1.2 commented imports are
+switched.
 
 Test Harnesses
 ==============

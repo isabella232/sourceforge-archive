@@ -4,8 +4,8 @@
 // ========================================================================
 
 package com.mortbay.Util;
+//import com.sun.java.util.collections.*; XXX-JDK1.1
 
-import java.util.*;
 import java.util.*;
 
 /* ------------------------------------------------------------ */

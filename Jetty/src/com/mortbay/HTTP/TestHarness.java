@@ -4,6 +4,7 @@
 // ========================================================================
 
 package com.mortbay.HTTP;
+//import com.sun.java.util.collections.*; XXX-JDK1.1
 import java.util.*;
 import com.mortbay.Util.*;
 import java.io.*;
@@ -18,7 +19,6 @@ import java.io.*;
 public class TestHarness
 {
     public static String CRLF = HttpFields.__CRLF;
-
             
     /* -------------------------------------------------------------- */
     public static void chunkInTest()

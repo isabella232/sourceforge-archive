@@ -4,9 +4,9 @@
 // ========================================================================
 
 package com.mortbay.Jetty;
+//import com.sun.java.util.collections.*; XXX-JDK1.1
 
 import com.mortbay.Util.*;
-import java.util.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -31,8 +31,12 @@ public class Demo
 	{    
 	    // Make server
 	    HttpServer server = new HttpServer();
-	    
-	    server.addListener(new InetAddrPort(8080));
+
+	    if (arg.length==0)
+		server.addListener(new InetAddrPort(8080));
+	    else
+	        for (int l=0;l<arg.length;l++)
+		    server.addListener(new InetAddrPort(arg[l]));
 	    
 	    // Configure handlers
 	    HandlerContext context;
@@ -52,6 +56,10 @@ public class Demo
 	    context.setServingDynamicServlets(true);
 	    context.addHandler(new NotFoundHandler());
 	    
+	    context=server.getContext(null,"/javadoc/*");
+	    context.setFileBase("./javadoc/");
+	    context.setServingFiles(true);
+
 	    // Start handlers and listener
 	    server.start();
 	}

@@ -4,9 +4,9 @@
 // ========================================================================
 
 package com.mortbay.HTTP;
+//import com.sun.java.util.collections.*; XXX-JDK1.1
 
 import com.mortbay.Util.*;
-import java.util.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -970,19 +970,6 @@ public class TestRFC2616
         }
     }
     
-    /* --------------------------------------------------------------- */
-    public static void testX_X()
-    {        
-        Test t = new Test("RFC2616 X.X");
-        try
-        {
-        }
-        catch(Exception e)
-        {
-            Code.warning(e);
-            t.check(false,e.toString());
-        }
-    }
     
     /* ------------------------------------------------------------ */
     public static void main(String[] args)
@@ -1015,7 +1002,7 @@ public class TestRFC2616
 			   HttpResponse response)
 	    throws HttpException, IOException
 	{
-	    if (!isStarted())
+	    if (!super.isStarted())
 		return;        
 	    
 	    // For testing set transfer encodings
