@@ -63,6 +63,9 @@ main.javadoc.HOSTS			           :
 main.javadoc.PATHS                                 : /javadoc%
 main.javadoc.HANDLERS                              : File;NotFound
 main.javadoc.File.CLASS			           : com.mortbay.HTTP.Handler.FileHandler
+main.javadoc.File.PROPERTY.AllowPut		   : False
+main.javadoc.File.PROPERTY.AllowDelete		   : False
+main.javadoc.File.PROPERTY.Indexes		   : index.html
 main.javadoc.File.PROPERTY.FILES.Javadoc.PATHS     : /javadoc
 main.javadoc.File.PROPERTY.FILES.Javadoc.DIRECTORY : ./javadoc
 main.javadoc.File.PROPERTY.FILES.Servlet.PATHS     : /javadoc/javax/servlet

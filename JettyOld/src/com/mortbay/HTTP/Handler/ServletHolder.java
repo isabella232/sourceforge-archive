@@ -45,6 +45,10 @@ public class ServletHolder implements ServletConfig
     private Stack servlets=new Stack();
     private GenericServlet servlet=null;
     private ServletLoader loader=null;
+    private int active=0;
+    private int requests=0;
+    private boolean reloading=false;
+    private boolean autoReload=false;
 
     /* ---------------------------------------------------------------- */
     /** Construct a Servlet property mostly from the servers config
@@ -160,18 +164,54 @@ public class ServletHolder implements ServletConfig
 	    return;
 	}
 	
-	try
+	synchronized(this)
 	{
-	    String className=servletClass.getName();
-	    loader = new ServletLoader(this.classPath);
-	    servletClass = loader.loadClass(className,true);
-	    servlets=new Stack();
-	    servlet=null;
+	    if (reloading)
+	    {
+		Code.warning("Already reloading "+this);
+		return;
+	    }
+	    
+	    try
+	    {
+		reloading=true;
+
+		// wait a bit to try to let requests finish
+		if (active>0)
+		{
+		    try{wait(5000);}
+		    catch(InterruptedException e){Code.ignore(e);}
+		}
+
+		// Destroy singleton servlet
+		if (servlet!=null)
+		    servlet.destroy();
+		servlet=null;
+		
+		// Destroy stack of servlets
+		while (servlets.size()>0)
+		{
+		    Servlet s = (Servlet)servlets.pop();
+		    s.destroy();
+		}
+		servlets=new Stack();
+		
+		// Setup new classloader
+		String className=servletClass.getName();
+		loader = new ServletLoader(this.classPath);
+		servletClass = loader.loadClass(className,true);
+	    }
+	    catch(Exception e)
+	    {
+		Code.warning(e);
+	    }
+	    finally
+	    {
+		active=0;
+		reloading=false;
+	    }
 	}
-	catch(Exception e)
-	{
-	    Code.warning(e);
-	}
+	
     }
     
     /* ---------------------------------------------------------------- */
@@ -230,6 +270,17 @@ public class ServletHolder implements ServletConfig
     public void setChunkByDefault(boolean chunk)
     {
 	chunkByDefault=chunk;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set autoReload.
+     * @param autoReload If true, an expensive check is made on each
+     * servlet requests to see if the servlet has been modified and
+     * should be reloaded.
+     */
+    public void setAutoReload(boolean autoReload)
+    {
+	this.autoReload=autoReload;
     }
     
     /* ------------------------------------------------------------ */
@@ -290,79 +341,124 @@ public class ServletHolder implements ServletConfig
 	       UnavailableException,
 	       IOException
     {
-	response.setChunkByDefault(chunkByDefault);
-
-	GenericServlet useServlet=null;
-	
-	if (singleThreadModel)    
+	try
 	{
-	    // try getting a servlet from the pool of servlets
-	    try{useServlet = (GenericServlet)servlets.pop();}
-	    catch(EmptyStackException e)
+	    if (autoReload && loader!=null && loader.isModified())
 	    {
-		// Create a new one for the pool
-		try
-		{
-		    useServlet = 
-			(GenericServlet) servletClass.newInstance();
-		    useServlet.init(this);
-		}
-		catch(Exception e2)
-		{
-		    Code.warning(e2);
-		    useServlet = null;
-		}
+		Log.event("Auto reload "+name);
+		reload();
 	    }
-	}
-	else
-	{
-	    // Is the singleton instance ready?
-	    if (servlet == null)
+	    
+	    // wait for reloading to complete
+	    synchronized(this)
 	    {
-		// no so get a lock on the class
-		synchronized(ServletHolder.class)
+		while (reloading)
 		{
-		    // check if still not ready
-		    if (servlet == null)
+		    try{wait();}catch(InterruptedException e){return;}
+		}
+		active++;
+		requests++;
+	    }
+	    
+	    response.setChunkByDefault(chunkByDefault);
+
+	    GenericServlet useServlet=null;
+
+	    // reference pool to protect from reloads
+	    Stack pool=servlets;
+	
+	    if (singleThreadModel)    
+	    {
+		// try getting a servlet from the pool of servlets
+		try{useServlet = (GenericServlet)pool.pop();}
+		catch(EmptyStackException e)
+		{
+		    // Create a new one for the pool
+		    try
 		    {
-			// no so build it
-			try
-			{
-			    useServlet = 
-				(GenericServlet) servletClass.newInstance();
-			    useServlet.init(this);
-			    servlet = useServlet;
-			}
-			catch(Exception e)
-			{
-			    Code.warning(e);
-			    useServlet = servlet = null;
-			}
+			useServlet = 
+			    (GenericServlet) servletClass.newInstance();
+			useServlet.init(this);
+		    }
+		    catch(Exception e2)
+		    {
+			Code.warning(e2);
+			useServlet = null;
 		    }
 		}
 	    }
 	    else
-		// yes so use it.
-		useServlet = servlet;
-	}
+	    {
+		// Is the singleton instance ready?
+		if (servlet == null)
+		{
+		    // no so get a lock on the class
+		    synchronized(ServletHolder.class)
+		    {
+			// check if still not ready
+			if (servlet == null)
+			{
+			    // no so build it
+			    try
+			    {
+				useServlet = 
+				    (GenericServlet) servletClass.newInstance();
+				useServlet.init(this);
+				servlet = useServlet;
+			    }
+			    catch(Exception e)
+			    {
+				Code.warning(e);
+				useServlet = servlet = null;
+			    }
+			}
+		    }
+		}
+		else
+		    // yes so use it.
+		    useServlet = servlet;
+	    }
 
-	// Check that we got one in the end
-	if (useServlet==null)
-	    throw new UnavailableException(null,"Could not construct servlet");
+	    // Check that we got one in the end
+	    if (useServlet==null)
+		throw new UnavailableException(null,"Could not construct servlet");
 
-	// Service the request
-	try
-	{
-	    useServlet.service(request,response);
+	    // Service the request
+	    try
+	    {
+		useServlet.service(request,response);
+	    }
+	    finally
+	    {
+		// Return to singleThreaded pool
+		if (singleThreadModel && useServlet!=null)
+		    pool.push(useServlet);
+	    }
 	}
 	finally
 	{
-	    // Return to singleThreaded pool
-	    if (singleThreadModel && useServlet!=null)
-		servlets.push(useServlet);
+	    synchronized(this)
+	    {
+		if (active--==0)
+		    active=0;
+		if (active==0 && reloading)
+		    notifyAll();
+	    }
 	}
     }
-
+    
+    /* ------------------------------------------------------------ */
+    public int getNumRequests()
+    {
+	return requests;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public int getActiveRequests()
+    {
+	return active;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Get the name of the Servlet
      * @return Servlet name

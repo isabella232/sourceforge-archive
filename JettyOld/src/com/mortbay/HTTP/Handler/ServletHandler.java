@@ -30,6 +30,7 @@ public class ServletHandler extends NullHandler
     PathMap dynamicMap=null;
     String dynamicClassPath=null;
     Hashtable nameMap=null;
+    boolean autoReloadDynamicServlets=true;
     
     /* ----------------------------------------------------------------- */
     /** Construct basic auth handler.
@@ -55,6 +56,7 @@ public class ServletHandler extends NullHandler
      * Properties treated as a PropertyTree with the following fields: <PRE>
      * PATHS : /servlet/:/SERVLET/    # URL Paths for dynamic servlet loading
      * CLASSPATH : ./servlets:        # CLASS Paths for dynamic servlet loading
+     * AutoReloadDynamicServlets: True# Should dynamic servlets auto reload 
      * SERVLET.name.CLASS: className  # Class of servlet
      * SERVLET.name.PATHS: /path      # Servlet path
      * SERVLET.name.CHUNK: False      # Should servlet HTTP/1.1 chunk by default
@@ -78,6 +80,7 @@ public class ServletHandler extends NullHandler
 	// Setup dynamic servlets
 	Vector dynamicPaths = tree.getVector("PATHS",";");
 	dynamicClassPath = tree.getProperty("CLASSPATH");
+	autoReloadDynamicServlets = tree.getBoolean("AutoReloadDynamicServlets");
 	if (dynamicPaths!=null && dynamicClassPath!=null &&
 	    dynamicPaths.size()>0 && dynamicClassPath.length()>0)
 	{
@@ -167,10 +170,11 @@ public class ServletHandler extends NullHandler
 	    Log.event("Dynamic load "+servletClass);
 	    
 	    ServletHolder holder= new ServletHolder(servletClass,
-							   servletClass,
-							   dynamicClassPath,
-							   null);
+						    servletClass,
+						    dynamicClassPath,
+						    null);
 	    holder.setServer(httpServer);
+	    holder.setAutoReload(autoReloadDynamicServlets);
 	    servletMap.put(PathMap.match(pathSpec,address)+servletClass+"%",
 			   holder);
 	    

@@ -1,5 +1,6 @@
 PATHS				    : /servlet/;/SERVLET/;/Servlet/
 CLASSPATH			    : ./servlets
+AutoReloadDynamicServlets	    : True
 
 SERVLET.Dump.CLASS		    : com.mortbay.Servlets.Dump
 SERVLET.Dump.PATHS		    : /Dump%;*.DUMP
@@ -10,7 +11,7 @@ SERVLET.Dump.PROPERTY.AttrZ	    : ValueZ
 SERVLET.Dump.PROPERTIES		    : ./etc/JettyDemoDump.prp
 
 SERVLET.Session.CLASS		    : com.mortbay.Servlets.SessionDump
-SERVLET.Session.PATHS		    : /Session
+SERVLET.Session.PATHS		    : /SessionDump
 
 SERVLET.PropertyTree.CLASS	    : com.mortbay.Servlets.PropertyTreeEditor
 SERVLET.PropertyTree.PATHS	    : /PropertyTree

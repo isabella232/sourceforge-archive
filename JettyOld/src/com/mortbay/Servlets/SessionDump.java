@@ -19,6 +19,7 @@ import javax.servlet.http.*;
  */
 public class SessionDump extends HttpServlet
 {
+    int redirectCount=0;
     /* ------------------------------------------------------------ */
     String pageType;
 
@@ -34,25 +35,51 @@ public class SessionDump extends HttpServlet
     }
 
     /* ------------------------------------------------------------ */
-    public void service(HttpServletRequest request,
-			HttpServletResponse response) 
+    public void doPost(HttpServletRequest request,
+		       HttpServletResponse response) 
+	throws ServletException, IOException
+    {
+	HttpSession session = request.getSession(false);
+	String action = request.getParameter("Action");
+	String name =  request.getParameter("Name");
+	String value =  request.getParameter("Value");
+
+	Code.warning(action+" : "+name+" == "+value);
+	
+	if (action.equals("New Session"))
+	    session = request.getSession(true);
+	else if (action.equals("Invalidate"))
+	    session.invalidate();
+	else if (action.equals("Add"))
+	    session.putValue(name,value);
+	else if (action.equals("Remove"))
+	    session.removeValue(name);
+
+	response.sendRedirect(request.getRequestURI()+
+			      "?R="+redirectCount++);
+    }
+    
+	
+    /* ------------------------------------------------------------ */
+    public void doGet(HttpServletRequest request,
+		      HttpServletResponse response) 
 	throws ServletException, IOException
     {
 	PrintWriter pout = new PrintWriter(response.getOutputStream());
 	Page page=Page.getPage(pageType,request,response);
 	page.title("Session Dump Servlet");
-	String action = request.getParameter("Action");
 	
-	HttpSession session = request.getSession("New Session".equals(action));
+	HttpSession session = request.getSession(false);
+	
 	TableForm tf =
 	    new TableForm(response.encodeURL(request.getRequestURI()));
-	    
+	tf.method("POST");    
+	page.add(tf);
+	
 	if (session==null)
 	{
 	    page.add("<B>No Session</B>");
 	    tf.addButton("Action","New Session");
-	    tf.method("GET");
-	    page.add(tf);
 	}
 	else
 	{
@@ -60,33 +87,6 @@ public class SessionDump extends HttpServlet
 	    {
 		String id = session.getId();
 	    
-		if (action!=null)
-		{
-		    String name =  request.getParameter("Name");
-		    String value =  request.getParameter("Value");
-		    if (action.equals("Invalidate"))
-			session.invalidate();
-		    else if (action.equals("Add"))
-			session.putValue(name,value);
-		    else if (action.equals("Remove"))
-			session.removeValue(name);
-		}
-	    
-		Table table = new Table(0).cellPadding(0).cellSpacing(0);
-		page.add(table);
-
-		String[] keys= session.getValueNames();
-		for(int k=keys.length;k-->0;)
-		{
-		    String name=keys[k];
-		    
-		    table.newRow();
-		    table.addHeading(name+":&nbsp;").cell().right().top();
-		    Object value = session.getValue(name);
-		    table.addCell(value);
-		}
-	    
-		page.add(tf);
 		tf.addText("ID",session.getId());
 		tf.addText("State",session.isNew()?"NEW":"Valid");
 		tf.addText("Creation",
@@ -96,16 +96,22 @@ public class SessionDump extends HttpServlet
 		tf.addText("Max Inactive",
 			   ""+session.getMaxInactiveInterval());
 		
-		tf.addTextField("Property Name","Name",20,"name");
-		tf.addTextField("Property Value","Value",20,"value");
+		String[] keys= session.getValueNames();
+		for(int k=keys.length;k-->0;)
+		{
+		    String name=keys[k];
+		    String value=session.getValue(name).toString();
+		    tf.addText(name,value);
+		}
+		
+		tf.addTextField("Name","Property Name",20,"name");
+		tf.addTextField("Value","Property Value",20,"value");
 		tf.addButtonArea();
 		tf.addButton("Action","Add");
 		tf.addButton("Action","Remove");
 		tf.addButton("Action","Invalidate");
-
 		
 		page.add("<P>Turn off cookies in your browser to try url encoding<BR>");
-
 	    }
 	    catch (IllegalStateException e)
 	    {

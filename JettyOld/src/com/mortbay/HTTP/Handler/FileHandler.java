@@ -98,9 +98,9 @@ public class FileHandler extends NullHandler
 	    tree = new PropertyTree(properties);
 	Code.debug(tree);
 
-	putAllowed=tree.getBoolean("PUT");
-	deleteAllowed=tree.getBoolean("DELETE");
-	indexFiles=tree.getVector("INDEXES",";,");
+	putAllowed=tree.getBoolean("AllowPut");
+	deleteAllowed=tree.getBoolean("AllowDelete");
+	indexFiles=tree.getVector("Indexes",";,");
 	if (indexFiles==null || indexFiles.size()==0)
 	{
 	    indexFiles=new Vector(2);

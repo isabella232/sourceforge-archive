@@ -37,7 +37,8 @@ public class ServletLoader extends ClassLoader
 	"javax.",
 	"com.mortbay."
     };
-    
+
+	
     /* ------------------------------------------------------------ */
     /* Is the class a system class.
      * Check if the class is from java, javax or the com.mortbay
@@ -54,9 +55,17 @@ public class ServletLoader extends ClassLoader
     }
 
     /* ------------------------------------------------------------ */
+    static class LoadedFile
+    {
+	File file;
+	long timeLoaded;
+    }
+    
+    /* ------------------------------------------------------------ */
     private Hashtable cache = new Hashtable();
     Vector paths=new Vector();
-
+    Vector loaded=new Vector();
+    
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param servletClassPath 
@@ -80,8 +89,14 @@ public class ServletLoader extends ClassLoader
 		    // add to the list if it is a directory.
 		    paths.addElement(file.getCanonicalPath());
 		else
+		{
 		    // Assume it is a zip file
 		    paths.addElement(new ZipFile(file));
+		    LoadedFile lc=new LoadedFile();
+		    lc.file=file;
+		    lc.timeLoaded=System.currentTimeMillis();
+		    loaded.addElement(lc);
+		}
 	    }
 	    catch(IOException e)
 	    {
@@ -127,6 +142,11 @@ public class ServletLoader extends ClassLoader
 			Code.debug("Loading ",file);
 			in = new FileInputStream(file);
 			length=(int)file.length();
+			
+			LoadedFile lc=new LoadedFile();
+			lc.file=file;
+			lc.timeLoaded=System.currentTimeMillis();
+			loaded.addElement(lc);
 			break;
 		    }
 		}
@@ -165,6 +185,7 @@ public class ServletLoader extends ClassLoader
      * @return 
      * @exception ClassNotFoundException 
      */
+    synchronized
     public Class loadClass(String name, boolean resolve)
 	throws ClassNotFoundException
     {
@@ -208,5 +229,28 @@ public class ServletLoader extends ClassLoader
 
 	return c;
     }
+
+
+    /* ------------------------------------------------------------ */
+    /** Return true a class is modified.
+     * @return true if any of the classes loaded by this loader have been
+     * modified since their load time.
+     */
+    synchronized public boolean isModified()
+    {
+	for (int f=loaded.size();f-->0;)
+	{
+	    LoadedFile lf = (LoadedFile)loaded.elementAt(f);
+	    if (!lf.file.exists() || lf.file.lastModified()>lf.timeLoaded)
+		return true;
+	}
+	return false;	
+    }
+    
 };
+
+
+
+
+
 

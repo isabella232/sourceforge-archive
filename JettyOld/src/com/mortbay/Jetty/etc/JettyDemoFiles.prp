@@ -1,6 +1,6 @@
-INDEXS		         : index.html;index.htm
-PUT			 : false
-DELETE			 : false
+AllowPut		 : False
+AllowDelete		 : False
+Indexes			 : index.html;index.htm
 FILES.FileBase.PATHS     : /
 FILES.FileBase.DIRECTORY : ./FileBase
 FILES.jsp.PATHS          : /JSP/

@@ -295,6 +295,22 @@ is restarted. It is the servlet implementors job to control the life
 cycle of any such threads.
 
 
+Servlet Reloading
+-----------------
+The servlet Holder class has a reload method and an auto reload state.
+The reload methods waits 5 seconds for all requests to the servlet to
+complete, before calling destroy on all servlets and creating a new
+ServletLoader for future requests.
+
+The auto reload method is an expensive check on each request to the 
+servlet. It checks the modification date of any class or jar file used
+to load any class for the servlet. If there has been a modification, then
+the servlet (and all it's referenced classes) are reloaded before the 
+request is handled.   This mode can be configured in the Server configuration
+file for all dynamically loaded servlets - which is an excellent servlet
+development mode.
+
+
 HTTP/1.1
 --------
 Servlets by default will only use persistent connections if
@@ -303,6 +319,24 @@ been set in the response header.  However, chunking can be used
 by default if the java property CHUNK_BY_DEFAULT is set or 
 ServletHolder.setChunkByDefault(true) is called, which allows
 persistent connections to be used in more situations.
+
+
+Running the Jetty Demo under MacOS
+----------------------------------
+Running Jetty under MacOS requires MacOS Runtime for Java and the MRJ SDK, both
+available from http://developer.apple.com/java/. 
+
+Use JBindery to make a double-clickable application to run the Jetty demo:
+
+- Launch JBindery.
+- In the Class name field, enter "com.mortbay.Jetty.Demo"
+- Click on the Classpath icon to show the Classpath screen.
+- Drag and drop the lib files (com.mortbay.Jetty.jar, gnujsp.jar,
+javax.servlet.jar) to the "Additions to class path" box.
+- Click Save Settings. Save the settings as an application in the Jetty 2.2
+folder (the same folder that contains the etc and FileBase folders).
+- Double-click the application you just created to start the server.
+
 
 
 

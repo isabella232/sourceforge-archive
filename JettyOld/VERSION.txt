@@ -1,3 +1,10 @@
+Release 2.1.Alpha1 - 7 May 1999
+  + ServletHolder can auto reload servlets
+  + Dynamic servlets can have autoReload configured 
+  + Wait for requests to complete before reloading.
+  + Call destroy on old servlets when reloading.
+  + Made capitalization of config file more consistent(ish)
+  + Fixed bug in SessionDump
 
 Release 2.2.Alpha0 - 6 May 1999
   + Improved PropertyTree implementation
