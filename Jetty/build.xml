@@ -13,7 +13,7 @@
 
   <!-- ==================================================================== -->
   <property name="RELEASE.MAJOR"  value="4.2" />
-  <property name="RELEASE.MAJOR.MINOR"  value="4.2.9rc2" />
+  <property name="RELEASE.MAJOR.MINOR"  value="4.2.9" />
 
   <!-- ==================================================================== -->
   <property name="build.compiler"            value="modern" />
@@ -537,7 +537,7 @@
          <pathelement path="${env.CLASSPATH}" />
          <path refid="classpath" />
        </classpath>
-       <jvmarg line="${jvmarg}" />
+       <jvmarg line="-Dorg.xml.sax.parser=org.apache.xerces.parsers.SAXParser ${jvmarg}" />
        <arg line="${etc}/admin.xml ${etc}/watchdog.xml" />
     </java>
   </target>
