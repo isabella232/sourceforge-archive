@@ -278,26 +278,24 @@ public class HandlerContext
     
     /* ------------------------------------------------------------ */
     /** Setup context for serving Resources as files.
-     * @param serve If true and there is no FileHandler instance in the
-     * context, a FileHandler is added. If false, all FileHandler instances
-     * are removed from the context.
+     * @param serve If true and there is no ResourceHandler instance in the
+     * context, a ResourceHandler is added. If false, all ResourceHandler
+     * instances are removed from the context.
      */
     public synchronized void setServingResources(boolean serve)
     {
-	// XXX - may have to use a ResourceHandler here....
-	
-	FileHandler handler = (FileHandler)
-	    getHandler(com.mortbay.HTTP.Handler.FileHandler.class);
+	ResourceHandler handler = (ResourceHandler)
+	    getHandler(com.mortbay.HTTP.Handler.ResourceHandler.class);
 	if (serve)
 	{
 	    if (handler==null)
-		addHandler(new FileHandler());
+		addHandler(new ResourceHandler());
 	}
 	else while (handler!=null)
 	{
 	    _handlers.remove(handler);
-	    handler = (FileHandler)
-	    getHandler(com.mortbay.HTTP.Handler.FileHandler.class);
+	    handler = (ResourceHandler)
+		getHandler(com.mortbay.HTTP.Handler.ResourceHandler.class);
 	}
     }
     
@@ -305,20 +303,13 @@ public class HandlerContext
     /* ------------------------------------------------------------ */
     public boolean isServingResources()
     {
-	return getFileHandler()!=null;
-    }
-
-    /* ------------------------------------------------------------ */
-    public FileHandler getFileHandler()
-    {
-	return (FileHandler)
-	    getHandler(com.mortbay.HTTP.Handler.FileHandler.class);
+	return getResourceHandler()!=null;
     }
     
     /* ------------------------------------------------------------ */
-    public FileHandler getResourceHandler()
+    public ResourceHandler getResourceHandler()
     {
-	return (FileHandler)
+	return (ResourceHandler)
 	    getHandler(com.mortbay.HTTP.Handler.ResourceHandler.class);
     }
     
@@ -357,6 +348,7 @@ public class HandlerContext
 	    _mimeMap=(Map)value;
     }
 
+    
     /* ------------------------------------------------------------ */
     /** 
      * @param name 

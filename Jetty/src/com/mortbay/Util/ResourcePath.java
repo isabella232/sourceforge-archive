@@ -16,6 +16,8 @@ import java.io.*;
  *
  * Access files from a path of URLs, directories and Jar files.
  *
+ * XXX - This class needs a BIG TIDY UP and a test harness
+ *
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -56,28 +58,23 @@ public class ResourcePath
 		    throw new FileNotFoundException(token);
 
 		File file=resource.getFile();
-		if (file!=null)
-		{
-		    if (file.isDirectory())
-			_paths.add(file.getCanonicalPath());
-		    else
-		    {
-			// Assume it is a zip file
-			_paths.add(new ZipFile(file));
-			LoadedFile lc=new LoadedFile();
-			lc.resource=resource;
-			lc.lastModified=System.currentTimeMillis();
-			_loaded.add(lc);
-			if (Code.verbose(100))
-			    Code.debug("Jar ",file);
-		    }
-		}
-		else if (resource.isDirectory())
-		{
+
+		if (resource.isDirectory())
 		    _paths.add(resource);
+		else if (file!=null)
+		{
+		    // Assume it is a zip file
+		    _paths.add(new ZipFile(file));
+		    LoadedFile lc=new LoadedFile();
+		    lc.resource=resource;
+		    lc.lastModified=System.currentTimeMillis();
+		    _loaded.add(lc);
+		    if (Code.verbose(100))
+			Code.debug("Jar ",file);
 		}
 		else
 		{
+		    // Assume it is a zip resource
 		    Set filenames = new HashSet();
 		    ZipInputStream zin =
 			new ZipInputStream(resource.getInputStream());
@@ -115,7 +112,7 @@ public class ResourcePath
 	    try
 	    {
                 Object source = _paths.get(p);
-                if (source instanceof java.util.zip.ZipFile)
+                if (source instanceof ZipFile)
                 {
                     ZipFile zip = (ZipFile)source;
 
@@ -144,30 +141,7 @@ public class ResourcePath
                         break;
                     }
                 }
-                else if (source instanceof File)
-                {
-                    String dir = (String)source;
-                    File file = new File(dir+File.separator+filename);
-                    if (file.exists())
-                    {
-			if (Code.verbose(1000))
-			    Code.debug("Look in dir ",file,
-				       " for ",filename);
-
-			
-                        in = new FileInputStream(file);
-                        length=(int)file.length();
-                        
-                        LoadedFile lc=new LoadedFile();
-                        lc.resource=
-			    Resource.newResource(file.toURL());//XXX yuck
-                        lc.lastModified=file.lastModified();
-                        _loaded.add(lc);
-                        if (Code.verbose()) Code.debug("Found ",filename);
-                        break;
-                    }
-                }
-		else
+		else if (source instanceof Resource)
 		{   
 		    Resource resourceBase = (Resource)_paths.get(p);
 		    resource = resourceBase.addPath(filename);
@@ -190,6 +164,10 @@ public class ResourcePath
 			break;
 		    }
 		}
+		else
+		{
+		    Code.warning("Not Implemented for: "+source);
+		}
 	    }
 	    catch(Exception e)
 	    {
@@ -206,6 +184,82 @@ public class ResourcePath
 	return in;
     }
 
+    
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     */
+    public Resource getResource(String filename)
+    {
+	if (Code.verbose()) Code.debug("get ",filename);
+	 
+	// XXX Maybe it should get here with / instead of \.
+	filename = filename.replace( File.separatorChar, '/');
+	int length=0;
+	
+	Resource resource=null;
+
+	// For each potential path
+	for (int p=0;p<_paths.size();p++)
+	{
+	    try
+	    {
+                Object source = _paths.get(p);
+                if (source instanceof ZipFile)
+                {
+                    ZipFile zip = (ZipFile)source;
+
+		    if (Code.verbose(1000))
+			Code.debug("Look in jar ",zip,
+				   " for ",filename);
+		    
+                    ZipEntry entry = zip.getEntry(filename);
+                    if (entry==null)
+                    {
+                        // Try alternate file separator for jars prepared
+                        // on other architectures.
+                        String alt=null;
+                        if (File.separatorChar=='/')
+                            alt=filename.replace('/','\\');
+                        else
+                            alt=filename.replace(File.separatorChar,'/');
+                        entry = zip.getEntry(alt);
+                    }
+                    
+                    if (entry!=null)
+                    {
+			resource=Resource.newResource
+			    ("jar:"+
+			     new File(zip.getName()).toURL().toString()+
+			     (filename.startsWith("/")?"!":"!/")+
+			     filename);  
+                        break;
+                    }
+                }
+		else if (source instanceof Resource)
+		{   
+		    Resource resourceBase = (Resource)_paths.get(p);
+		    resource = resourceBase.addPath(filename);
+		    if (resource.exists())
+			break;
+		    resource=null;
+		}
+		else
+		{
+		    Code.warning("Not Implemented for: "+source);
+		}
+	    }
+	    catch(Exception e)
+	    {
+		if (Code.verbose())
+		    Code.debug(e);
+	    }
+	}
+	 
+	return resource;
+    }
+
+    
     /* ------------------------------------------------------------ */
     /** Return true a loaded file is modified.
      * @return true if any of the files loaded have been

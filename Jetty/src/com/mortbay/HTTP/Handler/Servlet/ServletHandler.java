@@ -75,11 +75,11 @@ public class ServletHandler extends NullHandler
 	    String classPath=getHandlerContext().getClassPath();	    
 	    if (classPath!=null && classPath.length()>0)
 	    {
-		_loader=new FileJarServletLoader(classPath,false);
+		_loader=new ServletLoader(classPath,false);
 		Code.debug("servlet classpath=",classPath);
 	    }
 	    else
-		_loader=new ServletLoader();    
+		_loader=new ServletLoader(null,false);    
 	}
 	catch(Throwable e)
 	{

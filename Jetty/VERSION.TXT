@@ -3,7 +3,8 @@ Dev    3.0.A98
 
 
 Jetty-3.0.A99 - ????????????
-
+   + ServletLoader simplied and uses ResourcePath
+   + Replaced FileHandler with ResourceHandler
    + Use SAX XML parsing instead of DOM for space saving.
    + Removed FileBase. Now use ResourceBase instead
    + Added Resource abstraction

@@ -18,7 +18,7 @@ public class JettyPage extends Page
     private static final PathMap __pathMap = new PathMap();
     static   
     {
-	System.err.println("Loading Index");
+	Log.event("Loading JettyPage Index");
 	int i=0;
 	int j=0;
 	ArrayList major=new ArrayList(10);
@@ -38,7 +38,7 @@ public class JettyPage extends Page
 		    do
 		    {
 			Section section=new Section(value);
-			System.err.println(key+" = "+section);
+			Code.debug(key," = ",section);
 			minor.add(section);
 			if (section._pathSpec!=null)
 			    __pathMap.put(section._pathSpec,section);
@@ -202,9 +202,7 @@ public class JettyPage extends Page
     /* ------------------------------------------------------------ */
     public void completeSections()
     {
-	
     }
-
 
     /* ------------------------------------------------------------ */
     public static void main(String[] args)
@@ -268,10 +266,7 @@ public class JettyPage extends Page
 	{
 	    return _key+", "+_uri+", "+(_pathSpec==null?"":_pathSpec);
 	}
-	
     }
-
-    
 }
 
 

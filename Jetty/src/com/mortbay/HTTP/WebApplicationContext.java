@@ -19,11 +19,8 @@ import org.xml.sax.*;
 import javax.servlet.*;
 
 /* ------------------------------------------------------------ */
-/** 
- * <p>
+/**
  *
- *
- * @see
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -51,7 +48,6 @@ public class WebApplicationContext extends HandlerContext
 	if (__xmlParser==null)
 	{
 	    __xmlParser=new XmlParser();
-	    // XXX - need to configure this better
 	    __xmlParser.redirectEntity
 		("web-app_2_2.dtd",
 		 Resource.newSystemResource("com/mortbay/HTTP/web.dtd"));
@@ -257,8 +253,8 @@ public class WebApplicationContext extends HandlerContext
     /* ------------------------------------------------------------ */
     private void initWelcomeFileList(XmlParser.Node node)
     {
-	FileHandler fh = getFileHandler();
-	fh.setIndexFiles(null);
+	ResourceHandler rh = getResourceHandler();
+	rh.setIndexFiles(null);
 	
 	Iterator iter= node.iterator("welcome-file");
 	while(iter.hasNext())
@@ -266,7 +262,7 @@ public class WebApplicationContext extends HandlerContext
 	    XmlParser.Node indexNode=(XmlParser.Node)iter.next();
 	    String index=indexNode.toString(false);
 	    Code.debug("Index: ",index);
-	    fh.addIndexFile(index);
+	    rh.addIndexFile(index);
 	}
     }
 

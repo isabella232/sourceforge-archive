@@ -10,6 +10,7 @@ import com.mortbay.Util.*;
 import java.util.*;
 import java.util.zip.*;
 import java.io.*;
+import java.net.*;
 
 /* ------------------------------------------------------------ */
 /** Servlet Class Loader.
@@ -28,12 +29,50 @@ import java.io.*;
 public class ServletLoader extends ClassLoader
 {
     private HashMap _cache = new HashMap(37);
+    private ResourcePath _classPath;
     
     /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param servletClassPath Coma separated path of filenames or URLs
+     * pointing to directories or jar files. Directories should end
+     * with '/'.
+     */
     protected ServletLoader()
 	throws IOException
-    {}
+    {
+	this(null,false);
+    }
     
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param servletClassPath Coma separated path of filenames or URLs
+     * pointing to directories or jar files. Directories should end
+     * with '/'.
+     */
+    protected ServletLoader(String servletClassPath)
+	throws IOException
+    {
+	this(servletClassPath,false);
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param servletClassPath Coma separated path of filenames or URLs
+     * pointing to directories or jar files. Directories should end
+     * with '/'.
+     * @param quiet If true, non existant paths are not reported
+     * @exception IOException 
+     */
+    public ServletLoader(String servletClassPath,
+			 boolean quiet)
+        throws IOException
+    {
+	Code.debug("new ServletLoader(",servletClassPath,")");
+	if (servletClassPath!=null && servletClassPath.length()>0)
+	    _classPath=new ResourcePath(servletClassPath,quiet);
+    }
+
     
     /* ------------------------------------------------------------ */
     /** Load a class.
@@ -60,7 +99,7 @@ public class ServletLoader extends ClassLoader
 		return findSystemClass(name);    
 	    
 	    // try loading from the handler class path
-	    c=loadServletClass(name);
+	    c=loadFromClassPath(name);
 	    if (c!=null)
 	    {
 		if (Code.verbose())Code.debug("loaded  ",name);
@@ -89,9 +128,58 @@ public class ServletLoader extends ClassLoader
      * @param name Class name (without ".class");
      * @return the class or null if not found.
      */
-    protected Class loadServletClass(String name)
+    protected Class loadFromClassPath(String name)
     {
-	return null;
+	if (_classPath==null)
+	    return null;
+	
+        Class c;        
+        //remove the .class
+        if (name.endsWith(".class"))
+            name = name.substring(0,name.lastIndexOf('.'));
+        
+        // Look for a cached class
+        c=(Class)_cache.get(name);
+        if (c!=null)
+            return c;
+
+	// get the package name
+	String packageName="";
+	if (name.indexOf(".")>=0)
+	    packageName=name.substring(0,name.lastIndexOf('.'));
+	
+	// Check permission
+	SecurityManager sm=System.getSecurityManager();
+	if (sm!=null)
+	    sm.checkPackageAccess(packageName);
+	
+	// Load & define
+        String filename = name.replace('.',File.separatorChar)+".class";
+        InputStream in=_classPath.getInputStream(filename);
+        if (in!=null)
+        {
+            try{
+                ByteArrayOutputStream out =
+                    new ByteArrayOutputStream(8192);
+                com.mortbay.Util.IO.copy(in,out);
+                
+                byte data[] = out.toByteArray();
+                c= defineClass(name,data,0,data.length);
+		_cache.put(name,c);
+            }
+            catch(Exception e)
+            {
+		Code.ignore(e);
+            }
+            finally
+            {
+                try{in.close();}
+                catch(Exception e){Code.ignore(e);}
+            }
+        }
+
+	if (Code.verbose())Code.debug("Loaded ",c," for ",name);
+        return c;
     }
     
     /* ------------------------------------------------------------ */
@@ -104,28 +192,36 @@ public class ServletLoader extends ClassLoader
     {
 	if (Code.verbose()) Code.debug("Load resource as stream ",filename);
 
-	InputStream in= getServletResourceAsStream(filename);
-	
+	InputStream in=null;
+	if (_classPath!=null)
+	    in=_classPath.getInputStream(filename);
 	if (in==null)
 	    in=ClassLoader.getSystemResourceAsStream(filename);
 	
 	return in;
     }
-    
 
     /* ------------------------------------------------------------ */
-    /** Load a resource from the servlet class loader.
-     * This method is used by by getResourceAsStream to load resources
-     * from the servlet class path and should be specialized by
-     * derived ServletLoaders.
-     * @param filename The filename of the resource
-     * @return An InputStream to the resource or null
+    /** Get a resource.
+     * Not implemented.
+     * @param filename 
+     * @return 
      */
-    public InputStream getServletResourceAsStream(String filename)
+    public URL getResource(String filename)
     {
-	return null;
+	Code.debug("Load resource ",filename);
+	URL url=null;
+	if (_classPath!=null)
+	{
+	    Resource resource=_classPath.getResource(filename);
+	    if (resource!=null)
+		url=resource.getURL();
+	}
+	if (url==null)
+	    url=ClassLoader.getSystemResource(filename);
+	return url;
     }
-
+    
     
     /* ------------------------------------------------------------ */
     /** Return true a class is modified.
@@ -133,21 +229,11 @@ public class ServletLoader extends ClassLoader
      * @return true if any of the classes loaded by this loader have been
      * modified since their load time.
      */
-    final public boolean isModified()
+    public boolean isModified()
     {	
-	return isServletModified();
+	return _classPath.isModified();
     }
     
-    /* ------------------------------------------------------------ */
-    /**
-     * Must be implmented by derived loaders.
-     * @return 
-     */
-    public boolean isServletModified()
-    {
-	return false;
-    }
-
     
     /* ------------------------------------------------------------ */
     /** Load a class.
@@ -167,19 +253,6 @@ public class ServletLoader extends ClassLoader
         return c;
     }
 
-    
-    /* ------------------------------------------------------------ */
-    /** Get a resource.
-     * Not implemented.
-     * @param filename 
-     * @return 
-     */
-    public java.net.URL getResource(String filename)
-    {
-	Code.debug("Load resource ",filename);
-	Code.notImplemented();
-        return null;
-    }
     
     
     /* ------------------------------------------------------------ */
