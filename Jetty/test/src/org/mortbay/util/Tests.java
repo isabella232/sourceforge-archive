@@ -248,7 +248,7 @@ public class Tests extends junit.framework.TestCase
         assertTrue("c[3].check(c[0])", creds[3].check(creds[0]));
         assertTrue("c[3].check(c[1])", creds[3].check(creds[1]));
         assertTrue("c[3].check(c[2])",!creds[3].check(creds[2]));
-        assertTrue("c[3].check(c[3])",!creds[3].check(creds[3]));
+        assertTrue("c[3].check(c[3])", creds[3].check(creds[3]));
        
     }
 
@@ -520,15 +520,19 @@ public class Tests extends junit.framework.TestCase
             {"a/..",""},
             {"a/../..",null},
             {"/foo/../bar//","/bar//"},
+            {"/./blah/..","/"},
             {"//../a/../bb/../ccc/../test///..","/test//"},
         };
 
         for (int t=0;t<canonical.length;t++)
+        {
+            System.err.println(canonical[t][0]+" == "+URI.canonicalPath(canonical[t][0]));
+        
             assertEquals( "canonical "+canonical[t][0],
                           canonical[t][1],
                           URI.canonicalPath(canonical[t][0])
                           );
-        
+        }
     }
 
 
