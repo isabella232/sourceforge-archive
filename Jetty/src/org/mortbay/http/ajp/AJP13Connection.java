@@ -32,6 +32,7 @@ import java.io.StringBufferInputStream;
  */
 public class AJP13Connection extends HttpConnection
 {
+    private AJP13Listener _listener;
     private AJP13InputStream _ajpIn;
     private AJP13OutputStream _ajpOut;
     private String _remoteHost;
@@ -60,6 +61,7 @@ public class AJP13Connection extends HttpConnection
                                       bufferSize);
         _ajpOut.setCommitObserver(this);
         getOutputStream().setBufferedOutputStream(_ajpOut,true);
+        _listener=listener;
     }
 
     /* ------------------------------------------------------------ */
@@ -171,7 +173,6 @@ public class AJP13Connection extends HttpConnection
             {
               case AJP13Packet.__FORWARD_REQUEST:
                   request.setTimeStamp(System.currentTimeMillis());
-                  statsRequestStart();
                   
                   request.setState(HttpMessage.__MSG_EDITABLE);
                   request.setMethod(packet.getMethod());
@@ -233,7 +234,11 @@ public class AJP13Connection extends HttpConnection
                       
                       attr=packet.getByte();
                   }
+
+                  _listener.customizeRequest(this,request);
+                  
                   gotRequest=true;
+                  statsRequestStart();
                   request.setState(HttpMessage.__MSG_RECEIVED);
                   
                   // Complete response
