@@ -19,7 +19,7 @@ Request form parameters
 Request cookies
 Response set-cookies.
 Redirections
-
+Basic Authentication
 
 FileHandler:
 ------------
@@ -33,7 +33,6 @@ IfModifiedSince
 IfUnmodifiedSince
 Memory cache
 MIME Type by extension
-
 
 NotFoundHandler:
 ----------------
