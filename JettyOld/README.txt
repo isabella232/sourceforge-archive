@@ -208,7 +208,7 @@ FREQUENTLY ASKED QUESTIONS
 
 Does Jetty support SSL?
 -----------------------
-Jetty contains serveral listeners extensions that support SSL.
+Jetty contains several listeners that support SSL.
 In the contrib directories there is a listener for the Protekt SSL 
 commercial product from www.forge.com.au and a prototype JSSE
 listener from kiwiconsulting.com.
