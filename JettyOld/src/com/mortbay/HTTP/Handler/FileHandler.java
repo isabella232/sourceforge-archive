@@ -100,6 +100,7 @@ public class FileHandler extends NullHandler
         {
             this.filename=filename;
             this.file=file;
+            encoding=httpServer.getMimeType(file.getName());
             lastModified=file.lastModified();
             bytes = new byte[(int)file.length()];
             Code.debug("LOAD: ",filename);
@@ -113,7 +114,6 @@ public class FileHandler extends NullHandler
                 read+=len;
             }
             in.close();
-            encoding=httpServer.getMimeType(file.getName());
         }
         
         /* ------------------------------------------------------------ */

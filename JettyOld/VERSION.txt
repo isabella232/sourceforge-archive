@@ -1,4 +1,8 @@
-Release 2.4.0 - 24th March 2000 LATEST
+Release 2.4.1 - 2nd April 2000 LATEST STABLE
+  + Removed debug println from ServletHolder.
+  + Set encoding before exception in FileHandler.
+
+Release 2.4.0 - 24th March 2000 
   + Upgraded to gnujsp 1.0.0
   + Added per servlet resourceBase configuration.
   + Absolute URIs are returned by getRequestURI (if sent by browser). 

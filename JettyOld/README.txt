@@ -215,11 +215,13 @@ have been created under Unix, so are terminated with LF. If you edit
 these files under another OS, make sure you have a consistent line
 termination character (CRLF for DOS & Windows, LF for Unix, CR for Mac).
 
-GNUJSP locks during compile
----------------------------
+GNUJSP locks or fails during compile
+------------------------------------
 The default GNUJSP configuration uses a command line compiler. Try
 changing the compiler property for the gnujsp servlet to some of the
-options suggested in the GNUJSP INSTALL file.
+options suggested in the GNUJSP INSTALL file.  Also check the
+arguments defined for the JSP compiler, specifically the path to the
+gnujsp.jar.  If all else fails, put gnujsp into the system CLASSPATH.
 
 CLASSPATH does not work
 -----------------------

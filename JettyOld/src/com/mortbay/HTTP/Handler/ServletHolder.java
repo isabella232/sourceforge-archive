@@ -375,11 +375,6 @@ public class ServletHolder implements ServletConfig
                     resourceBase.substring(6);
             }
             
-            try{
-            System.err.println(resourceBase);
-            System.err.println(new URL(resourceBase));
-            System.err.println(System.getProperties());
-            }catch(Exception e){Code.warning(e);}
             context= new ServletContextWrapper(server,resourceBase);
             return context;
         }

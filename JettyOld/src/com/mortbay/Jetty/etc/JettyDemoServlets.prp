@@ -91,5 +91,5 @@ SERVLET.gnujsp.ResourceBase         : file:./FileBase/
 SERVLET.gnujsp.PROPERTY.scratchdir  : ./etc/jsp     
 SERVLET.gnujsp.PROPERTY.debug       : true
 SERVLET.gnujsp.PROPERTY.checkclass  : true
-SERVLET.gnujsp.PROPERTY.compiler    : builtin-javac -classpath %classpath%:%scratchdir%:./lib/gnujsp.jar -d %scratchdir% -deprecation %source% 
+SERVLET.gnujsp.PROPERTY.compiler    : builtin-javac -classpath %classpath%:%scratchdir%:lib/gnujsp.jar -d %scratchdir% -deprecation %source% 
 
