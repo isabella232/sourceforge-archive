@@ -374,8 +374,10 @@ fi
 #####################################################
 # Build the classpath with Jetty's bundled libraries.
 #####################################################
-CP=`ls $JETTY_HOME/lib/*.jar | tr "\n" "$PATH_SEPARATOR"`
-CLASSPATH="$CP$PATH_SEPARATOR$CLASSPATH"
+CP=`ls $JETTY_HOME/lib/*.jar | tr "\n" "$PATH_SEPARATOR" | sed s/$PATH_SEPARATOR'$'//`
+[ "$CLASSPATH" != "" ] && CP=$CP$PATH_SEPARATOR$CLASSPATH
+[ -f $JAVA_HOME/lib/tools.jar ] && CP="$CP$PATH_SEPARATOR$JAVA_HOME/lib/tools.jar"
+CLASSPATH="$CP"
 
 #####################################################
 # Add jetty properties to Java VM options.

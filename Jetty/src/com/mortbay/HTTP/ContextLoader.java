@@ -161,8 +161,8 @@ public class ContextLoader extends URLClassLoader
     public String getFileClassPath()
     {
         if (_info._unresolved)
-            Code.warning("Could not resolve file only path from path "+_path+
-                         "\nThis MAY affect JSP compiles dependant on this path");
+            Code.warning("Non file CLASSPATH "+_path+
+                         ". If JSP compiles are affected, try extracting WARs");
         
         return _info._fileClassPath;
     }
