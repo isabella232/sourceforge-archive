@@ -17,7 +17,7 @@ import org.mortbay.util.io.BufferCache;
  * @version $Revision$
  * @author gregw
  */
-public class Method extends BufferCache
+public class HttpMethod extends BufferCache
 {
     public final static String 
     	GET= "GET",
@@ -41,9 +41,9 @@ public class Method extends BufferCache
 	    CONNECT_INDEX= 8,
 	    MOVE_INDEX= 9;
 	    
-	public final static Method CACHE = new Method();
+	public final static HttpMethod CACHE = new HttpMethod();
 	    
-	private Method()
+	private HttpMethod()
 	{
 		add(GET,GET_INDEX);
 		add(POST,POST_INDEX);

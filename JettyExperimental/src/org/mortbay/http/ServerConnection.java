@@ -33,9 +33,9 @@ public class ServerConnection
          */
         public void gotMethodOrVersion(Buffer ref)
         {
-        	_methodIndex=Method.CACHE.lookupIndex(ref);
+        	_methodIndex=HttpMethod.CACHE.lookupIndex(ref);
         	if (_methodIndex>=0)
-        	_method=(_methodIndex>=0)?Method.CACHE.lookupBuffer(_methodIndex):ref;
+        	_method=(_methodIndex>=0)?HttpMethod.CACHE.lookupBuffer(_methodIndex):ref;
         }
 
         /* ------------------------------------------------------------------------------- */
