@@ -205,8 +205,7 @@ Unimplemented WebApplication features
 The following WebApplication tags are not implemented:
  
   <distributable>
-  <error-page>
-  <tag-lib>
+  <resource-ref>
   <env-entry>
   <ejb-ref>
 

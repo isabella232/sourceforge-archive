@@ -222,6 +222,7 @@ public class HandlerContext implements LifeCycle
     private Map _mimeMap;
     private Map _encodingMap;
     private Map _resourceAliases;
+    private Map _errorPages;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -487,6 +488,67 @@ public class HandlerContext implements LifeCycle
         if (_resourceAliases==null)
             return null;
        return (String) _resourceAliases.remove(alias);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** set error page URI.
+     * @param error A string representing an error code or a
+     * exception classname
+     * @param uriInContext 
+     */
+    public void setErrorPage(String error,String uriInContext)
+    {
+        if (_errorPages==null)
+            _errorPages=new HashMap(5);
+        _errorPages.put(error,uriInContext);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** get error page URI.
+     * @param error A string representing an error code or a
+     * exception classname
+     * @return URI within context
+     */
+    public String getErrorPage(String error)
+    {
+        if (_errorPages==null)
+            return null;
+       return (String) _errorPages.get(error);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** get error page URI.
+     * @param error A string representing an error code or a
+     * exception classname
+     * @return URI within context
+     */
+    public Resource getErrorPageResource(String error)
+    {
+        if (_errorPages==null || _resourceBase==null)
+            return null;
+        
+        String page = (String) _errorPages.get(error);
+        if (page==null)
+            return null;
+        
+        try{
+            Resource resource = _resourceBase.addPath(page);
+            if (resource.exists())
+                return resource;
+        }
+        catch(IOException e)
+        {
+            Code.ignore(e);
+        }
+        return null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String removeErrorPage(String error)
+    {
+        if (_errorPages==null)
+            return null;
+       return (String) _errorPages.remove(error);
     }
     
     /* ------------------------------------------------------------ */
@@ -947,10 +1009,12 @@ public class HandlerContext implements LifeCycle
         // Save the thread context loader
         Thread thread = Thread.currentThread();
         ClassLoader lastContextLoader=thread.getContextClassLoader();
+        HandlerContext lastHandlerContext=response.getHandlerContext();
         try
         {
             if (_loader!=null)
                 thread.setContextClassLoader(_loader);
+            response.setHandlerContext(this);
             
             List handlers=getHandlers();
             for (int k=0;k<handlers.size();k++)
@@ -984,6 +1048,7 @@ public class HandlerContext implements LifeCycle
         finally
         {
             thread.setContextClassLoader(lastContextLoader);
+            response.setHandlerContext(lastHandlerContext);
         }
     }
     

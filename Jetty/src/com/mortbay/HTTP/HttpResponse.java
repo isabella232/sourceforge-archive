@@ -6,8 +6,10 @@
 package com.mortbay.HTTP;
 
 import com.mortbay.Util.Code;
+import com.mortbay.Util.IO;
 import com.mortbay.Util.UrlEncoded;
 import com.mortbay.Util.StringUtil;
+import com.mortbay.Util.Resource;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Field;
@@ -113,6 +115,7 @@ public class HttpResponse extends HttpMessage
     /* -------------------------------------------------------------- */
     private int _status= __200_OK;
     private String _reason;
+    private HandlerContext _handlerContext;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -134,6 +137,23 @@ public class HttpResponse extends HttpMessage
         _state=__MSG_EDITABLE;
     }
 
+    /* ------------------------------------------------------------ */
+    /** Get the HandlerContext handling this reponse. 
+     * @return 
+     */
+    public HandlerContext getHandlerContext()
+    {
+        return _handlerContext;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the HandlerContext handling this reponse. 
+     * @return 
+     */
+    void setHandlerContext(HandlerContext context)
+    {
+        _handlerContext=context;
+    }
     
     /* ------------------------------------------------------------ */
     /** 
@@ -143,7 +163,6 @@ public class HttpResponse extends HttpMessage
     {
         return _status!=__200_OK || super.isDirty();
     }
-    
 
     /* ------------------------------------------------------------ */
     /** Reset the response.
@@ -279,23 +298,12 @@ public class HttpResponse extends HttpMessage
     
     /* ------------------------------------------------------------- */
     /** Send Error Response.
-     * Sends an error response to the client using the specified status
-     * code and detail message.
-     * @param exception 
-     * @exception IOException If an I/O error has occurred.
      */
-    public void sendError(HttpException exception) 
+    private void sendError(int code,String error,String message) 
         throws IOException
-    {
-        int code=exception.getCode();
-        String message=exception.getMessage();
-        if (message==null)
-            message="";
-        String reason=exception.getReason();
-        if (reason==null)
-            reason="";
-        
+    {        
         setStatus(code);
+        String reason = (String)__statusMsg.get(new Integer(code));
         setReason(reason);
 
         if (code!=204 && code!=304 && code>=200)
@@ -303,18 +311,30 @@ public class HttpResponse extends HttpMessage
             _header.put(HttpFields.__ContentType,HttpFields.__TextHtml);
             _mimeType=HttpFields.__TextHtml;
             _characterEncoding=null;
-
-            byte[] buf =
-                ("<HTML>\n<HEAD>\n<TITLE>Error "+code+
-                 " "+reason+
-                 "</TITLE>\n<BODY>\n<H2>HTTP ERROR: "+code+
-                 " "+reason+
-                 "</H2>\n"+(message==null?"":message)+
-                 "\n</BODY>\n</HTML>\n").getBytes(StringUtil.__ISO_8859_1);
-            
-            _header.putIntField(HttpFields.__ContentLength,buf.length);
             ChunkableOutputStream out=getOutputStream();
-            out.write(buf);
+
+            
+            Resource errorPage=null;
+            if (_handlerContext!=null && error!=null)
+                errorPage=_handlerContext.getErrorPageResource(error);
+            if (errorPage!=null)
+            {
+                _header.putIntField(HttpFields.__ContentLength,
+                                    (int)errorPage.length());
+                IO.copy(errorPage.getInputStream(),out);
+            }
+            else
+            {
+                byte[] buf =
+                    ("<HTML>\n<HEAD>\n<TITLE>Error "+code+
+                     " "+reason+
+                     "</TITLE>\n<BODY>\n<H2>HTTP ERROR: "+code+
+                     " "+reason+
+                     "</H2>\n"+(message==null?"":message)+
+                     "\n</BODY>\n</HTML>\n").getBytes(StringUtil.__ISO_8859_1);
+                _header.putIntField(HttpFields.__ContentLength,buf.length);
+                out.write(buf);
+            }
             out.flush();
         }
         else
@@ -328,49 +348,18 @@ public class HttpResponse extends HttpMessage
     }
     
     /* ------------------------------------------------------------- */
-    /** Send Error Response.
+    /**
      * Sends an error response to the client using the specified status
-     * code and detail message.
+     * code and no default message.
      * @param code the status code
      * @param message the detail message
      * @exception IOException If an I/O error has occurred.
-     */
-    public void sendError(int code,String message) 
+     */public void sendError(int code,String message) 
         throws IOException
     {
-        setStatus(code);
-        String reason = (String)__statusMsg.get(new Integer(code));
-        setReason(reason);
-
-        if (code!=204 && code!=304 && code>=200)
-        {
-            _header.put(HttpFields.__ContentType,HttpFields.__TextHtml);
-            _mimeType=HttpFields.__TextHtml;
-            _characterEncoding=null;
-
-            byte[] buf =
-                ("<HTML>\n<HEAD>\n<TITLE>Error "+code+
-                 " "+reason+
-                 "</TITLE>\n<BODY>\n<H2>HTTP ERROR: "+code+
-                 " "+reason+
-                 "</H2>\n"+(message==null?"":message)+
-                 "\n</BODY>\n</HTML>\n").getBytes(StringUtil.__ISO_8859_1);
-            
-            _header.putIntField(HttpFields.__ContentLength,buf.length);
-            ChunkableOutputStream out=getOutputStream();
-            out.write(buf);
-            out.flush();
-        }
-        else
-        {
-            _header.remove(HttpFields.__ContentType);
-            _header.remove(HttpFields.__ContentLength);
-            _characterEncoding=null;
-            _mimeType=null;
-        }
-        commit();
+        sendError(code,""+code,message);
     }
-      
+    
     /* ------------------------------------------------------------- */
     /**
      * Sends an error response to the client using the specified status
@@ -381,7 +370,27 @@ public class HttpResponse extends HttpMessage
     public void sendError(int code) 
         throws IOException
     {
-        sendError(code,null);
+        sendError(code,""+code,null);
+    }
+    
+    /* ------------------------------------------------------------- */
+    /** Send Error Response.
+     * Sends an error response to the client using the specified status
+     * code and detail message.
+     * @param exception 
+     * @exception IOException If an I/O error has occurred.
+     */
+    public void sendError(int code,Throwable exception) 
+        throws IOException
+    {
+        if (exception instanceof HttpException)
+        {
+            HttpException he = (HttpException)exception;
+            code=he.getCode();
+            sendError(code,""+code,he.getMessage());
+        }
+        else
+            sendError(code,exception.getClass().getName(),exception.toString());
     }
     
     /* ------------------------------------------------------------- */

@@ -52,7 +52,22 @@ public class Dump extends HttpServlet
     /* ------------------------------------------------------------ */
     public void doGet(HttpServletRequest sreq, HttpServletResponse sres) 
         throws ServletException, IOException
-    {   
+    {
+
+        String info=sreq.getPathInfo();
+        if (info!=null && info.endsWith("Exception"))
+        {
+            try
+            {
+                throw (Throwable)(Class.forName(info.substring(1)).newInstance());
+            }
+            catch(Throwable th)
+            {
+                throw new ServletException(th);
+            }
+        }
+        
+        
         sres.setContentType("text/html");
 
         String pi=sreq.getPathInfo();

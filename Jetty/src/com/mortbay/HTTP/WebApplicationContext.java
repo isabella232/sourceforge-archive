@@ -7,6 +7,7 @@ package com.mortbay.HTTP;
 
 import com.mortbay.HTTP.Handler.ResourceHandler;
 import com.mortbay.HTTP.Handler.SecurityHandler;
+import com.mortbay.HTTP.Handler.NotFoundHandler;
 import com.mortbay.HTTP.Handler.Servlet.Context;
 import com.mortbay.HTTP.Handler.Servlet.ServletHandler;
 import com.mortbay.HTTP.Handler.Servlet.ServletHolder;
@@ -42,6 +43,7 @@ public class WebApplicationContext extends HandlerContext
     private SecurityHandler _securityHandler;
     private Context _context;
     private Map _tagLibMap=new HashMap(3);
+    private NotFoundHandler _notFoundHandler;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -219,10 +221,7 @@ public class WebApplicationContext extends HandlerContext
                 else if ("welcome-file-list".equals(name))
                     initWelcomeFileList(node);
                 else if ("error-page".equals(name))
-                {
-                    Code.warning("Not implemented: "+name);
-                    System.err.println(node);
-                }
+                    initErrorPage(node);
                 else if ("taglib".equals(name))
                     initTagLib(node);
                 else if ("resource-ref".equals(name))
@@ -405,6 +404,22 @@ public class WebApplicationContext extends HandlerContext
         }
     }
 
+    /* ------------------------------------------------------------ */
+    private void initErrorPage(XmlParser.Node node)
+    {
+        String error= node.getString("error-code",false,true);
+        if (error==null || error.length()==0)
+            error= node.getString("exception-type",false,true);
+        else if (_notFoundHandler==null)
+        {
+            _notFoundHandler=new NotFoundHandler();
+            addHandler(_notFoundHandler);
+        }
+        
+        String location= node.getString("location",false,true);
+        setErrorPage(error,location);
+    }
+    
     /* ------------------------------------------------------------ */
     private void initTagLib(XmlParser.Node node)
     {

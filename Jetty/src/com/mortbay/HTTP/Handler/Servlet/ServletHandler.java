@@ -285,11 +285,9 @@ public class ServletHandler extends NullHandler
                 throw (HttpException)th;
             if (th instanceof IOException)
                 throw (IOException)th;
-            if (th instanceof UnavailableException)
-                throw new HttpException(503,th.toString());
-            if (!Code.debug())
-                Code.warning(th.toString());    
-            throw new HttpException(503,th.toString());
+            if (!(th instanceof UnavailableException) && !Code.debug())
+                Code.warning(th.toString());
+            httpResponse.sendError(503,th);
         }
         catch(Error e)
         {
@@ -298,7 +296,7 @@ public class ServletHandler extends NullHandler
                 Code.warning(e);
                 Code.debug(httpRequest);
             }
-            throw new HttpException(503,e.toString());
+            httpResponse.sendError(503,e);
         }
     }
 
@@ -411,8 +409,7 @@ public class ServletHandler extends NullHandler
             response.setOutputState(0);
             Code.debug("Handled by ",entry);
             if (!httpResponse.isCommitted())
-                httpResponse.commit();
-            
+                httpResponse.commit();  
         }
     }
         

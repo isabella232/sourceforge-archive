@@ -315,7 +315,6 @@ public class HttpConnection
                     
                 // service the request
                 service(_request,_response);
-            
             } 
             catch (InterruptedIOException e)
             {
@@ -426,9 +425,6 @@ public class HttpConnection
             else
                 Code.warning(e.toString());
 
-            int error=HttpResponse.__500_Internal_Server_Error;
-            if (e instanceof HttpException)
-                error=((HttpException)e).getCode();
             
             _persistent=false;
             if (!_response.isCommitted())
@@ -437,7 +433,8 @@ public class HttpConnection
                 _response.removeField(HttpFields.__TransferEncoding);
                 _response.setField(HttpFields.__Connection,
                                    HttpFields.__Close);
-                _response.sendError(error);
+                
+                _response.sendError(HttpResponse.__500_Internal_Server_Error,e);
             }
         }
         catch(IOException ex)
