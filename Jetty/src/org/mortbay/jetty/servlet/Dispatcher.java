@@ -41,7 +41,6 @@ import org.mortbay.util.Code;
 import org.mortbay.util.Log;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.Resource;
-import org.mortbay.util.StringMap;
 import org.mortbay.util.UrlEncoded;
 import org.mortbay.util.URI;
 import org.mortbay.util.WriterOutputStream;
@@ -60,15 +59,6 @@ public class Dispatcher implements RequestDispatcher
     public final static String __SERVLET_PATH= "javax.servlet.include.servlet_path";
     public final static String __PATH_INFO= "javax.servlet.include.path_info";
     public final static String __QUERY_STRING= "javax.servlet.include.query_string";
-    public final static StringMap __managedAttributes = new StringMap();
-    static
-    {
-        __managedAttributes.put(__REQUEST_URI,__REQUEST_URI);
-        __managedAttributes.put(__CONTEXT_PATH,__CONTEXT_PATH);
-        __managedAttributes.put(__SERVLET_PATH,__SERVLET_PATH);
-        __managedAttributes.put(__PATH_INFO,__PATH_INFO);
-        __managedAttributes.put(__QUERY_STRING,__QUERY_STRING);
-    }
     
     ServletHandler _servletHandler;
     ServletHolder _holder=null;
@@ -297,7 +287,6 @@ public class Dispatcher implements RequestDispatcher
         String _pathInfo;
         String _query;
         MultiMap _parameters;
-        HashMap _attributes;
         
         /* ------------------------------------------------------------ */
         DispatcherRequest(HttpServletRequest request)
@@ -461,11 +450,18 @@ public class Dispatcher implements RequestDispatcher
         /* ------------------------------------------------------------ */
         public void setAttribute(String name, Object o)
         {
-            if (__managedAttributes.containsKey(name))
+            if (_included)
             {
-                if (_attributes==null)
-                    _attributes=new HashMap(3);
-                _attributes.put(name,o);
+                if (name.equals(__PATH_INFO))
+                    _pathInfo=o.toString();
+                else if (name.equals(__SERVLET_PATH))
+                    _servletPath=o.toString();
+                else if (name.equals(__CONTEXT_PATH))
+                    _contextPath=o.toString();
+                else if (name.equals(__QUERY_STRING))
+                    _query=o.toString();
+                else
+                    super.setAttribute(name,o);
             }
             else
                 super.setAttribute(name,o);
@@ -474,9 +470,6 @@ public class Dispatcher implements RequestDispatcher
         /* ------------------------------------------------------------ */
         public Object getAttribute(String name)
         {
-            if (_attributes!=null && _attributes.containsKey(name))
-                return _attributes.get(name);
-            
             if (name.equals(__PATH_INFO))
                 return _included?_pathInfo:null;
             if (name.equals(__REQUEST_URI))
