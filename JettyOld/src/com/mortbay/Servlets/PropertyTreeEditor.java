@@ -348,6 +348,9 @@ public class PropertyTreeEditor
 	tree.put("animal.mammal.horse.furry","true");
 	tree.put("animal.mammal.human.furry","some");
 	tree.put("animal.mammal.human.legs","2");
+	tree.put("animal.spider.*.furry","probably not");
+	tree.put("animal.spider.redback.furry","false");
+	tree.put("animal.spider.huntsman.furry","true");
 	tree.put("animal.reptile.*.fur","false");
 	tree.put("animal.reptile.snake.legs","0");
 	tree.put("plant.*.legs","0");
