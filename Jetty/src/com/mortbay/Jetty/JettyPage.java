@@ -128,7 +128,7 @@ public class JettyPage extends Page
         attribute("link","#606CC0");
         attribute("vlink","#606CC0");
         attribute("alink","#606CC0");
-        attribute("background",context+"/images/jettybg.png");
+        //        attribute("background",context+"/images/jettybg.png");
         attribute("MARGINWIDTH","0");
         attribute("MARGINHEIGHT","0");
         attribute("LEFTMARGIN","0");
@@ -153,9 +153,9 @@ public class JettyPage extends Page
             addHeader("<META NAME=\"description\" CONTENT=\"Jetty Java HTTP Servlet Server\"><META NAME=\"keywords\" CONTENT=\"Jetty Java HTTP Servlet Server\">");
         }
         
-        _table = new Table();
+        _table = new Table(0);
         nest(_table);
-        _table.cellPadding(7);
+        _table.cellPadding(0);
         _table.cellSpacing(0);
         _table.newRow();
         _table.newCell();
@@ -206,10 +206,15 @@ public class JettyPage extends Page
         _table.add("<A HREF=\"http://www.mortbay.com\"><IMG SRC=\""+context+"/images/mbLogoBar.png\" BORDER=0></A><P>\n");
         _table.add("<A HREF=\"http://www.inetu.com\"><IMG SRC=\""+context+"/images/inetu.png\" BORDER=0></A><P>\n");
         _table.add("<A HREF=\"http://sourceforge.net/projects/jetty\"><IMG SRC=\""+context+"/images/sourceforge.png\" BORDER=0></A><P>\n");
-        //_table.add("<A HREF=\"http://sourceforge.net/projects/jetty\"><IMG SRC=\"http://sourceforge.net/sflogo.php?group_id=7322&type=1\" width=\"88\" height=\"31\" border=\"0\" alt=\"SourceForge Logo\" ></A><P>\n");
+        _table.add("&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P><font size=-4 color=\"#606CC0\">Copyright 2001<BR>Mort Bay Consulting.</FONT>");
         
         _table.newCell();
-        _table.add("<IMG SRC=\""+context+"/images/blank.png\">");
+        _table.cell().width(3);
+        _table.cell().bgColor("#606C90");
+        _table.add("<BR>");
+        _table.newCell();
+        _table.cell().width(10);
+        _table.add("&nbsp;&nbsp;");
         _table.newCell();
         _table.cell().top();
         _table.cell().left();

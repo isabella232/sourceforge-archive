@@ -339,15 +339,25 @@ public class WebApplicationContext extends HandlerContext
     {
         String name=node.getString("servlet-name",false,true);
         String className=node.getString("servlet-class",false,true);
+        String jspFile=null;
+        
         if (className==null)
         {
-            Code.warning("Missing servlet-class in "+node);
-            return;
+            // There is no class, so look for a jsp file
+            jspFile=node.getString("jsp-file",false,true);
+            if (jspFile!=null)
+                className=_servletHandler.getJSPClassName();
+            else
+            {
+                Code.warning("Missing servlet-class|jsp-file in "+node);
+                return;
+            }
         }
         if (name==null)
             name=className;
         
-        ServletHolder holder = _servletHandler.newServletHolder(className);
+        ServletHolder holder =
+            _servletHandler.newServletHolder(className,jspFile);
         holder.setServletName(name);
         
         Iterator iter= node.iterator("init-param");

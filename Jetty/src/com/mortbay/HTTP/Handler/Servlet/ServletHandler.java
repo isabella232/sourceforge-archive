@@ -47,8 +47,11 @@ import javax.servlet.UnavailableException;
  * @author Greg Wilkins
  */
 public class ServletHandler extends NullHandler 
-{    
-    /* ----------------------------------------------------------------- */
+{
+    /* ------------------------------------------------------------ */
+    private final String __JSP_SERVLET="org.apache.jasper.servlet.JspServlet";
+    
+    /* ------------------------------------------------------------ */
     private PathMap _servletMap=new PathMap();
     
     private Map _nameMap=new HashMap();
@@ -440,6 +443,13 @@ public class ServletHandler extends NullHandler
         return new ServletHolder(this,servletClass);
     }
 
+    /* ------------------------------------------------------------ */
+    public ServletHolder newServletHolder(String servletClass, String path)
+        throws javax.servlet.UnavailableException,
+               ClassNotFoundException
+    {
+        return new ServletHolder(this,servletClass,path);
+    }
     
     /* ------------------------------------------------------------ */
     /** Destroy Handler.
@@ -466,4 +476,11 @@ public class ServletHandler extends NullHandler
             _nameMap.put(name,holder);
         }
     }
+
+    /* ------------------------------------------------------------ */
+    public String getJSPClassName()
+    {
+        return __JSP_SERVLET;
+    }
+    
 }

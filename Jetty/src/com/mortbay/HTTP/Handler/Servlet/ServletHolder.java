@@ -56,7 +56,9 @@ public class ServletHolder
     private Config _config;
     private Map _roleMap;
     private int _checks;
+    private String _path;
 
+    
     /* ---------------------------------------------------------------- */
     /** Construct a Servlet property mostly from the servers config.
      * file.
@@ -74,6 +76,20 @@ public class ServletHolder
         _config=new Config();
     }
 
+    /* ---------------------------------------------------------------- */
+    /** Constructor. 
+     * @param handler 
+     * @param className 
+     * @param pathName 
+     */
+    public ServletHolder(ServletHandler handler,
+                         String className,
+                         String path)
+    {
+        this(handler,className);
+        _path=path;
+    }
+    
     
     /* ------------------------------------------------------------ */
     public String getServletName()
@@ -180,7 +196,7 @@ public class ServletHolder
         try
         {
             // XXX - This is horrible - got to find a better way.
-            if (getClassName().equals("org.apache.jasper.servlet.JspServlet"))
+            if (getClassName().equals(_handler.getJSPClassName()))
             {                
                 ClassLoader jettyLoader=_handler.getHandlerContext().getClassLoader();
                 ClassLoader jasperLoader=(ClassLoader)
@@ -445,6 +461,16 @@ public class ServletHolder
         // Service the request
         try
         {
+            // Handle aliased path
+            if (_path!=null)
+            {
+                request.setAttribute("javax.servlet.include.request_uri",
+                                     request.getContextPath()+
+                                     (_path.startsWith("/")?"":"/")+
+                                     _path);
+                request.setAttribute("javax.servlet.include.servlet_path",_path);
+            }
+            
             useServlet.service(request,response);
             response.flushBuffer();
         }

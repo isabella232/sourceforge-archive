@@ -33,6 +33,7 @@ class ServletWriter extends PrintWriter
         super(IO.getNullWriter());
         filter=new Filter(os);
         out=(new OutputStreamWriter(filter,encoding));
+        lock=os;
     }
 
     /* ------------------------------------------------------------ */

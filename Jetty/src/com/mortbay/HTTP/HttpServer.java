@@ -574,7 +574,8 @@ public class HttpServer implements LifeCycle
 
     /* ------------------------------------------------------------ */
     /** Set the request log.
-     * Set the LogSink to be used for the request log.
+     * Set the LogSink to be used for the request log. The log is
+     * written in the combined format.
      * @param logSink 
      */
     public synchronized void setLogSink(LogSink logSink)
@@ -603,7 +604,7 @@ public class HttpServer implements LifeCycle
     /** Set the request log date format.
      * @param format 
      */
-    public synchronized void setLogDateFormate(String format)
+    public synchronized void setLogDateFormat(String format)
     {
         _dateCache=new DateCache(format);
     }
@@ -744,6 +745,7 @@ public class HttpServer implements LifeCycle
     
     /* ------------------------------------------------------------ */
     /** Log a request and response.
+     * The log is written in combined format.
      * @param request 
      * @param response 
      */

@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
  
+ + Included new Jetty Logo
+ + Implemented web.xml servlet mapping to a JSP
  + Fixed handling of directories without trailing /
 
 Jetty-3.0.2 - 13 Jan 2001
