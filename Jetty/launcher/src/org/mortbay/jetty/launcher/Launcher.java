@@ -40,6 +40,7 @@ public class Launcher {
     
     private File _home_dir = null;
     private Classpath _classpath = new Classpath();
+    private boolean _debug = Boolean.getBoolean("org.mortbay.jetty.launcher.debug");
     
     public static void main(String[] args) {
         try {
@@ -103,7 +104,7 @@ public class Launcher {
             String line = cfg.readLine();
             while (line != null) {
                 if ((line.length() > 0) && (!line.startsWith("#"))) {
-                    System.out.println(">"+line);
+                    if (_debug) System.err.println(">"+line);
                     StringTokenizer st = new StringTokenizer(line);
                     String jarfile = st.nextToken();
                     boolean include_jar = true;
@@ -159,7 +160,7 @@ public class Launcher {
                             if (!done.containsKey(jar)) {
                                 done.put(jar,jar);
                                 if (include_jar) {
-                                    System.out.println("Adding JAR from directory: "+jar);
+                                    if (_debug) System.err.println("Adding JAR from directory: "+jar);
                                     classpath.addComponent(jar);
                                 }
                             }
@@ -171,7 +172,7 @@ public class Launcher {
                         if (!done.containsKey(d)) {
                             done.put(d,d);
                             if (include_jar) {
-                                System.out.println("Adding directory: "+d);
+                                if (_debug) System.err.println("Adding directory: "+d);
                                 classpath.addComponent(d);
                             }
                         }
@@ -182,7 +183,7 @@ public class Launcher {
                         if (!done.containsKey(d)) {
                             done.put(d,d);
                             if (include_jar) {
-                                System.out.println("Adding single JAR: "+d);
+                                if (_debug) System.err.println("Adding single JAR: "+d);
                                 classpath.addComponent(d);
                             }
                         }
@@ -255,10 +256,10 @@ public class Launcher {
                     cpcfg = null;
                 }
                 if (cpcfg == null) {
-                    System.out.println("Configuring classpath from default resource");
+                    if (_debug) System.err.println("Configuring classpath from default resource");
                     cpcfg = getClass().getClassLoader().getResourceAsStream("org/mortbay/jetty/launcher/classpath.config");
                 } else {
-                    System.out.println("Configuring classpath from etc/classpath.config");
+                    if (_debug) System.err.println("Configuring classpath from etc/classpath.config");
                 }
                 configureClasspath(_home_dir.getPath(), _classpath, cpcfg);
                 cpcfg.close();
@@ -283,7 +284,7 @@ public class Launcher {
                         // OK, found tools.jar in java.home/../lib
                         // add it in
                         _classpath.addComponent(tools_jar_file);
-                        System.out.println("JAVAC="+tools_jar_file);
+                        if (_debug) System.err.println("JAVAC="+tools_jar_file);
                     }
                 }
             }
@@ -301,9 +302,9 @@ public class Launcher {
             
         } catch (IOException e) {}
 
-            System.out.println("JETTY_HOME="+System.getProperty("jetty.home"));
-            System.out.println("TEMPDIR="+System.getProperty("java.io.tmpdir"));
-            System.out.println("CLASSPATH="+_classpath.toString());
+            if (_debug) System.err.println("JETTY_HOME="+System.getProperty("jetty.home"));
+            if (_debug) System.err.println("TEMPDIR="+System.getProperty("java.io.tmpdir"));
+            if (_debug) System.err.println("CLASSPATH="+_classpath.toString());
 
             // Invoke org.mortbay.jetty.Server.main(args) using new classloader.
             Thread.currentThread().setContextClassLoader(cl);
@@ -313,10 +314,10 @@ public class Launcher {
                    invokeMain(cl,"org.mortbay.jetty.Server", new String[] { "etc"+File.separator+"demo.xml", "etc"+File.separator+"admin.xml" } );
                    // for demo, try to invoke web browser on Windows
                    if (System.getProperty("os.name").indexOf("Windows")!=-1) {
-                        System.out.println("Trying to launch IE browser...");
+                        if (_debug) System.err.println("Trying to launch IE browser...");
                         Process p = Runtime.getRuntime().exec( new String[] {"C:\\Program Files\\Internet Explorer\\iexplore.exe","http://localhost:8080/"});
                         if (p==null) {
-                            System.out.println("Failed to start browser.");
+                            if (_debug) System.err.println("Failed to start browser.");
                         }
                    }
                 } else {

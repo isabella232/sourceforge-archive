@@ -5,7 +5,11 @@ Jetty launcher provides a cross platform replacement for startup scripts.
 It makes use of executable JAR mechanism, which lets application packaged as JAR
 to be started with simple command line:
 
-java -jar start.jar
+  java -jar start.jar [jetty.xml ... ]
+
+or to see debug output
+
+  java -Dorg.mortbay.jetty.launcher.debug=true -jar start.jar [jetty.xml ... ]
 
 What launcher does is:
 
