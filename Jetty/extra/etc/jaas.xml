@@ -50,6 +50,11 @@
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Add jaas demo web applications.                                 -->
+  <!--  NOTE: you don't have to specify RoleCheckPolicy and            -->
+  <!--  CallbackHandler as the defaults are                            -->
+  <!--  org.mortbay.jaas.StrictRoleCheckPolicy and                     -->
+  <!--  org.mortbay.jaas.callback.DefaultCallbackHandler respectively. -->
+  <!--  If you implement your own, then specify them here.             -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Call name="addWebApplication">
     <Arg>/jaas/*</Arg>
