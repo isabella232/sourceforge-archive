@@ -654,12 +654,12 @@ public class HttpConnection
             {
                 // Check against any TE field
                 List te = _request.getAcceptableTransferCodings();
-                Enumeration enum =
+                Enumeration enm =
                     _response.getFieldValues(HttpFields.__TransferEncoding,
                                              HttpFields.__separators);
-                while (enum.hasMoreElements())
+                while (enm.hasMoreElements())
                 {
-                    String coding=(String)enum.nextElement();
+                    String coding=(String)enm.nextElement();
                     if (HttpFields.__Identity.equalsIgnoreCase(coding) ||
                         HttpFields.__Chunked.equalsIgnoreCase(coding))
                         continue;

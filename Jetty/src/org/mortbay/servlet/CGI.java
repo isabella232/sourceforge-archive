@@ -221,10 +221,10 @@ public class CGI extends HttpServlet
 	env.set("SERVER_PORT", Integer.toString(req.getServerPort()));
 	env.set("SERVER_PROTOCOL", req.getProtocol());
         env.set("SERVER_SOFTWARE", getServletContext().getServerInfo());
-	Enumeration enum = req.getHeaderNames();
-	while (enum.hasMoreElements())
+	Enumeration enm = req.getHeaderNames();
+	while (enm.hasMoreElements())
 	{
-	    String name = (String) enum.nextElement();
+	    String name = (String) enm.nextElement();
 	    String value = req.getHeader(name);
 	    env.set("HTTP_" + name.toUpperCase().replace( '-', '_' ), value);
 	}

@@ -55,10 +55,10 @@ public class Forward extends HttpServlet
     {
         super.init(config);
 
-        Enumeration enum = config.getInitParameterNames();
-        while (enum.hasMoreElements())
+        Enumeration enm = config.getInitParameterNames();
+        while (enm.hasMoreElements())
         {
-            String path=(String)enum.nextElement();
+            String path=(String)enm.nextElement();
             String forward=config.getInitParameter(path);
             _forwardMap.put(path,forward);
         }

@@ -446,8 +446,8 @@ public class XmlConfiguration
             Method method = oClass.getMethod("get"+
                                              name.substring(0,1).toUpperCase()+
                                              name.substring(1),
-                                             null);
-            obj=method.invoke(obj,null);
+                                             (java.lang.Class[])null);
+            obj=method.invoke(obj,(java.lang.Object[])null);
             configure(obj,node,0);
         }
         catch (NoSuchMethodException nsme)

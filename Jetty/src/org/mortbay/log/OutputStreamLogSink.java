@@ -581,7 +581,7 @@ public class OutputStreamLogSink
                 {
                     Method getTargetException =
                         ex.getClass().getMethod(__nestedEx[i],__noArgs);
-                    Throwable ex2=(Throwable)getTargetException.invoke(ex,null);
+                    Throwable ex2=(Throwable)getTargetException.invoke(ex,(java.lang.Object[])null);
                     if (ex2!=null)
                     {
                         __printWriter.println(__nestedEx[i]+"():");

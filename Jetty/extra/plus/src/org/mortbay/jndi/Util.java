@@ -102,10 +102,10 @@ public class Util
         //the context representation of name arg
         Context c = (Context)ctx.lookup (name);
         NameParser parser = c.getNameParser("");
-        NamingEnumeration enum = ctx.listBindings(name);
-        while (enum.hasMore())
+        NamingEnumeration enm = ctx.listBindings(name);
+        while (enm.hasMore())
         {
-            Binding b = (Binding)enum.next();
+            Binding b = (Binding)enm.next();
 
             if (b.getObject() instanceof Context)
             {

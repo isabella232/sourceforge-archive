@@ -129,9 +129,9 @@ public class Applet extends Block
         if (debug)
             paramHolder.add("<param name=\"debug\" value=\"yes\">");
         if (params != null)
-            for (Enumeration enum = params.keys(); enum.hasMoreElements();)
+            for (Enumeration enm = params.keys(); enm.hasMoreElements();)
             {
-                String key = enum.nextElement().toString();
+                String key = enm.nextElement().toString();
                 paramHolder.add("<param name=\"" + key + "\" value=\"" +
                                 params.get(key).toString() + "\">");
             }

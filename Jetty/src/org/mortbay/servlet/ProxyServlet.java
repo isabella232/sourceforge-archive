@@ -129,11 +129,11 @@ public class ProxyServlet implements Servlet
             // copy headers
             boolean xForwardedFor=false;
             boolean hasContent=false;
-            Enumeration enum = request.getHeaderNames();
-            while (enum.hasMoreElements())
+            Enumeration enm = request.getHeaderNames();
+            while (enm.hasMoreElements())
             {
                 // TODO could be better than this!
-                String hdr=(String)enum.nextElement();
+                String hdr=(String)enm.nextElement();
                 String lhdr=hdr.toLowerCase();
 
                 if (_DontProxyHeaders.contains(lhdr))

@@ -963,10 +963,10 @@ public class HttpRequest extends HttpMessage
             if (_lastCookies!=null)
             {                
                 int last=0;
-                Enumeration enum =_header.getValues(HttpFields.__Cookie);
-                while (enum.hasMoreElements())
+                Enumeration enm =_header.getValues(HttpFields.__Cookie);
+                while (enm.hasMoreElements())
                 {
-                    String c = (String)enum.nextElement();
+                    String c = (String)enm.nextElement();
                     if (last>=_lastCookies.length ||
                         !c.equals(_lastCookies[last]))
                     {
@@ -990,11 +990,11 @@ public class HttpRequest extends HttpMessage
             Cookie cookie=null;
 
             // For each cookie header
-            Enumeration enum =_header.getValues(HttpFields.__Cookie);            
-            while (enum.hasMoreElements())
+            Enumeration enm =_header.getValues(HttpFields.__Cookie);            
+            while (enm.hasMoreElements())
             {
                 // Save a copy of the unparsed header as cache.
-                String hdr = enum.nextElement().toString();
+                String hdr = enm.nextElement().toString();
                 lastCookies=LazyList.add(lastCookies,hdr);
 
                 // Parse the header

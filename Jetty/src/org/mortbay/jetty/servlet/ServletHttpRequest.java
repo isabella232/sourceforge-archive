@@ -198,15 +198,15 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     public Locale getLocale()
     {
-        Enumeration enum = _httpRequest.getFieldValues(HttpFields.__AcceptLanguage,
+        Enumeration enm = _httpRequest.getFieldValues(HttpFields.__AcceptLanguage,
                                                        HttpFields.__separators);
 
         // handle no locale
-        if (enum == null || !enum.hasMoreElements())
+        if (enm == null || !enm.hasMoreElements())
             return Locale.getDefault();
         
         // sort the list in quality order
-        List acceptLanguage = HttpFields.qualityList(enum);
+        List acceptLanguage = HttpFields.qualityList(enm);
         if (acceptLanguage.size()==0)
             return  Locale.getDefault();
 
@@ -233,15 +233,15 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     public Enumeration getLocales()
     {
-        Enumeration enum = _httpRequest.getFieldValues(HttpFields.__AcceptLanguage,
+        Enumeration enm = _httpRequest.getFieldValues(HttpFields.__AcceptLanguage,
                                                        HttpFields.__separators);
 
         // handle no locale
-        if (enum == null || !enum.hasMoreElements())
+        if (enm == null || !enm.hasMoreElements())
             return Collections.enumeration(__defaultLocale);
         
         // sort the list in quality order
-        List acceptLanguage = HttpFields.qualityList(enum);
+        List acceptLanguage = HttpFields.qualityList(enm);
         
         if (acceptLanguage.size()==0)
             return
@@ -308,10 +308,10 @@ public class ServletHttpRequest
     /* ------------------------------------------------------------ */
     public Enumeration getHeaders(String s)
     {
-        Enumeration enum=_httpRequest.getFieldValues(s,",");
-        if (enum==null)
+        Enumeration enm=_httpRequest.getFieldValues(s,",");
+        if (enm==null)
             return __emptyEnum;
-        return enum;
+        return enm;
     }
     
     /* ------------------------------------------------------------ */

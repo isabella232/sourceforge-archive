@@ -1384,21 +1384,21 @@ public class HttpFields
 
     /* ------------------------------------------------------------ */
     /** List values in quality order.
-     * @param enum Enumeration of values with quality parameters
+     * @param enm Enumeration of values with quality parameters
      * @return values in quality order.
      */
-    public static List qualityList(Enumeration enum)
+    public static List qualityList(Enumeration enm)
     {
-        if(enum==null || !enum.hasMoreElements())
+        if(enm==null || !enm.hasMoreElements())
             return Collections.EMPTY_LIST;
 
         Object list=null;
         Object qual=null;
 
         // Assume list will be well ordered and just add nonzero
-        while(enum.hasMoreElements())
+        while(enm.hasMoreElements())
         {
-            String v=enum.nextElement().toString();
+            String v=enm.nextElement().toString();
             Float q=getQuality(v);
 
             if (q.floatValue()>=0.001)
@@ -1534,10 +1534,10 @@ public class HttpFields
         if (fields==null)
             return;
 
-        Enumeration enum = fields.getFieldNames();
-        while( enum.hasMoreElements() )
+        Enumeration enm = fields.getFieldNames();
+        while( enm.hasMoreElements() )
         {
-            String name = (String)enum.nextElement();
+            String name = (String)enm.nextElement();
             Enumeration values = fields.getValues(name);
             while(values.hasMoreElements())
                 add(name,(String)values.nextElement());

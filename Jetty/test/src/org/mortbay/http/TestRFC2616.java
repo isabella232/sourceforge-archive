@@ -448,8 +448,8 @@ public class TestRFC2616
             HttpFields fields = new HttpFields();
 
             fields.put("Q","bbb;q=0.5,aaa,ccc;q=0.002,d;q=0,e;q=0.0001,ddd;q=0.001,aa2,abb;q=0.7");
-            Enumeration enum = fields.getValues("Q",", \t");
-            List list=HttpFields.qualityList(enum);
+            Enumeration enm = fields.getValues("Q",", \t");
+            List list=HttpFields.qualityList(enm);
             t.checkEquals(HttpFields.valueParameters(list.get(0).toString(),null),
                           "aaa","Quality parameters");
             t.checkEquals(HttpFields.valueParameters(list.get(1).toString(),null),

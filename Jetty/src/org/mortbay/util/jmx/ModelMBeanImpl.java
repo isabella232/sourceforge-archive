@@ -457,7 +457,7 @@ public class ModelMBeanImpl
             Method setter=null;
             
             if (attrInfo.isReadable())
-                getter=oClass.getMethod((attrInfo.isIs()?"is":"get")+uName,null);
+                getter=oClass.getMethod((attrInfo.isIs()?"is":"get")+uName,(java.lang.Class[])null);
             
             if (attrInfo.isWritable())
                 setter=oClass.getMethod("set"+uName,new Class[] {type});
@@ -664,7 +664,7 @@ public class ModelMBeanImpl
             Object o=_object;
             if (getter.getDeclaringClass().isInstance(this))
                 o=this;
-            return getter.invoke(o,null);
+            return getter.invoke(o,(java.lang.Object[])null);
         }
         catch(IllegalAccessException e)
         {
