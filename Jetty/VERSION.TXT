@@ -1,6 +1,7 @@
 Jetty3 Versions
 --------------
 
+ + use exec for jetty.sh run
  + Improved SSL debugging information.
  + KeyPairTool can now load cert chains.
  + KeyPairTool is more robust to provider setup.

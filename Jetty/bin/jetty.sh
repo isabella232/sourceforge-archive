@@ -462,7 +462,7 @@ case "$ACTION" in
             exit 1
         fi
 
-        $RUN_CMD
+        exec $RUN_CMD
         ;;
 
   check)
