@@ -18,6 +18,3 @@
 
  + Implement encrypted password realm storage
 
- + Work out what this HTTP-DAV bullshit is from Microsoft
-   and give rude messages if anybody even attempt to use
-   it (see Halloween papers at http://www.opensource.org)
