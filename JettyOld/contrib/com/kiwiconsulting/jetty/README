@@ -1,7 +1,17 @@
+UPDATE: 16 June 2000 - Preston L. Bannister <preston@home.com>
+
+The Java Secure Socket Extension (JSSE) is currently available from:
+
+  http://java.sun.com/products/jsse/
+  
+The current version at the time of this writing is JSSE 1.0.1 which 
+requires that you have Java 1.2.1 or later.
+
+
+----- [Original note] -----
 
 This implementation of a JSEE SSL adaptor has been contributed to
 Jetty but not tested.
-
 
 From: court demas <court@kiwiconsulting.com>
 
@@ -50,6 +60,3 @@ I've attached the source & binary for the listener class and a sample
 configuration file.
 
 court
-
-
-
