@@ -217,19 +217,6 @@ public class HttpListener extends ThreadedServer
         {
             Code.debug("Request problem:",e);
         }
-        finally
-        {
-            try{
-		if(frameDebug) Log.event("CLOSE: "+connection);
-                connection.close();
-            }
-            catch (IOException e){
-                Code.ignore(e);
-            }
-            catch (Exception e){
-                Code.warning("Request problem:",e);
-            }
-        }
     }
 };
 

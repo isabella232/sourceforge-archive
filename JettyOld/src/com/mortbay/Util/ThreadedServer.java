@@ -213,6 +213,8 @@ abstract public class ThreadedServer
         }
         finally
         {
+            try {connection.setSoLinger(false,0);}
+            catch ( Exception e ){Code.ignore(e);}
             try {connection.close();}
             catch ( Exception e ){Code.warning("Connection problem",e);}
             connection=null;
@@ -427,6 +429,8 @@ abstract public class ThreadedServer
         {
             try
             {
+		try {listen.setSoTimeout(1);}
+		catch ( Exception e ){Code.ignore(e);}
                 listen.close();
             }
             catch(IOException e)
@@ -582,6 +586,8 @@ abstract public class ThreadedServer
                                 Code.debug("Handling ",connection);
                         }
                         handleConnection(connection);
+			try {connection.setSoLinger(false,0);}
+			catch ( Exception e ){Code.ignore(e);}
                         connection.close();
                     }
                     catch ( Exception e )

@@ -150,8 +150,21 @@ Crypto Package from <a href="http://www.bouncycastle.org/">The Legion of
 the Bouncy Castle</a>. Other JCE 1.2 providers may work too but at the 
 moment this is the one that this is tested against. You will only need 
 it for the key loading stage so install it on your safe machine somewhere. 
-
-The class com.mortbay.Util.KeyPairTool is used to load the keys into the
+<p>
+Firstly you will need to decrypt the private key. Do this using openssl like this:
+<pre>
+<b>$</b> openssl rsa -in bee.hive.net.key -out bee.hive.net.clearkey -outform DER
+read RSA key
+Enter PEM pass phrase:
+writing RSA key
+</pre>
+If this fails, check that the sun security provider is not registered in 
+the java.security file.  It only needs to be registered their if you are
+generating your keys with sun's keytool. Jetty registers the provider on
+an as need be basis. 
+<p> 
+Next, load the key and the cert into a JKS keystore. The class 
+com.mortbay.Util.KeyPairTool is used to load the keys into the
 keystore. It has the following arguments:
 <pre>
  -key        FILENAME, location of private key [MANDATORY]
@@ -166,18 +179,6 @@ keystore. It has the following arguments:
 If passwords are not provided on the command line, they are prompted for.
 While they still appear on the screen, this is a much safer option as they
 do not get saved in shell histories or process listings.
-
-<p>
-You will need to decrypt the private key. Do this using openssl like this:
-<pre>
-<b>$</b> openssl rsa -in bee.hive.net.key -out bee.hive.net.clearkey -outform DER
-read RSA key
-Enter PEM pass phrase:
-writing RSA key
-</pre>
-If this fails, check that the sun security provider is not registered in 
-the java.security file.
-<p> Next, load the key and the cert into a JKS keystore:
 <pre>
 <b>$</b> /bin/sh
 $ java com.mortbay.Util.KeyPairTool -key bee.hive.net.clearkey -cert bee.hive.net.crt -storepass testpasswd -keystore mykeystore
@@ -186,17 +187,29 @@ Loaded the public key...
 Will create keystore: keypair.keystore
 Keys have been written to keystore
 </pre>
-<p><B><font color=red> Remember to clean up!</font></B> a simple way to do this without going to overboard is:
+<p>
+<B><font color=red> Remember to clean up!</font></B> a simple way to do this without going to overboard is:
 <pre>
 <b>$</b> man man > bee.hive.net.clearkey
 <b>$</b> cat /var/log/messages | compress > bee.hive.net.clearkey
 <b>$</b> man ls > bee.hive.net.clearkey
 <b>$</b> rm bee.hive.net.clearkey
 </pre>
-<p> You now have a keystore with your keypair stashed away in it. You can use the jdk-1.2 keytool to manipulate the key/cert now that it is in there. You can use it to change the password for instance.
+<p> 
+You now have a keystore with your keypair stashed away in it.   If you
+ignored the previous step, you also have your private key in the clear in
+your file system - SO CLEAN UP! This is your last warning.
+<p>
+You can use the jdk-1.2 keytool to manipulate the key/cert now that it is in
+there. You can use it to change the password for instance.
 <pre>
-<b>$</b> keytool -list
+<b>$</b> keytool -storepasswd
 Enter keystore password:  testpasswd
+New keystore password:  newpasswd
+Re-enter new keystore password:  newpasswd
+
+keytool -list
+Enter keystore password:  newpasswd
 
 Keystore type: jks
 Keystore provider: SUN
@@ -231,9 +244,9 @@ main.LISTENER.https.ADDRS : 0.0.0.0:8443
 
 <p> Change the way you start Jetty to:
 <ul>
- <li> include all three JSSE provided jar files in the classpath. </li>
- <li> provide the path to the keystore file as a property </li>
- <li> provide the keystore password, either as a property or typed at a
+ <li> Include all three JSSE provided jar files in the classpath. </li>
+ <li> Provide the path to the keystore file as a property </li>
+ <li> Provide the keystore password, either as a property or typed at a
       prompt.</li>
 </ul>
 
@@ -243,6 +256,16 @@ java -Djetty.ssl.password=testpasswd \
      -Djetty.ssl.keystore=/home/jetty2/keystore \
      com.mortbay.Jetty.Demo
 </pre>
+
+Remember that putting your password on the command line is a security risk.
+If you leave it out, you will be prompted for it.
+<p>
+You may then access the SSL port with a URL like:
+
+  https://yourhost:8443/Dump
+
+If you get an javax.net.ssl.SSLException, check that you have 
+remembered the s in https.
 
 <hr>
 <h1><a name="issues"> Outstanding Issues. </a></h1>
@@ -268,5 +291,7 @@ java -Djetty.ssl.password=testpasswd \
 Written by Brett Sealey. 13th August 2000.<BR>
 Updated by Greg Wilkins. 14th August 2000. 
 <hr>
+I told you to clean up your private key - do it NOW!
 </body>
 </html>
+

@@ -180,7 +180,6 @@ public abstract class JsseListener extends HttpListener
     protected Socket accept( ServerSocket p_serverSocket )
         throws IOException
     {
-        
 	try
 	{
             SSLSocket s = (SSLSocket) p_serverSocket.accept();
@@ -191,7 +190,7 @@ public abstract class JsseListener extends HttpListener
 	}
 	catch( SSLException e )
 	{
-            e.printStackTrace();
+	    Code.warning(e);
 	    throw new IOException( e.getMessage() );
 	}
     }

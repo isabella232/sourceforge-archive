@@ -33,6 +33,10 @@ the $JETTY_HOME/lib directory  e.g.
         CLASSPATH=$CLASSPATH:$JETTY_HOME/lib/gnujsp.jar
 
 
+The jsse.jar, jnet.jar and jcert.jar are only required if you
+intend to run or compile the SSL classes.
+
+
 CONFIGURATION
 =============
 
