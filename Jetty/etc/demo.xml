@@ -1,5 +1,5 @@
-<?xml version="1.0"  encoding="ISO-8859-1"?> 
-<!DOCTYPE Configure SYSTEM "configure.dtd"> 
+<?xml version="1.0"  encoding="ISO-8859-1"?>
+<!DOCTYPE Configure SYSTEM "configure.dtd">
 
 <!--
 This is a Jetty HTTP server configuration file.  This configuration
@@ -39,9 +39,9 @@ host alias.
 
 Handler:  Handlers are the objects that actually
 service the HTTP requests. Examples of Handlers include
-ServletHandler, ResourceHandler and NotFoundHandler.  
+ServletHandler, ResourceHandler and NotFoundHandler.
 Handlers are contained within Contexts, which provide
-conveniance methods for the common handlers so 
+conveniance methods for the common handlers so
 that servlet and file serving may be configured for
 a context without explicit creation of a Handler.
 
@@ -82,7 +82,7 @@ $ID: $
   <Call name="addWebApplication">
     <Arg>/jetty</Arg>
     <Arg>file:<SystemProperty name="user.dir"/>/webapps/jetty.war</Arg>
-    <Arg><SystemProperty name="user.dir"/>/etc/webdefault.xml/</Arg>
+    <Arg>file:<SystemProperty name="user.dir"/>/etc/webdefault.xml/</Arg>
   </Call>
 
   <Call name="addContext">
