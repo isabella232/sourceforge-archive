@@ -51,6 +51,8 @@ public class ServletSSL
 	    return 0;
 	else if (cipherSuite.indexOf("WITH_RC4_128_") >= 0)
 	    return 128;
+        else if (cipherSuite.indexOf("WITH_AES_128_") >= 0)
+            return 128;
 	else if (cipherSuite.indexOf("WITH_RC4_40_") >= 0)
 	    return 40;
 	else if (cipherSuite.indexOf("WITH_3DES_EDE_CBC_") >= 0)
