@@ -116,7 +116,7 @@ class FileResource extends URLResource
             
             File newFile = new File(_file,path);
             
-            r=new FileResource(newFile.toURL(),null,newFile);
+            r=new FileResource(newFile.toURI().toURL(),null,newFile);
         }
                                   
         return r;
@@ -134,7 +134,7 @@ class FileResource extends URLResource
                 String can=_file.getCanonicalPath();
                 
                 if (abs.length()!=can.length() || !abs.equals(can))
-                    _alias=new File(can).toURL();
+                    _alias=new File(can).toURI().toURL();
                 
                 if (_alias!=null && log.isDebugEnabled())
                 {

@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Use File.toURI().toURL() when jdk 1.2 alternative is available.
+
 Jetty-5.0.alpha2 - 19 September 2003
  + Use commons logging.
  + Use log4j if extra is present.
