@@ -142,7 +142,7 @@ public class ServletRequest
     }
     
     /* ------------------------------------------------------------ */
-    ServletResponse getServletResponse()
+    public ServletResponse getServletResponse()
     {
         return _servletResponse;
     }
