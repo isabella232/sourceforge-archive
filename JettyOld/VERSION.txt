@@ -1,5 +1,4 @@
-
-Release 2.2.Beta1 -  June 1999
+Release 2.2.Beta1 - 7 June 1999
   + Defined abstract ServletLoader, derivations of which can be 
     specified in HttpConfiguration properties. 
   + Implemented all HttpServer attribute methods by mapping to the
