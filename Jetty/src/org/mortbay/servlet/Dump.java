@@ -493,6 +493,8 @@ public class Dump extends HttpServlet
             if ("/ex7".equals(pi))
                 throw new HttpException(501);
         }
+
+        request.getInputStream().close();
         
     }
 

@@ -534,7 +534,7 @@ public class ServletHandler extends AbstractHttpHandler
                 log.warn("Exception for "+httpRequest.getURI()+": "+th);
             else
             {
-                log.warn("Exception for "+httpRequest.getURI(),th);
+                LogSupport.warn(log,"Exception for "+httpRequest.getURI(),th);
                 if(log.isDebugEnabled())log.debug(httpRequest);
             }
             

@@ -16,23 +16,20 @@ import org.mortbay.jndi.Util;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.TypeUtil;
 import org.mortbay.xml.XmlParser;
+import java.net.MalformedURLException;
 
 /* ------------------------------------------------------------ */
 public class PlusWebAppContext extends WebApplicationContext
 {
     private static Log log = LogFactory.getLog(PlusWebAppContext.class);
-
-
     private InitialContext _initialCtx = null;
- 
-
+    private ClassLoader _removeClassLoader=null;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @exception IOException 
      */
-    public PlusWebAppContext(
-    )
+    public PlusWebAppContext()
     {
        super();
     }
@@ -186,4 +183,32 @@ public class PlusWebAppContext extends WebApplicationContext
         if(log.isDebugEnabled())log.debug("Bound object to "+name.get(name.size() - 1));
     }
     */
+
+
+    /* ------------------------------------------------------------ */
+    protected void initClassLoader(boolean forceContextLoader)
+        throws MalformedURLException, IOException
+    {
+        // detect if own classloader is created.  If so, make sure it is
+        // removed from log4j CRS
+        ClassLoader cl=getClassLoader();
+        super.initClassLoader(forceContextLoader);
+        if (cl==null || getClassLoader()!=cl)
+            _removeClassLoader=getClassLoader();
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    /* Removes context classloader from log4j repository
+     */
+    public void stop()
+        throws InterruptedException
+    {
+        try { super.stop(); }
+        finally
+        {
+            org.mortbay.log4j.CRS.remove(_removeClassLoader);
+            _removeClassLoader=null;
+        }
+    }
 }

@@ -9,6 +9,16 @@
 <Configure class="org.mortbay.jetty.plus.Server">
 
   <!-- =============================================================== -->
+  <!-- Configure context specific log4j logging                        -->
+  <!-- =============================================================== -->
+  <!-- uncomment to allow each context to configure log4j separately
+  <Call class="org.apache.log4j.LogManager" name="setRepositorySelector">
+    <Arg><New class="org.mortbay.log4j.CRS"/></Arg>
+    <Arg><New class="java.lang.Object"/></Arg>
+  </Call>
+  -->
+
+  <!-- =============================================================== -->
   <!-- Add a transaction manager and datasources                       -->
   <!-- =============================================================== -->
   <Call name="addService">

@@ -393,4 +393,20 @@ public class TypeUtil
         return array;
     }
     
+
+    public static void dump(Class c)
+    {
+        System.err.println("Dump: "+c);
+        dump(c.getClassLoader());
+    }
+
+    public static void dump(ClassLoader cl)
+    {
+        System.err.println("Dump Loaders:");
+        while(cl!=null)
+        {
+            System.err.println("  loader "+cl);
+            cl = cl.getParent();
+        }
+    }
 }

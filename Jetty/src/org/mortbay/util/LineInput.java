@@ -381,8 +381,6 @@ public class LineInput extends FilterInputStream
     {
         if (_mark < 0)
             throw new IOException("Resetting to invalid mark");
-        if (_byteLimit>=0)
-            _byteLimit+=_pos-_mark;
         _pos=_mark;
         _mark=-1;
     }
