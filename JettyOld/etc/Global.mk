@@ -40,7 +40,10 @@ endif
 JAVAC := ${JDK_HOME}/bin/javac
 JAVA := ${JDK_HOME}/bin/java
 JAVAH := ${JDK_HOME}/bin/javah
-NATIVEOPTS := -I${JDK_HOME}/include -I${JDK_HOME}/include/${ARCH}
+NATIVEOPTS := -I${JDK_HOME}/include \
+ -I${JDK_HOME}/include/${ARCH} \
+ -I${JDK_HOME}/include/$(shell echo ${ARCH} | tr A-Z a-z)
+
 
 SUFFIXES := $(SUFFIXES) .java .class
 # Java files

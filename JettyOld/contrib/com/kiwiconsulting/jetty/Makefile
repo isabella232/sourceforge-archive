@@ -10,7 +10,7 @@
 TESTS :=
 ROOTNAME := com
 
-EXCLUDECLASSES := JettyJavaSSLHttpListener.class
+EXCLUDECLASSES := 
 
 include $(JETTY_HOME)/etc/Global.mk
 
