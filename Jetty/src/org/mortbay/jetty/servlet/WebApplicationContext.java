@@ -666,6 +666,7 @@ public class WebApplicationContext extends ServletHandlerContext
         XmlParser.Node data=node.get("user-data-constraint");
         if (data!=null)
         {
+            data=data.get("transport-guarantee");
             String guarantee = data.toString(false,true).toUpperCase();
             if (guarantee==null || guarantee.length()==0 ||
                 "NONE".equals(guarantee))
@@ -733,11 +734,14 @@ public class WebApplicationContext extends ServletHandlerContext
     /* ------------------------------------------------------------ */
     private void initSecurityRole(XmlParser.Node node)
     {
+        Code.warning("Security role "+
+                     node.get("role-name").toString(false,true)+
+                     " not handled");
+        Code.debug("Not Implemented "+node);
         // XXX - not sure what needs to be done here.
         // Could check that the role is known to the security handler
         // but it could be initialized later?
     }
-    
 
     /* ------------------------------------------------------------ */
     public String toString()

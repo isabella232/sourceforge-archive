@@ -1,12 +1,13 @@
 Jetty3 Versions
 --------------
 
-Jetty-3.1.1 - 25 Sep 2001
+Jetty-3.1.1 - 27 Sep 2001
  + Removed JDK 1.3 dependancy
  + Fixed ServletRequest.getLocale().
  + Removed incorrect warning for WEB-INF/lib jar files.
  + Handle requestdispatcher during init.
- + html package uses lower-case names to be XHTML-like.
+ + Use lowercase tags in html package to be XHTML-like.
+ + Correctly ignore auth-constraint descriptions.
 
 Jetty-3.1.0 - 21 Sep 2001
  + Added long overdue Tutorial documentation.
