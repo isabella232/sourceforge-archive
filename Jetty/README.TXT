@@ -21,18 +21,26 @@ run:
   export JAVA_HOME=<JRE install directory>
   $JETTY_HOME/bin/jetty.sh run
 
-Browse to:
+This will start a basic Jetty server on port 8080. Point your browser at
   http://localhost:8080
 
+This should give a very basic Jetty page. 
 
-If this doesn't work - you can try the ant quick start below or you will need to
-read some more and setup the environment.
+By default, output will be logged in the $JETTY_HOME/logs directory.
+
+Type ^C to initiate a graceful shutdown and stop the server.
+
+The full Jetty demo can be started as follows:
+  $JETTY_HOME/bin/jetty.sh run demo admin
+
+Note: an ant demo quick start procedure is documented below along with
+detailed instructions on how to setup the runtime environment.
 
 
 
 Quick start on Windows
 ======================
-Due to problems with the servlet security model (see below). It is vital
+Due to problems with the servlet security model (see below).  It is vital
 that windows users use the exact case for drive letters, URLs and filenames.
 
 run:
@@ -45,20 +53,21 @@ Browse to:
 
 If you still have problems:
   - try installing in a path with no spaces in the directory name.
-  - Check that the case of JETTY_HOME is exactly the same as reported by
-    your system. Also read the section on alias checking in the web application
-    security section below.
 
-If this doesn't work - you can try the ant quick start below or you will need to
-read some more and setup the environment.
+  - Check that the case of JETTY_HOME is exactly the same as reported by
+    your system. Also read the section on alias checking in the web
+    application security section below.
+
+If this doesn't work - you can try the ant quick start below or you
+will need to read some more and setup the environment.
 
 
 
 Ant Quick Start
 ===============
 
-If you have the ant java build tool ant installed, you may use that to start
-jetty.  The demo can be started with:
+If you have the ant java build tool ant installed, you may use that to
+start jetty.  The demo can be started with:
 
   Unix:  ant -buildfile $JETTY_HOME/build.xml demo
   Win32: ant.bat -buildfile %JETTY_HOME%\build.xml demo
@@ -73,8 +82,8 @@ The default jetty.xml configuration can be started with:
 
 Environment
 ===========
-Development has been done in JDK1.2 and the following CLASSPATH is required
-(or the non unix equivalent):
+Development has been done in JDK1.2 and the following CLASSPATH is
+required (or the non unix equivalent):
 
   CLASSPATH=\
     $JETTY_HOME/lib/org.mortbay.jetty.jar:\
@@ -138,10 +147,10 @@ can be run with
 The org.mortbay.jetty.Server class is simply an xml configuration
 frontend to org.mortbay.http.HttpServer.
 
-There is a Jetty extension configuration mechanism for web applications.
-If a file WEB-INF/web-jetty.xml is found, it is treated as a Jetty XmlConfiguration
-file and applied to the WebApplicationContext object when the context
-is started.
+There is a Jetty extension configuration mechanism for web
+applications.  If a file WEB-INF/web-jetty.xml is found, it is treated
+as a Jetty XmlConfiguration file and applied to the
+WebApplicationContext object when the context is started.
 
 
 Building from source
@@ -175,8 +184,8 @@ to build all the source and run with the source hierarchy in the CLASSPATH.
 
 Running Watchdog Tests
 ======================
-See the etc/watchdog.xml configuration file comments for instructions on how
-to run the Jakarta Watchdog 4.0 tests.
+See the etc/watchdog.xml configuration file comments for instructions
+on how to run the Jakarta Watchdog 4.0 tests.
 
 
 Distribution
@@ -342,9 +351,10 @@ execute:
 
 Check /var/log/messages to see if everything worked fine.
 
-The Jetty SystemV Init script uses the $JETTY_HOME/bin/jetty.sh shell script
-to launch Jetty. Read the shell script's documentation above, or the one in
-the script's initial comments to learn about available configuration options.
+The Jetty SystemV Init script uses the $JETTY_HOME/bin/jetty.sh shell
+script to launch Jetty. Read the shell script's documentation above,
+or the one in the script's initial comments to learn about available
+configuration options.
 
 
 Win32 Service
@@ -360,8 +370,8 @@ constraints within a web.xml file:
 
  + Methods PUT, DELETE and GET are disabled unless explicitly enabled.
 
- + If multiple security-constraints are defined, the most specific applies to a
-   request.
+ + If multiple security-constraints are defined, the most specific
+   applies to a request.
 
  + A security-constraint an empty auth-constraint forbids all access by any
    user:
@@ -375,8 +385,8 @@ constraints within a web.xml file:
     </security-constraint>
 
 
- + A security constraint with an auth constraint with a role of "*" gives access
-   to all authenticated users:
+ + A security constraint with an auth constraint with a role of "*"
+   gives access to all authenticated users:
 
     <security-constraint>
       <web-resource-collection>
@@ -388,8 +398,8 @@ constraints within a web.xml file:
       </auth-constraint>
     </security-constraint>
 
- + A security-constraint with no auth-constraint and no data contrain gives access
-   to any request:
+ + A security-constraint with no auth-constraint and no data contraint
+   gives access to any request:
 
     <security-constraint>
       <web-resource-collection>
@@ -400,10 +410,11 @@ constraints within a web.xml file:
 
 
  + On platforms without the / file separator or when the system parameter
-   org.mortbay.util.FileResource.checkAliases is true, then the FileResouce class
-   compares the absolutePath and canonicalPath and treats the resource as not found
-   if they do not match.  THIS means that win32 platforms need to exactly match
-   the case of drive letters and filenames.
+   org.mortbay.util.FileResource.checkAliases is true, then the
+   FileResouce class compares the absolutePath and canonicalPath and
+   treats the resource as not found if they do not match.  THIS means
+   that win32 platforms need to exactly match the case of drive letters
+   and filenames.
 
  + Dynamic servlets by default, can only be loaded from the context classpath.
    Use ServletHandler.setServeDynamicSystemServlets to control this behaivour.
@@ -444,10 +455,11 @@ Specific access should then be granted with constraints like:
 
 Session Security
 ----------------
+
 Jetty uses the standard java.util.Random class to generate session IDs.  This
 may be insufficient for high security sites.  The SessionManager instance can
-be initialized with a more secure random number generator, such as java.security.SecureRandom
-The XML to do this to a webapplication is:
+be initialized with a more secure random number generator, such as
+java.security.SecureRandom. The XML to do this to a webapplication is:
 
   <Call name="addWebApplication">
     <Arg>/myapp/*</Arg>
@@ -469,26 +481,28 @@ operation which may cause the initial request to take much longer.
 
 Authentication Realms
 ---------------------
-The authentication mechanisms use and abstract org.mortbay.http.UserRealm 
-interface for authentication. The default implementation is a hashtable that
-is initialized from a properties file. Jetty also includes org.mortbay.http.JDBCUserRealm 
-for SQL based authentication data.  Users may simply implement their own Realms and 
-platforms such as JBoss use this mechanism to link the Jetty authentication mechanism
-to their own.
+The authentication mechanisms use and abstract
+org.mortbay.http.UserRealm interface for authentication. The default
+implementation is a hashtable that is initialized from a properties
+file. Jetty also includes org.mortbay.http.JDBCUserRealm for SQL based
+authentication data.  Users may simply implement their own Realms and
+platforms such as JBoss use this mechanism to link the Jetty
+authentication mechanism to their own.
 
 
 XML Parsing
 -----------
-Jetty comes with the JAXP 1.1 reference XML parser, which is crimson from
-apache.  The jars have been renamed with their main package name.
+Jetty comes with the JAXP 1.1 reference XML parser, which is crimson
+from apache.  The jars have been renamed with their main package name.
 Jetty does not use any of the DOM classes, so these jars can be
 trimmed significantly if you want to reduce size.
 
 Use the org.xml.sax.parser property to specify an alternative SAX parser.
 
-The DTDs used by jetty are resolved as resources from the system classpath,
-thus they are stored in org.mortbay.http/web.dtd and org.mortbay.util.configure.dtd
-within the source tree and jar file.  Copies are also placed in etc for reference.
+The DTDs used by jetty are resolved as resources from the system
+classpath, thus they are stored in org.mortbay.http/web.dtd and
+org.mortbay.util.configure.dtd within the source tree and jar file.
+Copies are also placed in etc for reference.
 
 
 JMX Management
@@ -511,40 +525,46 @@ reduct the thread usage of the Jetty server.
 DEBUGGING
 =========
 
-The debug and logging output of jetty can be controlled with java System properties:
+The debug and logging output of jetty can be controlled with java
+System properties:
 
     DEBUG - If set, debug output is enabled
-    DEBUG_PATTERNS - If set to a comma separated list of strings, Then debug output is only produced from those classes whose fully qualified class name contains one of the strings as a substring.
-    DEBUG_VERBOSE - Set to an integer verbosity level for use in controlling debug verbosity (see verbose(int))
+
+    DEBUG_PATTERNS - If set to a comma separated list of strings, Then
+        debug output is only produced from those classes whose fully
+        qualified class name contains one of the strings as a substring.
+
+    DEBUG_VERBOSE - Set to an integer verbosity level for use in
+        controlling debug verbosity (see verbose(int))
 
 Using this with the java program:
 
-   java [-DDEBUG [-DDEBUG_PATTERNS="MyClass,my.package"] [-DDEBUG_VERBOSE=n] ]  my.package.main
+   java [-DDEBUG [-DDEBUG_PATTERNS="MyClass,my.package"] [-DDEBUG_VERBOSE=n] ] my.package.main
 
 example:
 
-   java -DDEBUG -DDEBUG_PATTERNS=com.acme.MyServlet,HttpHandler  org.mortbay.jetty.Server
+   java -DDEBUG -DDEBUG_PATTERNS=com.acme.MyServlet,HttpHandler org.mortbay.jetty.Server
 
 
-There is also a debug servlet that can change the debug setting of a running
-server.   It is configured by the admin.xml file and is run on port 8081 as 
-part of the standard Jetty demo.
+There is also a debug servlet that can change the debug setting of a
+running server.  It is configured by the admin.xml file and is run on
+port 8081 as part of the standard Jetty demo.
 
-Finally the JMX MBeans provided by the JettyExtra package also provide a 
-mechanism to configure debugging and logging at runtime.
+Finally the JMX MBeans provided by the JettyExtra package also provide
+a mechanism to configure debugging and logging at runtime.
 
 
 Support FAQ
 ===========
- + This list if for jetty related support questions.  General questions about
-   servlets and/or java should not be posted here.
+ + This list if for jetty related support questions.  General
+   questions about servlets and/or java should not be posted here.
 
- + Before posting, please check the archives that the question has not been
-   asked before by checking the archives at 
-   http://groups.yahoo.com/group/jetty-support
+ + Before posting, please check the archives that the question has
+   not been asked before by checking the archives at 
+       http://groups.yahoo.com/group/jetty-support
 
  + Please also read the improving documentation at
-      http://jetty.mortbay.org/jetty/doc/index.html
+       http://jetty.mortbay.org/jetty/doc/index.html
    Please read the tutorial, then read it again.
 
  + Jetty 4 configuration is based around the concept of contexts,
