@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+Jetty-4.0.B2 - 23 Feb 2002
  + Improved default jetty.xml
  + Adjust servlet facades for welcome redirection
  + User / mapping rather than /* for servlet requests to static content
