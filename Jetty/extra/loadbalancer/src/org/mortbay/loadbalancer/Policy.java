@@ -53,9 +53,8 @@ public class Policy
         InetAddress client =
             connection.getClientSocketChannel().socket().getInetAddress();
 
-        if (log.isDebugEnabled())
-            if(log.isDebugEnabled())log.debug("Allocate "+ client + " size="+queue.size());
-
+        if(log.isDebugEnabled())log.debug("Allocate "+ client + " size="+queue.size());
+            
         Integer s = (Integer)_stickyInet.get(client);
         if (s==null)
         {

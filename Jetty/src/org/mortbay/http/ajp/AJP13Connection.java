@@ -173,8 +173,7 @@ public class AJP13Connection extends HttpConnection
             }
             
             int type=packet.getByte();
-            if (log.isDebugEnabled())
-                if(log.isDebugEnabled())log.debug("AJP13 type="+type+" size="+packet.unconsumedData());
+            if(log.isDebugEnabled())log.debug("AJP13 type="+type+" size="+packet.unconsumedData());
             
             switch (type)
             {

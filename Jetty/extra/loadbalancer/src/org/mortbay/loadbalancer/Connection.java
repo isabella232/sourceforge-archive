@@ -275,8 +275,7 @@ public class Connection
             
             boolean was_full = isFull();
 
-            if (log.isDebugEnabled())
-                if(log.isDebugEnabled())log.debug("was_full=="+was_full+" isEmpty()=="+isEmpty());
+            if(log.isDebugEnabled())log.debug("was_full=="+was_full+" isEmpty()=="+isEmpty());
             
             // While we have buffers to write
             while (!isEmpty())

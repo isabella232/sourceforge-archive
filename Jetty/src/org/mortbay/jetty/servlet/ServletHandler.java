@@ -671,8 +671,7 @@ public class ServletHandler extends AbstractHttpHandler
     /* ------------------------------------------------------------ */
     public String getRealPath(String path)
     {
-        if(log.isDebugEnabled())
-            if(log.isDebugEnabled())log.debug("getRealPath of "+path+" in "+this);
+        if(log.isDebugEnabled())log.debug("getRealPath of "+path+" in "+this);
 
         if (__Slosh2Slash)
             path=path.replace('\\','/');

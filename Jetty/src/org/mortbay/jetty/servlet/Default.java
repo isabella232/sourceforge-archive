@@ -212,7 +212,7 @@ public class Default extends HttpServlet
         // Handle the request
         try
         {
-            if (log.isDebugEnabled())if(log.isDebugEnabled())log.debug(method+" PATH="+pathInContext+" RESOURCE="+resource);
+            if (log.isDebugEnabled())log.debug(method+" PATH="+pathInContext+" RESOURCE="+resource);
             
             // handle by method.
             if (method.equals(HttpRequest.__GET) ||
@@ -621,8 +621,7 @@ public class Default extends HttpServlet
             
         // Parse the satisfiable ranges
         List ranges =InclusiveByteRange.satisfiableRanges(reqRanges,resLength);
-        if (log.isDebugEnabled())
-            if(log.isDebugEnabled())log.debug("ranges: " + reqRanges + " == " + ranges);
+        if(log.isDebugEnabled())log.debug("ranges: " + reqRanges + " == " + ranges);
         
         //  if there are no satisfiable ranges, send 416 response
         if (ranges==null || ranges.size()==0)

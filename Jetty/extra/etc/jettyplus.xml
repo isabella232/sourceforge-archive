@@ -8,19 +8,6 @@
 <!-- =============================================================== -->
 <Configure class="org.mortbay.jetty.plus.Server">
 
-  <Call name="instance" class="org.mortbay.util.Log">
-    <Call name="disableLog"/>
-    <Call name="add">
-      <Arg>
-        <New class="org.mortbay.util.log4j.Log4jSink">
-          <Call name="start"/>
-        </New>
-      </Arg>
-    </Call>
-  </Call>
-
-
-
   <!-- =============================================================== -->
   <!-- Add a transaction manager and datasources                       -->
   <!-- =============================================================== -->
@@ -57,11 +44,11 @@
                  <Set name="MaxSize">15</Set> 
                  <!-- Uncomment to setup other pool params as required          -->
                  <!--
-                 <Set name="SleepTime">10</Set>          -- millisec --
-                 <Set name="LifeTime">10</Set>           -- millisec --
-                 <Set name="DeadLockMaxWait">10</Set>    -- millisec --
-                 <Set name="DeadLockRetryWait">10</Set>  -- millisec --
-                 <Set name="LoginTimeout">10</Set>       -- sec      --
+                 <Set name="SleepTime">10</Set>        
+                 <Set name="LifeTime">10</Set>         
+                 <Set name="DeadLockMaxWait">10</Set>  
+                 <Set name="DeadLockRetryWait">10</Set> 
+                 <Set name="LoginTimeout">10</Set>      
                  <Set name="Debug" type="boolean">true</Set>
                  -->
                </New>
@@ -156,8 +143,12 @@
   <!-- Add tomcat examples                                             -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Call name="addWebApplication">
-      <Arg>/examples/*</Arg>
-      <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/examples</Arg>
+      <Arg>/servlets-examples/*</Arg>
+      <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/servlets-examples.war</Arg>
+  </Call>
+  <Call name="addWebApplication">
+      <Arg>/jsp-examples/*</Arg>
+      <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/jsp-examples.war</Arg>
   </Call>
 
   <!-- =============================================================== -->

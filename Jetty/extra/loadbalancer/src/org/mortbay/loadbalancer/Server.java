@@ -123,8 +123,7 @@ public class Server extends LifeCycleThread
                 iter.remove();
                 
                 Channel channel = key.channel();
-                if (log.isDebugEnabled())
-                    if(log.isDebugEnabled())log.debug("Ready key "+key+" for "+channel);
+                if(log.isDebugEnabled())log.debug("Ready key "+key+" for "+channel);
 
                 if (!channel.isOpen())
                     key.cancel();

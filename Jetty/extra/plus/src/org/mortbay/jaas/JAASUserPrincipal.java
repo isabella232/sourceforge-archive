@@ -163,13 +163,15 @@ public class JAASUserPrincipal implements Principal
         
         if (roleGroup != null)
         {
-            Enumeration members = roleGroup.members();
-            while (members.hasMoreElements())
-                if(log.isDebugEnabled())log.debug("Member = "+((Principal)members.nextElement()).getName());
+            if(log.isDebugEnabled())
+	    {
+                Enumeration members = roleGroup.members();
+                while (members.hasMoreElements())
+                    log.debug("Member = "+((Principal)members.nextElement()).getName());
+            }
             
             return roleGroup;
         }
-        
 
         if(log.isDebugEnabled())log.debug("Trying to find org.mortbay.jaas.JAASRoles instead");
 

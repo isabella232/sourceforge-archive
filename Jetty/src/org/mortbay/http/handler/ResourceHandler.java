@@ -627,8 +627,7 @@ public class ResourceHandler extends AbstractHttpHandler
             
         // Parse the satisfiable ranges
         List ranges =InclusiveByteRange.satisfiableRanges(reqRanges,resLength);
-        if (log.isDebugEnabled())
-            if(log.isDebugEnabled())log.debug("ranges: " + reqRanges + " == " + ranges);
+        if(log.isDebugEnabled())log.debug("ranges: " + reqRanges + " == " + ranges);
         
         //  if there are no satisfiable ranges, send 416 response
         if (ranges==null || ranges.size()==0)

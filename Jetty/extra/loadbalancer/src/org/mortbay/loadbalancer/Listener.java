@@ -142,8 +142,7 @@ public class Listener extends LifeCycleThread
     public void loop()
         throws Exception
     {
-        if (log.isDebugEnabled())
-            if(log.isDebugEnabled())log.debug("client keys="+_selector.keys());
+        if(log.isDebugEnabled())log.debug("client keys="+_selector.keys());
         
         if (_selector.select()>0)
         {
@@ -155,8 +154,7 @@ public class Listener extends LifeCycleThread
                 iter.remove();
 
                 Channel channel = key.channel();
-                if (log.isDebugEnabled())
-                    if(log.isDebugEnabled())log.debug("Ready key "+key+" for "+channel);
+                if(log.isDebugEnabled())log.debug("Ready key "+key+" for "+channel);
 
                 if (!channel.isOpen())
                     key.cancel();

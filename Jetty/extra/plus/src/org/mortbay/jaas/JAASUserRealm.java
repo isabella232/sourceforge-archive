@@ -22,16 +22,7 @@ import org.mortbay.jaas.callback.DefaultCallbackHandler;
 
 /* ---------------------------------------------------- */
 /** JAASUserRealm
- * <p>
- *
- * <p><h4>Notes</h4>
- * <p>
- *
- * <p><h4>Usage</h4>
- * <pre>
- */
-/*
- * </pre>
+ * 
  *
  * @see
  * @version 1.0 Mon Apr 14 2003

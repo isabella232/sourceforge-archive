@@ -200,10 +200,9 @@ public class WebApplicationContext
                 _webApp= Resource.newResource(_webApp.getAlias());
             }
 
-            if (log.isDebugEnabled())
-                if(log.isDebugEnabled())log.debug("Try webapp="+_webApp+
-                           ", exists="+_webApp.exists()+
-                           ", directory="+_webApp.isDirectory());
+            if(log.isDebugEnabled())log.debug("Try webapp="+_webApp+
+                                              ", exists="+_webApp.exists()+
+                                              ", directory="+_webApp.isDirectory());
             
             // Is the WAR usable directly?
             if (_webApp.exists() &&
@@ -216,10 +215,9 @@ public class WebApplicationContext
                 {
                     _webApp=jarWebApp;
                     _war=_webApp.toString();
-                    if (log.isDebugEnabled())
-                        if(log.isDebugEnabled())log.debug("Try webapp="+_webApp+
-                                   ", exists="+_webApp.exists()+
-                                   ", directory="+_webApp.isDirectory());
+                    if(log.isDebugEnabled())log.debug("Try webapp="+_webApp+
+                                                      ", exists="+_webApp.exists()+
+                                                      ", directory="+_webApp.isDirectory());
                 }
             }
             
@@ -239,10 +237,9 @@ public class WebApplicationContext
                 JarResource.extract(_webApp,tempDir,true);
                 _webApp=Resource.newResource(tempDir.getCanonicalPath());
                 
-                if (log.isDebugEnabled())
-                    if(log.isDebugEnabled())log.debug("Try webapp="+_webApp+
-                               ", exists="+_webApp.exists()+
-                               ", directory="+_webApp.isDirectory());
+                if(log.isDebugEnabled())log.debug("Try webapp="+_webApp+
+                                                  ", exists="+_webApp.exists()+
+                                                  ", directory="+_webApp.isDirectory());
             }
             
             // Now do we have something usable?
@@ -776,7 +773,9 @@ public class WebApplicationContext
         else if ("taglib".equals(element))
             initTagLib(node);
         else if ("resource-ref".equals(element))
+        {
             if(log.isDebugEnabled())log.debug("No implementation: "+node);
+        }
         else if ("security-constraint".equals(element))
             initSecurityConstraint(node);
         else if ("login-config".equals(element))
@@ -795,12 +794,17 @@ public class WebApplicationContext
                 _warnings=new HashSet(3);
             
             if (_warnings.contains(element))
+            {
                 if(log.isDebugEnabled())log.debug("Not Implemented: "+node);
+            }
             else
             {
                 _warnings.add(element);
-                if(log.isDebugEnabled())log.debug("Element "+element+" not handled in "+this);
-                if(log.isDebugEnabled())log.debug(node);
+                if(log.isDebugEnabled())
+                {
+                    log.debug("Element "+element+" not handled in "+this);
+                    log.debug(node);
+                }
             }
         }
     }

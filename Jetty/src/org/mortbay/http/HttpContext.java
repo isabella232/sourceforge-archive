@@ -5,6 +5,7 @@
 
 package org.mortbay.http;
 
+
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -26,7 +27,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.SecurityConstraint.Authenticator;
@@ -1180,8 +1180,10 @@ public class HttpContext implements LifeCycle,
             {
                 if(log.isDebugEnabled())log.debug("Delete existing temp dir "+_tmpDir+" for "+this);
                 if (!IO.delete(_tmpDir))
+                {
                     if(log.isDebugEnabled())log.debug("Failed to delete temp dir "+_tmpDir);
-
+                }
+                
                 if (_tmpDir.exists())
                 {
                     String old=_tmpDir.toString();
@@ -1383,7 +1385,7 @@ public class HttpContext implements LifeCycle,
             _constraintMap.put(pathSpec,scs);
         }
         scs.add(sc);
-
+        
         if(log.isDebugEnabled())log.debug("added "+sc+" at "+pathSpec);
     }
 
@@ -1392,14 +1394,14 @@ public class HttpContext implements LifeCycle,
                                             HttpRequest request,
                                             HttpResponse response)
         throws HttpException, IOException
-    {
+    {   
         UserRealm realm = getRealm();
 
         // Get all path matches
         // TODO. May not need to build list - or at least break
         // list at first non-matching pattern - ugh!
         
-        List scss =_constraintMap.getMatches(pathInContext);    
+        List scss =_constraintMap.getMatches(pathInContext);
         if (scss!=null && scss.size()>0)
         {
             Object constraints=null;
@@ -1419,7 +1421,6 @@ public class HttpContext implements LifeCycle,
                                             request,
                                             response); 
         }
-
         return true;
     }
 
