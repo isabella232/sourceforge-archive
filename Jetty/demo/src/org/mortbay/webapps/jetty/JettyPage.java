@@ -138,6 +138,9 @@ public class JettyPage extends Page
         addHeader
             ("<link REL=\"STYLESHEET\" TYPE=\"text/css\" HREF=\""+
              context+"/jetty.css\">");
+
+        addHeader("<link REL=\"icon\" HREF=\""+context+"/images/jicon.png\" TYPE=\"image/png\">");
+
         attribute("text","#000000");
         attribute(BGCOLOR,"#FFFFFF");
         attribute("link","#606CC0");

@@ -153,7 +153,7 @@ public class TldLocationsCache {
         if (is == null) {
             Constants.message("jsp.error.internal.filenotfound",
                               new Object[] {WEB_XML},
-                              Logger.WARNING);
+                              Logger.INFORMATION);
             return;
         }
 

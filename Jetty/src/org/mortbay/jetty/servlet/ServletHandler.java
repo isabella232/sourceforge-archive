@@ -20,6 +20,7 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.servlet.RequestDispatcher;
@@ -37,6 +38,7 @@ import javax.servlet.http.HttpSessionListener;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpException;
+import org.mortbay.http.HttpListener;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
@@ -49,6 +51,7 @@ import org.mortbay.http.handler.NullHandler;
 import org.mortbay.http.handler.SecurityHandler;
 import org.mortbay.util.Code;
 import org.mortbay.util.Frame;
+import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LifeCycle;
 import org.mortbay.util.Log;
 import org.mortbay.util.LogSink;
@@ -1052,26 +1055,109 @@ public class ServletHandler
             if ("javax.servlet.context.tempdir".equals(name))
             {
                 // Initialize temporary directory
-                File tempDir=(File)_httpContext
-                    .getAttribute("javax.servlet.context.tempdir");
-                if (tempDir==null)
+                //
+                // I'm afraid that this is very much black magic.
+                // but if you can think of better....
+
+                Object t = _httpContext .getAttribute("javax.servlet.context.tempdir");
+
+                if (t!=null && (t instanceof File))
+                    return t;
+                
+                if (t!=null && (t instanceof String))
                 {
-                    try{
-                        tempDir=File.createTempFile("JettyContext",null);
-                        if (tempDir.exists())
-                            tempDir.delete();
-                        tempDir.mkdir();
-                        tempDir.deleteOnExit();
-                        _httpContext
-                            .setAttribute("javax.servlet.context.tempdir",
-                                          tempDir);
+                    try
+                    {
+                        File tempDir=new File((String)t);
+                        Log.event("Converted temp dir "+tempDir+" for "+this);
+                        _httpContext.setAttribute("javax.servlet.context.tempdir",
+                                                  tempDir);
+                        return tempDir;
                     }
                     catch(Exception e)
                     {
                         Code.warning(e);
                     }
                 }
-                Code.debug("TempDir=",tempDir);
+
+                // No tempdir set so make one!
+                try{
+                    File temp_dir=null;
+                    String temp=null;
+                    try
+                    {
+                        HttpContext httpContext=getHttpContext();
+                        HttpServer httpServer=httpContext.getHttpServer();
+                        HttpListener httpListener=(HttpListener)
+                            httpServer.getListeners().iterator().next();
+                        
+                        List vhosts = httpContext.getHosts();
+                        String vhost = vhosts!=null && vhosts.size()>0
+                            ? ((String)vhosts.get(vhosts.size()-1))
+                            : null;
+                        if (InetAddrPort.__0_0_0_0.equals(vhost))
+                            vhost=null;
+
+                        String host=httpListener.getHost();
+                        if (InetAddrPort.__0_0_0_0.equals(host))
+                            host=null;
+                        
+                        temp="Jetty_"+
+                            (host==null?"":host)+
+                            "_"+
+                            httpListener.getPort()+
+                            "_"+
+                            (vhost==null?"":vhost)+
+                            "_"+
+                            httpContext.getContextPath();
+                        
+                        temp=temp.replace('/','_');
+                        temp=temp.replace('.','_');
+                        temp=temp.replace('\\','_');
+                            
+                        temp_dir=new File(System.getProperty("java.io.tmpdir"),
+                                             temp);
+                        if (!temp_dir.exists())
+                        {
+                            temp_dir.mkdir();
+                            temp_dir.deleteOnExit();
+                            Log.event("Created temp dir "+temp_dir+" for "+this);
+                        }
+                        else if (!temp_dir.isDirectory())
+                            temp_dir=null;
+                        else
+                        {
+                            temp_dir.deleteOnExit();
+                            Log.event("Reused temp dir "+temp_dir+" for "+this);
+                        }
+                    }
+                    catch(Exception e)
+                    {
+                        temp_dir=null;
+                        Code.warning(e);
+                    }
+
+                    
+                    if (temp_dir==null)
+                    {
+                        // that didn't work, so try something simpler (ish)
+                        temp_dir=File.createTempFile("JettyContext",null);
+                        if (temp_dir.exists())
+                            temp_dir.delete();
+                        temp_dir.mkdir();
+                        temp_dir.deleteOnExit();
+                        Log.event("Created temp dir "+temp_dir+" for "+this);
+                    }
+                    
+                    _httpContext
+                        .setAttribute("javax.servlet.context.tempdir",
+                                      temp_dir);
+                    return temp_dir;
+                }
+                catch(Exception e)
+                {
+                    Code.warning(e);
+                }
             }
 
             return _httpContext.getAttribute(name);
