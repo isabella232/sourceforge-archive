@@ -507,7 +507,7 @@ public class Dispatcher implements RequestDispatcher
                 if (name.equals(__INCLUDE_REQUEST_URI))  return URI.addPaths(_contextPath,_uriInContext);
                 if (name.equals(__INCLUDE_SERVLET_PATH)) return _servletPath;
                 if (name.equals(__INCLUDE_CONTEXT_PATH)) return _contextPath;
-                if (name.equals(__INCLUDE_QUERY_STRING)) return _query;
+                if (name.equals(__INCLUDE_QUERY_STRING)) return Dispatcher.this._query;
             }
             else
             {
