@@ -23,46 +23,62 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.ugli.LoggerFactory;
 import org.apache.ugli.ULogger;
-import org.mortbay.jetty.HandlerCollection;
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.HandlerCollection;
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.thread.AbstractLifeCycle;
-
 
 /* ------------------------------------------------------------ */
-/** AbstractHandler.
+/** AbstractHandlerCollection.
  * @author gregw
  *
  */
-public abstract class AbstractHandler extends AbstractLifeCycle implements Handler
+public class AbstractHandlerCollection extends AbstractHandler implements HandlerCollection
 {
     private static ULogger log = LoggerFactory.getLogger(HttpConnection.class);
-    
+
+    private Handler[] _handlers;
 
     /* ------------------------------------------------------------ */
     /**
      * 
      */
-    public AbstractHandler()
+    public AbstractHandlerCollection()
     {
+        super();
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the handlers.
+     */
+    public Handler[] getHandlers()
+    {
+        return _handlers;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param handlers The handlers to set.
+     */
+    public void setHandlers(Handler[] handlers)
+    {
+        _handlers = handlers;
     }
 
     /* ------------------------------------------------------------ */
     /* 
-     * @see org.mortbay.thread.LifeCycle#start()
+     * @see org.mortbay.jetty.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public void doStart() throws Exception
+    public boolean handle(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
     {
-        log.info("start {}",this);
+        if (_handlers!=null)
+        {
+            for (int i=0;i<_handlers.length;i++)
+            {
+                if (_handlers[i].handle(request,response))
+                    return true;
+            }
+        }    
+        return false;
     }
-
-    /* ------------------------------------------------------------ */
-    /* 
-     * @see org.mortbay.thread.LifeCycle#stop()
-     */
-    public void doStop() throws Exception
-    {
-        log.info("stop {}",this);
-    }
-
 }

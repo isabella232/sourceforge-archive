@@ -386,7 +386,12 @@ public class HttpConnection
         public void startRequest(Buffer method, Buffer uri, Buffer version)
         {
             _request.setMethod(method.toString());
-            _request.setUri(new URI(uri.toString())); // TODO more efficient???
+            
+            URI u=new URI(uri.toString()); // TODO more efficient???
+            _request.setUri(u); 
+            _request.setContextPath("");
+            _request.setServletPath(u.getPath());
+            
             _version = version == null ? HttpVersions.HTTP_0_9_ORDINAL : HttpVersions.CACHE
                     .getOrdinal(version);
             if (_version <= 0) _version = HttpVersions.HTTP_1_0_ORDINAL;

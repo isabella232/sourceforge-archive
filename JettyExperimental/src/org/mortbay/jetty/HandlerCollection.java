@@ -13,29 +13,16 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.content;
+package org.mortbay.jetty;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import org.mortbay.io.Buffer;
-
-/**
+/* ------------------------------------------------------------ */
+/** HandlerCollection.
  * @author gregw
  *
  */
-public interface Content
+public interface HandlerCollection extends Handler
 {
-    public String getMimeType();
-    public String getContentEncoding();
-    public int getLength();
-    public long getLastModified();
-    public long getExpiry();
-    
-    public Buffer get(long offset, long length);
-    public int put(Buffer buf);
-    
-    public void write(OutputStream out) throws IOException;
-    public void read(InputStream in) throws IOException;
+    public void setHandlers(Handler[] handlers);
+    public Handler[] getHandlers();   
+
 }

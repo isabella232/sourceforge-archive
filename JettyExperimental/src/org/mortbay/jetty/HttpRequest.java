@@ -900,7 +900,7 @@ public class HttpRequest implements HttpServletRequest
     /**
      * @param host The host to set.
      */
-    void setServerName(String host)
+    public void setServerName(String host)
     {
         _serverName = host;
     }
@@ -908,7 +908,7 @@ public class HttpRequest implements HttpServletRequest
     /**
      * @return Returns the uri.
      */
-    URI getUri()
+    public URI getUri()
     {
         return _uri;
     }
@@ -916,7 +916,7 @@ public class HttpRequest implements HttpServletRequest
     /**
      * @param uri The uri to set.
      */
-    void setUri(URI uri)
+    public void setUri(URI uri)
     {
         _uri = uri;
         _requestURI=uri.getPath();
@@ -926,7 +926,7 @@ public class HttpRequest implements HttpServletRequest
     /**
      * @return Returns the connection.
      */
-    HttpConnection getConnection()
+    public HttpConnection getConnection()
     {
         return _connection;
     }
@@ -935,7 +935,7 @@ public class HttpRequest implements HttpServletRequest
     /**
      * @return Returns the inputState.
      */
-    int getInputState()
+    public int getInputState()
     {
         return _inputState;
     }
@@ -944,7 +944,7 @@ public class HttpRequest implements HttpServletRequest
     /**
      * @param authType The authType to set.
      */
-    void setAuthType(String authType)
+    public void setAuthType(String authType)
     {
         _authType = authType;
     }
@@ -953,7 +953,7 @@ public class HttpRequest implements HttpServletRequest
     /**
      * @param contextPath The contextPath to set.
      */
-    void setContextPath(String contextPath)
+    public void setContextPath(String contextPath)
     {
         _contextPath = contextPath;
     }
@@ -962,7 +962,7 @@ public class HttpRequest implements HttpServletRequest
     /**
      * @param cookies The cookies to set.
      */
-    void setCookies(Cookie[] cookies)
+    public void setCookies(Cookie[] cookies)
     {
         _cookies = cookies;
     }
@@ -971,7 +971,7 @@ public class HttpRequest implements HttpServletRequest
     /**
      * @param method The method to set.
      */
-    void setMethod(String method)
+    public void setMethod(String method)
     {
         _method = method;
     }
@@ -980,7 +980,7 @@ public class HttpRequest implements HttpServletRequest
     /**
      * @param pathInfo The pathInfo to set.
      */
-    void setPathInfo(String pathInfo)
+    public void setPathInfo(String pathInfo)
     {
         _pathInfo = pathInfo;
     }
@@ -989,7 +989,7 @@ public class HttpRequest implements HttpServletRequest
     /**
      * @param protocol The protocol to set.
      */
-    void setProtocol(String protocol)
+    public void setProtocol(String protocol)
     {
         _protocol = protocol;
     }
@@ -998,7 +998,7 @@ public class HttpRequest implements HttpServletRequest
     /**
      * @param requestedSessionId The requestedSessionId to set.
      */
-    void setRequestedSessionId(String requestedSessionId)
+    public void setRequestedSessionId(String requestedSessionId)
     {
         _requestedSessionId = requestedSessionId;
     }
@@ -1007,16 +1007,40 @@ public class HttpRequest implements HttpServletRequest
     /**
      * @param scheme The scheme to set.
      */
-    void setScheme(String scheme)
+    public void setScheme(String scheme)
     {
         _scheme = scheme;
     }
     
     /* ------------------------------------------------------------ */
     /**
+     * @param queryString The queryString to set.
+     */
+    public void setQueryString(String queryString)
+    {
+        _queryString = queryString;
+    }
+    /* ------------------------------------------------------------ */
+    /**
+     * @param requestURI The requestURI to set.
+     */
+    public void setRequestURI(String requestURI)
+    {
+        _requestURI = requestURI;
+    }
+    /* ------------------------------------------------------------ */
+    /**
+     * @param servletPath The servletPath to set.
+     */
+    public void setServletPath(String servletPath)
+    {
+        _servletPath = servletPath;
+    }
+    /* ------------------------------------------------------------ */
+    /**
      * @param userPrincipal The userPrincipal to set.
      */
-    void setUserPrincipal(Principal userPrincipal)
+    public void setUserPrincipal(Principal userPrincipal)
     {
         _userPrincipal = userPrincipal;
     }

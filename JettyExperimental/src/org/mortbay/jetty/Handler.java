@@ -25,7 +25,7 @@ import org.mortbay.thread.LifeCycle;
 
 public interface Handler extends LifeCycle
 {
-    public void handle(HttpServletRequest request, HttpServletResponse response)
+    public boolean handle(HttpServletRequest request, HttpServletResponse response)
         throws IOException, ServletException;
     
 }

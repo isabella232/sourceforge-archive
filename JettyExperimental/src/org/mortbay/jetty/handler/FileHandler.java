@@ -55,10 +55,10 @@ public class FileHandler extends AbstractHandler
     /* 
      * @see org.mortbay.jetty.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public void handle(HttpServletRequest request, HttpServletResponse response)
+    public boolean handle(HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException
     {
-        String uri = request.getRequestURI();
+        String uri = request.getServletPath();
         
         
         Buffer content = (Buffer) _cache.get(uri);
@@ -122,5 +122,7 @@ public class FileHandler extends AbstractHandler
             File file = new File(".",uri);
             IO.copy(new FileInputStream(file), out);
         }
+        
+        return true;
     }
 }

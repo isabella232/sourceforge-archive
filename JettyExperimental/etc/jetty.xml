@@ -10,11 +10,19 @@
 
     <Set name="connectors">
       <Array type="org.mortbay.jetty.Connector"> 
+      
         <Item>
-	    <New class="org.mortbay.jetty.bio.SocketConnector">
-	      <Set name="port">8080</Set>
-	    </New>
-	</Item>
+	      <New class="org.mortbay.jetty.bio.SocketConnector">
+	        <Set name="port">8080</Set>
+	      </New>
+	    </Item>
+	    
+        <Item>
+	      <New class="org.mortbay.jetty.nio.SocketChannelConnector">
+	        <Set name="port">8081</Set>
+	      </New>
+	    </Item>
+	    
       </Array>
     </Set>
 
@@ -22,8 +30,17 @@
     <Set name="handlers">
       <Array type="org.mortbay.jetty.Handler"> 
         <Item>
-	  <New class="org.mortbay.jetty.handler.FileHandler"/>
-	</Item>
+	      <New class="org.mortbay.jetty.handler.ContextHandler">
+	        <Set name="contextPath">/test</Set>
+	        <Set name="handlers">
+	          <Array type="org.mortbay.jetty.Handler"> 
+                <Item>
+	              <New class="org.mortbay.jetty.handler.FileHandler"/>
+	            </Item>
+              </Array>
+            </Set>
+          </New>
+        </Item>
       </Array>
     </Set>
 

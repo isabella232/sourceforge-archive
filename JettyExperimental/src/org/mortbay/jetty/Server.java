@@ -26,7 +26,7 @@ import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.MultiException;
 
-public class Server extends AbstractLifeCycle implements Handler, ThreadPool
+public class Server extends AbstractLifeCycle implements HandlerCollection, ThreadPool
 {
     private ThreadPool _threadPool;
     private Connector[] _connectors;
@@ -93,7 +93,6 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
     public void setHandlers(Handler[] handlers)
     {
         _handlers = handlers;
-        
     }
     
     /* ------------------------------------------------------------ */
@@ -177,31 +176,24 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
 
     /* ------------------------------------------------------------ */
     /* 
-     */
-    public void componentAdded(Object component)
-    {
-    }
-
-    /* ------------------------------------------------------------ */
-    /* 
-     */
-    public void componentRemoved(Object component)
-    {
-    }
-
-    /* ------------------------------------------------------------ */
-    /* 
      * @see org.mortbay.jetty.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public void handle(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
+    public boolean handle(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException
     {
         if (_handlers==null || _handlers.length==0)
+        {
             response.sendError(500);
+            return true;
+        }
         else
         {
             for (int i=0;i<_handlers.length;i++)
-                _handlers[i].handle(request,response);
+            {
+                if (_handlers[i].handle(request,response))
+                    return true;
+            }
         }    
+        return false;
     }
     
 
