@@ -5,7 +5,6 @@
 
   <!-- The following section can be uncommented to control the
        debugging and logging mechanism.
-       The config shown here reflect the default settings.
   <Set name="Debug" class="org.mortbay.util.Code" type="boolean">false</Set>
   <Set name="Verbose" class="org.mortbay.util.Code" type="int">0</Set>
   <Set name="DebugPatterns" class="org.mortbay.util.Code" type="String"></Set>
