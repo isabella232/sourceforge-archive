@@ -1,3 +1,4 @@
+Release 2.2.4 - 2 Aug 1999
   + ThreadedServer can use subclasses of Thread.
   + Better help on Jetty.Server
   + HttpRequests may be passed to HttpFilter constructors.
