@@ -29,7 +29,7 @@ Development has been done in JDK1.1 with the 1.2 Collection classes.
 The compiled classes excluding test harnesses are put into lib/jetty3.jar,
 so the following CLASSPATH is required (or the non unix equivalent):
 
-  CLASSPATH=$JETTY3_HOME/lib/jetty3.jar:$JETTY3_HOME/lib/collections.jar
+  CLASSPATH=$JETTY3_HOME/lib/com.mortbay.jetty.jar:$JETTY3_HOME/lib/collections.jar
 
 To compile the source with JDK1.1 the following class path should be used.
 
@@ -42,10 +42,25 @@ Then compile using the class path:
 
   CLASSPATH=$JETTY3_HOME
 
+
+Class Paths
+===========
 In order to support multiple versions of the javax.servlet API, the 
 javax.servlet.jar is loaded as a resource as part of the particular
-ServletHandler.  Each ServletHandler instantiated has it's own classloader
-and may have it own class path.
+ServletHandler.  Thus the com.mortbay.jetty.jar contains the
+javax.servlet.jar for the 2.1 servlet API in the location
+
+ com/mortbay/HTTP/Servlet2_1/javax.servlet.jar
+
+If no servlet API is located in the JVM system class path, then
+the servlet class loader gets the javax.servlet.jar as a resource 
+and includes it in the effective load path for that servlet handler.
+Furthermore, if a class load from the system path fails, the servlet
+class loader will attempt to load that class from the system classpath
+with the javax.servlet packages available.
+
+Each ServletHandler instance represents a servlet context has it's own 
+classloader and may have it own class path.
 
 
 Test Harnesses
