@@ -9,8 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Vector;
 import java.util.Enumeration;
 
-/** Class to aid in handling trees of Objects handling recursive servlet
- * dispatching
+/** Class to aid in handling trees of Objects handling recursive servlet dispatching.
  * <p> This class can be derived from by objects that handle recursive
  * servlet dispatching to aid with generation of servlet urls.
  *

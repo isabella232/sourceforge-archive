@@ -8,7 +8,7 @@ package org.mortbay.tools.servlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-/** Handle an Argument Format Error
+/** Handle an Argument Format Error.
  * <p> Object that are being called by ServletDispatch.dispatch calls may
  * implement this interface if they take arbitrary object as parameters and
  * expect ServletDispatch to populate those objects from request

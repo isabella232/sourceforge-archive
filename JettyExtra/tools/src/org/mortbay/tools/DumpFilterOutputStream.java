@@ -7,7 +7,7 @@ package org.mortbay.tools;
 import java.io.OutputStream;
 
 /* ------------------------------------------------------------ */
-/** Filtered OutputStream that summarized throughput on stderr
+/** Filtered OutputStream that summarized throughput on stderr.
  * <p>
  *
  * @see FilterOutputStream

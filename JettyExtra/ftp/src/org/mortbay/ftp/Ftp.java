@@ -31,7 +31,7 @@ import java.util.NoSuchElementException;
 import java.util.Vector;
 
 // ===========================================================================
-/** FTP Client
+/** FTP Client.
  * <p>
  * File Transfer Protocol client class. Provides basic FTP client
  * functionality in an Asynchronous interface.

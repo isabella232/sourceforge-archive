@@ -11,7 +11,7 @@ import java.util.Vector;
 import java.util.Enumeration;
 import java.lang.reflect.Array;
 
-/** Class to transform leaves in trees of containers
+/** Class to transform leaves in trees of containers.
  * <p> Objects of this class are not Thread-safe.
  *
  * <p> This class is a Transformer that handles Transformation of the leaves

@@ -7,7 +7,7 @@ package org.mortbay.tools.converter;
 
 import org.mortbay.util.Code;
 
-/** Interface for converting classes
+/** Interface for converting classes.
  *
  * <p><h4>Notes</h4>
  * <p> A good check for implementors of this class as a first line is:

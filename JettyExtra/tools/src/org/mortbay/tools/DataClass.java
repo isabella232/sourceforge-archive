@@ -30,7 +30,8 @@ public class DataClass
     private static String __space = "                                                                               ";
     
     /* ------------------------------------------------------------ */
-    /** Construct and return an "empty" instance of a class. An empty
+    /** Construct and return an "empty" instance of a class.
+     * An empty
      * instance is a class constructed with its simplest constructor and
      * with all its public members non null. The recursive process to
      * create a null instance is as follows: <BR>

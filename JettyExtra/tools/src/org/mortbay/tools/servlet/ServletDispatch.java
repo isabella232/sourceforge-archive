@@ -22,7 +22,7 @@ import java.util.StringTokenizer;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Array;
 
-/** Class to aid in servlet method dispatching and argument parsing
+/** Class to aid in servlet method dispatching and argument parsing.
  * <h4>Method Dispatching</h4>
  * This class takes a HttpRequest and looks through the pathInfo trying
  * to call a matching method on the given object. Methods are matched by
@@ -243,7 +243,7 @@ public class ServletDispatch
         return req.getServletPath() + processedPath;
     }
     /* ------------------------------------------------------------ */
-    /** Initialise an argument from the request parameters
+    /** Initialise an argument from the request parameters.
      * <p> E.g. <pre>
      * {
      *        int foo[];

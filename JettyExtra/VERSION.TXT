@@ -1,6 +1,10 @@
 JettyExtra Versions
 --------------------
 
+JettyExtra-4.2.0
+  + Moved StressTester to the StressTest webapp
+  + Fixed some javadoc
+
 JettyExtra-4.1.0
   + Improved StressTester
 

@@ -63,7 +63,7 @@ public class Tenlet extends ThreadedServer
             
             Tenlet tenlet=new Tenlet(new InetAddrPort(arg[0]));
             tenlet.start();
-            tenlet.join();
+            //tenlet.join();
         }
         catch(Exception e)
         {
