@@ -704,9 +704,18 @@ public class ResourceHandler extends NullHandler
         MultiPartResponse multi = new MultiPartResponse(request, response);
         response.setStatus(response.__206_Partial_Content);
         response.setReason((String)response.__statusMsg
-                           .get(new Integer(response.__206_Partial_Content)));    
-        response.setField(HttpFields.__ContentType,
-                          "multipart/byteranges; boundary="+multi.getBoundary()); 
+                           .get(new Integer(response.__206_Partial_Content)));
+
+	// If the request has a "Request-Range" header then we need to
+	// send an old style multipart/x-byteranges Content-Type. This
+	// keeps Netscape and acrobat happy. This is what Apache does.
+	String ctp;
+	if (request.containsField(HttpFields.__RequestRange))
+	    ctp = "multipart/x-byteranges; boundary=";
+	else
+	    ctp = "multipart/byteranges; boundary=";
+	response.setField(HttpFields.__ContentType, ctp+multi.getBoundary());
+
         rit = validRanges.listIterator();
         while (rit.hasNext())
         {

@@ -92,6 +92,7 @@ public class HttpFields
         __MaxForwards = "Max-Forwards",
         __ProxyAuthentication = "Proxy-Authentication",
         __Range = "Range",
+        __RequestRange = "Request-Range",
         __Referer = "Referer",
         __TE = "TE",
         __UserAgent = "User-Agent";
@@ -141,8 +142,8 @@ public class HttpFields
         __Age,__Authorization,__ContentLength,__ContentLocation,__ContentMD5,
         __ContentRange,__ContentType,__Date,__ETag,__Expires,__From,__Host,
         __IfModifiedSince,__IfRange,__IfUnmodifiedSince,__LastModified,
-        __Location,__MaxForwards,__ProxyAuthentication,__Range,__Referer,
-        __RetryAfter,__Server,__UserAgent
+        __Location,__MaxForwards,__ProxyAuthentication,__Range,
+	__RequestRange,__Referer,__RetryAfter,__Server,__UserAgent
     };
     public final static Set __singleValuedSet=new HashSet(37);
     static
