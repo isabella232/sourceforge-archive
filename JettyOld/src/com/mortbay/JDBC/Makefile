@@ -1,7 +1,7 @@
 ROOTNAME := com
 TESTS := Select.java TestHarness.java
 JAVAOPTIONS := $(JAVAOPTIONS) -DMSQL2
-
+EXCLUDECLASSES := MultiTestTable.class TestHarness.class TestTable.class
 
 include $(JETTY_HOME)/etc/Global.mk
 msql: all

@@ -9,6 +9,7 @@
 #JAVACOPTIONS :=
 TESTS := Server.java
 ROOTNAME := com
+EXCLUDECLASSES := StressTester$$URLGetter.class  StressTester.class            
 
 UUFILES := \
 	$(wildcard FileBase/Images/*.gif.uu) \

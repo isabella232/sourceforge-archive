@@ -9,10 +9,10 @@
 #JAVACOPTIONS :=
 TESTS := PropertyTreeTest.java TestHarness.java DictionaryConverterTest.java
 ROOTNAME := com
-SUBDIRS := STF
+SUBDIRS := Test
 INSTALLPATH := etc
 INSTALLFILES := InetGateway.prp
+EXCLUDECLASSES := TestHarness.class PropertyTreeTest.class DictionaryConverterTest.class DictionaryConverterTest$$TestClass1.class DictionaryConverterTest$$TestClass2.class TestHarness$$1.class
 
 include $(JETTY_HOME)/etc/Global.mk
-tests:
-	make -C Test all
+

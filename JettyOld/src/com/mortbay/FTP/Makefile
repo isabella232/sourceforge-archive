@@ -12,6 +12,7 @@ BINFILES :=
 CFGFILES := 
 
 TESTS := TestFtp.java
+EXCLUDECLASSES := TestFtp.class TestServer.class
 
 all: 
 

@@ -9,5 +9,6 @@
 #JAVACOPTIONS :=
 TESTS :=
 ROOTNAME := com
+EXCLUDECLASSES := T1.class T2.class
 
 include $(JETTY_HOME)/etc/Global.mk

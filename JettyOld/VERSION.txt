@@ -1,5 +1,5 @@
 
-Release 2.1.Beta0 - 30 May 1999
+Release 2.1.Beta0 - 31 May 1999
   + Servlet loader handles jar files with different files separator.
   + ThreadedServer gently shutsdown.
   + Handle malformed % characters in URLs.
@@ -16,6 +16,8 @@ Release 2.1.Beta0 - 30 May 1999
   + LogHandler changed to support only a single outfile and optional
     append.
   + Included contributed com.mortbay.Jetty.StressTester class
+  + Token effort to keep test files out of the jar 
+  + Removed support for STF
 
 Release 2.1.Alpha1 - 7 May 1999
   + ServletHolder can auto reload servlets

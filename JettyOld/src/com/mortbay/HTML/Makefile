@@ -9,5 +9,6 @@
 #JAVACOPTIONS :=
 TESTS := TestHtml.java
 ROOTNAME := com
+EXCLUDECLASSES := TestHtml.class
 
 include $(JETTY_HOME)/etc/Global.mk

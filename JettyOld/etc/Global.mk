@@ -3,6 +3,7 @@
 # Use 'make help' to see what it can do
 ###################################################################
 
+
 ifndef MKFILEPATH
 MKFILEPATH := $(JETTY_HOME)/etc
 endif
@@ -20,11 +21,11 @@ ROOTNAME := .
 endif
 #help var:	ROOTNAME	Root of java source tree. Defaults to .
 
+# default
+all:
+
 include $(MKFILEPATH)/Recurse.mk
 
-# Normal stuff - here to the end of the file...
-# default
-all :
 
 # Recursive targets.
 RECURSIVE := rall rclean rtests install ridl rnative rnodebug ralljava
@@ -250,6 +251,7 @@ endif
 #help var:	CFGFILES	Config files to install: defaults to *.cfg
 #help var:	CLASSFILES	Class files to install - defaults to all class
 #help     			files once a make all has been completed.
+#help var:      EXCLUDECLASSES  Do not install these classes
 #help var:	INSTALLPATH	Path relative to INSTALLROOT to install
 #help     			INSTALLFILES to.
 #help var:	INSTALLFILES	Extra files to install
@@ -277,6 +279,11 @@ endef
 ifndef CLASSFILES
 CLASSFILES := $(wildcard *.class idl/*.class)
 endif
+
+ifdef EXCLUDECLASSES
+CLASSFILES := $(filter-out $(EXCLUDECLASSES) , $(CLASSFILES))
+endif 
+
 ifndef LIBFILES
 LIBFILES := $(NATIVELIBNAME)
 endif

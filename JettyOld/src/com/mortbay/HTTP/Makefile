@@ -12,6 +12,7 @@ rall: all
 #JAVAOPTIONS := 
 #JAVACOPTIONS :=
 TESTS := HttpTests.java
+EXCLUDECLASSES := HttpTests.class
 ROOTNAME := com
 BINFILES := 
 CFGFILES := 
