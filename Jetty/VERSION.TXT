@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
 Jetty-4.0.RC1 - wait for it....
+ + Minor changes to make HttpServer work on J2ME CVM
  + Warn if jdk 1.4 classes used on JVM <1.4
  + WebApplication will use ContextLoader even without WEB-INF directory.
  + FileResource depends less on FilePermissions.

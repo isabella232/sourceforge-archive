@@ -7,7 +7,6 @@ package org.mortbay.util;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.reflect.Method;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
@@ -72,9 +71,8 @@ public class Code
     /*-------------------------------------------------------------------*/
     /** Shared static instances, reduces object creation at expense
      * of lock contention in multi threaded debugging */
-    private static StringWriter __stringWriter = new StringWriter();
-    private static StringBuffer __writerBuffer = __stringWriter.getBuffer();
-    private static PrintWriter __out = new PrintWriter(__stringWriter,false);
+    private static StringBufferWriter __stringBufferWriter = new StringBufferWriter();
+    private static PrintWriter __printWriter = new PrintWriter(__stringBufferWriter);
     
     /*-------------------------------------------------------------------*/
     private static class Singleton {static Code __instance=new Code();}
@@ -901,12 +899,11 @@ public class Code
             }
             else
             {
-                synchronized(__writerBuffer)
+                synchronized(__printWriter)
                 {
-                    __writerBuffer.setLength(0);
+                    __stringBufferWriter.setStringBuffer(buf);
                     expandThrowable(ex);
-                    __out.flush();
-                    buf.append(__writerBuffer.toString());
+                    __printWriter.flush();
                 }
             }
         }
@@ -917,7 +914,7 @@ public class Code
     /* ------------------------------------------------------------ */
     private synchronized static void expandThrowable(Throwable ex)
     {
-        ex.printStackTrace(__out);
+        ex.printStackTrace(__printWriter);
 
         if (ex instanceof MultiException)
         {
@@ -925,7 +922,7 @@ public class Code
             
             for (int i=0;i<mx.size();i++)
             {
-                __out.print("["+i+"]=");
+                __printWriter.print("["+i+"]=");
                 Throwable ex2=mx.getException(i);
                 expandThrowable(ex2);
             }
@@ -941,7 +938,7 @@ public class Code
                     Throwable ex2=(Throwable)getTargetException.invoke(ex,null);
                     if (ex2!=null)
                     {
-                        __out.println(__nestedEx[i]+"():");
+                        __printWriter.println(__nestedEx[i]+"():");
                         expandThrowable(ex2);
                     }
                 }

@@ -6,7 +6,6 @@
 package org.mortbay.util;
 
 import java.io.PrintWriter;
-import java.io.StringWriter;
 
 
 /*-----------------------------------------------------------------------*/
@@ -18,9 +17,9 @@ public class Frame
     /** Shared static instances, reduces object creation at expense
      * of lock contention in multi threaded debugging */
     private static Throwable __throwable = new Throwable();
-    private static StringWriter __stringWriter = new StringWriter();
-    private static StringBuffer __writerBuffer = __stringWriter.getBuffer();
-    private static PrintWriter __out = new PrintWriter(__stringWriter,false);
+    private static StringBuffer __stringBuffer = new StringBuffer();
+    private static StringBufferWriter __stringBufferWriter = new StringBufferWriter();
+    private static PrintWriter __printWriter = new PrintWriter(__stringBufferWriter,false);
     private static final String __lineSeparator = System.getProperty("line.separator");
     private static final int __lineSeparatorLen = __lineSeparator.length();
     
@@ -39,19 +38,22 @@ public class Frame
     private String _where;
     private int _lineStart=0;
     private int _lineEnd;
+
+
+
     /*-------------------------------------------------------------------*/
     /** Construct a frame.
      */
     public Frame()
     {
         // Dump the stack
-        synchronized(__writerBuffer)
+        synchronized(__printWriter)
         {
-            __writerBuffer.setLength(0);
+            __stringBuffer.setLength(0);
             __throwable.fillInStackTrace();
-            __throwable.printStackTrace(__out);
-            __out.flush();
-            _stack = __writerBuffer.toString();
+            __throwable.printStackTrace(__printWriter);
+            __printWriter.flush();
+            _stack = __stringBuffer.toString();
         }
         internalInit(0, false);
     }
@@ -63,13 +65,13 @@ public class Frame
     public Frame(int ignoreFrames)
     {
         // Dump the stack
-        synchronized(__writerBuffer)
+        synchronized(__printWriter)
         {
-            __writerBuffer.setLength(0);
+            __stringBuffer.setLength(0);
             __throwable.fillInStackTrace();
-            __throwable.printStackTrace(__out);
-            __out.flush();
-            _stack = __writerBuffer.toString();
+            __throwable.printStackTrace(__printWriter);
+            __printWriter.flush();
+            _stack = __stringBuffer.toString();
         }
         internalInit(ignoreFrames, false);
     }
@@ -81,15 +83,15 @@ public class Frame
      */
     Frame(int ignoreFrames, boolean partial)
     {
-        // Dump the stack
-        synchronized(__writerBuffer)
+        synchronized(__printWriter)
         {
-            __writerBuffer.setLength(0);
+            __stringBuffer.setLength(0);
             __throwable.fillInStackTrace();
-            __throwable.printStackTrace(__out);
-            __out.flush();
-            _stack = __writerBuffer.toString();
+            __throwable.printStackTrace(__printWriter);
+            __printWriter.flush();
+            _stack = __stringBuffer.toString();
         }
+        // Dump the stack
         internalInit(ignoreFrames, partial);
     }
     
