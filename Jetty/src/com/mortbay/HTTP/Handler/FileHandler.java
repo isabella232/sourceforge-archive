@@ -30,8 +30,6 @@ public class FileHandler extends NullHandler
     private CachedFile[] _cache=null;
     private int _nextIn=0;
     private Map _cacheMap=null;
-
-
     
     
     /* ------------------------------------------------------------ */
@@ -135,7 +133,8 @@ public class FileHandler extends NullHandler
     public void destroy()
     {
         _cache=null;
-        _cacheMap.clear();
+        if( _cacheMap != null)
+	    _cacheMap.clear();
         super.destroy();
     }
 
@@ -611,7 +610,7 @@ public class FileHandler extends NullHandler
             if (parent)
             {
                 out.print("<TR><TD><A HREF=");
-                out.print(base);
+                out.print(padSpaces(base));
                 out.print("../>Parent Directory</A></TD><TD></TD><TD></TD></TR>\n");
             }
         
@@ -625,7 +624,7 @@ public class FileHandler extends NullHandler
                 String path=base+ls[i];
                 if (item.isDirectory())
                     path+="/";
-                out.print(path);
+                out.print(padSpaces(path));
                 out.print(">");
                 out.print(ls[i]);
                 out.print("&nbsp;");
@@ -649,6 +648,19 @@ public class FileHandler extends NullHandler
 
 
     
+    /* ------------------------------------------------------------ */
+    /**
+     * Replaces spaces by %20
+     */
+    private String padSpaces(String str)
+    {
+	return StringUtil.replace(str," ","%20");
+    }
+    
+
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /** Holds a cached file.
      * It is assumed that threads accessing CachedFile have
