@@ -249,7 +249,7 @@ public class OutputStreamLogSink
     }
 
     /* ------------------------------------------------------------ */
-    public  synchronized void setFilename(String filename)
+    public synchronized void setFilename(String filename)
     {
         if (filename!=null)
         {
@@ -257,6 +257,10 @@ public class OutputStreamLogSink
             if (filename.length()==0)
                 filename=null;
         }
+        
+        if (isStarted() && _filename!=null && filename==null)
+            _out=null;
+        
         _reopen=isStarted() &&
             ((_filename==null && filename!=null)||
              (_filename!=null && !_filename.equals(filename)));
@@ -309,7 +313,6 @@ public class OutputStreamLogSink
             try{_out.flush();}
             catch(IOException e){e.printStackTrace();}
         }
-        
     }
     
     /* ------------------------------------------------------------ */
@@ -396,7 +399,7 @@ public class OutputStreamLogSink
      */
     public synchronized void log(String formattedLog)
     {
-        if (_reopen)
+        if (_reopen || _out==null)
         {
             stop();
             start();

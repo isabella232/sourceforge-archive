@@ -61,6 +61,13 @@ $Id$
       <Arg>/</Arg>
       <Arg>org.mortbay.servlet.AdminServlet</Arg>
     </Call>
+    
+    <Call name="addServlet">
+      <Arg>Debug</Arg>
+      <Arg>/debug/*</Arg>
+      <Arg>org.mortbay.servlet.Debug</Arg>
+    </Call>
+    
     <Call name="setAttribute">
       <Arg>org.mortbay.http.HttpServer</Arg>
       <Arg><Call name="getHttpServer"/></Arg>
