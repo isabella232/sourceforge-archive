@@ -401,6 +401,7 @@ abstract public class ThreadedServer extends ThreadPool
                 _listen.setSoTimeout(_soTimeOut);
             
             _acceptor=new Acceptor();
+            _acceptor.setDaemon(isDaemon());
             _acceptor.start();
             
             super.start();
@@ -510,6 +511,7 @@ abstract public class ThreadedServer extends ThreadPool
                         // Reserve a thread
 //                         while (!threadedServer.reserveThread())
 //                         {
+//                             System.err.println("SLEEP");
 //                             Thread.sleep(250);
 //                         }
                         
@@ -527,6 +529,8 @@ abstract public class ThreadedServer extends ThreadPool
                         else if (socket!=null)
                             socket.close();
                     }
+                    catch(InterruptedException e)
+                    {}
                     catch(Exception e)
                     {
                         Code.warning(e);

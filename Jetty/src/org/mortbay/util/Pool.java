@@ -49,6 +49,7 @@ public class Pool
     private String _name;
     private String _className;
     private int _maxIdleTimeMs=10000;
+    private HashMap _attributes = new HashMap();
     
     private transient Class _class;
     private transient PondLife[] _pondLife;
@@ -159,7 +160,18 @@ public class Pool
     {
         _maxIdleTimeMs=maxIdleTimeMs;
     }
-
+    
+    /* ------------------------------------------------------------ */
+    public void setAttribute(String name,Object value)
+    {
+        _attributes.put(name,value);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public Object getAttribute(String name)
+    {
+        return _attributes.get(name);
+    }
     
     /* ------------------------------------------------------------ */
     public boolean isStarted()

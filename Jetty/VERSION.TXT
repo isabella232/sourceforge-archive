@@ -7,6 +7,8 @@ Jetty-4.2.0pre0 ...
  + Fixed caching of directories to avoid shared buffers.
 
 Jetty-4.1.2 ...
+ + getNamedDispatcher(null) returns containers default servlet.
+ + unquote charset in content type
  + Stop/Start filters in declaration order.
  + Some AJP13 optimizations.
  + Use "standard" names for default,jsp & invoker servlets.

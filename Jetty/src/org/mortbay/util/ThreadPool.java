@@ -36,12 +36,7 @@ import java.util.Iterator;
 public class ThreadPool
     implements LifeCycle, Serializable
 {
-    /* ------------------------------------------------------------ */
-    /** The number of times a null lock check should synchronize.
-     */
-    public static int __nullLockChecks =
-        Integer.getInteger("THREADPOOL_NULL_LOCK_CHECKS",2).intValue();
-
+    public static final String __DAEMON="org.mortbay.util.ThreadPool.daemon";
     
     /* ------------------------------------------------------------------- */
     private String _name;
@@ -131,6 +126,23 @@ public class ThreadPool
         }
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * Delegated to the named or anonymous Pool.
+     */
+    public boolean isDaemon()
+    {
+        return _pool.getAttribute(__DAEMON)!=null;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * Delegated to the named or anonymous Pool.
+     */
+    public void setDaemon(boolean daemon)
+    {
+        _pool.setAttribute(__DAEMON,daemon?"true":null);
+    }
     
     /* ------------------------------------------------------------ */
     /** Is the pool running jobs.
@@ -272,8 +284,18 @@ public class ThreadPool
     public void shrink()
         throws InterruptedException
     {
-        _pool.shrink();
+        synchronized(this)
+        {
+            if (_reserved!=null)
+            {
+                _pool.put(_reserved);
+                _reserved=null;
+            }
+        
+            _pool.shrink();
+        }
     }
+    
 
     /* ------------------------------------------------------------ */
     /** Run job.
@@ -381,6 +403,7 @@ public class ThreadPool
             _name=_pool.getPoolName()==null
                 ?("PoolThread-"+id):(_pool.getPoolName()+"-"+id);
             setName(_name);
+            setDaemon(pool.getAttribute(__DAEMON)!=null);
             start();
         }
 

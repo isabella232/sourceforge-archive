@@ -356,7 +356,7 @@ public class HttpOutputStream
         throws IOException, IllegalStateException
     {
         if (isChunking())
-            throw new IllegalStateException("Chunking");
+            close();
         
         _committed=false;
         _written=false;

@@ -293,6 +293,14 @@ public class WebApplicationContext
     }
     
     /* ------------------------------------------------------------ */
+    public void setPermissions(PermissionCollection permissions)
+    {
+        if (!_ignorewebjetty)
+            Code.warning("Permissions set with web-jetty.xml enabled");
+        super.setPermissions(permissions);
+    }
+    
+    /* ------------------------------------------------------------ */
     public boolean isIgnoreWebJetty()
     {
         return _ignorewebjetty;
@@ -306,6 +314,8 @@ public class WebApplicationContext
     public void setIgnoreWebJetty(boolean b)
     {
         _ignorewebjetty=b;
+        if (b && getPermissions()!=null)
+            Code.warning("Permissions set with web-jetty.xml enabled");
     }
     
     /* ------------------------------------------------------------ */
