@@ -433,7 +433,10 @@ you can uncomment the following lines:
 </pre>
 <p> 
 
-Remember that the default port for https is 443 not 80, so change 80 to 443 if you want to be able to use URL's without explicit port numbers. For a production site it normally makes sense to have a HttpListener on port 80 and a SunJsseListener on port 443.
+Remember that the default port for https is 443 not 80, so change 8443 to 443 if you want to be able to use URL's without explicit port numbers. For a production site it normally makes sense to have a HttpListener on port 80 and a SunJsseListener on port 443.
+Note that as these are privileged ports, you may want to use a redirection mechanism to map port 80 to
+eg 8080 and 443 to eg 8443. For details on this, see the <a href="User80.html">FAQ</A>.
+
 
 <p>
 Choose a private directory with restricted access to keep your keystore
