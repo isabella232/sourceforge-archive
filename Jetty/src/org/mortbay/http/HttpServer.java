@@ -63,6 +63,8 @@ import org.mortbay.util.URI;
 public class HttpServer implements LifeCycle
 {
     /* ------------------------------------------------------------ */
+    private final static String __notice=Version.__notice;
+
     private static WeakHashMap __servers = new WeakHashMap();
     private static Collection __roServers =
         Collections.unmodifiableCollection(__servers.keySet());

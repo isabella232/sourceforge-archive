@@ -510,6 +510,8 @@ public class ResourceHandler extends NullHandler
     {
         long resLength=resource.length();
         
+
+
         //  see if there are any range headers
         Enumeration reqRanges =
             request.getDotVersion()>0
@@ -540,6 +542,7 @@ public class ResourceHandler extends NullHandler
             response.setStatus(response.__416_Requested_Range_Not_Satisfiable);
             response.setReason((String)response.__statusMsg
                                .get(TypeUtil.newInteger(response.__416_Requested_Range_Not_Satisfiable)));
+
             response.setField(HttpFields.__ContentRange, 
                               InclusiveByteRange.to416HeaderRangeString(resLength));
             

@@ -43,7 +43,7 @@ public class ThreadPool
     static int __maxThreads = 
         Integer.getInteger("THREADPOOL_MAX_THREADS",256).intValue();
     static int __minThreads =
-        Integer.getInteger("THREADPOOL_MIN_THREADS",1).intValue();
+        Integer.getInteger("THREADPOOL_MIN_THREADS",4).intValue();
     static String __threadClass =
         System.getProperty("THREADPOOL_THREAD_CLASS");
     
