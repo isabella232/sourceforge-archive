@@ -62,7 +62,6 @@ the Ant optional tasks from:
   <property name="mini.http.jar"  value="${basedir}/org.mortbay.http.jar"/>
   <property name="mortbay.jmx.jar" value="${lib}/org.mortbay.jmx.jar"/>
   <property name="servlet.jar"    value="${lib}/javax.servlet.jar"/>
-  <property name="jasper.jar"     value="${lib}/org.apache.jasper.jar"/>
 
   <!-- ==================================================================== -->
   <target name="classpath" depends="is.jdk1.4.available,classpath1.2,classpath1.4"/>

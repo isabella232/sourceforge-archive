@@ -37,7 +37,6 @@ read Y
     cd Jetty
     rm -fr FileBase servlets doc docroot src/com webappsrc webapps/default webapps/examples webapps/jetty testdocs
     ant all tidy || exit 1
-    cp /usr/share/java/ant-1.5.jar ext
     cd ..
     mv Jetty Jetty-$VERSION
     tar cfz /usr/local/archive/Jetty-${VERSION}.tgz Jetty-$VERSION
