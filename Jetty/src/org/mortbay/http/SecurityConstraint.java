@@ -50,7 +50,7 @@ public class SecurityConstraint
         throws IOException;
 
         public String getAuthMethod();
-    };
+    }
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -68,7 +68,7 @@ public class SecurityConstraint
         public String getName() { return "Nobody";}
         public boolean isAuthenticated() {return false;}
         public boolean isUserInRole(String role) {return false;}
-    };
+    }
     public final static Nobody __NOBODY=new Nobody();
 
     
