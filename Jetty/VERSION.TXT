@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
  + Fixed form auth success redirect after retry, introduced in 4.2.9rc1
+ + Trace support is now optional (in AbstractHttpHandler).
+ + Deprecated forced chunking.
 
 Jetty-4.2.10pre0 - 5 May 2003
  + Moved Log4JLogSink into JettyPlus
