@@ -271,13 +271,10 @@ public class HttpConnection
             
             if (_request.getState()!=HttpMessage.__MSG_RECEIVED)
                 throw new HttpException(_response.__400_Bad_Request);
-            if (Code.debug())
-            {
-                if (Code.verbose(100))
-                    Code.debug("Request:",_request.toString());
-                else
-                    Code.debug("Request:",_request.getRequestLine());
-            }
+	    
+	    Log.event("Request:"+_request.getRequestLine());
+	    if (Code.verbose(100))
+		Code.debug("Request:",_request.toString());
 
             // Pick response version
             _version=_request.getVersion();
@@ -430,6 +427,20 @@ public class HttpConnection
                 _response.sendError(HttpResponse.__500_Internal_Server_Error);
             }
         }
+        catch (Error e)
+        {
+	    Code.warning(e);
+            
+            _persistent=false;
+            if (!_outputStream.isCommitted())
+            {
+                _outputStream.resetBuffer();
+                _response.removeField(HttpFields.__TransferEncoding);
+                _response.setField(HttpFields.__Connection,
+                                  HttpFields.__Close);
+                _response.sendError(HttpResponse.__500_Internal_Server_Error);
+            }
+	}
         finally
         {
             if (_request!=null)
@@ -585,11 +596,12 @@ public class HttpConnection
     public void outputNotify(ChunkableOutputStream out, int action)
         throws IOException
     {
+	
         switch(action)
         {
           case OutputObserver.__FIRST_WRITE:
-              Code.debug("notify FIRST_WRITE");
-
+              Code.debug("notify FIRST_WRITE ");
+	      
               // Determine how to limit content length and
               // enable output transfer encodings 
               List transfer_coding=_response.getFieldValues(HttpFields.__TransferEncoding);

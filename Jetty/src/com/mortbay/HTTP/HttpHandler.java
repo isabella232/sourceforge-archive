@@ -55,24 +55,16 @@ public interface HttpHandler extends LifeCycle
     /** Handle a request.
      * If the response is not sending or committed, then the request
      * is not considered handled.
-     * @param pathSpec The path specification that mapped to this handler.
+     * @param contextPath The path specification that mapped to this handler.
      * @param request The request
      * @param response The response.
      */
-    public void handle(String pathSpec,HttpRequest request,HttpResponse response)
-        throws HttpException, IOException;
-
-
-    /* ------------------------------------------------------------ */
-    /** Get a real path.
-     * @param pathSpec The path specification that mapped to this handler.
-     * @param path A URI path.
-     * @return The real path of the uri or the empty string if there is
-     *         no real path or null if this handler would not have handled
-     *         the path.
-     */
-    public String realPath(String pathSpec, String path);
-    
-    
+    public void handle(String contextPath,
+		       HttpRequest request,
+		       HttpResponse response)
+        throws HttpException, IOException;    
 }
+
+
+
 

@@ -56,8 +56,12 @@ public class FileJarPath
                     throw new FileNotFoundException(filename);
                 file = new File(file.getCanonicalPath());
                 if (file.isDirectory())
+		{
                     // add to the list if it is a directory.
                     _paths.add(file.getCanonicalPath());
+		    if (Code.verbose(100))
+			Code.debug("Directory ",file);
+		}
                 else
                 {
                     // Assume it is a zip file
@@ -66,6 +70,8 @@ public class FileJarPath
                     lc.file=file;
                     lc.lastModified=System.currentTimeMillis();
                     _loaded.add(lc);
+		    if (Code.verbose(100))
+			Code.debug("Jar ",file);
                 }
             }
             catch(IOException e)
@@ -97,6 +103,10 @@ public class FileJarPath
                 {
                     ZipFile zip = (ZipFile)source;
 
+		    if (Code.verbose(1000))
+			Code.debug("Look in jar ",zip,
+				   " for ",filename);
+		    
                     ZipEntry entry = zip.getEntry(filename);
                     if (entry==null)
                     {
@@ -124,6 +134,11 @@ public class FileJarPath
                     File file = new File(dir+File.separator+filename);
                     if (file.exists())
                     {
+			if (Code.verbose(1000))
+			    Code.debug("Look in dir ",file,
+				       " for ",filename);
+
+			
                         in = new FileInputStream(file);
                         length=(int)file.length();
                         
@@ -155,7 +170,7 @@ public class FileJarPath
     {
         for (int f=_loaded.size();f-->0;)
         {
-            LoadedFile lf = (LoadedFile)_loaded.get(f);        
+            LoadedFile lf = (LoadedFile)_loaded.get(f);
             if (!lf.file.exists() || lf.file.lastModified()>lf.lastModified)
                 return true;
         }

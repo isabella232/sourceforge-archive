@@ -36,11 +36,10 @@ public class HttpResponse extends HttpMessage
           __206_Partial_Content = 206,
           __300_Multiple_Choices = 300,
           __301_Moved_Permanently = 301,
-          __302_Found = 302,
+          __302_Moved_Temporarily = 302,
           __303_See_Other = 303,
           __304_Not_Modified = 304,
           __305_Use_Proxy = 305,
-          __307_Temporary_Redirect = 307,
           __400_Bad_Request = 400,
           __401_Unauthorized = 401, 
           __402_Payment_Required = 402,
@@ -127,6 +126,20 @@ public class HttpResponse extends HttpMessage
     }
     
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return 
+     */
+    public boolean isDirty()
+    {
+	ChunkableOutputStream out=getOutputStream();
+	
+	return _state!=__MSG_EDITABLE
+	    || ( out!=null &&
+		 (out.isWritten() || out.isCommitted()));
+    }
+    
+    
     /* ------------------------------------------------------------ */
     /** Get the HTTP Request.
      * Get the HTTP Request associated with this response.
@@ -332,7 +345,7 @@ public class HttpResponse extends HttpMessage
         throws IOException
     {
         _header.put(HttpFields.__Location,location);
-        setStatus(__307_Temporary_Redirect);
+        setStatus(__302_Moved_Temporarily);
         commit();
     }
 
@@ -429,5 +442,19 @@ public class HttpResponse extends HttpMessage
     {
         _reason=null;
         super.destroy();
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @exception IOException 
+     */
+    public synchronized void commit()
+	throws IOException
+    {
+	super.commit();
+	HttpRequest request=getRequest();
+	if (request!=null)
+	    request.setHandled(true);
     }
 }

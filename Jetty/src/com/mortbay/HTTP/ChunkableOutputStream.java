@@ -143,7 +143,7 @@ public class ChunkableOutputStream extends FilterOutputStream
      */
     public synchronized boolean isWritten()
     {
-        return !_written;
+        return _written;
     }
     
     /* ------------------------------------------------------------ */

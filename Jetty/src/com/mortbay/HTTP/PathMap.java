@@ -252,8 +252,12 @@ public class PathMap extends HashMap
             return null;
 
         if (pathSpec.equals("/"))
+	{
+	    if ("/".equals(path))
+		return null;
             return path;
-        
+        }
+	
         if (pathSpec.startsWith("/"))
         {
             if (pathSpec.equals(path))

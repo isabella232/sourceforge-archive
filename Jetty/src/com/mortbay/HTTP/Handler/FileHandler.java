@@ -5,6 +5,7 @@
 
 package com.mortbay.HTTP.Handler;
 
+import com.sun.java.util.collections.*;
 import com.mortbay.HTTP.*;
 import com.mortbay.Util.*;
 import java.util.*;
@@ -25,51 +26,122 @@ import java.io.*;
 public class FileHandler extends NullHandler
 {
     /* ----------------------------------------------------------------- */
-    String _fileBase;
-    Vector indexFiles=new Vector(2);
-    boolean putAllowed;
-    boolean deleteAllowed;
-    boolean dirAllowed=true;
-    String allowHeader = null;
-    Hashtable mimeMap;
-    CachedFile[] cache=null;
-    int nextIn=0;
-    Hashtable cacheMap=null;
-    int maxCachedFiles;
-    int maxCachedFileSize;
-    
-    /* ----------------------------------------------------------------- */
-    /** Construct a FileHandler at the given fileBase and use indexFile
-     * as the default directory return file.
-     */
-    public FileHandler(String fileBase,
-                       String indexFile,
-                       boolean dirAllowed,
-                       boolean putAllowed,
-                       boolean deleteAllowed,
-                       int maxCachedFiles,
-                       int maxCachedFileSize)
-    {
-        _fileBase=fileBase;
-        indexFiles=new Vector();
-        indexFiles.addElement(indexFile);
-        this.dirAllowed=dirAllowed;
-        this.putAllowed=putAllowed;
-        this.deleteAllowed=deleteAllowed;
+    String _allowHeader = null;
+    CachedFile[] _cache=null;
+    int _nextIn=0;
+    Map _cacheMap=null;
 
-        this.maxCachedFiles=maxCachedFiles;
-        this.maxCachedFileSize=maxCachedFileSize;
-          
+    
+    /* ------------------------------------------------------------ */
+    String _fileBase ;
+    public String getFileBase()
+    {
+	return _fileBase;
+    }
+    public void setFileBase(String fileBase)
+    {
+	_fileBase = fileBase;
     }
 
+
+    /* ------------------------------------------------------------ */
+    boolean _dirAllowed =true;
+    public boolean isDirAllowed()
+    {
+	return _dirAllowed;
+    }
+    public void setDirAllowed(boolean dirAllowed)
+    {
+	_dirAllowed = dirAllowed;
+    }
+    
+    /* ------------------------------------------------------------ */
+    boolean _putAllowed =false;
+    public boolean isPutAllowed()
+    {
+	return _putAllowed;
+    }
+    public void setPutAllowed(boolean putAllowed)
+    {
+	_putAllowed = putAllowed;
+    }
+
+    /* ------------------------------------------------------------ */
+    boolean _delAllowed=false;
+    public boolean isDelAllowed()
+    {
+	return _delAllowed;
+    }
+    public void setDelAllowed(boolean delAllowed)
+    {
+	_delAllowed = delAllowed;
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    List _indexFiles =new ArrayList(2);
+    {
+	_indexFiles.add("index.html");
+	_indexFiles.add("index.htm");
+    }
+    public List getIndexFiles()
+    {
+	return _indexFiles;
+    }
+    public void setIndexFiles(List indexFiles)
+    {
+	_indexFiles = indexFiles;
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    int _maxCachedFiles =64;
+    public int getMaxCachedFiles()
+    {
+	return _maxCachedFiles;
+    }
+    public void setMaxCachedFiles(int maxCachedFiles_)
+    {
+	_maxCachedFiles = maxCachedFiles_;
+    }
+    
+    /* ------------------------------------------------------------ */
+    int _maxCachedFileSize =40960;
+    public int getMaxCachedFileSize()
+    {
+	return _maxCachedFileSize;
+    }
+    public void setMaxCachedFileSize(int maxCachedFileSize)
+    {
+	_maxCachedFileSize = maxCachedFileSize;
+    }
+
+    /* ------------------------------------------------------------ */
+    Map _mimeMap ;
+    public Map getMimeMap()
+    {
+	return _mimeMap;
+    }
+    public void setMimeMap(Map mimeMap)
+    {
+	_mimeMap = mimeMap;
+    }
+
+    /* ----------------------------------------------------------------- */
+    /** Construct a FileHandler.
+     */
+    public FileHandler()
+    {}
+
+    
     /* ----------------------------------------------------------------- */
     public void start()
     {
         Log.event("FileHandler started in "+_fileBase);
-        if (maxCachedFiles>0 && maxCachedFileSize>0 && cache==null)
+        if (_maxCachedFiles>0 && _maxCachedFileSize>0 && _cache==null)
         {
-            cache=new CachedFile[maxCachedFiles];
-            cacheMap=new Hashtable();
+            _cache=new CachedFile[_maxCachedFiles];
+            _cacheMap=new HashMap();
         }
         super.start();
     }
@@ -83,8 +155,8 @@ public class FileHandler extends NullHandler
     /* ----------------------------------------------------------------- */
     public void destroy()
     {
-        cache=null;
-        cacheMap.clear();
+        _cache=null;
+        _cacheMap.clear();
         super.destroy();
     }
 
@@ -110,44 +182,6 @@ public class FileHandler extends NullHandler
         }
         
         return realpath;
-    }
-    
-    /* ----------------------------------------------------------------- */
-    public boolean isPutAllowed()
-    {
-        return putAllowed;
-    }
-    
-    /* ----------------------------------------------------------------- */
-    public void setPutAllowed(boolean putAllowed_)
-    {
-        putAllowed = putAllowed_;
-        allowHeader = null;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public boolean isDeleteAllowed()
-    {
-        return deleteAllowed;
-    }
-    
-    /* ----------------------------------------------------------------- */
-    public void setDeleteAllowed(boolean deleteAllowed_)
-    {
-        deleteAllowed = deleteAllowed_;
-        allowHeader = null;
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isDirAllowed()
-    {
-        return dirAllowed;
-    }
-    
-    /* ----------------------------------------------------------------- */
-    public void setDirAllowed(boolean dirAllowed_)
-    {
-        dirAllowed = dirAllowed_;
     }
     
     /* ------------------------------------------------------------ */
@@ -204,13 +238,13 @@ public class FileHandler extends NullHandler
         Code.debug("Looking for ",filename);
         
         // Try a cache lookup
-        if (cache!=null && !endsWithSlash)
+        if (_cache!=null && !endsWithSlash)
         {
             byte[] bytes=null;
-            synchronized(cacheMap)
+            synchronized(_cacheMap)
             {
                 CachedFile cachedFile=
-                    (CachedFile)cacheMap.get(filename);
+                    (CachedFile)_cacheMap.get(filename);
                 if (cachedFile!=null &&cachedFile.isValid())
                 {
                     if (!checkGetHeader(request,response,cachedFile.file))
@@ -224,7 +258,6 @@ public class FileHandler extends NullHandler
                 OutputStream out = response.getOutputStream();
                 out.write(bytes);
                 out.flush();
-                request.setHandled(true);
                 return;
             }
         }
@@ -260,11 +293,11 @@ public class FileHandler extends NullHandler
                     
                 // See if index file exists
                 boolean indexSent=false;
-                for (int i=indexFiles.size();i-->0;)
+                for (int i=_indexFiles.size();i-->0;)
                 {
                     File index = new File(filename+
                                           File.separator +
-                                          indexFiles.elementAt(i));
+                                          _indexFiles.get(i));
                     if (index.isFile())
                     {
 			// Check modified dates
@@ -334,7 +367,7 @@ public class FileHandler extends NullHandler
     {
         Code.debug("PUT ",path," in ",filename);
 
-        if (!putAllowed)
+        if (!_putAllowed)
             return;
         
         try
@@ -383,7 +416,7 @@ public class FileHandler extends NullHandler
         if (!file.exists())
             return;
 
-        if (!deleteAllowed)
+        if (!_delAllowed)
         {
             setAllowHeader(response);
             response.sendError(response.__405_Method_Not_Allowed);
@@ -396,9 +429,9 @@ public class FileHandler extends NullHandler
             file.delete();
             
             // flush the cache
-            if (cacheMap!=null)
+            if (_cacheMap!=null)
             {
-                CachedFile cachedFile=(CachedFile)cacheMap.get(filename);
+                CachedFile cachedFile=(CachedFile)_cacheMap.get(filename);
                 if (cachedFile!=null)
                     cachedFile.flush();
             }
@@ -420,18 +453,18 @@ public class FileHandler extends NullHandler
                     String pathSpec, String path, String filename)
         throws IOException
     {
-        if (!deleteAllowed || !putAllowed)
+        if (!_delAllowed || !_putAllowed)
             return;
         
         File file = new File(filename);
         if (!file.exists())
         {
-            if (deleteAllowed && putAllowed)
+            if (_delAllowed && _putAllowed)
                 response.sendError(response.__404_Not_Found);
             return;
         }
 
-        if (!deleteAllowed || !putAllowed)
+        if (!_delAllowed || !_putAllowed)
         {
             setAllowHeader(response);
             response.sendError(response.__405_Method_Not_Allowed);
@@ -477,30 +510,30 @@ public class FileHandler extends NullHandler
     /* ------------------------------------------------------------ */
     void setAllowHeader(HttpResponse response)
     {
-        if (allowHeader == null)
+        if (_allowHeader == null)
         {
             StringBuffer sb = new StringBuffer(128);
             sb.append(HttpRequest.__GET);
             sb.append(", ");
             sb.append(HttpRequest.__HEAD);
-            if (putAllowed){
+            if (_putAllowed){
                 sb.append(", ");
                 sb.append(HttpRequest.__PUT);
             }
-            if (deleteAllowed){
+            if (_delAllowed){
                 sb.append(", ");
                 sb.append(HttpRequest.__DELETE);
             }
-            if (putAllowed && deleteAllowed)
+            if (_putAllowed && _delAllowed)
             {
                 sb.append(", ");
                 sb.append(HttpRequest.__MOVE);
             }
             sb.append(", ");
             sb.append(HttpRequest.__OPTIONS);
-            allowHeader = sb.toString();
+            _allowHeader = sb.toString();
         }
-        response.setField(HttpFields.__Allow, allowHeader);
+        response.setField(HttpFields.__Allow, _allowHeader);
     }
     
     /* ------------------------------------------------------------ */
@@ -513,18 +546,18 @@ public class FileHandler extends NullHandler
         Code.debug("sendFile: ",file.getAbsolutePath());
 
         // Can the file be cached?
-        if (cache!=null && file.length()<maxCachedFileSize)
+        if (_cache!=null && file.length()<_maxCachedFileSize)
         {
             byte[] bytes=null;
-            synchronized (cacheMap)
+            synchronized (_cacheMap)
             {
-                CachedFile cachedFile=cache[nextIn];
+                CachedFile cachedFile=_cache[_nextIn];
                 if (cachedFile==null)
-                    cachedFile=cache[nextIn]=new CachedFile();
-                nextIn=(nextIn+1)%cache.length;
+                    cachedFile=_cache[_nextIn]=new CachedFile();
+                _nextIn=(_nextIn+1)%_cache.length;
                 cachedFile.flush();
                 cachedFile.load(filename,file);
-                cacheMap.put(filename,cachedFile);
+                _cacheMap.put(filename,cachedFile);
                 bytes=cachedFile.prepare(response);
             }
             if (bytes!=null)
@@ -569,7 +602,7 @@ public class FileHandler extends NullHandler
                        boolean parent)
          throws IOException
     {
-        if (dirAllowed)
+        if (_dirAllowed)
         {
             Code.debug("sendDirectory: "+file);
             String base = request.getPath();
@@ -651,31 +684,31 @@ public class FileHandler extends NullHandler
         else
             ext=StringUtil.asciiToLowerCase(filename.substring(i+1));
         
-        if (mimeMap==null)
+        if (_mimeMap==null)
         {
-            mimeMap = new Hashtable();
-            mimeMap.put("default","application/octet-stream");
-            mimeMap.put("class","application/octet-stream");
-            mimeMap.put("html","text/html");
-            mimeMap.put("htm","text/html");
-            mimeMap.put("txt","text/plain");
-            mimeMap.put("java","text/plain");
-            mimeMap.put("gif","image/gif");
-            mimeMap.put("jpg","image/jpeg");
-            mimeMap.put("jpeg","image/jpeg");
-            mimeMap.put("au","audio/basic");
-            mimeMap.put("snd","audio/basic");
-            mimeMap.put("ra","audio/x-pn-realaudio");
-            mimeMap.put("ram","audio/x-pn-realaudio");
-            mimeMap.put("rm","audio/x-pn-realaudio");
-            mimeMap.put("rpm","audio/x-pn-realaudio");
-            mimeMap.put("mov","video/quicktime");
-            mimeMap.put("jsp","text/plain");
+            _mimeMap = new HashMap();
+            _mimeMap.put("default","application/octet-stream");
+            _mimeMap.put("class","application/octet-stream");
+            _mimeMap.put("html","text/html");
+            _mimeMap.put("htm","text/html");
+            _mimeMap.put("txt","text/plain");
+            _mimeMap.put("java","text/plain");
+            _mimeMap.put("gif","image/gif");
+            _mimeMap.put("jpg","image/jpeg");
+            _mimeMap.put("jpeg","image/jpeg");
+            _mimeMap.put("au","audio/basic");
+            _mimeMap.put("snd","audio/basic");
+            _mimeMap.put("ra","audio/x-pn-realaudio");
+            _mimeMap.put("ram","audio/x-pn-realaudio");
+            _mimeMap.put("rm","audio/x-pn-realaudio");
+            _mimeMap.put("rpm","audio/x-pn-realaudio");
+            _mimeMap.put("mov","video/quicktime");
+            _mimeMap.put("jsp","text/plain");
         }
         
-        String type = (String)mimeMap.get(ext);
+        String type = (String)_mimeMap.get(ext);
         if (type==null)
-            type = (String)mimeMap.get("default");
+            type = (String)_mimeMap.get("default");
 
         return type;
     }
@@ -713,7 +746,7 @@ public class FileHandler extends NullHandler
             if( lastModified!=file.lastModified())
             {
                 // If it is too big
-                if (file.length()>maxCachedFileSize)
+                if (file.length()>_maxCachedFileSize)
                 {
                     flush();
                     return false;
@@ -763,13 +796,10 @@ public class FileHandler extends NullHandler
             if (file!=null)
             {
                 Code.debug("FLUSH: ",filename);
-                cacheMap.remove(filename);
+                _cacheMap.remove(filename);
                 filename=null;
                 file=null;
             }
         }
     }
-
-    
-
 }

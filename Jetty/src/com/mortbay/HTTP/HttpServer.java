@@ -16,26 +16,17 @@ import java.lang.reflect.*;
 /* ------------------------------------------------------------ */
 /** HTTP Server.
  *
- *
  * @see
  * @version 1.0 Thu Oct  7 1999
  * @author Greg Wilkins (gregw)
  */
-public class HttpServer
+public class HttpServer implements LifeCycle
 {
-    /* ------------------------------------------------------------ */
-    public final String __defaultServletHandler =
-	"com.mortbay.Servlet2_1.ServletHandler";
-    public final String __defaultDynamicServletHandler =
-	"com.mortbay.Servlet2_1.DynamicHandler";
-    
     /* ------------------------------------------------------------ */
     HashMap _listeners = new HashMap(7);
     HashMap _hostMap = new HashMap(7);
     PathMap _handlerMap = new PathMap();
-    HashMap _fileMap = new HashMap(7);
-    ServletHandler _servletHandler=null;
-    
+
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
@@ -44,6 +35,151 @@ public class HttpServer
         _hostMap.put(null,_handlerMap);
     }
 
+    /* ------------------------------------------------------------ */
+    public void initialize(Object config)
+    {
+	Code.notImplemented();
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /** Start all handlers then listeners.
+     */
+    public synchronized void start()
+    {
+        Iterator handlers = getHandlers().iterator();
+        while(handlers.hasNext())
+        {
+            HttpHandler handler=(HttpHandler)handlers.next();
+            if (!handler.isStarted())
+                handler.start();
+        }
+        
+        Iterator listeners = getListeners().iterator();
+        while(listeners.hasNext())
+        {
+            HttpListener listener =(HttpListener)listeners.next();
+            if (!listener.isStarted())
+                listener.start();
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Start all handlers then listeners.
+     */
+    public synchronized boolean isStarted()
+    {
+        Iterator handlers = getHandlers().iterator();
+        while(handlers.hasNext())
+        {
+            HttpHandler handler=(HttpHandler)handlers.next();
+            if (handler.isStarted())
+		return true;
+        }
+        
+        Iterator listeners = getListeners().iterator();
+        while(listeners.hasNext())
+        {
+            HttpListener listener =(HttpListener)listeners.next();
+            if (listener.isStarted())
+		return true;
+        }
+	return false;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Stop all listeners then handlers.
+     * @exception InterruptedException If interrupted, stop may not have
+     * been called on everything.
+     */
+    public synchronized void stop()
+        throws InterruptedException
+    {
+        Iterator listeners = getListeners().iterator();
+        while(listeners.hasNext())
+        {
+            HttpListener listener =(HttpListener)listeners.next();
+            if (listener.isStarted())
+                listener.stop();
+        }
+        
+        Iterator handlers = getHandlers().iterator();
+        while(handlers.hasNext())
+        {
+            HttpHandler handler=(HttpHandler)handlers.next();
+            if (handler.isStarted())
+                handler.stop();
+        }
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    /** Stop all listeners then handlers.
+     * All the handlers are unmapped and the listeners removed.
+     */
+    public synchronized void destroy()
+    {
+        Iterator listeners = getListeners().iterator();
+        while(listeners.hasNext())
+        {
+            HttpListener listener =(HttpListener)listeners.next();
+            listener.destroy();
+        }
+        
+        Iterator handlers = getHandlers().iterator();
+        while(handlers.hasNext())
+        {
+            HttpHandler handler=(HttpHandler)handlers.next();
+            handler.destroy();
+        }
+
+        _hostMap.clear();
+        _handlerMap.clear();
+        _listeners.clear();
+        _hostMap.put(null,_handlerMap);
+    }
+
+    /* ------------------------------------------------------------ */
+    public synchronized boolean isDestroyed()
+    {
+        Iterator handlers = getHandlers().iterator();
+        while(handlers.hasNext())
+        {
+            HttpHandler handler=(HttpHandler)handlers.next();
+            if (!handler.isDestroyed())
+		return false;
+        }
+        
+        Iterator listeners = getListeners().iterator();
+        while(listeners.hasNext())
+        {
+            HttpListener listener =(HttpListener)listeners.next();
+            if (!listener.isDestroyed())
+		return false;
+        }
+	return true;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Add a SocketListener.
+     * Conveniance method.
+     * @param address
+     * @return the HttpListener.
+     * @exception IOException 
+     */
+    public HttpListener addListener(InetAddrPort address)
+        throws IOException
+    {
+        HttpListener listener = (HttpListener)_listeners.get(address);
+        if (listener==null)
+        {
+            listener=new SocketListener(this,address);
+            _listeners.put(address,listener);
+        }
+
+        return listener;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Add a HTTP Listener to the server.
      * @param listener The Listener.
@@ -82,27 +218,7 @@ public class HttpServer
     {
         return new HashSet(_listeners.values());
     }
-    
-    /* ------------------------------------------------------------ */
-    private PathMap getHandlerMap(String host, boolean create)
-    {
-        PathMap virtual;
-        if (host!=null && host.length()>0)
-        {
-            virtual=(PathMap)_hostMap.get(host);
-            if (virtual==null && create)
-            {
-                virtual=new PathMap();
-                _hostMap.put(host,virtual);
-            }
-            
-            if (virtual==null)
-                 virtual=_handlerMap;
-        }
-        else
-            virtual=_handlerMap;        
-        return virtual;
-    }
+
     
     /* ------------------------------------------------------------ */
     /** Define a virtual host alias.
@@ -111,33 +227,34 @@ public class HttpServer
      * @param host 
      * @param alias 
      */
-    public void hostAlias(String host, String alias)
+    public void addHostAlias(String host, String alias)
     {
         PathMap handlerMap=getHandlerMap(host,true);
         _hostMap.put(alias,handlerMap);
     }
+
     
     /* ------------------------------------------------------------ */
-    /** Map a handler to a path specification.
+    /** Add a handler to a path specification.
      * Requests with paths matching the path specification are passed
      * to the handle method of the handler. All matching handlers
      * are offered the request, starting with the best match, until
      * the request is handled.
      *
-     * Multiple handlers can be mapped to the same pathSpec and
+     * Multiple handlers can be mapped to the same contextPath and
      * requests are passed to the handlers in the order they
      * were registered.
      * @param host Virtual host name or null.
-     * @param pathSpec 
+     * @param contextPath 
      * @param handler 
      */
-    public void mapHandler(String host,String pathSpec, HttpHandler handler)
+    public void addHandler(String host,String contextPath, HttpHandler handler)
     {
-        List list=(List)getHandlerMap(host,true).get(pathSpec);
+        List list=(List)getHandlerMap(host,true).get(contextPath);
         if (list==null)
         {
             list=new ArrayList(8);
-            getHandlerMap(host,false).put(pathSpec,list);
+            getHandlerMap(host,false).put(contextPath,list);
         }
         if (!list.contains(handler))
             list.add(handler);
@@ -146,12 +263,14 @@ public class HttpServer
     /* ------------------------------------------------------------ */
     /** Unmap a handler from a path specification.
      * @param host Virtual host name or null.
-     * @param pathSpec 
+     * @param contextPath 
      * @param handler 
      */
-    public void unmapHandler(String host, String pathSpec, HttpHandler handler)
+    public void removeHandler(String host,
+			      String contextPath,
+			      HttpHandler handler)
     {
-        List list=(List)getHandlerMap(host,false).get(pathSpec);
+        List list=(List)getHandlerMap(host,false).get(contextPath);
         if (list!=null)
             list.remove(handler);
     }
@@ -178,208 +297,132 @@ public class HttpServer
         }
         return set;
     }
-    
-    /* ------------------------------------------------------------ */
-    /** Add and start a SocketListener.
-     * Conveniance method.
-     * @param address
-     * @return the HttpListener.
-     * @exception IOException 
-     */
-    public HttpListener startListener(InetAddrPort address)
-        throws IOException
-    {
-        HttpListener listener = (HttpListener)_listeners.get(address);
-        if (listener==null)
-        {
-            listener=new SocketListener(this,address);
-            _listeners.put(address,listener);
-        }
-
-        listener.start();
-        return listener;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Stop a SocketListener.
-     * Conveniance method.
-     * @param address 
-     * @exception InterruptedException 
-     */
-    public void stopListener(InetAddrPort address)
-        throws InterruptedException
-    {
-        HttpListener listener = (HttpListener)_listeners.get(address);
-        if (listener!=null)
-            listener.stop();
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Destroy a SocketListener
-     * Conveniance method.
-     * @param address 
-     */
-    public void destroyListener(InetAddrPort address)
-    {
-        HttpListener listener = (HttpListener)_listeners.remove(address);
-        if (listener!=null)
-            listener.destroy();
-    }
 
     
+    
     /* ------------------------------------------------------------ */
-    /** Conveniance method for adding FileHandlers.
-     * A single FileHandler instance is maintained for each
-     * mapped filename and can be mapped to multiple path specifications.
-     * @param host Virtual host name or null.
-     * @param pathSpec 
-     * @param directory
-     * @return The handler.
-     */
-    public HttpHandler mapFiles(String host, String pathSpec, String directory)
+    private String _defaultServletHandlerClass =
+	"com.mortbay.Servlet2_1.ServletHandler";
+    public String getDefaultServletHandlerClass()
+    {return _defaultServletHandlerClass;}
+    public void setDefaultServletHandlerClass(String className)
+    {clearDefaultContext();_defaultServletHandlerClass = className;}
+
+    /* ------------------------------------------------------------ */
+    private String _defaultDynamicServletHandlerClass =
+	"com.mortbay.Servlet2_1.DynamicHandler";
+    public String getDefaultDynamicServletHandler()
+    {return _defaultDynamicServletHandlerClass;}
+    public void setDefaultDynamicServletHandlerClass(String className)
+    {clearDefaultContext();_defaultDynamicServletHandlerClass = className;}
+
+    /* ------------------------------------------------------------ */
+    String _contextHost;
+    public String getContextHost() {return _contextHost;}    
+    public void setContextHost(String  v)
+    {clearDefaultContext();this._contextHost = v;}
+    
+    /* ------------------------------------------------------------ */
+    String _contextPath="/";
+    public String getContextPath() {return _contextPath;}
+    public void setContextPath(String  v)
+    {clearDefaultContext();this._contextPath = v;}
+
+    /* ------------------------------------------------------------ */
+    FileHandler _contextFileHandler;
+    public FileHandler getContextFileHandler()
+    {return _contextFileHandler;}
+    public void setContextFileHandler(FileHandler  v)
+    {this._contextFileHandler = v;}
+    
+    /* ------------------------------------------------------------ */
+    ServletHandler _contextServletHandler;
+    public ServletHandler getContextServletHandler()
+    {return _contextServletHandler;}
+    public void setContextServletHandler(ServletHandler  v)
+    {this._contextServletHandler = v;}
+
+    /* ------------------------------------------------------------ */
+    ServletHandler _contextDynamicServletHandler;
+    public ServletHandler getContextDynamicServletHandler()
+    {return _contextDynamicServletHandler;}
+    public void setContextDynamicServletHandler(ServletHandler  v)
+    {this._contextServletHandler = v;}
+    
+    /* ------------------------------------------------------------ */
+    private void clearDefaultContext()
     {
-        FileHandler fileHandler = (FileHandler)_fileMap.get(directory);
-        if (fileHandler==null)
-        {
-            fileHandler = new FileHandler(directory,
-                                          "index.html",
-                                          true, // dir OK
-                                          false,// put !OK
-                                          false,// delete !OK
-                                          64,   // cached files
-                                          40960 // cached file size
-                                          );
-            _fileMap.put(directory,fileHandler);
-            fileHandler.start();
-        }
-        mapHandler(host,pathSpec,fileHandler);
-        return fileHandler;
+	_contextFileHandler=null;
+	_contextServletHandler=null;
+	_contextDynamicServletHandler=null;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Creates a FileHandler for the context if one does not exist.
+     * If a ServletHandler exists for the context, it's FileBase is
+     * also set.
+     * @param directory 
+     */
+    public synchronized void setContextFileBase(String directory)
+    {
+	if (_contextFileHandler==null)
+	{
+	    _contextFileHandler = new FileHandler();
+	    addHandler(_contextHost,_contextPath,_contextFileHandler);
+	}
+	_contextFileHandler.setFileBase(directory);
+	if (_contextServletHandler!=null)
+	    _contextServletHandler.setFileBase(directory);
     }
 
     
-    /* ------------------------------------------------------------ */
-    public HttpHandler mapServlet(String host,
-				  String pathSpec,
-				  String servletClass)
-	throws ClassNotFoundException,InstantiationException,IllegalAccessException
+  /* ------------------------------------------------------------ */
+    public synchronized ServletHolder addContextServlet(String pathSpec,
+							String className)
+	throws ClassNotFoundException,
+	       InstantiationException,
+	       IllegalAccessException
     {
-	if (_servletHandler==null)
+	if (_contextServletHandler==null)
 	{
 	    Class servletHandlerClass =
-		Class.forName(__defaultServletHandler);
-	    
-	    _servletHandler=(ServletHandler)servletHandlerClass.newInstance();
-	    mapHandler(host,"/",_servletHandler);
-	    _servletHandler.start();
+		Class.forName(_defaultServletHandlerClass);
+	    _contextServletHandler=(ServletHandler)
+		servletHandlerClass.newInstance();
+	    addHandler(_contextHost,_contextPath,_contextServletHandler);
 	}
-	
-	_servletHandler.addServlet(pathSpec,servletClass);
-	return _servletHandler;
+	return _contextServletHandler.addServlet(pathSpec,className);
     }
+
     
     /* ------------------------------------------------------------ */
-    public HttpHandler mapDynamicServlet(String host,
-					 String pathSpec,
-					 String classPath)
+    public synchronized void setContextDynamicServletClassPath(String classPath)
+	throws ClassNotFoundException,
+	       InstantiationException,
+	       IllegalAccessException
     {
-	try
+	if (_contextDynamicServletHandler==null)
 	{
 	    Class servletHandlerClass =
-		Class.forName(__defaultDynamicServletHandler);
-	    Class[] types = 
-	    {
-		java.lang.String.class,
-		com.sun.java.util.collections.Map.class
-	    };
-	    Constructor constructor =
-		servletHandlerClass.getConstructor(types);
-	    Object[] args ={classPath,null};
-	    ServletHandler handler=(ServletHandler)constructor.newInstance(args);
-	    mapHandler(host,pathSpec,handler);
-	    handler.start();
-	    
-	    return handler;
+		Class.forName(_defaultDynamicServletHandlerClass);
+	    _contextDynamicServletHandler=(ServletHandler)
+		servletHandlerClass.newInstance();
+	    addHandler(_contextHost,_contextPath,
+		       _contextDynamicServletHandler);
 	}
-	catch(Exception e)
-	{
-	    Code.warning(e);
-	    throw new IllegalArgumentException(e.toString());
-	}
+	_contextDynamicServletHandler.setClassPath(classPath);
     }
-    
-    
-    /* ------------------------------------------------------------ */
-    /** Start all handlers then listeners.
-     */
-    public synchronized void startAll()
-    {
-        Iterator handlers = getHandlers().iterator();
-        while(handlers.hasNext())
-        {
-            HttpHandler handler=(HttpHandler)handlers.next();
-            if (!handler.isStarted())
-                handler.start();
-        }
-        
-        Iterator listeners = getListeners().iterator();
-        while(listeners.hasNext())
-        {
-            HttpListener listener =(HttpListener)listeners.next();
-            if (!listener.isStarted())
-                listener.start();
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Stop all listeners then handlers.
-     * @exception InterruptedException If interrupted, stop may not have
-     * been called on everything.
-     */
-    public synchronized void stopAll()
-        throws InterruptedException
-    {
-        Iterator listeners = getListeners().iterator();
-        while(listeners.hasNext())
-        {
-            HttpListener listener =(HttpListener)listeners.next();
-            if (listener.isStarted())
-                listener.stop();
-        }
-        
-        Iterator handlers = getHandlers().iterator();
-        while(handlers.hasNext())
-        {
-            HttpHandler handler=(HttpHandler)handlers.next();
-            if (handler.isStarted())
-                handler.stop();
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Stop all listeners then handlers.
-     * All the handlers are unmapped and the listeners removed.
-     */
-    public synchronized void destroyAll()
-    {
-        Iterator listeners = getListeners().iterator();
-        while(listeners.hasNext())
-        {
-            HttpListener listener =(HttpListener)listeners.next();
-            listener.destroy();
-        }
-        
-        Iterator handlers = getHandlers().iterator();
-        while(handlers.hasNext())
-        {
-            HttpHandler handler=(HttpHandler)handlers.next();
-            handler.destroy();
-        }
 
-        _hostMap.clear();
-        _handlerMap.clear();
-        _listeners.clear();
-        _hostMap.put(null,_handlerMap);
-    }
+
+
+
+
+
+
+
+
+    
     
     /* ------------------------------------------------------------ */
     /** Service a request.
@@ -388,10 +431,6 @@ public class HttpServer
      * are passed to the handle method of the handler. All matching handlers
      * are offered the request, starting with the best match, until
      * the request is handled.
-     *
-     * Multiple handlers can be mapped to the same pathSpec and
-     * requests are passed to the handlers in the order they
-     * were registered.
      *
      * If no handler handles the request, 404 Not Found is returned.
      *
@@ -417,7 +456,7 @@ public class HttpServer
             {
                 com.sun.java.util.collections.Map$Entry entry=
                     (com.sun.java.util.collections.Map$Entry)i1.next();
-                String pathSpec=(String)entry.getKey();
+                String contextPath=(String)entry.getKey();
                 List handlers = (List)entry.getValue();
                 
                 Iterator i2=handlers.iterator();
@@ -427,12 +466,12 @@ public class HttpServer
                     if (Code.verbose(9))
                     {
                         Code.debug("Try handler ",handler);
-                        handler.handle(pathSpec,request,response);
+                        handler.handle(contextPath,request,response);
                         if (request.isHandled())
                             Code.debug("Handled by ",handler);
                     }
                     else
-                        handler.handle(pathSpec,request,response);
+                        handler.handle(contextPath,request,response);
                 }
             }
 
@@ -537,6 +576,25 @@ public class HttpServer
     }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+    
     /* ------------------------------------------------------------ */
     /** Construct server from command line arguments.
      * @param args 
@@ -547,41 +605,56 @@ public class HttpServer
         {
             String[] newArgs=
 	    {
-		"-a","8080",
-		"-f","/=.",
-		"-ds","/servlet/*=./servlets",
-		"-d","/",
-		"-h","com.mortbay.HTTP.Handler.NotFoundHandler"
+		"-contextPath","/",
+		"-fileBase",".",
+		"-dump",
+		"-handler","com.mortbay.HTTP.Handler.NotFoundHandler",
+		"-contextPath","/servlet/*",
+		"-dynamic","./servlets",
+		"8080",
 	    };
             args=newArgs;
         }
         else if (args.length%2==1)
         {
             System.err.println
-                ("Usage - java com.mortbay.HTTP.HttpServer [ -a|f|d|h <value> ... ]");
+                ("Usage - java com.mortbay.HTTP.HttpServer [ options .. ] [[<addr>:]<port> ..]");
             System.err.println
-                (" -a [<addr>:]<port>  - Listen on [ address & ] port");
+                ("[<addr>:]<port>       - Listen on [ address & ] port");
             System.err.println
-                (" -f <path>=<dir>     - File handler at path Spec to file/directory");
+                (" -contextPath <path>  - Set default context path. Default=\"/\"");
             System.err.println
-                (" -d <path>           - Dump handler at path Spec");
-            
+                (" -contextHost <name>  - Set default context host name");
+	    
             System.err.println
-                (" -ds <path>=<dir>    - Dynamic servlets at path & dir");
-            
-            System.err.println
-                (" -s <path>=<class>   - Servlet at path");
-            
-            System.err.println
-                (" -h <path>=<class>   - Map a hander");
-            
-            System.err.println
-                (" -v <host>[=<alias>] - Remaining options for virtual host");
+                (" -contextAlias <alias>- Add Alias for context host");
 
+            System.err.println
+                (" -handler <class>     - Add a hander to the context");
+            
+            System.err.println
+                (" -fileBase <dir>      - Set contexts File Base");
+            System.err.println
+                (" -dynamic <classPath> - Set contexts Dynamic servlets class path");
+            
+            System.err.println
+                (" -servlet <pathSpec>=<class>");
+            System.err.println
+                ("                      - Add Servlet at path to context");
+            
+            System.err.println
+                (" -dump                - Add a Dump handler to context");
+            
             System.err.println
                 ("Default options:");
             System.err.println
-                (" -a 8080 -f /=. -ds /servlet/*=./servlets -d / -h /=com.mortbay.HTTP.Handler.NotFoundHandler");
+                ("  -contextPath /\n"+
+		 "   -fileBase .\n"+
+		 "   -dump\n"+
+		 "  -handler com.mortbay.HTTP.Handler.NotFoundHandler\n"+
+		 "  -contextPath /servlet/*\n"+
+		 "  -dynamic ./servlets\n"+
+		 "  8080");
             System.exit(1);
         }
         
@@ -597,95 +670,62 @@ public class HttpServer
             {
                 try
                 {
-                    // Look for listener
-                    if ("-a".equals(args[i]))
+                    // Look for dump handler
+                    if ("-contextPath".equals(args[i]))
+		    {
+                        server.setContextPath(args[++i]);
+		    }
+		    else if ("-contextHost".equals(args[i]))
+		    {
+                        server.setContextHost(args[++i]);
+		    }
+		    else if ("-contextAlias".equals(args[i]))
+		    {
+			server.addHostAlias(server.getContextHost(),
+					    args[++i]);
+		    }
+		    else if ("-handler".equals(args[i]))
+		    {
+                        String className=args[++i];
+			HttpHandler handler = (HttpHandler)
+			    Class.forName(className).newInstance();
+			server.addHandler(server.getContextHost(),
+					  server.getContextPath(),
+					  handler);
+		    }
+		    else if ("-fileBase".equals(args[i]))
+                    {
+			server.setContextFileBase(args[++i]);
+		    }
+		    else if ("-dynamic".equals(args[i]))
+		    {
+			server.setContextDynamicServletClassPath(args[++i]);
+		    }
+		    else if ("-servlet".equals(args[i]))
+                    {
+                        String spec=args[++i];
+                        int e=spec.indexOf("=");
+                        if (e>0)
+                        {
+                            String pathSpec=spec.substring(0,e);
+                            String className=spec.substring(e+1);
+			    server.addContextServlet(pathSpec,className);
+                        }
+                    }
+		    else if ("-dump".equals(args[i]))
+		    {
+                        String className="com.mortbay.HTTP.Handler.DumpHandler";
+			HttpHandler handler = (HttpHandler)
+			    Class.forName(className).newInstance();
+			server.addHandler(server.getContextHost(),
+					  server.getContextPath(),
+					  handler);
+		    }
+                    else
                     {
                         // Add listener.
-                        i++;
                         InetAddrPort address = new InetAddrPort(args[i]);
-                        server.startListener(address);
-                    }
-
-                    // Look for dump handler
-                    if ("-d".equals(args[i]))
-                    {
-                        i++;
-                        HttpHandler handler=new DumpHandler();
-                        server.mapHandler(host,args[i],handler);
-                        handler.start();
-                    }
-                    
-                    // Look for file handler
-                    if ("-f".equals(args[i]))
-                    {
-                        i++;
-                        String spec=args[i];
-                        int e=spec.indexOf("=");
-                        if (e>0)
-                        {
-                            String pathSpec=spec.substring(0,e);
-                            String file=spec.substring(e+1);
-                            server.mapFiles(host,pathSpec,file);
-                        }
-                    }
-		    
-                    // Look for servlet handler
-                    if ("-ds".equals(args[i]))
-                    {
-                        i++;
-                        String spec=args[i];
-                        int e=spec.indexOf("=");
-                        if (e>0)
-                        {
-                            String pathSpec=spec.substring(0,e);
-                            String file=spec.substring(e+1);
-			    server.mapDynamicServlet(host,pathSpec,file);
-                        }
-                    }
-		    
-                    // Look for servlet handler
-                    if ("-s".equals(args[i]))
-                    {
-                        i++;
-                        String spec=args[i];
-                        int e=spec.indexOf("=");
-                        if (e>0)
-                        {
-                            String pathSpec=spec.substring(0,e);
-                            String className=spec.substring(e+1);
-			    server.mapServlet(host,pathSpec,className);
-                        }
-                    }
-                    
-                    // Look for Virtual host
-                    if ("-v".equals(args[i]))
-                    {
-                        i++;
-                        host=args[i];
-                        int e=host.indexOf("=");
-                        if (e>0)
-                        {
-                            String alias=host.substring(e+1);
-                            host=host.substring(0,e);
-                            server.hostAlias(host,alias);
-                        }
-                    }
-                    
-                    // Look for handler
-                    if ("-h".equals(args[i]))
-                    {
-                        i++;
-                        String spec=args[i];
-                        int e=spec.indexOf("=");
-                        if (e>0)
-                        {
-                            String pathSpec=spec.substring(0,e);
-                            String className=spec.substring(e+1);
-                            HttpHandler handler = (HttpHandler)
-                                Class.forName(className).newInstance();
-                            handler.start();
-                            server.mapHandler(host,pathSpec,handler);
-                        }
+                        server.addListener(address);
                     }
                 }
                 catch (Exception e)
@@ -693,12 +733,35 @@ public class HttpServer
                     Code.warning(e);
                 }
             }
+	    server.start();
         }
         catch (Exception e)
         {
             Code.warning(e);
         }
     }
+    
+    /* ------------------------------------------------------------ */
+    private PathMap getHandlerMap(String host, boolean create)
+    {
+        PathMap virtual;
+        if (host!=null && host.length()>0)
+        {
+            virtual=(PathMap)_hostMap.get(host);
+            if (virtual==null && create)
+            {
+                virtual=new PathMap();
+                _hostMap.put(host,virtual);
+            }
+            
+            if (virtual==null)
+                 virtual=_handlerMap;
+        }
+        else
+            virtual=_handlerMap;        
+        return virtual;
+    }
+    
 }
 
 

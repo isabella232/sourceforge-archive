@@ -88,7 +88,7 @@ public class SocketListener
     {
         try
         {
-            Log.event("Accepted "+socket);
+            Code.debug("Accepted ",socket);
             HttpConnection connection =
                 new HttpConnection(this,socket.getInetAddress(),
 				   socket.getInputStream(),

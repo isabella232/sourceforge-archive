@@ -8,6 +8,7 @@ package com.mortbay.HTML;
 import com.mortbay.Util.*;
 import com.mortbay.Util.*;
 import java.util.*;
+import java.net.*;
 import java.io.*;
 
 /* -------------------------------------------------------------------- */
@@ -87,7 +88,24 @@ public class Include extends Element
     public Include(InputStream in)
         throws IOException
     {
-        reader=new InputStreamReader(in);
+	if (in!=null)
+	    reader=new InputStreamReader(in);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor.
+     * Include InputStream.
+     * Byte to character transformation is done assuming the default
+     * local character set.  What this means is that on EBCDIC systems
+     * the included file is assumed to be in EBCDIC.
+     * @param in stream
+     * @exception IOException
+     */
+    public Include(URL url)
+        throws IOException
+    {
+	if (url!=null)
+	    reader=new InputStreamReader(url.openStream());
     }
     
     /* ------------------------------------------------------------ */
@@ -130,6 +148,9 @@ public class Include extends Element
     public void write(Writer out)
          throws IOException
     {
+	if (reader==null)
+	    return;
+	
         try{
             IO.copy(reader,out);
         }

@@ -538,26 +538,6 @@ public class LineInput extends FilterInputStream
         {
             len=-1;
         }
-
-        if (Code.verbose(500))
-        {
-            if (len>=0)
-            {
-                if (Code.verbose(1000))
-                {
-                    Code.debug("LINE: "+new String(_buf,_mark,len)+
-                               "\npos="+_pos+
-                               "\nBUFFER: '"+
-                               new String(_buf,_pos,_contents-_pos)+
-                               "'");
-                }
-                else
-                    Code.debug("LINE: "+new String(_buf,_mark,len)+
-                               "\npos="+_pos);
-            }
-            else
-                Code.debug("EOF");
-        }
         
         return len;
     }

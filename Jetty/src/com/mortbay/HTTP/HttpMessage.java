@@ -70,7 +70,6 @@ abstract public class HttpMessage
         _connection=connection;
     }
 
-
     /* ------------------------------------------------------------ */
     /** XXX
      * @return 
