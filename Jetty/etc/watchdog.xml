@@ -58,7 +58,6 @@ Instructions for running Watchdog on Linux
         <Set name="MinThreads">8</Set>
         <Set name="MaxThreads">64</Set>
         <Set name="MaxIdleTimeMs">60000</Set>
-        <Set name="MaxReadTimeMs">60000</Set>
         <Set name="LowResourcePersistTimeMs">5000</Set>
       </New>
     </Arg>
@@ -71,8 +70,6 @@ Instructions for running Watchdog on Linux
         <Set name="MinThreads">5</Set>
         <Set name="MaxThreads">255</Set>
         <Set name="MaxIdleTimeMs">0</Set>
-        <Set name="MaxReadTimeMs">60000</Set>
-        <Set name="MaxStopTimeMs">5000</Set>
         <Set name="confidentialPort">443</Set>
       </New>
     </Arg>
@@ -91,7 +88,6 @@ Instructions for running Watchdog on Linux
   </Call>
 
   <Call name="addWebApplication">
-    <Arg></Arg>
     <Arg>/jsp-tests/*</Arg>
     <Arg>webapps/jsp-tests.war</Arg>
     <Set name="extractWAR">true</Set>
