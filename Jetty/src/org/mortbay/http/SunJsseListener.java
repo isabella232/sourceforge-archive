@@ -119,15 +119,17 @@ public class SunJsseListener extends JsseListener
             ks.load( new FileInputStream( new File( _keystore ) ),
                      _password.getCharArray());
             
-            KeyManagerFactory km = KeyManagerFactory.getInstance( "SunX509"); 
+            KeyManagerFactory km = KeyManagerFactory.getInstance( "SunX509","SunJSSE"); 
             km.init( ks, _keypassword.getCharArray() );
             KeyManager[] kma = km.getKeyManagers();                        
             
-            TrustManagerFactory tm = TrustManagerFactory.getInstance("SunX509" );
+            TrustManagerFactory tm = TrustManagerFactory.getInstance("SunX509","SunJSSE");
             tm.init( ks ); 
-            TrustManager[] tma = tm.getTrustManagers(); 
+            TrustManager[] tma = tm.getTrustManagers();
+            
             SSLContext sslc = SSLContext.getInstance( "SSL" ); 
-            sslc.init( kma, tma, SecureRandom.getInstance( "SHA1PRNG" ) ); 
+            sslc.init( kma, tma, SecureRandom.getInstance("SHA1PRNG"));
+            
             SSLServerSocketFactory ssfc = sslc.getServerSocketFactory();
             Log.event("SSLServerSocketFactory="+ssfc);
             return ssfc;
