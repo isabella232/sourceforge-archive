@@ -61,11 +61,12 @@ public class Pool
     private HashMap _attributes = new HashMap();
     
     private transient Class _class;
-    private transient PondLife[] _pondLife;
-    private transient int[] _index;
+    private transient PondLife[] _pondLife; // Array of pondlife indexed by ID.
+    private transient int[] _index; // Mapping of pondlife IDs.  Entries with indexes <_available are idle IDs.  Entries with indexes>_size are unused IDs.
     private transient int _size;
     private transient int _available;
     private transient int _running=0;
+    private transient long _lastShrink=0;  // control shrinking to once per maxIdleTime
     
     /* ------------------------------------------------------------------- */
     public static Pool getPool(String name)
@@ -218,8 +219,8 @@ public class Pool
             if (_running>1)
                 return;
 
-	    if (_min >= _max || _max<1)
-		throw new IllegalStateException("!(0<=min<max)");
+	    	if (_min >= _max || _max<1)
+				throw new IllegalStateException("!(0<=min<max)");
 
             // Start the threads
             _pondLife=new PondLife[_max];
@@ -314,21 +315,17 @@ public class Pool
     {
         int id=pl.getID();
         
-        if (_running==0)
-            stopPondLife(id);
-        else
+        synchronized(this)
         {
-            synchronized(this)
+            if (_running==0)
+                stopPondLife(id);
+            else if (_pondLife[id]!=null)
             {
-                if (_running==0)
-                    stopPondLife(id);
-                else if (_pondLife[id]!=null)
-                {
-                    _index[_available++]=id;
-                    notify();
-                }
+                _index[_available++]=id;
+                notify();
             }
         }
+        
     }
     
     /* ------------------------------------------------------------ */
@@ -340,6 +337,16 @@ public class Pool
 
         synchronized(this)
         {
+            // If we have a maxIdleTime, then only shrink once per period.
+            if (_maxIdleTimeMs>0)
+            {
+                long now=System.currentTimeMillis();
+                if ((now-_lastShrink)<_maxIdleTimeMs)
+                    return; // don't shrink
+                _lastShrink=now;
+            }
+            
+            // shrink if we are running and have available threads and we are above minimal size
             if (_running>0 && _available>0 && _size>_min)
                 stopPondLife(_index[--_available]);
         }

@@ -24,8 +24,8 @@ import org.apache.commons.logging.LogFactory;
  * <p>
  * Avoids the expense of thread creation by pooling threads after their run methods exit for reuse.
  * <p>
- * If the maximum pool size is reached, jobs wait for a free thread. By default there is no maximum
- * pool size. Idle threads timeout and terminate until the minimum number of threads are running.
+ * If the maximum pool size is reached, jobs wait for a free thread. 
+ * Idle threads timeout and terminate until the minimum number of threads are running.
  * <p>
  * This implementation uses the run(Object) method to place a job on a queue, which is read by the
  * getJob(timeout) method. Derived implementations may specialize getJob(timeout) to obtain jobs
@@ -532,6 +532,8 @@ public class ThreadPool implements LifeCycle,Serializable
                     // handle outside of sync
                     if(run!=null && runPool!=null)
                         runPool.handle(run);
+                    else if (run==null && _pool!=null)
+                        _pool.shrink();
                 }
                 catch(InterruptedException e)
                 {

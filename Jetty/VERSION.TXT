@@ -11,6 +11,10 @@ Jetty-5.1.3rc0
  + Added simple xpath support to XmlParser
  + Added TagLibConfiguration to search for listeners in TLDs.
  + Added SslListener for 1.4 JSSE API.
+ + Fixed moderate load preventing ThreadPool shrinking.
+
+Jetty-4.2.24rc0
+ + Back ported Jetty 5 ThreadedServer and ThreadPool
 
 Jetty-5.1.2 - 18 January 2005
  + Added id and ref support to XmlConfiguration
