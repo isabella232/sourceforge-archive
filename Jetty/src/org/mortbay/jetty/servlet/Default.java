@@ -425,7 +425,7 @@ public class Default extends HttpServlet
             
             if ((date=request.getDateHeader(HttpFields.__IfUnmodifiedSince))>0)
             {
-                if (resource.lastModified() > date)
+                if (resource.lastModified()/1000 > date/1000)
                 {
                     response.sendError(HttpResponse.__412_Precondition_Failed);
                     return false;
@@ -434,7 +434,7 @@ public class Default extends HttpServlet
             
             if ((date=request.getDateHeader(HttpFields.__IfModifiedSince))>0)
             {
-                if (resource.lastModified() <= date)
+                if (resource.lastModified()/1000 <= date/1000)
                 {
                     response.setStatus(HttpResponse.__304_Not_Modified);
                     response.flushBuffer();

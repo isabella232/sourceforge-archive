@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Restrict 304 responses to second resolution.
+ + Use IE date formatting for speed.
  + Removed jasper source and just include jars from 4.1.12
  + Worked around JVM1.3 bug for JSPs
  + Lowercase jsessionid for URLs only.
