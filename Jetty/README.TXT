@@ -38,6 +38,8 @@ Package contents
   demo    - Demos of the HTTP server and servlet container.
   test    - Test harnesses.
   webapps - The default location for war files or webapps.
+  webapps/template
+          - A template webapp that can be used to base your own on.
   extra   - Directory of optional extras
             /plus          - Extended jetty with JNDI, transaction, JAAS & log4j
             /ftp           - FTP client
@@ -49,20 +51,24 @@ Package contents
 Quick Start
 ===========
 
-  Unpack the full jetty release Jetty-X.X.X.tar.gz using an archive 
-  tool such as tar or winzip.
+Unpack the full jetty release Jetty-X.X.X.tar.gz using an archive 
+tool such as tar or winzip.
 
-  The demo server can be run with the commands
+The demo server can be run with the commands
 
-     cd Jetty-X.X.X
-     java -jar start.jar etc/demo.xml
+   cd Jetty-X.X.X
+   java -jar start.jar etc/demo.xml
 
-  Then point your browser at http://localhost:8080 to see the demo 
-  web site.
+Then point your browser at http://localhost:8080 to see the demo 
+web site.
 
-  The default configuration file (etc/jetty.xml) can be run with:
+The default configuration file (etc/jetty.xml) can be run with:
 
-     java -jar start.jar
+   java -jar start.jar
+
+There is a template webapplication in webapps/template that is
+run by the above command and can be accessed at http://localhost:8080/template
+This can be used as a base for your own webapplications.
 
 
 Starting Jetty

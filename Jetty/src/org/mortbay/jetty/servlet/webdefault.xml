@@ -3,27 +3,21 @@
 <!-- ===================================================================== -->
 <!-- This file contains the default descriptor for web applications.       -->
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-<!-- The original of this file is included as a resource in the            -->
-<!-- org.mortbay.jetty.jar file and is loaded by default for all web       -->
-<!-- applications before there own WEB-INF/web.xml file is loaded          -->
+<!-- The intent of this descriptor is to include jetty specific or common  -->
+<!-- configuration for all webapps.   If a context has a webdefault.xml    -->
+<!-- descriptor, it is applied before the contexts own web.xml file        -->
 <!--                                                                       -->
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-<!-- THE COPY OF THIS FILE in $JETTY_HOME/etc IS NOT USED BY DEFAULT!      -->
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-<!-- If the version in $JETTY_HOME/etc/ is to be used, then the            -->
-<!-- setDefaultsDescriptor method must be called on each context,          -->
-<!-- giving the location of the default web.xml file to use.               -->
-<!-- eg of setting the defaultsDescriptor in jetty.xml:
-
-    <Call name="addWebApplication">
-      <Arg>/mycontext</Arg>
-      <Arg><SystemProperty name="jetty.home" default=".">/webapps/mywebapp</Arg>
-      <Set name="defaultsDescriptor"><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Set>
-    </Call>
-                                                                           -->
-<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-
-
+<!-- A context may be assigned a default descriptor by:                    -->
+<!--  + Allowing the default defaultweb.xml to be applied                  -->
+<!--  + Calling WebApplicationContext.setDefaultsDescriptor                -->
+<!--  + Passed an arg to addWebApplications                                -->
+<!--                                                                       -->
+<!-- If a defaults descriptor is set, it is first looked for as a system   -->
+<!-- resource. The jetty jar contains a webdefault.xml file as a resource  -->
+<!-- at "org/mortbay/jetty/servlet/webdefault.xml".   If a system resource -->
+<!-- is not found, then a normal resource is tried, thus a filename or URL -->
+<!-- may be used to specify an arbitrary file.                             -->
+<!--                                                                       -->
 <!-- ===================================================================== -->
 <web-app 
    xmlns="http://java.sun.com/xml/ns/j2ee" 
