@@ -13,10 +13,9 @@ To use sso, each participating web application must have a <code>WEB-INF/jetty-w
         &lt;!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure 1.2//EN" "http://jetty.mortbay.org/configure_1_2.dtd"&gt;
 
         &lt;Configure class="org.mortbay.jetty.servlet.WebApplicationContext"&gt;
-          &lt;Get name="UserRealm"&gt;
-             &lt;Set name="SSORealmName"&gt;MY-SSO-REALM-NAME&lt;/Set&gt;
-          &lt;/Get&gt;
-
+	    &lt;Call name="getRealm"&gt;
+	         &lt;Set name="SSORealmName">MY-SSO-REALM-NAME&lt;/Set&gt;
+	    &lt;/Call&gt;
         &lt;/Configure&gt;
 </code>
 </pre>
