@@ -78,6 +78,7 @@ public class Dispatcher implements RequestDispatcher
     String _pathInContext;
     String _query;
     boolean _include;
+    HttpServletRequest _request;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -161,6 +162,7 @@ public class Dispatcher implements RequestDispatcher
         // wrap the request and response
         DispatcherRequest request = new DispatcherRequest(httpServletRequest);
         DispatcherResponse response = new DispatcherResponse(httpServletResponse);
+        _request=request;
         
         if (!_include)
             servletResponse.resetBuffer();
@@ -255,6 +257,21 @@ public class Dispatcher implements RequestDispatcher
             if (_include || isNamed())
                 return super.getRequestURI();
             return URI.addPaths(_contextPath,_uriInContext);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public StringBuffer getRequestURL()
+        {
+            if (_include || isNamed())
+                return super.getRequestURL();
+            // XXX - YUCK!
+            StringBuffer buf = super.getRequestURL();
+            String url=buf.toString();
+            int i=url.indexOf("//");
+            i=url.indexOf("/",i+2);
+            buf.setLength(i);
+            buf.append(URI.addPaths(_contextPath,_uriInContext));
+            return buf;
         }
 
         
@@ -541,7 +558,27 @@ public class Dispatcher implements RequestDispatcher
         public void sendRedirect(String url)
             throws IOException
         {
-            if (!_include) super.sendRedirect(url);
+            if (!_include)
+            {
+                // XXX need to share this code!
+                if (!url.startsWith("http:/")&&!url.startsWith("https:/"))
+                {
+                    StringBuffer buf = _request.getRequestURL();
+                    String u=buf.toString();
+
+                    int i=u.indexOf("//");
+                    i=u.indexOf("/",i+2);
+                    buf.setLength(i);
+                    
+                    if (url.startsWith("/"))
+                        buf.append(URI.canonicalPath(url));
+                    else
+                        buf.append(URI.canonicalPath(URI.addPaths(URI.parentPath(_request.getRequestURI()),url)));
+                    url=buf.toString();
+                }
+                
+                super.sendRedirect(url);
+            }
         }
         
         /* ------------------------------------------------------------ */
