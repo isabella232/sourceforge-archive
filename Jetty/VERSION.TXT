@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
 Jetty-4.2.10pre2 - 4 July 2003
+ + Many improvements in JettyPlus java:comp handling
  + Allow multiple security-role-ref elements per servlet.
  + Handle Proxy-Connection better
  + Cleaned up alias handling.
