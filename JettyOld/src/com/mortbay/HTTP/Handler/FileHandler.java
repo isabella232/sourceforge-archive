@@ -57,7 +57,7 @@ public class FileHandler extends NullHandler
     public FileHandler(PathMap directoryMap)
     {
 	dirMap=directoryMap;
-	this.indexFile = indexFile;
+	this.indexFile = "index.html";
 	Code.debug(dirMap);
     }
 
