@@ -504,7 +504,6 @@ public class ChunkableOutputStream extends FilterOutputStream
 
     /* ------------------------------------------------------------ */
     /** Close the stream.
-     * In chunking mode, the underlying stream is not closed.
      * All filters are closed and discarded.
      * @exception IOException 
      */
@@ -520,9 +519,6 @@ public class ChunkableOutputStream extends FilterOutputStream
             notify(OutputObserver.__CLOSING);
             flush(true);
             out=null;
-            if (!_chunking)
-                _realOut.close();
-            
             notify(OutputObserver.__CLOSED);
         }
         catch (IOException e)

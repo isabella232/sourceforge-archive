@@ -321,6 +321,8 @@ public class Dump extends HttpServlet
         }
     
         page.write(pout);
+	pout.close();
+
         if (pi!=null)
         {
             if ("/ex4".equals(pi))

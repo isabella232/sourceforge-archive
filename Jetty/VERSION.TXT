@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
 Jetty-4.0.3 - 13 June 2002
+ + Fixed close propagation of on-chunked output streams
  + Force security disassociation.
  + Better recycling of HttpRequests.
  + Protect session.getAttributeNames from concurrent modifications.
