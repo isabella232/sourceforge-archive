@@ -85,6 +85,17 @@ $ID: $
   </Call>
 
   <Call name="addContext">
+    <Arg>/servlet/wiki/*</Arg>
+    <Set name="ResourceBase">/usr/local/java/wiki/webtrans/samplesite</Set>
+    <Call name="addServlet">
+      <Arg>Wiki</Arg>
+      <Arg>/</Arg>
+      <Arg>org.devtools.wiki.ServletDisplay</Arg>
+      <Put name="configfile">/usr/local/java/wiki/webtrans/wiki.properties</Put>
+    </Call>
+  </Call>
+
+  <Call name="addContext">
     <Arg>/demo/*</Arg>
     <Set name="ResourceBase">./docroot/</Set>
     <Call name="addServlet">

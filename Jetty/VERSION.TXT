@@ -1,7 +1,8 @@
 Stable 2.4.7
 Dev    3.0.B03
 
- + Added modified vereson of JasperB3.2 for JSP
+ + Fixed problem with session ID in paths
+ + Added modified version of JasperB3.2 for JSP
  + Moved FileBase to docroot
 
 Jetty-3.0.B03 - 9th Oct 2000

@@ -192,7 +192,7 @@ public class ServletResponse implements HttpServletResponse
     {
         // should not encode if cookies in evidence
         if (_servletRequest==null || _servletRequest.isRequestedSessionIdFromCookie())
-            return url;
+            return url;        
         
         // get session;
         if (_session==null && !_noSession)
@@ -200,16 +200,16 @@ public class ServletResponse implements HttpServletResponse
             _session=_servletRequest.getSession(false);
             _noSession=(_session==null);
         }
-
+        
         // no session or no url
         if (_session == null || url==null)
             return url;
-
+        
         // invalid session
         String id = _session.getId();
         if (id == null)
             return url;
-
+        
         // Check host and port are for this server
         // XXX not implemented
         
@@ -217,24 +217,22 @@ public class ServletResponse implements HttpServletResponse
         int prefix=url.indexOf(Context.__SessionUrlPrefix);
         if (prefix!=-1)
         {
-            int suffix=url.indexOf(Context.__SessionUrlSuffix,prefix);
-            if (suffix!=-1 && prefix<suffix)
-                // Update ID
-                return
-                    url.substring(0,prefix+Context.__SessionUrlPrefix.length())+
-                    id+
-                    url.substring(suffix);
-        }
+            int suffix=url.indexOf("?",prefix);
+            if (suffix<0)
+                suffix=url.indexOf("#",prefix);
+            
+            return url.substring(0,prefix+Context.__SessionUrlPrefix.length())+
+                (suffix<=prefix?"":url.substring(suffix));
+        }        
         
         // edit the session
         int end=url.indexOf('?');
         if (end<0)
             end=url.indexOf('#');
         if (end<0)
-            return url+";jsessionid="+id+"_";
+            return url+Context.__SessionUrlPrefix+id;
         return url.substring(0,end)+
-            ";jsessionid="+id+"_"+
-            url.substring(end);
+            Context.__SessionUrlPrefix+id+url.substring(end);
     }
 
     /* ------------------------------------------------------------ */
@@ -256,7 +254,6 @@ public class ServletResponse implements HttpServletResponse
     /**
      * @deprecated	As of version 2.1, use 
      *			encodeRedirectURL(String url) instead
-     *
      */
     public String encodeRedirectUrl(String url) 
     {

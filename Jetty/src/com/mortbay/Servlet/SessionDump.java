@@ -44,8 +44,13 @@ public class SessionDump extends HttpServlet
         String name =  request.getParameter("Name");
         String value =  request.getParameter("Value");
 
+        String nextUrl = request.getRequestURI()+"?R="+redirectCount++;
         if (action.equals("New Session"))
+        {   
             session = request.getSession(true);
+            if ("on".equals(request.getParameter("Dump")))
+                nextUrl="/demo/dump";
+        }
         else 
         if (session!=null)
         {
@@ -57,9 +62,7 @@ public class SessionDump extends HttpServlet
                 session.removeValue(name);
         }
         
-        response.sendRedirect
-            (response.encodeURL
-             (request.getRequestURI()+"?R="+redirectCount++));
+        response.sendRedirect(response.encodeRedirectURL(nextUrl));
     }
     
         
@@ -76,12 +79,12 @@ public class SessionDump extends HttpServlet
         
         TableForm tf =
             new TableForm(response.encodeURL(request.getRequestURI()));
-        tf.method("POST");    
-        page.add(tf);
+        tf.method("POST");
         
         if (session==null)
         {
-            page.add("<B>No Session</B>");
+            page.add("<H1>No Session</H1>");
+            tf.addCheckbox("Dump","Dump new session request",false);
             tf.addButton("Action","New Session");
         }
         else
@@ -114,6 +117,8 @@ public class SessionDump extends HttpServlet
                 tf.addButton("Action","Remove");
                 tf.addButton("Action","Invalidate");
 
+                page.add(tf);
+                tf=null;
                 if (request.isRequestedSessionIdFromCookie())
                     page.add("<P>Turn off cookies in your browser to try url encoding<BR>");
                 
@@ -124,13 +129,15 @@ public class SessionDump extends HttpServlet
             catch (IllegalStateException e)
             {
                 Code.debug(e);
-                page.add("<B>INVALID Session</B>");
+                page.add("<H1>INVALID Session</H1>");
                 tf=new TableForm(request.getRequestURI());
                 tf.addButton("Action","New Session");
-                page.add(tf);
             }
         }
 
+        if (tf!=null)
+            page.add(tf);
+        
         Writer writer=response.getWriter();
         page.write(writer);
         writer.flush();
@@ -138,6 +145,6 @@ public class SessionDump extends HttpServlet
 
     /* ------------------------------------------------------------ */
     public String getServletInfo() {
-        return "Dump Servlet";
+        return "Session Dump Servlet";
     }
 }

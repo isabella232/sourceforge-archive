@@ -336,43 +336,30 @@ class ServletRequest
             int prefix=path.indexOf(Context.__SessionUrlPrefix);
             if (prefix!=-1)
             {
-                int suffix=path.indexOf(Context.__SessionUrlSuffix,prefix);
-                if (suffix!=-1 && prefix<suffix)
+                String id =
+                    path.substring(prefix+Context.__SessionUrlPrefix.length());
+                    
+                Code.debug("Got Session ",id," from URL");
+                    
+                try
                 {
-                    // definitely a session id in there!
-                    String id =
-                        path.substring(prefix+
-                                       Context.__SessionUrlPrefix.length(),
-                                       suffix);
-                    
-                    Code.debug("Got Session ",id," from URL");
-                    
-                    try
+                    Long.parseLong(id,36);
+                    if (_sessionIdState==__SESSIONID_NOT_CHECKED)
                     {
-                        Long.parseLong(id,36);
-                        if (_sessionIdState==__SESSIONID_NOT_CHECKED)
-                        {
-                            _sessionId=id;
-                            _sessionIdState = __SESSIONID_URL;
-                        }
-                        else if (!id.equals(_sessionId))
-                            Code.warning("Mismatched session IDs");
-                        
-                        // translate our path to drop the prefix off.
-                        if (suffix+Context.__SessionUrlSuffix.length()<path.length())
-                            _servletPath =
-                                path.substring(0,prefix)+
-                                path.substring(suffix+
-                                               Context.__SessionUrlSuffix.length());
-                        else
-                            _servletPath = path.substring(0,prefix);
-                        
-                        Code.debug("Translated servlet path="+_servletPath);
+                        _sessionId=id;
+                        _sessionIdState = __SESSIONID_URL;
                     }
-                    catch(NumberFormatException e)
-                    {
-                        Code.ignore(e);
-                    }
+                    else if (!id.equals(_sessionId))
+                        Code.warning("Mismatched session IDs");
+                    
+                    // translate our path to drop the prefix off.
+                    _servletPath = path.substring(0,prefix);
+                    
+                    Code.debug("Translated servlet path="+_servletPath);
+                }
+                catch(NumberFormatException e)
+                {
+                    Code.ignore(e);
                 }
             }
             
@@ -391,26 +378,10 @@ class ServletRequest
         
         String path=_httpRequest.getPath();
 
-        // remove any session stuff
-        if (isRequestedSessionIdFromURL())
-        {
-            int prefix=path.indexOf(Context.__SessionUrlPrefix);
-            if (prefix!=-1)
-            {
-                int suffix=path.indexOf(Context.__SessionUrlSuffix,prefix);
-                if (suffix!=-1 && prefix<suffix)
-                {    
-                    // translate our path to drop the prefix off.
-                    if (suffix+Context.__SessionUrlSuffix.length()<path.length())
-                        path =
-                            path.substring(0,prefix)+
-                            path.substring(suffix+
-                                           Context.__SessionUrlSuffix.length());
-                    else
-                        path = path.substring(0,prefix);
-                }
-            }    
-        }
+        int prefix=path.indexOf(Context.__SessionUrlPrefix);
+        if (prefix!=-1)
+            path = path.substring(0,prefix);
+        
         return path;
     }
     
