@@ -17,6 +17,9 @@ Jetty-4.2.4rc0
  + Configurable root context.
  + RootNotFoundHandler to help when no context found.
  + Update jasper to 4.1.16beta
+ + Fixed dir listing from jars.
+ + Dir listings in UTF8
+ + Character encoding handling for GET requests.
 
 Jetty-4.2.3 - 2 December 2002
  + Removed aggressive threadpool shrinkage to avoid deadlock on SMP machines. 
