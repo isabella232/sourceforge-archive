@@ -304,6 +304,7 @@ public class ResourceHandler extends AbstractHttpHandler
                     {
                         // Redirect to the index
                         ipath=URI.addPaths(getHttpContext().getContextPath(),ipath);
+                        response.setContentLength(0);
                         response.sendRedirect(ipath);
                     }
                     else

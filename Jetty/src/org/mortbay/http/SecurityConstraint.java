@@ -350,6 +350,7 @@ public class SecurityConstraint
                               request.getPath();
                           if (request.getQuery()!=null)
                               url+="?"+request.getQuery();
+                          response.setContentLength(0);
                           response.sendRedirect(url);
                       }
                       else
@@ -368,6 +369,7 @@ public class SecurityConstraint
                               request.getPath();
                           if (request.getQuery()!=null)
                               url+="?"+request.getQuery();
+                          response.setContentLength(0);
                           response.sendRedirect(url);
                       }
                       else

@@ -69,6 +69,8 @@ public class HttpOutputStream
     private boolean _bufferHeaders;
     private HttpWriter _iso8859writer;
     private HttpWriter _utf8writer;
+
+    boolean _closing=false;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -354,6 +356,8 @@ public class HttpOutputStream
     public void resetStream()
         throws IOException, IllegalStateException
     {
+        _closing=false;
+        
         if (isChunking())
             close();
         
@@ -506,6 +510,8 @@ public class HttpOutputStream
         
         // Close
         try {
+            _closing=true;
+            
             if (out==_nullableOut)
                 notify(OutputObserver.__COMMITING);
             

@@ -277,6 +277,7 @@ public class Default extends HttpServlet
                         buf.append('?');
                         buf.append(q);
                     }
+                    response.setContentLength(0);
                     response.sendRedirect(response.encodeRedirectURL(URI.addPaths(buf.toString(),"/")));
                     return;
                 }
@@ -289,6 +290,7 @@ public class Default extends HttpServlet
                     if (_redirectWelcomeFiles)
                     {
                         // Redirect to the index
+                        response.setContentLength(0);
                         response.sendRedirect(URI.addPaths( _httpContext.getContextPath(),ipath));
                     }
                     else
