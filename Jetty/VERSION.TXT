@@ -4,11 +4,17 @@ Jetty Versions
 Jetty-4.2.0rc0 - 24 October 2002
  + Greg's birthday release!
  + Added embedded iso8859 writer to HttpOutputStream.
+ + Removed duplicate classes from jar
  + Fixed RolloverFileOutputStream without date.
  + Fixed SessionManager initialization
  + Added authenticator to admin.xml
  + Fixed Session timeout NPE.
- + Removed duplicate classes from jar
+
+ Jetty-4.1.3 - 24 October 2002
+ + Fixed RolloverFileOutputStream without date.
+ + Fixed SessionManager initialization
+ + Added authenticator to admin.xml
+ + Fixed Session timeout NPE.
 
 Jetty-4.2.0beta0 - 13 October 2002
  + New ThreadPool implementation.
