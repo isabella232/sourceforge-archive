@@ -32,11 +32,8 @@ import javax.servlet.UnavailableException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.http.HttpConnection;
-import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.UserRealm;
-import org.mortbay.util.LogSupport;
 
 
 /* --------------------------------------------------------------------- */
@@ -289,7 +286,7 @@ public class ServletHolder extends Holder
      * @return The servlet
      */
     public synchronized Servlet getServlet()
-        throws UnavailableException
+        throws ServletException
     {
         // Handle previous unavailability
         if (_unavailable!=0)
@@ -339,12 +336,17 @@ public class ServletHolder extends Holder
                     1000*_unavailableEx.getUnavailableSeconds();
             throw _unavailableEx;
         }
-        catch(Exception e)
+        catch(ServletException e)
         {
             _servlet=null;
             _config=null;
-            log.warn(LogSupport.EXCEPTION,e);
-            throw new UnavailableException(getName()+":"+e.toString());
+            throw e;
+        }
+        catch(Throwable e)
+        {
+            _servlet=null;
+            _config=null;
+            throw new ServletException("init",e);
         }    
     }
 
@@ -359,15 +361,6 @@ public class ServletHolder extends Holder
             if (_runAs!=null && _realm!=null)
                 user=_realm.pushRole(null,_runAs);
             servlet.init(config);
-        }
-        catch(UnavailableException e)
-        {
-            throw e;
-        }
-        catch(Throwable e)
-        {
-            log.warn(e);
-            throw new UnavailableException(getName()+":"+e);
         }
         finally
         {
