@@ -11,6 +11,7 @@ import java.io.FilePermission;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.Permission;
@@ -67,6 +68,21 @@ class FileResource extends URLResource
         _file=file;
         checkAliases(url);
     }
+
+    /* -------------------------------------------------------- */
+    public Resource addPath(String path)
+        throws IOException,MalformedURLException
+    {
+        if (!isDirectory())
+            return super.addPath(path);
+
+        path = URI.canonicalPath(path);
+        File newFile = new File(_file,path);
+        return new FileResource(newFile.toURL(),
+                                null,
+                                newFile);
+    }
+    
     
     /* ------------------------------------------------------------ */
     private void checkAliases(URL url)

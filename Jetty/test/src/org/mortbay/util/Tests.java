@@ -634,65 +634,85 @@ public class Tests extends junit.framework.TestCase
     public void testUrlEncoded()
     {
           
-        UrlEncoded code = new UrlEncoded();
-        assertEquals("Empty",0, code.size());
+        UrlEncoded url_encoded = new UrlEncoded();
+        assertEquals("Empty",0, url_encoded.size());
 
-        code.clear();
-        code.decode("Name1=Value1");
-        assertEquals("simple param size",1, code.size());
-        assertEquals("simple encode","Name1=Value1", code.encode());
-        assertEquals("simple get","Value1", code.getString("Name1"));
+        url_encoded.clear();
+        url_encoded.decode("Name1=Value1");
+        assertEquals("simple param size",1, url_encoded.size());
+        assertEquals("simple encode","Name1=Value1", url_encoded.encode());
+        assertEquals("simple get","Value1", url_encoded.getString("Name1"));
         
-        code.clear();
-        code.decode("Name2=");
-        assertEquals("dangling param size",1, code.size());
-        assertEquals("dangling encode","Name2", code.encode());
-        assertEquals("dangling get","", code.getString("Name2"));
+        url_encoded.clear();
+        url_encoded.decode("Name2=");
+        assertEquals("dangling param size",1, url_encoded.size());
+        assertEquals("dangling encode","Name2", url_encoded.encode());
+        assertEquals("dangling get","", url_encoded.getString("Name2"));
     
-        code.clear();
-        code.decode("Name3");
-        assertEquals("noValue param size",1, code.size());
-        assertEquals("noValue encode","Name3", code.encode());
-        assertEquals("noValue get","", code.getString("Name3"));
+        url_encoded.clear();
+        url_encoded.decode("Name3");
+        assertEquals("noValue param size",1, url_encoded.size());
+        assertEquals("noValue encode","Name3", url_encoded.encode());
+        assertEquals("noValue get","", url_encoded.getString("Name3"));
     
-        code.clear();
-        code.decode("Name4=Value+4%21");
-        assertEquals("encoded param size",1, code.size());
-        assertEquals("encoded encode","Name4=Value+4%21", code.encode());
-        assertEquals("encoded get","Value 4!", code.getString("Name4"));
+        url_encoded.clear();
+        url_encoded.decode("Name4=Value+4%21");
+        assertEquals("encoded param size",1, url_encoded.size());
+        assertEquals("encoded encode","Name4=Value+4%21", url_encoded.encode());
+        assertEquals("encoded get","Value 4!", url_encoded.getString("Name4"));
         
-        code.clear();
-        code.decode("Name4=Value+4%21%20%214");
-        assertEquals("encoded param size",1, code.size());
-        assertEquals("encoded encode","Name4=Value+4%21+%214", code.encode());
-        assertEquals("encoded get","Value 4! !4", code.getString("Name4"));
+        url_encoded.clear();
+        url_encoded.decode("Name4=Value+4%21%20%214");
+        assertEquals("encoded param size",1, url_encoded.size());
+        assertEquals("encoded encode","Name4=Value+4%21+%214", url_encoded.encode());
+        assertEquals("encoded get","Value 4! !4", url_encoded.getString("Name4"));
 
         
-        code.clear();
-        code.decode("Name5=aaa&Name6=bbb");
-        assertEquals("multi param size",2, code.size());
-        assertTrue("multi encode "+code.encode(),
-                   code.encode().equals("Name5=aaa&Name6=bbb") ||
-                   code.encode().equals("Name6=bbb&Name5=aaa")
+        url_encoded.clear();
+        url_encoded.decode("Name5=aaa&Name6=bbb");
+        assertEquals("multi param size",2, url_encoded.size());
+        assertTrue("multi encode "+url_encoded.encode(),
+                   url_encoded.encode().equals("Name5=aaa&Name6=bbb") ||
+                   url_encoded.encode().equals("Name6=bbb&Name5=aaa")
                    );
-        assertEquals("multi get","aaa", code.getString("Name5"));
-        assertEquals("multi get","bbb", code.getString("Name6"));
+        assertEquals("multi get","aaa", url_encoded.getString("Name5"));
+        assertEquals("multi get","bbb", url_encoded.getString("Name6"));
     
-        code.clear();
-        code.decode("Name7=aaa&Name7=b%2Cb&Name7=ccc");
+        url_encoded.clear();
+        url_encoded.decode("Name7=aaa&Name7=b%2Cb&Name7=ccc");
         assertEquals("multi encode",
                          "Name7=aaa&Name7=b%2Cb&Name7=ccc"
                          ,
-                        code.encode());
-        assertEquals("list get all", code.getString("Name7"),"aaa,b,b,ccc");
-        assertEquals("list get","aaa", code.getValues("Name7").get(0));
-        assertEquals("list get", code.getValues("Name7").get(1),"b,b");
-        assertEquals("list get","ccc", code.getValues("Name7").get(2));
+                        url_encoded.encode());
+        assertEquals("list get all", url_encoded.getString("Name7"),"aaa,b,b,ccc");
+        assertEquals("list get","aaa", url_encoded.getValues("Name7").get(0));
+        assertEquals("list get", url_encoded.getValues("Name7").get(1),"b,b");
+        assertEquals("list get","ccc", url_encoded.getValues("Name7").get(2));
 
-        code.clear();
-        code.decode("Name8=xx%2C++yy++%2Czz");
-        assertEquals("encoded param size",1, code.size());
-        assertEquals("encoded encode","Name8=xx%2C++yy++%2Czz", code.encode());
-        assertEquals("encoded get", code.getString("Name8"),"xx,  yy  ,zz");
+        url_encoded.clear();
+        url_encoded.decode("Name8=xx%2C++yy++%2Czz");
+        assertEquals("encoded param size",1, url_encoded.size());
+        assertEquals("encoded encode","Name8=xx%2C++yy++%2Czz", url_encoded.encode());
+        assertEquals("encoded get", url_encoded.getString("Name8"),"xx,  yy  ,zz");
+
+        
+        byte[] b = new byte[]
+            {
+                (byte)'s',
+                (byte)'=',
+                (byte)0x83,
+                (byte)'Q',
+                (byte)0x81,
+                (byte)0x5b,
+                (byte)0x83,
+                (byte)0x80
+            };
+        MultiMap m = new MultiMap();
+        UrlEncoded.decodeTo(b,m,"SJIS");
+        String sjis=(String)m.get("s");
+        assertEquals("SJIS len",3, sjis.length());
+        assertEquals("SJIS param","\u30b2\u30fc\u30e0",sjis );
+        
+        
     }
 }

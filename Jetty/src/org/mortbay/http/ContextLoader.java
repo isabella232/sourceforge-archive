@@ -22,6 +22,7 @@ import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.Log;
 import org.mortbay.util.Resource;
+import org.mortbay.util.URI;
 
 /* ------------------------------------------------------------ */
 /** ClassLoader for HttpContext.
@@ -273,7 +274,7 @@ public class ContextLoader extends URLClassLoader
         
         if (url!=null && Code.verbose())
             Code.debug("found ",url);
-
+        
         return url;
     }
     
