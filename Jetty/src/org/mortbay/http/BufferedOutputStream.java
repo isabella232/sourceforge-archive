@@ -151,9 +151,16 @@ public class BufferedOutputStream
     protected void bypassWrite(byte[] b, int offset, int length)
         throws IOException
     {
-        _out.write(b,offset,length);
-        _out.flush();
-    }
+        try
+        {
+            _out.write(b,offset,length);
+            _out.flush();
+        }
+        catch (IOException e)
+        {
+            throw new EOFException(e);
+        }
+    }             
     
     /* ------------------------------------------------------------ */
     /**
