@@ -15,7 +15,7 @@ Other targets:
 
 -->
 
-<project name="JettyPlus" default="all" basedir=".">
+<project name="JettyPlus" default="jars" basedir=".">
 
   <!-- ==================================================================== -->
   <property name="package"          value="jetty.plus" />

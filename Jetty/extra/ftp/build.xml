@@ -10,10 +10,9 @@
 
 <project name="LoadBalancer" default="jars" basedir=".">
 
-  <property name="package"          value="loadbalancer" />
+  <property name="package"          value="ftp" />
   <property environment="env"/>
   <property file="../build.package.properties" />
-
 
   <!-- ==================================================================== -->
   <target name="is.jdk1.4.available">
@@ -74,11 +73,8 @@
   <!-- Clean                                                                -->
   <!-- ==================================================================== -->
   <target name="clean" depends="tidy" description="Remove generated files">
-    <delete quiet="false">
-      <fileset dir="${logs}">
-        <include name="**/*.log"/>
-      </fileset>
-    </delete>
+    <delete dir="${logs}" quiet="false"/>
+    <delete dir="${test}/classes" quiet="false"/>
     <delete file="${package.jar}"/>
   </target>
 
@@ -121,16 +117,33 @@
   <!-- ==================================================================== -->
   <!-- test                                                                 -->
   <!-- ==================================================================== -->
-  <target name="check.tests" description="check to see if there are any tests">
-    <available property="tests.available" file="${test}/build.xml"/>
-  </target>
-
-  <!-- ==================================================================== -->
-  <target name="test" 
-          depends="check.tests" 
-          if="tests.available" 
+  <target name="test" depends="jars"
           description="run tests">
-    <ant antfile="${test}/build.xml" inheritAll="false" target="test"/>
+
+    <mkdir dir="${test}/classes"/>   
+
+    <javac srcdir="${test}/src"
+           destdir="${test}/classes"
+           debug="true"
+           optimize="fale"
+           deprecation="${javac.deprecation}">
+       <classpath>
+         <pathelement location="${package.jar}" />
+         <path refid="classpath"/>
+       </classpath>
+       <include name="**/*.java"/>
+    </javac>
+
+    <java classname="org.mortbay.ftp.TestFtp"
+          fork="yes"
+          failonerror="yes"
+          >
+       <classpath>
+         <pathelement location="${package.jar}" />
+         <path refid="classpath"/>
+         <pathelement location="${test}/classes" />
+       </classpath>
+    </java>
   </target>
 
 
