@@ -23,7 +23,11 @@ import org.mortbay.util.ThreadedServer;
 
 
 /* ------------------------------------------------------------ */
-/**
+/** AJP 1.3 Protocol Listener.
+ * This listener takes requests from the mod_jk or mod_jk2 modules
+ * used by web servers such as apache and IIS to forward requests to a
+ * servlet container.
+ * <p>
  * This code uses the AJP13 code from tomcat3.3 as the protocol
  * specification, but is new  implementation.
  *

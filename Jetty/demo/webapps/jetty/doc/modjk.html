@@ -1,6 +1,22 @@
 <HR>
-<BIG><BIG><B>Using mod_jk2 and Jetty</B></BIG></BIG>
+<BIG><BIG><B>Using mod_jk and Jetty</B></BIG></BIG>
 <HR>
+Jetty includes <a href="/javadoc/org/mortbay/http/ajp/AJP13Listener.html">org.mortbay.http.ajp.AJP13Listener</A>, which can be
+used instead of the normal SocketListener to received requests forwarded
+from a mod_jk module in apache or IIS.
+<P>
+The AJP13Listener has been tested with mod_jk from apache and mod_jk2 from
+apache2.
+<P>
+The <A href="http://jakarta.apache.org/tomcat/tomcat-3.3-doc/mod_jk-howto.html">normal
+jakarta/apache documentation</A> 
+can be used to configure mod_jk for Jetty. The documentation below was 
+contributed for using mod_jk2 in apache2 and is included with the
+mod_jk2 source code.
+
+<hr>
+<H3>Using mod_jk2 and Jetty</H3>
+
 <small><I>by Simon Stewart&lt;sms@lateral.net&gt;</I></small><P>
 
 Jetty is a popular Open Source HTTP Server and Servlet container,
@@ -130,23 +146,27 @@ Congratulations!
 The Jetty AJP13 connector has a compact set of configuration
 options. These are:
 
-<UL><PRE>
+<UL><small><PRE>
 ---- Jetty config options
 
-bufferSize          Size of the AJP13 data buffers (default 8192)
+bufferSize          Size of the AJP13 data buffers 
+                    (default 8192)
 
-confidentialPort    The port to redirect to if a servlet security constraint of
-                    CONFIDENTIAL is not met. (default 0 : forbidden response).
+confidentialPort    The port to redirect to if a servlet security 
+                    constraint of CONFIDENTIAL is not met. 
+                    (default 0 : forbidden response).
 
-confidentialScheme  The scheme to use for confidential redirections (default https)
+confidentialScheme  The scheme to use for confidential redirections 
+                    (default https)
 
-host                The host or IP interface to listen on. (default 0.0.0.0 == all
-                    interfaces)
+host                The host or IP interface to listen on. 
+                    (default 0.0.0.0 == all interfaces)
 
+identifyListener    Set the listener name as a request attribute 
+                    (default false)
 
-identifyListener    Set the listener name as a request attribute (false)
-
-lingerTimeSecs      The socket linger time for closing sockets (30)
+lingerTimeSecs      The socket linger time for closing sockets 
+                    (default 30)
 
 maxIdleTimeMs       Millisecs that a thread can be idle before the
                     thread pool shrinks.
@@ -167,7 +187,7 @@ port                Port to listen on (8009)
 threadClass         The class to use for threads in the threadpool.
 
 ---- End Jetty config options
-</PRE></UL>
+</PRE></small></UL>
 
 Most of these default to sensible values, and some of them (such as
 bufferSize) are unwise to fiddle with. An example of using these
