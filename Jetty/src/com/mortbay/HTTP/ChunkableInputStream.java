@@ -5,6 +5,7 @@
 
 package com.mortbay.HTTP;
 import com.mortbay.Util.*;
+import com.sun.java.util.collections.*;
 
 import java.io.*;
 
@@ -32,6 +33,7 @@ public class ChunkableInputStream extends FilterInputStream
     private HttpFields _footers=null;
     private boolean _chunking=false;
     private int _contentLength=-1;
+    private InputStream _filteredIn;
     
     /* ------------------------------------------------------------ */
     /** Buffer for readRawLine.
@@ -103,7 +105,7 @@ public class ChunkableInputStream extends FilterInputStream
             throw new IllegalStateException("Can't chunk and have content length");
         _contentLength=len;
     }
-    
+
     /* ------------------------------------------------------------ */
     public int read()
         throws IOException
