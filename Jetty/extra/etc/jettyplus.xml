@@ -52,7 +52,7 @@
     <Arg>
       <New class="org.mortbay.jetty.plus.MailService">
         <Set name="Name">MailService</Set>
-        <Set name="JNDI">mail/TestMail</Set>
+        <Set name="JNDI">mail/Session</Set>
 	<!-- set up the id of the smtp user                 -->
         <Set name="User">XXX</Set>
 	<!-- set up the password of the smtp user           -->
@@ -106,6 +106,15 @@
   <Call name="addWebApplication">
     <Arg>/jettyplus</Arg>
     <Arg><SystemProperty name="jetty.home"/>/extra/plus/demo/webapps/jettyplus</Arg>
+  </Call>
+
+
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Add tomcat examples                                             -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <Call name="addWebApplication">
+      <Arg>/examples/*</Arg>
+      <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/examples</Arg>
   </Call>
 
   <!-- =============================================================== -->
