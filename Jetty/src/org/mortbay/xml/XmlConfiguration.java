@@ -169,12 +169,11 @@ public class XmlConfiguration
     {
         //Check the class of the object
         Class oClass = nodeClass(_config);
-        if (oClass!=null)
+        if (oClass != null)
         {
-            if (obj !=null && !oClass.isInstance(obj))
-                throw new IllegalArgumentException("Object is not of type " + oClass);
-            if (obj==null)
-                obj=oClass.newInstance();
+            if (obj != null && !oClass.isInstance(obj))
+                    throw new IllegalArgumentException("Object is not of type " + oClass);
+            if (obj == null) obj = oClass.newInstance();
         }
         configure(obj, _config, 0);
     }
@@ -194,9 +193,8 @@ public class XmlConfiguration
             InvocationTargetException, InstantiationException, IllegalAccessException
     {
         Class oClass = nodeClass(_config);
-        Object obj=null;
-        if (oClass!=null)
-            obj = oClass.newInstance();
+        Object obj = null;
+        if (oClass != null) obj = oClass.newInstance();
         configure(obj, _config, 0);
         return obj;
     }
@@ -219,7 +217,7 @@ public class XmlConfiguration
     private void configure(Object obj, XmlParser.Node cfg, int i) throws ClassNotFoundException,
             NoSuchMethodException, InvocationTargetException, IllegalAccessException
     {
-        XmlParser.Node node=null;
+        XmlParser.Node node = null;
         try
         {
             for (; i < cfg.size(); i++)
@@ -227,7 +225,7 @@ public class XmlConfiguration
                 Object o = cfg.get(i);
                 if (o instanceof String) continue;
                 node = (XmlParser.Node) o;
-                
+
                 String tag = node.getTag();
                 if ("Set".equals(tag))
                     set(obj, node);
@@ -253,14 +251,10 @@ public class XmlConfiguration
         catch (Exception e)
         {
             log.debug(node);
-            if (e instanceof NoSuchMethodException)
-                throw (NoSuchMethodException)e;
-            if (e instanceof InvocationTargetException)
-                throw (InvocationTargetException)e;
-            if (e instanceof IllegalAccessException)
-                throw (IllegalAccessException)e;
-            if (e instanceof RuntimeException)
-                throw (RuntimeException)e;
+            if (e instanceof NoSuchMethodException) throw (NoSuchMethodException) e;
+            if (e instanceof InvocationTargetException) throw (InvocationTargetException) e;
+            if (e instanceof IllegalAccessException) throw (IllegalAccessException) e;
+            if (e instanceof RuntimeException) throw (RuntimeException) e;
         }
     }
 
@@ -497,10 +491,8 @@ public class XmlConfiguration
         Class oClass = nodeClass(node);
         if (oClass != null)
             obj = null;
-        else if (obj!=null)
-            oClass = obj.getClass();
-        if (oClass==null)
-            throw new IllegalArgumentException(node.toString());
+        else if (obj != null) oClass = obj.getClass();
+        if (oClass == null) throw new IllegalArgumentException(node.toString());
 
         int size = 0;
         int argi = node.size();
@@ -645,13 +637,12 @@ public class XmlConfiguration
             ClassNotFoundException, InvocationTargetException, IllegalAccessException
     {
         String id = node.getAttribute("id");
-        obj=_idMap.get(id);
-        if (obj==null)
-            throw new IllegalStateException("No object for id="+id);
+        obj = _idMap.get(id);
+        if (obj == null) throw new IllegalStateException("No object for id=" + id);
         configure(obj, node, 0);
         return obj;
     }
-    
+
     /* ------------------------------------------------------------ */
     /*
      * Create a new array object.
@@ -859,6 +850,7 @@ public class XmlConfiguration
         if ("Call".equals(tag)) return call(obj, node);
         if ("Get".equals(tag)) return get(obj, node);
         if ("New".equals(tag)) return newObj(obj, node);
+        if ("Ref".equals(tag)) return refObj(obj, node);
         if ("Array".equals(tag)) return newArray(obj, node);
 
         if ("SystemProperty".equals(tag))

@@ -20,7 +20,7 @@ $Id$
 -->
 
 <!ENTITY % CONFIG "Get|Set|Put|Call|New|Ref">
-<!ENTITY % VALUE "#PCDATA|Call|New|Get|SystemProperty|Array">
+<!ENTITY % VALUE "#PCDATA|Call|New|Get|SystemProperty|Array|Ref">
 
 <!ENTITY % TYPEATTR "type CDATA #IMPLIED " > <!-- String|Character|Short|Byte|Integer|Long|Boolean|Float|Double|char|short|byte|int|long|boolean|float|double|URL|InetAddress|InetAddrPort| #classname -->
 <!ENTITY % IMPLIEDCLASSATTR "class NMTOKEN #IMPLIED" >
@@ -167,7 +167,6 @@ which act on the referenced object:
 -->
 <!ELEMENT Ref ((%CONFIG;)*)>
 <!ATTLIST Ref %REQUIREDIDATTR;>
-
 
 <!--
 Array Element.
