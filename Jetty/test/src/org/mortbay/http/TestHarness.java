@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FilePermission;
-import java.io.IOException;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -319,7 +318,6 @@ public class TestHarness
     
     /* --------------------------------------------------------------- */
     public static void httpFields()
-        throws IOException
     {
         String h1 =
             "Content-Type: xyz" + CRLF +
@@ -403,6 +401,7 @@ public class TestHarness
             t.checkEquals(d1,d2,"getDateHeader12");
             t.checkEquals(d2,d3,"getDateHeader23");
             t.checkEquals(d3+2000,d4,"getDateHeader34");
+            t.checkEquals(951825600000L,d5,"getDateHeader5");
 
             f.putDateField("D2",d1);
             t.checkEquals(f.get("D1"),f.get("D2"),
