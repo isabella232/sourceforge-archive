@@ -235,26 +235,35 @@ public class AJP13Connection extends HttpConnection
         finally
         {
             // flush and end the output
-            try{getOutputStream().flush(true);} catch (Exception e){Code.warning(e);}
-            try{_ajpOut.end(persistent);} catch (Exception e){Code.warning(e);}
-            
-            // Consume unread input.
-            try{while(_ajpIn.skip(4096)>0 || _ajpIn.read()>=0);}
-            catch (IOException e){Code.ignore(e);}
+            try{
+                getOutputStream().flush(true);
+                response.commit();
+                _ajpOut.end(persistent);
 
-            // Close the outout
-            try{_ajpOut.close();} catch (IOException e){Code.warning(e);}
+                // Consume unread input.
+                while(_ajpIn.skip(4096)>0 || _ajpIn.read()>=0);
+                
+                // Close the outout
+                _ajpOut.close();
 
-            try{getOutputStream().resetStream();} catch (Exception e){Code.warning(e);}
-            getOutputStream().addObserver(this);
-            try{getInputStream().resetStream();}catch (Exception e){Code.warning(e);}
-            _ajpIn.recycle();
-            _ajpOut.recycle();
-            
-            statsRequestEnd();
-            if (context!=null)
-                context.log(request,response,-1);
-
+                // reset streams
+                getOutputStream().resetStream();
+                getOutputStream().addObserver(this);
+                getInputStream().resetStream();
+                _ajpIn.recycle();
+                _ajpOut.recycle();
+            }
+            catch (Exception e)
+            {
+                Code.debug(e);
+                persistent=false;
+            }
+            finally
+            {
+                statsRequestEnd();
+                if (context!=null)
+                    context.log(request,response,-1);
+            }
         }
         return persistent;
     }

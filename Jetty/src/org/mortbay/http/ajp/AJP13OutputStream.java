@@ -118,6 +118,7 @@ public class AJP13OutputStream extends OutputStream
         _packet.addBoolean(persistent);
         _packet.setDataSize();
         _packet.write(_out);
+        
         _packet.resetData();
         _packet.addByte(AJP13Packet.__SEND_BODY_CHUNK);
         _packet.addInt(0);

@@ -181,7 +181,7 @@ public class AJP13Packet
         if (Code.verbose(99))
             Code.debug("AJP13 rcv: "+this.toString(64));
 
-	// System.err.println(Thread.currentThread()+" AJP13 rcv>>>> "+this.toString());
+	//System.err.println(Thread.currentThread()+" AJP13 rcv>>>> "+this.toString());
     }
 
     /* ------------------------------------------------------------ */
@@ -190,7 +190,7 @@ public class AJP13Packet
     {
         if (Code.verbose(99))
             Code.debug("AJP13 snd: "+this.toString(64));
-	// System.err.println(Thread.currentThread()+" AJP13 snd<<<< "+this.toString());
+	//System.err.println(Thread.currentThread()+" AJP13 snd<<<< "+this.toString());
         out.write(_buf,0,_bytes);
     }
     
@@ -362,13 +362,25 @@ public class AJP13Packet
         StringBuffer b=new StringBuffer();
         StringBuffer a=new StringBuffer();
 
+        
         b.append(_bytes);
         b.append('/');
         b.append(_buf.length);
         b.append('[');
         b.append(_pos);
-        b.append("]:\n");
+        b.append("]: ");
 
+        switch(_buf[__HDR_SIZE])
+        {
+          case __FORWARD_REQUEST: b.append("FORWARD_REQUEST:");break;
+          case __SHUTDOWN: b.append("SHUTDOWN:");break;
+          case __SEND_BODY_CHUNK: b.append("SEND_BODY_CHUNK:");break;
+          case __SEND_HEADERS: b.append("SEND_HEADERS:");break;
+          case __END_RESPONSE: b.append("END_RESPONSE:");break;
+          case __GET_BODY_CHUNK: b.append("GET_BODY_CHUNK:");break;
+        }
+        b.append("\n");
+        
         for (int i=0;i<_bytes;i++)
         {
             char c=(char)((int)_buf[i]&0xFF);
