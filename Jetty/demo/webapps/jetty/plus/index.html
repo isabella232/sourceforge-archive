@@ -1,4 +1,381 @@
 <P>
-<H1>Coming Soon</H1>
-This page has not yet been written.
+<H1>JettyPlus://</H1>
 
+<h2> What it is and how to run it</h2>
+
+The purpose of this project is to enrich Jetty by
+selectively incorporating useful J2EE and non-J2EE features. The result is
+JettyPlus, an environment offering additional facilities to
+core web and servlet services, but which does not entail a full-blown 
+application server (such as <A HREF="/jetty/jboss/index.html">JettyJBoss</A> and <A HREF="/jetty/jonas/index.html">JettyJOnAS</A>).
+<P>
+The feature set currently contains:
+
+
+<ul>
+  <li> <A HREF="http://java.sun.com/j2ee/transactions.html">Java
+  Transaction API (JTA)</A> and Resource references, eg <A HREF="http://java.sun.com/j2se/1.4.1/docs/api/javax/sql/package-summary.html">DataSources</A>
+  <li> <A HREF="http://java.sun.com/products/jndi/">Java Naming and Directory Interface API (JNDI)</A> 
+  <li> <A HREF="http://jakarta.apache.org/log4j/docs/">Log4J</A>  
+  <li> <A HREF="http://java.sun.com/products/jaas/">Java Authentication and Authorization Service (JAAS)</A>
+</ul> 
+
+To use JettyPlus, you must:
+<ul>
+  <li> Configure the <code>org.mortbay.jetty.plus.Server</code>
+  class in your xml configuration file rather than the standard
+  <code>org.mortbay.jetty.Server</code> class, eg:
+<BR>
+  <code><pre>  &lt;Configure class="org.mortbay.jetty.plus.Server"&gt;</code></pre>
+  </li>
+
+  <li> Reference this class on the runline:
+<BR>
+  <code><pre>   java -Djetty.server=org.mortbay.jetty.plus.Server -Dlog4j.configuration=log4j.xml -jar start.jar config.xml
+  </pre></code>
+If you prefer, instead of specifying the class on the runline,
+you can edit the <code>start.config</code> file inside
+<code>start.jar</code> and change the line:
+  <code><pre>
+             # The main class to run
+             org.mortbay.jetty.Server.class  
+
+             to
+ 
+             org.mortbay.jetty.plus.Server.class
+  </pre></code>
+  </li>
+</ul>
+<P>
+JettyPlus consists of
+<code><b>org.mortbay.jetty.plus.jar</b></code>, ancillary file
+<code><b>org.mortbay.jetty.plus.resource.jar</b></code>, and
+optionally <code><b>org.mortbay.jaas.jar</b></code> as well
+as a number of libraries found in extra/ext. If you use the convenient
+start.jar method of running Jetty (highly recommended), all necessary jar files will
+automatically be placed on the JVM classpath for you. Otherwise,
+you will need to place the following on the Java classpath in
+addition to the usual Jetty jars:
+<ul>
+  <li>org.mortbay.jetty.plus.jar
+  <li>org.mortbay.jetty.plus.resource.jar
+  <li>org.mortbay.jetty.jaas.jar (if you want to use JAAS)
+  <li>carol.jar 
+  <li>commons-cli.jar
+  <li>commons-logging.jar
+  <li>hsqldb.jar (only for running the demo webapps)
+  <li>jonas_timer.jar
+  <li>jotm.jar
+  <li>jotm_iiop_stubs.jar
+  <li>jotm_jrmp_stubs.jar
+  <li>jta-spec1_0_1.jar
+  <li>jts1_0.jar
+  <li>log4j.jar
+  <li>objectweb-datasource.jar
+  <li>p6spy.jar
+  <li>xapool.jar
+</ul>
+<P>
+The <code>extra/plus/README.TXT</code> file in the source distribution
+contains more information on the JettyPlus package, including
+instructions on how to run the JettyPlus demonstration webapps.
+<P>
+<h2>Features</H2>
+<H3>Transactions and DataSources</H3>
+Thanks to the integration of the <A HREF="http://www.objectweb.org/jotm/index.html">JOTM</A> and <A
+HREF="http://xapool.experlog.com/">XAPool</A> packages
+from <A HREF="http://www.objectweb.org">ObjectWeb</A>,
+it is now possible to easily incorporate distributed transactional semantics in your
+servlets and JSPs using
+<code>javax.transaction.UserTransaction</code> objects. 
+
+<P>
+For example:  code to obtain, start and commit a UserTransaction
+is as follows:
+
+<code><pre>
+    try
+    {
+      UserTransaction usertransaction =
+                      (UserTransaction)context.lookup("java:comp/UserTransaction");
+      <font color="silver">//do some stuff</font>
+      usertransaction.begin();
+      <font color="silver">//access some resources and make changes</font>
+      usertransaction.commit();
+    }
+    catch (Exception e)
+    {
+      usertransaction.rollback();
+    }
+</code></pre>
+
+<P>
+JettyPlus also provides support for
+<code>javax.sql.DataSource</code> and <code>javax.sql.XADataSource</code> objects referenced in web.xml
+<code>&lt;resource-ref&gt;</code> and <code>&lt;resource-env-ref&gt;</code>
+elements. 
+
+To use DataSources in your webapp, you need to:
+
+<ul>
+ <li><B>Step 1:</B>  reference the DataSource in your <code>web.xml</code>
+ descriptor. Eg.
+<code><pre>
+  &lt;resource-env-ref&gt;
+    &lt;description&gt;
+      DB Connection
+    &lt;/description&gt;
+    &lt;resource-env-ref-name&gt;
+      jdbc/myDB
+    &lt;/resource-env-ref-name&gt;
+    &lt;resource-env-ref-type&gt;
+      javax.sql.DataSource
+    &lt;/resource-env-ref-type&gt;
+  &lt;/resource-env-ref&gt;
+</pre></code>
+ </li>
+ <li><B>Step 2:</B> set up the DataSource in your JettyPlus xml
+ configuration file. Note that this is configured along with the
+ transaction service Eg:
+<code><pre>
+&lt;Configure class="org.mortbay.jetty.plus.Server"&gt;
+  &lt;Call name="setTransactionManager"&gt;
+    &lt;Arg&gt;
+      &lt;New class="org.mortbay.jetty.plus.JotmService "&gt;
+        &lt;Call name="addDataSource"&gt;
+           &lt;Arg&gt;jdbc/myDB&lt;/Arg&gt;                    <font color=silver>&lt;-- name --&gt;</font>
+           &lt;Arg&gt;org.hsqldb.jdbcDriver&lt;/Arg&gt;        <font color=silver>&lt;-- driver class --&gt;</font>
+           &lt;Arg&gt;jdbc:hsqldb:extra/etc/tmtest&lt;/Arg&gt; <font color=silver>&lt;-- url --&gt;</font>
+           &lt;Arg&gt;sa&lt;/Arg&gt; <font color=silver>&lt;-- username --&gt;</font>
+           &lt;Arg&gt;&lt;/Arg&gt;   <font color=silver>&lt;-- password --&gt;</font>
+           &lt;Arg&gt;8&lt;/Arg&gt; <font color=silver> &lt;-- inital connection pool size --&gt;</font>
+           &lt;Arg&gt;4&lt;/Arg&gt;  <font color=silver>&lt;-- min connection pool size --&gt;</font>
+           &lt;Arg&gt;15&lt;/Arg&gt;<font color=silver> &lt;-- max connection pool size --&gt;</font>
+        &lt;/Call&gt;
+      &lt;/New&gt;
+    &lt;/Arg&gt;
+  &lt;/Call&gt;
+&lt;Configure&gt;
+</pre></code>
+</li>
+
+<li><B>Step 3:</B>  access it in your code. Eg:
+<code><pre>
+  DataSource datasource =
+  (DataSource)context.lookup("java:comp/env/jdbc/myDB");
+  Connection connection = datasource.getConnection();
+</code></pre>
+</li>
+
+</ul>
+
+<H3>JNDI </H3>
+JettyPlus provides JNDI lookups courtesy of <A
+HREF="http://www.objectweb.org/carol/index.html">CAROL</A>. A
+suitable default CAROL properties file is provided for you and
+usually would not need to be changed, however, it is available in
+the <code>org.mortbay.jetty.resource.jar</code>.
+<P>
+JettyPlus supports ENC lookups of &lt;env-entry&gt; tags in the
+web.xml descriptor. All you need to do to effect JNDI lookups in your code is to:
+
+ <ul>
+ <li><B>Step 1:</B>  enter some env entries in your webapp
+ web.xml file, eg:
+<code><pre>
+  &lt;env-entry&gt;
+    &lt;env-entry-name&gt;
+       someEnv
+    &lt;/env-entry-name&gt;
+    &lt;env-entry-value&gt;
+       A long time ago in a galaxy far far away 
+    &lt;/env-entry-value&gt;
+    &lt;env-entry-type&gt;
+       java.lang.String
+    &lt;/env-entry-type&gt;
+  &lt;/env-entry&gt;
+</code></pre>
+</li>
+
+<li><B>Step 2:</B>  obtain a javax.naming.InitialContext object and call the lookup
+method, eg:
+<code><pre>
+ InitialContext context = new InitialContext();
+ String starwars = (String)context.lookup("java:comp/env/someEnv");
+</code></pre>
+</li>
+</ul>
+
+<H3> Log4J </H3>
+The JettyPlus package provides a Jetty <code>org.mortbay.util.LogSink</code> to
+enable Jetty log messages to appear in Log4J style logs. The
+<code>org.mortbay.jetty.plus.resource.jar</code> file contains a
+<code>log4j.xml</code> configuration file which may be modified
+as needed.
+<P>
+To use Log4J:
+<ul>
+  <li><b>Step 1:</b>  configure the LogSink in your Jetty xml
+  configuration file, eg:
+<code><pre>
+  &lt;Call name="instance" class="org.mortbay.util.Log"&gt;
+    &lt;Call name="disableLog"/&gt;
+    &lt;Call name="add"&gt;
+      &lt;Arg&gt;
+        &lt;New class="org.mortbay.util.log4j.Log4jSink"&gt;
+          &lt;Call name="start"/&gt;
+        &lt;/New&gt;
+      &lt;/Arg&gt;
+    &lt;/Call&gt;
+  &lt;/Call&gt;
+</pre></code>
+</li>
+
+<li><b>Step 2:</b>  enable it on the command line:
+<code><pre>
+  java -Dlog4j.configuration=log4j.xml -jar start.jar config.xml
+</pre></code>
+</ul>
+
+<H3>JAAS</H3>
+JAAS provides a pluggable framework for authenticating and
+authorising users. JettyPlus JAAS integrates this with the declarative
+security model of the Java Servlet Specification.
+<P>
+The Jetty JAAS classes are <emph>not</emph> included in the main
+JettyPlus jar (<code>org.mortbay.jetty.plus.jar</code>). Instead, it is built
+as <code>org.mortbay.jaas.jar</code> to enable it to be used
+either with standard Jetty, or with JettyPlus.
+<P>
+As JAAS is a pluggable framework, the Jetty JAAS integration
+aims to dictate as little as possible whilst providing
+a sufficiently flexible infrastructure to allow users to drop in
+their own custom LoginModules. An example LoginModule (<code>org.mortbay.jaas.spi.JDBCLoginModule</code>),
+interacting with a database to store user names, passwords and
+roles, is included with the release to illustrate what to
+implement.
+<P>
+Some important classes are:
+
+<h4>org.mortbay.jaas.JAASUserRealm</h4>
+This bridges Jetty's realm concept to JAAS. This class must be
+configured as the realm for your webapp.
+
+
+<h4>org.mortbay.jaas.JAASPrincipal</h4>
+Implements the java.security.Principal interface. This class is
+used by the sample JDBCLoginModule, but the Jetty JAAS infrastructure
+is Principal agnostic, meaning you can use your own
+implementation of this class for your LoginModules if you wish.
+
+<h4>org.mortbay.jaas.JAASRole</h4>
+This is a Principal that represents a role possessed by a
+user.
+
+<h4>org.mortbay.jaas.JAASGroup</h4>
+An implementation of the java.security.acl.Group interface. It is
+used only by the sample JDBCLoginModule to group all roles
+possessed by a user under a single Principal called "roles".
+
+<h4>org.mortbay.jaas.spi.JDBCLoginModule</h4>
+An implementation of a LoginModule that uses a database to store
+user names, passwords and roles. All database-related information
+is configurable, including:
+<ul>
+ <li>the names and columns of the user table and role table
+ <li>the database connection driver, URL, username and password.
+</ul>
+
+
+<P>
+
+To use JAAS:
+<ul>
+  <li><b>Step 1:</b>  Configure the realm for your webapp
+  context in the Jetty xml configuration file:
+  <code><pre>
+    &lt;Call name="addWebApplication"&gt;
+    &lt;Arg&gt;/jaas/*&lt;/Arg&gt;
+    &lt;Arg&gt;&lt;SystemProperty name="jetty.home"/&gt;/extra/plus/demo/webapps/jaas&lt;/Arg&gt;
+
+    &lt;Set name="Realm"&gt;
+        &lt;New class="org.mortbay.jaas.JAASUserRealm"&gt;
+          &lt;Set name="Name"&gt;Test JAAS Realm&lt;/Set&gt;
+          &lt;Set name="LoginModuleName"&gt;jdbc&lt;/Set&gt;
+          &lt;Set name="RoleCheckPolicy"&gt;
+            &lt;New class="org.mortbay.jaas.StrictRoleCheckPolicy"/&gt;
+          &lt;/Set&gt;
+          &lt;Set name="CallbackHandler"&gt;
+            &lt;New class="org.mortbay.jaas.callback.DefaultCallbackHandler"/&gt;
+          &lt;/Set&gt;
+        &lt;/New&gt;
+    &lt;/Set&gt;
+  &lt;/Call&gt;
+  </pre></code>
+  Note that it is only actually necessary to specify the
+        <code>RoleCheckPolicy</code> or
+        <code>CallbackHandler</code> if you have provided custom
+        implementations of them.
+ </li>
+<BR>
+ <li><b>Step 2:</b>  Configure some security constraints and a
+        login method in your
+        <code>web.xml</code> file, eg:
+<code><pre>  
+  &lt;security-constraint&gt;
+    &lt;web-resource-collection&gt;
+      &lt;web-resource-name&gt;JAAS Role&lt;/web-resource-name&gt;
+      &lt;url-pattern&gt;/doit/*&lt;/url-pattern&gt;
+    &lt;/web-resource-collection&gt;
+    &lt;auth-constraint&gt;
+      &lt;role-name&gt;roleA&lt;/role-name&gt;
+    &lt;/auth-constraint&gt;
+  &lt;/security-constraint&gt;
+
+  &lt;login-config&gt;
+    &lt;auth-method&gt;BASIC&lt;/auth-method&gt;
+    &lt;realm-name&gt;Jetty Demo Realm&lt;/realm-name&gt;
+  &lt;/login-config&gt;
+</pre></code>
+ </li>
+
+ <li><b>Step 3:</b>  Create a login module configuration
+  file. This one is from the Jetty JAAS demo (in <code>extra/etc/login.conf</code>):
+  <code><pre>
+      // sample login config file for the Jetty JDBCLoginModule
+      // if you change the database and need to specify a password, set the property dbPassword
+      jdbc {
+      org.mortbay.jaas.spi.JDBCLoginModule required
+      debug="true"
+      dbUrl="jdbc:hsqldb:."
+      dbUserName="sa"
+      dbDriver="org.hsqldb.jdbcDriver"
+      userTable="myusers"
+      userField="myuser"
+      credentialField="mypassword"
+      userRoleTable="myuserroles"
+      userRoleUserField="myuser"
+      userRoleRoleField="myrole";
+      };
+  </pre></code> 
+   Note that the name of the module ("jdbc") must be the same as
+  that specified as the <code>LoginModuleName</code> in the Jetty
+  xml config file in Step 1.
+ </li>
+<BR>
+  <li><b>Step 4:</b>  Specify the location of the login
+  configuration file on the Jetty run line by setting the
+  <code>java.security.auth.login.config</code> property:
+  <code><pre>
+    -Djava.security.auth.login.config=mylogin.conf
+  </pre></code>
+ </li>
+</ul>
+
+<P>
+The above describes how to use the Jetty JAAS integration to
+authenticate web users and authorize them against webapp security
+constraints. It can also be used for authorization with a Java
+security manager and permission policy file. For information on
+how to accomplish this, build and run the JAAS demo in <code>extra/plus</code>
+as instructed in the README.TXT file in the source distribution.
