@@ -55,7 +55,7 @@ public class ErrorPageHandler extends AbstractHttpHandler
         writer.write(Integer.toString(code));
         writer.write(' ');
         writer.write(message);
-        writer.write("</title>\n<body>\n<h2>HTTP ERROR: ");
+        writer.write("</title>\n</head>\n<body>\n<h2>HTTP ERROR: ");
         writer.write(Integer.toString(code));
         writer.write(' ');
         writer.write(message);

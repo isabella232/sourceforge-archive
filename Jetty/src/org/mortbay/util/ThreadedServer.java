@@ -288,11 +288,11 @@ abstract public class ThreadedServer extends ThreadPool
         {
             handleConnection(socket);
         }
-        catch(Exception e){Code.warning("Connection problem",e);}
+        catch(Exception e){Code.debug("Connection problem",e);}
         finally
         {
             try {socket.close();}
-            catch(Exception e){Code.warning("Connection problem",e);}
+            catch(Exception e){Code.debug("Connection problem",e);}
         }
     }
     
