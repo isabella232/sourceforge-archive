@@ -40,7 +40,7 @@ public class HttpContextMBean extends LifeCycleMBean
         defineAttribute("virtualHosts");
         defineAttribute("contextPath");
         
-        defineAttribute("handlers",false);
+        defineAttribute("handlers",READ_ONLY,ON_MBEAN);
 
         defineAttribute("classPath");
         
@@ -121,11 +121,27 @@ public class HttpContextMBean extends LifeCycleMBean
     }
     
     /* ------------------------------------------------------------ */
+    public void postRegister(Boolean ok)
+    {
+        super.postRegister(ok);
+        if (ok.booleanValue())
+            getHandlers();
+    }
+    
+    
+    /* ------------------------------------------------------------ */
     public void postDeregister()
     {
         _httpContext=null;
         super.postDeregister();
     }
+    
+    /* ------------------------------------------------------------ */
+    public ObjectName[] getHandlers()
+    {
+        return getComponentMBeans(_httpContext.getHandlers(),null);
+    }
+    
 }
 
 

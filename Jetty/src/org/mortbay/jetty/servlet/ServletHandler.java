@@ -167,9 +167,6 @@ public class ServletHandler extends AbstractHttpHandler
     public PathMap getServletMap() { return _servletMap; }
     
     /* ------------------------------------------------------------ */
-    public boolean isAutoReload() { return false; }
-    
-    /* ------------------------------------------------------------ */
     public boolean isUsingCookies() { return _usingCookies; }
     
     /* ------------------------------------------------------------ */

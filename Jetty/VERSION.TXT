@@ -6,6 +6,8 @@ Jetty Versions
  + HTAccessHandler checks realm as well as htpassword.
  + Clear context listeners after stop.
  + Clear context attributes after stop.
+ + Use requestedSessionId as default session ID.
+ + Added MBeans for handlers
 
 Jetty-4.2.4rc0 - 12 December 2002
  + Simplified ThreadedServer

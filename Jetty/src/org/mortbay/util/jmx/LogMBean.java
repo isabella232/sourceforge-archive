@@ -22,7 +22,6 @@ import org.mortbay.util.LogSink;
 public class LogMBean extends ModelMBeanImpl
 {
     Log _log;
-    HashMap _sinks=new HashMap();
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -53,7 +52,7 @@ public class LogMBean extends ModelMBeanImpl
     {
         super.defineManagedResource();
 
-        defineAttribute("logSinks",false);
+        defineAttribute("logSinks",READ_ONLY,ON_MBEAN);
         defineOperation("add",
                         new String[]{STRING},
                         IMPACT_ACTION);
@@ -72,113 +71,21 @@ public class LogMBean extends ModelMBeanImpl
     /* ------------------------------------------------------------ */
     public void postRegister(Boolean ok)
     {
-        super.postRegister(ok);    
+        super.postRegister(ok);
         if (ok.booleanValue())
-            rescanSinks();
-    }    
-
-    /* ------------------------------------------------------------ */
-    public void preDeregister()
-    {
-        super.preDeregister();
-
-        ArrayList sinkKeys= new ArrayList(_sinks.keySet());
-        Iterator iter=sinkKeys.iterator();
-        while(iter.hasNext())
-        {
-            try
-            {
-                LogSink sink=(LogSink)iter.next();
-                LogSinkMBean bean=(LogSinkMBean)_sinks.remove(sink);
-                getMBeanServer().unregisterMBean(bean.getObjectName());
-            }
-            catch(Exception e)
-            {
-                Code.warning(e);
-            }
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    public Object getAttribute(String name)
-        throws AttributeNotFoundException,
-               MBeanException,
-               ReflectionException
-    {
-        if ("logSinks".equals(name))
-            rescanSinks();
-        return super.getAttribute(name);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public Object invoke(String name, Object[] params, String[] signature)
-        throws MBeanException,
-               ReflectionException
-    {
-        Object o=super.invoke(name,params,signature);
-        if ("add".equals(name))
-            rescanSinks();
-        return o;
-    }
-    
-    /* ------------------------------------------------------------ */
-    private synchronized void rescanSinks()
-    {
-        LogSink[] sinks = _log.getLogSinks();
-
-        // Add new beans
-        for(int i=0;i<sinks.length;i++)
-        {
-            LogSink sink=sinks[i];
-
-            ModelMBean bean=(LogSinkMBean)_sinks.get(sink);
-            if (bean==null)
-            {
-                try
-                {
-                    bean = mbeanFor(sink);
-                    getMBeanServer().registerMBean(bean,new ObjectName(getObjectName()+",sink="+i));
-                    _sinks.put(sink,bean);
-                }
-                catch(Exception e)
-                {
-                    Code.warning(e);
-                }
-            }
-        }
-
-        // delete old beans
-        if (_sinks.size()!=sinks.length)
-        {
-            Iterator iter=_sinks.keySet().iterator();
-        keys:
-            while(iter.hasNext())
-            {
-                try
-                {
-                    LogSink sink=(LogSink)iter.next();
-                    for(int i=0;i<sinks.length;i++)
-                        if(sink==sinks[i]) continue keys;
-                
-                    LogSinkMBean bean=(LogSinkMBean)_sinks.remove(sink);
-                    
-                    getMBeanServer().unregisterMBean(bean.getObjectName());
-                }
-                catch(Exception e)
-                {
-                    Code.warning(e);
-                }
-            }
-        }
+            getLogSinks();
     }
     
     /* ------------------------------------------------------------ */
     public void postDeregister()
     {
+        super.postDeregister();
         _log=null;
-        if (_sinks!=null)
-            _sinks.clear();
-        _sinks=null;
     }
     
+    /* ------------------------------------------------------------ */
+    public ObjectName[] getLogSinks()
+    {
+        return getComponentMBeans(_log.getLogSinks(),null);
+    }
 }

@@ -183,12 +183,9 @@ public class Holder
     }
     
     /* ------------------------------------------------------------ */
-    /** Get the name of the Filter.
-     * @return Filter name
-     */
     public String toString()
     {
-        return _name+"<"+_displayName+"> "+_className;
+        return _name+"["+_className+"]";
     }
     
 }

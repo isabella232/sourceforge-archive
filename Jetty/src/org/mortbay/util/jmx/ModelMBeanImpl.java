@@ -10,6 +10,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -101,14 +102,14 @@ public class ModelMBeanImpl
     private ObjectName _objectName;
     
     private boolean _dirty=false;
-    private HashMap _getter = new HashMap();
-    private HashMap _setter = new HashMap();
-    private HashMap _method = new HashMap();
-    private ArrayList _attributes = new ArrayList();
-    private ArrayList _operations = new ArrayList();
-    private ArrayList _notifications = new ArrayList();
+    private HashMap _getter = new HashMap(4);
+    private HashMap _setter = new HashMap(4);
+    private HashMap _method = new HashMap(4);
+    private ArrayList _attributes = new ArrayList(4);
+    private ArrayList _operations = new ArrayList(4);
+    private ArrayList _notifications = new ArrayList(4);
     private String _baseObjectName=null;
-
+    private Map _components = new HashMap(4);
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -1017,6 +1018,8 @@ public class ModelMBeanImpl
     public void preDeregister()
     {
         Log.event("Deregister "+_objectName);
+        getComponentMBeans(null,_components);
+        _components.clear();
     }
     
     /* ------------------------------------------------------------ */
@@ -1110,5 +1113,93 @@ public class ModelMBeanImpl
         }
 
         return oName;
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /** Get Component MBeans.
+     * Creates, registers and deregisters MBeans for an array of components.
+     * On each call the passed map is used to determine components that have
+     * already been registers and those that need to be deregistered.
+     * @param components the components.
+     * @param map A map of previously registered components to object
+     * name. If null is passed, a default map for the mbean is used.
+     * @return An array of ObjectNames for each component. 
+     */
+    protected ObjectName[] getComponentMBeans(Object[] components, Map map)
+    {
+        if (map==null)
+            map=_components;
+        ObjectName[] beans=null;   
+        if (components==null)
+            beans = new ObjectName[0];
+        else
+        {
+            beans = new ObjectName[components==null?0:components.length];
+
+            // Add new beans
+            for (int i=0;i<components.length;i++)
+            {
+                ObjectName on = (ObjectName)map.get(components[i]);
+                if (on==null)
+                {
+                    ModelMBean mbean = mbeanFor(components[i]);
+                    if (mbean==null)
+                        Code.warning("No mbean for "+components[i]);
+                    else
+                    {
+                        try
+                        {
+                            if (mbean instanceof ModelMBeanImpl)
+                            {
+                                ((ModelMBeanImpl)mbean).setBaseObjectName(getObjectName().toString());
+                                on=getMBeanServer().registerMBean(mbean,null).getObjectName();
+                            }
+                            else
+                            {
+                                on=uniqueObjectName(getMBeanServer(),
+                                                    components[i],
+                                                    getObjectName().toString());
+                                on=getMBeanServer().registerMBean(mbean,on).getObjectName();
+                            }
+                            map.put(components[i],on);
+                        }
+                        catch (Exception e)
+                        {
+                            Code.warning(e);
+                        }
+                    }
+                }
+                beans[i]=on;
+            }
+        }
+        
+        // Delete old beans
+        if (components==null || map.size()>components.length)
+        {
+            Object[] to_delete=new Object[map.size()-beans.length];
+            int d=0;
+            Iterator iter = map.keySet().iterator();
+            keys:
+            while(iter.hasNext())
+            {
+                Object bean = iter.next();
+                if (components!=null)
+                {
+                    for(int i=0;i<components.length;i++)
+                        if (components[i]==bean)
+                            continue keys;
+                }
+                to_delete[d++]=bean;
+            }
+
+            for (;d-->0;)
+            {
+                try{getMBeanServer().unregisterMBean((ObjectName)map.remove(to_delete[d]));}
+                catch (Exception e) {Code.warning(e);}
+            }
+        }
+        
+        return beans;
     }
 }

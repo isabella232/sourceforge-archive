@@ -87,7 +87,14 @@ public class WebApplicationHandler extends ServletHandler
             throw new IllegalArgumentException("Unknown filter :"+filterName);
         Code.debug("Filter servlet ",servletName," --> ",filterName);
         _servletFilterMap.add(servletName,holder);
+        holder.addServlet(servletName);
         return holder;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public List getFilters()
+    {
+        return _filters;
     }
     
     /* ------------------------------------------------------------ */
@@ -107,6 +114,7 @@ public class WebApplicationHandler extends ServletHandler
         return holder;
     }
 
+    
     /* ------------------------------------------------------------ */
     public boolean isStarted()
     {
@@ -119,8 +127,8 @@ public class WebApplicationHandler extends ServletHandler
     {
         // Start Servlet Handler
         super.start();
-        Code.debug("Path Filters: "+_pathFilters);
-        Code.debug("Servlet Filters: "+_servletFilterMap);
+        Code.debug("Path Filters: ",_pathFilters);
+        Code.debug("Servlet Filters: ",_servletFilterMap);
         _started=true;
     }
     

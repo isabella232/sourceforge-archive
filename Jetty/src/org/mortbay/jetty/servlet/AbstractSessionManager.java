@@ -86,6 +86,7 @@ public abstract class AbstractSessionManager implements SessionManager
     
     /* ------------------------------------------------------------ */
     /* new Session ID.
+     * If the request has a requestedSessionID which is unique, that is used.
      * The session ID is created as a unique random long, represented as in a
      * base between 30 and 36, selected by timestamp.
      * If the request has a jvmRoute attribute, that is appended as a
@@ -96,8 +97,8 @@ public abstract class AbstractSessionManager implements SessionManager
      */
     private synchronized String newSessionId(HttpServletRequest request,long created)
     {
-        String id=null;
-        do
+        String id=request.getRequestedSessionId();
+        while (_sessions.containsKey(id))
         {
             long r = _random.nextLong();
             if (r<0)r=-r;
@@ -108,7 +109,6 @@ public abstract class AbstractSessionManager implements SessionManager
             else if (_workerName!=null)
                 id+="."+_workerName;
         }
-        while (_sessions.containsKey(id));
         return id;
     }
     

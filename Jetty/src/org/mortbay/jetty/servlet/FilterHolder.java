@@ -7,11 +7,13 @@ package org.mortbay.jetty.servlet;
 
 import java.util.Enumeration;
 import java.util.Map;
+import java.util.Iterator;
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 import org.mortbay.http.HttpHandler;
 import org.mortbay.http.PathMap;
+import org.mortbay.util.LazyList;
 
 /* --------------------------------------------------------------------- */
 /** 
@@ -44,6 +46,7 @@ public class FilterHolder
     /* ------------------------------------------------------------ */
     private PathMap _pathSpecs;
     private int _appliesTo;
+    private LazyList _servlets;
 
     private transient Filter _filter;
     private transient Config _config;
@@ -79,7 +82,15 @@ public class FilterHolder
     {
         _appliesTo|=type(type);
     }
-
+    
+    /* ------------------------------------------------------------ */
+    /** Add A servlet that this filter applies to.
+     * @param pathSpec 
+     */
+    public void addServlet(String servlet)
+    {
+        _servlets=LazyList.add(_servlets,servlet);
+    }
     
     /* ------------------------------------------------------------ */
     /** Add A path spec that this filter applies to.
@@ -168,6 +179,30 @@ public class FilterHolder
         return _filter;
     }
 
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        StringBuffer buf = new StringBuffer();
+        buf.append(getName());
+        buf.append('[');
+        buf.append(getClassName());
+        for (int i=0;i<LazyList.size(_servlets);i++)
+        {
+            buf.append(',');
+            buf.append(LazyList.get(_servlets,i));
+        }
+        if (_pathSpecs!=null)
+        {
+            Iterator iter = _pathSpecs.keySet().iterator();
+            while (iter.hasNext())
+            {
+                buf.append(',');
+                buf.append(iter.next());
+            }
+        }
+        buf.append(']');
+        return buf.toString();
+    }
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */

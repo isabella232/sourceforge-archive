@@ -238,7 +238,7 @@
     </Call>
     <Call name="addServlet">
       <Arg>JSP</Arg>
-      <Arg>*.jsp:*.jsP:*.jSp:*.jSP:*.Jsp:*.JsP:*.JSp:*.JSP</Arg>
+      <Arg>*.jsp</Arg>
       <Arg>org.apache.jasper.servlet.JspServlet</Arg>
     </Call>   
 
