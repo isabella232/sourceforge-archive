@@ -35,6 +35,7 @@ public class ThreadPool
     static Log log = LogFactory.getLog(ThreadPool.class);
 
     public static final String __DAEMON="org.mortbay.util.ThreadPool.daemon";
+    public static final String __PRIORITY="org.mortbay.util.ThreadPool.priority";
     
     /* ------------------------------------------------------------------- */
     private String _name;
@@ -240,7 +241,32 @@ public class ThreadPool
         _pool.setMaxIdleTimeMs(maxIdleTimeMs);
     }
     
+    /* ------------------------------------------------------------ */
+    /** Get the priority of the pool threads.
+     *  @return the priority of the pool threads.
+     */ 
+    public int getThreadsPriority()
+    {
+        int priority = Thread.NORM_PRIORITY;
+
+        Object o = _pool.getAttribute(__PRIORITY);
+        if (o != null)
+        {
+            priority = ((Integer) o).intValue();
+        }
+
+        return priority;
+    }
     
+    /* ------------------------------------------------------------ */
+    /** Set the priority of the pool threads.
+     *  @param priority the new thread priority.
+     */
+    public void setThreadsPriority(int priority)
+    {
+        _pool.setAttribute(__PRIORITY, new Integer(priority));
+    }
+
     /* ------------------------------------------------------------ */
     /** Set Max Read Time.
      * @deprecated maxIdleTime is used instead.
@@ -386,6 +412,13 @@ public class ThreadPool
                 ?("PoolThread-"+id):(_pool.getPoolName()+"-"+id);
             this.setName(_name);
             this.setDaemon(pool.getAttribute(__DAEMON)!=null);
+
+            Object o = pool.getAttribute(__PRIORITY);
+            if (o != null)
+            {
+                this.setPriority(((Integer) o).intValue());
+            }
+
             this.start();
             if(log.isTraceEnabled())log.trace("enterPool "+this+" -> "+pool);
         }
