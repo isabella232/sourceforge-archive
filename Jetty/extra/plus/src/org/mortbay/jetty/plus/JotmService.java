@@ -106,7 +106,7 @@ public class JotmService extends TMService
      * @exception Exception An arbitrary exception may be thrown.
      */
     public void start()
-        throws Exception
+    throws Exception
     {
         if (!isStarted())
         {
@@ -124,10 +124,10 @@ public class JotmService extends TMService
                 log.warn(LogSupport.EXCEPTION,eExc);
                 throw new IOException("Failed to start JoTM: " + eExc);
             }
-
+            
             //  Register the user transaction and transaction mgr objects in JNDI
             Context ictx = null;
-
+            
             
             try 
             {
@@ -151,7 +151,7 @@ public class JotmService extends TMService
                 log.warn(LogSupport.EXCEPTION,e);
                 throw new IOException("UserTransaction rebind failed :" + e.getExplanation());
             }
- 
+            
             try
             {
                 Util.bind(ictx, getTransactionManagerJNDI(), m_tm.getTransactionManager());
@@ -174,23 +174,23 @@ public class JotmService extends TMService
             String               strDataSourceName;
             
             for (itrDataSources = m_mpDataSources.entrySet().iterator();
-                 itrDataSources.hasNext();)
+            itrDataSources.hasNext();)
             {
                 meDataSource = (Map.Entry)itrDataSources.next();
                 strDataSourceName = (String)meDataSource.getKey();
                 Object o = meDataSource.getValue();
-
+                
                 if (o instanceof StandardXAPoolDataSource)
                 {
                     StandardXAPoolDataSource xapdsPoolDataSource = (StandardXAPoolDataSource)meDataSource.getValue();
                     xadsDataSource = xapdsPoolDataSource.getDataSource();
-                
-		    if (m_tm != null)
-		    {
+                    
+                    if (m_tm != null)
+                    {
                         xapdsPoolDataSource.setTransactionManager(m_tm.getTransactionManager());
-			((StandardXADataSource)xadsDataSource).setTransactionManager(m_tm.getTransactionManager());
-		    }
-
+                        ((StandardXADataSource)xadsDataSource).setTransactionManager(m_tm.getTransactionManager());
+                    }
+                    
                     //bind both the Pool and the DataSource
                     try 
                     {
@@ -210,12 +210,12 @@ public class JotmService extends TMService
                 {
                     //bind only the DataSource
                     xadsDataSource = (StandardXADataSource)o;
-		    if (m_tm != null)
-		    {
+                    if (m_tm != null)
+                    {
                         ((StandardXADataSource)xadsDataSource).setTransactionManager(m_tm.getTransactionManager());
-		    }
-
-
+                    }
+                    
+                    
                     try
                     {
                         Util.bind(ictx, strDataSourceName, xadsDataSource);
@@ -231,7 +231,7 @@ public class JotmService extends TMService
                 else
                     throw new IllegalStateException (o + " is not a StandardDataSource");
             }
-
+            
             super.start();
             
             log.info("JoTM is running.");

@@ -23,9 +23,8 @@ Open Source application server. Again, members of the Jetty and JOnAs communitie
 integration. You can find the download lists <A HREF="http://www.objectweb.org/jonas/download/index.html">here</A>.
 
 <P>
-Additionally, the Jetty community is working on extracting a useful subset of J2EE functionality, namely transactions and
-datasources, to bundle as a JettyExtra. Please watch the <a HREF="http://groups.yahoo.com/group/jetty-discuss">mailing lists</A>
-for more information on this sub-project.
+Additionally, the Jetty community has developed the <a href="plus">JettyPlus</a> subproject, which extends Jetty by providing support for such J2EE-style features such as distributed transactions, JNDI, JAAS and various resource services such as DataSources and Mail.
+
 <P>
 Finally, Jetty is widely used within both the Open Source and commercial worlds but as these communities are large, diverse and
 fast moving it is difficult to keep a definitive list of Jetty integrations. So, if you are working on a Jetty J2EE integration

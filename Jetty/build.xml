@@ -178,6 +178,7 @@
            debug="${javac.debug}"
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}"
+	   encoding="${javac.encoding}"
            >
        <classpath>
          <path refid="extpath"/>

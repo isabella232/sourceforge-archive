@@ -6,13 +6,19 @@
     <h1>JettyPlus Demo</h1>
 
     <%
-      org.mortbay.webapps.jettyplus.DBTest test = new org.mortbay.webapps.jettyplus.DBTest();   
-      test.doIt(request.getParameter("completion")); 
+	  if (null != request.getParameter("regular"))
+	      org.mortbay.webapps.jettyplus.DBTest.doItNonXA();
+	  else if (null!=request.getParameter("pooled"))
+	    org.mortbay.webapps.jettyplus.DBTest.doItPooled();
+	  else
+	  {
+        org.mortbay.webapps.jettyplus.DBTest.doIt(request.getParameter("completion")); 
+	  }
     %>
     
-    You chose to: <B><%= request.getParameter("completion") %></B>
+    
 <BR>
-    foo is now: <B><%= test.readFoo() %></B>
+    foo is now: <B><%= org.mortbay.webapps.jettyplus.DBTest.readFoo() %></B>
     
 <P>
     <A HREF="/jettyplus/test.jsp"> Go again</A>

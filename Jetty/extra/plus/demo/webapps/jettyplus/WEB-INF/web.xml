@@ -17,7 +17,7 @@
  
   <resource-ref>
     <description>
-       DB via resource-ref
+       XADataSource via resource-ref
     </description>
     <res-ref-name>
       jdbc/myDB
@@ -29,6 +29,41 @@
       Application
     </res-auth>
   </resource-ref>
+  
+  
+  <resource-ref>
+    <description>
+      DataSource(non-XA)
+    </description>
+    <res-ref-name>
+      jdbc/myNonXADataSource
+    </res-ref-name>
+    <res-type>
+      javax.sql.DataSource
+    </res-type>
+    <res-auth>
+      Application
+    </res-auth>
+  </resource-ref>
+
+
+
+  <resource-ref>
+    <description>
+      DataSource (pooling)
+    </description>
+    <res-ref-name>
+      jdbc/myPooledDataSource
+    </res-ref-name>
+    <res-type>
+      javax.sql.DataSource
+    </res-type>
+    <res-auth>
+      Application
+    </res-auth>
+  </resource-ref>
+
+
 
   <resource-ref>
     <description>

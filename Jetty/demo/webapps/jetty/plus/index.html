@@ -6,6 +6,8 @@
     <li>[07-Apr-2004] JettyPlus now updated to <a href="http://jotm.objectweb.org">JOTM 1.4.3 </a></li>
     <li>[07-Apr-2004] new <A href="#start.config">start configuration</a> for JettyPlus start.jar</li>
     <li>[13-Jun-2004] JettyPlus now <A href="#jmx">supports JMX</a></li>
+    <li>[22-Aug-2004] JettyPlus supports <A href="#datasource">pluggable DataSources</A></li>
+    <li>[22-Aug-2004] JettyPlus now updated to <a href="http://xapool.experlog.com">XAPool 1.3.3</a></li>
   </ol>
 
 <h2>About these instructions</h2>
@@ -35,6 +37,10 @@ The feature set currently contains:
   <li> <A HREF="http://java.sun.com/products/jaas/">Java Authentication and Authorization Service (JAAS)</A>
   <li> <A HREF="http://java.sun.com/products/javamail/">Java Mail</A>&nbsp; 
 </ul> 
+
+<P>
+These features have been implemented as a pluggable, Service-based architecture. This means that it is possible to develop and use alternative services to those provided.
+</P>
 
 <a name="download">
 <h3>Downloading</h3>
@@ -108,148 +114,10 @@ contains more information on the JettyPlus package, including
 instructions on how to run the JettyPlus demonstration webapps.
 <P>
 <A name="feature-config"><h2>Features</H2></a>
-<H3>Transactions and DataSources</H3>
-Thanks to the integration of the <A HREF="http://jotm.objectweb.org">JOTM</A> and <A
-HREF="http://xapool.experlog.com/">XAPool</A> packages
-from <A HREF="http://www.objectweb.org">ObjectWeb</A>,
-it is now possible to easily incorporate distributed transactional semantics in your
-servlets and JSPs using
-<code>javax.transaction.UserTransaction</code> objects. 
-
-<P>
-For example:  code to obtain, start and commit a UserTransaction
-is as follows:
-
-<code><pre>
-    try
-    {
-      UserTransaction usertransaction =
-                      (UserTransaction)context.lookup("java:comp/UserTransaction");
-      <font color="silver">//do some stuff</font>
-      usertransaction.begin();
-      <font color="silver">//access some resources and make changes</font>
-      usertransaction.commit();
-    }
-    catch (Exception e)
-    {
-      usertransaction.rollback();
-    }
-</code></pre>
-
-<P>
-JettyPlus also provides support for
-<code>javax.sql.DataSource</code> and <code>javax.sql.XADataSource</code> objects referenced in web.xml
-<code>&lt;resource-ref&gt;</code> and <code>&lt;resource-env-ref&gt;</code>
-elements. 
-
-To use DataSources in your webapp, you need to:
-
-<ul>
- <li><B>Step 1:</B>  reference the DataSource in your <code>web.xml</code>
- descriptor. Eg.
-<code><pre>
-  &lt;resource-env-ref&gt;
-    &lt;description&gt;
-      DB Connection
-    &lt;/description&gt;
-    &lt;resource-env-ref-name&gt;
-      jdbc/myDB
-    &lt;/resource-env-ref-name&gt;
-    &lt;resource-env-ref-type&gt;
-      javax.sql.DataSource
-    &lt;/resource-env-ref-type&gt;
-  &lt;/resource-env-ref&gt;
-</pre></code>
- </li>
- <li><B>Step 2:</B> set up the DataSource in your JettyPlus xml
- configuration file. Note that this is configured along with the
- transaction service Eg:
-<code><pre>
-  &lt;Call name="addService"&gt;
-    &lt;Arg&gt;
-      &lt;New class="org.mortbay.jetty.plus.JotmService"&gt;
-        &lt;Set name="Name"&gt;TransactionMgr&lt;/Set&gt;
-        <font color="blue"> &lt;!-- set up a pooled DataSource --&gt;</font>
-         &lt;Call name="addDataSource"&gt;
-             &lt;Arg&gt;jdbc/myDB&lt;/Arg&gt;   <font color="blue"&lt;!-- client lookup jndi name of datasource  --&gt;</font>
-             <font color="blue">&lt;!-- set up the datasource --&gt;</font>
-             &lt;Arg&gt;
-               <font color="blue">
-               &lt;!-- Uncomment one of the following types of XADataSource        --&gt;
-               &lt;!-- according to your type of database:                         --&gt;
-               &lt;!-- New class="org.enhydra.jdbc.sybase.SybaseXADataSource"      --&gt;
-               &lt;!-- New class="org.enhydra.jdbc.informix.InformixXADataSource"  --&gt;
-               &lt;!-- New class="org.enhydra.jdbc.oracle.OracleXADataSource"      --&gt;
-               </font>
-               &lt;New class="org.enhydra.jdbc.standard.StandardXADataSource"&gt;
-                 &lt;Set name="DriverName"&gt;org.hsqldb.jdbcDriver&lt;/Set&gt;
-                 &lt;Set name="Url"&gt;jdbc:hsqldb:extra/etc/tmtest&lt;/Set&gt;
-                 &lt;Set name="User"&gt;sa&lt;/Set&gt;
-                 &lt;Set name="Password"&gt;&lt;/Set&gt;
-                 <font color="blue">
-                 &lt;!-- Uncomment to setup isolation level as required            --&gt;
-                 </font>
-                 &lt;!--
-                 &lt;Set name="TransactionIsolation"&gt;&lt;Get class="java.sql.Connection" name="TRANSACTION_SERIALIZABLE"/&gt;&lt;/Set&gt; 
-                 --&gt;
-               &lt;/New&gt;
-             &lt;/Arg&gt;
-             <font color="blue">&lt;!-- set up a pool for the datasource --&gt;</font>
-             &lt;Arg&gt;
-               &lt;New class="org.enhydra.jdbc.pool.StandardXAPoolDataSource"&gt;
-                 &lt;Arg type="Integer"&gt;4&lt;/Arg&gt;          <font color="blue">&lt;!-- initial size of pool --&gt;</font>     
-                 &lt;Set name="MinSize"&gt;4&lt;/Set&gt;                
-                 &lt;Set name="MaxSize"&gt;15&lt;/Set&gt; 
-                 <font color="blue">&lt;!-- Uncomment to setup other pool params as required          --&gt;</font>
-                 &lt;!--
-                 &lt;Set name="SleepTime"&gt;10&lt;/Set&gt;
-                 &lt;Set name="LifeTime"&gt;10&lt;/Set&gt;
-                 &lt;Set name="DeadLockMaxWait"&gt;10&lt;/Set&gt;
-                 &lt;Set name="DeadLockRetryWait"&gt;10&lt;/Set&gt;
-                 &lt;Set name="LoginTimeout"&gt;10&lt;/Set&gt;
-                 &lt;Set name="Debug" type="boolean"&gt;true&lt;/Set&gt;
-                 --&gt;
-               &lt;/New&gt;
-             &lt;/Arg&gt;               
-        &lt;/Call&gt;
-
-        Note: if your JDBC driver does connection pooling for you, then instead of 
-        configuring both a <code>StandardXADataSource</code> and a <code>StandardXAPoolDataSource</code>, 
-        you can just configure the <code>StandardXADataSource</code> instead: 
-
-
-        <font color="blue">&lt;!-- set up a DataSource where the driver does the pooling                 --&gt;</font>
-        &lt;Call name="addDataSource"&gt;
-             &lt;Arg&gt;jdbc/otherDB&lt;/Arg&gt;    <font color="blue">&lt;!-- client lookup jndi name of datasource  --&gt;</font>
-             &lt;Arg&gt;
-               &lt;New class="org.enhydra.jdbc.standard.StandardXADataSource"&gt;
-                 &lt;Set name="DriverName"&gt;com.mysql.jdbc.Driver&lt;/Set&gt;
-                 &lt;Set name="Url"&gt;jdbc:mysql://localhost:3306/oln &lt;/Set&gt;
-                 &lt;Set name="User"&gt;&lt;/Set&gt;
-                 &lt;Set name="Password"&gt;&lt;/Set&gt;
-               &lt;/New&gt;
-             &lt;/Arg&gt;
-        &lt;/Call&gt;
- 
-     &lt;/New&gt;
-   &lt;/Arg&gt;
-  &lt;/Call&gt;
-</pre></code>
-</li>
-
-<li><B>Step 3:</B>  access it in your code. Eg:
-<code><pre>
-  DataSource datasource =
-  (DataSource)context.lookup("java:comp/env/jdbc/myDB");
-  Connection connection = datasource.getConnection();
-</code></pre>
-</li>
-
-</ul>
-
-
-
-
+<A href="xadatasources.html"><H3>Transactions and XADataSources</H3></a>
+Click here for <a href="xadatasources.html">information on distributed transactions and XA resources</a>.
+<A href="datasources.html"><H3>Non-XA DataSources</H3></a>
+Click here for <a href="datasources.html">information on DataSource resources</a>
 <H3>Mail Service </H3>
 
 A mail service is provided with JettyPlus. This means that you can send email programmatically from servlets, JSPs etc.
@@ -436,7 +304,7 @@ used only by the sample JDBCLoginModule to group all roles
 possessed by a user under a single Principal called "roles".
 
 <h4>org.mortbay.jaas.spi.JDBCLoginModule</h4>
-An implementation of a LoginModule that uses a database to store
+An example implementation of a LoginModule that uses a database to store
 user names, passwords and roles. All database-related information
 is configurable, including:
 <ul>
@@ -491,8 +359,12 @@ To use JAAS:
   &lt;/security-constraint&gt;
 
   &lt;login-config&gt;
-    &lt;auth-method&gt;BASIC&lt;/auth-method&gt;
+    &lt;auth-method&gt;FORM&lt;/auth-method&gt;
     &lt;realm-name&gt;Jetty Demo Realm&lt;/realm-name&gt;
+       &lt;form-login-config&gt;
+           &lt;form-login-page&gt;/login.html &lt;/form-login-page&gt;
+           &lt;form-error-page&gt;/error401.html &lt;/form-error-page&gt;
+       &lt;/form-login-config&gt;
   &lt;/login-config&gt;
 </pre></code>
  </li>
@@ -519,6 +391,11 @@ To use JAAS:
    Note that the name of the module ("jdbc") must be the same as
   that specified as the <code>LoginModuleName</code> in the Jetty
   xml config file in Step 1.
+  <P>There is no particular schema required for the database tables storing the authentication and role information. The properties <code>userTable, userField, credentialField, userRoleTable, userRoleUserField, userRoleRoleField</code> configure the names of the tables and the columns within them that are used to format the following queries:
+  <code><pre>
+  select &lt;credentialField&gt; from &lt;userTable&gt; where &lt;userField&gt; =?
+  select &lt;userRoleRoleField&gt; from &lt;userRoleTable&gt; where &lt;userRoleUserField&gt; =? 
+  </pre></code>
  </li>
 <BR>
   <li><b>Step 4:</b>  Specify the location of the login
