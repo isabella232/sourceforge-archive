@@ -124,6 +124,12 @@ public class BaseConfiguration implements HttpConfiguration
 	    mimeMap.put("java","text/plain");
 	    mimeMap.put("gif","image/gif");
 	    mimeMap.put("jpg","image/jpg");
+	    mimeMap.put("au","audio/basic");
+	    mimeMap.put("snd","audio/basic");
+	    mimeMap.put("ra","audio/x-pn-realaudio");
+	    mimeMap.put("ram","audio/x-pn-realaudio");
+	    mimeMap.put("rm","audio/x-pn-realaudio");
+	    mimeMap.put("rpm","audio/x-pn-realaudio");
 	}
 	
 	String type = (String)mimeMap.get(ext);

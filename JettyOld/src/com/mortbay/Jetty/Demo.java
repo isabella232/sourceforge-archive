@@ -38,6 +38,8 @@ public class Demo
 	File filebase = new File("./FileBase");
 	Code.assert(filebase.isDirectory(),"Demo must be run in $MORTBAY_HOME");
 	
+	Page.setDefaultPageType("com.mortbay.Jetty.JettyLaF");
+	
 	String demoArgs[] = {"./etc/JettyDemo.prp"};
 	Server.main(demoArgs);
     }

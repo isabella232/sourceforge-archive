@@ -17,7 +17,6 @@ public class DemoIndex extends IndexServlet
     public DemoIndex()
     {
 	super(buildIndex());
-	Page.setDefaultPageType("com.mortbay.Jetty.JettyLaF");
     }
     
     /* ------------------------------------------------------------ */
@@ -124,10 +123,9 @@ public class DemoIndex extends IndexServlet
 		"/Jetty/Demo/push.html",
 		"Server push and multi part MIME"
 	    },
-	    {   "Chat Room",
-		"/Jetty/Demo/chat.html",
-		"A chat room that demonstrates the combination of frames,"+
-		"<BR>look&feels, authentication and server push."
+	    {   "File upload",
+		"/Jetty/Demo/upload.html",
+		"Handle multi part MIME requests"
 	    },
 	    {   "Advanced Features",null,null
 	    },

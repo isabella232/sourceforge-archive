@@ -931,8 +931,7 @@ public class Code
     {
 	if (o==null)
 	    buf.append("null");
-	
-	if (o instanceof Throwable)
+	else if (o instanceof Throwable)
 	{
 	    Throwable ex = (Throwable) o;
 	    buf.append('\n');

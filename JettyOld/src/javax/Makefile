@@ -15,6 +15,8 @@ UUFILES := \
 
 LIBFILES := javax.servlet.jar
 
+rall: all
+
 all: $(LIBFILES) servlet install
 
 clean:: rm-servlet
