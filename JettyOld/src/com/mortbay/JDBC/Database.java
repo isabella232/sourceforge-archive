@@ -282,6 +282,23 @@ public class Database
     }
 
     /* ------------------------------------------------------------ */
+    /** Get Transaction connection.
+     * Get connection from a transaction.  If the connection is null,
+     * this call acts as getConnection().
+     * @param t Transaction or null.
+     * @return Connection for the transaction or a pool connection
+     * the transaction is null.
+     */
+    public synchronized Connection getConnection(Transaction t)
+	throws SQLException
+    {
+	if (t==null)
+	    return getConnection();
+	return t.getConnection();
+    }
+    
+
+    /* ------------------------------------------------------------ */
     /** Recycle a connection
      * Called by com.mortbay.JDBC.Connection and
      * com.mortbay.JDBC.Transaction to return a connection to the
@@ -290,17 +307,20 @@ public class Database
      */
     synchronized void recycleConnection(java.sql.Connection c)
     {
-        boolean closed=true;
+	
+        boolean canReUse=true;
         try{
-            if (c!=null)
-                closed=c.isClosed();
+	    if (c==null)
+		canReUse=false;
+	    else
+		canReUse=!c.isClosed() && !c.getAutoCommit();
         }
         catch(SQLException sqle)
         {
-            closed=true;
+            canReUse=false;
         }
         
-        if (!closed)
+        if (canReUse)
             connections.push(c);
     }
     

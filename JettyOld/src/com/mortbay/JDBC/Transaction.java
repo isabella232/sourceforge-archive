@@ -36,6 +36,7 @@ public class Transaction
         throws java.sql.SQLException
     {
         connection = db.getConnection();
+	connection.setAutoCommit(false);
         database = db;
     }
 
@@ -79,6 +80,7 @@ public class Transaction
         }
         finally
         {
+	    connection.setAutoCommit(true);
             database.recycleConnection(connection);
             connection=null;
         }
@@ -96,6 +98,7 @@ public class Transaction
         }
         finally
         {
+	    connection.setAutoCommit(true);
             database.recycleConnection(connection);
             connection=null;
         }
