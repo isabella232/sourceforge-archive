@@ -169,7 +169,7 @@ $Id$
 
   <Set name="LogSink">
     <New class="com.mortbay.Util.WriterLogSink">
-      <Arg><SystemProperty name="jetty.logs" default="./logs"/>/yyyy_mm_dd.request.log</Arg>
+      <Arg><SystemProperty name="jetty.log" default="./logs"/>/yyyy_mm_dd.request.log</Arg>
       <Set name="RetainDays">90</Set>
       <Set name="Append">true</Set>
     </New>
