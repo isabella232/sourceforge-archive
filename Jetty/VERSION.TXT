@@ -5,6 +5,7 @@ Jetty-5.1.3rc1 -
  + Fixed typo in context-param handling.
  + update to demo site look and feel.
  + Fixed principal naming in FormAuthenticator
+ + JettyPlus updated to JOTM 2.0.5, XAPool 1.4.2
 
 Jetty-4.2.24rc1 
  + Fixed principal naming in FormAuthenticator

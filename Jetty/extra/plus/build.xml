@@ -284,6 +284,8 @@ Other targets:
      <echo message="dbDriver=org.hsqldb.jdbcDriver"/>
      <echo message="dbUrl=jdbc:hsqldb:."/>
      <echo message="login config=${etc}/login.conf"/>
+     <echo message="policy file=${etc}/jaas.policy"/>
+     <echo message="java.io.tmpdir=${java.io.tmpdir}"/>
      <copy file="${install.dir}/demo/webapps/jaas/WEB-INF/template.xml"
            tofile="${install.dir}/demo/webapps/jaas/WEB-INF/web.xml"
 	   overwrite="true"/>
