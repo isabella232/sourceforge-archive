@@ -541,7 +541,7 @@ public class PathMap extends Dictionary
     }
     
     /* =============================================================== */
-    private static class Holder
+    static class Holder
     {
 	Object value;
 	String prefix="";
