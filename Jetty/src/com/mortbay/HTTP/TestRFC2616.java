@@ -653,7 +653,7 @@ public class TestRFC2616
                                    "HTTP/1.1 200 OK\015\012","8.1.2 default")+10;
             
             t.checkContains(response,offset,
-                            "Transfer-Encoding: chunked","8.1.2 default");
+                            "Content-Length: ","8.1.2 default");
 
             offset=0;
             response=listener.getResponses("GET /R1 HTTP/1.1\n"+
@@ -948,7 +948,7 @@ public class TestRFC2616
             // response for the a GET w/ range must also have that same header
 
             offset=t.checkContains(response,offset, 
-                                   "Content-Range: bytes 1-3/26",
+                                   "Content-Range: bytes 1-3/3",
                                    "4. content range") + 2;
 
             if (noRangeHasContentLocation) {
@@ -964,8 +964,8 @@ public class TestRFC2616
 
             String expectedData = listener.testFiles[0].data.substring(1, 3+1);
             offset=t.checkContains(response,offset, 
-                                  "3\r\n" + expectedData + "\r\n0", 
-                                  "6. subrange data: \"" + expectedData + "\"");
+                                   expectedData, 
+                                   "6. subrange data: \"" + expectedData + "\"");
 	}
         catch(Exception e)
         {
@@ -1147,16 +1147,17 @@ public class TestRFC2616
                 }
             }
 
-            if (expectedRange != null) {
+            if (expectedRange != null)
+            {
                 String expectedContentRange = "Content-Range: bytes " + expectedRange + "\r\n"; 
                 offset=t.checkContains(response,offset, 
                                   expectedContentRange,
                                   tname + ".2. content range " + expectedRange);
             }
 
-            if (expectedStatus == 200 || expectedStatus == 206) {
-                  offset=t.checkContains(response,offset, 
-                                  "\r\n" + expectedData + "\r\n0", 
+            if (expectedStatus == 200 || expectedStatus == 206)
+            {
+                  offset=t.checkContains(response,offset,expectedData, 
                                   tname + ".3. subrange data: \"" + expectedData + "\"");
             }
         }

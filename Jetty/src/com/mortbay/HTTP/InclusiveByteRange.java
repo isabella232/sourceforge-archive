@@ -65,40 +65,46 @@ public class InclusiveByteRange {
             // read all byte ranges for this header 
             while (tok.hasMoreTokens())
             {
-                String t=tok.nextToken().trim();
-                
-                long first = 0;
-                long last  = -1;
-                int d=t.indexOf("-");
-                if (d<0)
-                {           
-                    if ("bytes".equals(t))
+                try{
+                    String t=tok.nextToken().trim();
+                    
+                    long first = 0;
+                    long last  = -1;
+                    int d=t.indexOf("-");
+                    if (d<0)
+                    {           
+                        if ("bytes".equals(t))
+                            continue;
+                        Code.warning("Bad range format: "+t+" in "+reqRangeHeaders);
                         continue;
-                    Code.warning("Bad range format: "+t+" in "+reqRangeHeaders);
-                    continue;
-                }
-                else if (d==0)
-                {
-                    if (d+1<t.length())
+                    }
+                    else if (d==0)
+                    {
+                        if (d+1<t.length())
                         last = Long.parseLong(t.substring(d+1).trim());
+                    }
+                    else if (d+1<t.length())
+                    {
+                        first = Long.parseLong(t.substring(0,d).trim());
+                        last = Long.parseLong(t.substring(d+1).trim());
+                    }
+                    else
+                        first = Long.parseLong(t.substring(0,d).trim());
+                    
+                    
+                    if (first == -1 && last == -1)
+                        continue;
+                    
+                    if (first != -1 && last != -1 && (first > last))
+                        continue;
+                    
+                    validRanges.add(new InclusiveByteRange(first, last));
                 }
-                else if (d+1<t.length())
+                catch(Exception e)
                 {
-                    first = Long.parseLong(t.substring(0,d).trim());
-                    last = Long.parseLong(t.substring(d+1).trim());
+                    Code.ignore(e);
                 }
-                else
-                    first = Long.parseLong(t.substring(0,d).trim());
-                
-                
-                if (first == -1 && last == -1)
-                    continue;
-                
-                if (first != -1 && last != -1 && (first > last))
-                    continue;
-                
-                validRanges.add(new InclusiveByteRange(first, last));
-             }
+            }
         }
         return validRanges;
     }

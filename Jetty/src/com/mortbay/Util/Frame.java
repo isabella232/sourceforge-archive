@@ -106,11 +106,19 @@ public class Frame
     {   
         // Extract stack components, after we look for the Frame constructor
  	// itself and pull that off the stack!
+
+        
         _lineStart = 0;
  	_lineStart = _stack.indexOf("Frame.<init>(",_lineStart);
         if (_lineStart==-1)
+        {
+            System.err.println("\n\nXXXX\n"+_stack);
+            new Throwable().printStackTrace();
             // JIT has inlined Frame constructor
-            _lineStart = _stack.indexOf(__lineSeparator)+__lineSeparatorLen;
+            _lineStart =
+                _stack.indexOf(__lineSeparator)+__lineSeparatorLen;
+        }
+        
         
         _lineStart = _stack.indexOf(__lineSeparator,_lineStart)+
  	    __lineSeparatorLen;
@@ -195,8 +203,9 @@ public class Frame
     /** Get a Frame representing the function one level up in this frame.
      * @return parent frame or null if none
      */
-    public Frame getParent(){
-        Frame f = new Frame(_stack, 0, false);
+    public Frame getParent()
+    {
+        Frame f = new Frame("Frame.<init>("+__lineSeparator+_stack, 1, false);
         if (f._where == null) return null;
         f._thread = _thread;
         return f;
