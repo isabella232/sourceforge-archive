@@ -336,10 +336,19 @@ public class ThreadPool
             Thread.yield();
             if (_idleSet.size()>0)
             {
-                Thread.sleep(100);
+                Thread.sleep(100);   
                 if (_idleSet.size()>0)
-                    forceStop();
-                Thread.yield();
+                {
+                    synchronized(this)
+                    {
+                        Object[] threads=_idleSet.toArray();
+                        for(int t=0;t<threads.length;t++)
+                        {
+                            Thread thread=(Thread)threads[t];
+                            thread.stop();
+                        }
+                    }
+                }
                 
                 if (_idleSet.size()>0)
                 {
@@ -349,16 +358,6 @@ public class ThreadPool
             }
         }
     }
-
-
-    /* ------------------------------------------------------------ */
-    /** Take forceful stop actions.
-     * This method is called if interrupt is not stopping the
-     * threads.
-     */
-    protected void forceStop()
-    {}
-    
     
     /* ------------------------------------------------------------ */
     /** Destroy the ThreadPool.
@@ -371,9 +370,6 @@ public class ThreadPool
 
         if (_threadSet==null)
             return;
-
-        if (_threadSet.size()>0)
-            forceStop();
         
         _running=false;
         

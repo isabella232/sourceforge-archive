@@ -32,9 +32,8 @@
 :: if needed and used.
 ::
 :: JETTY_OPTIONS - (Optional) Any options to be passed to the JVM 
-::                 can be set in this variable.  It will have appended 
-::                 to it
-:: -Djetty.home=%JETTY_HOME% -Djetty.logs=%JETTY_LOG%
+:: can be set in this variable.  It will have appended to it:
+::     -Djetty.home=%JETTY_HOME% -Djetty.logs=%JETTY_LOG%
 ::
 :: NOTES: 
 :: -  etc\admin.xml file is always prepended to each set of arguments
@@ -58,7 +57,7 @@ set x_CP=%CP%
 rem ===========================================================
 rem == save the current directory and drive
 rem ===========================================================
-for /F %%i in ('cd') do set x_PWD=%%i
+for /F "delims=;" %%i in ('cd') do set x_PWD=%%i
 set x_DRIVE=%x_PWD:~0,2%
 
 rem ===========================================================
@@ -87,7 +86,7 @@ if EXIST .\lib\org.mortbay.jetty.jar goto found_jar
         echo The environment variable JETTY_HOME must be set!
         goto done
 :found_jar
-        for /F %%i in ('cd') do set JETTY_HOME=%%i
+	for /F "delims=;" %%i in ('cd') do set JETTY_HOME=%%i
 :endif1
 
 :got_jetty_home
@@ -95,13 +94,14 @@ rem ===========================================================
 rem == get Drive information
 rem ===========================================================
 set JETTY_DRIVE=%JETTY_HOME:~0,2%
-echo JETTY_HOME is set to %JETTY_HOME%
-echo JETTY_DRIVE is set to %JETTY_DRIVE%
 
 rem ===========================================================
 rem == Change directory to the JETTY_HOME root directory.
-rem == JTB: I have had problems with Jetty working unJETTY_DRIVE%
-cd %JETTY_HOME%
+rem == JTB: I have had problems with Jetty working under Windows NT
+rem == unless this is done! 
+rem ===========================================================
+%JETTY_DRIVE%
+cd "%JETTY_HOME%"
 
 rem ===========================================================
 rem == set CLASSPATH
@@ -114,31 +114,31 @@ set CP=%CP%;%JETTY_HOME%\lib\org.apache.crimson.jar
 set CP=%CP%;%JETTY_HOME%\lib\org.apache.jasper.jar
 set CP=%CP%;%JETTY_HOME%\lib\com.sun.net.ssl.jar
 set CP=%CP%;%JAVA_HOME%\lib\tools.jar
+set CP="%CP%"
 
 rem ===========================================================
 rem == check for and set command line args
 rem ===========================================================
-
-if "%1"=="" (
-    set ARGS="%JETTY_HOME%\etc\admin.xml" "%JETTY_HOME%\etc\demo.xml"
-) else (
-  set ARGS="%1"
-  shift
-)
+rem == if no args then set admin.xml and demo.xml
+rem == note: since we will cd to the JETTY_HOME directory
+rem          we do not need to append JETTY_HOME onto the
+rem          file names.
+if "%1"=="" (set ARGS=etc\admin.xml etc\demo.xml & goto args_done)
 rem == append command line arguments on ARGS
 :setargs
 if NOT "%1"=="" (set ARGS=%ARGS% "%1" & shift & goto setargs)
-echo ARGS=%ARGS%
+:args_done
 
 rem ===========================================================
 rem == check for log directory
 rem ===========================================================
-if NOT "%JETTY_LOG%"=="" goto found_logs
+if NOT "%JETTY_LOG%"=="" goto logs_set
 dir /b /ad | find /I "logs" >NUL
 if ERRORLEVEL 0 goto found_logs
-        mkdir logs
-        set JETTY_LOG=%JETTY_HOME%\logs
+	mkdir logs
 :found_logs
+	set JETTY_LOG=%JETTY_HOME%\logs
+:logs_set
 
 rem ===========================================================
 rem == build jvm options
@@ -147,27 +147,38 @@ set OPTIONS=-Djetty.home="%JETTY_HOME%" -Djetty.log="%JETTY_LOG%"
 if DEFINED JETTY_OPTIONS set OPTIONS=%OPTIONS% %JETTY_OPTIONS%
 
 rem ===========================================================
-rem == build run commands
+rem == build run command
 rem ===========================================================
-set RUNJETTY=%JAVA_HOME%\bin\java -cp "%CP%" %OPTIONS% org.mortbay.jetty.Server %ARGS%
+set RUNME="%JAVA_HOME%\bin\java" -cp %CP% %OPTIONS% org.mortbay.jetty.Server %ARGS%
 
 rem ===========================================================
-rem == change to the correct directory and run jetty
+rem == echo environment variables to aid in debugging
 rem ===========================================================
+echo 
+echo JAVA_HOME=%JAVA_HOME%
+echo JETTY_HOME=%JETTY_HOME%
+echo JETTY_DRIVE=%JETTY_DRIVE%
+echo JETTY_LOG=%JETTY_LOG%
+echo OPTIONS=%OPTIONS%
+echo ARGS=%args%
+echo RUNME=%RUNME%
+echo 
 
-echo RUNJETTY=%RUNJETTY%
-%RUNJETTY%
+rem ===========================================================
+rem == run jetty
+rem ===========================================================
+rem pause
+%RUNME%
 
 :done
-@echo off
 rem ===========================================================
 rem == clean up our toys
 rem ===========================================================
 %x_DRIVE%
-cd %x_PWD%
+cd "%x_PWD%"
 set PATH=%x_PATH%
 set CP=%x_CP%
 set ARGS=
 set OPTIONS=
-set RUNJETTY=
+set RUNME=
 endlocal

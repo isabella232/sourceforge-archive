@@ -409,63 +409,73 @@ abstract public class ThreadedServer extends ThreadPool
     public void stop()
         throws InterruptedException
     {
-        
         try{
             if (_acceptor!=null)
             {
                 _acceptor._running=false;
                 _acceptor.interrupt();
+                Thread.yield();
+                while(_listen!=null && _address!=null)
+                {
+                    try{
+                        Code.debug("Self connect to close listener ",_address);
+                        InetAddress addr=_address.getInetAddress();
+                        if (addr==null)
+                            addr=InetAddress.getLocalHost();
+                        new Socket(addr,_address.getPort()).close();
+                    }
+                    catch(IOException e)
+                    {
+                        Code.ignore(e);
+                    }
+                }
             }
-            if (_listen!=null)
-                _listen.setSoTimeout(100);
         }
-        catch(SocketException e){Code.warning(e);}
-        try {super.stop();}
         finally
         {
-            try{if (_listen!=null) _listen.close();}
-            catch(IOException e){Code.warning(e);}
             _listen=null;
             _acceptor=null;
+            super.stop();
         }
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Force a stop.
-     * Close the socket, then make a connection to it.
-     * called from stop if interrupt is not enough
-     */
-    protected void forceStop()
-    {
-        try{
-            if (_listen!=null)
-                _listen.close();
-            if (_address!=null)
-            {
-                InetAddress addr=_address.getInetAddress();
-                if (addr==null)
-                    addr=InetAddress.getLocalHost();
-                new Socket(addr,_address.getPort());
-                Code.warning ("JVM cannot close accepting Socket");
-            }
-        }
-        catch(Exception e)
-        {Code.debug(e);}
     }
     
     /* --------------------------------------------------------------- */
     synchronized public void destroy()
     {
-        if (_listen!=null)
-        {
-            try{_listen.setSoTimeout(0);}
-            catch(SocketException e){Code.warning(e);}
-            try{_listen.close();}
-            catch(IOException e){Code.warning(e);}
-            _listen=null;
+        try{
+            if (_acceptor!=null)
+            {
+                _acceptor._running=false;
+                _acceptor.interrupt();
+                Thread.yield();
+                if (_listen!=null && _address!=null)
+                {
+                    try{
+                        Code.warning("Trying self connect to close listener");
+                        InetAddress addr=_address.getInetAddress();
+                        if (addr==null)
+                            addr=InetAddress.getLocalHost();
+                        new Socket(addr,_address.getPort()).close();
+                    }
+                    catch(IOException e)
+                    {
+                        Code.ignore(e);
+                    }
+                }
+            }
         }
-        _address=null;
-        super.destroy();
+        finally
+        {
+            if (_listen!=null)
+            {
+                try{_listen.close();}
+                catch(IOException e){Code.warning(e);}
+            }
+            _listen=null;
+            _acceptor=null;
+            _address=null;
+            super.destroy();
+        }
     }
 
 
@@ -484,19 +494,29 @@ abstract public class ThreadedServer extends ThreadPool
         boolean _running=false;
         public void run()
         {
-            _running=true;
-            while(_running)
+            try
+            {    
+                _running=true;
+                while(_running)
+                {
+                    try
+                    {
+                        Socket socket=acceptSocket(_listen,_soTimeOut);
+                        if (socket!=null)
+                            ThreadedServer.this.run(socket);
+                    }
+                    catch(Exception e)
+                    {
+                        Code.warning(e);
+                    }
+                }
+            }
+            finally
             {
-                try
-                {
-                    Socket socket=acceptSocket(_listen,_soTimeOut);
-                    if (socket!=null)
-                        ThreadedServer.this.run(socket);
-                }
-                catch(Exception e)
-                {
-                    Code.warning(e);
-                }
+                Log.event("Closing listener on "+_address);
+                try{_listen.close();}
+                catch (IOException e) {Code.ignore(e);}
+                _listen=null;
             }
         }
     }
