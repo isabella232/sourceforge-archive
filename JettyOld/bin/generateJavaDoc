@@ -20,6 +20,5 @@ javadoc -d $DOCDIR -version -author -protected $PACKAGES
 
 cd $DOCDIR
 /bin/rm -f images
-cp -R /usr/local/java/jdk/docs/api/images .
-
+cp -R /usr/local/java/jdk/DEFAULT/docs/api/images .
 
