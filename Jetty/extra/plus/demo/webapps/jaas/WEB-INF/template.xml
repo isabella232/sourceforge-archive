@@ -93,7 +93,7 @@
 
   <login-config>
     <auth-method>FORM</auth-method>
-    <realm-name>Jetty Demo Realm</realm-name>
+    <realm-name>Test JAAS Realm</realm-name>
     <form-login-config>
       <form-login-page>
         /login.html
