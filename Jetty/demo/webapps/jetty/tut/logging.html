@@ -75,7 +75,13 @@ it will start on port 8081. To login to it, use username   <tt>admin</tt>
 
 See <a href="/javadoc/org/mortbay/http/RequestLog.html">RequestLog</a> and 
 <a href="/javadoc/org/mortbay/http/NCSARequestLog.html">NCSARequestLog</a>.
-<p>         
+<p>
+Requests can be logged at the server or context level by adding a
+implementation of RequestLog to the server and/or context. NCSARequestLog is
+an implementation of the defacto standard request log format in normal and
+extended modes.
+ <P>
+
        <big><big><br>
        <a name="debugging"></a><b>Debugging</b></big></big></b></font><br>
        <br>
