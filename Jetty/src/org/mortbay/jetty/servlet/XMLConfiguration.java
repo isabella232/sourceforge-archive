@@ -236,7 +236,7 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
             initDisplayName(node);
         else if("description".equals(element))
         {}
-        else if("_context-param".equals(element))
+        else if("context-param".equals(element))
             initContextParam(node);
         else if("servlet".equals(element))
             initServlet(node);

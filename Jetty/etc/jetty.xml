@@ -225,7 +225,9 @@
   <!-- Server classes are hidden from a HttpContext or webapp -->
   <Set name="serverClasses">
     <Array type="java.lang.String">
+<!--      <Item>-org.mortbay.http.PathMap</Item>
       <Item>org.mortbay.http.</Item>
+-->
       <Item>-org.mortbay.jetty.servlet.Default</Item>
       <Item>-org.mortbay.jetty.servlet.Invoker</Item>
       <Item>-org.mortbay.jetty.servlet.JSR154Filter</Item>

@@ -468,7 +468,7 @@ public class XmlConfiguration
             }
         }
         if (id!=null)
-	  _idMap.put(id,obj);
+	       _idMap.put(id,obj);
         return obj;
     }
     

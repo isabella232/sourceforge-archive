@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+Jetty-5.1.3rc1 - 10 March 2005
+ + Fixed typo in context-param handling.
+
 Jetty-5.1.3rc0 - 8 March 2005
  + Flush filter chain caches on servlet/filter change
  + Fixed rollover filename format bug
