@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
  + Update jakarta examples
+ + Correctly setup context classloader in cross context dispatch.
 
 Jetty-5.0.alpha1 - 12 August 2003
  + Switched to mx4j
