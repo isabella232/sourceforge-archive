@@ -15,10 +15,12 @@ import java.net.MalformedURLException;
  * <p> Implements a best match of paths to objects
  *
  * <p>Notes<br>
- * Paths ending with '$' must match the path absolutely,
- * Paths ending with '/' must match an exact path element,
- * Paths ending with '%' match either an absoulte path or exect path element
- * Paths ending with '|' match either an absoulte path or trailing '/'
+ * Paths ending with '$' must match the path absolutely,<BR>
+ * Paths ending with '/' must match an exact path element,<BR>
+ * Paths ending with '%' match either an absoulte path or exect path element<BR>
+ * Paths ending with '|' match either an absoulte path or trailing '/'<BR>
+ * Paths may include a * to separate prefix and suffix matches. Suffix
+ * matches have precidence.<P>
  * All other paths only need to be a prefix to match.
  * <P>
  * <TABLE BORDER=1 CELLPADDING=5>
@@ -81,6 +83,29 @@ import java.net.MalformedURLException;
  * /aaa/bbb/<BR>
  * /aaa/bbb/ccc<BR>
  * /aaa/bbbbbb
+ * </TD></TR>
+ * <TR><TD>
+ * *.xxx
+ * </TD><TD>
+ * .xxx<BR>
+ * xxx.xxx<BR>
+ * </TD><TD>
+ * <BR>
+ * .xxxx<BR>
+ * xxxx.xxxx<BR>
+ * .xx<BR>
+ * xx.xx
+ * </TD></TR>
+ * <TR><TD>
+ * /yyy/*.zzz
+ * </TD><TD>
+ * /yyy/.zzz<BR>
+ * /yyy/xxx.zzz<BR>
+ * </TD><TD>
+ * <BR>
+ * .zzz<BR>
+ * /aaa/xxx.zzz<BR>
+ * /yyy/xxx.zzzz
  * </TD></TR>
  * <P>
  * Path suffixes are also supported. For example for /aaa/bbb/ccc.c the

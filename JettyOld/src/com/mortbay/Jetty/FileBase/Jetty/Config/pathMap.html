@@ -3,10 +3,10 @@
 <BLOCKQUOTE>
 <TABLE><TR><TD>
 Most of Jetty's configuration uses the
-<A HREF=/javadoc/com.mortbay.HTTP.PathMap.html>com.mortbay.HTTP.PathMap</A>
+<A HREF=/javadoc/com/mortbay/HTTP/PathMap.html>com.mortbay.HTTP.PathMap</A>
 class. PathMap is an implementation of Dictionary that uses a best
-match of a path prefix to select an Object from the dictionary. Thus an
-understanding of PathMap is required to configure Jeeves.
+match of a path suffix and prefix to select an Object from the dictionary.
+Thus an understanding of PathMap is required to configure Jeeves.
 <p>
 PathMap will always return the longest matching path prefix that it
 contains. Paths may be matched exactly, as an arbitrary prefix or as
@@ -72,6 +72,29 @@ a path prefix.
 /aaa/bbb/<BR>
 /aaa/bbb/ccc<BR>
 /aaa/bbbbbb
+</TD></TR>
+<TR><TD>
+*.xxx
+</TD><TD>
+.xxx<BR>
+xxx.xxx<BR>
+</TD><TD>
+<BR>
+.xxxx<BR>
+xxxx.xxxx<BR>
+.xx<BR>
+xx.xx
+</TD></TR>
+<TR><TD>
+/yyy/*.zzz
+</TD><TD>
+/yyy/.zzz<BR>
+/yyy/xxx.zzz<BR>
+</TD><TD>
+<BR>
+.zzz<BR>
+/aaa/xxx.zzz<BR>
+/yyy/xxx.zzzz
 </TD></TR>
 
 </TABLE>

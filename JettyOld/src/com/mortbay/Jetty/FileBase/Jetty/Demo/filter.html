@@ -11,10 +11,10 @@ The class FilterHandler can be used to insert filters
 into a response, determined by the request path.
 <P>
 Developers can extend
-<A HREF="/javadoc/com.mortbay.HTTP.HttpFilter.html">
+<A HREF="/javadoc/com/mortbay/HTTP/HttpFilter.html">
 com.mortbay.HTTP.HttpFilter</A>
 to implement a filters. Jetty provides the utility filter
-<A HREF="/javadoc/com.mortbay.HTTP.Filter.HtmlFilter.html">
+<A HREF="/javadoc/com/mortbay/HTTP/Filter/HtmlFilter.html">
 com.mortbay.HTTP.Filter.HtmlFilter</A>,
 which scans HTML responses for specially formatted HTML comments.
 These comments contain a call to a Java method on a class. Java reflextion
@@ -22,12 +22,12 @@ is used to find the class and static method and invoke the method with
 the given arguements.
 <p>
 Static methods are also provided by  
-<A HREF="/javadoc/com.mortbay.HTTP.Filter.HtmlFilter.html">
+<A HREF="/javadoc/com/mortbay/HTTP/Filter/HtmlFilter.html">
 com.mortbay.HTTP.Filter.HtmlFilter</A> To include files or embed pages
 fetched from URLs.
 <p>
 The source of this page is included below using  
-<A HREF="/javadoc/com.mortbay.HTTP.Filter.HtmlFilter.html">
+<A HREF="/javadoc/com/mortbay/HTTP/Filter/HtmlFilter.html">
 com.mortbay.HTTP.Filter.HtmlFilter</A>.includePreFile().
 <P>
 Other potential uses for filters include:<UL>

@@ -196,7 +196,7 @@ public class DemoIndex extends IndexServlet
 		"HTML generation and HTML authoring"
 	    },
 	    {   "Jetty API Documentation",
-		"/javadoc/packages.html",
+		"/javadoc/overview-summary.html",
 		"The generated class reference documentation."
 	    },
 	    {   "Servlet API Documentation",
