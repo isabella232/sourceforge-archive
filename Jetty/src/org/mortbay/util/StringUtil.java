@@ -31,7 +31,7 @@ public class StringUtil
     public static final String __LINE_SEPARATOR=
         System.getProperty("line.separator","\n");
     
-    public static String __ISO_8859_1;
+    public final static String __ISO_8859_1;
     static
     {
         String iso=System.getProperty("ISO_8859_1");
@@ -41,16 +41,17 @@ public class StringUtil
         {
             try{
                 new String(new byte[]{(byte)20},"ISO-8859-1");
-                __ISO_8859_1="ISO-8859-1";
+                iso="ISO-8859-1";
             }
             catch(java.io.UnsupportedEncodingException e)
             {
-                __ISO_8859_1="ISO8859_1";
-            }        
+                iso="ISO8859_1";
+            }   
+            __ISO_8859_1=iso;
         }
     }
     
-    public static String __UTF_8="UTF-8";
+    public final static String __UTF_8="UTF-8";
     
     private static char[] lowercases = {
           '\000','\001','\002','\003','\004','\005','\006','\007',

@@ -152,17 +152,6 @@
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <Set name="rootWebApp">root</Set>
   
-  <!-- configure the list of configurators for webapps -->
-  <Set name="WebApplicationConfigurationClassNames">
-    <Array type="java.lang.String">
-      <Item>org.mortbay.jetty.servlet.XMLConfiguration</Item>
-      <Item>org.mortbay.jetty.servlet.JettyWebConfiguration</Item>
-    </Array>
-  </Set>
-  
-  
-  
-  
   <Call name="addWebApplications">
     <Arg></Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/webapps/</Arg>

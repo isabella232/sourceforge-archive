@@ -933,9 +933,9 @@ public class HttpConnection
             // Common fields on the response
             _response.setVersion(HttpMessage.__HTTP_1_1);
             _response.setField(HttpFields.__Date,_request.getTimeStampStr());
-            if (!Version.__paranoid)
+            if (!Version.isParanoid())
             {
-                _response.setField(HttpFields.__Server,Version.__VersionDetail);
+                _response.setField(HttpFields.__Server,Version.getDetail());
                 // _response.setField(HttpFields.__ServletEngine,Version.__ServletEngine);
             }
             

@@ -434,7 +434,7 @@ public class HttpFields
         "dd-MMM-yy HH:mm:ss",
     };
     public static SimpleDateFormat __dateReceiveSource[];
-    public static ThreadLocal __dateReceiveCache=new ThreadLocal();
+    public static final ThreadLocal __dateReceiveCache=new ThreadLocal();
     static
     {
         __GMT.setID("GMT");

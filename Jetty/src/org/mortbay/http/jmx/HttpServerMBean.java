@@ -173,7 +173,7 @@ public class HttpServerMBean extends LifeCycleMBean
     /* ------------------------------------------------------------ */
     public String getVersion()
     {
-        return Version.__VersionDetail;
+        return Version.getDetail();
     }
     
     

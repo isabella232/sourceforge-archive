@@ -280,7 +280,8 @@ public class AJP13Connection extends HttpConnection
                   response.setState(HttpMessage.__MSG_EDITABLE);
                   response.setVersion(HttpMessage.__HTTP_1_1);
                   response.setDateField(HttpFields.__Date,_request.getTimeStamp());
-                  response.setField(HttpFields.__Server,Version.__VersionDetail);
+                  if (!Version.isParanoid())
+                      response.setField(HttpFields.__Server,Version.getDetail());
                   
                   // Service request
                   if(log.isDebugEnabled())log.debug("REQUEST:\n"+request);

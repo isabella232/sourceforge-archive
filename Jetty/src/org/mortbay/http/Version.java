@@ -29,24 +29,25 @@ package org.mortbay.http;
  */
 public class Version
 {
-    public static boolean __paranoid = 
+    private static boolean __paranoid = 
         Boolean.getBoolean("org.mortbay.http.Version.paranoid");
     
-    public static String __Version="Jetty/5.0";
-    public static String __VersionImpl=__Version+".x";
-    public static String __VersionDetail="Unknown";
-    public static String __Container=
-        System.getProperty("org.mortbay.http.Version.container");
-    
+    private static String __Version="Jetty/5.1";
+    private static String __VersionImpl=__Version+".x";
+    private static String __VersionDetail="Unknown";
+    private  static String __notice = "This application is using software from the "+
+        __Version+
+        " HTTP server and servlet container.\nJetty is Copyright (c) Mort Bay Consulting Pty. Ltd. (Australia) and others.\nJetty is distributed under an open source license.\nThe license and standard release of Jetty are available from http://jetty.mortbay.org\n";
+
     static
     {
         updateVersion();
     }
     
-    public static String __notice = "This application is using software from the "+
-        __Version+
-        " HTTP server and servlet container.\nJetty is Copyright (c) Mort Bay Consulting Pty. Ltd. (Australia) and others.\nJetty is distributed under an open source license.\nThe license and standard release of Jetty are available from http://jetty.mortbay.org\n";
-
+    public static String getVersion() {return __Version;}
+    public static String getImplVersion() {return __VersionImpl;}
+    public static String getDetail() {return __VersionDetail;}
+    public static boolean isParanoid(){return __paranoid;}
 
     public static void main(String[] arg)
     {
@@ -68,8 +69,7 @@ public class Version
                 " ("+System.getProperty("os.name")+
                 "/"+System.getProperty("os.version")+
                 " "+System.getProperty("os.arch")+
-                " java/"+System.getProperty("java.version")+
-                (__Container!=null?(" "+__Container+")"):")");
+                " java/"+System.getProperty("java.version");
         }
     }
 }

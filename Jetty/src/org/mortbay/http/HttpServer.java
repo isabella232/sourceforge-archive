@@ -668,7 +668,7 @@ public class HttpServer extends Container
     protected synchronized void doStart()
         throws Exception
     {
-        log.info("Version "+Version.__VersionImpl);
+        log.info("Version "+Version.getImplVersion());
         
         MultiException mex = new MultiException();
 

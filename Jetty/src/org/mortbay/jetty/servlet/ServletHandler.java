@@ -1151,7 +1151,7 @@ public class ServletHandler extends Container implements HttpHandler
         /* ------------------------------------------------------------ */
         public String getServerInfo()
         {
-            return Version.__VersionImpl;
+            return Version.getImplVersion();
         }
 
 
