@@ -53,7 +53,7 @@ public class RolloverFileOutputStream extends FilterOutputStream
     public RolloverFileOutputStream(String filename, boolean append)
         throws IOException
     {
-        this(filename,true,Integer.getInteger("ROLLOVERFILE_RETAIN_DAYS",31).intValue());
+        this(filename,append,Integer.getInteger("ROLLOVERFILE_RETAIN_DAYS",31).intValue());
     }
     
     /* ------------------------------------------------------------ */
