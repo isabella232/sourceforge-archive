@@ -4,6 +4,7 @@ import com.mortbay.HTTP.ChunkableOutputStream;
 import com.mortbay.HTTP.HandlerContext;
 import com.mortbay.HTTP.HttpException;
 import com.mortbay.HTTP.HttpFields;
+import com.mortbay.HTTP.HttpMessage;
 import com.mortbay.HTTP.HttpRequest;
 import com.mortbay.HTTP.HttpResponse;
 import com.mortbay.HTTP.PathMap;
@@ -318,12 +319,11 @@ public class ResourceHandler extends NullHandler
                     if (q!=null&&q.length()!=0)
                         buf.append("?"+q);
                     response.setField(HttpFields.__Location, buf.toString());
-                    response.sendError(301,"Moved Permanently");
+                    response.sendError(302);
                     return;
                 }
   
                 // See if index file exists
-                boolean indexSent=false;
                 for (int i=_indexFiles.size();i-->0;)
                 {
                     Resource index =
@@ -331,18 +331,18 @@ public class ResourceHandler extends NullHandler
       
                     if (index.exists())
                     {
-                        // Redirect to the index
-                        StringBuffer url=request.getRequestURL();
-                        url.append(_indexFiles.get(i));
-                        response.sendRedirect(url.toString());
-                        indexSent=true;
-                        break;
+                        // Forward to the index
+                        int last=request.setState(HttpMessage.__MSG_EDITABLE);
+                        request.setPath(request.getPath()+_indexFiles.get(i));
+                        request.setState(last);
+                        getHandlerContext().handle(request,response);
+                        return;
                     }
                 }
-  
-                if (!indexSent)
-                    sendDirectory(request,response,resource,
-                                  path.length()>1);
+
+                // If we got here, no forward to index took place
+                sendDirectory(request,response,resource,
+                              path.length()>1);
             }
             // check if it is a file
             else if (resource.exists())

@@ -1,8 +1,12 @@
 Jetty Versions
 --------------
 
+ + Change PathMap handling of /* to give precedence over suffix mapping.
+ + Forward to welcome pages rather than redirect.
  + Removed special characters from source.
  + Default log options changed if in debug mode.
+ + Removed some unused variables.
+ + Added ForwardHandler
 
 Jetty-3.0.0.rc7 - 02 Dec 2000
  + Fixed security problem with lowercase WEB-INF uris on windows.

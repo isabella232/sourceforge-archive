@@ -135,11 +135,14 @@ abstract public class HttpMessage
     /** Set the message state.
      * This method should be used by experts only as it can prevent
      * normal handling of a request/response.
-     * @param state 
+     * @param state The new state
+     * @return the last state.
      */
-    public void setState(int state)
+    public int setState(int state)
     {
+        int last=_state;
         _state=state;
+        return last;
     }
     
     /* ------------------------------------------------------------ */

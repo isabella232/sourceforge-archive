@@ -6,6 +6,7 @@
 package com.mortbay.Jetty;
 
 import com.mortbay.HTTP.Handler.DumpHandler;
+import com.mortbay.HTTP.Handler.ForwardHandler;
 import com.mortbay.HTTP.HandlerContext;
 import com.mortbay.HTTP.HashUserRealm;
 import com.mortbay.HTTP.HttpServer;
@@ -66,6 +67,7 @@ public class Demo
             
             context=server.getContext(null,"/demo/*");
             context.setResourceBase("docroot/");
+
             context.addServlet("Dump",
                                "/dump/*,*.DUMP",
                                "com.mortbay.Servlet.Dump");
@@ -80,6 +82,10 @@ public class Demo
             context.setServingResources(true);
             context.addHandler(new DumpHandler());
             
+            ForwardHandler fh = new ForwardHandler("/dump/forwardedRoot");
+            fh.addForward("/forward/*","/dump/forwarded");
+            context.addHandler(0,fh);
+            
             context=server.addContext(null,"/javadoc/*");
             context.setResourceBase("javadoc/");
             context.setServingResources(true);
@@ -90,14 +96,13 @@ public class Demo
                 .put("Path","/bin:/usr/bin:/usr/local/bin");
             
             context=server.addContext(null,"/");
+            context.addHandler(new ForwardHandler("/jetty/index.html"));
             context.setRealm("Jetty Demo Realm");
             context.addSecurityConstraint
                 ("/admin/*",
                  new SecurityConstraint("admin","content-administrator"));
             context.setClassPath("servlets/");
             context.setDynamicServletPathSpec("/servlet/*");
-            context.addServlet("Forward","/","com.mortbay.Servlet.Forward")
-                .put("/","/jetty/index.html");
             context.addServlet("Admin","/admin/*","com.mortbay.HTTP.AdminServlet");
             
             

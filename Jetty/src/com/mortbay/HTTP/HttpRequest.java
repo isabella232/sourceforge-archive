@@ -63,10 +63,6 @@ public class HttpRequest extends HttpMessage
         __AuthType = "com.mortbay.HTTP.HttpRequest.AuthType",
         __AuthUser = "com.mortbay.HTTP.HttpRequest.AuthUser";
     
-    /* -------------------------------------------------------------- */
-    private static Map __emptyMap =
-        Collections.unmodifiableMap(new HashMap(1));
-    
     /* ------------------------------------------------------------ */
     private String _method=null;
     private URI _uri=null;

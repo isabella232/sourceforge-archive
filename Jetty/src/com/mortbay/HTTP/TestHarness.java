@@ -437,6 +437,49 @@ public class TestHarness
                           "; in path");
             t.checkEquals(p.pathMatch("/animal/*","/animal/xx;extra"),"/animal",
                           "; in path");
+
+            
+            p.put("/*","0");
+
+            t.checkEquals(p.get("/abs/path"),"1","Get absolute path");
+            t.checkEquals(p.getMatch("/abs/path").getKey(),"/abs/path",
+                          "Match absolute path");
+            t.checkEquals(p.getMatch("/abs/path").getValue(),"1",
+                          "Match absolute path");
+            t.checkEquals(p.getMatch("/abs/path/xxx").getValue(),"0",
+                          "Mismatch absolute path");
+            t.checkEquals(p.getMatch("/abs/pith").getValue(),"0",
+                          "Mismatch absolute path");
+            t.checkEquals(p.getMatch("/abs/path/longer").getValue(),"2",
+                          "Match longer absolute path");
+            t.checkEquals(p.getMatch("/abs/path/").getValue(),"0",
+                          "Not exact absolute path");
+            t.checkEquals(p.getMatch("/abs/path/xxx").getValue(),"0",
+                          "Not exact absolute path");
+            
+            t.checkEquals(p.getMatch("/animal/bird/eagle/bald").getValue(),"3",
+                          "Match longest prefix");
+            t.checkEquals(p.getMatch("/animal/fish/shark/grey").getValue(),"4",
+                          "Match longest prefix");
+            t.checkEquals(p.getMatch("/animal/insect/bug").getValue(),"5",
+                          "Match longest prefix");
+            t.checkEquals(p.getMatch("/animal").getValue(),"5",
+                          "mismatch exact prefix");
+            t.checkEquals(p.getMatch("/animal/").getValue(),"5",
+                          "mismatch exact prefix");
+            
+            t.checkEquals(p.getMatch("/suffix/path.tar.gz").getValue(),"0",
+                          "Match longest suffix");
+            t.checkEquals(p.getMatch("/suffix/path.gz").getValue(),"0",
+                          "Match longest suffix");
+            t.checkEquals(p.getMatch("/animal/path.gz").getValue(),"5",
+                          "prefix rather than suffix");
+            
+            t.checkEquals(p.getMatch("/Other/path").getValue(),"0",
+                          "default");
+            
+            t.checkEquals(p.pathMatch("/*","/xxx/zzz"),"","pathMatch /*");
+            t.checkEquals(p.pathInfo("/*","/xxx/zzz"),"/xxx/zzz","pathInfo /*");
         }
         catch(Exception e)
         {

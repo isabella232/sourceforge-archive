@@ -73,11 +73,6 @@ public class Page extends Composite
         ;
 
     /* ----------------------------------------------------------------- */
-    private static Vector pageFactories = new Vector();
-    private static String defaultPage = "com.mortbay.HTML.Page";
-    private static Hashtable classCache = new Hashtable(10);
-    
-    /* ----------------------------------------------------------------- */
     protected Hashtable properties = new Hashtable(10);
 
     /* ----------------------------------------------------------------- */

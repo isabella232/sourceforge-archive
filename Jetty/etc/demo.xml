@@ -115,6 +115,16 @@ $Id$
       <Arg><New class="com.mortbay.HTTP.Handler.DumpHandler"/></Arg>
     </Call>
     <Set name="HttpServerAccess">TRUE</Set>
+
+    <Call name="addHandler">
+      <Arg type="int">0</Arg>
+      <Arg>
+        <New class="com.mortbay.HTTP.Handler.ForwardHandler">
+          <Arg>/dump/forwardedRoot</Arg>
+          <Call name="addForward"><Arg>/forward/*</Arg><Arg>/dump/forwarded</Arg></Call>
+        </New>
+      </Arg>
+    </Call>
   </Call>
 
   <Call name="addContext">
@@ -138,11 +148,13 @@ $Id$
     <Arg>/</Arg>
     <Set name="ClassPath">servlets/</Set>
     <Set name="DynamicServletPathSpec">/servlet/*</Set>
-    <Call name="addServlet">
-      <Arg>Forward</Arg>
-      <Arg>/</Arg>
-      <Arg>com.mortbay.Servlet.Forward</Arg>
-      <Put name="/">/jetty/index.html</Put>
+    <Call name="addHandler">
+      <Arg type="int">0</Arg>
+      <Arg>
+        <New class="com.mortbay.HTTP.Handler.ForwardHandler">
+          <Arg>/jetty/index.html</Arg>
+        </New>
+      </Arg>
     </Call>
   </Call>
 

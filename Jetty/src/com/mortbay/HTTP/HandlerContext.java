@@ -8,6 +8,7 @@ package com.mortbay.HTTP;
 
 import com.mortbay.HTTP.Handler.ResourceHandler;
 import com.mortbay.HTTP.Handler.SecurityHandler;
+import com.mortbay.HTTP.Handler.ForwardHandler;
 import com.mortbay.HTTP.Handler.Servlet.DynamicHandler;
 import com.mortbay.HTTP.Handler.Servlet.ServletHandler;
 import com.mortbay.HTTP.Handler.Servlet.ServletHolder;
@@ -43,6 +44,9 @@ import java.util.Map;
  * <p>
  * Convenience methods are provided for adding file and servlet
  * handlers.
+ * <B>Note. that order is important when configuring a HandlerContext.
+ * For example, if resource serving is enabled before servlets, then resources
+ * take priority.</B>
  *
  * @see HttpServer
  * @see HttpHandler

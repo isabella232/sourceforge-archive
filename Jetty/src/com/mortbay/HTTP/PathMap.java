@@ -105,7 +105,7 @@ public class PathMap extends HashMap
                     _entryMap.put(prefix,entry);
                     
                     // Also create a prefix map to the entry
-                    if (prefix.length()>2 && prefix.endsWith("/*"))
+                    if (prefix.endsWith("/*"))
                         _prefixMap.put(prefix.substring(0,prefix.length()-2),entry);
                     break;
                 }
@@ -151,7 +151,7 @@ public class PathMap extends HashMap
         // prefix search
         String prefix=path;
         int i;
-        while((i=prefix.lastIndexOf('/'))>0)
+        while((i=prefix.lastIndexOf('/'))>=0)
         {
             prefix=prefix.substring(0,i);
             entry=_prefixMap.get(prefix);
@@ -203,7 +203,7 @@ public class PathMap extends HashMap
         // prefix search
         String prefix=path;
         int i;
-        while((i=prefix.lastIndexOf('/'))>0)
+        while((i=prefix.lastIndexOf('/'))>=0)
         {
             prefix=prefix.substring(0,i);
             entry=_prefixMap.get(prefix);
