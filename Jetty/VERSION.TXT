@@ -18,7 +18,7 @@ Jetty-5.0.RC2 - 2 July 2004
  + Fixed JAAS logout
  + HttpContext sendError for authentication errors
 
-Jetty-4.2
+Jetty-4.2.21 - 2 July 2004
  + integrated jetty-jboss with jboss-3.2.4
  + add JMX support for JettyPlus
  + add listing of java:comp/env for webapp with JMX
