@@ -88,11 +88,6 @@ $Id$
       <Arg>/dump/*,/handler/Dump,/handler/Dump/*</Arg>
       <Arg>com.mortbay.Servlet.Dump</Arg>
     </Call>
-
-    <Call name="addHandler">
-      <Arg><New class="com.mortbay.HTTP.Handler.NotFoundHandler"/></Arg>
-    </Call>
-
   </Call>
 </Configure>
 

@@ -8,15 +8,21 @@ package com.mortbay.HTTP;
 import com.mortbay.HTTP.Handler.DumpHandler;
 import com.mortbay.HTTP.Handler.NotFoundHandler;
 import com.mortbay.HTTP.Handler.NullHandler;
+import com.mortbay.HTTP.Handler.ResourceHandler;
 import com.mortbay.HTTP.Handler.TestTEHandler;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.IO;
+import com.mortbay.Util.Resource;
 import com.mortbay.Util.LineInput;
 import com.mortbay.Util.Test;
 import com.mortbay.Util.ThreadPool;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.FileOutputStream;
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
@@ -33,19 +39,112 @@ public class TestRFC2616
     implements HttpListener
 {
     private HttpServer _server;
+    private static File docRoot = null;
+    private static TestFileData [] testFiles = null;
+
+
+    /* -------------------------------------------------------------- */
+
+    //
+    // this inner class creates some files needed for testing of code 
+    // involving the ResourceHandler.  instead, it may be cleaner to 
+    // subclass the handler or resource context to fetch data from 
+    // this code instead of going to disk, but that would involve 
+    // hacking up the production code to a much larger degree than
+    // is necessary to implement certain desired features (Ranges)
+    //
+    // so, this class instead creates a "docroot/" directory with 
+    // some small files in it.  That way, you still dont have to
+    // worry about what your work dir is when you run the tests.
+    // drawback: it will overwrite these files if they exist. hopefully
+    // nobody will use the same bizarre file names.
+    //
+    // @author Helmut Hissen (hzh)
+    //
+
+    public final static String defaultTestRoot = "testdocs";
+    public final static String testFilePrefix = "alphabet";
+    public final static String testFileSuffix = ".txt";
+
+    class TestFileData {
+
+          File file;
+          String data;
+          String name;
+          String modDate;
+          Resource resource;
+
+
+
+          public TestFileData(File file, String data) throws IOException {
+               File docRoot = new File(file.getParent());
+
+               this.file = file;
+               this.data = data;
+               this.name = file.getName();
+
+               if ( !docRoot.exists() ) {
+                      docRoot.mkdir();
+               }
+
+               FileOutputStream fos = new FileOutputStream(file);
+               fos.write(data.getBytes());
+               fos.close();
+               Code.debug("created " + file.getPath());
+
+               try {
+                  this.resource = Resource.newResource(
+                              new URL("file", "localhost", file.getAbsolutePath())
+                  );
+                  this.modDate = HttpFields.__dateSend.format(new Date(resource.lastModified()));
+               }
+               catch (MalformedURLException mue) {  
+                  Code.warning(mue);
+               }
+
+          }
+    }
+
+    public final static String [] testFileChars = {
+        "abcdefghijklmnopqrstuvwxyz",        // PLAIN TEXT ONLY PLEASE
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"         // OTHERWISE: DEAL WITH TEXT ENCODING
+    };
+
+    public TestFileData[] initTestFileData(File docRoot) throws IOException {
+
+        TestFileData[] testFiles = new TestFileData[testFileChars.length];
+
+        for (int i = 0; i < testFileChars.length; i++) {
+             testFiles[i] = new TestFileData(
+                      new File(docRoot, testFilePrefix + i + testFileSuffix), 
+                      testFileChars[i]
+             );
+        }
+
+	return testFiles;
+    }
     
     /* --------------------------------------------------------------- */
     public TestRFC2616()
         throws IOException
     {
+	if (testFiles == null) {
+		docRoot = new File(defaultTestRoot);
+		testFiles = initTestFileData(docRoot);
+	}
+	
         setName("Test");
         setMinThreads(1);
         setMaxThreads(10);
         setMaxIdleTimeMs(30000);
         _server=new HttpServer();
         HandlerContext context = _server.getContext(null,"/");
+	context.setResourceBase(docRoot.getName());
         context.addHandler(new TestTEHandler());
         context.addHandler(new RedirectHandler());
+        ResourceHandler rh = new ResourceHandler();
+        context.addHandler(rh);   // for testdocs
+        rh.setHandleGeneralOptionsQuery(false); // dont handle OPTIONS *
         context.addHandler(new DumpHandler());
         context.addHandler(new NotFoundHandler());
         _server.addListener(this);
@@ -114,19 +213,22 @@ public class TestRFC2616
     /* --------------------------------------------------------------- */
     public static void test()
     {   
-        test3_3();
-        test3_6();
-        test3_9();
-        test4_4();
+        test3_3();      /* Date/Time Formats                           */
+        test3_6();      /* Transfer Encodings                          */
+        test3_9();      /* Quality Values                              */
+        test4_4();      /* Message Length                              */
         test5_2();
         test8_1();
         test8_2();
         test9_2();
         test9_4();
         test9_8();
-        test10_3();
-        test14_39();
-        test19_6();
+	test10_2_7();	/* 206 Partial Content                         */
+        test10_3();     /* Redirection 3XX                             */
+        test14_16();    /* Content-Range                               */
+        test14_35();    /* Byte Ranges                                 */
+        test14_39();    /* TE                                          */
+        test19_6();     /* Compatibility with Previous Versions        */
     }
 
     
@@ -765,6 +867,83 @@ public class TestRFC2616
     }
     
     /* --------------------------------------------------------------- */
+    public static void test10_2_7()
+    {        
+        Test t = new Test("RFC2616 10.2.7 206 Partial Content");
+
+        try
+        {
+            TestRFC2616 listener = new TestRFC2616();
+            String response;
+            int offset=0;
+
+            // check to see if corresponging GET w/o range would return 
+            //   a) ETag
+            //   b) Content-Location
+            // these same headers will be required for corresponding 
+            // sub range requests 
+
+            response=listener.getResponses("GET /" + listener.testFiles[0].name + " HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Connection: close\n"+
+                                           "\n");
+            Code.debug("RESPONSE: ",response);
+
+            boolean noRangeHasContentLocation = (response.indexOf("\r\nContent-Location: ") != -1);
+
+
+            // now try again for the same resource but this time WITH range header
+
+            response=listener.getResponses("GET /" + listener.testFiles[0].name + " HTTP/1.1\n"+
+                                           "Host: localhost\n"+
+                                           "Connection: close\n"+
+                                           "Range: bytes=1-3\n"+
+                                           "\n");
+
+            Code.debug("RESPONSE: ",response);
+            offset=0;
+            offset=t.checkContains(response,offset,
+                                   "HTTP/1.1 206 Partial Content\r\n",
+                                   "1. proper 206 status code");
+            offset=t.checkContains(response,offset, 
+                                   "Content-Type: text/plain",
+                                   "2. content type") + 2;
+            offset=t.checkContains(response,offset,
+                                   "Last-Modified: " + listener.testFiles[0].modDate + "\r\n", 
+                                   "3. correct resource mod date");
+
+            // if GET w/o range had Content-Location, then the corresponding 
+            // response for the a GET w/ range must also have that same header
+
+            offset=t.checkContains(response,offset, 
+                                   "Content-Range: bytes 1-3/26",
+                                   "4. content range") + 2;
+
+            if (noRangeHasContentLocation) {
+                    offset=t.checkContains(response,offset, 
+                                  "Content-Location: ", 
+                                  "5. Content-Location header as with 200");
+            } 
+            else {
+                    Code.debug("no need to check for Conten-Location header in 206 response");
+                    // spec does not require existence or absence if these want any
+                    // header for the get w/o range
+            }
+
+            String expectedData = listener.testFiles[0].data.substring(1, 3+1);
+            offset=t.checkContains(response,offset, 
+                                  "3;\r\n" + expectedData + "\r\n0;", 
+                                  "6. subrange data: \"" + expectedData + "\"");
+	}
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,e.toString());
+        }
+    } 
+
+    
+    /* --------------------------------------------------------------- */
     public static void test10_3()
     {        
         Test t = new Test("RFC2616 10.3 redirection");
@@ -889,6 +1068,312 @@ public class TestRFC2616
         }
     }
     
+
+    /* --------------------------------------------------------------- */
+
+    public void checkContentRange( Test t, 
+                     String tname,
+                     String path, 
+                     String reqRanges,
+                     int expectedStatus,
+                     String expectedRange,
+                     String expectedData) {
+
+        try {
+            String response;
+            int offset=0;
+
+            String byteRangeHeader = "";
+            if (reqRanges != null) {
+                 byteRangeHeader = "Range: " + reqRanges + "\n";
+            }
+
+            response=getResponses("GET /" + path + " HTTP/1.1\n"+
+                                    "Host: localhost\n"+
+                                    byteRangeHeader +
+                                    "Connection: close\n"+
+                                    "\n");
+
+            switch (expectedStatus) {
+                case 200 : {
+                       offset=t.checkContains(response,offset,
+                                  "HTTP/1.1 200 OK\r\n",
+                                  tname + ".1. proper 200 OK status code");
+                       break;
+                }
+                case 206 : {
+                       offset=t.checkContains(response,offset,
+                                  "HTTP/1.1 206 Partial Content\r\n",
+                                  tname + ".1. proper 206 Partial Content status code");
+                       break;
+                }
+                case 416 : {
+                       offset=t.checkContains(response,offset,
+                                  "HTTP/1.1 416 Requested Range Not Satisfiable\r\n",
+                                  tname + ".1. proper 416 Requested Range not Satisfiable status code");
+                       break;
+                }
+            }
+
+            if (expectedRange != null) {
+                String expectedContentRange = "Content-Range: bytes " + expectedRange + "\r\n"; 
+                offset=t.checkContains(response,offset, 
+                                  expectedContentRange,
+                                  tname + ".2. content range " + expectedRange);
+            }
+
+            if (expectedStatus == 200 || expectedStatus == 206) {
+                  offset=t.checkContains(response,offset, 
+                                  ";\r\n" + expectedData + "\r\n0;", 
+                                  tname + ".3. subrange data: \"" + expectedData + "\"");
+            }
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,e.toString());
+        }
+    }
+
+
+    public static void test14_16()
+    {        
+        Test t = new Test("RFC2616 14.16 Conent-Range");
+        try {
+          TestRFC2616 listener = new TestRFC2616();
+
+          int id = 0;
+
+
+          //
+          // calibrate with normal request (no ranges); if this doesnt
+          // work, dont expect ranges to work either
+          //
+
+          listener.checkContentRange( t, 
+                     Integer.toString(id++),
+                     listener.testFiles[0].name,
+                     null,
+                     200,
+                     null,
+                     listener.testFiles[0].data 
+          );
+
+
+          //
+          // server should ignore all range headers which include
+          // at least one syntactically invalid range 
+          //
+
+          String [] totallyBadRanges = {
+                     "bytes=a-b",
+                     "bytes=-1-2",
+                     "bytes=-1-2,2-3",
+                     "bytes=-",
+                     "bytes=-1-",
+                     "bytes=a-b,-1-1-1",
+                     "bytes=",
+                     "doublehalfwords=1-2",
+          };
+
+          for (int i = 0; i < totallyBadRanges.length; i++) {
+             listener.checkContentRange( t, 
+                     Integer.toString(id++),
+                     listener.testFiles[0].name,
+                     totallyBadRanges[i],
+                     200,
+                     null,
+                     listener.testFiles[0].data 
+             );
+          }
+
+
+          //
+          // should test for combinations of good and syntactically
+          // invalid ranges here, but I am not certain what the right
+          // behavior is abymore
+          //
+          // a) Range: bytes=a-b,5-8
+          //
+          // b) Range: bytes=a-b,bytes=5-8
+          //
+          // c) Range: bytes=a-b
+          //    Range: bytes=5-8
+          //
+
+
+          //
+          // return data for valid ranges while ignoring unsatisfiable
+          // ranges
+          //
+
+          listener.checkContentRange( t, 
+                     Integer.toString(id++),
+                     listener.testFiles[0].name,
+                     "bytes=5-8",
+                     206,
+                     "5-8/26",
+                     listener.testFiles[0].data.substring(5,8+1) 
+          );
+          listener.checkContentRange( t, 
+                     Integer.toString(id++),
+                     listener.testFiles[0].name,
+                     "bytes=5-8,50-60",
+                     206,
+                     "5-8/26",
+                     listener.testFiles[0].data.substring(5,8+1) 
+          );
+          listener.checkContentRange( t, 
+                     Integer.toString(id++),
+                     listener.testFiles[0].name,
+                     "bytes=50-60,5-8",
+                     206,
+                     "5-8/26",
+                     listener.testFiles[0].data.substring(5,8+1) 
+          );
+
+
+          // 
+          // server should return a 416 if all syntactically valid ranges
+          // are unsatisfiable
+          //
+
+          listener.checkContentRange( t, 
+                     Integer.toString(id++),
+                     listener.testFiles[0].name,
+                     "bytes=50-60",
+                     416,
+                     "*/26",
+                     null
+          );
+          listener.checkContentRange( t, 
+                     Integer.toString(id++),
+                     listener.testFiles[0].name,
+                     "bytes=50-60,60-64",
+                     416,
+                     "*/26",
+                     null
+          );
+
+     
+          //
+          // server may combine overlapping or adjacent ranges and 
+          // return a single combined range
+          //
+
+          String [] overlappingRanges = {
+                     "bytes=5-5,6-6,7-8", 
+                     "bytes=5-7,6-8", 
+                     "bytes=5-8,6-7",
+                     "bytes=6-8,5-7",
+                     "bytes=8-8,7-8,5-6", 
+          };
+
+          for (int i = 0; i < overlappingRanges.length; i++) {
+              listener.checkContentRange( t, 
+                     Integer.toString(id++),
+                     listener.testFiles[0].name,
+                     overlappingRanges[i],
+                     206,
+                     "5-8/26",
+                     listener.testFiles[0].data.substring(5,8+1) 
+              );
+          }
+
+
+          //
+          // boundary range cases are tested in 14_35
+          //
+
+        }
+
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,e.toString());
+        }
+      } 
+
+
+    /* --------------------------------------------------------------- */
+    public static void test14_35()
+    {        
+        Test t = new Test("RFC2616 14.35 Byte Ranges");
+        try {
+          TestRFC2616 listener = new TestRFC2616();
+
+          int id = 0;
+
+
+          //
+          // test various valid range specs that have not been 
+          // tested yet
+          //
+
+          listener.checkContentRange( t, 
+                     Integer.toString(id++),
+                     listener.testFiles[0].name,
+                     "bytes=0-2",
+                     206,
+                     "0-2/26",
+                     listener.testFiles[0].data.substring(0,2+1) 
+          );
+
+          listener.checkContentRange( t, 
+                     Integer.toString(id++),
+                     listener.testFiles[0].name,
+                     "bytes=23-",
+                     206,
+                     "23-25/26",
+                     listener.testFiles[0].data.substring(23,25+1) 
+          );
+
+          listener.checkContentRange( t, 
+                     Integer.toString(id++),
+                     listener.testFiles[0].name,
+                     "bytes=23-42",
+                     206,
+                     "23-25/26",
+                     listener.testFiles[0].data.substring(23,25+1) 
+          );
+
+          listener.checkContentRange( t, 
+                     Integer.toString(id++),
+                     listener.testFiles[0].name,
+                     "bytes=-3",
+                     206,
+                     "23-25/26",
+                     listener.testFiles[0].data.substring(23,25+1) 
+          );
+
+          listener.checkContentRange( t, 
+                     Integer.toString(id++),
+                     listener.testFiles[0].name,
+                     "bytes=23-23,-2",
+                     206,
+                     "23-25/26",
+                     listener.testFiles[0].data.substring(23,25+1) 
+          );
+
+          listener.checkContentRange( t, 
+                     Integer.toString(id++),
+                     listener.testFiles[0].name,
+                     "bytes=-1,-2,-3",
+                     206,
+                     "23-25/26",
+                     listener.testFiles[0].data.substring(23,25+1) 
+          );
+
+        }
+
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,e.toString());
+        }
+    } 
+
+    
     /* --------------------------------------------------------------- */
     public static void test14_39()
     {        
@@ -910,7 +1395,7 @@ public class TestRFC2616
             offset=t.checkContains(response,offset,
                                    "HTTP/1.1 200","TE: coding")+1;
             offset=t.checkContains(response,offset,
-                                   "Transfer-Encoding: gzip, chunked","TE: coding")+1;
+                                   "Transfer-Encoding: gzip,chunked","TE: coding")+1;
 
             // Gzip not accepted
             offset=0;

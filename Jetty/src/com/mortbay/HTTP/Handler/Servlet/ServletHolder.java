@@ -70,6 +70,7 @@ public class ServletHolder
         _context=_handler.getContext();
         setServletName(className);
         _className=className;
+        _name=className;
         _config=new Config();
     }
 
@@ -152,7 +153,7 @@ public class ServletHolder
                 return 1;
             if (sh._initOrder>_initOrder)
                 return -1;
-            return _className.compareTo(sh._className);
+            return _name.compareTo(sh._name);
         }
         return 1;
     }

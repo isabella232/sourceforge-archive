@@ -306,7 +306,7 @@ public class HttpResponse extends HttpMessage
         String reason = (String)__statusMsg.get(new Integer(code));
         setReason(reason);
 
-        if (code!=204 && code!=304 && code>=200)
+        if (code!=204 && code!=304 && code!=206 && code>=200)
         {
             _header.put(HttpFields.__ContentType,HttpFields.__TextHtml);
             _mimeType=HttpFields.__TextHtml;
@@ -337,7 +337,7 @@ public class HttpResponse extends HttpMessage
             }
             out.flush();
         }
-        else
+        else if (code!=206) 
         {
             _header.remove(HttpFields.__ContentType);
             _header.remove(HttpFields.__ContentLength);

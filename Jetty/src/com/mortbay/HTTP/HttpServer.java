@@ -60,6 +60,8 @@ public class HttpServer implements LifeCycle
     // HandlerContext[List[HttpHandler]]
     private HashMap _hostMap = new HashMap(3);
     
+    private HandlerContext _notFoundContext=null;
+    
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
@@ -639,8 +641,19 @@ public class HttpServer implements LifeCycle
             host=null;
         }	
 
-        response.sendError(response.__404_Not_Found);
-        
+        synchronized(this)
+        {
+            if (_notFoundContext==null)
+            {
+                _notFoundContext=getContext(null,"/");
+                Log.event("Adding NotFoundHandler to "+_notFoundContext);
+                _notFoundContext.addHandler(new NotFoundHandler());
+                _notFoundContext.start();
+            }
+
+            if (!_notFoundContext.handle(request,response))
+                response.sendError(response.__404_Not_Found);
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -800,7 +813,6 @@ public class HttpServer implements LifeCycle
             context.setDynamicServletPathSpec("/servlet/*");
             context.setResourceBase("./docroot/");
             context.setServingResources(true);
-            context.addHandler(new NotFoundHandler());
             
             // Parse arguments
             for (int i=0;i<args.length;i++)

@@ -124,7 +124,10 @@ public class CGI extends HttpServlet
     File script = new File(_docRoot, exe).getCanonicalFile();
     Code.debug("CGI: script is "+script);
 
-    exec(script.toString(), req, res);
+    if (script.exists())
+        exec(script.toString(), req, res);
+    else
+        res.sendError(404);
   }
     
   /* ------------------------------------------------------------ */

@@ -7,6 +7,7 @@ import com.mortbay.HTTP.HttpFields;
 import com.mortbay.HTTP.HttpRequest;
 import com.mortbay.HTTP.HttpResponse;
 import com.mortbay.HTTP.PathMap;
+import com.mortbay.HTTP.InclusiveByteRange;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.Log;
 import com.mortbay.Util.Resource;
@@ -20,6 +21,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.StringTokenizer;
 import java.util.Map;
 
 /* ------------------------------------------------------------ */
@@ -46,6 +49,7 @@ public class ResourceHandler extends NullHandler
     private int _maxCachedFiles =64;
     private int _maxCachedFileSize =40960;
     private Resource _resourceBase=null;
+    private boolean _handleGeneralOptionsQuery=true;
  
     /* ------------------------------------------------------------ */
     List _indexFiles =new ArrayList(2);
@@ -130,6 +134,18 @@ public class ResourceHandler extends NullHandler
     public void setMaxCachedFileSize(int maxCachedFileSize)
     {
         _maxCachedFileSize = maxCachedFileSize;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean getHandleGeneralOptionsQuery()
+    {
+        return _handleGeneralOptionsQuery;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setHandleGeneralOptionsQuery(boolean b)
+    {
+        _handleGeneralOptionsQuery=b;
     }
 
 
@@ -229,7 +245,7 @@ public class ResourceHandler extends NullHandler
             else if (method.equals(HttpRequest.__DELETE))
                 handleDelete(request, response, pathInContext, resource);
             else if (method.equals(HttpRequest.__OPTIONS))
-                handleOptions(response);
+                handleOptions(response, pathInContext);
             else if (method.equals(HttpRequest.__MOVE))
                 handleMove(request, response, pathInContext, resource);
             else
@@ -263,24 +279,22 @@ public class ResourceHandler extends NullHandler
         // Try a cache lookup
         if (_cache!=null && !endsWithSlash)
         {
-            byte[] bytes=null;
+            CachedFile cachedFile = null;
             synchronized(_cacheMap)
             {
-                CachedFile cachedFile=
-                    (CachedFile)_cacheMap.get(resource.toString());
+                cachedFile= (CachedFile)_cacheMap.get(resource.toString());
+
                 if (cachedFile!=null &&cachedFile.isValid())
                 {
                     if (!checkGetHeader(request,response,cachedFile.resource))
                         return;
-                    bytes=cachedFile.prepare(response);
                 }
             }
-            if (bytes!=null)
+
+            if (cachedFile != null)
             {
                 Code.debug("Cache hit: "+resource);
-                OutputStream out = response.getOutputStream();
-                out.write(bytes);
-                out.flush();
+                sendData(request, response, cachedFile);
                 return;
             }
         }  
@@ -537,9 +551,12 @@ public class ResourceHandler extends NullHandler
     }
  
     /* ------------------------------------------------------------ */
-    void handleOptions(HttpResponse response)
+    void handleOptions(HttpResponse response, String path)
         throws IOException
     {
+        if (!_handleGeneralOptionsQuery && path.equals("*")) 
+            return;
+
         setAllowHeader(response);
         response.commit();
     }
@@ -573,6 +590,186 @@ public class ResourceHandler extends NullHandler
         response.setField(HttpFields.__Allow, _allowHeader);
     }
  
+
+
+    /* ------------------------------------------------------------ */
+    void sendData(HttpRequest request,
+                  HttpResponse response,
+                  SendableResource data)
+        throws IOException
+    {
+        //
+        //  see if there are any range headers
+        //
+        String reqRanges = request.getField(HttpFields.__Range);
+        List validRanges = null;
+
+        if ( reqRanges != null )
+        {
+            ArrayList ranges=new ArrayList(1);
+            ranges.add(reqRanges);
+            validRanges = InclusiveByteRange
+                .parseRangeHeaders(ranges);
+            Code.debug("requested ranges: " + reqRanges + "=" + validRanges);
+        }
+
+
+        // 
+        //  if there were no valid ranges, send entire entity
+        //
+        long resLength = data.getLength();
+        if (validRanges == null || validRanges.size() == 0) {
+            data.writeHeaders(response, resLength);
+            data.writeBytes(response.getOutputStream(), 0, resLength);
+            request.setHandled(true);
+            return;
+        }
+
+
+        //
+        //  run through the ranges and count satisfiable ranges;
+        //  also try to collapse overlapping or adjacent ranges 
+        //  into a single range
+        //
+        ListIterator rit = validRanges.listIterator();
+        InclusiveByteRange singleSatisfiableRange = null;
+        int satisfiableRangeCount = 0;
+
+        while (rit.hasNext())
+        {
+            InclusiveByteRange ibr = (InclusiveByteRange) rit.next();
+
+            long first0 = ibr.getFirst(resLength);
+            if (first0 >= resLength) {
+                Code.debug("no satisfiable: " + ibr);
+                continue;   // not satisfiable
+            }
+
+            if (singleSatisfiableRange == null) {
+                singleSatisfiableRange = ibr;
+                satisfiableRangeCount = 1;
+                Code.debug("first satisfiable range: " + ibr);
+                continue;   // found first sat range
+            }
+
+            long last1 = singleSatisfiableRange.getLast(resLength);
+            if (first0 > (last1 + 1)) {
+                satisfiableRangeCount++;
+                singleSatisfiableRange = null;
+                Code.debug("second (right) satisfiable range: " + ibr);
+                break;   // just found second non-overlapping sat range
+            }
+
+            long first1 = singleSatisfiableRange.getFirst(resLength);
+            long last0 = ibr.getLast(resLength);
+            if (last0 < (first1 - 1)) {
+                satisfiableRangeCount++;
+                singleSatisfiableRange = null;
+                Code.debug("second (left) satisfiable range: " + ibr);
+                break;   // just found second non-overlapping sat range
+            }
+
+            // ranges overlap -> merge the two ranges
+
+            long first = first0;
+            long last  = last0;
+
+            if (first1 < first) {
+                  first = first1;
+            }
+
+            if (last1 > last) {
+                  last = last1;
+            }
+
+            Code.debug("merged " + ibr + " into single satisfiable range: " + singleSatisfiableRange);
+            singleSatisfiableRange = new InclusiveByteRange(first, last);
+        }
+
+
+        // 
+        //  if there are no satisfiable ranges, send 416 response
+        //
+
+        if (satisfiableRangeCount == 0) {
+            Code.debug("no satisfiable ranges");
+            response.setField(
+                       HttpFields.__ContentRange, 
+                       InclusiveByteRange.to416HeaderRangeString(resLength)
+            );
+            response.sendError(response.__416_Requested_Range_Not_Satisfiable);
+            request.setHandled(true);
+            return;
+        }
+
+
+        // 
+        //  if there is only a single valid range (must be satisfiable 
+        //  since were here now), send that range with a 216 response
+        // 
+
+        if (satisfiableRangeCount == 1) {
+            Code.debug("single satisfiable range: " + singleSatisfiableRange);
+            long singleLength = singleSatisfiableRange.getSize(resLength);
+            data.writeHeaders(response, singleLength);
+            response.setField(
+                       HttpFields.__ContentRange, 
+                       singleSatisfiableRange.toHeaderRangeString(resLength)
+            );
+            data.writeBytes(response.getOutputStream(), 
+                        singleSatisfiableRange.getFirst(resLength), 
+                        singleLength);
+            response.sendError(response.__206_Partial_Content);
+            request.setHandled(true);
+            return;
+        }
+
+
+        // 
+        //  multiple non-overlapping valid ranges cause a multipart
+        //  216 response which does not require an overall 
+        //  content-length header
+        // 
+
+        /** this is sample code for what could eventually be the
+         ** complete implementation including multipart responses
+
+        String encoding = data.getEncoding();
+        MultiPartResponse multi = new MultiPartResponse(request, response);
+        rit = validRanges.listIterator();
+        boolean isFirstMultiPart = true;
+
+        while (rit.hasNext()) {
+            InclusiveByteRange ibr = (InclusiveByteRange) rit.next();
+            long first = ibr.getFirst(resLength);
+            if (first >= resLength) 
+                continue;   // not satisfiable
+
+            Code.debug("next satisfiable range: " + ibr);
+            if (isFirstMultiPart)
+                isFirstMultiPart = false;
+            else
+                multi.endPart();
+            multi.startNextPart(encoding);
+            data.writeBytes( multi.out, first, ibr.getSize(resLength));
+        }
+        multi.endLastPart();
+        response.sendError(response.__206_Partial_Content);
+        request.setHandled(true);
+
+
+         ** until this is all implemented, we just pretend we dont
+         ** support ranges for such a request and send the whole 
+         ** enchilada.
+         **/
+
+        data.writeHeaders(response, resLength);
+        data.writeBytes(response.getOutputStream(), 0, resLength);
+        request.setHandled(true);
+        return;
+    }
+
+
     /* ------------------------------------------------------------ */
     void sendFile(HttpRequest request,
                   HttpResponse response,
@@ -581,52 +778,35 @@ public class ResourceHandler extends NullHandler
     {
         Code.debug("sendFile: ",resource);
 
+        SendableResource data = null;
+
         // Can the file be cached?
         if (_cache!=null && resource.length()>0 &&
             resource.length()<_maxCachedFileSize)
         {
-            byte[] bytes=null;
+            CachedFile cachedFile = null;
             synchronized (_cacheMap)
             {
-                CachedFile cachedFile=_cache[_nextIn];
+                cachedFile=_cache[_nextIn];
                 if (cachedFile==null)
                     cachedFile=_cache[_nextIn]=new CachedFile();
                 _nextIn=(_nextIn+1)%_cache.length;
                 cachedFile.flush();
                 cachedFile.load(resource);
                 _cacheMap.put(resource.toString(),cachedFile);
-                bytes=cachedFile.prepare(response);
             }
-            if (bytes!=null)
-            {
-                OutputStream out = response.getOutputStream();
-                out.write(bytes);
-                request.setHandled(true);
-                return;
-            }
+
+            data = cachedFile;
         }
-        else
-        {
-            InputStream in=null;
-            int len=0;
-            String encoding=getHandlerContext().getMimeByExtension(resource.getName());
-            response.setField(HttpFields.__ContentType,encoding);
-            len = (int)resource.length();
-            response.setIntField(HttpFields.__ContentLength,len);
-     
-            response.setDateField(HttpFields.__LastModified,
-                                  resource.lastModified());
-            in = resource.getInputStream();
-     
-            try
-            {
-                response.getOutputStream().write(in,len);
-            }
-            finally
-            {
-                request.setHandled(true);
-                in.close();
-            }
+        else {
+            data = new UnCachedFile(resource);
+        }
+
+        try {
+            sendData(request, response, data);
+        }
+        finally {
+            data.requestDone();
         }
     }
 
@@ -736,17 +916,108 @@ public class ResourceHandler extends NullHandler
  
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
+
+    private interface SendableResource {
+        long getLength();
+        String getEncoding();
+        void writeHeaders(HttpResponse response, long count)
+                                throws IOException; 
+        void writeBytes(ChunkableOutputStream os, long startByte, long count) 
+                                throws IOException; 
+        void requestDone();
+    }
+
+
+    /* ------------------------------------------------------------ */
+    /** Holds an uncached file.  
+     */
+
+    private class UnCachedFile implements SendableResource {
+
+        Resource resource;
+        InputStream ris = null;
+        String encoding;
+        long length = 0;
+        long pos = 0;
+
+
+        public String getEncoding() {
+            return encoding;
+        }
+
+        public long getLength() {
+            return length;
+        }
+
+
+        public UnCachedFile(Resource resource) {
+            this.resource = resource;
+            encoding = getHandlerContext().getMimeByExtension(resource.getName());
+            length = resource.length();
+        }
+
+        public void writeBytes(ChunkableOutputStream os, long start, long count) throws IOException {
+
+             if (ris == null || pos > start) {
+                  ris = resource.getInputStream();
+                  pos = 0;
+             }
+
+             if (pos < start) {
+                  ris.skip(start - pos);
+                  pos = start;
+             } 
+
+             os.write(ris, (int) count);
+        }
+
+        public void writeHeaders(HttpResponse response, long count) {
+            response.setField(HttpFields.__ContentType,encoding);
+            if (length != -1) {
+                 response.setIntField(HttpFields.__ContentLength, (int) count);
+            }
+            response.setDateField(HttpFields.__LastModified,resource.lastModified());
+        }
+
+        public void requestDone() {
+            if (ris != null) {
+                try {
+                    ris.close();
+                }
+                catch (IOException ioe) {
+                }
+            }
+        }
+
+    }
+
+
     /* ------------------------------------------------------------ */
     /** Holds a cached file.
      * It is assumed that threads accessing CachedFile have
      * the parents cacheMap locked. 
      */
-    private class CachedFile
+    private class CachedFile implements SendableResource
     {
         Resource resource;
         long lastModified;
         byte[] bytes;
         String encoding;
+
+
+        /* ------------------------------------------------------------ */
+
+        public String getEncoding() {
+            return encoding;
+        }
+
+
+        /* ------------------------------------------------------------ */
+        public void writeBytes(ChunkableOutputStream os, long startByte, long count) 
+                    throws IOException {
+             os.write(bytes, (int) startByte, (int) count);
+        }
+
 
         /* ------------------------------------------------------------ */
         boolean isValid()
@@ -780,14 +1051,15 @@ public class ResourceHandler extends NullHandler
         }
   
         /* ------------------------------------------------------------ */
-        byte[] prepare(HttpResponse response)
+        public void writeHeaders(HttpResponse response, long count)
             throws IOException
         {
             Code.debug("HIT: ",resource);
             response.setField(HttpFields.__ContentType,encoding);
-            response.setIntField(HttpFields.__ContentLength,bytes.length);
+            if (count != -1) {
+                 response.setIntField(HttpFields.__ContentLength, (int) count);
+            }
             response.setDateField(HttpFields.__LastModified,lastModified);
-            return bytes;
         }
 
         /* ------------------------------------------------------------ */
@@ -822,6 +1094,16 @@ public class ResourceHandler extends NullHandler
                 resource=null;
             }
         }
+
+        /* ------------------------------------------------------------ */
+        public void requestDone() {
+        }
+
+        /* ------------------------------------------------------------ */
+        public long getLength() {
+            return bytes.length;
+        }
+
     }
 }
 

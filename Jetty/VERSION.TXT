@@ -4,6 +4,10 @@ Jetty Versions
  + Set thread context classloader during handler start/stop calls.
  + Don't set MIME-Version in response.
  + Allow dynamic servlets to be served from /
+ + Handle multiple inits of same servlet class.
+ + Auto add a NotFoundHandler if needed.
+ + Added NotFoundServlet
+ + Added range handling to ResourceHandler.
  
 Jetty-3.0.0.rc6 - 20 Nov 2000
  + RequestDispatcher.forward() only resets buffer, not headers.

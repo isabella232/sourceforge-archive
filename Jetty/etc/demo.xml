@@ -137,15 +137,12 @@ $Id$
   <Call name="addContext">
     <Arg>/</Arg>
     <Set name="ClassPath">servlets/</Set>
-    <Set name="DynamicServletPathSpec">/sservlet/*</Set>
+    <Set name="DynamicServletPathSpec">/servlet/*</Set>
     <Call name="addServlet">
       <Arg>Forward</Arg>
       <Arg>/</Arg>
       <Arg>com.mortbay.Servlet.Forward</Arg>
       <Put name="/">/jetty/index.html</Put>
-    </Call>
-    <Call name="addHandler">
-      <Arg><New class="com.mortbay.HTTP.Handler.NotFoundHandler"/></Arg>
     </Call>
   </Call>
 

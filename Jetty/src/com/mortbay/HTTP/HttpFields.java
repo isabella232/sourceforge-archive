@@ -760,7 +760,7 @@ public class HttpFields
             for (int i=0;i<list.size();i++)
             {
                 if (i>0)
-                    buf.append(", ");
+                    buf.append(",");
                 buf.append(QuotedStringTokenizer.quote((String)list.get(i),
                                                        ", \t"));
             }

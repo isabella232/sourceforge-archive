@@ -149,7 +149,9 @@ public class ServletHandler extends NullHandler
         _loader=getHandlerContext().getClassLoader();
         
         // Sort and Initialize servlets
-        Iterator i = new TreeSet(_servletMap.values()).iterator();
+        TreeSet sorted=new TreeSet(_servletMap.values());
+        
+        Iterator i = sorted.iterator();
         while (i.hasNext())
         {
             ServletHolder holder = (ServletHolder)i.next();

@@ -6,7 +6,6 @@
 package com.mortbay.Jetty;
 
 import com.mortbay.HTTP.Handler.DumpHandler;
-import com.mortbay.HTTP.Handler.NotFoundHandler;
 import com.mortbay.HTTP.HandlerContext;
 import com.mortbay.HTTP.HashUserRealm;
 import com.mortbay.HTTP.HttpServer;
@@ -100,7 +99,6 @@ public class Demo
             context.addServlet("Forward","/","com.mortbay.Servlet.Forward")
                 .put("/","/jetty/index.html");
             context.addServlet("Admin","/admin/*","com.mortbay.HTTP.AdminServlet");
-            context.addHandler(new NotFoundHandler());
             
             
             // Logger
@@ -129,10 +127,7 @@ public class Demo
                  new SecurityConstraint("admin",
                                         "content-administrator"));
             context.addServlet("Admin","/","com.mortbay.HTTP.AdminServlet");
-            context.addHandler(new NotFoundHandler());
             admin.start();
-            
-            
         }
         catch(Exception e)
         {
