@@ -152,8 +152,8 @@ public class Server extends HttpServer
      * @param defaults The defaults xml filename or URL which is
      * loaded before any in the web app. Must respect the web.dtd.
      * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
-     * @param extractWar If true, WAR files are extracted to a
-     * temporary directory.
+     * @param extractWar If true, WAR files are extracted to the
+     * webapp subdirectory of the contexts temporary directory.
      * @exception IOException 
      */
     public void addWebApplications(String host,
@@ -232,8 +232,8 @@ public class Server extends HttpServer
      * @param defaults The defaults xml filename or URL which is
      * loaded before any in the web app. Must respect the web.dtd.
      * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
-     * @param extractWar If true, WAR files are extracted to a
-     * temporary directory.
+     * @param extractWar If true, WAR files are extracted to the
+     * webapp subdirectory of the contexts temporary directory.
      * @return The WebApplicationContext
      * @exception IOException 
      */
@@ -259,8 +259,8 @@ public class Server extends HttpServer
      * @param defaults The defaults xml filename or URL which is
      * loaded before any in the web app. Must respect the web.dtd.
      * Normally this is passed the file $JETTY_HOME/etc/webdefault.xml
-     * @param extractWar If true, WAR files are extracted to a
-     * temporary directory.
+     * @param extractWar If true, WAR files are extracted to the
+     * webapp subdirectory of the contexts temporary directory.
      * @return The WebApplicationContext
      * @exception IOException 
      */

@@ -346,7 +346,7 @@ public class HttpResponse extends HttpMessage
                     
                     // Set attributes to describe error
                     request.setAttribute("javax.servlet.error.request_uri",
-                                         getHttpRequest().getPath());
+                                         getHttpRequest().getEncodedPath());
                     request.setAttribute("javax.servlet.error.status_code",code_integer);
                     request.setAttribute("javax.servlet.error.message",message);
                     

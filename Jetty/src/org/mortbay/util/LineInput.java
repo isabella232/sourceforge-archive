@@ -38,7 +38,6 @@ import java.io.UnsupportedEncodingException;
  */
 public class LineInput extends FilterInputStream                           
 {
-    
     /* ------------------------------------------------------------ */
     private byte _buf[];
     private ByteBuffer _byteBuffer;
@@ -53,9 +52,11 @@ public class LineInput extends FilterInputStream
     private String _encoding;
     private boolean _eof=false;
     private boolean _lastCr=false;
-
+    private boolean _seenCrLf=false;
+    
     private final static int LF=10;
     private final static int CR=13;
+
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -274,7 +275,7 @@ public class LineInput extends FilterInputStream
         _lineBuffer.size=
             _reader.read(_lineBuffer.buffer,0,_lineBuffer.buffer.length);
         _mark=-1;
-        
+
         return _lineBuffer;
     }
     
@@ -472,6 +473,7 @@ public class LineInput extends FilterInputStream
         // the first char is a LF, skip it
         if (_avail-_pos>0 && _lastCr && _buf[_pos]==LF)
         {
+            _seenCrLf=true;
             _pos++;
             if (_mark>=0)
                 _mark++;
@@ -529,10 +531,9 @@ public class LineInput extends FilterInputStream
                 }
                 
                 // If we have a CR and no more characters are available
-                // try again and if it is still the case
-                // return a line.
-                if (cr && in.available()==0)
+                if (cr && in.available()==0 && !_seenCrLf)
                 {
+                    Code.debug("Missing LF");
                     _lastCr=true;
                     cr=true;
                     lf=true;
@@ -553,7 +554,8 @@ public class LineInput extends FilterInputStream
             
             switch(b)
             {
-              case LF: 
+              case LF:
+                  if (cr) _seenCrLf=true;
                   lf=true;
                   break LineLoop;
                 

@@ -122,6 +122,12 @@ public class ServletHttpRequest
     }
 
     /* ------------------------------------------------------------ */
+    /** Set a ServletRequest Wrapper.
+     * This call is used by the Dispatcher and the FilterHandler to
+     * store a user generated wrapper for this request. The wrapper is
+     * recovered by getWrapper for use by the next filter and/or servlet.
+     * @param wrapper 
+     */
     void setWrapper(ServletRequest wrapper)
     {
         if (wrapper == this)

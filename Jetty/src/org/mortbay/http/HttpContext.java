@@ -392,6 +392,36 @@ public class HttpContext implements LifeCycle
     }
 
     /* ------------------------------------------------------------ */
+    /** Set temporary directory for context.
+     * The javax.servlet.context.tempdir attribute is also set.
+     * @param dir Writable temporary directory.
+     */
+    public void setTempDirectory(File dir)
+    {
+        if (isStarted())
+            throw new IllegalStateException("Started");
+
+        if (dir!=null && !dir.exists())
+        {
+            _tmpDir.mkdir();
+            _tmpDir.deleteOnExit();
+        }
+        
+        if (dir!=null && ( !dir.exists() || !dir.isDirectory() || !dir.canWrite()))
+            throw new IllegalArgumentException("Bad temp directory: "+dir);
+        
+        _tmpDir=dir;
+        setAttribute("javax.servlet.context.tempdir",_tmpDir);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get Context temporary directory.
+     * A tempory directory is generated if it has not been set.  The
+     * "javax.servlet.context.tempdir" attribute is consulted and if
+     * not set, the host, port and context are used to generate a
+     * directory within the JVMs temporary directory.
+     * @return 
+     */
     public File getTempDirectory()
     {
         if (_tmpDir!=null)
@@ -505,12 +535,6 @@ public class HttpContext implements LifeCycle
         return _tmpDir;
     }
     
-    /* ------------------------------------------------------------ */
-    public void setTempDirectory(File file)
-    {
-        _tmpDir=file;
-        setAttribute("javax.servlet.context.tempdir",_tmpDir);
-    }
 
 
     /* ------------------------------------------------------------ */
