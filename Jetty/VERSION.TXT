@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.9
+
  + Work around URLClassloader not handling leading /
  + Dump servlet can load resources for testing now.
  + Added trust manager support to SunJsseListener.
