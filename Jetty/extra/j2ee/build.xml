@@ -60,6 +60,7 @@ all         - everything
     <pathelement location="${mortbay.jmx.jar}"/>
     <pathelement location="${ext}/javax77.jar"/>
     <pathelement location="${lib}/org.mortbay.jsr77.jar"/>
+    <pathelement location="${jetty.ext}/commons-logging.jar"/>
     <path refid="jboss.classpath"/>
   </path>
 
@@ -186,6 +187,9 @@ all         - everything
       </fileset>
       <fileset dir="${jetty.etc}">   
         <include name="webdefault.xml"/>
+      </fileset>
+      <fileset dir="${j2ee.etc}">
+        <include name="commons-logging.properties"/>
       </fileset>
     </jar>
   </target>
