@@ -947,7 +947,7 @@ public class HttpRequest extends HttpMessage
     {
         if (_cookies!=null && _cookiesExtracted)
             return _cookies;
-
+        
         try
         {
             // Handle no cookies
@@ -958,7 +958,7 @@ public class HttpRequest extends HttpMessage
                 _lastCookies=null;
                 return _cookies;
             }
-
+            
             // Check if cookie headers match last cookies
             if (_lastCookies!=null)
             {                
@@ -968,7 +968,7 @@ public class HttpRequest extends HttpMessage
                 {
                     String c = (String)enm.nextElement();
                     if (last>=_lastCookies.length ||
-                        !c.equals(_lastCookies[last]))
+                            !c.equals(_lastCookies[last]))
                     {
                         _lastCookies=null;
                         break;
@@ -988,7 +988,7 @@ public class HttpRequest extends HttpMessage
             
             int version=0;
             Cookie cookie=null;
-
+            
             // For each cookie header
             Enumeration enm =_header.getValues(HttpFields.__Cookie);            
             while (enm.hasMoreElements())
@@ -996,7 +996,7 @@ public class HttpRequest extends HttpMessage
                 // Save a copy of the unparsed header as cache.
                 String hdr = enm.nextElement().toString();
                 lastCookies=LazyList.add(lastCookies,hdr);
-
+                
                 // Parse the header
                 QuotedStringTokenizer tok=new QuotedStringTokenizer(hdr,",;",false,false);
                 while (tok.hasMoreElements())
@@ -1009,16 +1009,16 @@ public class HttpRequest extends HttpMessage
                     {                   
                         String n;
                         String v;
-			int e = c.indexOf('=');
-			if (e>0)
-			{
-			    n=c.substring(0,e);
-			    v=c.substring(e+1);
-			}
-			else
-			{
-			    n=c;
-			    v="";
+                        int e = c.indexOf('=');
+                        if (e>0)
+                        {
+                            n=c.substring(0,e);
+                            v=c.substring(e+1);
+                        }
+                        else
+                        {
+                            n=c;
+                            v="";
                         }
                         
                         // Handle quoted values
@@ -1029,37 +1029,12 @@ public class HttpRequest extends HttpMessage
                         if (n.startsWith("$"))
                         {
                             if ("$version".equalsIgnoreCase(n))
-                            {
-                                int comma=v.indexOf(',');
-                                if (comma>=0)
-                                {   
-                                    version=Integer.parseInt
-                                        (StringUtil.unquote(v.substring(0,comma)));
-                                    v=v.substring(comma+1);
-                                    e=v.indexOf('=');
-                                    if (e>0)
-                                    {
-                                        n=v.substring(0,e);
-                                        v=v.substring(e+1);
-                                        v=StringUtil.unquote(v);
-                                    }
-                                    else
-                                    {
-                                        n=v;
-                                        v="";
-                                    }
-                                }
-                                else
-                                    continue;
-                            }
-                            else
-                            {
-                                if ("$path".equalsIgnoreCase(n) && cookie!=null)
-                                    cookie.setPath(v);
-                                else if ("$domain".equalsIgnoreCase(n)&&cookie!=null)
-                                    cookie.setDomain(v);
-                                continue;
-                            }
+                                version=Integer.parseInt(StringUtil.unquote(v));
+                            else if ("$path".equalsIgnoreCase(n) && cookie!=null)
+                                cookie.setPath(v);
+                            else if ("$domain".equalsIgnoreCase(n)&&cookie!=null)
+                                cookie.setDomain(v);
+                            continue;
                         }
                         
                         v=URI.decodePath(v);
@@ -1074,7 +1049,7 @@ public class HttpRequest extends HttpMessage
                     }
                 }
             }
-
+            
             int l=LazyList.size(cookies);
             if (_cookies==null || _cookies.length!=l)
                 _cookies=new Cookie[l];

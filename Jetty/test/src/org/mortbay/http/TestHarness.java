@@ -616,7 +616,6 @@ public class TestHarness
             httpFields();
             pathMap();
             
-            TestRequest.test();
             TestRFC2616.test();
         }
         catch(Throwable e)

@@ -30,8 +30,11 @@ public class Tests extends junit.framework.TestCase
       super(name);
     }
 
-    public static junit.framework.Test suite() {
-      return new TestSuite(Tests.class);
+    public static junit.framework.Test suite() 
+    {
+        TestSuite suite=new TestSuite(Tests.class);
+        suite.addTestSuite(TestRequest.class);
+        return suite;
     }
 
     /* ------------------------------------------------------------ */

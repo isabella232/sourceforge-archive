@@ -19,11 +19,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import javax.servlet.http.Cookie;
+
+import junit.framework.TestSuite;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.LogSupport;
-import org.mortbay.util.TestCase;
 import org.mortbay.util.URI;
 
 /* ------------------------------------------------------------ */
@@ -32,20 +35,39 @@ import org.mortbay.util.URI;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class TestRequest
+public class TestRequest extends junit.framework.TestCase
 {
     private static Log log = LogFactory.getLog(TestRequest.class);
     
+    
+    public TestRequest(String name)
+    {
+        super(name);
+    }
+    
+    public static junit.framework.Test suite() {
+        return new TestSuite(TestRequest.class);
+    }
+    
+    /* ------------------------------------------------------------ */
+    
+    public static void main(String[] args)
+    {
+        junit.textui.TestRunner.run(suite());
+    }
+    
+    
+    
     /* --------------------------------------------------------------- */
-    public static HttpRequest getRequest(String data)
-        throws IOException
+    public HttpRequest getRequest(String data)
+    throws IOException
     {
         return getRequest(data.getBytes());
     }
     
     /* --------------------------------------------------------------- */
-    public static HttpRequest getRequest(byte[] data)
-        throws IOException
+    public HttpRequest getRequest(byte[] data)
+    throws IOException
     {
         ByteArrayInputStream in = new ByteArrayInputStream(data);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -57,41 +79,31 @@ public class TestRequest
     }
     
     /* --------------------------------------------------------------- */
-    public static void test()
-    {   
-        testRequestLine();
-        testParameters();
-        testMimeTypes();
-    }
-
-    /* --------------------------------------------------------------- */
-    public static void testRequestLine()
+    public void testRequestLine()
     {
-        TestCase test = new TestCase("org.mortbay.http.HttpRequest.getRequestLine");
-
         String[] rl =
         {
-            "GET /xxx HTTP/1.0",          "GET", "/xxx",    "HTTP/1.0",
-            " GET /xxx HTTP/1.0 ",        "GET", "/xxx",    "HTTP/1.0",
-            "  PUT  /xxx  HTTP/1.1  ",    "PUT", "/xxx",    "HTTP/1.1",
-            "  GET  /xxx   ",             "GET", "/xxx",    "HTTP/0.9",
-            "GET  /xxx",                  "GET", "/xxx",    "HTTP/0.9",
-            "  GET  /xxx   ",             "GET", "/xxx",    "HTTP/0.9",
-            "GET / ",                     "GET", "/",       "HTTP/0.9",
-            "GET /",                      "GET", "/",       "HTTP/0.9",
-            "GET http://h:1/ HTTP/1.0",   "GET", "/",       "HTTP/1.0",
-            "GET http://h:1/xx HTTP/1.0", "GET", "/xx",     "HTTP/1.0",
-            "GET http HTTP/1.0",          "GET", "http",    "HTTP/1.0",
-            "GET http://h:1/",            "GET", "/",       "HTTP/0.9",
-            "GET http://h:1/xxx",         "GET", "/xxx",    "HTTP/0.9",
-            "  GET     ",                 null,  null,      null,
-            "GET",                        null,  null,      null,
-            "",                           null,  null,      null,
-            "Options * http/1.1  ",       "OPTIONS", "*",    "HTTP/1.1",
-            "GET /xxx/%%123/blah HTTP/1.0",  null, null,       null,
-            "GET http://h:x/ HTTP/1.0",   null, null,       null,
+                "GET /xxx HTTP/1.0",          "GET", "/xxx",    "HTTP/1.0",
+                " GET /xxx HTTP/1.0 ",        "GET", "/xxx",    "HTTP/1.0",
+                "  PUT  /xxx  HTTP/1.1  ",    "PUT", "/xxx",    "HTTP/1.1",
+                "  GET  /xxx   ",             "GET", "/xxx",    "HTTP/0.9",
+                "GET  /xxx",                  "GET", "/xxx",    "HTTP/0.9",
+                "  GET  /xxx   ",             "GET", "/xxx",    "HTTP/0.9",
+                "GET / ",                     "GET", "/",       "HTTP/0.9",
+                "GET /",                      "GET", "/",       "HTTP/0.9",
+                "GET http://h:1/ HTTP/1.0",   "GET", "/",       "HTTP/1.0",
+                "GET http://h:1/xx HTTP/1.0", "GET", "/xx",     "HTTP/1.0",
+                "GET http HTTP/1.0",          "GET", "http",    "HTTP/1.0",
+                "GET http://h:1/",            "GET", "/",       "HTTP/0.9",
+                "GET http://h:1/xxx",         "GET", "/xxx",    "HTTP/0.9",
+                "  GET     ",                 null,  null,      null,
+                "GET",                        null,  null,      null,
+                "",                           null,  null,      null,
+                "Options * http/1.1  ",       "OPTIONS", "*",    "HTTP/1.1",
+                "GET /xxx/%%123/blah HTTP/1.0",  null, null,       null,
+                "GET http://h:x/ HTTP/1.0",   null, null,       null,
         };
-
+        
         HttpRequest r = new HttpRequest();
         
         try{
@@ -99,183 +111,191 @@ public class TestRequest
             {
                 try{
                     r.decodeRequestLine(rl[i].toCharArray(),rl[i].length());
-                    test.checkEquals(r.getMethod(),rl[i+1],rl[i]);
+                    assertEquals(rl[i],rl[i+1],r.getMethod());
                     URI uri=r.getURI();
-                    test.checkEquals(uri!=null?uri.getPath():null,
-                                     rl[i+2],rl[i]);
-                    test.checkEquals(r.getVersion(),rl[i+3],rl[i]);
+                    assertEquals(rl[i],rl[i+2],uri!=null?uri.getPath():null);
+                    assertEquals(rl[i],rl[i+3],r.getVersion());
                 }
                 catch(IOException e)
                 {
                     if (rl[i+1]!=null)
                         log.warn(LogSupport.EXCEPTION,e);
-                    test.check(rl[i+1]==null,rl[i]);
+                    assertTrue(rl[i],rl[i+1]==null);
                 }
                 catch(IllegalArgumentException e)
                 {
                     if (rl[i+1]!=null)
                         log.warn(LogSupport.EXCEPTION,e);
-                    test.check(rl[i+1]==null,rl[i]);
+                    assertTrue(rl[i],rl[i+1]==null);
                 }
             }
         }
         catch(Exception e)
         {
-            test.check(false,e.toString());
             log.warn("failed",e);
+            assertTrue(false);
         }
     }
     
     
     /* --------------------------------------------------------------- */
-    public static void testParameters()
-    {        
-        TestCase t = new TestCase("org.mortbay.http.HttpRequest.getParameter");
-        try
-        {
-            HttpRequest request=null;
-
-
-            // No params
-            request=getRequest("GET /R1 HTTP/1.0\n"+
-                               "Content-Type: text/plain\n"+
-                               "Content-Length: 5\n"+
-                               "\n"+
-                               "123\015\012");
-            if(log.isDebugEnabled())log.debug("Request: "+request);
-            t.checkEquals(request.getParameterNames().size(),0,"No parameters");
-            
-
-            // Query params
-            request=getRequest("GET /R1 HTTP/1.0\n"+
-                               "Content-Type: text/plain\n"+
-                               "Content-Length: 5\n"+
-                               "\n"+
-                               "123\015\012");
-            if(log.isDebugEnabled())log.debug("Request: "+request);
-            t.checkEquals(request.getQuery(),null,"No query");
-            
-            request=getRequest("GET /R1?A=1,2,3&B=4&B=5&B=6 HTTP/1.0\n"+
-                               "Content-Type: text/plain\n"+
-                               "Content-Length: 5\n"+
-                               "\n"+
-                               "123\015\012");
-            if(log.isDebugEnabled())log.debug("Request: "+request);
-            t.checkEquals(request.getParameterNames().size(),2,"Query parameters");
-            t.checkEquals(request.getParameter("A"),"1,2,3","Single Query");
-            t.checkEquals(request.getParameter("B"),"4","Multi as Single");
-            t.checkEquals(request.getParameterValues("A").size(),1,"Single as Multi");
-            t.checkEquals(request.getParameterValues("A").get(0),"1,2,3",
-                          "Single as Multi");
-            t.checkEquals(request.getParameterValues("B").get(0),"4",
-                          "Multi query");
-            t.checkEquals(request.getParameterValues("B").get(1),"5",
-                          "Multi query");
-            t.checkEquals(request.getParameterValues("B").get(2),"6",
-                          "Multi query");
-
-
-            // Form params
-            request=getRequest("GET /R1 HTTP/1.0\n"+
-                               "Content-Type: text/plain\n"+
-                               "Content-Length: 15\n"+
-                               "\n"+
-                               "B=7&C=8&D=9&D=A");
-            t.checkEquals(request.getParameterNames().size(),0,"No form, wrong type");
-
-            request=getRequest("GET /R1 HTTP/1.0\n"+
-                               "Content-Type: application/x-www-form-urlencoded\n"+
-                               "Content-Length: 15\n"+
-                               "\n"+
-                               "B=7&C=8&D=9&D=A");
-            t.checkEquals(request.getParameterNames().size(),0,"No form, GET");
-            
-            request=getRequest("POST /R1 HTTP/1.0\n"+
-                               "Content-Type: application/x-www-form-urlencoded\n"+
-                               "Content-Length: 15\n"+
-                               "\n"+
-                               "B=7&C=8&D=9&D=A");
-            t.checkEquals(request.getInputStream().available(),15,"Form not read yet");
-            t.checkEquals(request.getParameterNames().size(),3,"Form parameters");
-            t.checkEquals(request.getInputStream().available(),0,"Form read");
-            t.checkEquals(request.getParameter("B"),"7","Form single param");
-            t.checkEquals(request.getParameter("C"),"8","Form single param");
-            t.checkEquals(request.getParameterValues("D").size(),2,"Form Multi");
-            t.checkEquals(request.getParameterValues("D").get(0),"9",
-                          "Form Multi");
-            t.checkEquals(request.getParameterValues("D").get(1),"A",
-                          "Form Multi");
-
-            // Query and form params
-            
-            request=getRequest("POST /R1?A=1,2,3&B=4&B=5&B=6 HTTP/1.0\n"+
-                               "Content-Type: application/x-www-form-urlencoded\n"+
-                               "Content-Length: 15\n"+
-                               "\n"+
-                               "B=7&C=8&D=9&D=A");
-            t.checkEquals(request.getInputStream().available(),15,"Form not read yet");
-            t.checkEquals(request.getParameterNames().size(),4,"Form and query params");
-            t.checkEquals(request.getInputStream().available(),0,"Form read");
-
-            t.checkEquals(request.getParameter("A"),"1,2,3","Single Query");
-            t.checkEquals(request.getParameter("B"),"4","Merge as Single");
-            t.checkEquals(request.getParameterValues("B").get(0),"4",
-                          "Merged multi");
-            t.checkEquals(request.getParameterValues("B").get(1),"5",
-                          "Merged multi");
-            t.checkEquals(request.getParameterValues("B").get(2),"6",
-                          "Merged multi");
-            t.checkEquals(request.getParameterValues("B").get(3),"7",
-                          "Merged multi");
-            t.checkEquals(request.getParameter("C"),"8","Form single param");
-            t.checkEquals(request.getParameterValues("D").size(),2,"Form Multi");
-            t.checkEquals(request.getParameterValues("D").get(0),"9",
-                          "Form Multi");
-            t.checkEquals(request.getParameterValues("D").get(1),"A",
-                          "Form Multi");
-        }
-        catch(Exception e)
-        {
-            log.warn(LogSupport.EXCEPTION,e);
-            t.check(false,e.toString());
-        }
+    public void testParameters()
+    throws Exception
+    {      
+        HttpRequest request=null;
+        
+        
+        // No params
+        request=getRequest("GET /R1 HTTP/1.0\n"+
+                "Content-Type: text/plain\n"+
+                "Content-Length: 5\n"+
+                "\n"+
+        "123\015\012");
+        if(log.isDebugEnabled())log.debug("Request: "+request);
+        assertEquals("No parameters",0,request.getParameterNames().size());
+        
+        
+        // Query params
+        request=getRequest("GET /R1 HTTP/1.0\n"+
+                "Content-Type: text/plain\n"+
+                "Content-Length: 5\n"+
+                "\n"+
+        "123\015\012");
+        if(log.isDebugEnabled())log.debug("Request: "+request);
+        assertEquals("No query",null,request.getQuery());
+        
+        request=getRequest("GET /R1?A=1,2,3&B=4&B=5&B=6 HTTP/1.0\n"+
+                "Content-Type: text/plain\n"+
+                "Content-Length: 5\n"+
+                "\n"+
+        "123\015\012");
+        if(log.isDebugEnabled())log.debug("Request: "+request);
+        assertEquals("Query parameters",2,request.getParameterNames().size());
+        assertEquals("Single Query","1,2,3",request.getParameter("A"));
+        assertEquals("Multi as Single","4",request.getParameter("B"));
+        assertEquals("Single as Multi",1,request.getParameterValues("A").size());
+        assertEquals( "Single as Multi","1,2,3",request.getParameterValues("A").get(0));
+        assertEquals( "Multi query","4",request.getParameterValues("B").get(0));
+        assertEquals( "Multi query","5",request.getParameterValues("B").get(1));
+        assertEquals( "Multi query","6",request.getParameterValues("B").get(2));
+        
+        
+        // Form params
+        request=getRequest("GET /R1 HTTP/1.0\n"+
+                "Content-Type: text/plain\n"+
+                "Content-Length: 15\n"+
+                "\n"+
+        "B=7&C=8&D=9&D=A");
+        assertEquals("No form wrong type",0,request.getParameterNames().size());
+        
+        request=getRequest("GET /R1 HTTP/1.0\n"+
+                "Content-Type: application/x-www-form-urlencoded\n"+
+                "Content-Length: 15\n"+
+                "\n"+
+        "B=7&C=8&D=9&D=A");
+        assertEquals("No form GET",0,request.getParameterNames().size());
+        
+        request=getRequest("POST /R1 HTTP/1.0\n"+
+                "Content-Type: application/x-www-form-urlencoded\n"+
+                "Content-Length: 15\n"+
+                "\n"+
+        "B=7&C=8&D=9&D=A");
+        assertEquals("Form not read yet",15,request.getInputStream().available());
+        assertEquals("Form parameters",3,request.getParameterNames().size());
+        assertEquals("Form read",0,request.getInputStream().available());
+        assertEquals("Form single param","7",request.getParameter("B"));
+        assertEquals("Form single param","8",request.getParameter("C"));
+        assertEquals("Form Multi",2,request.getParameterValues("D").size());
+        assertEquals( "Form Multi","9",request.getParameterValues("D").get(0));
+        assertEquals( "Form Multi","A",request.getParameterValues("D").get(1));
+        
+        // Query and form params
+        
+        request=getRequest("POST /R1?A=1,2,3&B=4&B=5&B=6 HTTP/1.0\n"+
+                "Content-Type: application/x-www-form-urlencoded\n"+
+                "Content-Length: 15\n"+
+                "\n"+
+        "B=7&C=8&D=9&D=A");
+        assertEquals("Form not read yet",15,request.getInputStream().available());
+        assertEquals("Form and query params",4,request.getParameterNames().size());
+        assertEquals("Form read",0,request.getInputStream().available());
+        
+        assertEquals("Single Query","1,2,3",request.getParameter("A"));
+        assertEquals("Merge as Single","4",request.getParameter("B"));
+        assertEquals( "Merged multi","4",request.getParameterValues("B").get(0));
+        assertEquals( "Merged multi","5",request.getParameterValues("B").get(1));
+        assertEquals( "Merged multi","6",request.getParameterValues("B").get(2));
+        assertEquals( "Merged multi","7",request.getParameterValues("B").get(3));
+        assertEquals("Form single param","8",request.getParameter("C"));
+        assertEquals("Form Multi",2,request.getParameterValues("D").size());
+        assertEquals( "Form Multi","9",request.getParameterValues("D").get(0));
+        assertEquals( "Form Multi","A",request.getParameterValues("D").get(1));
+        
     }
+    
+    /* --------------------------------------------------------------- */
+    public void testMimeTypes()
+    {     
+        HttpContext c = new HttpContext(null,"/");
+        c.getMimeMap();
+        
+        assertEquals("index.html","text/html",c.getMimeByExtension("index.html"));
+        assertEquals("index.html","text/css",c.getMimeByExtension("style.css"));
+        assertEquals("index.html","application/pdf",c.getMimeByExtension("doc.pdf"));
+        assertEquals("index.html","text/html",c.getMimeByExtension("blah/index.html"));
+        assertEquals("index.html","text/css",c.getMimeByExtension("blah/style.css"));
+        assertEquals("index.html","application/pdf",c.getMimeByExtension("blah/doc.pdf"));
+        assertEquals("index.html","text/html",c.getMimeByExtension("blah/my.index.html"));
+        assertEquals("index.html","text/css",c.getMimeByExtension("blah/my.style.css"));
+        assertEquals("index.html","application/pdf",c.getMimeByExtension("blah/my.doc.pdf"));
+        
+        assertEquals("index.html","text/html",c.getMimeByExtension("index.HTML"));
+        assertEquals("index.html","text/css",c.getMimeByExtension("style.CSS"));
+        assertEquals("index.html","application/pdf",c.getMimeByExtension("doc.PDF"));
+        assertEquals("index.html","text/html",c.getMimeByExtension("blah/index.htMl"));
+        assertEquals("index.html","text/css",c.getMimeByExtension("blah/style.cSs"));
+        assertEquals("index.html","application/pdf",c.getMimeByExtension("blah/doc.pDf"));
+        assertEquals("index.html","text/html",c.getMimeByExtension("blah/my.index.Html"));
+        assertEquals("index.html","text/css",c.getMimeByExtension("blah/my.style.Css"));
+        assertEquals("index.html","application/pdf",c.getMimeByExtension("blah/my.doc.Pdf"));
+        
+    }
+    
 
     /* --------------------------------------------------------------- */
-    public static void testMimeTypes()
-    {        
-        TestCase t = new TestCase("org.mortbay.http.HttpContext.getMimeByExtension");
-        try
+    public void testCookies()
+    throws Exception
+    {      
+        HttpRequest request=null;
+        
+        // No params
+        request=getRequest("GET /R1 HTTP/1.0\n"+
+                "Cookie: Client=Winston Churchill\n"+
+                "Cookie: $Version=\"1\"; Customer=\"WILE_E_COYOTE\"; $Path=\"/acme\"\n"+
+                "\n");
+        
+        Cookie[] cookies = request.getCookies();
+        
+        assertEquals(cookies.length,2);
+        for (int i=0;i<cookies.length;i++)
         {
-            HttpContext c = new HttpContext(null,"/");
-            c.getMimeMap();
+            Cookie cookie = cookies[i];
             
-            t.checkEquals(c.getMimeByExtension("index.html"),"text/html","index.html");
-            t.checkEquals(c.getMimeByExtension("style.css"),"text/css","index.html");
-            t.checkEquals(c.getMimeByExtension("doc.pdf"),"application/pdf","index.html");
-            t.checkEquals(c.getMimeByExtension("blah/index.html"),"text/html","index.html");
-            t.checkEquals(c.getMimeByExtension("blah/style.css"),"text/css","index.html");
-            t.checkEquals(c.getMimeByExtension("blah/doc.pdf"),"application/pdf","index.html");
-            t.checkEquals(c.getMimeByExtension("blah/my.index.html"),"text/html","index.html");
-            t.checkEquals(c.getMimeByExtension("blah/my.style.css"),"text/css","index.html");
-            t.checkEquals(c.getMimeByExtension("blah/my.doc.pdf"),"application/pdf","index.html");
-            
-            t.checkEquals(c.getMimeByExtension("index.HTML"),"text/html","index.html");
-            t.checkEquals(c.getMimeByExtension("style.CSS"),"text/css","index.html");
-            t.checkEquals(c.getMimeByExtension("doc.PDF"),"application/pdf","index.html");
-            t.checkEquals(c.getMimeByExtension("blah/index.htMl"),"text/html","index.html");
-            t.checkEquals(c.getMimeByExtension("blah/style.cSs"),"text/css","index.html");
-            t.checkEquals(c.getMimeByExtension("blah/doc.pDf"),"application/pdf","index.html");
-            t.checkEquals(c.getMimeByExtension("blah/my.index.Html"),"text/html","index.html");
-            t.checkEquals(c.getMimeByExtension("blah/my.style.Css"),"text/css","index.html");
-            t.checkEquals(c.getMimeByExtension("blah/my.doc.Pdf"),"application/pdf","index.html");
-        }
-        catch(Exception e)
-        {
-            log.warn(LogSupport.EXCEPTION,e);
-            t.check(false,e.toString());
+            if ("Customer".equals(cookie.getName()))
+            {
+                assertEquals("WILE_E_COYOTE",cookie.getValue());
+                assertEquals(1,cookie.getVersion());
+                assertEquals("/acme",cookie.getPath());
+            }
+            else if ("Client".equals(cookie.getName()))
+            {
+                assertEquals("Winston Churchill",cookie.getValue());
+                assertEquals(0,cookie.getVersion());
+                assertEquals(null,cookie.getPath());
+            }
+            else
+                assertTrue(false);
         }
     }
-
     
 }
