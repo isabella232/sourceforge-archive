@@ -728,16 +728,50 @@ public class TestHarness
             test.checkEquals(URI.parentPath("/aaa"),"/","parent /aaa");
             test.checkEquals(URI.parentPath("/"),null,"parent /");
             test.checkEquals(URI.parentPath(null),null,"parent null");
-            
-            test.checkEquals(URI.canonicalPath("/aaa/bbb/"),"/aaa/bbb/","canonical /aaa/bbb/");
-            test.checkEquals(URI.canonicalPath("/aaa//bbb/"),"/aaa/bbb/","canonical /aaa//bbb/");
-            test.checkEquals(URI.canonicalPath("/aaa/./bbb/"),"/aaa/bbb/","canonical /aaa/./bbb/");
-            test.checkEquals(URI.canonicalPath("/aaa/../bbb/"),"/bbb/","canonical /aaa/../bbb/");
-            test.checkEquals(URI.canonicalPath("./bbb/"),"bbb/","canonical ./bbb/");
-            test.checkEquals(URI.canonicalPath("./aaa/../bbb/"),"bbb/","canonical ./aaa/../bbb/");
-            test.checkEquals(URI.canonicalPath(".//"),"/","canonical .//");
-            test.checkEquals(URI.canonicalPath("/"),"/","canonical /");
-            
+
+            String[][] canonical = 
+            {
+                {"/aaa/bbb/","/aaa/bbb/"},
+                {"/aaa//bbb/","/aaa/bbb/"},
+                {"/aaa/./bbb/","/aaa/bbb/"},
+                {"/aaa/../bbb/","/bbb/"},
+                {"/aaa/./../bbb/","/bbb/"},
+                {"./bbb/","bbb/"},
+                {"./aaa/../bbb/","bbb/"},
+                {".//",""},
+                {"/","/"},
+                {"aaa/bbb","aaa/bbb"},
+                {"aaa/","aaa/"},
+                {"aaa","aaa"},
+                {"/aaa/bbb","/aaa/bbb"},
+                {"/aaa//bbb","/aaa/bbb"},
+                {"/aaa/./bbb","/aaa/bbb"},
+                {"/aaa/../bbb","/bbb"},
+                {"/aaa/./../bbb","/bbb"},
+                {"./bbb","bbb"},
+                {"./aaa/../bbb","bbb"},
+                {"aaa/bbb/..","aaa/"},
+                {"aaa/bbb/../","aaa/"},
+                {"./",""},
+                {".",""},
+                {"",""},
+                {"..",null},
+                {"./..",null},
+                {"aaa/../..",null},
+                {"/foo/bar/../../..",null},
+                {"/../foo",null},
+                {"/foo/.","/foo/"},
+                {"a","a"},
+                {"a/","a/"},
+                {"a/.","a/"},
+                {"a/..",""},
+                {"a/../..",null},
+            };
+
+            for (int t=0;t<canonical.length;t++)
+                test.checkEquals(URI.canonicalPath(canonical[t][0]),
+                                 canonical[t][1],
+                                 "canonical "+canonical[t][0]);
         }
         catch(Exception e)
         {
@@ -1653,32 +1687,7 @@ public class TestHarness
             t.check(r.lastModified()!=-1,"Last Modified");
             in = r.getInputStream();
             data=IO.toString(in);
-            t.checkContains(data,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","Fetched file");
-
-            t.checkEquals(Resource.canonicalPath("foo"),"foo","canonicalPath");
-            t.checkEquals(Resource.canonicalPath("/"),"/","canonicalPath");
-            t.checkEquals(Resource.canonicalPath("/foo/bar"),"/foo/bar","canonicalPath");
-            t.checkEquals(Resource.canonicalPath("/foo/bar/"),"/foo/bar/","canonicalPath");
-            t.checkEquals(Resource.canonicalPath("//"),"/","canonicalPath //");
-            t.checkEquals(Resource.canonicalPath("//foo//bar"),"/foo/bar","canonicalPath //");
-            t.checkEquals(Resource.canonicalPath("//foo//bar//"),"/foo/bar/","canonicalPath //");
-            t.checkEquals(Resource.canonicalPath("//foo//bar//"),"/foo/bar/","canonicalPath //");
-            t.checkEquals(Resource.canonicalPath("/foo/../bar"),"/bar","canonicalPath ..");
-            t.checkEquals(Resource.canonicalPath("/foo/bar/.."),"/foo","canonicalPath ..");
-            t.checkEquals(Resource.canonicalPath("/foo/../bar/"),"/bar/","canonicalPath ..");
-            t.checkEquals(Resource.canonicalPath("/foo/bar/../"),"/foo/","canonicalPath ..");
-            t.checkEquals(Resource.canonicalPath("/foo/bar/../.."),"/","canonicalPath");
-            t.checkEquals(Resource.canonicalPath("/foo/bar/../../"),"/","canonicalPath");
-            t.checkEquals(Resource.canonicalPath("/foo/../bar/../"),"/","canonicalPath");
-            t.checkEquals(Resource.canonicalPath("/foo/bar/../../.."),null,"canonicalPath");
-            t.checkEquals(Resource.canonicalPath("../foo"),null,"canonicalPath");
-            t.checkEquals(Resource.canonicalPath("/../foo"),null,"canonicalPath");
-            t.checkEquals(Resource.canonicalPath("."),"","canonicalPath");
-            t.checkEquals(Resource.canonicalPath("/."),"/","canonicalPath");
-            t.checkEquals(Resource.canonicalPath("./"),"/","canonicalPath");
-            t.checkEquals(Resource.canonicalPath("/foo/."),"/foo","canonicalPath");
-            t.checkEquals(Resource.canonicalPath("/foo/./"),"/foo/","canonicalPath");
-  
+            t.checkContains(data,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","Fetched file");  
         }
         catch(Exception e)
         {

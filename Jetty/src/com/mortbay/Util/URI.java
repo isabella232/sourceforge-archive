@@ -619,47 +619,80 @@ public class URI
      */
     public static String canonicalPath(String path)
     {
-        /// XXX - this could be a LOT more efficient.
-        if (path==null || (!path.startsWith(".") &&  
-                           path.indexOf("/.")<0 &&
-                           path.indexOf("//")<0))
+        if (path==null || path.length()==0)
             return path;
-        
-        StringTokenizer tok = new StringTokenizer(path,"/",false);
-        ArrayList paths = new ArrayList(10);
-
-        while (tok.hasMoreTokens())
-        {
-            String item=tok.nextToken();
-            if ("..".equals(item))
-            {
-                if (paths.size()==0)
-                    return null;
-                paths.remove(paths.size()-1);
-            }
-            else if (".".equals(item))
-                continue;
-            else
-                paths.add(item);
-        }
 
         StringBuffer buf = new StringBuffer(path.length());
-        synchronized(buf)
+        int last=-1;
+        int slash=path.indexOf('/');
+        if (slash<0)
+            slash=path.length();
+        while (last<slash)
         {
-            if (path.startsWith("/"))
-                    buf.append("/");
-                
-            for (int i=0;i<paths.size();i++)
+            switch(slash-last)
             {
-                if (i>0)
-                    buf.append("/");
-                buf.append((String)paths.get(i));
+              case 1:
+                  if (last<0)
+                      buf.append('/');
+                  break;
+              case 2:
+                  {
+                      char c= path.charAt(last+1);
+                      if (c!='.')
+                      {
+                          buf.append(c);
+                          if(slash<path.length())
+                              buf.append('/');
+                      }
+                  }
+                  break;
+              case 3:
+                  {
+                      char c1= path.charAt(last+1);
+                      char c2= path.charAt(last+2);
+                      if (c1=='.' && c2=='.')
+                      {
+                          int i=buf.length()-1;
+                          if (i<0 || i==0 && buf.charAt(0)=='/')
+                              return null;
+                              
+                          for (i=buf.length()-1;i-->0;)
+                          {
+                              char c3=buf.charAt(i);
+                              if (c3=='/')
+                              {
+                                  buf.setLength(i+1);
+                                  break;
+                              }
+                          }
+                          if (i<0)
+                              buf.setLength(0);
+                      }
+                      else
+                      {
+                          buf.append(c1);
+                          buf.append(c2);
+                          buf.append('/');
+                      }
+                  }
+                  break;
+              default:
+                  if (slash<0)
+                      StringUtil.append(buf,path,last+1,path.length()-last);
+                  else
+                      StringUtil.append(buf,path,last+1,slash-last);
+                  break;
             }
-            if (path.endsWith("/") && (buf.length()==0 || buf.charAt(buf.length()-1)!='/'))
-                buf.append("/");
-
-            return buf.toString();
+            
+            last=slash;
+            slash=path.indexOf('/',last+1);
+            if (slash<0)
+                slash=path.length();
         }
+
+        if (buf.length()==path.length())
+            return path;
+        return buf.toString();
     }
 }
 

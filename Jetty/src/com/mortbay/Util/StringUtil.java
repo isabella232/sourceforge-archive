@@ -122,6 +122,32 @@ public class StringUtil
             s=s.substring(1,s.length()-1);
         return s;
     }
+
+
+    /* ------------------------------------------------------------ */
+    /** Append substring to StringBuffer 
+     * @param buf StringBuffer to append to
+     * @param s String to append from
+     * @param offset The offset of the substring
+     * @param length The length of the substring
+     */
+    public static void append(StringBuffer buf,
+                              String s,
+                              int offset,
+                              int length)
+    {
+        synchronized(buf)
+        {
+            int end=offset+length;
+            for (int i=offset; i<end;i++)
+            {
+                if (i>=s.length())
+                    break;
+                buf.append(s.charAt(i));
+            }
+        }
+    }
+    
     
     /* ------------------------------------------------------------ */
     /** Test main.
