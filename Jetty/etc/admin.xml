@@ -34,7 +34,7 @@ $Id$
     <Arg>
       <New class="com.mortbay.HTTP.HashUserRealm">
         <Arg>Jetty Demo Realm</Arg>
-        <Arg>./etc/demoRealm.properties</Arg>
+        <Arg><SystemProperty name="jetty.home" default="."/>/etc/demoRealm.properties</Arg>
       </New>
     </Arg>
   </Call>

@@ -73,8 +73,8 @@ $Id$
 
   <Call name="addWebApplication">
     <Arg>/default/*</Arg>
-    <Arg>webapps/default/</Arg>
-    <Arg>etc/webdefault.xml/</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/default/</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml/</Arg>
   </Call>
 
   <Call name="addContext">
@@ -92,7 +92,7 @@ $Id$
 
   <Set name="LogSink">
     <New class="com.mortbay.Util.WriterLogSink">
-      <Arg>logs/yyyy_mm_dd.request.log</Arg>
+      <Arg><SystemProperty name="jetty.logs" default="./logs"/>/yyyy_mm_dd.request.log</Arg>
       <Set name="RetainDays">90</Set>
       <Set name="Append">true</Set>
     </New>

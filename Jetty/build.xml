@@ -232,6 +232,7 @@ release     - Cleanup for release
           fork="yes"
           failonerror="yes" 
           >
+       <jvmarg line="-Djetty.home=. -Djetty.logs=." />
        <arg line="etc/admin.xml etc/demo.xml" />
     </java>
   </target>
