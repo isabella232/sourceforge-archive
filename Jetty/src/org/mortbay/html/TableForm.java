@@ -83,6 +83,19 @@ public class TableForm extends Form
     }
 
     /* ----------------------------------------------------------- */
+    /** Add a File Entry Field.
+     * @param tag The form name of the element
+     * @param label The label for the element in the table.
+     */
+    public Input addFileField(String tag, 
+                              String label)
+    {
+        Input i = new Input(Input.File,tag);
+        addField(label,i);
+        return i;
+    }
+    
+    /* ----------------------------------------------------------- */
     /** Add an informational field which also passes the data as hidden.
      * @param tag The form name of the element
      * @param label The label for the element in the table.

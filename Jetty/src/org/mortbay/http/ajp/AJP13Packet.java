@@ -422,10 +422,12 @@ public class AJP13Packet
         
         for (int i=0;i<_bytes;i++)
         {
-            char c=(char)((int)_buf[i]&0xFF);
-            if (c<32)
+            int d=_buf[i]&0xFF;
+            if (d<16)
                 b.append('0');
-            b.append(Integer.toString(c,32));
+            b.append(Integer.toString(d,16));
+
+            char c= (char)d;
             
             if (Character.isLetterOrDigit(c))
                 a.append(c);

@@ -156,7 +156,7 @@ public class AJP13InputStream extends InputStream
         // read packet
         if (!_packet.read(_in))
             throw new IOException("EOF");
-
+        
         if (_packet.unconsumedData()<=0)
             _closed=true;
         else if(_packet.getInt()>_packet.getBufferSize())

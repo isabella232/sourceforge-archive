@@ -248,7 +248,7 @@ public class AJP13Connection extends HttpConnection
                   break;
                   
               default:
-                  Code.warning("Not implemented: "+packet);
+                  Code.debug("Ignored: "+packet);
                   persistent=false;
             }
 

@@ -84,7 +84,6 @@ public class Dump extends HttpServlet
         
         request.setCharacterEncoding("UTF-8");
         response.setContentType("text/html");
-        Reader r = request.getReader();
 
         if (info!=null && info.indexOf("Locale/")>=0)
         {
@@ -326,19 +325,54 @@ public class Dump extends HttpServlet
 			      + "</pre>");
             }
 
-
+            if (request.getContentType()!=null &&
+                request.getContentType().startsWith("multipart/form-data") &&
+                request.getContentLength()<1000000)
+            {
+                MultiPartRequest multi = new MultiPartRequest(request);
+                String[] parts = multi.getPartNames();
+                
+                table.newRow();
+                table.newHeading()
+                    .cell().nest(new Font(2,true))
+                    .add("<BR>Multi-part content")
+                    .attribute("COLSPAN","2")
+                    .left();
+                for (int p=0;p<parts.length;p++)
+                {
+                    name=parts[p];
+                    table.newRow();
+                    table.addHeading(name+":&nbsp;")
+                        .cell().attribute("VALIGN","TOP").right();
+                    table.addCell("<pre>" +
+                                  multi.getString(parts[p]) +
+                                  "</pre>");
+                }
+            }
+            
             page.add(Break.para);
             
             page.add(new Heading(1,"Form to generate Dump content"));
             TableForm tf = new TableForm(response.encodeURL(request.getRequestURI()));
             tf.method("POST");
-            page.add(tf);
             tf.addTextField("TextField","TextField",20,"value");
             Select select = tf.addSelect("Select","Select",true,3);
             select.add("ValueA");
             select.add("ValueB1,ValueB2");
             select.add("ValueC");
-            tf.addButton("Action","Submit");            
+            tf.addButton("Action","Submit");
+            page.add(tf);
+
+            page.add(new Heading(1,"Form to upload content"));
+            tf = new TableForm(response.encodeURL(request.getRequestURI()));
+            tf.method("POST");
+            tf.attribute("enctype","multipart/form-data");
+            tf.addFileField("file","file");              
+            tf.addButton("Upload","Upload");
+            page.add(tf);
+
+
+            
         }
         catch (Exception e)
         {
@@ -347,7 +381,6 @@ public class Dump extends HttpServlet
     
         page.write(pout);
         pout.close();
-        r.close();
         
         if (pi!=null)
         {

@@ -47,7 +47,7 @@ public class AJP13Listener
     private int _integralPort=0;
     private int _confidentialPort=0;
     private boolean _identifyListener=false;
-    private int _bufferSize=8185; // == 8192 - hdr - type - len
+    private int _bufferSize=8192; 
     private int _bufferReserve=512;
     private String[] _remoteServers;
     
@@ -86,8 +86,8 @@ public class AJP13Listener
     public void setBufferSize(int size)
     {
         _bufferSize=size;
-        if (_bufferSize>8185)
-            Code.warning("AJP Data buffer > 8185: "+size);
+        if (_bufferSize>8192)
+            Code.warning("AJP Data buffer > 8192: "+size);
     }
         
     /* ------------------------------------------------------------ */
