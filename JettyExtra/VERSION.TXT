@@ -2,6 +2,8 @@ JettyExtra Versions
 --------------------
 
   + Merged HttpContext
+  + Moved jmx to main release
+
 
 JettyExtra-4.1.D0
   + Handle other ModelMBean implementations better.
