@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+Jetty-3.1.5 - 11 Dec 2001
+ + setCookie always has equals for cookie value
+ + cookies with maxage==0 expired 1 jan 1970 
  + Fixed formatting of redirectURLs for NS4.08
  + Fixed ChunableInputStream.resetStream bug.
  + Ignore IO errors when trying to persist connections.

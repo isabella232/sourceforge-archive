@@ -1932,38 +1932,7 @@ public class TestHarness
             t.check(r.lastModified()!=-1,"Last Modified");
             in = r.getInputStream();
             data=IO.toString(in);
-            t.checkContains(data,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","Fetched file");  
-
-            // Test HTTP Resource
-            try{
-                Resource h = Resource.newResource("http://jetty.mortbay.org/demo/files/");
-                in = h.getInputStream();
-                t.check(h.exists(),"http exists");
-                t.check(h.isDirectory(),"http directory");
-                t.check(h.lastModified()!=-1,"http Modified");
-                data=IO.toString(in);
-                t.checkContains(data,"file.txt","Fetched http"); 
-                t.checkContains(data,"file.html","Fetched http");
-                t.check(h.exists(),"http exists");
-                t.check(h.lastModified()!=-1,"http Modified");
-                in = h.getInputStream();
-                data=IO.toString(in);
-                t.checkContains(data,"file.txt","Fetched http"); 
-                t.checkContains(data,"file.html","Fetched http");
-                
-                h=h.addPath("file.txt");
-                t.check(h.exists(),"http exists");
-                t.check(!h.isDirectory(),"http !directory");
-                
-                h= Resource.newResource("http://jetty.mortbay.org/xxxx");
-                t.check(!h.exists(),"http !exists "+h);
-                t.check(!h.isDirectory(),"http !directory ");
-            }
-            catch(java.net.UnknownHostException uhe)
-            {
-                Code.ignore(uhe);
-                Code.warning("org.mortbay.util.Resource Not fully tested. An internet connection is required");
-            }
+            t.checkContains(data,"ABCDEFGHIJKLMNOPQRSTUVWXYZ","Fetched file");
         }
         catch(Exception e)
         {

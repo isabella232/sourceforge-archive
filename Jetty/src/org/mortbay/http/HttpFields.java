@@ -283,7 +283,9 @@ public class HttpFields
     public final static SimpleDateFormat __dateSend = 
         new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'",
                              Locale.US);
-
+    public final static String __01Jan1970=
+        HttpFields.__dateSend.format(new Date(0));
+    
     /* ------------------------------------------------------------ */
     private final static String __dateReceiveFmt[] =
     {
@@ -1157,11 +1159,10 @@ public class HttpFields
         synchronized(buf)
         {
             buf.append(name);
+            buf.append('=');
+            
             if (value!=null && value.length()>0)
-            {
-                buf.append('=');
                 buf.append(UrlEncoded.encodeString(value));
-            }
             
             if (version>0)
             {
@@ -1193,7 +1194,10 @@ public class HttpFields
                 if (version==0)
                 {
                     buf.append(";Expires=");
-                    buf.append(HttpFields.__dateSend.format(new Date(System.currentTimeMillis()+1000L*maxAge)));
+                    if (maxAge==0)
+                        buf.append(__01Jan1970);
+                    else
+                        buf.append(HttpFields.__dateSend.format(new Date(System.currentTimeMillis()+1000L*maxAge)));
                 }
                 else
                 {
