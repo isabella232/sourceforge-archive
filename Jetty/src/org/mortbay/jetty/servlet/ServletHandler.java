@@ -57,10 +57,10 @@ public class ServletHandler
 {
     /* ------------------------------------------------------------ */
     public final static String __JSP_SERVLET="org.apache.jasper.servlet.JspServlet";
-    public final static String __SERVLET_REQUEST="org.mortbay.J.S.Request";
-    public final static String __SERVLET_HOLDER="org.mortbay.J.S.Holder";
-    public final static String __J_URI="org.mortbay.J.S.URI";
-    public final static String __J_AUTHENTICATED="org.mortbay.J.S.Auth";
+    public final static String __SERVLET_REQUEST="org.mortbay.jetty.Request";
+    public final static String __SERVLET_HOLDER="org.mortbay.jetty.Holder";
+    public final static String __J_URI="org.mortbay.jetty.URI";
+    public final static String __J_AUTHENTICATED="org.mortbay.jetty.Auth";
     
     /* ------------------------------------------------------------ */
     private PathMap _servletMap=new PathMap();

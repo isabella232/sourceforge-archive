@@ -122,7 +122,7 @@ public class ForwardHandler extends NullHandler
             if (context.length()==1)
                 request.setPath(newPath);
             else
-                request.setPath(getHandlerContext().getContextPath()+newPath);
+                request.setPath(URI.addPaths(context,newPath));
             if (_handleQueries && query != null){
                 // add forwarded to query string to parameters
                 UrlEncoded.decodeTo(query, request.getParameters());

@@ -304,9 +304,32 @@ public class HttpResponse extends HttpMessage
      */
     private void sendError(int code,String error,String message) 
         throws IOException
-    {        
+    {
+        Integer code_integer=new Integer(code);
+        String reason = (String)__statusMsg.get(code_integer);
+        HttpRequest request=getRequest();
+
+        // Handle error page.
+        // XXX some servlet dependancies in attribute names here.
+        String error_page = _handlerContext==null?null:_handlerContext.getErrorPage(error);
+        if (error_page!=null)
+        {
+            if (request.getAttribute("javax.servlet.error.status_code")==null)
+            {
+                // Set attributes to describe error
+                request.setAttribute("javax.servlet.error.status_code",code_integer);
+                request.setAttribute("javax.servlet.error.message",
+                                     message==null?reason:message);
+                // Do a forward to the error page resource.
+                getHandlerContext().handle(error_page,null,request,this);
+                return;
+            }
+            Code.warning("Error "+code+" while serving error page for "+
+                         request.getAttribute("javax.servlet.error.status_code"));
+        }
+
+        // Generate normal error page.
         setStatus(code);
-        String reason = (String)__statusMsg.get(new Integer(code));
         setReason(reason);
 
         if (code!=__204_No_Content &&
@@ -319,47 +342,34 @@ public class HttpResponse extends HttpMessage
             _characterEncoding=null;
             ChunkableOutputStream out=getOutputStream();
             
-            Resource errorPage=null;
-            if (_handlerContext!=null && error!=null)
-                errorPage=_handlerContext.getErrorPageResource(error);
-
-            if (errorPage!=null)
+            if (message!=null)
             {
-                _header.putIntField(HttpFields.__ContentLength,
-                                    (int)errorPage.length());
-                IO.copy(errorPage.getInputStream(),out);
+                message=StringUtil.replace(message,"<","&lt;");
+                message=StringUtil.replace(message,">","&gt;");
             }
-            else
-            {
-	        if (message!=null)
-		{
-		    message=StringUtil.replace(message,"<","&lt;");
-		    message=StringUtil.replace(message,">","&gt;");
-		}
-	        String uri=getRequest().getPath();
-		uri=StringUtil.replace(uri,"<","&lt;");
-		uri=StringUtil.replace(uri,">","&gt;");
-
-                StringBuffer body= new StringBuffer(1500);
-                body.append("<HTML>\n<HEAD>\n<TITLE>Error ");
-                body.append(code);
-                body.append(' ');
-                body.append(reason);
-                body.append("</TITLE>\n<BODY>\n<H2>HTTP ERROR: ");
-                body.append(code);
-                body.append(' ');
-                body.append(reason);
-                body.append("</H2>\n");
-                if (message!=null) body.append(message);
-                body.append("<P>RequestURI=");
-                body.append(uri);
-                for (int i=0;i<20;i++)
-                    body.append("\n                                                ");
-                body.append("\n</BODY>\n</HTML>\n");
-                byte[] buf=body.toString().getBytes(StringUtil.__ISO_8859_1);
-                _header.putIntField(HttpFields.__ContentLength,buf.length);
-                out.write(buf);
-            }
+            String uri=getRequest().getPath();
+            uri=StringUtil.replace(uri,"<","&lt;");
+            uri=StringUtil.replace(uri,">","&gt;");
+            
+            StringBuffer body= new StringBuffer(1500);
+            body.append("<HTML>\n<HEAD>\n<TITLE>Error ");
+            body.append(code);
+            body.append(' ');
+            body.append(reason);
+            body.append("</TITLE>\n<BODY>\n<H2>HTTP ERROR: ");
+            body.append(code);
+            body.append(' ');
+            body.append(reason);
+            body.append("</H2>\n");
+            if (message!=null) body.append(message);
+            body.append("<P>RequestURI=");
+            body.append(uri);
+            for (int i=0;i<20;i++)
+                body.append("\n                                                ");
+            body.append("\n</BODY>\n</HTML>\n");
+            byte[] buf=body.toString().getBytes(StringUtil.__ISO_8859_1);
+            _header.putIntField(HttpFields.__ContentLength,buf.length);
+            out.write(buf);
         }
         else if (code!=206) 
         {
@@ -414,7 +424,11 @@ public class HttpResponse extends HttpMessage
             sendError(code,""+code,he.getMessage());
         }
         else
+        {
+            getRequest().setAttribute("javax.servlet.error.exception_type",
+                                      exception.getClass());
             sendError(code,exception.getClass().getName(),exception.toString());
+        }
     }
     
     /* ------------------------------------------------------------- */
