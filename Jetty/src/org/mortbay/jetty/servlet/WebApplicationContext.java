@@ -376,7 +376,7 @@ public class WebApplicationContext
                 Resource web = _webInf.addPath("web.xml");
                 if (!web.exists())
                 {
-                    Code.warning("No WEB-INF/web.xml in "+_war+". Serving files and default/dynamic servlets only");
+                    Log.event("No WEB-INF/web.xml in "+_war+". Serving files and default/dynamic servlets only");
                 }
                 else
                 {

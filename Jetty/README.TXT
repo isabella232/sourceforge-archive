@@ -55,11 +55,14 @@ Quick Start
   The demo server can be run with the commands
 
      cd Jetty-X.X.X
-     java -jar start.jar
+     java -jar start.jar etc/demo.xml
 
   Then point your browser at http://localhost:8080 to see the demo 
   web site.
 
+  The default configuration file (etc/jetty.xml) can be run with:
+
+     java -jar start.jar
 
 
 Starting Jetty
@@ -117,6 +120,10 @@ If an extra classpaths are needed, they can be added with the jetty.class.path
 property:
  
   java -Djetty.class.path=/usr/share/java -jar start.jar <configfile> ...
+
+
+If no configuration file is provided, start.jar will use etc/admin.xml and 
+etc/jetty.xml
 
 
 

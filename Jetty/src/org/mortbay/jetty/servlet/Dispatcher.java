@@ -24,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
+import javax.servlet.http.HttpSession;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.PathMap;
 import org.mortbay.util.Code;
@@ -66,6 +67,8 @@ public class Dispatcher implements RequestDispatcher
     String _query;
     boolean _include;
     DispatcherRequest _request;
+    boolean _xContext;
+    HttpSession _xSession;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -144,6 +147,10 @@ public class Dispatcher implements RequestDispatcher
             ?(ServletHttpRequest)httpConnection.getRequest().getWrapper()
             :ServletHttpRequest.unwrap(servletRequest);
 
+        // Is this being dispatched to a different context?
+        _xContext=
+            httpServletRequest.getContextPath()!=_servletHandler.getHttpContext().getContextPath();
+
         // wrap the request and response
         DispatcherRequest request = new DispatcherRequest(httpServletRequest);
         DispatcherResponse response = new DispatcherResponse(httpServletResponse);
@@ -203,6 +210,7 @@ public class Dispatcher implements RequestDispatcher
             else if (response.isFlushNeeded())
                 response.flushBuffer();
         }
+            
     }
 
     /* ------------------------------------------------------------ */
@@ -467,6 +475,29 @@ public class Dispatcher implements RequestDispatcher
             
             return Collections.enumeration(set);
         }
+        
+        /* ------------------------------------------------------------ */
+        public HttpSession getSession(boolean create)
+        {
+            if (_xContext)
+            {
+                if (_xSession==null)
+                {
+                    Code.debug("Ctx dispatch session");
+                    _xSession=_servletHandler.getHttpSession(getRequestedSessionId());
+                    if (create && _xSession==null)
+                        _xSession=_servletHandler.newHttpSession((HttpServletRequest)getRequest());
+                }
+                return _xSession;
+            }
+            return super.getSession(create);
+        }
+    
+        /* ------------------------------------------------------------ */
+        public HttpSession getSession()
+        {
+            return getSession(true);
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -703,6 +734,3 @@ public class Dispatcher implements RequestDispatcher
         {}
     }
 };
-
-
-

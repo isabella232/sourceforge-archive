@@ -10,6 +10,7 @@ Jetty Versions
  + Form authentication remembers URL over 403
  + ProxyHandler has improved test for request content
  + Removed support of org.mortbay.http.User role.
+ + Fixed problem with shared session for inter context dispatching.
 
 Jetty-4.2.10pre0 - 5 May 2003
  + Moved Log4JLogSink into JettyPlus

@@ -124,7 +124,7 @@
        java.lang.NullPointerException
     </exception-type>
     <location>
-       errorNullPointer.html
+       /dump/nullpointer
     </location>
   </error-page>
 
