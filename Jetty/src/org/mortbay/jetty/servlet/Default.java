@@ -53,6 +53,12 @@ import org.mortbay.util.URI;
  *                    larger than this will be served as gzip content encoded
  *                    if a matching resource is found ending with ".gz"
  *
+ *  resourceBase      Set to replace the context resource base
+ *
+ *  relativeResourceBase    
+ *                    Set with a pathname relative to the base of the
+ *                    servlet context root. Useful for only serving static content out
+ *                    of only specific subdirectories.
  * </PRE>
  *                                                               
  * The MOVE method is allowed if PUT and DELETE are allowed             
@@ -89,7 +95,25 @@ public class Default extends HttpServlet
         _redirectWelcomeFiles=getInitBoolean("redirectWelcome");
         _minGzipLength=getInitInt("minGzipLength");
         
+        String rrb = getInitParameter("relativeResourceBase");
+        if (rrb!=null)
+        {
+            try
+            {
+                _resourceBase=_httpContext.getBaseResource().addPath(rrb);
+            }
+            catch (Exception e) 
+            {
+                Code.warning(e);
+                throw new UnavailableException(e.toString()); 
+            }
+        }
+ 
         String rb=getInitParameter("resourceBase");
+ 
+        if (rrb != null && rb != null)
+             throw new  UnavailableException("resourceBase & relativeResourceBase");    
+         
         if (rb!=null)
         {
             try{_resourceBase=Resource.newResource(rb);}
@@ -98,7 +122,7 @@ public class Default extends HttpServlet
                 throw new UnavailableException(e.toString()); 
             }
         }
-        
+       
         
         if (_putAllowed)
             _AllowString+=", PUT";
