@@ -58,8 +58,20 @@ public class XmlParser
             boolean notValidating = Boolean.getBoolean("org.mortbay.xml.XmlParser.NotValidating");
             factory.setValidating(!notValidating);
             _parser = factory.newSAXParser();
-            
-            _parser.getXMLReader().setFeature ("http://apache.org/xml/features/validation/schema", !notValidating);
+
+
+
+            try
+            {  
+                if (!notValidating)
+                    _parser.getXMLReader().setFeature ("http://apache.org/xml/features/validation/schema",  true);
+            }
+            catch (Exception e)
+            {
+                Code.warning ("Schema validation may not be supported: ", e);
+            }
+
+         
             _parser.getXMLReader().setFeature ("http://xml.org/sax/features/validation", !notValidating);
             _parser.getXMLReader().setFeature ("http://xml.org/sax/features/namespaces", !notValidating); 	
             _parser.getXMLReader().setFeature ("http://xml.org/sax/features/namespace-prefixes", !notValidating);
@@ -81,7 +93,23 @@ public class XmlParser
             SAXParserFactory factory = SAXParserFactory.newInstance();
             factory.setValidating(validating);
             _parser = factory.newSAXParser();
-            _parser.getXMLReader().setFeature ("http://apache.org/xml/features/validation/schema", validating);            
+
+
+
+            try
+            {
+                if (validating)
+                    _parser.getXMLReader().setFeature ("http://apache.org/xml/features/validation/schema", validating);
+            }
+            catch (Exception e)
+            {
+                if (validating)
+                    Code.warning ("Schema validation may not be supported: ", e);
+                else
+                    Code.ignore (e);
+            }
+
+
             _parser.getXMLReader().setFeature ("http://xml.org/sax/features/validation", validating );
             _parser.getXMLReader().setFeature ("http://xml.org/sax/features/namespaces", validating);
             _parser.getXMLReader().setFeature ("http://xml.org/sax/features/namespace-prefixes", validating);
@@ -91,6 +119,7 @@ public class XmlParser
             Code.warning(e);
             throw new Error(e.toString());
         }
+
     }
 
     /* ------------------------------------------------------------ */
