@@ -487,7 +487,7 @@ public class WebApplicationContext extends ServletHandlerContext
                 else if ("env-entry".equals(name))
                     Code.warning("Not implemented: "+node);
                 else if ("filter".equals(name))
-                    Code.warning("Not implemented: "+node);
+                    initFilter(node);
                 else if ("filter-mapping".equals(name))
                     Code.warning("Not implemented: "+node);
                 else if ("listener".equals(name))
@@ -526,6 +526,36 @@ public class WebApplicationContext extends ServletHandlerContext
         setInitParameter(name,value); 
     }
 
+    /* ------------------------------------------------------------ */
+    private void initFilter(XmlParser.Node node)
+        throws ClassNotFoundException, UnavailableException
+    {
+        String name=node.getString("filter-name",false,true);
+        String className=node.getString("filter-class",false,true);
+        
+        if (className==null)
+        {
+            Code.warning("Missing filter-class in "+node);
+            return;
+        }
+        if (name==null)
+            name=className;
+        
+        FilterHolder holder =
+            new FilterHolder(_servletHandler,name,className);
+        
+        Iterator iter= node.iterator("init-param");
+        while(iter.hasNext())
+        {
+            XmlParser.Node paramNode=(XmlParser.Node)iter.next();
+            String pname=paramNode.getString("param-name",false,true);
+            String pvalue=paramNode.getString("param-value",false,true);
+            holder.put(pname,pvalue);
+        }
+
+        System.err.println(holder);
+    }
+    
     /* ------------------------------------------------------------ */
     private void initServlet(XmlParser.Node node)
         throws ClassNotFoundException, UnavailableException

@@ -41,7 +41,6 @@ public class ServletHolder extends Holder
     implements Comparable
 {
     /* ---------------------------------------------------------------- */
-    private ServletHandler _servletHandler;
     private Stack _servlets;
     private Servlet _servlet;
     
