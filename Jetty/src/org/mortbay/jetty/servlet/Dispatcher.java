@@ -7,6 +7,7 @@ package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Enumeration;
 import java.util.Collections;
@@ -19,6 +20,7 @@ import java.util.Set;
 import java.util.HashSet;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -40,6 +42,7 @@ import org.mortbay.util.MultiMap;
 import org.mortbay.util.Resource;
 import org.mortbay.util.UrlEncoded;
 import org.mortbay.util.URI;
+import org.mortbay.util.WriterOutputStream;
 
 
 /* ------------------------------------------------------------ */
@@ -182,7 +185,6 @@ public class Dispatcher implements RequestDispatcher
         HttpResponse httpResponse=httpRequest.getHttpResponse();
         ServletRequest oldRequestWrapper=servletHttpRequest.getWrapper();
         ServletResponse oldResponseWrapper=servletHttpResponse.getWrapper();
-        int old_output_state=0;
         
         try
         {
@@ -197,14 +199,10 @@ public class Dispatcher implements RequestDispatcher
                 // Reset any output done so far.
                 servletResponse.resetBuffer();
                 servletHttpResponse.resetBuffer();
-                servletHttpResponse.setOutputState(ServletHttpResponse.DISABLED);
-                servletHttpResponse.setOutputState(ServletHttpResponse.NO_OUT);
             }
             else
             {
                 response.setLocked(true);
-                old_output_state=servletHttpResponse.getOutputState();
-                servletHttpResponse.setOutputState(ServletHttpResponse.NO_OUT);
             }
             
 
@@ -260,15 +258,17 @@ public class Dispatcher implements RequestDispatcher
                 request.setQueryString(query);
                 _holder.handle(request,response);
                 if (forward)
+                {
+                    response.flushBuffer();
+                    response.close();
                     servletHttpResponse.setOutputState(ServletHttpResponse.DISABLED);
+                }
             }
         }
         finally
         {
             servletHttpRequest.setWrapper(oldRequestWrapper);
             servletHttpResponse.setWrapper(oldResponseWrapper);
-            if (!forward)
-                servletHttpResponse.setOutputState(old_output_state);
         }
     }
         
@@ -500,7 +500,9 @@ public class Dispatcher implements RequestDispatcher
     /* ------------------------------------------------------------ */
     private class DispatcherResponse extends HttpServletResponseWrapper
     {
-        boolean _locked;
+        private boolean _locked;
+        private ServletOutputStream _out=null;
+        private PrintWriter _writer=null;
         
         /* ------------------------------------------------------------ */
         DispatcherResponse(HttpServletResponse response)
@@ -521,9 +523,70 @@ public class Dispatcher implements RequestDispatcher
         }
 
         /* ------------------------------------------------------------ */
+        public ServletOutputStream getOutputStream()
+            throws IOException
+        {
+            if (_writer!=null)
+                throw new IllegalStateException("getWriter called");
+
+            if (_out==null)
+            {
+                try {_out=super.getOutputStream();}
+                catch(IllegalStateException e)
+                {
+                    Code.warning(e);
+                    _out=new ServletOut(new WriterOutputStream(super.getWriter()));
+                }
+            }
+            
+            return _out;
+        }  
+      
+        /* ------------------------------------------------------------ */
+        public PrintWriter getWriter()
+            throws IOException
+        {
+            if (_out!=null)
+                throw new IllegalStateException("getOutputStream called");
+
+            if (_writer==null)
+            {
+                try{_writer=super.getWriter();}
+                catch(IllegalStateException e)
+                {
+                    Code.warning(e);
+                    _writer = new ServletWriter(super.getOutputStream(),
+                                                getCharacterEncoding());
+                }
+            }
+            return _writer;
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void flushBuffer()
+            throws IOException
+        {
+            if (_writer!=null)
+                _writer.flush();
+            if (_out!=null)
+                _out.flush();
+            super.flushBuffer();
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void close()
+            throws IOException
+        {
+            if (_writer!=null)
+                _writer.close();
+            if (_out!=null)
+                _out.close();
+        }
+        
+        /* ------------------------------------------------------------ */
         public void setLocale(Locale locale)
         {
-            if (!_locked)  super.setLocale(locale);
+            if (!_locked) super.setLocale(locale);
         }
         
         /* ------------------------------------------------------------ */

@@ -572,7 +572,7 @@ public class ServletHandler
                 holder.handle(request.getWrapper(),response.getWrapper());
                 
                 // reset output
-                response.setOutputState(0);
+                response.setOutputState(ServletHttpResponse.NO_OUT);
                 Code.debug("Handled by ",holder);
                 if (!httpResponse.isCommitted() && response.isWrapped())
                     response.getWrapper().flushBuffer();

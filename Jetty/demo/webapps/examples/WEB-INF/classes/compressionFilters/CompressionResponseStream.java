@@ -98,7 +98,6 @@ public class CompressionResponseStream
         count = 0;
         this.response = response;
         this.output = response.getOutputStream();
-
     }
 
 
@@ -176,7 +175,7 @@ public class CompressionResponseStream
      * any further output data to throw an IOException.
      */
     public void close() throws IOException {
-
+        
         //System.out.println("close() @ CompressionResponseStream");
         if (closed)
             throw new IOException("This output stream has already been closed");
@@ -202,7 +201,6 @@ public class CompressionResponseStream
      * response to be committed.
      */
     public void flush() throws IOException {
-
         //System.out.println("flush() @ CompressionResponseStream");
         if (closed) {
             throw new IOException("Cannot flush a closed output stream");
@@ -234,7 +232,7 @@ public class CompressionResponseStream
      * @exception IOException if an input/output error occurs
      */
     public void write(int b) throws IOException {
-
+        
         //System.out.print("write "+b+" in CompressionResponseStream ");
         if (closed)
             throw new IOException("Cannot write to a closed output stream");
@@ -348,7 +346,6 @@ public class CompressionResponseStream
      * Reset the count of bytes written to this stream to zero.
      */
     public void reset() {
-
         count = 0;
 
     }

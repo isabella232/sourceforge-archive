@@ -2,6 +2,8 @@ Jetty Versions
 --------------
 
 Jetty-4.0.RC1 - wait for it....
+ + Added ContentEncodingHandler for compression.
+ + Fixed filter vs forward bug.
  + Improved efficiency of quality list handling
  + Simplified filter API to chunkable streams
  + XmlParser is validating by default. use o.m.x.XmlParser.NotValidating property to change.
