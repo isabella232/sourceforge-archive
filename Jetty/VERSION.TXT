@@ -1,6 +1,7 @@
 Jetty3 Versions
 --------------
 
+ + Fixed handling of default mime types
  + Allow contextpaths without leading /
 
 

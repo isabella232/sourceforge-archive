@@ -435,7 +435,8 @@ public class HttpConnection
                 if (_response!=null)
                 {
                     Code.debug("RESPONSE:\n",_response);
-                    if (content_length>=0 && bytes_written>0 && content_length!=bytes_written)
+                    if (_persistent &&
+                        content_length>=0 && bytes_written>0 && content_length!=bytes_written)
                     {
                         Code.warning("Invalid length: Content-Length="+content_length+
                                      " bytes written="+bytes_written+

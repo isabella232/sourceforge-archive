@@ -904,6 +904,8 @@ public class ResourceHandler extends NullHandler
         {
             this.resource = resource;
             encoding = getHandlerContext().getMimeByExtension(resource.getName());
+            if (encoding==null)
+                encoding=getHandlerContext().getMimeByExtension(".default");
             length = resource.length();
         }
 
@@ -1110,6 +1112,8 @@ public class ResourceHandler extends NullHandler
             }
             in.close();
             encoding=getHandlerContext().getMimeByExtension(resource.getName());
+            if (encoding==null)
+                encoding=getHandlerContext().getMimeByExtension(".default");
         }
 
         /* ------------------------------------------------------------ */

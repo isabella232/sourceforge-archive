@@ -535,6 +535,9 @@ public class HttpFields
      */
     public String put(String name,String value)
     {
+        if (value==null)
+            return remove(name);
+        
         FieldInfo info=getFieldInfo(name);
         
         // Look for value to replace.
@@ -615,6 +618,9 @@ public class HttpFields
     public void add(String name,String value)
         throws IllegalArgumentException
     {
+        if (value==null)
+            throw new IllegalArgumentException("null value");
+        
         FieldInfo info=getFieldInfo(name);
         Field last=null;
         if (_index[info.hashCode()]>=0)
