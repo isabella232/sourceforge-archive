@@ -127,7 +127,6 @@ public class HttpContext extends Container
     private PathMap _constraintMap=new PathMap();
     private Authenticator _authenticator;
     private RequestLog _requestLog;
-    private Object _eventListeners;
 
 
     private String[] _welcomes=
@@ -1993,32 +1992,6 @@ public class HttpContext extends Container
     {
         throw new UnsupportedOperationException();
     }   
-
-    /* ------------------------------------------------------------ */
-    /** Add a server event listener.
-     * @param listener ComponentEventListener or LifeCycleEventListener 
-     */
-    public void addEventListener(EventListener listener)
-    	throws IllegalArgumentException
-    {
-        if(log.isDebugEnabled())log.debug("addEventListener: "+listener);
-        if (_eventListeners==null)
-            _eventListeners=new ArrayList();
-        
-        if (listener instanceof ComponentListener ||
-            listener instanceof LifeCycleListener )
-            _eventListeners=LazyList.add(_eventListeners,listener);
-        else
-            throw new IllegalArgumentException("Not handled "+listener);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void removeEventListener(EventListener listener)
-    {
-        if(log.isDebugEnabled())log.debug("removeEventListener: "+listener);
-        _eventListeners=LazyList.remove(_eventListeners,listener);
-    }
-    
     
     
     /**
