@@ -170,8 +170,8 @@ public class Dispatcher implements RequestDispatcher
     
     /* ------------------------------------------------------------ */
     private void dispatch(ServletRequest servletRequest,
-                         ServletResponse servletResponse,
-                         boolean forward)
+                          ServletResponse servletResponse,
+                          boolean forward)
         throws ServletException,IOException
     {
         HttpServletRequest httpServletRequest=(HttpServletRequest)servletRequest;
@@ -180,8 +180,8 @@ public class Dispatcher implements RequestDispatcher
         ServletHttpResponse servletHttpResponse=servletHttpRequest.getServletHttpResponse();
         HttpRequest httpRequest=servletHttpRequest.getHttpRequest();
         HttpResponse httpResponse=httpRequest.getHttpResponse();
-        Object oldRequestFacade=httpRequest.getFacade();
-        Object oldResponseFacade=httpResponse.getFacade();
+        HttpServletRequest oldRequestWrapper=servletHttpRequest.getWrapper();
+        HttpServletResponse oldResponseWrapper=servletHttpResponse.getWrapper();
         int old_output_state=0;
         
         try
@@ -189,8 +189,8 @@ public class Dispatcher implements RequestDispatcher
             // wrap the request and response
             DispatcherRequest request = new DispatcherRequest(httpServletRequest);
             DispatcherResponse response = new DispatcherResponse(httpServletResponse);
-            httpRequest.setFacade(request);
-            httpResponse.setFacade(response);
+            servletHttpRequest.setWrapper(request);
+            servletHttpResponse.setWrapper(response);
 
             if (forward)
             {
@@ -274,8 +274,8 @@ public class Dispatcher implements RequestDispatcher
         }
         finally
         {
-            httpRequest.setFacade(oldRequestFacade);
-            httpResponse.setFacade(oldResponseFacade);
+            servletHttpRequest.setWrapper(oldRequestWrapper);
+            servletHttpResponse.setWrapper(oldResponseWrapper);
             if (!forward)
                 servletHttpResponse.setOutputState(old_output_state);
         }

@@ -68,12 +68,10 @@
 
 <!-- Example filter mapping to apply the "Set Character Encoding" filter
      to *all* requests processed by this web application -->
-<!--
     <filter-mapping>
         <filter-name>Set Character Encoding</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
--->
 
 <!--
     <filter-mapping>
@@ -82,12 +80,10 @@
     </filter-mapping>
 -->
 
-<!--
     <filter-mapping>
         <filter-name>Request Dumper Filter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
--->
 
     <!-- Define example application events listeners -->
     <listener>

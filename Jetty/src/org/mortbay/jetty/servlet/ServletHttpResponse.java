@@ -48,6 +48,7 @@ public class ServletHttpResponse implements HttpServletResponse
     private HttpSession _session=null;
     private boolean _noSession=false;
     private Locale _locale=null;
+    private HttpServletResponse _wrapper;    
 
     private static Map __charSetMap = new HashMap();
     static
@@ -103,6 +104,27 @@ public class ServletHttpResponse implements HttpServletResponse
         _httpResponse=response;
     }
 
+    /* ------------------------------------------------------------ */
+    void setWrapper(HttpServletResponse wrapper)
+    {
+        if (wrapper == this)
+            _wrapper=null;
+        else
+            _wrapper=wrapper;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return The top most wrapper of the response or this response if
+     * there are no wrappers. 
+     */
+    HttpServletResponse getWrapper()
+    {
+        if (_wrapper==null)
+            return this;
+        return _wrapper;
+    }
+    
     /* ------------------------------------------------------------ */
     int getOutputState()
     {

@@ -91,6 +91,7 @@ public class ServletHttpRequest
     private int _inputState=0;
     private ServletHolder _servletHolder;
     private String _pathInContext;
+    private HttpServletRequest _wrapper;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -116,17 +117,26 @@ public class ServletHttpRequest
     {
         _servletHandler=servletHandler;
     }
-    
+
     /* ------------------------------------------------------------ */
-    ServletHolder getServletHolder()
+    void setWrapper(HttpServletRequest wrapper)
     {
-        return _servletHolder;
+        if (wrapper == this)
+            _wrapper=null;
+        else
+            _wrapper=wrapper;
     }
     
     /* ------------------------------------------------------------ */
-    String getPathInContext()
+    /** 
+     * @return The top most wrapper of the request or this request if
+     * there are no wrappers. 
+     */
+    HttpServletRequest getWrapper()
     {
-        return _pathInContext;
+        if (_wrapper==null)
+            return this;
+        return _wrapper;
     }
     
     /* ------------------------------------------------------------ */
@@ -145,6 +155,18 @@ public class ServletHttpRequest
         _servletPath=servletPath;
         _pathInfo=pathInfo;
         _servletHolder=holder;
+    }
+    
+    /* ------------------------------------------------------------ */
+    ServletHolder getServletHolder()
+    {
+        return _servletHolder;
+    }
+    
+    /* ------------------------------------------------------------ */
+    String getPathInContext()
+    {
+        return _pathInContext;
     }
     
     /* ------------------------------------------------------------ */

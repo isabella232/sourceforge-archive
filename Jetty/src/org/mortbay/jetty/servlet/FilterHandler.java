@@ -19,7 +19,9 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
@@ -323,14 +325,17 @@ public class FilterHandler
 
             
             // Goto the original resource
-            ServletHttpRequest servletHttpRequest=
-                ServletHttpRequest.unwrap(request);
-            HttpRequest httpRequest =servletHttpRequest.getHttpRequest();
-            HttpResponse httpResponse = httpRequest.getHttpResponse();
+            ServletHttpRequest servletHttpRequest=  ServletHttpRequest.unwrap(request);
+            ServletHttpResponse servletHttpResponse=servletHttpRequest.getServletHttpResponse();
+            HttpServletRequest requestWrapper=      servletHttpRequest.getWrapper();
+            HttpServletResponse responseWrapper=    servletHttpResponse.getWrapper();
+            HttpRequest httpRequest =               servletHttpRequest.getHttpRequest();
+            HttpResponse httpResponse =             httpRequest.getHttpResponse();
+            
             try
             {
-                httpRequest.setFacade(request);
-                httpResponse.setFacade(response);
+                servletHttpRequest.setWrapper((HttpServletRequest)request);
+                servletHttpResponse.setWrapper((HttpServletResponse)response);
                 
                 _httpContext.handle(_nextHandler,
                                     _pathInContext,
@@ -341,8 +346,8 @@ public class FilterHandler
             }
             finally
             {
-                httpRequest.setFacade(servletHttpRequest);
-                httpResponse.setFacade(servletHttpRequest.getServletHttpResponse());
+                servletHttpRequest.setWrapper(requestWrapper);
+                servletHttpResponse.setWrapper(responseWrapper);
             }
         }   
     }

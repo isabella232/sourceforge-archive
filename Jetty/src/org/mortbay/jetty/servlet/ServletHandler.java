@@ -400,17 +400,16 @@ public class ServletHandler
                                                     HttpResponse httpResponse)
     {
         // Look for a previously built servlet request.
-        HttpServletRequest httpServletRequest = (HttpServletRequest)
+        ServletHttpRequest servletHttpRequest = (ServletHttpRequest)
             httpRequest.getFacade();
-        
-        if (httpServletRequest==null)
-            httpServletRequest=newFacades(pathInContext,
+        if (servletHttpRequest==null)
+            servletHttpRequest=newFacades(pathInContext,
                                           pathParams,
                                           httpRequest,
                                           httpResponse,
                                           getHolderEntry(pathInContext));
         
-        return httpServletRequest;
+        return servletHttpRequest; // XXX should this be getWrapper()???
     }
 
     /* ------------------------------------------------------------ */
@@ -422,7 +421,7 @@ public class ServletHandler
     public HttpServletResponse getHttpServletResponse(HttpResponse httpResponse)
     {
         // Look for a previously built servlet request.
-        return (HttpServletResponse)httpResponse.getFacade();
+        return (ServletHttpResponse)httpResponse.getFacade();
     }
     
     /* ------------------------------------------------------------ */
@@ -499,39 +498,52 @@ public class ServletHandler
         {
             ServletHttpRequest request=null;
             ServletHttpResponse response=null;
+            ServletHolder holder=null;
             
-            // handle
+            // handling
             Code.debug("ServletHandler: ",pathInContext);
 
-            // Do we already have facades?
-            if (httpRequest.getFacade() instanceof ServletHttpRequest)
-                request= (ServletHttpRequest) httpRequest.getFacade();
-            else
+            // Do we already have servlet facades?
+            request = (ServletHttpRequest) httpRequest.getFacade();
+            if (request==null)
             {
-                // Return if no servlet match
                 Map.Entry entry=getHolderEntry(pathInContext);
                 if (entry==null)
                     return;
-
-                // create the facade
-                request=newFacades(pathInContext,pathParams,httpRequest,httpResponse,entry);
+                
+                request=newFacades(pathInContext,
+                                   pathParams,
+                                   httpRequest,
+                                   httpResponse,
+                                   entry);
+                holder = request.getServletHolder();
             }
-
-            // Get the rest of the stuff
+            else if (!pathInContext.equals(request.getPathInContext()))
+            {
+                // pathInContext has changed, so get a new holder!
+                // But do not make a new facade. It should have been
+                // wrapped if the paths needed to be changed.
+                Map.Entry entry=getHolderEntry(pathInContext);
+                if (entry==null)
+                    return;
+                holder=(ServletHolder)entry.getValue();
+            }
+            else
+                holder = request.getServletHolder();
+            
+            // Get the response
             response = request.getServletHttpResponse();
-            ServletHolder holder = request.getServletHolder();
 
             // service request
             if (holder!=null)
             {
                 // service request
-                holder.handle(request,response);
+                holder.handle(request.getWrapper(),response.getWrapper());
                 response.setOutputState(0);
                 Code.debug("Handled by ",holder);
                 if (!httpResponse.isCommitted())
                     httpResponse.commit();  
             }
-            
         }
         catch(Exception e)
         {
