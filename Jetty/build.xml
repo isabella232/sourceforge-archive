@@ -172,6 +172,7 @@ release     - Cleanup for release
         <include name="com/mortbay/Jetty//*.properties" />
       </fileset>
     </copy>
+    <copy file="${jetty.webapp.classes}/com/mortbay/Jetty/JettyIndex_en.properties" tofile="${jetty.webapp.classes}/com/mortbay/Jetty/JettyIndex.properties" />
     <javac srcdir="${src.dir}" 
            destdir="${jetty.webapp.classes}"
            classpath="${jetty.jar};${servlet.jar}"

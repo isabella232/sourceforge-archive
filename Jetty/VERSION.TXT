@@ -2,6 +2,7 @@ Jetty Versions
 --------------
  
 Jetty-3.0.0.rc4 - 6 Nov 2000
+ + Provide default JettyIndex.properties
  + Fixed mis-synchronization in ThreadPool.stop()
  + Fixed mime type mapping bug introduced in RC3
  + Ignore more IOExceptions (still visible with debug).
