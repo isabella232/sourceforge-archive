@@ -125,7 +125,7 @@ public class ThreadPool
     public synchronized void setThreadClass(Class threadClass)
         throws IllegalStateException
     {
-        Log.event("setThreadClass("+threadClass+")");
+        Code.debug("setThreadClass("+threadClass+")");
         
         if (_running)
             throw new IllegalStateException("Thread Pool Running");
