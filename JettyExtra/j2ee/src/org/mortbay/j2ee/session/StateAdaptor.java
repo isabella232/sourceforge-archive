@@ -35,16 +35,11 @@ public class StateAdaptor
 
   // we cache these for speed...
   final String _id;
-  long _lastAccessedTime;
-  int _maxInactiveInterval;
-
 
   StateAdaptor(String id, Manager manager, int maxInactiveInterval, long lastAccessedTime)
   {
     _id=id;
     _manager=manager;
-    _maxInactiveInterval=maxInactiveInterval;
-    _lastAccessedTime=lastAccessedTime;	// this starts not quite in synch with State
   }
 
   void
@@ -59,51 +54,29 @@ public class StateAdaptor
     return _state;
   }
 
-  protected int getActualMaxInactiveInterval() { return _manager.getActualMaxInactiveInterval(); }
-  protected int getRealMaxInactiveValue() { return _maxInactiveInterval<1?getActualMaxInactiveInterval():_maxInactiveInterval; }
-
+  // hmmmm...
+  // why does Greg call this?
+  // could it be compressed into a subsequent call ?
   public boolean
     isValid()
   {
     if (_state==null)
       return false;
 
-    long currentSecond=_manager.currentSecond();
-    //    _log.debug("isValid() - checking local cache");
-    if ((_lastAccessedTime+(getRealMaxInactiveValue()*1000))<currentSecond)
+    try
     {
-      // our local cache reckons we have timed out - confirm with our
-      // actual state, which may have been changed via another route
-      // (e.g.. on another box)... - and update our local cache at the
-      // same time...
-
-      try
-      {
-	// TODO - we need some synchronisation and maybe optionally
-	// support for Transactions around this...
-	_lastAccessedTime   =_state.getLastAccessedTime();
-	_maxInactiveInterval=_state.getMaxInactiveInterval();
-	// check again...
-	//	_log.debug("isValid() - checking distributed state");
-	if ((_lastAccessedTime+(getRealMaxInactiveValue()*1000))<currentSecond)
-	{
-	  //	  invalidate(); - watch out for this - you'll recurse to the bottom of the stack !
-	  _log.debug("isValid() - calling _manager.destroySession("+_id+")...");
-	  _manager.destroySession(this);
-	  return false;
-	}
-      }
-      catch (RemoteException e)
-      {
-	_log.error("problem querying distributed state...", e);
-	// we can't declare ourself invalid - because we don't know
-	// what is happening - even if we did, we wouldn't be able to
-	// invalidate() ourself because the DB is probably down...
-      }
+      _state.getLastAccessedTime(); // this should cause an interceptor/the session to check
+      return true;
     }
-
-    // if we got to here - we must have a valid state...
-    return true;
+    catch (IllegalStateException ignore)
+    {
+      return false;
+    }
+    catch (Exception e)
+    {
+      _log.error("problem contacting HttpSession", e);
+      return false;
+    }
   }
 
   // HttpSession API
@@ -112,8 +85,7 @@ public class StateAdaptor
     getCreationTime()
     throws IllegalStateException
   {
-    if (!isValid())
-      throw new IllegalStateException("invalid session");
+    checkState();
 
     try
     {
@@ -130,8 +102,7 @@ public class StateAdaptor
     getId()
     throws IllegalStateException
   {
-    if (!isValid())
-      throw new IllegalStateException("invalid session");
+    checkState();
 
     // locally cached and invariant
     return _id;
@@ -141,8 +112,7 @@ public class StateAdaptor
     getLastAccessedTime()
     throws IllegalStateException
   {
-    if (!isValid())
-      throw new IllegalStateException("invalid session");
+    checkState();
 
     try
     {
@@ -159,13 +129,11 @@ public class StateAdaptor
   public void
     setMaxInactiveInterval(int interval)
   {
-    if (!isValid())
-      throw new IllegalStateException("invalid session"); // TODO - not spec
+    checkState();
 
     try
     {
       _state.setMaxInactiveInterval(interval);
-      _maxInactiveInterval=interval; // synchronize - TODO
     }
     catch (RemoteException e)
     {
@@ -176,8 +144,7 @@ public class StateAdaptor
   public int
     getMaxInactiveInterval()
   {
-    if (!isValid())
-      throw new IllegalStateException("invalid session"); // TODO - not spec
+    checkState();
 
     try
     {
@@ -196,8 +163,7 @@ public class StateAdaptor
     getAttribute(String name)
     throws IllegalStateException
   {
-    if (!isValid())
-      throw new IllegalStateException("invalid session");
+    checkState();
 
     try
     {
@@ -214,8 +180,7 @@ public class StateAdaptor
     getValue(String name)
     throws IllegalStateException
   {
-    if (!isValid())
-      throw new IllegalStateException("invalid session");
+    checkState();
 
     try
     {
@@ -232,8 +197,7 @@ public class StateAdaptor
     getAttributeNames()
     throws IllegalStateException
   {
-    if (!isValid())
-      throw new IllegalStateException("invalid session");
+    checkState();
 
     try
     {
@@ -250,8 +214,7 @@ public class StateAdaptor
     getValueNames()
     throws IllegalStateException
   {
-    if (!isValid())
-      throw new IllegalStateException("invalid session");
+    checkState();
 
     try
     {
@@ -268,8 +231,7 @@ public class StateAdaptor
     setAttribute(String name, Object value)
     throws IllegalStateException
   {
-    if (!isValid())
-      throw new IllegalStateException("invalid session");
+    checkState();
 
     try
     {
@@ -294,8 +256,7 @@ public class StateAdaptor
     putValue(String name, Object value)
     throws IllegalStateException
   {
-    if (!isValid())
-      throw new IllegalStateException("invalid session");
+    checkState();
 
     if (name==null)
       throw new IllegalArgumentException("invalid attribute name: "+name);
@@ -318,8 +279,7 @@ public class StateAdaptor
     removeAttribute(String name)
     throws IllegalStateException
   {
-    if (!isValid())
-      throw new IllegalStateException("invalid session");
+    checkState();
 
     try
     {
@@ -336,8 +296,7 @@ public class StateAdaptor
     removeValue(String name)
     throws IllegalStateException
   {
-    if (!isValid())
-      throw new IllegalStateException("invalid session");
+    checkState();
 
     try
     {
@@ -354,9 +313,6 @@ public class StateAdaptor
     invalidate()
     throws IllegalStateException
   {
-    if (!isValid())
-      throw new IllegalStateException("invalid session");
-
     _log.debug("user invalidated session: "+getId());
     _manager.destroySession(this);
   }
@@ -382,9 +338,6 @@ public class StateAdaptor
     isNew()
     throws IllegalStateException
   {
-    if (!isValid())
-      throw new IllegalStateException("invalid session");
-
     return _new;
   }
 
@@ -414,19 +367,25 @@ public class StateAdaptor
     setLastAccessedTime(long time)
     throws IllegalStateException
   {
-    if (!isValid())		// do we need this check ?
-      throw new IllegalStateException("invalid session");
+    checkState();
 
     try
     {
       _state.setLastAccessedTime(time);
-      _lastAccessedTime=time;	// local cache - synchronize - TODO
     }
     catch (RemoteException e)
     {
       _log.error("could not set LastAccessedTime", e);
       throw new IllegalStateException("problem with distribution layer");
     }
+  }
+
+  protected void
+    checkState()
+    throws IllegalStateException
+  {
+    if (_state==null)
+      throw new IllegalStateException("invalid session");
   }
 
   public String
@@ -450,9 +409,6 @@ public class StateAdaptor
   public void
     migrate()
   {
-    if (!isValid())		// do we need this check ?
-      throw new IllegalStateException("invalid session");
-
     if (_mi!=null)
       _mi.migrate(); // yeugh - TODO
   }

@@ -31,7 +31,7 @@ import org.mortbay.j2ee.session.interfaces.CMPStatePK;
  *   @ejb:pk
  *   @ejb:finder
  *        signature="java.util.Collection findTimedOut(long currentTime, int extraTime, int actualMaxInactiveInterval)"
- *        query="SELECT OBJECT(o) FROM CMPState o WHERE (o.maxInactiveInterval>0 AND o.creationTime < (?1-(1000*(o.maxInactiveInterval+?2)))) OR (o.maxInactiveInterval<1 AND o.creationTime < (?1-(1000*(?3+?2))))"
+ *        query="SELECT OBJECT(o) FROM CMPState o WHERE (o.maxInactiveIntervalInternal>0 AND o.creationTimeInternal < (?1-(1000*(o.maxInactiveIntervalInternal+?2)))) OR (o.maxInactiveIntervalInternal<1 AND o.creationTimeInternal < (?1-(1000*(?3+?2))))"
  *
  *   @jboss:table-name "JETTY_HTTPSESSION_CMPState"
  *   @jboss:create-table create="true"
@@ -96,19 +96,20 @@ public abstract class CMPStateBean
    *
    * @ejb:create-method
    */
-  public CMPStatePK ejbCreate(String context, String id, int maxInactiveInterval)
+  public CMPStatePK ejbCreate(String context, String id, int maxInactiveInterval, int actualMaxInactiveInterval)
     throws CreateException
   {
     _log.debug("ejbCreate("+context+":"+id+")");
 
-    setContext(context);
-    setId(id);
-    setMaxInactiveInterval(maxInactiveInterval);
+    setContextInternal(context);
+    setIdInternal(id);
+    setMaxInactiveIntervalInternal(maxInactiveInterval);
+    setActualMaxInactiveIntervalInternal(actualMaxInactiveInterval);
 
     long time=System.currentTimeMillis();
-    setCreationTime(time);
-    setLastAccessedTime(time);
-    setAttributes(new HashMap());
+    setCreationTimeInternal(time);
+    setLastAccessedTimeInternal(time);
+    setAttributesInternal(new HashMap());
 
     return null;
   }
@@ -117,7 +118,7 @@ public abstract class CMPStateBean
    * Create httpSession.
    *
    */
-  public void ejbPostCreate(String context, String id, int maxInactiveInterval)
+  public void ejbPostCreate(String context, String id, int maxInactiveInterval, int actualMaxInactiveInterval)
     throws CreateException
   {
     //    _log.info("ejbPostCreate("+id+")");
@@ -138,7 +139,7 @@ public abstract class CMPStateBean
     ejbRemove()
     throws RemoveException
   {
-    _log.debug("ejbRemove("+getContext()+":"+getId()+")");
+    _log.debug("ejbRemove("+getContextInternal()+":"+getIdInternal()+")");
   }
 
   //----------------------------------------
@@ -149,16 +150,14 @@ public abstract class CMPStateBean
   /**
    * @ejb:pk-field
    * @ejb:persistent-field
-   *
    */
-  public abstract String getContext();
+  public abstract String getContextInternal();
 
   /**
    * @ejb:pk-field
    * @ejb:persistent-field
-   *
    */
-  public abstract void setContext(String context);
+  public abstract void setContextInternal(String context);
 
   //----------------------------------------
   // Id
@@ -166,41 +165,160 @@ public abstract class CMPStateBean
   /**
    * @ejb:pk-field
    * @ejb:persistent-field
-   *
    */
-  public abstract String getId();
+  public abstract String getIdInternal();
 
   /**
    * @ejb:pk-field
    * @ejb:persistent-field
-   *
    */
-  public abstract void setId(String id);
+  public abstract void setIdInternal(String id);
+
+  /**
+   * @ejb:interface-method
+   */
+  public String
+    getId()
+    throws IllegalStateException
+  {
+    checkValid();
+    return getIdInternal();
+  }
+
+  //----------------------------------------
+  /**
+   * @ejb:persistent-field
+   */
+  public abstract long getCreationTimeInternal();
+
+  /**
+   * @ejb:persistent-field
+   */
+  public abstract void setCreationTimeInternal(long time);
+
+  /**
+   * @ejb:interface-method
+   */
+  public long
+    getCreationTime()
+    throws IllegalStateException
+  {
+    checkValid();
+    return getCreationTimeInternal();
+  }
+
+  //----------------------------------------
+  /**
+   * @ejb:persistent-field
+   */
+  public abstract long getLastAccessedTimeInternal();
+
+  /**
+   * @ejb:persistent-field
+   */
+  public abstract void setLastAccessedTimeInternal(long time);
+
+  /**
+   * @ejb:interface-method
+   */
+  public long
+    getLastAccessedTime()
+    throws IllegalStateException
+  {
+    checkValid();
+    return getLastAccessedTimeInternal();
+  }
+
+  /**
+   * @ejb:interface-method
+   */
+  public void
+    setLastAccessedTime(long time)
+    throws IllegalStateException
+  {
+    checkValid();
+    setLastAccessedTimeInternal(time);
+  }
+
+  //----------------------------------------
+  /**
+   * @ejb:persistent-field
+   */
+  public abstract int getMaxInactiveIntervalInternal();
+
+  /**
+   * @ejb:persistent-field
+   */
+  public abstract void setMaxInactiveIntervalInternal(int interval);
+
+  /**
+   * @ejb:interface-method
+   */
+  public int
+    getMaxInactiveInterval()
+    throws IllegalStateException
+  {
+    checkValid();
+    return getMaxInactiveIntervalInternal();
+  }
+
+  /**
+   * @ejb:interface-method
+   */
+  public void
+    setMaxInactiveInterval(int interval)
+    throws IllegalStateException
+  {
+    checkValid();
+    setMaxInactiveIntervalInternal(interval);
+  }
 
   //----------------------------------------
   // Attributes
 
   /**
-   * @ejb:interface-method
    * @ejb:persistent-field
    */
-  public abstract Map getAttributes();
+  public abstract Map getAttributesInternal();
+
+  /**
+   * @ejb:persistent-field
+   */
+  public abstract void setAttributesInternal(Map attributes);
 
   /**
    * @ejb:interface-method
-   * @ejb:persistent-field
    */
-  public abstract void setAttributes(Map attributes);
+  public Map
+    getAttributes()
+    throws IllegalStateException
+  {
+    checkValid();
+    return getAttributesInternal();
+  }
 
+  /**
+   * @ejb:interface-method
+   */
+  public void
+    setAttributes(Map attributes)
+    throws IllegalStateException
+  {
+    checkValid();
+    setAttributesInternal(attributes);
+  }
 
   /**
    * @ejb:interface-method
    */
   public Object
     getAttribute(String name)
+    throws IllegalStateException
   {
-    //    _log.info(getId()+": get attribute - "+name);
-    return getAttributes().get(name);
+    checkValid();
+
+    //    _log.info(getIdInternal()+": get attribute - "+name);
+    return getAttributesInternal().get(name);
   }
 
   /**
@@ -208,13 +326,16 @@ public abstract class CMPStateBean
    */
   public Object
     setAttribute(String name, Object value, boolean returnValue)
+    throws IllegalStateException
   {
-    Map attrs=getAttributes();
-    Object tmp=attrs.put(name, value);
-    setAttributes(null);
-    setAttributes(attrs);
+    checkValid();
 
-    //    _log.info(getContext()+":"+getId()+": set attribute - "+name+":"+value);
+    Map attrs=getAttributesInternal();
+    Object tmp=attrs.put(name, value);
+    setAttributesInternal(null);
+    setAttributesInternal(attrs);
+
+    //    _log.info(getContextInternal()+":"+getIdInternal()+": set attribute - "+name+":"+value);
 
     return returnValue?tmp:null;
   }
@@ -224,63 +345,34 @@ public abstract class CMPStateBean
    */
   public Object
     removeAttribute(String name, boolean returnValue)
+    throws IllegalStateException
   {
-    Map attrs=getAttributes();
+    checkValid();
+
+    Map attrs=getAttributesInternal();
     Object tmp=attrs.remove(name);
 
     if (tmp!=null)
     {
-      setAttributes(null);	// belt-n-braces - TODO
-      setAttributes(attrs);
+      setAttributesInternal(null);	// belt-n-braces - TODO
+      setAttributesInternal(attrs);
     }
 
-    //    _log.info(getContext()+":"+getId()+": remove attribute - "+name);
+    //    _log.info(getContextInternal()+":"+getIdInternal()+": remove attribute - "+name);
 
     return returnValue?tmp:null;
   }
-
-  /**
-   * @ejb:persistent-field
-   */
-  public abstract void setCreationTime(long time);
-
-  /**
-   * @ejb:interface-method
-   * @ejb:persistent-field
-   */
-  public abstract long getCreationTime();
-
-  /**
-   * @ejb:interface-method
-   * @ejb:persistent-field
-   */
-  public abstract void setLastAccessedTime(long time);
-
-  /**
-   * @ejb:interface-method
-   * @ejb:persistent-field
-   */
-  public abstract long getLastAccessedTime();
-
-  /**
-   * @ejb:interface-method
-   * @ejb:persistent-field
-   */
-  public abstract void setMaxInactiveInterval(int interval);
-
-  /**
-   * @ejb:interface-method
-   * @ejb:persistent-field
-   */
-  public abstract int getMaxInactiveInterval();
 
   /**
    * @ejb:interface-method
    */
   public Enumeration
     getAttributeNameEnumeration()
+    throws IllegalStateException
   {
-    return Collections.enumeration(getAttributes().keySet());
+    checkValid();
+
+    return Collections.enumeration(getAttributesInternal().keySet());
   }
 
   /**
@@ -288,9 +380,46 @@ public abstract class CMPStateBean
    */
   public String[]
     getAttributeNameStringArray()
+    throws IllegalStateException
   {
-    Map attrs=getAttributes();
+    checkValid();
+
+    Map attrs=getAttributesInternal();
     return (String[])attrs.keySet().toArray(new String[attrs.size()]);
   }
-}
 
+  //----------------------------------------
+  /**
+   * @ejb:persistent-field
+   */
+  public abstract int getActualMaxInactiveIntervalInternal();
+
+  /**
+   * @ejb:persistent-field
+   */
+  public abstract void setActualMaxInactiveIntervalInternal(int interval);
+
+  //----------------------------------------
+  // new stuff - for server sider validity checking...
+
+  protected long
+    getRealMaxInactiveValue()
+  {
+    long maxInactiveInterval=getMaxInactiveIntervalInternal();
+    return maxInactiveInterval<1?getActualMaxInactiveIntervalInternal()*1000:maxInactiveInterval;
+  }
+
+  protected boolean
+    isValid()
+  {
+    return (getLastAccessedTimeInternal()+getRealMaxInactiveValue())>System.currentTimeMillis();
+  }
+
+  protected void
+    checkValid()
+    throws IllegalStateException
+  {
+    if (!isValid())
+      throw new IllegalStateException("HttpSession timed out");
+  }
+}

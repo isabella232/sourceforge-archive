@@ -700,7 +700,7 @@ public class Manager
       // because it has a local cache of the necessary details, it
       // will only go to the Stored State if it really thinks that it
       // is invalid...
-      ((StateAdaptor)i.next()).isValid();
+      ((StateAdaptor)i.next()).getLastAccessedTime();
     }
     //
     _log.debug("...local scavenging");

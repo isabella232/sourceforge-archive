@@ -31,28 +31,29 @@ public
     _state=state;
   }
 
-  protected State getState() {return _state;}
-  protected void  setState(State state) {_state=state;}
+ protected State getState() {return _state;}
+ protected void  setState(State state) {_state=state;}
 
-  protected HttpSession getSession() {return _session;}
+ protected HttpSession getSession() {return _session;}
 
-  public long        getCreationTime()                       throws RemoteException {return getState().getCreationTime();}
-  public String      getId()                                 throws RemoteException {return getState().getId();}
-  public void        setLastAccessedTime(long time)          throws RemoteException {getState().setLastAccessedTime(time);}
-  public long        getLastAccessedTime()                   throws RemoteException {return getState().getLastAccessedTime();}
-  public void        setMaxInactiveInterval(int interval)    throws RemoteException {getState().setMaxInactiveInterval(interval);}
-  public int         getMaxInactiveInterval()                throws RemoteException {return getState().getMaxInactiveInterval();}
-  public Object      getAttribute(String name)               throws RemoteException {return getState().getAttribute(name);}
-  public Enumeration getAttributeNameEnumeration()           throws RemoteException {return getState().getAttributeNameEnumeration();}
-  public String[]    getAttributeNameStringArray()           throws RemoteException {return getState().getAttributeNameStringArray();}
-  public Object      setAttribute(String name, Object value, boolean returnValue) throws RemoteException {return getState().setAttribute(name, value, returnValue);}
-  public Object      removeAttribute(String name, boolean returnValue)            throws RemoteException {return getState().removeAttribute(name, returnValue);}
-  public Map         getAttributes()                         throws RemoteException {return getState().getAttributes();}
-  public void        setAttributes(Map attributes)           throws RemoteException {getState().setAttributes(attributes);}
+ public    String      getId()                                                      throws RemoteException {return getState().getId();}
+ public    long        getCreationTime()                                            throws RemoteException {return getState().getCreationTime();}
+ public    long        getLastAccessedTime()                                        throws RemoteException {return getState().getLastAccessedTime();}
+ public    void        setLastAccessedTime(long time)                               throws RemoteException {getState().setLastAccessedTime(time);}
+ public    int         getMaxInactiveInterval()                                     throws RemoteException {return getState().getMaxInactiveInterval();}
+ public    void        setMaxInactiveInterval(int interval)                         throws RemoteException {getState().setMaxInactiveInterval(interval);}
+ public    Map         getAttributes()                                              throws RemoteException {return getState().getAttributes();}
+ public    void        setAttributes(Map attributes)                                throws RemoteException {getState().setAttributes(attributes);}
 
-  public String toString() {return "<"+getClass()+"->"+getState()+">";}
+ public    Object      getAttribute(String name)                                    throws RemoteException {return getState().getAttribute(name);}
+ public    Object      setAttribute(String name, Object value, boolean returnValue) throws RemoteException {return getState().setAttribute(name, value, returnValue);}
+ public    Enumeration getAttributeNameEnumeration()                                throws RemoteException {return getState().getAttributeNameEnumeration();}
+ public    String[]    getAttributeNameStringArray()                                throws RemoteException {return getState().getAttributeNameStringArray();}
+ public    Object      removeAttribute(String name, boolean returnValue)            throws RemoteException {return getState().removeAttribute(name, returnValue);}
 
-  public void start() {}
-  public void stop() {}
+ public    String toString() {return "<"+getClass()+"->"+getState()+">";}
+
+ public    void start() {}
+ public    void stop() {}
 }
 
