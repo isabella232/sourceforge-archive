@@ -23,6 +23,12 @@ import java.util.*;
  */
 public class Balancer 
 {
+    public static void usage()
+    {
+        System.err.println("Usage - java org.mortbay.loadbalancer.Balancer [[host]:port ... ] - [[server]:port ... ]");
+        System.exit(1);
+    }
+    
     /* ------------------------------------------------------------ */
     public static void main(String[] arg)
         throws Exception
@@ -31,14 +37,38 @@ public class Balancer
         System.err.println("SelectionKey.OP_ACCEPT == "+SelectionKey.OP_ACCEPT);
         System.err.println("SelectionKey.OP_READ == "+SelectionKey.OP_READ);
         System.err.println("SelectionKey.OP_WRITE == "+SelectionKey.OP_WRITE);
+
+        if (arg.length<3)
+            usage();
         
-        ByteBufferPool pool = new ByteBufferPool(512,true);
-        
-        Server server = new Server(pool,new InetAddrPort(arg[1]));
+        ByteBufferPool pool = new ByteBufferPool(4096,true);
+
+        int c=-1;
+        for (int i=0;i<arg.length;i++)
+            if (arg[i].equals("-"))
+                c=i;
+        if (c<0)
+            usage();
+
+        Listener[] listener= new Listener[c];
+        Server[] server= new Server[arg.length-c-1];
         Policy policy = new Policy(server);
-        Listener listener = new Listener(pool,new InetAddrPort(arg[0]),policy);
+
+        for (int i=0;i<arg.length;i++)
+        {
+            if (i<c)
+                listener[i] = new Listener(pool,new
+                    InetAddrPort(arg[i]),policy);
+            if (i>c)
+                server[i-c-1] = new Server(pool,new InetAddrPort(arg[i]));
+        }
         
-        server.start();
-        listener.start();
+        for (int i=arg.length;i-->0;)
+        {
+            if (i<c)
+                listener[i].start();
+            if (i>c)
+                server[i-c-1].start();
+        }
     }
 }

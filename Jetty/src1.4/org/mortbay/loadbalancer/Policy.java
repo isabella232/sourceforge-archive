@@ -14,9 +14,10 @@ import java.util.*;
 
 public class Policy
 {
-    private Server _server;
-
-    public Policy(Server server)
+    private Server[] _server;
+    private int next;
+    
+    public Policy(Server[] server)
     {
         _server=server;
     }
@@ -24,7 +25,8 @@ public class Policy
     public void allocate(Connection connection)
         throws IOException
     {
-        connection.allocate(_server);
+        next=(next+1)%_server.length;
+        connection.allocate(_server[next]);
     }
     
 }

@@ -28,6 +28,12 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
     }
     
     /* ------------------------------------------------------------ */
+    public Thread getThread()
+    {
+        return _thread;
+    }
+    
+    /* ------------------------------------------------------------ */
     public boolean isStarted()
     {
         return _running;
