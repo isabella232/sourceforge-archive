@@ -14,7 +14,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Stack;
 import org.mortbay.util.Code;
-import org.mortbay.http.UserPrincipal;
+import java.security.Principal;
 
 
 /* ---------------------------------------------------- */
@@ -22,20 +22,10 @@ import org.mortbay.http.UserPrincipal;
  * <p>Implements the JAAS version of the 
  *  org.mortbay.http.UserPrincipal interface.
  *
- * <p><h4>Notes</h4>
- * <p>
- *
- * <p><h4>Usage</h4>
- * <pre>
- */
-/*
- * </pre>
- *
- * @see
- * @version 1.0 Mon Apr 14 2003
+ * @version $Id$
  * @author Jan Bartel (janb)
  */
-public class JAASUserPrincipal implements UserPrincipal 
+public class JAASUserPrincipal implements Principal 
 {
     
     
@@ -111,11 +101,8 @@ public class JAASUserPrincipal implements UserPrincipal
     //holds the JAAS Credential and roles associated with
     //this UserPrincipal 
     private Subject subject = null;
-
     private static RoleStack runAsRoles = new RoleStack();
-    
     private RoleCheckPolicy roleCheckPolicy = null;
-
     private String name = null;
     
 
@@ -130,22 +117,6 @@ public class JAASUserPrincipal implements UserPrincipal
     {
         this.name = name;
     }
-
-
-    /* ------------------------------------------------ */
-    /** Is this user authenticated
-     * @return true if authenticated false otherwise
-     */
-    public boolean isAuthenticated ()
-    {
-        // we wouldn't have proceeded to create the
-        // JAASUserPrincipal if their login didn't succeed, so
-        // they must be authentic??
-
-        //tmp
-        return true;
-    }
-
     
 
     /* ------------------------------------------------ */
@@ -153,7 +124,7 @@ public class JAASUserPrincipal implements UserPrincipal
      * @param roleName role to check
      * @return true or false accordint to the RoleCheckPolicy.
      */
-    public boolean isUserInRole (String roleName)
+    boolean isUserInRole (String roleName)
     {
         if (roleCheckPolicy == null)
             roleCheckPolicy = new StrictRoleCheckPolicy();
@@ -162,7 +133,6 @@ public class JAASUserPrincipal implements UserPrincipal
                                           runAsRoles.peek(),
                                           getRoles());
     }
-
 
     
     /* ------------------------------------------------ */

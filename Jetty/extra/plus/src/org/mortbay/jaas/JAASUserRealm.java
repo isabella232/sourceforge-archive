@@ -10,11 +10,11 @@ import javax.security.auth.login.FailedLoginException;
 import javax.security.auth.login.LoginContext;
 import javax.security.auth.login.LoginException;
 import org.mortbay.http.HttpRequest;
-import org.mortbay.http.UserPrincipal;
 import org.mortbay.http.UserRealm;
 import org.mortbay.jaas.callback.AbstractCallbackHandler;
 import org.mortbay.jaas.callback.DefaultCallbackHandler;
 import org.mortbay.util.Log;
+import java.security.Principal;
 
 
 
@@ -43,8 +43,6 @@ public class JAASUserRealm implements UserRealm
     protected HashMap userMap;
     protected RoleCheckPolicy roleCheckPolicy;
     
-    
-
     public JAASUserRealm ()
     {
         userMap = new HashMap();
@@ -76,18 +74,20 @@ public class JAASUserRealm implements UserRealm
     {
         callbackHandler = handler;
     }
-    
-    
 
     public void setRoleCheckPolicy (RoleCheckPolicy policy)
     {
         roleCheckPolicy = policy;
     }
 
+    public Principal getUserPrincipal(String username)
+    {
+        return (Principal)userMap.get(username);
+    }
     
-    public UserPrincipal authenticate(String username,
-                                      Object credentials,
-                                      HttpRequest request)
+    public Principal authenticate(String username,
+                                  Object credentials,
+                                  HttpRequest request)
     {
         try
         {
@@ -131,20 +131,38 @@ public class JAASUserRealm implements UserRealm
     }
 
     
-    public void disassociate(UserPrincipal user)
+    /* ------------------------------------------------------------ */
+    public boolean isAuthenticated(Principal user)
+    {
+        // XXX This is not correct if auth can expire!
+        return user instanceof JAASUserPrincipal;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean isUserInRole(Principal user, String role)
+    {
+        if (user instanceof JAASUserPrincipal)
+            return ((JAASUserPrincipal)user).isUserInRole(role);
+        return false;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void disassociate(Principal user)
     {
         if (user != null)
             ((JAASUserPrincipal)user).disassociate();
     }
 
     
-    public UserPrincipal pushRole(UserPrincipal user, String role)
+    /* ------------------------------------------------------------ */
+    public Principal pushRole(Principal user, String role)
     {
         ((JAASUserPrincipal)user).pushRole(role);
         return user;
     }
     
-    public UserPrincipal popRole(UserPrincipal user)
+    /* ------------------------------------------------------------ */
+    public Principal popRole(Principal user)
     {
         ((JAASUserPrincipal)user).popRole();
         return user;
