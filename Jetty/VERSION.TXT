@@ -1,10 +1,11 @@
 Jetty Versions
 --------------
 
-Jetty-4.2.5 - 13 January 2003
+Jetty-4.2.5 - 14 January 2003
  + Fixed pathParam bug for ;jsessionid
  + Don't process conditional headers and ranges for includes
  + Added Log4jSink in the contrib directory.
+ + Fixed requestedSessionId null bug.
 
 Jetty-4.2.4 - 4 January 2003
  + Fixed stop/start handling of servlet context

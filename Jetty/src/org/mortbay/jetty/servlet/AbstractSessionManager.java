@@ -98,7 +98,7 @@ public abstract class AbstractSessionManager implements SessionManager
     private synchronized String newSessionId(HttpServletRequest request,long created)
     {
         String id=request.getRequestedSessionId();
-        while (_sessions.containsKey(id))
+        while (id==null || id.length()==0 || _sessions.containsKey(id))
         {
             long r = _random.nextLong();
             if (r<0)r=-r;
