@@ -72,6 +72,14 @@ public class NCSARequestLog implements RequestLog
     }
 
     /* ------------------------------------------------------------ */
+    /** Set the log filename.
+     * @see setRetainDays()
+     * @param filename The filename to use. If the filename contains the
+     * string "yyyy_mm_dd", then a RolloverFileOutputStream is used and the
+     * log is rolled over nightly and aged according setRetainDays. If no
+     * filename is set or a null filename
+     * passed, then requests are logged to System.err.
+     */
     public void setFilename(String filename)
     {
         if (filename!=null)
@@ -84,24 +92,20 @@ public class NCSARequestLog implements RequestLog
     }
 
     /* ------------------------------------------------------------ */
+    /** Get the log filename.
+     * @see getDatedFilename()
+     * @return The log filename without any date expansion.
+     */
     public String getFilename()
     {
         return _filename;
     }
 
     /* ------------------------------------------------------------ */
-    public boolean isBuffered()
-    {
-        return _buffered;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void setBuffered(boolean buffered)
-    {
-        _buffered = buffered;
-    }
-    
-    /* ------------------------------------------------------------ */
+    /** Get the dated log filename.
+     * @see getFilename()
+     * @return The log filename with any date encoding expanded.
+     */
     public String getDatedFilename()
     {
         if (_fileOut instanceof RolloverFileOutputStream)
@@ -110,60 +114,109 @@ public class NCSARequestLog implements RequestLog
     }
     
     /* ------------------------------------------------------------ */
+    /** Is output buffered.
+     * @return True if the log output is buffered (which can increase performance).
+     */
+    public boolean isBuffered()
+    {
+        return _buffered;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set output buffering.
+     * @param buffered True if the log output is buffered (which can increase performance).
+     */
+    public void setBuffered(boolean buffered)
+    {
+        _buffered = buffered;
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param format The date format to use within the log file.
+     */
     public void setLogDateFormat(String format)
     {
         _logDateFormat=format;
     }
 
     /* ------------------------------------------------------------ */
+    /** 
+     * @return The date format to use within the log file.
+     */
     public String getLogDateFormat()
     {
         return _logDateFormat;
     }
     
     /* ------------------------------------------------------------ */
+    /** 
+     * @param tz The date format timezone to use within the log file.
+     */
     public void setLogTimeZone(String tz)
     {
         _logTimeZone=tz;
     }
 
     /* ------------------------------------------------------------ */
+    /** 
+     * @return The date format timezone to use within the log file.
+     */
     public String getLogTimeZone()
     {
         return _logTimeZone;
     }
     
     /* ------------------------------------------------------------ */
+    /** 
+     * @return The number of days to retain rollovered log files.
+     */
     public int getRetainDays()
     {
         return _retainDays;
     }
 
     /* ------------------------------------------------------------ */
+    /** 
+     * @param retainDays The number of days to retain rollovered log files.
+     */
     public void setRetainDays(int retainDays)
     {
         _retainDays = retainDays;
     }
 
     /* ------------------------------------------------------------ */
+    /** 
+     * @return True if NCSA extended format is to be used.
+     */
     public boolean isExtended()
     {
         return _extended;
     }
 
     /* ------------------------------------------------------------ */
+    /** 
+     * @param e True if NCSA extended format is to be used.
+     */
     public void setExtended(boolean e)
     {
         _extended=e;
     }
     
     /* ------------------------------------------------------------ */
+    /** 
+     * @return True if logs are appended to existing log files.
+     */
     public boolean isAppend()
     {
         return _append;
     }
 
     /* ------------------------------------------------------------ */
+    /** 
+     * @param a True if logs are appended to existing log files.
+     */
     public void setAppend(boolean a)
     {
         _append=a;
@@ -236,6 +289,11 @@ public class NCSARequestLog implements RequestLog
     }
     
     /* ------------------------------------------------------------ */
+    /** Log a request.
+     * @param request The request
+     * @param response The response to this request.
+     * @param responseLength The bytes written to the response.
+     */
     public void log(HttpRequest request,
                     HttpResponse response,
                     int responseLength)
