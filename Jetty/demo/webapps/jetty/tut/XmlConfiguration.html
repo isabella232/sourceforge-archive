@@ -32,8 +32,8 @@
      Jetty Server</a> section in relation to web applications. Here we discuss 
   the syntax in detail, and provide some further examples.<br>
      <br>
-      For a precise definition of the format, consult <a href="configure_1_1.dtd">
-     configure_1_1 DTD</a>    . <br>
+      For a precise definition of the format, consult <a href="configure_1_2.dtd">
+     configure_1_2 DTD</a>    . <br>
     <br>
     Jetty uses the class <a href="/javadoc/org/mortbay/xml/XmlConfiguration.html">
      org.mortbay.xml.XmlConfiguration</a> to read and interpret all configuration 
@@ -58,7 +58,7 @@ method  calls upon them.<br>
       <blockquote><tt>    &lt;?xml version="1.0"  encoding="ISO-8859-1"?&gt;</tt><br>
               <tt>    &lt;!DOCTYPE Configure PUBLIC </tt><tt>&nbsp;"-//Mort 
  Bay  Consulting//DTD Configure 1.1//EN" </tt><br>
-              <tt>        "http://jetty.mortbay.org/configure_1_1.dtd"&gt;</tt><br>
+              <tt>        "http://jetty.mortbay.org/configure_1_2.dtd"&gt;</tt><br>
               <br>
               <tt>    &lt;Configure class="packagename.classname"&gt; &lt;!-- 
   class specified here--&gt;</tt><br>
@@ -1090,8 +1090,8 @@ name,    Object  value)</code>  can be called with the <code>Put</code> element:
    <tt>
 <pre>                                                                     
  &lt;?xml version="1.0"&nbsp; encoding="ISO-8859-1"?&gt;
- &lt;!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure 1.0//EN"
- "http://jetty.mortbay.org/configure_1_1.dtd"&gt;
+ &lt;!DOCTYPE Configure PUBLIC "-//Mort Bay Consulting//DTD Configure 1.2//EN"
+ "http://jetty.mortbay.org/configure_1_2.dtd"&gt;
                                                                         
 &lt;Configure class="org.mortbay.jetty.Server"&gt;
 &nbsp; &lt;Call name="addListener"&gt;
