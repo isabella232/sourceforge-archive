@@ -712,7 +712,7 @@ public class ResourceHandler extends AbstractHttpHandler
                                    "No directory");
                 return;
             }
-            data=dir.getBuf();
+            data=dir.getByteArray();
             if (resource instanceof CachedResource)
                 ((CachedResource)resource).setCachedData(data);
         }
@@ -726,7 +726,7 @@ public class ResourceHandler extends AbstractHttpHandler
             return;
         }
         
-        response.getOutputStream().write(data);
+        response.getOutputStream().write(data,0,data.length);
         response.commit();
     }
 

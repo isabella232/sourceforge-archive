@@ -236,6 +236,14 @@ public class ByteArrayISO8859Writer extends Writer
     {
         ByteArrayPool.returnByteArray(_buf);
     }
+
+    /* ------------------------------------------------------------ */
+    public byte[] getByteArray()
+    {
+        byte[] data=new byte[_size];
+        System.arraycopy(_buf,0,data,0,_size);
+        return data;
+    }
     
 }
     

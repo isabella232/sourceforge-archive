@@ -476,7 +476,7 @@ public class Default extends HttpServlet
                                    "No directory");
                 return;
             }
-            data=dir.getBuf();
+            data=dir.getByteArray();
             if (resource instanceof CachedResource)
                 ((CachedResource)resource).setCachedData(data);
         }
