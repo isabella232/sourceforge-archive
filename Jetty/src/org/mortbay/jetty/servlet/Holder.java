@@ -214,7 +214,7 @@ public class Holder
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return _name+"["+_className+"]";
+        return _name;
     }
     
 }

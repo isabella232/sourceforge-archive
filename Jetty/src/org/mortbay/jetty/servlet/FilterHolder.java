@@ -16,6 +16,7 @@
 package org.mortbay.jetty.servlet;
 
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -26,6 +27,7 @@ import javax.servlet.ServletContext;
 import org.mortbay.http.HttpHandler;
 import org.mortbay.http.PathMap;
 import org.mortbay.util.LazyList;
+import org.mortbay.util.TypeUtil;
 
 /* --------------------------------------------------------------------- */
 /** 
@@ -54,13 +56,12 @@ public class FilterHolder
             return __INCLUDE;
         if ("error".equalsIgnoreCase(type))
             return __ERROR;
-        return 0;
+        throw new IllegalArgumentException(type);
     }
     
     /* ------------------------------------------------------------ */
     private PathMap _pathSpecs;
-    private int _appliesTo;
-    private Object _servlets;
+    private Map _servlets;
 
     private transient Filter _filter;
     private transient Config _config;
@@ -79,22 +80,27 @@ public class FilterHolder
         super(httpHandler,name,className);
     }
 
-    /* ------------------------------------------------------------ */
-    /** Add a type that this filter applies to.
-     * @param type Of __REQUEST, __FORWARD, __INCLUDE or __ERROR
-     */
-    public void addAppliesTo(int type)
-    {
-        _appliesTo|=type;
-    }
 
     /* ------------------------------------------------------------ */
     /** Add a type that this filter applies to.
      * @param type "REQUEST", "FORWARD", "INCLUDE" or "ERROR"
      */
-    public void addAppliesTo(String type)
+    public void addDispatchesToServlet(String name, String type)
     {
-        _appliesTo|=type(type);
+        if (_servlets==null || !_servlets.containsKey(name))
+            throw new IllegalStateException();
+        _servlets.put(name,TypeUtil.newInteger(((Integer)_servlets.get(name)).intValue()|type(type)));
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Add a type that this filter applies to.
+     * @param type "REQUEST", "FORWARD", "INCLUDE" or "ERROR"
+     */
+    public void addDispatchesToPathSpec(String pathSpec, String type)
+    {
+        if (_pathSpecs==null || !_pathSpecs.containsKey(pathSpec))
+            throw new IllegalStateException();
+        _pathSpecs.put(pathSpec,TypeUtil.newInteger(((Integer)_pathSpecs.get(pathSpec)).intValue()|type(type)));
     }
     
     /* ------------------------------------------------------------ */
@@ -103,7 +109,9 @@ public class FilterHolder
      */
     public void addServlet(String servlet)
     {
-        _servlets=LazyList.add(_servlets,servlet);
+        if (_servlets==null)
+            _servlets=new HashMap();
+        _servlets.put(servlet,new Integer(0));
     }
     
     /* ------------------------------------------------------------ */
@@ -114,23 +122,13 @@ public class FilterHolder
     {
         if (_pathSpecs==null)
             _pathSpecs=new PathMap();
-        _pathSpecs.put(pathSpec,pathSpec);
+        _pathSpecs.put(pathSpec,TypeUtil.newInteger(0));
     }
     
     /* ------------------------------------------------------------ */
     public boolean isMappedToPath()
     {
         return _pathSpecs!=null;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Check if this filter applies.
-     * @param type The type of request: __REQUEST,__FORWARD,__INCLUDE or __ERROR.
-     * @return True if this filter applies
-     */
-    public boolean appliesTo(int type)
-    {
-        return (_appliesTo&type)!=0 || (_appliesTo==0&&type==__REQUEST) ;
     }
     
     /* ------------------------------------------------------------ */
@@ -139,23 +137,30 @@ public class FilterHolder
      * @param type The type of request: __REQUEST,__FORWARD,__INCLUDE or __ERROR.
      * @return True if this filter applies
      */
-    public boolean appliesTo(String path, int type)
+    public boolean appliesToPath(String path, int type)
     {
-        return
-            ((_appliesTo&type)!=0 || (_appliesTo==0&&type==__REQUEST) ) &&
-            _pathSpecs!=null &&
-            _pathSpecs.getMatch(path)!=null;
+        if (_pathSpecs==null)
+            return false;
+        Integer t=(Integer)_pathSpecs.match(path);
+        if (t==null)
+            return false;
+        return (t.intValue()==0 && type==__REQUEST) || (t.intValue()&type)!=0;
     }
     
     /* ------------------------------------------------------------ */
-    public String appliedPathSpec(String path)
+    /** Check if this filter applies to a servlet.
+     * @param path The path to check.
+     * @param type The type of request: __REQUEST,__FORWARD,__INCLUDE or __ERROR.
+     * @return True if this filter applies
+     */
+    public boolean appliesToServlet(String name, int type)
     {
-        if (_pathSpecs==null)
-            return null;
-        Map.Entry entry = _pathSpecs.getMatch(path);
-        if (entry==null)
-            return null;
-        return (String)entry.getKey();
+        if (_servlets==null)
+            return false;
+        Integer t=(Integer)_servlets.get(name);
+        if (t==null)
+            return false;
+        return (t.intValue()==0 && type==__REQUEST) || (t.intValue()&type)!=0;
     }
 
     /* ------------------------------------------------------------ */
@@ -209,9 +214,15 @@ public class FilterHolder
         int s = LazyList.size(_servlets);
         return (String[])LazyList.getList(_servlets).toArray(new String[s]);
     }
-    
+
     /* ------------------------------------------------------------ */
     public String toString()
+    {
+        return getName();
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String dump()
     {
         StringBuffer buf = new StringBuffer();
         buf.append(getName());

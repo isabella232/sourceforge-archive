@@ -420,8 +420,7 @@ public class WebApplicationHandler extends ServletHandler
             }
             
             // Security Check
-            if (!getHttpContext()
-                    .checkSecurityConstraints(
+            if (!getHttpContext().checkSecurityConstraints(
                             pathInContext,
                             servletHttpRequest.getHttpRequest(),
                             servletHttpResponse.getHttpResponse()))
@@ -480,7 +479,7 @@ public class WebApplicationHandler extends ServletHandler
                 for (int i= 0; i < _pathFilters.size(); i++)
                 {
                     FilterHolder holder= (FilterHolder)_pathFilters.get(i);
-                    if (holder.appliesTo(pathInContext, requestType))
+                    if (holder.appliesToPath(pathInContext, requestType))
                         filters= LazyList.add(filters, holder);
                 }
             } 
@@ -503,15 +502,15 @@ public class WebApplicationHandler extends ServletHandler
                         for (int i= 0; i < list.size(); i++)
                         {
                             FilterHolder holder= (FilterHolder)list.get(i);
-                            if (holder.appliesTo(requestType))
-                                filters= LazyList.add(filters, holder);
+                            if (holder.appliesToServlet(servletHolder.getName(),requestType))
+                                filters=LazyList.add(filters, holder);
                         }
                     }
                     else
                     {
                         FilterHolder holder= (FilterHolder)o;
-                        if (holder.appliesTo(requestType))
-                            filters= LazyList.add(filters, holder);
+                        if (holder.appliesToServlet(servletHolder.getName(),requestType))
+                            filters=LazyList.add(filters, holder);
                     }
                 }
             }
@@ -529,6 +528,8 @@ public class WebApplicationHandler extends ServletHandler
             else if (_filterChainsCached)
                 _chainCache[requestType].put(pathInContext,null);
         }
+        
+        if (log.isDebugEnabled()) log.debug("chain="+chain);
         
         // Do the handling thang
         if (chain!=null)
@@ -661,6 +662,18 @@ public class WebApplicationHandler extends ServletHandler
             else // Not found
                 notFound((HttpServletRequest)request, (HttpServletResponse)response);
         }
+        
+        public String toString()
+        {
+            StringBuffer b = new StringBuffer();
+            for (int i=0; i<LazyList.size(_filters);i++)
+            {
+                b.append(LazyList.get(_filters, i).toString());
+                b.append("->");
+            }
+            b.append(_servletHolder);
+            return b.toString();
+        }
     }
     
 
@@ -708,6 +721,15 @@ public class WebApplicationHandler extends ServletHandler
             }
             else // Not found
                 notFound((HttpServletRequest)request, (HttpServletResponse)response);
+        }
+        
+        public String toString()
+        {
+            if (_filterHolder!=null)
+                return _filterHolder+"->"+_next.toString();
+            if (_servletHolder!=null)
+                return _servletHolder.toString();
+            return "null";
         }
     }
 }

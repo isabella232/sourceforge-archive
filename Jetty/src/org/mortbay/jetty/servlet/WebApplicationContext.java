@@ -708,7 +708,7 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
     public String toString()
     {
         String name = getDisplayName();
-        return "WebApplicationContext[" + getHttpContextName() + "," + (name == null ? _war : name) + "]";
+        return "WebApplicationContext[" + getContextPath() + "," + (name == null ? _war : name) + "]";
     }
 
     /* ------------------------------------------------------------ */

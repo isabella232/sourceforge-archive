@@ -1563,13 +1563,13 @@ public class HttpContext extends Container
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "HttpContext["+getHttpContextName()+"]";
+        return "HttpContext["+getContextPath()+","+getHttpContextName()+"]";
     }
 
     /* ------------------------------------------------------------ */
     public String toString(boolean detail)
     {
-        return "HttpContext["+getHttpContextName()+"]" +
+        return "HttpContext["+getContextPath()+","+getHttpContextName()+"]" +
             (detail?("="+_handlers):"");
     }
 

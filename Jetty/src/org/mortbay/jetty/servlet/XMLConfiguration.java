@@ -330,7 +330,10 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
         while(iter.hasNext())
         {
             String dispatcher=((XmlParser.Node)iter.next()).toString(false,true);
-            holder.addAppliesTo(dispatcher);
+            if (servletName!=null)
+                holder.addDispatchesToServlet(servletName,dispatcher);
+            else
+                holder.addDispatchesToPathSpec(pathSpec, dispatcher);
         }
     }
 
