@@ -5,8 +5,8 @@
 
 package org.mortbay.xml;
 
-import java.io.StringReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -20,11 +20,11 @@ import java.net.UnknownHostException;
 import java.util.Map;
 import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
+import org.mortbay.util.Loader;
 import org.mortbay.util.Primitive;
 import org.mortbay.util.Resource;
-import org.mortbay.util.Loader;
-import org.xml.sax.SAXException;
 import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 
 /* ------------------------------------------------------------ */

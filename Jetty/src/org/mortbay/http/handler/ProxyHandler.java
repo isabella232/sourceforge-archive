@@ -8,29 +8,23 @@ package org.mortbay.http.handler;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.URL;
-import java.net.URLConnection;
 import java.net.HttpURLConnection;
 import java.net.Socket;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.Enumeration;
 import java.util.HashSet;
-import org.mortbay.http.HttpOutputStream;
-import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
-import org.mortbay.http.HttpTunnel;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.util.ByteArrayISO8859Writer;
+import org.mortbay.http.HttpTunnel;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
-import org.mortbay.util.URI;
-import org.mortbay.util.LineInput;
-import org.mortbay.util.StringUtil;
-import org.mortbay.util.StringMap;
 import org.mortbay.util.InetAddrPort;
+import org.mortbay.util.StringMap;
+import org.mortbay.util.URI;
 
 /* ------------------------------------------------------------ */
 /** Proxy request handler.

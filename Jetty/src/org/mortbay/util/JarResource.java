@@ -12,7 +12,6 @@ import java.net.JarURLConnection;
 import java.net.URL;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
-import java.util.zip.ZipEntry;
 
 
 /* ------------------------------------------------------------ */

@@ -7,10 +7,9 @@ package org.mortbay.http;
 
 import java.io.IOException;
 import org.mortbay.http.SecurityConstraint.Authenticator;
-import java.security.Principal;
+import org.mortbay.util.B64Code;
 import org.mortbay.util.Code;
 import org.mortbay.util.StringUtil;
-import org.mortbay.util.B64Code;
 
 /* ------------------------------------------------------------ */
 /** BASIC authentication.

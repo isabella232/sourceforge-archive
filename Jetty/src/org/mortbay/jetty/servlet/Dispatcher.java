@@ -6,19 +6,15 @@
 package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Enumeration;
 import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.HashSet;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -28,23 +24,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
-import org.mortbay.http.HttpOutputStream;
 import org.mortbay.http.HttpConnection;
-import org.mortbay.http.HttpContext;
-import org.mortbay.http.HttpFields;
-import org.mortbay.http.HttpMessage;
-import org.mortbay.http.HttpRequest;
-import org.mortbay.http.HttpResponse;
 import org.mortbay.http.PathMap;
-import org.mortbay.http.handler.NullHandler;
-import org.mortbay.http.handler.ResourceHandler;
 import org.mortbay.util.Code;
-import org.mortbay.util.Log;
 import org.mortbay.util.MultiMap;
-import org.mortbay.util.Resource;
 import org.mortbay.util.StringMap;
-import org.mortbay.util.UrlEncoded;
 import org.mortbay.util.URI;
+import org.mortbay.util.UrlEncoded;
 import org.mortbay.util.WriterOutputStream;
 
 

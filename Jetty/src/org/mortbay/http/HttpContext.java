@@ -7,14 +7,13 @@ package org.mortbay.http;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.security.Permission;
 import java.security.PermissionCollection;
 import java.security.Permissions;
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -24,21 +23,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import org.mortbay.http.SecurityConstraint.Authenticator;
-import org.mortbay.http.handler.ResourceHandler;
-import org.mortbay.http.handler.SecurityHandler;
-import org.mortbay.util.ByteArrayISO8859Writer;
-import org.mortbay.util.ByteBufferOutputStream;
 import org.mortbay.util.CachedResource;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
-import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LifeCycle;
 import org.mortbay.util.Log;
-import org.mortbay.util.LogSink;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
 import org.mortbay.util.StringUtil;
-import org.mortbay.util.TypeUtil;
 import org.mortbay.util.URI;
 
 
@@ -52,7 +44,7 @@ import org.mortbay.util.URI;
  * Servlet API, except that it may contain other types of handler
  * other than servlets.
  * <p>
- * A ClassLoader is created for the context and it uses 
+ * A ClassLoader is created for the context and it uses
  * Thread.currentThread().getContextClassLoader(); as it's parent loader.
  * The class loader is initialized during start(), when a derived
  * context calls initClassLoader() or on the first call to loadClass()
@@ -75,11 +67,11 @@ public class HttpContext implements LifeCycle,
     /** File class path attribute.
      * If this name is set as a context init parameter, then the attribute
      * name given will be used to set the file classpath for the context as a
-     * context attribute. 
+     * context attribute.
      */
     public final static String __fileClassPathAttr=
         "org.mortbay.http.HttpContext.FileClassPathAttribute";
-    
+
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     private final static Map __dftMimeMap = new HashMap();
@@ -139,7 +131,7 @@ public class HttpContext implements LifeCycle,
         "index.jsp"
     };
 
-    
+
     /* ------------------------------------------------------------ */
     private transient boolean _started;
     private transient ClassLoader _parent;
@@ -167,15 +159,15 @@ public class HttpContext implements LifeCycle,
 
 
     /* ------------------------------------------------------------ */
-    /** Constructor. 
+    /** Constructor.
      */
     public HttpContext()
     {}
-    
+
     /* ------------------------------------------------------------ */
-    /** Constructor. 
-     * @param httpServer 
-     * @param contextPathSpec 
+    /** Constructor.
+     * @param httpServer
+     * @param contextPathSpec
      */
     public HttpContext(HttpServer httpServer,String contextPathSpec)
     {
@@ -195,7 +187,7 @@ public class HttpContext implements LifeCycle,
         for (int i=0;i<_handlersArray.length;i++)
             _handlersArray[i].initialize(this);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get the ThreadLocal HttpConnection.
      * Get the HttpConnection for current thread, if any.  This method is
@@ -206,7 +198,7 @@ public class HttpContext implements LifeCycle,
     {
         return HttpConnection.getHttpConnection();
     }
-    
+
     /* ------------------------------------------------------------ */
     void setHttpServer(HttpServer httpServer)
     {
@@ -242,7 +234,7 @@ public class HttpContext implements LifeCycle,
 
         return contextPathSpec;
     }
-    
+
     /* ------------------------------------------------------------ */
     public void setContextPath(String contextPathSpec)
     {
@@ -255,24 +247,24 @@ public class HttpContext implements LifeCycle,
             _contextPath=contextPathSpec.substring(0,contextPathSpec.length()-2);
         else
             _contextPath="/";
-        
+
         _contextName=null;
 
         if (_httpServer!=null)
             _httpServer.addMappings(this);
     }
-    
-    
+
+
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * @return The context prefix
      */
     public String getContextPath()
     {
         return _contextPath;
     }
-    
-    
+
+
     /* ------------------------------------------------------------ */
     /** Add a virtual host alias to this context.
      * @see setVirtualHosts
@@ -296,7 +288,7 @@ public class HttpContext implements LifeCycle,
             _hostsArray=null;
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     /** remove a virtual host alias to this context.
      * @see setVirtualHosts
@@ -333,7 +325,7 @@ public class HttpContext implements LifeCycle,
     public void setVirtualHosts(String[] hosts)
     {
         List old = new ArrayList(_hosts);
-        
+
         for (int i=0;i<hosts.length;i++)
         {
             boolean existing=old.remove(hosts[i]);
@@ -344,7 +336,7 @@ public class HttpContext implements LifeCycle,
         for (int i=0;i<old.size();i++)
             removeVirtualHost((String)old.get(i));
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get the virtual hosts for the context.
      * Only requests that have a matching host header or fully qualified
@@ -370,12 +362,12 @@ public class HttpContext implements LifeCycle,
         return _hostsArray;
     }
 
-    
+
     /* ------------------------------------------------------------ */
     public void setHandlers(HttpHandler[] handlers)
     {
         List old = new ArrayList(_handlers);
-        
+
         for (int i=0;i<handlers.length;i++)
         {
             boolean existing=old.remove(handlers[i]);
@@ -386,7 +378,7 @@ public class HttpContext implements LifeCycle,
         for (int i=0;i<old.size();i++)
             removeHandler((HttpHandler)old.get(i));
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get all handlers.
      * @return List of all HttpHandlers
@@ -405,7 +397,7 @@ public class HttpContext implements LifeCycle,
         return _handlersArray;
     }
 
-    
+
     /* ------------------------------------------------------------ */
     /** Add a handler.
      * @param i The position in the handler list
@@ -422,19 +414,19 @@ public class HttpContext implements LifeCycle,
         else if (context!=this)
             throw new IllegalArgumentException("Handler already initialized in another HttpContext");
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Add a HttpHandler to the context.
-     * @param handler 
+     * @param handler
      */
     public synchronized void addHandler(HttpHandler handler)
     {
         addHandler(_handlers.size(),handler);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get handler index.
-     * @param Handler instance 
+     * @param Handler instance
      * @return Index of handler in context or -1 if not found.
      */
     public int getHandlerIndex(HttpHandler handler)
@@ -446,10 +438,10 @@ public class HttpContext implements LifeCycle,
         }
         return -1;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get a handler by class.
-     * @param handlerClass 
+     * @param handlerClass
      * @return The first handler that is an instance of the handlerClass
      */
     public synchronized HttpHandler getHandler(Class handlerClass)
@@ -462,7 +454,7 @@ public class HttpContext implements LifeCycle,
         }
         return null;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Remove a handler.
      * The handler must be stopped before being removed.
@@ -477,7 +469,7 @@ public class HttpContext implements LifeCycle,
         _handlersArray=null;
         return handler;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Remove a handler.
      * The handler must be stopped before being removed.
@@ -490,7 +482,7 @@ public class HttpContext implements LifeCycle,
         _handlersArray=null;
     }
 
-    
+
     /* ------------------------------------------------------------ */
     /** Set context init parameter.
      * Init Parameters differ from attributes as they can only
@@ -503,7 +495,7 @@ public class HttpContext implements LifeCycle,
     {
         _initParams.put(param,value);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get context init parameter.
      * @param param param name
@@ -513,7 +505,7 @@ public class HttpContext implements LifeCycle,
     {
         return (String)_initParams.get(param);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get context init parameter.
      * @return Enumeration of names
@@ -522,9 +514,9 @@ public class HttpContext implements LifeCycle,
     {
         return Collections.enumeration(_initParams.keySet());
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * @param name attribute name
      * @param value attribute value
      */
@@ -532,9 +524,9 @@ public class HttpContext implements LifeCycle,
     {
         _attributes.put(name,value);
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * @param name attribute name
      * @return attribute value or null
      */
@@ -542,17 +534,17 @@ public class HttpContext implements LifeCycle,
     {
         return _attributes.get(name);
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      */
     public Map getAttributes()
     {
         return _attributes;
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      */
     public void setAttributes(Map attributes)
     {
@@ -560,16 +552,16 @@ public class HttpContext implements LifeCycle,
     }
 
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * @return enumaration of names.
      */
     public Enumeration getAttributeNames()
     {
         return Collections.enumeration(_attributes.keySet());
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * @param name attribute name
      */
     public synchronized void removeAttribute(String name)
@@ -595,7 +587,7 @@ public class HttpContext implements LifeCycle,
             return null;
         return _resourceBase.toString();
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Set the Resource Base.
      * The base resource is the Resource to use as a relative base
@@ -618,19 +610,19 @@ public class HttpContext implements LifeCycle,
         }
     }
 
-    
+
     /* ------------------------------------------------------------ */
     /** Get the base resource.
      * The base resource is the Resource to use as a relative base
      * for all context resources. The ResourceBase attribute is a
      * string version of the baseResource.
-     * @return The resourceBase as a Resource instance 
+     * @return The resourceBase as a Resource instance
      */
     public Resource getBaseResource()
     {
         return _resourceBase;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Set the base resource.
      * The base resource is the Resource to use as a relative base
@@ -642,14 +634,14 @@ public class HttpContext implements LifeCycle,
     {
         _resourceBase=base;
     }
-    
-    
+
+
     /* ------------------------------------------------------------ */
     public int getMaxCachedFileSize()
     {
         return _maxCachedFileSize;
     }
- 
+
     /* ------------------------------------------------------------ */
     public void setMaxCachedFileSize(int maxCachedFileSize)
     {
@@ -662,21 +654,21 @@ public class HttpContext implements LifeCycle,
     {
         return _maxCacheSize;
     }
- 
+
     /* ------------------------------------------------------------ */
     public void setMaxCacheSize(int maxCacheSize)
     {
         _maxCacheSize = maxCacheSize;
         _cache.clear();
     }
-    
+
     /* ------------------------------------------------------------ */
     public void flushCache()
     {
         _cache.clear();
         System.gc();
     }
-    
+
     /* ------------------------------------------------------------ */
     public String[] getWelcomeFiles()
     {
@@ -704,7 +696,7 @@ public class HttpContext implements LifeCycle,
         list.add(welcomeFile);
         _welcomes=(String[])list.toArray(_welcomes);
     }
-    
+
     /* ------------------------------------------------------------ */
     public void removeWelcomeFile(String welcomeFile)
     {
@@ -712,7 +704,7 @@ public class HttpContext implements LifeCycle,
         list.remove(welcomeFile);
         _welcomes=(String[])list.toArray(_welcomes);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get a resource from the context.
      * Cached Resources are returned if the resource fits within the LRU
@@ -720,16 +712,16 @@ public class HttpContext implements LifeCycle,
      * caller must use the CachedResource.setCachedData method to set the
      * formatted directory content.
      *
-     * @param pathInContext 
+     * @param pathInContext
      * @return Resource
-     * @exception IOException 
+     * @exception IOException
      */
     public Resource getResource(String pathInContext)
         throws IOException
     {
         if (_resourceBase==null)
             return null;
-        
+
         Resource resource=null;
 
         // Cache operations
@@ -767,14 +759,14 @@ public class HttpContext implements LifeCycle,
                     else
                         len=0;
                 }
-                
+
                 // Is it cacheable?
                 if (len>0 && len<_maxCachedFileSize && len<_maxCacheSize)
                 {
                     int needed=_maxCacheSize-(int)len;
                     while(_cacheSize>needed)
                         _leastRecentlyUsed.invalidate();
-                    
+
                     cached=resource.cache();
                     if (Code.verbose()) Code.debug("CACHED: ",resource);
                     new CachedMetaData(cached,pathInContext);
@@ -794,7 +786,7 @@ public class HttpContext implements LifeCycle,
     {
         if (!resource.isDirectory())
             return null;
-        
+
         for (int i=0;i<_welcomes.length;i++)
         {
             Resource welcome=resource.addPath(_welcomes[i]);
@@ -804,18 +796,18 @@ public class HttpContext implements LifeCycle,
 
         return null;
     }
-    
-    
+
+
     /* ------------------------------------------------------------ */
     public synchronized Map getMimeMap()
     {
         return _mimeMap;
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * Also sets the org.mortbay.http.mimeMap context attribute
-     * @param mimeMap 
+     * @param mimeMap
      */
     public void setMimeMap(Map mimeMap)
     {
@@ -831,17 +823,17 @@ public class HttpContext implements LifeCycle,
     public String getMimeByExtension(String filename)
     {
         String type=null;
-        
+
         if (filename!=null)
         {
             int i=-1;
             while(type==null)
             {
                 i=filename.indexOf(".",i+1);
-                
+
                 if (i<0 || i>=filename.length())
                     break;
-                
+
                 String ext=StringUtil.asciiToLowerCase(filename.substring(i+1));
                 if (_mimeMap!=null)
                     type = (String)_mimeMap.get(ext);
@@ -863,8 +855,8 @@ public class HttpContext implements LifeCycle,
 
     /* ------------------------------------------------------------ */
     /** Set a mime mapping
-     * @param extension 
-     * @param type 
+     * @param extension
+     * @param type
      */
     public void setMimeMapping(String extension,String type)
     {
@@ -873,13 +865,13 @@ public class HttpContext implements LifeCycle,
         _mimeMap.put(extension,type);
     }
 
-    
+
     /* ------------------------------------------------------------ */
     /** Get the context classpath.
      * This method only returns the paths that have been set for this
      * context and does not include any paths from a parent or the
      * system classloader.
-     * Note that this may not be a legal javac classpath. 
+     * Note that this may not be a legal javac classpath.
      * @return a comma or ';' separated list of class
      * resources. These may be jar files, directories or URLs to jars
      * or directories.
@@ -927,7 +919,7 @@ public class HttpContext implements LifeCycle,
             System.getProperty("java.class.path");
         return fileClassPath;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Sets the class path for the context.
      * A class path is only required for a context if it uses classes
@@ -955,14 +947,14 @@ public class HttpContext implements LifeCycle,
     {
         if (isStarted())
             Code.warning("classpaths set while started");
-        
+
         if (lib.exists() && lib.isDirectory())
         {
             StringBuffer classPath=new StringBuffer();
 
             if (append && this.getClassPath()!=null)
                 classPath.append(_classPath);
-            
+
             String[] files=lib.list();
             for (int f=0;files!=null && f<files.length;f++)
             {
@@ -1012,7 +1004,7 @@ public class HttpContext implements LifeCycle,
     {
         return _classLoaderJava2Compliant;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Set Java2 compliant classloading.
      * @param compliant If true, the class loader will conform to the java 2
@@ -1026,7 +1018,7 @@ public class HttpContext implements LifeCycle,
         if (_loader!=null && (_loader instanceof ContextLoader))
             ((ContextLoader)_loader).setJava2Compliant(compliant);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Set temporary directory for context.
      * The javax.servlet.context.tempdir attribute is also set.
@@ -1041,21 +1033,21 @@ public class HttpContext implements LifeCycle,
         {
             try{dir=new File(dir.getCanonicalPath());}
             catch (IOException e){Code.warning(e);}
-        }        
-        
+        }
+
         if (dir!=null && !dir.exists())
         {
             dir.mkdir();
             dir.deleteOnExit();
         }
-        
+
         if (dir!=null && ( !dir.exists() || !dir.isDirectory() || !dir.canWrite()))
             throw new IllegalArgumentException("Bad temp directory: "+dir);
-        
+
         _tmpDir=dir;
         setAttribute("javax.servlet.context.tempdir",_tmpDir);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get Context temporary directory.
      * A tempory directory is generated if it has not been set.  The
@@ -1068,26 +1060,26 @@ public class HttpContext implements LifeCycle,
     {
         if (_tmpDir!=null)
             return _tmpDir;
-        
+
         // Initialize temporary directory
         //
         // I'm afraid that this is very much black magic.
         // but if you can think of better....
         Object t = getAttribute("javax.servlet.context.tempdir");
-        
+
         if (t!=null && (t instanceof File))
         {
             _tmpDir=(File)t;
             if (_tmpDir.isDirectory() && _tmpDir.canWrite())
                 return _tmpDir;
         }
-                
+
         if (t!=null && (t instanceof String))
         {
             try
             {
                 _tmpDir=new File((String)t);
-                
+
                 if (_tmpDir.isDirectory() && _tmpDir.canWrite())
                 {
                     Code.debug("Converted to File ",_tmpDir," for ",this);
@@ -1105,7 +1097,7 @@ public class HttpContext implements LifeCycle,
         try
         {
             HttpListener httpListener=_httpServer.getListeners()[0];
-            
+
             String vhost = null;
             for (int h=0;vhost==null && _hosts!=null && h<_hosts.size();h++)
                 vhost=(String)_hosts.get(h);
@@ -1117,11 +1109,11 @@ public class HttpContext implements LifeCycle,
                 "_"+
                 (vhost==null?"":vhost)+
                 getContextPath();
-            
+
             temp=temp.replace('/','_');
             temp=temp.replace('.','_');
             temp=temp.replace('\\','_');
-            
+
             _tmpDir=new File(System.getProperty("java.io.tmpdir"),temp);
             if (_tmpDir.exists())
             {
@@ -1138,7 +1130,7 @@ public class HttpContext implements LifeCycle,
                     Code.warning("Can't reuse "+old+", using "+_tmpDir);
                 }
             }
-            
+
             _tmpDir.mkdir();
             _tmpDir.deleteOnExit();
             Code.debug("Created temp dir ",_tmpDir," for ",this);
@@ -1147,8 +1139,8 @@ public class HttpContext implements LifeCycle,
         {
             _tmpDir=null;
             Code.ignore(e);
-        }    
-        
+        }
+
         if (_tmpDir==null)
         {
             try{
@@ -1165,11 +1157,11 @@ public class HttpContext implements LifeCycle,
                 Code.fail(e);
             }
         }
-        
+
         setAttribute("javax.servlet.context.tempdir",_tmpDir);
         return _tmpDir;
     }
-    
+
 
 
     /* ------------------------------------------------------------ */
@@ -1182,8 +1174,8 @@ public class HttpContext implements LifeCycle,
             throw new IllegalStateException("Started");
         _loader=loader;
     }
-    
-    
+
+
     /* ------------------------------------------------------------ */
     /** Get the classloader.
      * If no classloader has been set and the context has been loaded
@@ -1222,7 +1214,7 @@ public class HttpContext implements LifeCycle,
     {
         return _parent;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Initialize the context classloader.
      * Initialize the context classloader with the current parameters.
@@ -1239,11 +1231,11 @@ public class HttpContext implements LifeCycle,
             // If no parent, then try this threads classes loader as parent
             if (_parent==null)
                 _parent=Thread.currentThread().getContextClassLoader();
-            
+
             // If no parent, then try this classes loader as parent
             if (_parent==null)
                 _parent=this.getClass().getClassLoader();
-            
+
             Code.debug("Init classloader from ",_classPath,
                        ", ",_parent," for ",this);
 
@@ -1257,7 +1249,7 @@ public class HttpContext implements LifeCycle,
                 _loader=_parent;
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     public synchronized Class loadClass(String className)
         throws ClassNotFoundException
@@ -1271,18 +1263,18 @@ public class HttpContext implements LifeCycle,
                 return null;
             }
         }
-        
+
         if (className==null)
-            return null;        
-                       
+            return null;
+
         return _loader.loadClass(className);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** set error page URI.
      * @param error A string representing an error code or a
      * exception classname
-     * @param uriInContext 
+     * @param uriInContext
      */
     public void setErrorPage(String error,String uriInContext)
     {
@@ -1290,7 +1282,7 @@ public class HttpContext implements LifeCycle,
             _errorPages=new HashMap(5);
         _errorPages.put(error,uriInContext);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** get error page URI.
      * @param error A string representing an error code or a
@@ -1303,8 +1295,8 @@ public class HttpContext implements LifeCycle,
             return null;
        return (String) _errorPages.get(error);
     }
-    
-    
+
+
     /* ------------------------------------------------------------ */
     public String removeErrorPage(String error)
     {
@@ -1312,7 +1304,7 @@ public class HttpContext implements LifeCycle,
             return null;
        return (String) _errorPages.remove(error);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Set the realm name.
      * @param realmName The name to use to retrieve the actual realm
@@ -1322,13 +1314,13 @@ public class HttpContext implements LifeCycle,
     {
         _realmName=realmName;
     }
-    
+
     /* ------------------------------------------------------------ */
     public String getRealmName()
     {
         return _realmName;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Set the  realm.
      */
@@ -1341,14 +1333,14 @@ public class HttpContext implements LifeCycle,
     public UserRealm getRealm()
     {
         return _userRealm;
-    }    
+    }
 
     /* ------------------------------------------------------------ */
     public Authenticator getAuthenticator()
-    {        
+    {
         return _authenticator;
     }
-    
+
     /* ------------------------------------------------------------ */
     public void setAuthenticator(Authenticator authenticator)
     {
@@ -1365,7 +1357,7 @@ public class HttpContext implements LifeCycle,
             _constraintMap.put(pathSpec,scs);
         }
         scs.add(sc);
-        
+
         Code.debug("added ",sc," at ",pathSpec);
     }
 
@@ -1396,13 +1388,13 @@ public class HttpContext implements LifeCycle,
         throws HttpException, IOException
     {
         UserRealm realm = getRealm();
-        
+
         // Get all path matches
         List scss =_constraintMap.getMatches(pathInContext);
         if (scss!=null)
-        {          
+        {
             Code.debug("Security Constraint on ",pathInContext," against ",scss);
-            
+
             // for each path match
             matches:
             for (int m=0;m<scss.size();m++)
@@ -1411,9 +1403,9 @@ public class HttpContext implements LifeCycle,
                 Map.Entry entry=(Map.Entry)scss.get(m);
                 if (Code.verbose())
                     Code.debug("Check ",pathInContext," against ",entry);
-                
+
                 List scs = (List)entry.getValue();
-                
+
                 switch (SecurityConstraint.check(scs,
                                                  _authenticator,
                                                  realm,
@@ -1427,10 +1419,10 @@ public class HttpContext implements LifeCycle,
                 }
             }
         }
-        
+
         return true;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get the map of mime type to char encoding.
      * @return Map of mime type to character encodings.
@@ -1441,7 +1433,7 @@ public class HttpContext implements LifeCycle,
             _encodingMap=Collections.unmodifiableMap(__encodings);
         return _encodingMap;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Set the map of mime type to char encoding.
      * Also sets the org.mortbay.http.encodingMap context attribute
@@ -1460,7 +1452,7 @@ public class HttpContext implements LifeCycle,
     public String getEncodingByMimeType(String type)
     {
         String encoding =null;
-        
+
         if (type!=null)
             encoding=(String)_encodingMap.get(type);
 
@@ -1486,9 +1478,9 @@ public class HttpContext implements LifeCycle,
     {
         _redirectNullPath=b;
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * @return True if a /context request is redirected to /context/ if
      * there is not path in the context.
      */
@@ -1505,13 +1497,13 @@ public class HttpContext implements LifeCycle,
      * loaded by this context.  This is simpler that creating a
      * security policy file, as not all code sources may be statically
      * known.
-     * @param permissions 
+     * @param permissions
      */
     public void setPermissions(PermissionCollection permissions)
     {
         _permissions=permissions;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get the permissions to be used for this context.
      */
@@ -1526,7 +1518,7 @@ public class HttpContext implements LifeCycle,
      * loaded by this context.  This is simpler that creating a
      * security policy file, as not all code sources may be statically
      * known.
-     * @param permission 
+     * @param permission
      */
     public void addPermission(Permission permission)
     {
@@ -1539,11 +1531,11 @@ public class HttpContext implements LifeCycle,
     /** Handler request.
      * Determine the path within the context and then call
      * handle(pathInContext,request,response).
-     * @param request 
-     * @param response 
+     * @param request
+     * @param response
      * @return True if the request has been handled.
-     * @exception HttpException 
-     * @exception IOException 
+     * @exception HttpException
+     * @exception IOException
      */
     public boolean handle(HttpRequest request,
                           HttpResponse response)
@@ -1551,7 +1543,7 @@ public class HttpContext implements LifeCycle,
     {
         if (!_started)
             return false;
-        
+
         if (_statsOn)
         {
             synchronized(_statsLock)
@@ -1562,21 +1554,21 @@ public class HttpContext implements LifeCycle,
                     _requestsActiveMax=_requestsActive;
             }
         }
-        
+
         String pathInContext = URI.canonicalPath(request.getPath());
         if (pathInContext==null)
         {
             // Must be a bad request.
             throw new HttpException(response.__400_Bad_Request);
         }
-        
+
         String contextPath=null;
         if (_contextPath.length()>1)
         {
             contextPath=_contextPath;
             pathInContext=pathInContext.substring(_contextPath.length());
         }
-        
+
         if (_redirectNullPath && (pathInContext==null ||
                                   pathInContext.length()==0))
         {
@@ -1594,7 +1586,7 @@ public class HttpContext implements LifeCycle,
             response.sendError(302);
             return true;
         }
-        
+
         String pathParams=null;
         int semi = pathInContext.lastIndexOf(';');
         if (semi>=0)
@@ -1625,18 +1617,18 @@ public class HttpContext implements LifeCycle,
      * Call each HttpHandler until request is handled.
      * @param pathInContext Path in context
      * @param pathParams Path parameters such as encoded Session ID
-     * @param request 
-     * @param response 
+     * @param request
+     * @param response
      * @return True if the request has been handled.
-     * @exception HttpException 
-     * @exception IOException 
+     * @exception HttpException
+     * @exception IOException
      */
     public boolean handle(String pathInContext,
                           String pathParams,
                           HttpRequest request,
                           HttpResponse response)
         throws HttpException, IOException
-    {           
+    {
         // Save the thread context loader
         Thread thread = Thread.currentThread();
         ClassLoader lastContextLoader=thread.getContextClassLoader();
@@ -1646,25 +1638,25 @@ public class HttpContext implements LifeCycle,
             if (_loader!=null)
                 thread.setContextClassLoader(_loader);
             response.setHttpContext(this);
-            
+
             HttpHandler[] handlers=getHandlers();
             for (int k=0;k<handlers.length;k++)
             {
                 HttpHandler handler = handlers[k];
-                
+
                 if (!handler.isStarted())
                 {
                     Code.debug(handler," not started in ",this);
                     continue;
                 }
-                
+
                 Code.debug("Handler ",handler);
-                
+
                 handler.handle(pathInContext,
                                pathParams,
                                request,
                                response);
-                
+
                 if (request.isHandled())
                 {
                     Code.debug("Handled by ",handler);
@@ -1679,7 +1671,7 @@ public class HttpContext implements LifeCycle,
             response.setHttpContext(lastHttpContext);
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     public String getHttpContextName()
     {
@@ -1687,20 +1679,20 @@ public class HttpContext implements LifeCycle,
             _contextName = (_hosts.size()>1?(_hosts.toString()+":"):"")+_contextPath;
         return _contextName;
     }
-    
+
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "HttpContext["+getHttpContextName()+"]"; 
+        return "HttpContext["+getHttpContextName()+"]";
     }
-    
+
     /* ------------------------------------------------------------ */
     public String toString(boolean detail)
     {
         return "HttpContext["+getHttpContextName()+"]" +
-            (detail?("="+_handlers):""); 
+            (detail?("="+_handlers):"");
     }
-    
+
     /* ------------------------------------------------------------ */
     public synchronized void start()
         throws Exception
@@ -1709,7 +1701,7 @@ public class HttpContext implements LifeCycle,
             return;
 
         statsReset();
-        
+
         if (_httpServer==null)
             throw new IllegalStateException("No server for "+this);
 
@@ -1724,15 +1716,15 @@ public class HttpContext implements LifeCycle,
             if (_userRealm==null)
                 Code.warning("No Realm: "+_realmName);
         }
-        
+
         // setup the context loader
         initClassLoader(false);
-        
+
         // Set attribute if needed
         String attr = getInitParameter(__fileClassPathAttr);
         if (attr!=null && attr.length()>0)
             setAttribute(attr,getFileClassPath());
-        
+
         // Start the handlers
         Thread thread = Thread.currentThread();
         ClassLoader lastContextLoader=thread.getContextClassLoader();
@@ -1741,7 +1733,7 @@ public class HttpContext implements LifeCycle,
             if (_loader!=null)
                 thread.setContextClassLoader(_loader);
 
-            startHandlers();            
+            startHandlers();
         }
         finally
         {
@@ -1758,11 +1750,11 @@ public class HttpContext implements LifeCycle,
      * initialized and set as the thread context loader.
      * It may be specialized to provide custom handling
      * before any handlers are started.
-     * @exception Exception 
+     * @exception Exception
      */
     protected void startHandlers()
         throws Exception
-    {   
+    {
         // Prepare a multi exception
         MultiException mx = new MultiException();
 
@@ -1775,13 +1767,13 @@ public class HttpContext implements LifeCycle,
         }
         mx.ifExceptionThrow();
     }
-    
+
     /* ------------------------------------------------------------ */
     public synchronized boolean isStarted()
     {
         return _started;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Stop the context.
      * @param graceful If true and statistics are on, then this method will wait
@@ -1791,7 +1783,7 @@ public class HttpContext implements LifeCycle,
         throws InterruptedException
     {
         _started=false;
-        
+
         // wait for all requests to complete.
         while (graceful && _statsOn && _requestsActive>0 && _httpServer!=null)
             try {Thread.sleep(100);}
@@ -1800,7 +1792,7 @@ public class HttpContext implements LifeCycle,
 
         stop();
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Stop the context.
      */
@@ -1842,7 +1834,7 @@ public class HttpContext implements LifeCycle,
 	_constraintMap.clear();
         Log.event("Stopped "+this);
     }
-    
+
 
     /* ------------------------------------------------------------ */
     /** Destroy a context.
@@ -1874,7 +1866,7 @@ public class HttpContext implements LifeCycle,
             _hosts.clear();
         _hosts=null;
         _tmpDir=null;
-        
+
         setMimeMap(null);
         _encodingMap=null;
         if (_errorPages!=null)
@@ -1883,8 +1875,8 @@ public class HttpContext implements LifeCycle,
 
         _permissions=null;
     }
-    
-    
+
+
 
     /* ------------------------------------------------------------ */
     /** True set statistics recording on for this context.
@@ -1903,7 +1895,7 @@ public class HttpContext implements LifeCycle,
     /* ------------------------------------------------------------ */
     public long getStatsOnMs()
     {return _statsOn?(System.currentTimeMillis()-_statsStartedAt):0;}
-    
+
     /* ------------------------------------------------------------ */
     public void statsReset()
     {
@@ -1921,75 +1913,75 @@ public class HttpContext implements LifeCycle,
             _responses5xx=0;
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @return Get the number of requests handled by this context
      * since last call of statsReset(). If setStatsOn(false) then this
-     * is undefined. 
+     * is undefined.
      */
     public int getRequests() {return _requests;}
 
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * @return Number of requests currently active.
      * Undefined if setStatsOn(false).
      */
     public int getRequestsActive() {return _requestsActive;}
 
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * @return Maximum number of active requests
      * since statsReset() called. Undefined if setStatsOn(false).
      */
     public int getRequestsActiveMax() {return _requestsActiveMax;}
 
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * @return Get the number of responses with a 2xx status returned
      * by this context since last call of statsReset(). Undefined if
-     * if setStatsOn(false). 
+     * if setStatsOn(false).
      */
     public int getResponses1xx() {return _responses1xx;}
 
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * @return Get the number of responses with a 100 status returned
      * by this context since last call of statsReset(). Undefined if
-     * if setStatsOn(false). 
+     * if setStatsOn(false).
      */
     public int getResponses2xx() {return _responses2xx;}
 
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * @return Get the number of responses with a 3xx status returned
      * by this context since last call of statsReset(). Undefined if
-     * if setStatsOn(false). 
+     * if setStatsOn(false).
      */
     public int getResponses3xx() {return _responses3xx;}
 
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * @return Get the number of responses with a 4xx status returned
      * by this context since last call of statsReset(). Undefined if
-     * if setStatsOn(false). 
+     * if setStatsOn(false).
      */
     public int getResponses4xx() {return _responses4xx;}
 
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * @return Get the number of responses with a 5xx status returned
      * by this context since last call of statsReset(). Undefined if
-     * if setStatsOn(false). 
+     * if setStatsOn(false).
      */
     public int getResponses5xx() {return _responses5xx;}
-    
-        
+
+
     /* ------------------------------------------------------------ */
     /** Log a request and response.
      * Statistics are also collected by this method.
-     * @param request 
-     * @param response 
+     * @param request
+     * @param response
      */
     public void log(HttpRequest request,
                     HttpResponse response,
@@ -2001,7 +1993,7 @@ public class HttpContext implements LifeCycle,
             {
                 if (--_requestsActive<0)
                     _requestsActive=0;
-                
+
                 if (response!=null)
                 {
                     switch(response.getStatus()/100)
@@ -2019,7 +2011,7 @@ public class HttpContext implements LifeCycle,
         if (_httpServer!=null)
             _httpServer.log(request,response,length);
     }
-    
+
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /** MetaData associated with a context Resource.
@@ -2028,7 +2020,7 @@ public class HttpContext implements LifeCycle,
     {
         protected String _name;
         protected Resource _resource;
-        
+
         ResourceMetaData(Resource resource)
         {
             _resource=resource;
@@ -2040,18 +2032,18 @@ public class HttpContext implements LifeCycle,
         {
             return Long.toString(_resource.length());
         }
-        
+
         public String getLastModified()
         {
             return HttpFields.__dateSend.format(new Date(_resource.lastModified()));
         }
-        
+
         public String getEncoding()
         {
             return getMimeByExtension(_name);
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     private class CachedMetaData extends ResourceMetaData
@@ -2060,11 +2052,11 @@ public class HttpContext implements LifeCycle,
         String _encoding;
         String _length;
         String _key;
-        
+
         CachedResource _cached;
         CachedMetaData _prev;
         CachedMetaData _next;
-            
+
         CachedMetaData(CachedResource resource, String pathInContext)
         {
             super(resource);
@@ -2073,7 +2065,7 @@ public class HttpContext implements LifeCycle,
             _lastModified=super.getLastModified();
             _encoding=super.getEncoding();
             _key=pathInContext;
-            
+
             _next=_mostRecentlyUsed;
             _mostRecentlyUsed=this;
             if (_next!=null)
@@ -2081,28 +2073,28 @@ public class HttpContext implements LifeCycle,
             _prev=null;
             if (_leastRecentlyUsed==null)
                 _leastRecentlyUsed=this;
-            
+
             _cache.put(_key,resource);
 
             _cacheSize+=_cached.length();
-            
+
         }
-        
+
         public String getLength()
         {
             return _length;
         }
-        
+
         public String getLastModified()
         {
             return _lastModified;
         }
-        
+
         public String getEncoding()
         {
             return _encoding;
         }
-        
+
         /* ------------------------------------------------------------ */
         boolean isValid()
             throws IOException
@@ -2113,18 +2105,18 @@ public class HttpContext implements LifeCycle,
                 {
                     CachedMetaData tp = _prev;
                     CachedMetaData tn = _next;
-                    
+
                     _next=_mostRecentlyUsed;
                     _mostRecentlyUsed=this;
                     if (_next!=null)
                         _next._prev=this;
                     _prev=null;
-                    
+
                     if (tp!=null)
                         tp._next=tn;
                     if (tn!=null)
                         tn._prev=tp;
-                    
+
                     if (_leastRecentlyUsed==this && tp!=null)
                         _leastRecentlyUsed=tp;
                 }
@@ -2140,20 +2132,20 @@ public class HttpContext implements LifeCycle,
             // Invalidate it
             _cache.remove(_key);
             _cacheSize=_cacheSize-(int)_cached.length();
-            
-            
+
+
             if (_mostRecentlyUsed==this)
                 _mostRecentlyUsed=_next;
             else
                 _prev._next=_next;
-            
+
             if (_leastRecentlyUsed==this)
                 _leastRecentlyUsed=_prev;
             else
                 _next._prev=_prev;
-            
+
             _prev=null;
             _next=null;
-        }        
+        }
     }
 }

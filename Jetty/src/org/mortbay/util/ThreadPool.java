@@ -5,14 +5,7 @@
 
 package org.mortbay.util;
 
-import java.io.InterruptedIOException;
-import java.io.ObjectInputValidation;
 import java.io.Serializable;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.Iterator;
 
 /* ------------------------------------------------------------ */
 /** A pool of threads.

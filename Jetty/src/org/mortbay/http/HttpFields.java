@@ -8,10 +8,7 @@ package org.mortbay.http;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.text.DateFormat;
-import java.text.Format;
 import java.text.SimpleDateFormat;
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -19,26 +16,21 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.TimeZone;
 import javax.servlet.http.Cookie;
 import org.mortbay.util.Code;
 import org.mortbay.util.DateCache;
+import org.mortbay.util.LazyList;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.QuotedStringTokenizer;
-import org.mortbay.util.SingletonList;
 import org.mortbay.util.StringMap;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URI;
-import org.mortbay.util.UrlEncoded;
-import org.mortbay.util.LazyList;
 
 /* ------------------------------------------------------------ */
 /** HTTP Fields.

@@ -12,7 +12,6 @@ package org.mortbay.http.handler;
 import java.io.IOException;
 import java.util.Hashtable;
 import org.mortbay.http.HttpException;
-import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 

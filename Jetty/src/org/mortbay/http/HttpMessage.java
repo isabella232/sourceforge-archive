@@ -6,11 +6,10 @@
 package org.mortbay.http;
 
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Collection;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
@@ -19,8 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import org.mortbay.util.Code;
-import org.mortbay.util.TypeUtil;
 import org.mortbay.util.QuotedStringTokenizer;
+import org.mortbay.util.TypeUtil;
 
 
 /* ------------------------------------------------------------ */

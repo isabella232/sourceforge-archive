@@ -7,19 +7,7 @@ package org.mortbay.util.jmx;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
-import javax.management.MBeanOperationInfo;
-import javax.management.MBeanServer;
-import javax.management.modelmbean.InvalidTargetObjectTypeException;
-import javax.management.modelmbean.ModelMBeanAttributeInfo;
-import javax.management.modelmbean.ModelMBeanOperationInfo;
-
 import org.mortbay.util.Code;
-import org.mortbay.util.Log;
-    
-import java.beans.beancontext.BeanContextMembershipListener;
-import java.beans.beancontext.BeanContextMembershipEvent;
-
-import java.util.Iterator;
 
 
 public class CodeMBean extends ModelMBeanImpl

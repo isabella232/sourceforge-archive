@@ -5,8 +5,8 @@
 
 package org.mortbay.http;
 
-import org.mortbay.util.LifeCycle;
 import java.io.Serializable;
+import org.mortbay.util.LifeCycle;
 
 /* ------------------------------------------------------------ */
 /** Abstract HTTP Request Log format

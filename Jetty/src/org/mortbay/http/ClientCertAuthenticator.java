@@ -6,11 +6,10 @@
 package org.mortbay.http;
 
 import java.io.IOException;
-import org.mortbay.http.SecurityConstraint.Authenticator;
 import java.security.Principal;
-import org.mortbay.util.Code;
 import javax.net.ssl.SSLSocket;
-import javax.net.ssl.HandshakeCompletedListener;
+import org.mortbay.http.SecurityConstraint.Authenticator;
+import org.mortbay.util.Code;
 
 /* ------------------------------------------------------------ */
 /** Client Certificate Authenticator.

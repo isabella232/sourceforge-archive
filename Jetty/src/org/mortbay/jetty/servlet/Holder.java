@@ -12,9 +12,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpHandler;
-import org.mortbay.http.handler.NullHandler;
 import org.mortbay.util.Code;
 import org.mortbay.util.LifeCycle;
 

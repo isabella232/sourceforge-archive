@@ -5,34 +5,17 @@
 
 package org.mortbay.http.jmx;
 
+import java.util.HashMap;
 import javax.management.InstanceNotFoundException;
-import javax.management.MBeanServer;
 import javax.management.MBeanException;
 import javax.management.ObjectName;
-import javax.management.MBeanOperationInfo;
 import javax.management.modelmbean.InvalidTargetObjectTypeException;
-import javax.management.modelmbean.ModelMBeanAttributeInfo;
-import javax.management.modelmbean.ModelMBeanOperationInfo;
 import javax.management.modelmbean.ModelMBean;
-
 import org.mortbay.http.HttpServer;
 import org.mortbay.http.HttpServer.ComponentEvent;
-import org.mortbay.http.HttpServer.ComponentEventListener;
-import org.mortbay.http.HttpListener;
-import org.mortbay.http.SocketListener;
-import org.mortbay.http.HttpContext;
 import org.mortbay.util.Code;
-import org.mortbay.util.Log;
-import org.mortbay.util.LogSink;
-import org.mortbay.util.LifeCycle;
-import org.mortbay.util.OutputStreamLogSink;
 import org.mortbay.util.jmx.LifeCycleMBean;
 import org.mortbay.util.jmx.ModelMBeanImpl;
-
-import java.util.Iterator;
-import java.util.HashMap;
-
-import java.io.IOException;
 
 /* ------------------------------------------------------------ */
 /** HttpServer MBean.

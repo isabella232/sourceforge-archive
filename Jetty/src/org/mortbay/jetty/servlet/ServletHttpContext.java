@@ -5,10 +5,8 @@
 
 package org.mortbay.jetty.servlet;
 
-import org.mortbay.http.HttpConnection;
-import org.mortbay.http.HttpContext;
-import org.mortbay.http.HttpServer;
 import javax.servlet.ServletContext;
+import org.mortbay.http.HttpContext;
 import org.mortbay.util.Code;
 
 /* ------------------------------------------------------------ */

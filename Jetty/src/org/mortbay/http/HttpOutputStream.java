@@ -9,6 +9,7 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import org.mortbay.util.ByteArrayPool;
@@ -16,8 +17,6 @@ import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.OutputObserver;
 import org.mortbay.util.StringUtil;
-import java.io.Writer;
-import java.io.OutputStreamWriter;
 
 
 /* ---------------------------------------------------------------- */

@@ -7,7 +7,6 @@ package org.mortbay.http;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.IOException;
 import java.net.Socket;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;

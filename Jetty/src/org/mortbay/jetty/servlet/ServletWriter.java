@@ -5,17 +5,14 @@
 
 package org.mortbay.jetty.servlet;
 
-import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.io.UnsupportedEncodingException;
-import org.mortbay.util.IO;
-import org.mortbay.util.Code;
-import org.mortbay.util.StringUtil;
 import org.mortbay.http.HttpOutputStream;
+import org.mortbay.util.Code;
+import org.mortbay.util.IO;
 
 
 /* ------------------------------------------------------------ */

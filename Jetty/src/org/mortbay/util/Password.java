@@ -5,13 +5,6 @@
 
 package org.mortbay.util;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.zip.Adler32;
-import java.util.zip.CRC32;
 
 /* ------------------------------------------------------------ */
 /** Password utility class.

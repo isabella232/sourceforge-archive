@@ -7,22 +7,19 @@ package org.mortbay.http;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
 import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.StringTokenizer;
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 import org.mortbay.util.Log;
 import org.mortbay.util.Resource;
-import org.mortbay.util.URI;
 
 /* ------------------------------------------------------------ */
 /** ClassLoader for HttpContext.

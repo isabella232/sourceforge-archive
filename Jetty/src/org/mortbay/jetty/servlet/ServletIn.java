@@ -5,7 +5,6 @@
 
 package org.mortbay.jetty.servlet;
 
-import java.io.FilterInputStream;
 import java.io.IOException;
 import javax.servlet.ServletInputStream;
 import org.mortbay.http.HttpInputStream;

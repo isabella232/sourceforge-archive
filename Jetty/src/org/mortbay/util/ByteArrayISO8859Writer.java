@@ -4,7 +4,6 @@
 // ---------------------------------------------------------------------------
 
 package org.mortbay.util;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;

@@ -5,7 +5,6 @@
 
 package org.mortbay.util;
 
-import java.text.DateFormat;
 import java.text.DateFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.Date;

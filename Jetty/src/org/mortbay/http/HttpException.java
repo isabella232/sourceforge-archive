@@ -5,7 +5,6 @@
 
 package org.mortbay.http;
 import java.io.IOException;
-import java.util.HashMap;
 import org.mortbay.util.TypeUtil;
 
 

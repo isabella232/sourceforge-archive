@@ -7,9 +7,7 @@ package org.mortbay.http;
 
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import org.mortbay.util.Code;
 import org.mortbay.util.LazyList;

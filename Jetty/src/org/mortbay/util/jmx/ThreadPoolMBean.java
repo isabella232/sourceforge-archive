@@ -6,13 +6,7 @@
 package org.mortbay.util.jmx;
 
 import javax.management.MBeanException;
-import javax.management.MBeanOperationInfo;
-import javax.management.modelmbean.ModelMBeanAttributeInfo;
-import javax.management.modelmbean.ModelMBeanOperationInfo;
-
-import org.mortbay.util.Code;
 import org.mortbay.util.ThreadPool;
-import org.mortbay.util.LifeCycle;
 
 
 /* ------------------------------------------------------------ */

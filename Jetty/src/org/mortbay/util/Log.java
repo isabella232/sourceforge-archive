@@ -5,7 +5,6 @@
 
 package org.mortbay.util;
 
-import java.io.PrintStream;
 import java.util.StringTokenizer;
 
 /*-----------------------------------------------------------------------*/

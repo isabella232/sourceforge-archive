@@ -6,14 +6,13 @@
 package org.mortbay.http;
 
 import java.io.IOException;
+import java.security.MessageDigest;
 import org.mortbay.http.SecurityConstraint.Authenticator;
-import java.security.Principal;
-import org.mortbay.util.Credential;
 import org.mortbay.util.Code;
+import org.mortbay.util.Credential;
+import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
-import org.mortbay.util.QuotedStringTokenizer;
-import java.security.MessageDigest;
 
 /* ------------------------------------------------------------ */
 /** DIGEST authentication.

@@ -12,11 +12,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
+import org.mortbay.util.Code;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.SingletonList;
 import org.mortbay.util.StringMap;
-import org.mortbay.util.URI;
-import org.mortbay.util.Code;
 
 /* ------------------------------------------------------------ */
 /** URI path map to Object.

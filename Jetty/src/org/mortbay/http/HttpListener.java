@@ -5,7 +5,6 @@
 
 package org.mortbay.http;
 import java.io.Serializable;
-import java.net.ServerSocket;
 import java.net.UnknownHostException;
 import org.mortbay.util.LifeCycle;
 

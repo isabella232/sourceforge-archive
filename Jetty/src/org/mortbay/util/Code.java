@@ -5,10 +5,8 @@
 
 package org.mortbay.util;
 
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
-import java.util.Hashtable;
 import java.util.StringTokenizer;
 import java.util.Vector;
 

@@ -10,23 +10,18 @@ import java.io.File;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 import java.security.KeyStore;
-import javax.net.ServerSocketFactory;
+import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
-import javax.security.cert.Certificate;
 import org.mortbay.jetty.servlet.ServletSSL;
 import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.Log;
-import org.mortbay.util.ThreadPool;
-import org.mortbay.util.ThreadedServer;
 
 /* ------------------------------------------------------------ */
 /** JSSE Socket Listener.

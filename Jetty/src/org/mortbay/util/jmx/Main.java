@@ -5,18 +5,13 @@
 
 package org.mortbay.util.jmx;
 
-import java.util.Set;
-import java.util.ArrayList;
 import java.util.Iterator;
-import javax.management.loading.MLet;
-import javax.management.ObjectInstance;
-import javax.management.ObjectName;
+import java.util.Set;
 import javax.management.MBeanServer;
 import javax.management.MBeanServerFactory;
-import javax.management.MBeanException;
-import javax.management.RuntimeErrorException;
-import javax.management.RuntimeMBeanException;
-import javax.management.RuntimeOperationsException;
+import javax.management.ObjectInstance;
+import javax.management.ObjectName;
+import javax.management.loading.MLet;
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
 

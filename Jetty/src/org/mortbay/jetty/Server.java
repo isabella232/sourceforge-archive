@@ -6,11 +6,6 @@
 package org.mortbay.jetty;
 
 import java.io.IOException;
-import java.io.PrintStream;
-import java.io.FileOutputStream;
-import java.io.FileInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
@@ -21,7 +16,6 @@ import org.mortbay.jetty.servlet.WebApplicationContext;
 import org.mortbay.util.Code;
 import org.mortbay.util.Log;
 import org.mortbay.util.Resource;
-import org.mortbay.util.URI;
 import org.mortbay.xml.XmlConfiguration;
 
 

@@ -6,7 +6,6 @@
 package org.mortbay.util;
 
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.util.Enumeration;
 import java.util.Vector;
 

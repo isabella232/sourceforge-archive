@@ -10,7 +10,6 @@ import java.util.Map;
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
-import org.mortbay.util.Code;
 import org.mortbay.http.HttpHandler;
 import org.mortbay.http.PathMap;
 

@@ -6,21 +6,18 @@
 package org.mortbay.util;
 
 import java.io.File;
-import java.io.FilterOutputStream;
 import java.io.FileOutputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
-import java.io.InterruptedIOException;
 import java.io.OutputStream;
-import java.text.DateFormat;
+import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.StringTokenizer;
-import java.util.TimeZone;
-import java.util.ArrayList;
 import java.util.ListIterator;
-import java.lang.ref.WeakReference;
+import java.util.StringTokenizer;
 
 /* ------------------------------------------------------------ */
 /** 

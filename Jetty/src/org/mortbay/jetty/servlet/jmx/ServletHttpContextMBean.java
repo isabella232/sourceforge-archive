@@ -7,25 +7,7 @@ package org.mortbay.jetty.servlet.jmx;
 
 import javax.management.InstanceNotFoundException;
 import javax.management.MBeanException;
-import javax.management.MBeanServer;
-import javax.management.MBeanOperationInfo;
-import javax.management.modelmbean.InvalidTargetObjectTypeException;
-import javax.management.modelmbean.ModelMBeanAttributeInfo;
-import javax.management.modelmbean.ModelMBeanOperationInfo;
-
-import org.mortbay.http.HttpServer;
-import org.mortbay.jetty.servlet.ServletHttpContext;
-import org.mortbay.jetty.servlet.WebApplicationContext;
-import org.mortbay.util.Code;
-import org.mortbay.util.Log;
-import org.mortbay.util.LifeCycle;
 import org.mortbay.http.jmx.HttpContextMBean;
-import org.mortbay.jetty.jmx.ServerMBean;
-
-import java.beans.beancontext.BeanContextMembershipListener;
-import java.beans.beancontext.BeanContextMembershipEvent;
-
-import java.util.Iterator;
 
 
 /* ------------------------------------------------------------ */

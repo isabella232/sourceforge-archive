@@ -5,18 +5,17 @@
 
 package org.mortbay.http;
 
-import org.mortbay.util.Code;
-import java.util.TimeZone;
-import org.mortbay.util.RolloverFileOutputStream;
-import org.mortbay.util.DateCache;
-import org.mortbay.util.ByteArrayISO8859Writer;
-import org.mortbay.util.StringUtil;
-import java.io.IOException;
 import java.io.BufferedOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
-import java.io.Writer;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.util.Locale;
+import java.util.TimeZone;
+import org.mortbay.util.Code;
+import org.mortbay.util.DateCache;
+import org.mortbay.util.RolloverFileOutputStream;
+import org.mortbay.util.StringUtil;
 
 
 /* ------------------------------------------------------------ */

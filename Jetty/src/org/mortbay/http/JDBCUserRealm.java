@@ -1,19 +1,15 @@
 package org.mortbay.http;
 
-import org.mortbay.util.Code;
-import org.mortbay.util.Loader;
-import org.mortbay.util.Resource;
-import org.mortbay.http.HashUserRealm;
-
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.HashMap;
 import java.util.Properties;
+import org.mortbay.util.Code;
+import org.mortbay.util.Loader;
+import org.mortbay.util.Resource;
 
 /* ------------------------------------------------------------ */
 /** HashMapped User Realm with JDBC as data source.

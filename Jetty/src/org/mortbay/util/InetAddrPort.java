@@ -7,7 +7,6 @@ package org.mortbay.util;
 
 import java.io.Serializable;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 /* ======================================================================== */
 /** InetAddress and Port.

@@ -13,12 +13,10 @@ import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpListener;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
-import org.mortbay.http.HttpResponse;
 import org.mortbay.http.HttpServer;
 import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.Log;
-import org.mortbay.util.ThreadPool;
 import org.mortbay.util.ThreadedServer;
 
 

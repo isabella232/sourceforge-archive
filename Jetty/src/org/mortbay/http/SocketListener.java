@@ -9,7 +9,6 @@ import java.net.Socket;
 import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.Log;
-import org.mortbay.util.ThreadPool;
 import org.mortbay.util.ThreadedServer;
 
 

@@ -10,18 +10,15 @@ import java.io.IOException;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import org.mortbay.util.Code;
-import org.mortbay.util.Log;
 import org.mortbay.util.URI;
-import javax.servlet.http.HttpServletRequestWrapper;
 
 /* ------------------------------------------------------------ */
 /**  Dynamic Servlet Invoker.  

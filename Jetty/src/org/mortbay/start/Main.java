@@ -5,19 +5,17 @@
 
 package org.mortbay.start;
 
-import java.util.StringTokenizer;
-import java.net.URL;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.FilenameFilter;
-import java.net.MalformedURLException;
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Hashtable;
-import java.util.ArrayList;
-import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.StringTokenizer;
 
 
 

@@ -7,13 +7,12 @@ package org.mortbay.http.ajp;
 
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
-import org.mortbay.util.Code;
 import org.mortbay.http.BufferedOutputStream;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpResponse;
+import org.mortbay.util.Code;
 
 
 

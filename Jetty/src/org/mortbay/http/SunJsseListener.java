@@ -5,12 +5,6 @@
 
 package org.mortbay.http;
 
-import com.sun.net.ssl.KeyManager;
-import com.sun.net.ssl.KeyManagerFactory;
-import com.sun.net.ssl.SSLContext;
-import com.sun.net.ssl.TrustManager;
-import com.sun.net.ssl.TrustManagerFactory;
-import com.sun.net.ssl.internal.ssl.Provider;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -18,6 +12,11 @@ import java.security.KeyStore;
 import java.security.SecureRandom;
 import java.security.Security;
 import javax.net.ssl.SSLServerSocketFactory;
+import com.sun.net.ssl.KeyManager;
+import com.sun.net.ssl.KeyManagerFactory;
+import com.sun.net.ssl.SSLContext;
+import com.sun.net.ssl.TrustManager;
+import com.sun.net.ssl.TrustManagerFactory;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.Log;
 import org.mortbay.util.Password;

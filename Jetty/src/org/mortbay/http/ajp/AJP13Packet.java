@@ -10,12 +10,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.Socket;
 import java.util.HashMap;
-import org.mortbay.util.Code;
-import org.mortbay.util.StringUtil;
 import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.ByteArrayPool;
+import org.mortbay.util.Code;
+import org.mortbay.util.StringUtil;
 
 
 /* ------------------------------------------------------------ */
