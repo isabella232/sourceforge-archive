@@ -31,7 +31,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.resource.Resource;
 import org.mortbay.util.Loader;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.TypeUtil;
@@ -823,21 +822,5 @@ public class XmlConfiguration
         return null;
     }    
     
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    public static void main(String[] arg)
-    {
-        try
-        {
-            for (int i=0;i<arg.length;i++)
-                new XmlConfiguration
-                    (Resource.newResource(arg[i]).getURL()).newInstance();
-        }
-        catch (Exception e)
-        {
-            log.warn(LogSupport.EXCEPTION,e);
-        }
-    }
 }
 

@@ -22,6 +22,7 @@
   </organization>
 
   <inceptionYear>1995</inceptionYear>
+  <package>org.mortbay</package>
   <logo>http://jetty.mortbay.org/jetty/images/powered.gif</logo>
   <description>Java HTTP Server and Servlet Container</description>
   <shortDescription>Java HTTP Server and Servlet Container</shortDescription>
