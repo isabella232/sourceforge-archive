@@ -54,9 +54,9 @@ public class
   public long        getCreationTime()                       {return _creationTime;}
   public int         getActualMaxInactiveInterval()          {return _actualMaxInactiveInterval;}
   public long        getLastAccessedTime()                   {return _lastAccessedTime;}
-  public void        setLastAccessedTime(long time)          {_lastAccessedTime=time;};
+  public void        setLastAccessedTime(long time)          {_lastAccessedTime=time;}
   public int         getMaxInactiveInterval()                {return _maxInactiveInterval;}
-  public void        setMaxInactiveInterval(int interval)    {_maxInactiveInterval=interval;};
+  public void        setMaxInactiveInterval(int interval)    {_maxInactiveInterval=interval;}
 
   // allocate attribute map lazily. This is more complex, but JSPs
   // seem to force allocation of sessions and then never put anything
