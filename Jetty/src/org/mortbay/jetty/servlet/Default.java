@@ -474,12 +474,12 @@ public class Default extends HttpServlet
                                    "No directory");
                 return;
             }
-            data=dir.getBytes("UTF8");
+            data=dir.getBytes("UTF-8");
             if (resource instanceof CachedResource)
                 ((CachedResource)resource).setCachedData(data);
         }
         
-        response.setContentType("text/html; charset=UTF8");
+        response.setContentType("text/html; charset=UTF-8");
         response.setContentLength(data.length);
         
         if (!request.getMethod().equals(HttpRequest.__HEAD))
