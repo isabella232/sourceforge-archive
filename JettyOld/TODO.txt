@@ -20,6 +20,7 @@
  + Documentation
  + HTTP Meta tags in HTML
  + HTTP/1.1:
+     - RFC2616 (Why is this not HTTP/1.2 ????)
      - Timeout connection
      - Handle termination of multipart mime server push.
  + Implement encrypted password realm storage

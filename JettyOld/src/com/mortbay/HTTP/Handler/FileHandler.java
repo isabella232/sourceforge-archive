@@ -343,9 +343,12 @@ public class FileHandler extends NullHandler
 	else if (request.getMethod().equals(HttpRequest.MOVE))
 	    handleMove(request, response, uri, filename, path);
 	else {
-	// anything else...
 	    Code.debug("Unknown action:"+request.getMethod());
-	    response.sendError(response.SC_NOT_IMPLEMENTED);
+	    // anything else...
+	    if (new File(filename).exists())
+		response.sendError(response.SC_NOT_IMPLEMENTED);
+	    else
+		return;
 	}
     }
 
