@@ -1,15 +1,15 @@
 Jetty Versions
 --------------
 
-Jetty-4.2.10
- + Improvement to JettyPlus config of datasources and connection pools
- + Addition of mail service for JettyPlus
- + Move to Service-based architecture for JettyPlus features
- + Re-implementation of JNDI
+Jetty-4.2.10 - 7 July 2003
  + Updates to JettyPlus documentation
  + Updates to Jetty tutorial for start.jar, jmx etc
 
 Jetty-4.2.10pre2 - 4 July 2003
+ + Improvement to JettyPlus config of datasources and connection pools
+ + Addition of mail service for JettyPlus
+ + Move to Service-based architecture for JettyPlus features
+ + Re-implementation of JNDI
  + Many improvements in JettyPlus java:comp handling
  + Allow multiple security-role-ref elements per servlet.
  + Handle Proxy-Connection better
