@@ -16,6 +16,14 @@ Jetty-4.2.0 - 16 November 2002
  + Added upload demo to dump servlet.
  + Many more optimizations.
 
+Jetty-4.1.4 - 16 November
+ + Fixed ContextLoader parent delegation bug
+ + Fixed remove SocketListener bug.
+ + Fixed Invoker servlet for RD.include
+ + Use IE date formatting for last-modified efficiency
+ + Last modified handling uses second resolution.
+ + Made NCSARequestLog simpler to extend.
+
 Jetty-4.2.0rc1 - 2 November 2002
  + Support default mime mapping defined by *
  + Recycling of HttpFields class.
