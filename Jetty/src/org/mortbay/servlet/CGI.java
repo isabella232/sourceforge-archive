@@ -193,7 +193,7 @@ public class CGI extends HttpServlet
             "HTTP_FORWARDED="           + StringUtil.nonNull(req.getHeader(HttpFields.__Forwarded)),
             "HTTP_HOST="                + StringUtil.nonNull(req.getHeader(HttpFields.__Host)),
             "HTTP_PROXY_AUTHORIZATION=" + StringUtil.nonNull(req.getHeader(HttpFields.__ProxyAuthorization)),
-            "HTTP_REFERRER="            + StringUtil.nonNull(req.getHeader(HttpFields.__Referer)),
+            "HTTP_REFERER="            + StringUtil.nonNull(req.getHeader(HttpFields.__Referer)),
             "HTTP_USER_AGENT="          + StringUtil.nonNull(req.getHeader(HttpFields.__UserAgent)),
         
             // found these 2 extra headers in request from Jetty - should

@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Corrected name to HTTP_REFERER in CGI Servlet.
  + Fixed UrlEncoding for % + combination.
  + Generalized temp file handling
  + Fixed ContextLoader lib handling.
