@@ -66,7 +66,7 @@ package javax.servlet;
  * that it is permanently or temporarily unavailable. 
  *
  * <p>When a servlet or filter is permanently unavailable, something is wrong
- * with the it, and it cannot handle
+ * with it, and it cannot handle
  * requests until some action is taken. For example, a servlet
  * might be configured incorrectly, or a filter's state may be corrupted.
  * The component should log both the error and the corrective action

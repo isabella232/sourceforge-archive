@@ -68,23 +68,33 @@ package javax.servlet;
 
 import java.util.EventListener;
 
-    /** Implementations of this interface receive notifications of
-      * changes to the attribute list on the servlet request of a 
-      * web application. 
-      * To receive notification events, the implementation class
-      * must be configured in the deployment descriptor for the web application.
-      * @see ServletRequestAttributeEvent
-      * @since	v 2.4
+    /**
+     * A ServletRequestAttributeListener can be implemented by the
+     * developer interested in being notified of request attribute
+     * changes. Notifications will be generated while the request
+     * is within the scope of the web application in which the listener
+     * is registered. A request is defined as coming into scope when
+     * it is about to enter the first servlet or filter in each web
+     * application, as going out of scope when it exits the last servlet
+     * or the first filter in the chain.
+     *
+     * @since Servlet 2.4
      */
 
 public interface ServletRequestAttributeListener extends EventListener {
-    /** Notification that a new attribute was added to the servlet request. Called after the attribute is added.*/
+    /** Notification that a new attribute was added to the
+     ** servlet request. Called after the attribute is added.
+     */
     public void attributeAdded(ServletRequestAttributeEvent srae);
 
-    /** Notification that an existing attribute has been removed from the servlet request. Called after the attribute is removed.*/
+    /** Notification that an existing attribute has been removed from the
+     ** servlet request. Called after the attribute is removed.
+     */
     public void attributeRemoved(ServletRequestAttributeEvent srae);
 
-    /** Notification that an attribute on the servlet request has been replaced. Called after the attribute is replaced. */
+    /** Notification that an attribute was replaced on the
+     ** servlet request. Called after the attribute is replaced.
+     */
     public void attributeReplaced(ServletRequestAttributeEvent srae);
 }
 

@@ -60,9 +60,9 @@
 
 package javax.servlet;
 
-import java.io.CharConversionException;
-import java.io.IOException;
 import java.io.OutputStream;
+import java.io.IOException;
+import java.io.CharConversionException;
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
 
@@ -107,7 +107,7 @@ public abstract class ServletOutputStream extends OutputStream {
      * character at the end.
      *
      *
-     * @param s			the <code>String</code to send to the client
+     * @param s			the <code>String</code> to send to the client
      *
      * @exception IOException 	if an input or output exception occurred
      *
@@ -276,7 +276,7 @@ public abstract class ServletOutputStream extends OutputStream {
      * followed by a carriage return-line feed (CRLF).
      *
      *
-     * @param s			the </code>String</code> to write to the client
+     * @param s			the <code>String</code> to write to the client
      *
      * @exception IOException 	if an input or output exception occurred
      *

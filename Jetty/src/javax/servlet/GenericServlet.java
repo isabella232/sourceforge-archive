@@ -136,7 +136,7 @@ public abstract class GenericServlet
      *				of the initialization parameter
      *
      * @return String 		a <code>String</code> containing the value
-     *				of the initalization parameter
+     *				of the initialization parameter
      *
      */ 
 

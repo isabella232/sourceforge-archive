@@ -54,7 +54,7 @@
  */
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.*;
 
 /**
  * The IterationTag interface extends Tag by defining one additional
@@ -91,21 +91,23 @@ import javax.servlet.jsp.JspException;
  *
  * <p><B>Empty and Non-Empty Action</B>
  * <p> If the TagLibraryDescriptor file indicates that the action must
- * always have an empty action, by an &lt;body-content&gt; entry of "empty",
- * then the doStartTag() method must return SKIP_BODY.
+ * always have an empty element body, by a &lt;body-content&gt; entry of 
+ * "empty", then the doStartTag() method must return SKIP_BODY.
  *
- * Otherwise, the doStartTag() method may return SKIP_BODY or
- * EVAL_BODY_INCLUDE.
+ * <p>Note that which methods are invoked after the doStartTag() depends on
+ * both the return value and on if the custom action element is empty
+ * or not in the JSP page, not on how it's declared in the TLD.
  *
  * <p>
  * If SKIP_BODY is returned the body is not evaluated, and then doEndTag()
  * is invoked.
  *
  * <p>
- * If EVAL_BODY_INCLUDE is returned, the body is evaluated and
- * "passed through" to the current out, then doAfterBody() is invoked
- * and, after zero or more iterations, doEndTag() is invoked.
-*/
+ * If EVAL_BODY_INCLUDE is returned, and the custom action element is not
+ * empty, the body is evaluated and "passed through" to the current out, 
+ * then doAfterBody() is invoked and, after zero or more iterations, 
+ * doEndTag() is invoked.
+ */
 
 public interface IterationTag extends Tag {
 

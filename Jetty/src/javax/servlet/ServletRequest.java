@@ -147,7 +147,7 @@ public interface ServletRequest {
      * 
      *
      * @return		a <code>String</code> containing the name of 
-     *			the chararacter encoding, or <code>null</code>
+     *			the character encoding, or <code>null</code>
      *			if the request does not specify a character encoding
      *
      */
@@ -161,7 +161,7 @@ public interface ServletRequest {
      * 
      *
      * @param env	a <code>String</code> containing the name of 
-     *			the chararacter encoding.
+     *			the character encoding.
      * @throws		java.io.UnsupportedEncodingException if this is not a valid encoding
      */
 
@@ -351,7 +351,7 @@ public interface ServletRequest {
     /**
      * Returns the host name of the server to which the request was sent.
      * It is the value of the part before ":" in the <code>Host</code>
-     * header, if any, or the resolved server name, or the server IP address.
+     * header value, if any, or the resolved server name, or the server IP address.
      *
      * @return		a <code>String</code> containing the name 
      *			of the server
@@ -365,7 +365,7 @@ public interface ServletRequest {
     /**
      * Returns the port number to which the request was sent.
      * It is the value of the part after ":" in the <code>Host</code>
-     * header, if any, or the server port where the client connection
+     * header value, if any, or the server port where the client connection
      * was accepted on.
      *
      * @return		an integer specifying the port number
@@ -451,7 +451,10 @@ public interface ServletRequest {
      * reserved for use by Sun Microsystems.
      *<br> If the object passed in is null, the effect is the same as
      * calling {@link #removeAttribute}.
-     *
+     * <br> It is warned that when the request is dispatched from the
+     * servlet resides in a different web application by
+     * <code>RequestDispatcher</code>, the object set by this method
+     * may not be correctly retrieved in the caller servlet.
      *
      *
      * @param name			a <code>String</code> specifying 
@@ -566,7 +569,9 @@ public interface ServletRequest {
      *
      * @return          a <code>RequestDispatcher</code> object
      *                  that acts as a wrapper for the resource
-     *                  at the specified path
+     *                  at the specified path, or <code>null</code>
+     *                  if the servlet container cannot return a
+     *                  <code>RequestDispatcher</code>
      *
      * @see             RequestDispatcher
      * @see             ServletContext#getRequestDispatcher
@@ -591,6 +596,8 @@ public interface ServletRequest {
     /**
      * Returns the Internet Protocol (IP) source port of the client
      * or last proxy that sent the request.
+     *
+     * @return	an integer specifying the port number
      *
      * @since 2.4
      */    

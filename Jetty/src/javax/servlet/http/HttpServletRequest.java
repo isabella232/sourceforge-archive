@@ -61,9 +61,8 @@
 
 package javax.servlet.http;
 
-import java.util.Enumeration;
-
 import javax.servlet.ServletRequest;
+import java.util.Enumeration;
 
 /**
  *
@@ -88,15 +87,15 @@ public interface HttpServletRequest extends ServletRequest {
     */
     public static final String BASIC_AUTH = "BASIC";
     /**
-    * String identifier for Basic authentication. Value "FORM"
+    * String identifier for Form authentication. Value "FORM"
     */
     public static final String FORM_AUTH = "FORM";
     /**
-    * String identifier for Basic authentication. Value "CLIENT_CERT"
+    * String identifier for Client Certificate authentication. Value "CLIENT_CERT"
     */
     public static final String CLIENT_CERT_AUTH = "CLIENT_CERT";
     /**
-    * String identifier for Basic authentication. Value "DIGEST"
+    * String identifier for Digest authentication. Value "DIGEST"
     */
     public static final String DIGEST_AUTH = "DIGEST";
 
@@ -170,7 +169,7 @@ public interface HttpServletRequest extends ServletRequest {
      *				since January 1, 1970 GMT,
      *				or -1 if the named header
      *				was not included with the
-     *				reqest
+     *				request
      *
      * @exception	IllegalArgumentException	If the header value
      *							can't be converted
@@ -249,7 +248,7 @@ public interface HttpServletRequest extends ServletRequest {
      * this request contains. If the request has no
      * headers, this method returns an empty enumeration.
      *
-     * <p>Some servlet containers do not allow do not allow
+     * <p>Some servlet containers do not allow
      * servlets to access headers using this method, in
      * which case this method returns <code>null</code>
      *
@@ -421,7 +420,7 @@ public interface HttpServletRequest extends ServletRequest {
      * value of the CGI variable REMOTE_USER.
      *
      * @return		a <code>String</code> specifying the login
-     *			of the user making this request, or <code>null</code
+     *			of the user making this request, or <code>null</code>
      *			if the user login is not known
      *
      */
@@ -510,7 +509,7 @@ public interface HttpServletRequest extends ServletRequest {
      * <td><td>/a.html
      * <tr><td>HEAD /xyz?a=b HTTP/1.1<td><td>/xyz
      * </table>
-     *      
+     *
      * <p>To reconstruct an URL with a scheme and host, use
      * {@link HttpUtils#getRequestURL}.
      *
@@ -530,7 +529,7 @@ public interface HttpServletRequest extends ServletRequest {
      * The returned URL contains a protocol, server name, port
      * number, and server path, but it does not include query
      * string parameters.
-     * 
+     *
      * <p>Because this method returns a <code>StringBuffer</code>,
      * not a string, you can modify the URL easily, for example,
      * to append query parameters.

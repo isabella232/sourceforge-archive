@@ -67,7 +67,7 @@ import java.util.Enumeration;
 /**
  * 
  * A servlet configuration object used by a servlet container
- * used to pass information to a servlet during initialization. 
+ * to pass information to a servlet during initialization. 
  *
  */
  

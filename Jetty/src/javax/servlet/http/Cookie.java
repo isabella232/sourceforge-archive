@@ -386,7 +386,7 @@ public class Cookie implements Cloneable {
      * <p>The default value is <code>false</code>.
      *
      * @param flag	if <code>true</code>, sends the cookie from the browser
-     *			to the server using only when using a secure protocol;
+     *			to the server only when using a secure protocol;
      *			if <code>false</code>, sent on any protocol
      *
      * @see #getSecure

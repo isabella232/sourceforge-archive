@@ -55,8 +55,7 @@
  
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.JspException;
-import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.*;
 
 
 /**

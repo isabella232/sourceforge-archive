@@ -311,7 +311,9 @@ public interface ServletContext {
      *
      * @return 		a <code>RequestDispatcher</code> object
      *			that acts as a wrapper for the resource
-     *			at the specified path
+     *			at the specified path, or <code>null</code> if 
+     *			the <code>ServletContext</code> cannot return
+     *			a <code>RequestDispatcher</code>
      *
      * @see 		RequestDispatcher
      * @see 		ServletContext#getContext
@@ -339,7 +341,9 @@ public interface ServletContext {
      *			of a servlet to wrap
      *
      * @return 		a <code>RequestDispatcher</code> object
-     *			that acts as a wrapper for the named servlet
+     *			that acts as a wrapper for the named servlet,
+     *			or <code>null</code> if the <code>ServletContext</code>
+     *			cannot return a <code>RequestDispatcher</code>
      *
      * @see 		RequestDispatcher
      * @see 		ServletContext#getContext
@@ -670,7 +674,7 @@ public interface ServletContext {
     public void removeAttribute(String name);
     
     /**
-     * Returns the name of this web application correponding to this ServletContext as specified in the deployment
+     * Returns the name of this web application corresponding to this ServletContext as specified in the deployment
      * descriptor for this web application by the display-name element.
      *
      *

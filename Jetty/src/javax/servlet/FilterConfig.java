@@ -67,7 +67,7 @@ import java.util.Enumeration;
 	 /** 
 	 *
 	 * A filter configuration object used by a servlet container
-	 * used to pass information to a filter during initialization.
+	 * to pass information to a filter during initialization.
 	 * @see Filter 
 	  * @since	Servlet 2.3
 	 *
@@ -115,13 +115,13 @@ public interface FilterConfig {
 
 
     /**
-     * Returns the names of the servlet's initialization parameters
+     * Returns the names of the filter's initialization parameters
      * as an <code>Enumeration</code> of <code>String</code> objects, 
-     * or an empty <code>Enumeration</code> if the servlet has
+     * or an empty <code>Enumeration</code> if the filter has
      * no initialization parameters.
      *
      * @return		an <code>Enumeration</code> of <code>String</code> 
-     *			objects containing the names of the servlet's 
+     *			objects containing the names of the filter's 
      *			initialization parameters
      *
      *

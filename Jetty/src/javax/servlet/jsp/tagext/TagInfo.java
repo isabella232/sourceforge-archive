@@ -268,25 +268,13 @@ public class TagInfo {
      * @param data TagData describing this action.
      * @return if a TagExtraInfo object is associated with this TagInfo, the
      *     result of getTagExtraInfo().getVariableInfo( data ), otherwise
-     *     null if the tag has no "id" attribute or new VariableInfo[] {
-     *     new VariableInfo( data.getId(), "java.lang.Object", true,
-     *     VariableInfo.NESTED ) } if an "id" attribute is present.
+     *     null.
      */
    public VariableInfo[] getVariableInfo(TagData data) {
        VariableInfo[] result = null;
        TagExtraInfo tei = getTagExtraInfo();
        if (tei != null) {
 	   result = tei.getVariableInfo( data );
-       }
-       else {
-	   String idValue = data.getId();
-	   if( idValue != null ) {
-	       result = 
-		   new VariableInfo[] {
-		       new VariableInfo( idValue, "java.lang.Object",
-			   true, VariableInfo.NESTED )
-	           };
-	   }
        }
        return result;
    }

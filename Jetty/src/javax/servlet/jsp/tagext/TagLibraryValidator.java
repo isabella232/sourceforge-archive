@@ -76,7 +76,7 @@ import java.util.Map;
  *
  * once initialized, the validate(String, String, PageData) method will
  * be invoked, where the first two arguments are the prefix
- * and uri arguments used in the taglib directive.  The prefix is intended
+ * and uri for this tag library in the XML View.  The prefix is intended
  * to make it easier to produce an error message.  However, it is not
  * always accurate.  In the case where a single URI is mapped to more 
  * than one prefix in the XML view, the prefix of the first URI is provided.
@@ -158,7 +158,7 @@ abstract public class TagLibraryValidator {
      * @param prefix the first prefix with which the tag library is 
      *     associated, in the XML view.  Note that some tags may use 
      *     a different prefix if the namespace is redefined.
-     * @param uri the value of the uri argument in the directive
+     * @param uri the tag library's unique identifier
      * @param page the JspData page object
      * @return A null object, or zero length array if no errors, an array
      * of ValidationMessages otherwise.

@@ -55,7 +55,7 @@
  
 package javax.servlet.jsp;
 
-import javax.servlet.Servlet;
+import javax.servlet.*;
 
 /**
  * The JspPage interface describes the generic interaction that a JSP Page
