@@ -159,17 +159,8 @@
   <Call name="addWebApplication">
     <Arg>/jetty/*</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/jetty</Arg>
-
-    <!-- See demo/webapps/jetty/WEB-INF/jetty-web.xml for more configuration -->
-
-  </Call>
-
-  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- Add jetty demo web applications.                                -->
-  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <Call name="addWebApplication">
-    <Arg>/jetty2/*</Arg>
-    <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/jetty</Arg>
+    <!-- See demo/webapps/jetty/WEB-INF/jetty-web.xml for more configuration.       -->
+    <!-- That configuration could go here, but is more flexible in a separate file -->
   </Call>
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
