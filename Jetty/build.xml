@@ -12,17 +12,7 @@
 <project name="Jetty HTTP Server" default="webapps" basedir=".">
 
   <!-- ==================================================================== -->
-  <property name="RELEASE.MAJOR"  value="4.2" />
-  <property name="RELEASE.MAJOR.MINOR"  value="4.2.9" />
-
-  <!-- ==================================================================== -->
-  <property name="build.compiler"            value="modern" />
-  <property name="build.compiler.emacs"      value="true" />
-  <property name="build.compiler.fulldepend" value="false" />
-  <property name="build.compiler.pedantic"   value="false" />
-  <property name="javac.debug"               value="on" />
-  <property name="javac.optimize"            value="off" />
-  <property name="javac.deprecation"         value="off" />
+  <property file="ant.properties" />
 
   <!-- ==================================================================== -->
   <property environment="env"/>
@@ -30,6 +20,7 @@
   <property name="etc"            value="${basedir}/etc" />
   <property name="lib"            value="${basedir}/lib"/>
   <property name="ext"            value="${basedir}/ext"/>
+  <property name="dist"           value="${basedir}/dist"/>
   <property name="contrib"        value="${basedir}/contrib"/>
   <property name="extra"          value="${basedir}/extra"/>
   <property name="classes"        value="${basedir}/classes"/>
@@ -64,7 +55,6 @@
 
   <!-- ==================================================================== -->
   <target name="classpath" >
-
     <available property="jdk1.4.available" classname="java.util.logging.Handler" />
     <fail message="JDK1.4 needed to build main release. See extra/jdk1.2 for 1.2,1.3 builds." unless="jdk1.4.available"/>
     <echo message="JDK1.4 available=${jdk1.4.available}" level="info"/>
@@ -133,29 +123,30 @@
   <!-- ==================================================================== -->
   <target name="clean" depends="tidy"
      description="Remove generated files">
-    <delete dir="${jetty.webapp.classes}" quiet="true"/>
-    <delete dir="${javadoc}" quiet="true"/>
-    <delete dir="${etc}/dtd" quiet="true"/>
-    <delete file="${jetty.jar}" quiet="true"/>
-    <delete file="${mortbay.jmx.jar}" quiet="true"/>
-    <delete file="${servlet.jar}" quiet="true"/> 
-    <delete file="${start.jar}" quiet="true"/>
-    <delete file="${etc}/demo.mlet" quiet="true"/>
-    <delete file="${etc}/webdefault.xml" quiet="true"/>
-    <delete file="${demo.webapps}/jetty/LICENSE.html" quiet="true"/>
-    <delete file="${demo.webapps}/jetty/versions.txt" quiet="true"/>
+    <delete dir="${jetty.webapp.classes}" quiet="false"/>
+    <delete dir="${javadoc}" quiet="false"/>
+    <delete dir="${etc}/dtd" quiet="false"/>
+    <delete dir="${dist}" quiet="false"/>
+    <delete file="${jetty.jar}" quiet="false"/>
+    <delete file="${mortbay.jmx.jar}" quiet="false"/>
+    <delete file="${servlet.jar}" quiet="false"/> 
+    <delete file="${start.jar}" quiet="false"/>
+    <delete file="${etc}/demo.mlet" quiet="false"/>
+    <delete file="${etc}/webdefault.xml" quiet="false"/>
+    <delete file="${demo.webapps}/jetty/LICENSE.html" quiet="false"/>
+    <delete file="${demo.webapps}/jetty/versions.txt" quiet="false"/>
 
-    <delete quiet="true">
+    <delete quiet="false">
       <fileset dir="${logs}">
         <include name="**/*.log"/>
       </fileset>
     </delete>
-    <delete quiet="true">
+    <delete quiet="false">
       <fileset dir="${demo.webapps}/examples">
         <include name="**/*.class"/>
       </fileset>
     </delete>
-    <delete quiet="true">
+    <delete quiet="false">
       <fileset dir="${demo.webapps}/root">
         <include name="*.dtd"/>
       </fileset>
@@ -487,6 +478,63 @@
        <arg line="${etc}/admin.xml ${etc}/watchdog.xml" />
     </java>
   </target>
+
+
+  <!-- ==================================================================== -->
+  <target name="dist" 
+          depends="clean,jars,webapps,extra,test,javadoc,tidy" 
+          description="Build the distribution archives">
+    <mkdir dir="${dist}"/>
+    
+    <tar tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}.tar.gz" 
+         compression="gzip"
+         longfile="gnu">
+      <tarfileset 
+       dir="${basedir}"
+       prefix="Jetty-${RELEASE.MAJOR.MINOR}/">
+        <exclude name="dist/**"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/logs/*.log"/>
+      </tarfileset>
+    </tar>
+
+    <tar 
+     tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-no-ext.tar.gz" 
+     compression="gzip"
+     longfile="gnu"
+    >
+      <tarfileset 
+       dir="${basedir}"
+       prefix="Jetty-${RELEASE.MAJOR.MINOR}/">
+        <exclude name="dist/**"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/logs/*.log"/>
+        <exclude name="**/ext/**"/>
+      </tarfileset>
+    </tar>
+
+
+    <tar 
+     tarfile="${dist}/Jetty-${RELEASE.MAJOR.MINOR}-src.tar.gz" 
+     compression="gzip"
+     longfile="gnu"
+    >
+      <tarfileset 
+       dir="${basedir}"
+       prefix="Jetty-${RELEASE.MAJOR.MINOR}/">
+        <exclude name="dist/**"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/logs/*.log"/>
+        <exclude name="**/ext/**"/>
+        <exclude name="**/javadoc/**"/>
+        <exclude name="**/lib/**"/>
+        <exclude name="**/classes/**"/>
+        <exclude name="**/demo/**"/>
+      </tarfileset>
+    </tar>
+ 
+  </target>
+
 
 </project>
 

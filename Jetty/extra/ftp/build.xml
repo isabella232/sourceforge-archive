@@ -12,6 +12,7 @@
 
   <property name="package"          value="ftp" />
   <property environment="env"/>
+  <property file="../../ant.properties" />
   <property file="../build.package.properties" />
 
   <!-- ==================================================================== -->

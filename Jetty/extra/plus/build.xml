@@ -20,6 +20,7 @@ Other targets:
   <!-- ==================================================================== -->
   <property name="package"          value="jetty.plus" />
   <property environment="env"/>
+  <property file="../../ant.properties" />
   <property file="../build.package.properties" />
 
   <!-- ==================================================================== -->

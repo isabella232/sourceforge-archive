@@ -12,7 +12,9 @@
 
   <property name="package"          value="jdk1.2" />
   <property environment="env"/>
+  <property file="../../ant.properties" />
   <property file="../build.package.properties" />
+
   <property name="tmp.src" value="${this}/src.tmp" /> 
 
   <!-- ==================================================================== -->
@@ -138,12 +140,34 @@
   <!-- build.package.jar                                                    -->
   <!-- ==================================================================== -->
   <target name="build.package.jar" description="Make the jar file">
-    <jar basedir="${classes}" destfile="${lib}/org.mortbay.jetty-jdk1.2.jar"
-     manifest="${jetty.home}/classes/org/mortbay/jetty/MANIFEST.MF">
-         <include name="org/mortbay/**"/>
-         <exclude name="org/mortbay/start/**" />
-         <exclude name="**/jmx/**" />
-         <exclude name="**/MANIFEST.MF" />
+    <jar basedir="${classes}" destfile="${lib}/org.mortbay.jetty-jdk1.2.jar">
+       <manifest>    
+         <attribute name="Sealed" value="true"/>
+         <attribute name="Built-By" value="${user.name}"/>
+         <attribute name="Specification-Version" value="${RELEASE.MAJOR}"/>
+         <attribute name="Implementation-Version" value="${RELEASE.MAJOR.MINOR}"/>
+         <attribute name="Package-Title" value="org.mortbay.http"/>
+         <attribute name="Implementation-Vendor" value="Mort Bay Consulting, Pty. Ltd."/>
+         <attribute name="Implementation-URL" value="http://jetty.mortbay.org"/>
+         <attribute name="Main-Class" value="org.mortbay.http.HttpServer"/>
+
+         <section name="org/mortbay/jetty/">
+           <attribute name="Specification-Title" value="Servlet/2.3"/>
+           <attribute name="Implementation-Title" value="Jetty/${RELEASE.MAJOR}"/>
+         </section>
+
+         <section name="org/mortbay/http/">
+           <attribute name="Implementation-Title" value="Mort Bay HTTP Server"/>
+         </section>
+
+         <section name="org/mortbay/util/">
+           <attribute name="Implementation-Title" value="Mort Bay Misc. Utilities"/>
+         </section>
+       </manifest>
+
+       <include name="org/mortbay/**"/>
+       <exclude name="org/mortbay/start/**" />
+       <exclude name="**/jmx/**" />
     </jar>
   </target>
 
@@ -151,10 +175,12 @@
   <!-- build.package.jar                                                    -->
   <!-- ==================================================================== -->
   <target name="build.jmx.jar" description="Make the jmx jar file">
-    <jar basedir="${classes}" destfile="${lib}/org.mortbay.jmx-jdk1.2.jar"
-     manifest="${jetty.home}/classes/org/mortbay/util/jmx/MANIFEST.MF">
-         <include name="**/jmx/**" />
-         <exclude name="**/MANIFEST.MF" />
+    <jar basedir="${classes}" destfile="${lib}/org.mortbay.jmx-jdk1.2.jar">
+       <manifest>    
+         <attribute name="Main-Class" value="org.mortbay.util.jmx.Main"/>
+         <attribute name="Class-Path" value="org.mortbay.jetty.jar org.mortbay.jetty.jar ../ext/jmxri.jar ../ext/jmxtools.jar"/>
+       </manifest>    
+       <include name="**/jmx/**" />
     </jar>
   </target>
 
