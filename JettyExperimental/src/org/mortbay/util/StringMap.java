@@ -653,6 +653,7 @@ public class StringMap extends AbstractMap implements Externalizable
         throws java.io.IOException
     {
         HashMap map = new HashMap(this);
+        out.writeBoolean(_ignoreCase);
         out.writeObject(map);
     }
     
@@ -660,7 +661,9 @@ public class StringMap extends AbstractMap implements Externalizable
     public void readExternal(java.io.ObjectInput in)
         throws java.io.IOException, ClassNotFoundException
     {
+        boolean ic=in.readBoolean();
         HashMap map = (HashMap)in.readObject();
+        setIgnoreCase(ic);
         this.putAll(map);
     }
 }

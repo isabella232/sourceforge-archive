@@ -27,18 +27,75 @@ public class QuotedStringTokenizerTest extends TestCase
     /*
      * Test for String nextToken()
      */
-    public void testTokenizer()
+    public void testTokenizer0()
     {
         QuotedStringTokenizer tok = 
-            new QuotedStringTokenizer("abc, \"d\\\"'\", 'p\\',y' z", " ,",
-            false,false);
-            
+            new QuotedStringTokenizer("abc\n\"d\\\"'\"\n'p\\',y'\nz");
+        checkTok(tok,false,false);
+    }
+
+    /*
+     * Test for String nextToken()
+     */
+    public void testTokenizer1()
+    {
+        QuotedStringTokenizer tok = 
+            new QuotedStringTokenizer("abc, \"d\\\"'\",'p\\',y' z", 
+                                      " ,");
+        checkTok(tok,false,false);
+    }
+
+    /*
+     * Test for String nextToken()
+     */
+    public void testTokenizer2()
+    {
+        QuotedStringTokenizer tok = 
+            new QuotedStringTokenizer("abc, \"d\\\"'\",'p\\',y' z", " ,",
+            false);
+        checkTok(tok,false,false);
+        
+        tok = new QuotedStringTokenizer("abc, \"d\\\"'\",'p\\',y' z", " ,",
+                                        true);
+        checkTok(tok,true,false);
+    }
+    
+    /*
+     * Test for String nextToken()
+     */
+    public void testTokenizer3()
+    {
+        QuotedStringTokenizer tok;
+        
+        tok = new QuotedStringTokenizer("abc, \"d\\\"'\",'p\\',y' z", " ,",
+                                        false,false);
+        checkTok(tok,false,false);
+        
+        tok = new QuotedStringTokenizer("abc, \"d\\\"'\",'p\\',y' z", " ,",
+                                        false,true);
+        checkTok(tok,false,true);
+        
+        tok = new QuotedStringTokenizer("abc, \"d\\\"'\",'p\\',y' z", " ,",
+                                        true,false);
+        checkTok(tok,true,false);
+        
+        tok = new QuotedStringTokenizer("abc, \"d\\\"'\",'p\\',y' z", " ,",
+                                        true,true);
+        checkTok(tok,true,true);
+    }
+    
+    private void checkTok(QuotedStringTokenizer tok,boolean delim,boolean quotes)
+    {
         assertTrue(tok.hasMoreElements());
         assertTrue(tok.hasMoreTokens());
         assertEquals("abc",tok.nextToken());
-        
-        assertEquals("d\"'",tok.nextElement());
-        assertEquals("p',y",tok.nextToken());
+        if (delim)assertEquals(",",tok.nextToken());
+        if (delim)assertEquals(" ",tok.nextToken());
+            
+        assertEquals(quotes?"\"d\\\"'\"":"d\"'",tok.nextElement());
+        if (delim)assertEquals(",",tok.nextToken());
+        assertEquals(quotes?"'p\\',y'":"p',y",tok.nextToken());
+        if (delim)assertEquals(" ",tok.nextToken());
         assertEquals("z",tok.nextToken());
         assertFalse(tok.hasMoreTokens());
     }

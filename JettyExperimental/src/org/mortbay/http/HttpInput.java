@@ -53,6 +53,9 @@ public class HttpInput
     public int parseNext()
         throws IOException
     {
+        try
+        {
+        
         if (!_parser._headerComplete && 
             _parser._content==null && 
             !_parser._messageComplete)
@@ -78,6 +81,13 @@ public class HttpInput
             return EOF;
         
         return NOP;
+        }
+        catch (IOException e)
+        {
+            if (_parser.getState()==HttpParser.STATE_START)
+                return EOF;
+            throw e;
+        }
     }
     
     
