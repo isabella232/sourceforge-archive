@@ -372,11 +372,14 @@ public class JspReader {
 	for (ret = mark(), ch = nextChar() ; ch != -1 ;
 	         ret = mark(), ch = nextChar()) {	    
 	    if (ch == limit.charAt(0)) {
+                Mark restart = mark();
 		for (int i = 1 ; i < limlen ; i++) {
 		    if (peekChar() == limit.charAt(i))
 			nextChar();
-		    else
+		    else {
+                        reset(restart);
 			continue skip;
+                    }
 		}
 		return ret;
 	    }

@@ -1301,8 +1301,6 @@ public class Generator {
 	    out.printin("/* ----  ");
 	    out.print(n.getName());
 	    out.println(" ---- */");
-	    out.printil("{");
-	    out.pushIndent();
 
 	    // Declare AT_BEGIN scripting variables
 	    declareScriptingVars(n, VariableInfo.AT_BEGIN);
@@ -1344,7 +1342,7 @@ public class Generator {
 	    out.print(tagHandlerVar);
 	    out.println(".doStartTag();");
 
-	    if (!implementsBodyTag) {
+	    if (!implementsIterationTag) {
 		// Synchronize AT_BEGIN scripting variables
 		syncScriptingVars(n, VariableInfo.AT_BEGIN);
 		// Declare and synchronize NESTED scripting variables
@@ -1358,10 +1356,11 @@ public class Generator {
 		out.println(" != javax.servlet.jsp.tagext.Tag.SKIP_BODY) {");
 		out.pushIndent();
 		
-		if (implementsBodyTag) {
+		if (implementsIterationTag) {
 		    // Declare NESTED scripting variables
 		    declareScriptingVars(n, VariableInfo.NESTED);
 
+		    if (n.implementsBodyTag()) {
 		    out.printin("if (");
 		    out.print(tagEvalVar);
 		    out.println(" != javax.servlet.jsp.tagext.Tag.EVAL_BODY_INCLUDE) {");
@@ -1384,7 +1383,6 @@ public class Generator {
 		    out.printil("}");
 		}
 		
-		if (implementsIterationTag) {
 		    out.printil("do {");
 		    out.pushIndent();
 		}
@@ -1407,10 +1405,8 @@ public class Generator {
 		out.println(".doAfterBody();");
 
 		// Synchronize AT_BEGIN and NESTED scripting variables
-		if (implementsBodyTag) {
 		    syncScriptingVars(n, VariableInfo.AT_BEGIN);
 		    syncScriptingVars(n, VariableInfo.NESTED);
-		}
 
 		out.printil("if (evalDoAfterBody != javax.servlet.jsp.tagext.BodyTag.EVAL_BODY_AGAIN)");
 		out.pushIndent();
@@ -1476,8 +1472,6 @@ public class Generator {
 	    }
 
 	    restoreScriptingVars(n);
-	    out.popIndent();
-	    out.printil("}");
 
 	    n.setEndJavaLine(out.getJavaLine());
 	}
