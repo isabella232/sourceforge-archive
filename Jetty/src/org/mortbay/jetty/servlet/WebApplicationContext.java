@@ -28,6 +28,7 @@ import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
+import org.mortbay.http.ContextLoader;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpRequest;
@@ -391,6 +392,31 @@ public class WebApplicationContext extends ServletHttpContext
             }
         }
 
+        // Set classpath for Jasper.
+        if (_servletHandler!=null)
+        {
+            Map.Entry entry = _servletHandler.getHolderEntry("test.jsp");
+            if (entry!=null)
+            {
+                ServletHolder jspHolder = (ServletHolder)entry.getValue();
+                if (jspHolder!=null)
+                {
+                    initClassLoader();
+                    ClassLoader loader = getClassLoader();
+                    String fileClassPath = (loader instanceof ContextLoader)
+                        ? ((ContextLoader)loader).getFileClassPath()
+                        : getClassPath();
+
+                    if (jspHolder.getInitParameter("classpath")==null)
+                    {
+                        jspHolder.setInitParameter("classpath",fileClassPath);
+                        Code.debug("Set classpath=",fileClassPath," for ",jspHolder);
+                    }
+                }
+            }
+        }
+        
+        
         // Start handlers
         super.start();
 

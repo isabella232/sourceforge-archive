@@ -258,6 +258,13 @@ public class HttpContext implements LifeCycle
     }
 
     /* ------------------------------------------------------------ */
+    /** Get the context classpath.
+     * Note that this may not be a legal javac classpath.  A file only
+     * classpath can be obtained from ContextLoader.getFileClassPath().
+     * @return a coma or ';' separated list of class
+     * resources. These may be jar files, directories or URLs to jars
+     * or directories.
+     */
     public String getClassPath()
     {
         return _classPath;
@@ -267,7 +274,9 @@ public class HttpContext implements LifeCycle
     /** Sets the class path for the context.
      * A class path is only required for a context if it uses classes
      * that are not in the system class path.
-     * @param fileBase 
+     * @param filePath a coma or ';' separated list of class
+     * resources. These may be jar files, directories or URLs to jars
+     * or directories.
      */
     public void setClassPath(String classPath)
     {

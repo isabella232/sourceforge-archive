@@ -42,6 +42,7 @@ public class ContextLoader extends URLClassLoader
     private PermissionCollection _permissions;
     private String _urlClassPath;
     private String _fileClassPath;
+    private boolean _fileClassPathWarning=false;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -78,6 +79,8 @@ public class ContextLoader extends URLClassLoader
                     ?file.getCanonicalPath()
                     :(_fileClassPath+File.pathSeparator+file.getCanonicalPath());            
             }
+            else
+                _fileClassPathWarning=true;
             
             // Add resource or expand jar/
             if (!resource.isDirectory() && file!=null)
@@ -135,6 +138,13 @@ public class ContextLoader extends URLClassLoader
     /* ------------------------------------------------------------ */
     public String getFileClassPath()
     {
+        if (_fileClassPathWarning)
+        {
+            _fileClassPathWarning=false;
+            Code.warning("Classpath incomplete as it cannot include URL elements: "+
+                         _fileClassPath);            
+        }
+        
         return _fileClassPath;
     }
     
