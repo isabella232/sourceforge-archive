@@ -162,7 +162,7 @@ public class Password extends Credential
      * @param realm The realm name for the password, used as a SystemProperty name.
      * @param dft The default password.
      * @param promptDft The default to use if prompting for the password.
-     * @return 
+     * @return Password
      */
     public static Password getPassword(String realm,String dft, String promptDft)
     {

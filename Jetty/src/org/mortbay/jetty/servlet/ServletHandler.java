@@ -694,7 +694,7 @@ public class ServletHandler
     /** Get a Resource.
      * If no resource is found, resource aliases are tried.
      * @param uriInContext 
-     * @return 
+     * @return URL of the resource.
      * @exception MalformedURLException 
      */
     public URL getResource(String uriInContext)
