@@ -289,6 +289,11 @@ public class ServletHandler extends AbstractHttpHandler
         if (holder==null)
             holder = newServletHolder(name,servletClass,forcedPath);
         mapPathToServlet(pathSpec,name);
+        if (isStarted() && !holder.isStarted())
+        {
+            try{holder.start();}
+            catch(Exception e){Code.warning(e);}
+        }
         return holder;
     }
     
@@ -458,7 +463,6 @@ public class ServletHandler extends AbstractHttpHandler
         _sessionManager.stop();
         
         _loader=null;
-        _context=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -493,7 +497,7 @@ public class ServletHandler extends AbstractHttpHandler
                        HttpResponse httpResponse)
          throws IOException
     {
-        if (!isStarted())
+        if (!isStarted() && _context==null)
             return;
         
         // Handle TRACE
