@@ -226,8 +226,7 @@ public class RolloverFileLogSink
     private synchronized void clearOldLogFiles(java.util.Date curDate)
     {
         String[] logFileList =
-            logDir.list(
-                        new java.io.FilenameFilter() {
+            logDir.list(new java.io.FilenameFilter() {
                                 public boolean accept(java.io.File dir,
                                                       String n)
                                 {
@@ -249,19 +248,26 @@ public class RolloverFileLogSink
         {
             java.io.File logFile = new java.io.File(logDir, logFileList[i]);
             java.util.StringTokenizer st = 
-                new java.util.StringTokenizer(logFile.getName(), "_.");
-            int nYear = Integer.parseInt(st.nextToken());
-            int nMonth = Integer.parseInt(st.nextToken());
-            int nDay = Integer.parseInt(st.nextToken());
-
-
-            if (nYear < borderYear ||
-                (nYear == borderYear && nMonth < borderMonth) ||
-                (nYear == borderYear && nMonth == borderMonth && nDay <= borderDay)) {
-                logFile.delete();
-            }//if
-
-        }//for
+                new java.util.StringTokenizer(logFile.getName(),
+                                              "_.");
+            try
+            {
+                int nYear = Integer.parseInt(st.nextToken());
+                int nMonth = Integer.parseInt(st.nextToken());
+                int nDay = Integer.parseInt(st.nextToken());
+                
+                if (nYear < borderYear ||
+                    (nYear == borderYear && nMonth < borderMonth) ||
+                    (nYear == borderYear && nMonth == borderMonth && nDay <= borderDay)) {
+                    logFile.delete();
+                }
+            }
+            catch(Exception e)
+            {
+                if (Code.debug() && Code.getVerbose()>0)
+                    e.printStackTrace();
+            }
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -274,7 +280,7 @@ public class RolloverFileLogSink
             clearThread = new Thread(this);
             clearThread.setDaemon(true);
             clearThread.start();
-        }//if
+        }
     }
 
 

@@ -26,8 +26,8 @@ public class WriterLogSink
     implements LogSink
 {
     /*-------------------------------------------------------------------*/
-    protected String _logDateFormat=null;
-    protected String _logTimezone=null;
+    protected String _logDateFormat="yyyyMMddHHmmssSSSzzz";
+    protected String _logTimezone="GMT";
     protected DateCache _dateFormat=null;
     
     protected boolean _logTimeStamps=true;
@@ -294,6 +294,11 @@ public class WriterLogSink
      */
     public void start()
     {
+        if (_dateFormat==null)
+        {
+            setLogDateFormat(_logDateFormat);
+            setLogTimezone(_logTimezone);
+        }
         _started=true;
     }
     

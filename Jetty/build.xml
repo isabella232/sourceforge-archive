@@ -94,9 +94,7 @@ release     - Cleanup for release
            >
       <include name="javax/servlet/**/*.java"/> 
     </javac>
-    <jar jarfile="${servlet.jar}"
-         basedir="${classes}" 
-         >
+    <jar jarfile="${servlet.jar}" basedir="${classes}" >
        <include name="javax/servlet/**" />
     </jar>
   </target>
@@ -122,9 +120,7 @@ release     - Cleanup for release
       <exclude name="com/mortbay/Jetty/JettyServlet.java" />
       <exclude name="com/mortbay/Jetty/JettyIndex*.properties" />
     </javac>
-    <jar jarfile="${jetty.jar}"
-         basedir="${classes}" 
-    >
+    <jar jarfile="${jetty.jar}" basedir="${classes}" >
        <include name="com/mortbay/**"  />      
        <exclude name="com/mortbay/**/TestHarness*.class" />
        <exclude name="com/mortbay/Util/DataClass/*" />

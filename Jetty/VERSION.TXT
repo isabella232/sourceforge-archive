@@ -1,6 +1,10 @@
 Jetty Versions
 --------------
  
+ + Allow load-on-startup with no content.
+ + Fixed RollOverFileLogSink bug with extra log files.  
+ + Improved Log defaults
+
 Jetty-3.0.0.rc5 - 12 Nov 2000
  + Default writer encoding set by mime type if not explicitly set.
  + Relax webapp rules, accept no web.xml or no WEB-INF
@@ -15,6 +19,13 @@ Jetty-3.0.0.rc5 - 12 Nov 2000
  + Moved JSP classpath hack to ServletHolder
  + Removed Makefile build system.
  + Many javadoc cleanups.
+
+Jetty-2.4.9 - 12 Nov 2000
+ + HttpListener ignore InterruptedIOExceptions
+ + HttpListener default max idle time = 20s
+ + HtmlFilter handles non default encodings
+ + Writing HttpRequests encodes path
+ + HttpRequest.write uses ISO8859_1 encoding.
 
 Jetty-3.0.0.rc4 - 6 Nov 2000
  + Provide default JettyIndex.properties

@@ -310,16 +310,18 @@ public class WebApplicationContext extends HandlerContext
             }
             else
             {
+                int order=0;
                 try
                 {
-                    int order=Integer.parseInt(s);
-                    holder.setInitOrder(order);
+                    if (s!=null && s.trim().length()>0)
+                        order=Integer.parseInt(s);
                 }
                 catch(Exception e)
                 {
                     Code.warning("Cannot parse load-on-startup "+s+". Please use integer");
                     Code.ignore(e);
                 }
+                holder.setInitOrder(order);
             }
         }
     
