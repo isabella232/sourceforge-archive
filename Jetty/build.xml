@@ -167,6 +167,7 @@
         <include name="**/*.dtd" />
         <include name="**/*.xml" />
         <include name="**/*.config" />
+        <include name="**/*.xsd" />
       </fileset>
     </copy>
 
@@ -429,19 +430,17 @@
   <!-- ==================================================================== -->
   <target name="demo" depends="webapps" if="demo.available"
    description="Build and run the demo">
-    <java classname="org.mortbay.jetty.Server"
+    <java jar="${start.jar}"
           dir="${jetty.home}"
           fork="yes"
           failonerror="yes"
           >
-       <classpath>
-         <pathelement path="${env.CLASSPATH}" />
-         <path refid="classpath" />
-       </classpath>
        <jvmarg line="${jvmarg}" />
        <arg line="${etc}/admin.xml ${etc}/demo.xml" />
     </java>
   </target>
+
+
 
   <!-- ==================================================================== -->
   <target name="demo.jmx" depends="mortbay.jmx.jar,webapps" if="demo.available"
