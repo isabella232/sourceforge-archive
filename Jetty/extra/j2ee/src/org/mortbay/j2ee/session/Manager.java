@@ -99,6 +99,7 @@ public class Manager
   //----------------------------------------
   protected Store _store = null;
 
+  private boolean _secureCookies = false;
   public Store
     getStore()
   {
@@ -697,4 +698,24 @@ public class Manager
     }
     _log.trace("...finished local scavenge");
   }
+      /* ------------------------------------------------------------ */
+      /**
+       * @return Returns the secureCookies.
+       *
+       * 
+       */
+      public boolean getSecureCookies()
+      {
+        return _secureCookies;
+      }
+                                                                                                                                
+      /* ------------------------------------------------------------ */
+      /**
+       * @param secureCookies The secureCookies to set.
+       */
+      public void setSecureCookies(boolean secureCookies)
+      {
+        _secureCookies = secureCookies;
+      }
+
 }
