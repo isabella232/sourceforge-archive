@@ -22,6 +22,7 @@ import java.util.ResourceBundle;
 import org.mortbay.http.handler.ResourceHandler;
 import org.mortbay.http.handler.SecurityHandler;
 import org.mortbay.util.Code;
+import org.mortbay.util.IO;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LifeCycle;
 import org.mortbay.util.Log;
@@ -490,23 +491,16 @@ public class HttpContext implements LifeCycle
             
             _tmpDir=new File(System.getProperty("java.io.tmpdir"),
                              temp);
-            if (!_tmpDir.exists())
+            
+            if (_tmpDir.exists())
             {
-                _tmpDir.mkdir();
-                _tmpDir.deleteOnExit();
-                Log.event("Created temp dir "+_tmpDir+" for "+this);
+                Log.event("Delete existing temp dir "+_tmpDir+" for "+this);
+                IO.delete(_tmpDir);
             }
-            else if (!_tmpDir.isDirectory() || !_tmpDir.canWrite())
-	    {
-                _tmpDir=null;
-		Code.warning(this+" will use a default temp dir because "+
-			     _tmpDir+" is not a writeable directory.");
-	    }	
-            else
-            {
-                _tmpDir.deleteOnExit();
-                Log.event("Reused temp dir "+_tmpDir+" for "+this);
-            }
+            
+            _tmpDir.mkdir();
+            _tmpDir.deleteOnExit();
+            Log.event("Created temp dir "+_tmpDir+" for "+this);
         }
         catch(Exception e)
         {

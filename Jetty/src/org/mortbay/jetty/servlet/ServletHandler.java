@@ -583,7 +583,7 @@ public class ServletHandler
             
             if (th instanceof HttpException)
                 throw (HttpException)th;
-            if (th instanceof IOException)
+            if (th.getClass().equals(IOException.class))
                 throw (IOException)th;
             
             Code.warning("Servlet Exception for "+httpRequest.getURI(),th);
@@ -1081,20 +1081,12 @@ public class ServletHandler
             if ("javax.servlet.context.tempdir".equals(name))
             {
                 // Initialize temporary directory
-                //
-                // I'm afraid that this is very much black magic.
-                // but if you can think of better....
-
-                Object t = _httpContext .getAttribute("javax.servlet.context.tempdir");
+                Object t = _httpContext.getAttribute("javax.servlet.context.tempdir");
 
                 if (t instanceof File)
                     return (File)t;
-
-                File tmp_dir=_httpContext.getTempDirectory();
-                _httpContext
-                    .setAttribute("javax.servlet.context.tempdir",
-                                  tmp_dir);
-                return tmp_dir;
+                
+                return _httpContext.getTempDirectory();
             }
 
             return _httpContext.getAttribute(name);

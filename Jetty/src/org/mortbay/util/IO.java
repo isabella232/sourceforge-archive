@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
+import java.io.File;
 
 /* ======================================================================== */
 /** IO Utilities.
@@ -200,6 +201,25 @@ public class IO extends ThreadPool
         return new String(out.toByteArray());
     }
 
+
+    /* ------------------------------------------------------------ */
+    /** Delete File.
+     * This delete will recursively delete directories - BE CAREFULL
+     * @param file The file to be deleted.
+     */
+    public static void delete(File file)
+    {
+        if (!file.exists())
+            return;
+        if (file.isDirectory())
+        {
+            File[] files = file.listFiles();
+            for (int i=0;files!=null && i<files.length;i++)
+                delete(files[i]);
+        }
+        file.delete();
+    }
+    
     
     /* ------------------------------------------------------------ */
     /** Run copy for copyThread()

@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Suppress error only for IOExceptions not derivitives.
  + HttpConnection always eats unused bodies
  + Merged HttpMessage and Message
  + LineInput waits for LF after CF if seen CRLF before.
