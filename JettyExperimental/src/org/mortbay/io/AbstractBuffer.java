@@ -27,7 +27,7 @@ public abstract class AbstractBuffer implements Buffer
     __READONLY = "READONLY",
     __READWRITE = "READWRITE", 
     __VOLATILE = "VOLATILE";
-
+    
     protected int _access;
     protected boolean _volatile;
 

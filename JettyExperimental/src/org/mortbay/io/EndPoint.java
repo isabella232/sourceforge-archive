@@ -26,9 +26,6 @@ import java.io.IOException;
  */
 public interface EndPoint
 {
-    boolean isClosed();
-    
-    boolean isBlocking();
     
     /**
      * Close any backing stream associated with the buffer
@@ -71,4 +68,53 @@ public interface EndPoint
      */
     int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException;
 
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    public String getLocalAddr();
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    public String getLocalHost();
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    public int getLocalPort();
+
+    /* ------------------------------------------------------------ */
+    /**
+     * 
+     */
+    public String getRemoteAddr();
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    public String getRemoteHost();
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    public int getRemotePort();
+
+
+    /* ------------------------------------------------------------ */
+    public boolean isBlocking();
+    
+    /* ------------------------------------------------------------ */
+    public void block(long millisecs);
+
+    /* ------------------------------------------------------------ */
+    public boolean isClosed();
+
+    
+    
 }

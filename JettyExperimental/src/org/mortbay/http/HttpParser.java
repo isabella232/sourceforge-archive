@@ -460,20 +460,20 @@ public class HttpParser implements HttpTokens
                             {
                                 case HttpParser.EOF_CONTENT:
                                     _state = STATE_EOF_CONTENT;
-                                	_handler.headerComplete();
+                                	_handler.headerComplete(); // May recurse here !
                                     break;
                                 case HttpParser.CHUNKED_CONTENT:
                                     _state = STATE_CHUNKED_CONTENT;
-                                	_handler.headerComplete();
+                                	_handler.headerComplete(); // May recurse here !
                                     break;
                                 case HttpParser.NO_CONTENT:
                                     _state = STATE_END;
-                                	_handler.headerComplete();
+                                	_handler.headerComplete(); // May recurse here !
                                     _handler.messageComplete(_contentPosition);
                                     break;
                                 default:
                                     _state = STATE_CONTENT;
-                                	_handler.headerComplete();
+                                	_handler.headerComplete(); // May recurse here !
                                     break;
                             }
                             return;

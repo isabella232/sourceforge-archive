@@ -22,7 +22,8 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 
-import org.mortbay.log.Log;
+import org.apache.ugli.ULogger;
+import org.apache.ugli.LoggerFactory;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.LogSupport;
 
@@ -33,7 +34,7 @@ import org.mortbay.util.LogSupport;
  */
 public class IO extends ThreadPool
 {
-    private static Log log = Log.getInstance(IO.class);
+    private static ULogger log = LoggerFactory.getLogger(IO.class);
 
     /* ------------------------------------------------------------------- */
     public final static String
@@ -52,7 +53,7 @@ public class IO extends ThreadPool
         static
         {
             try{__instance.start();}
-            catch(Exception e){log.fatal(e); System.exit(1);}
+            catch(Exception e){log.error("IO",e); System.exit(1);}
         }
     }
     

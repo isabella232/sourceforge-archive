@@ -20,7 +20,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
-import org.mortbay.log.Log;
+import org.apache.ugli.ULogger;
+import org.apache.ugli.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** TYPE Utilities.
@@ -33,7 +34,7 @@ import org.mortbay.log.Log;
  */
 public class TypeUtil
 {
-    private static Log log = Log.getInstance(TypeUtil.class);
+    private static ULogger log = LoggerFactory.getLogger(TypeUtil.class);
 
     /* ------------------------------------------------------------ */
     private static final HashMap name2Class=new HashMap();

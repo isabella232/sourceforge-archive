@@ -24,6 +24,8 @@ import java.io.IOException;
  */
 public class Portable
 {
+    public static final String ALL_INTERFACES="0.0.0.0";
+    
     public static void arraycopy(byte[] src, int srcOffset, byte[] dst, int dstOffset, int length)
     {
         System.arraycopy(src, srcOffset, dst, dstOffset, length);

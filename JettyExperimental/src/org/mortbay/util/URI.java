@@ -20,8 +20,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.mortbay.log.Log;
+import org.apache.ugli.ULogger;
+import org.apache.ugli.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** URI Holder.
@@ -38,8 +38,12 @@ import org.mortbay.log.Log;
 public class URI
     implements Cloneable
 {
-    private static Log log = Log.getInstance(URI.class);
+    private static ULogger log = LoggerFactory.getLogger(URI.class);
 
+    public static final String HTTP="http";
+    public static final String HTTP_COLON="http:";
+    public static final String HTTPS="https";
+    public static final String HTTPS_COLON="https:";
 
     public static final String __CHARSET=
         System.getProperty("org.mortbay.util.URI.charset",StringUtil.__ISO_8859_1);

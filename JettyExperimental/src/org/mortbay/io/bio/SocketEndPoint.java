@@ -16,7 +16,12 @@
 package org.mortbay.io.bio;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
+
+import org.mortbay.io.Portable;
 
 /**
  * @author gregw
@@ -27,6 +32,8 @@ import java.net.Socket;
 public class SocketEndPoint extends StreamEndPoint
 {
     Socket _socket;
+    InetSocketAddress _local;
+    InetSocketAddress _remote;
 
     /**
      * 
@@ -55,4 +62,82 @@ public class SocketEndPoint extends StreamEndPoint
         _in=null;
         _out=null;
     }
+    
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getLocalAddr()
+     */
+    public String getLocalAddr()
+    {
+        if (_local==null)
+            _local=(InetSocketAddress)_socket.getLocalSocketAddress();
+        
+       if (_local==null || _local.getAddress()==null || _local.getAddress().isAnyLocalAddress())
+           return Portable.ALL_INTERFACES;
+        
+        return _local.getAddress().getHostAddress();
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getLocalHost()
+     */
+    public String getLocalHost()
+    {
+        if (_local==null)
+            _local=(InetSocketAddress)_socket.getLocalSocketAddress();
+        
+       if (_local==null || _local.getAddress()==null || _local.getAddress().isAnyLocalAddress())
+           return Portable.ALL_INTERFACES;
+        
+        return _local.getAddress().getCanonicalHostName();
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getLocalPort()
+     */
+    public int getLocalPort()
+    {
+        if (_local==null)
+            _local=(InetSocketAddress)_socket.getLocalSocketAddress();
+        return _local.getPort();
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getRemoteAddr()
+     */
+    public String getRemoteAddr()
+    {
+        if (_remote==null)
+            _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
+        
+        return _remote.getAddress().getHostAddress();
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getRemoteHost()
+     */
+    public String getRemoteHost()
+    {
+        if (_remote==null)
+            _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
+        
+        return _remote.getAddress().getCanonicalHostName();
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getRemotePort()
+     */
+    public int getRemotePort()
+    {
+        if (_remote==null)
+            _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
+        return _remote.getPort();
+    }
+
 }

@@ -25,6 +25,8 @@ public class BufferUtil
 {
     static final byte SPACE= 0x20;
     static final byte MINUS= '-';
+    static final byte[] DIGIT=
+    {(byte)'0',(byte)'1',(byte)'2',(byte)'3',(byte)'4',(byte)'5',(byte)'6',(byte)'7',(byte)'8',(byte)'9',(byte)'A',(byte)'B',(byte)'C',(byte)'D',(byte)'E',(byte)'F'};
 
     /**
      * Convert buffer to an integer.
@@ -64,6 +66,45 @@ public class BufferUtil
         Portable.throwNumberFormat(buffer.toString());
         return -1;
     }
+    
+    /**
+     * Convert buffer to an long.
+     * Parses up to the first non-numeric character. If no number is found an
+     * IllegalArgumentException is thrown
+     * @param buffer A buffer containing an integer. The position is not changed.
+     * @return an int 
+     */
+    public static long toLong(Buffer buffer)
+    {
+        long val= 0;
+        boolean started= false;
+        boolean minus= false;
+        for (int i= buffer.getIndex(); i < buffer.putIndex(); i++)
+        {
+            byte b= buffer.peek(i);
+            if (b <= SPACE)
+            {
+                if (started)
+                    break;
+            }
+            else if (b >= '0' && b <= '9')
+            {
+                val= val * 10L + (b - '0');
+                started= true;
+            }
+            else if (b == MINUS && !started)
+            {
+                minus= true;
+            }
+            else
+                break;
+        }
+
+        if (started)
+            return minus ? (-val) : val;
+        Portable.throwNumberFormat(buffer.toString());
+        return -1L;
+    }
 
     public static void putHexInt(Buffer buffer, int n)
     {
@@ -82,57 +123,7 @@ public class BufferUtil
 
         if (n < 0x10)
         {
-            switch (n)
-            {
-                case 0 :
-                    buffer.put((byte)'0');
-                    break;
-                case 1 :
-                    buffer.put((byte)'1');
-                    break;
-                case 2 :
-                    buffer.put((byte)'2');
-                    break;
-                case 3 :
-                    buffer.put((byte)'3');
-                    break;
-                case 4 :
-                    buffer.put((byte)'4');
-                    break;
-                case 5 :
-                    buffer.put((byte)'5');
-                    break;
-                case 6 :
-                    buffer.put((byte)'6');
-                    break;
-                case 7 :
-                    buffer.put((byte)'7');
-                    break;
-                case 8 :
-                    buffer.put((byte)'8');
-                    break;
-                case 9 :
-                    buffer.put((byte)'9');
-                    break;
-                case 10 :
-                    buffer.put((byte)'A');
-                    break;
-                case 11 :
-                    buffer.put((byte)'B');
-                    break;
-                case 12 :
-                    buffer.put((byte)'C');
-                    break;
-                case 13 :
-                    buffer.put((byte)'D');
-                    break;
-                case 14 :
-                    buffer.put((byte)'E');
-                    break;
-                case 15 :
-                    buffer.put((byte)'F');
-                    break;
-            }
+            buffer.put(DIGIT[n]);
         }
         else
         {
@@ -149,15 +140,51 @@ public class BufferUtil
 
                 started= true;
                 int d= n / hexDivisors[i];
-                if (d<10)
-                    buffer.put((byte) (d + '0'));
-                else
-                    buffer.put((byte) (d-10+ 'A'));
+                buffer.put(DIGIT[d]);
                 n= n - d * hexDivisors[i];
             }
         }
     }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Add hex integer BEFORE current getIndex.
+     * @param buffer
+     * @param size
+     */
+    public static void prependHexInt(Buffer buffer, int n)
+    {
+        if (n==0)
+        {
+            int gi=buffer.getIndex();
+            buffer.poke(--gi,(byte)'0');
+            buffer.setGetIndex(gi);
+        }
+        else
+        {
+            boolean minus=false;
+            if (n<0)
+            {
+                minus=true;
+                n=-n;
+            }
+
+            int gi=buffer.getIndex();
+            while(n>0)
+            {
+                int d = 0xf&n;
+                n=n>>4;
+                buffer.poke(--gi,DIGIT[d]);
+            }
+            
+            if (minus)
+                buffer.poke(--gi,(byte)'-');
+            buffer.setGetIndex(gi);
+        }
+    }
     
+
+    /* ------------------------------------------------------------ */
     public static void putDecInt(Buffer buffer, int n)
     {
         if (n < 0)
@@ -175,39 +202,7 @@ public class BufferUtil
 
         if (n < 10)
         {
-            switch (n)
-            {
-                case 0 :
-                    buffer.put((byte)'0');
-                    break;
-                case 1 :
-                    buffer.put((byte)'1');
-                    break;
-                case 2 :
-                    buffer.put((byte)'2');
-                    break;
-                case 3 :
-                    buffer.put((byte)'3');
-                    break;
-                case 4 :
-                    buffer.put((byte)'4');
-                    break;
-                case 5 :
-                    buffer.put((byte)'5');
-                    break;
-                case 6 :
-                    buffer.put((byte)'6');
-                    break;
-                case 7 :
-                    buffer.put((byte)'7');
-                    break;
-                case 8 :
-                    buffer.put((byte)'8');
-                    break;
-                case 9 :
-                    buffer.put((byte)'9');
-                    break;
-            }
+            buffer.put(DIGIT[n]);
         }
         else
         {
@@ -224,7 +219,7 @@ public class BufferUtil
 
                 started= true;
                 int d= n / decDivisors[i];
-                buffer.put((byte) (d + '0'));
+                buffer.put(DIGIT[d]);
                 n= n - d * decDivisors[i];
             }
         }
@@ -247,39 +242,7 @@ public class BufferUtil
 
         if (n < 10)
         {
-            switch ((int)n)
-            {
-                case 0 :
-                    buffer.put((byte)'0');
-                    break;
-                case 1 :
-                    buffer.put((byte)'1');
-                    break;
-                case 2 :
-                    buffer.put((byte)'2');
-                    break;
-                case 3 :
-                    buffer.put((byte)'3');
-                    break;
-                case 4 :
-                    buffer.put((byte)'4');
-                    break;
-                case 5 :
-                    buffer.put((byte)'5');
-                    break;
-                case 6 :
-                    buffer.put((byte)'6');
-                    break;
-                case 7 :
-                    buffer.put((byte)'7');
-                    break;
-                case 8 :
-                    buffer.put((byte)'8');
-                    break;
-                case 9 :
-                    buffer.put((byte)'9');
-                    break;
-            }
+            buffer.put(DIGIT[(int)n]);
         }
         else
         {
@@ -296,10 +259,17 @@ public class BufferUtil
 
                 started= true;
                 long d= n / decDivisors[i];
-                buffer.put((byte) (d + '0'));
+                buffer.put(DIGIT[(int)d]);
                 n= n - d * decDivisors[i];
             }
         }
+    }
+    
+    public static Buffer toBuffer(long value)
+    {
+        ByteArrayBuffer buf=new ByteArrayBuffer(16);
+        putDecLong(buf, value);
+        return buf;
     }
 
     private static int[] decDivisors=
@@ -331,5 +301,6 @@ public class BufferUtil
     {
         System.err.println(Long.MIN_VALUE);
     }
+
 
 }

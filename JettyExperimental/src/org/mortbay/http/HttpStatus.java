@@ -17,6 +17,7 @@ package org.mortbay.http;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferCache;
+import org.mortbay.io.ByteArrayBuffer;
 
 /* ------------------------------------------------------------------------------- */
 /**
@@ -171,4 +172,43 @@ public class HttpStatus extends BufferCache
         HTTP_Version_Not_Supported_BUFFER=CACHE.add(HTTP_Version_Not_Supported,ORDINAL_505_HTTP_Version_Not_Supported),
         Insufficient_Storage_BUFFER=CACHE.add(Insufficient_Storage,ORDINAL_507_Insufficient_Storage),
         Unknown_BUFFER=CACHE.add(Unknown,ORDINAL_999_Unknown);
+    
+    
+    // Build cache of response lines for status
+    private static Buffer[] __responseLine = new Buffer[600];
+    static
+    {
+        int versionLength=HttpVersions.HTTP_1_1_BUFFER.length();
+        
+        for (int i=0;i<__responseLine.length;i++)
+        {
+            Buffer reason = CACHE.get(i);
+            if (reason==null)
+                continue;
+            
+            byte[] bytes=new byte[versionLength+5+reason.length()+2];
+            HttpVersions.HTTP_1_1_BUFFER.peek(0,bytes, 0, versionLength);
+            bytes[versionLength+0]=' ';
+            bytes[versionLength+1]=(byte)('0'+i/100);
+            bytes[versionLength+2]=(byte)('0'+(i%100)/10);
+            bytes[versionLength+3]=(byte)('0'+(i%10));
+            bytes[versionLength+4]=' ';
+            reason.peek(0, bytes, versionLength+5, reason.length());
+            bytes[versionLength+5+reason.length()]=HttpParser.CARRIAGE_RETURN;
+            bytes[versionLength+6+reason.length()]=HttpParser.LINE_FEED;
+            __responseLine[i]=new ByteArrayBuffer(bytes,0,bytes.length,Buffer.IMMUTABLE);
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param status
+     * @return HTTP response line for the status code including CRLF
+     */
+    public static Buffer getResponseLine(int status)
+    {
+        if (status>__responseLine.length)
+            return null;
+        return __responseLine[status];
+    }
 }

@@ -16,7 +16,7 @@
 package org.mortbay.util;
 import java.lang.reflect.Method;
 
-import org.mortbay.log.Log;
+import org.apache.ugli.ULogger;
 
 /*-----------------------------------------------------------------------*/
 /** Log Support class.
@@ -34,21 +34,11 @@ public class LogSupport
      * Ignore an exception unless trace is enabled.
      * This works around the problem that log4j does not support the trace level.
      */
-    public static void ignore(Log log,Throwable th)
+    public static void ignore(ULogger log,Throwable th)
     {
-        if (trace && log.isTraceEnabled()) log.trace(IGNORED,th);
+        if (trace && log.isDebugEnabled()) log.debug(IGNORED,th);
     }
     
-    /* ------------------------------------------------------------ */
-    /**
-     * Is Trace Enabled.
-     * This works around the problem that log4j does not support the trace level.
-     * @return true IFF log.isTraceEnabled() AND ( the system property TRACE is set OR not using log4j )
-     */
-    public static boolean isTraceEnabled(Log log)
-    {
-        return log.isTraceEnabled() && (trace || log.getClass().getName().indexOf("Log4J")>=0);
-    }
 
     /*-------------------------------------------------------------------*/
     private static final Class[] __noArgs=new Class[0];
@@ -57,7 +47,7 @@ public class LogSupport
 
     /** Log nested exceptions 
      */
-    public static void warn(Log log,String msg, Throwable th)
+    public static void warn(ULogger log,String msg, Throwable th)
     {
         log.warn(msg,th);
 

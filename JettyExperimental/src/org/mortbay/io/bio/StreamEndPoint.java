@@ -50,6 +50,11 @@ public class StreamEndPoint implements EndPoint
         return true;
     }
 
+    public void block(long millisecs)
+    {
+        Portable.throwNotSupported();
+    }
+
     /* (non-Javadoc)
      * @see org.mortbay.io.BufferIO#isClosed()
      */
@@ -182,6 +187,60 @@ public class StreamEndPoint implements EndPoint
         }
         
         return total;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getLocalAddr()
+     */
+    public String getLocalAddr()
+    {
+        return null;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getLocalHost()
+     */
+    public String getLocalHost()
+    {
+        return null;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getLocalPort()
+     */
+    public int getLocalPort()
+    {
+        return 0;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getRemoteAddr()
+     */
+    public String getRemoteAddr()
+    {
+        return null;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getRemoteHost()
+     */
+    public String getRemoteHost()
+    {
+        return null;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getRemotePort()
+     */
+    public int getRemotePort()
+    {
+        return 0;
     }
 
 }

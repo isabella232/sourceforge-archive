@@ -20,12 +20,18 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 
-import org.mortbay.log.Log;
+import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+
+import org.apache.ugli.ULogger;
+import org.apache.ugli.LoggerFactory;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
+import org.mortbay.io.Portable;
 import org.mortbay.io.View;
 import org.mortbay.io.nio.NIOBuffer;
+import org.mortbay.util.URI;
 
 /**
  * @author gregw
@@ -35,25 +41,32 @@ import org.mortbay.io.nio.NIOBuffer;
  */
 public class HttpConnection extends HttpParser.Handler
 {
-    private static Log log = Log.getInstance(HttpConnection.class);
+    private static ULogger log = LoggerFactory.getLogger(HttpConnection.class);
     private static int UNKNOWN = -2;
-
-    private EndPoint _endpoint;
-
-    EndPoint _endp;
-    HttpConnector _connector;
-    HttpParser _parser;
     HttpBuilder _builder;
-
-    transient String _url;
-    transient int _version = UNKNOWN;
-    transient boolean _head = false;
-    transient boolean _host = false;
-    transient int _expect = UNKNOWN;
-    transient int _connection = UNKNOWN;
     
     // TODO hack!
     HashMap _cache = new HashMap();
+    transient int _connection = UNKNOWN;
+    HttpConnector _connector;
+
+    EndPoint _endp;
+
+    private EndPoint _endpoint;
+    transient int _expect = UNKNOWN;
+    transient boolean _head = false;
+    
+    transient Buffer _headerBuffer;
+    transient boolean _host = false;
+    transient Buffer _inBuffer;
+    HttpParser _parser;
+    HttpRequest _request;
+    HttpResponse _response;
+    HttpFields _requestFields;
+    HttpFields _responseFields;
+
+    transient String _url;
+    transient int _version = UNKNOWN;
     
 
     /**
@@ -65,9 +78,39 @@ public class HttpConnection extends HttpParser.Handler
         _endp = endpoint;
         _endpoint = endpoint;
         _parser = new HttpParser(null, endpoint, this);
-        _builder = new HttpBuilder(null, endpoint);
+        _requestFields=new HttpFields();
+        _responseFields=new HttpFields();
+        _request=new HttpRequest(this);
+        _builder = new HttpBuilder(_connector,_endp);
     }
 
+    /*
+     * @see org.mortbay.http.HttpParser.Handler#foundContent(int, org.mortbay.io.Buffer)
+     */
+    public void content(int index, Buffer ref)
+    {
+        // TODO make available to input stream OR other content sink OR maybe buffer it???
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the requestFields.
+     */
+    HttpFields getRequestFields()
+    {
+        return _requestFields;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the responseFields.
+     */
+    HttpFields getResponseFields()
+    {
+        return _responseFields;
+    }
+
+    /* ------------------------------------------------------------ */
     public void handle() throws IOException
     {
         try
@@ -75,10 +118,37 @@ public class HttpConnection extends HttpParser.Handler
             // check read buffer buffers
             if (_parser.isState(HttpParser.STATE_START))
             {
-                if (_parser.getBuffer() == null) _parser.setBuffer(_connector.getBuffer());
+                // start with a just a header buffer
+                if (_parser.getBuffer() == null) 
+                {
+                    // TODO - move this buffer management stuff into HttpParser
+                    
+                    // get a new header buffer.
+                    if (_headerBuffer==null)
+                        _headerBuffer=_connector.getBuffer(false);
+                    else
+                        _headerBuffer.clear();
+                    _parser.setBuffer(_headerBuffer);
+                }
+                else if (_parser.getBuffer()==_inBuffer)
+                {
+                    // reuse last header buffer
+                    if (_inBuffer!=null)	
+                    {
+                        _connector.returnBuffer(_inBuffer);
+                        _inBuffer=null;
+                    }
+                    _parser.setBuffer(_headerBuffer);
+                    _headerBuffer.clear();
+                }
+                else
+                    _headerBuffer.clear();
+                    
             }
 
-            if (!_parser.isState(HttpParser.STATE_END)) _parser.parseAvailable();
+            // If we are not ended then parse available
+            if (!_parser.isState(HttpParser.STATE_END)) 
+                _parser.parseAvailable();
 
             // Do we have more writting to do?
             if (_builder.isState(HttpBuilder.STATE_FLUSHING) || _builder.isState(HttpBuilder.STATE_CONTENT))
@@ -87,56 +157,147 @@ public class HttpConnection extends HttpParser.Handler
         }
         finally
         {
+            // If we are non block
             if (!_endp.isBlocking())
             {
+                // return input buffers while request ended.
                 if (_parser.isState(HttpParser.STATE_END) && _parser.getBuffer() != null)
                 {
-                    _connector.returnBuffer(_parser.getBuffer());
-                    _parser.setBuffer(null);
-                }
-                
-                if (_builder.isState(HttpBuilder.STATE_END) && _builder.getBuffer() != null)
-                {
-                    _connector.returnBuffer(_builder.getBuffer());
-                    _builder.setBuffer(null);
+                    if (_inBuffer!=null)
+                    {
+                        _connector.returnBuffer(_inBuffer);
+                        _inBuffer=null;
+                        _parser.setBuffer(null);
+                    }
+                    
+                    // return header and output buffer while response ended
+                    // TODO FIX THIS
+                    /*
+                    if (_builder.isState(HttpBuilder.STATE_END) && _builder.getSmallBuffer() != null)
+                    {
+                        if (_headerBuffer!=null)
+                        {
+                            _connector.returnBuffer(_headerBuffer);
+                            _headerBuffer=null;
+                            _parser.setBuffer(null);
+                        }
+                        if (_outBuffer!=null)
+                        {
+                            _connector.returnBuffer(_outBuffer);
+                            _outBuffer=null;
+                            _builder.setSmallBuffer(null);
+                        }
+                    }
+                    */
                 }
             }
 
             if (_parser.isState(HttpParser.STATE_END) && _builder.isState(HttpBuilder.STATE_END))
             {
                 _parser.reset();
-                _builder.reset();
+                _builder.reset(!_builder.isPersistent());  // TODO true or false?
             }
         }
     }
 
     /*
-     * (non-Javadoc)
-     * 
-     * @see org.mortbay.http.HttpParser.Handler#startRequest(org.mortbay.io.Buffer,
-     *      org.mortbay.io.Buffer, org.mortbay.io.Buffer)
+     * @see org.mortbay.http.HttpParser.Handler#headerComplete()
      */
-    public void startRequest(Buffer method, Buffer url, Buffer version)
+    public void headerComplete() throws IOException
     {
-        _version = version == null ? HttpVersions.HTTP_0_9_ORDINAL : HttpVersions.CACHE
-                .getOrdinal(version);
-        if (_version <= 0) _version = HttpVersions.HTTP_1_0_ORDINAL;
-        _url=url.toString();
-        _host = false;
-        _expect = UNKNOWN;
-        _connection = UNKNOWN;
-        _head = HttpVersions.CACHE.getOrdinal(method) == HttpMethods.HEAD_ORDINAL;
+        if (_parser.getState() == HttpParser.STATE_END)
+        {
+            _parser.setBuffer(null);
+        }
+        else
+        {
+            // Request content, so consider giving it a bigger buffer.
+            // TODO may not need to do this swap for small content.
+            if (_inBuffer==null)
+                _inBuffer=_connector.getBuffer(false);
+            _inBuffer.put(_headerBuffer);
+            _parser.setBuffer(_inBuffer);
+        }
+
+        _builder.setVersion(_version);
+        switch (_version)
+        {
+            case HttpVersions.HTTP_0_9_ORDINAL:
+                break;
+            case HttpVersions.HTTP_1_0_ORDINAL:
+                _builder.setHead(_head);
+                break;
+            case HttpVersions.HTTP_1_1_ORDINAL:
+                _builder.setHead(_head);
+                if (!_host)
+                {
+                    // TODO prebuilt response
+                    _builder.setResponse(400, null);
+                    _responseFields.put(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CLOSE_BUFFER);
+                    _builder.complete();
+                    return;
+                }
+
+                if (_expect != UNKNOWN)
+                {
+                    if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
+                    {
+                        _builder.setResponse(100, null);
+                        _builder.complete();
+                        _builder.reset(false);
+                    }
+                    else
+                    {
+                        _builder.setResponse(417, null);
+                        _responseFields.put(HttpHeaders.CONNECTION_BUFFER,HttpHeaderValues.CLOSE_BUFFER);
+                        _builder.complete();
+                        return;
+                    }
+                }
+                break;
+            default:
+        }
+
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see org.mortbay.http.HttpParser.Handler#startResponse(org.mortbay.io.Buffer, int,
-     *      org.mortbay.io.Buffer)
+     * @see org.mortbay.http.HttpParser.Handler#messageComplete(int)
      */
-    public void startResponse(Buffer version, int status, Buffer reason)
+    public void messageComplete(int contextLength) throws IOException
     {
-        _host = false;
+        _parser.setBuffer(null);
+        if (_builder.isState(HttpBuilder.STATE_HEADER))
+        {
+            _builder.setResponse(200, null);
+
+            if (_connection >= 0)
+                    _responseFields.put(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CACHE.get(_connection));
+
+            _responseFields.put(HttpHeaders.CONTENT_TYPE_BUFFER, HttpHeaderValues.TEXT_HTML_BUFFER);
+
+            Buffer content = (Buffer) _cache.get(_url);
+            
+            if (content==null)
+            {
+                File file = new File(".",_url);
+                if (file.exists() && !file.isDirectory())
+                {
+                    content = new NIOBuffer(file);
+                    ByteBuffer bbuf = ((NIOBuffer)content).getByteBuffer();
+                    _cache.put(_url, content);
+                }
+            }
+            
+            if (content==null)
+                content = new ByteArrayBuffer("<h1>Hello World: "+_url+"</h1>\n" + "" + "");
+            
+            _builder.addContent(new View(content), true);
+            _builder.completeHeader(_responseFields,HttpBuilder.LAST);
+            _builder.complete();
+        }
+
     }
 
     /*
@@ -155,116 +316,88 @@ public class HttpConnection extends HttpParser.Handler
                 _expect = HttpHeaderValues.CACHE.getOrdinal(value);
 
             case HttpHeaders.CONNECTION_ORDINAL:
-                // TODO comma list of connections !!!
+                // TODO comma list of connections ???
                 _connection = HttpHeaderValues.CACHE.getOrdinal(value);
         }
+        
+        _requestFields.add(name, value);
     }
-
+    
+    
     /*
-     * @see org.mortbay.http.HttpParser.Handler#headerComplete()
+     * 
+     * @see org.mortbay.http.HttpParser.Handler#startRequest(org.mortbay.io.Buffer,
+     *      org.mortbay.io.Buffer, org.mortbay.io.Buffer)
      */
-    public void headerComplete() throws IOException
+    public void startRequest(Buffer method, Buffer uri, Buffer version)
     {
-        if (_parser.getState() == HttpParser.STATE_END)
-        {
-            // Reuse input buffer
-            _builder.setBuffer(_parser.getBuffer());
-            _parser.setBuffer(null);
-        }
-        else
-        {
-            // get builder buffer from pool
-            _builder.setBuffer(_connector.getBuffer());
-        }
-
-        switch (_version)
-        {
-            case HttpVersions.HTTP_0_9_ORDINAL:
-                break;
-            case HttpVersions.HTTP_1_0_ORDINAL:
-                _builder.setHead(_head);
-                break;
-            case HttpVersions.HTTP_1_1_ORDINAL:
-                _builder.setHead(_head);
-                if (!_host)
-                {
-                    // TODO prebuilt response
-                    _builder.buildResponse(_version, 400, null);
-                    _builder.addHeader(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CLOSE_BUFFER);
-                    _builder.complete();
-                    return;
-                }
-
-                if (_expect != UNKNOWN)
-                {
-                    if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
-                    {
-                        _builder.buildResponse(_version, 100, null);
-                        _builder.complete();
-                        _builder.reset();
-                    }
-                    else
-                    {
-                        _builder.buildResponse(_version, 417, null);
-                        _builder.addHeader(HttpHeaders.CONNECTION_BUFFER,
-                                HttpHeaderValues.CLOSE_BUFFER);
-                        _builder.complete();
-                        return;
-                    }
-                }
-                break;
-            default:
-        }
-
+        _request.setMethod(method.toString());
+        _url=uri.toString();
+        _request.setUri(new URI(_url));
+        _version = version == null ? HttpVersions.HTTP_0_9_ORDINAL : HttpVersions.CACHE
+                .getOrdinal(version);
+        if (_version <= 0) _version = HttpVersions.HTTP_1_0_ORDINAL;
+        _request.setProtocol(HttpVersions.CACHE.get(_version).toString());
+        
+        _host = false;
+        _expect = UNKNOWN;
+        _connection = UNKNOWN;
+        _head = HttpVersions.CACHE.getOrdinal(method) == HttpMethods.HEAD_ORDINAL;
+        
     }
-
-    /*
-     * @see org.mortbay.http.HttpParser.Handler#foundContent(int, org.mortbay.io.Buffer)
-     */
-    public void content(int index, Buffer ref)
-    {
-        // TODO
-    }
-
+    
     /*
      * (non-Javadoc)
      * 
-     * @see org.mortbay.http.HttpParser.Handler#messageComplete(int)
+     * @see org.mortbay.http.HttpParser.Handler#startResponse(org.mortbay.io.Buffer, int,
+     *      org.mortbay.io.Buffer)
      */
-    public void messageComplete(int contextLength) throws IOException
+    public void startResponse(Buffer version, int status, Buffer reason)
     {
-        _parser.setBuffer(null);
-        if (_builder.isState(HttpBuilder.STATE_START))
-        {
-            _builder.buildResponse(_version, 200, null);
-
-            if (_connection >= 0)
-                    _builder.addHeader(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CACHE
-                            .get(_connection));
-
-            _builder.addHeader(HttpHeaders.CONTENT_TYPE_BUFFER, HttpHeaderValues.TEXT_HTML_BUFFER);
-
-            
-            Buffer content = (Buffer) _cache.get(_url);
-            
-            if (content==null)
-            {
-                File file = new File(".",_url);
-                if (file.exists() && !file.isDirectory())
-                {
-                    content = new NIOBuffer(file);
-                    ByteBuffer bbuf = ((NIOBuffer)content).getByteBuffer();
-                    _cache.put(_url, content);
-                }
-            }
-            
-            if (content==null)
-                content = new ByteArrayBuffer("<h1>Hello World: "+_url+"</h1>\n" + "" + "");
-            
-            _builder.addContent(new View(content), true);
-            _builder.complete();
-        }
-
+        Portable.throwIllegalState("response");
     }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    public boolean isConfidential()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    public EndPoint getEndPoint()
+    {
+        return _endp;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    public boolean useDNS()
+    {
+        // TODO Auto-generated method stub
+        return false;
+    }
+    
+    
+    private class Input extends ServletInputStream
+    {
+        /* ------------------------------------------------------------ */
+        /* 
+         * @see java.io.InputStream#read()
+         */
+        public int read() throws IOException
+        {
+            // TODO Auto-generated method stub
+            return 0;
+        }
+    
+    }
 }

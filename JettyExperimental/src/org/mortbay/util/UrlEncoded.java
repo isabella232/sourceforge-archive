@@ -19,7 +19,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.mortbay.log.Log;
+import org.apache.ugli.ULogger;
+import org.apache.ugli.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** Handles coding of MIME  "x-www-form-urlencoded".
@@ -39,7 +40,7 @@ import org.mortbay.log.Log;
  */
 public class UrlEncoded extends MultiMap
 {
-    private static Log log = Log.getInstance(UrlEncoded.class);
+    private static ULogger log = LoggerFactory.getLogger(UrlEncoded.class);
 
     /* ----------------------------------------------------------------- */
     public UrlEncoded(UrlEncoded url)

@@ -15,8 +15,21 @@
 
 package org.mortbay.http;
 
-public class HttpHandler
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.mortbay.thread.LifeCycle;
+
+public interface HttpHandler extends LifeCycle
 {
+    public void setNextHttpHandler(HttpHandler next);
+    public HttpHandler getNextHttpHandler();
+    
+    public void handle(HttpServletRequest request, HttpServletResponse response)
+        throws IOException, ServletException;
     
 }
 

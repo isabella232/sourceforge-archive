@@ -16,6 +16,7 @@
 package org.mortbay.io.nio;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
@@ -24,6 +25,7 @@ import java.nio.channels.SocketChannel;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
+import org.mortbay.io.Portable;
 
 
 /**
@@ -37,19 +39,29 @@ public class ChannelEndPoint implements EndPoint
     ByteChannel _channel;
     ByteBuffer[] _gather2;
     ByteBuffer[] _gather3;
+    Socket _socket;
+    InetSocketAddress _local;
+    InetSocketAddress _remote;
     
     /**
      * 
      */
-    public ChannelEndPoint(ByteChannel chanel)
+    public ChannelEndPoint(ByteChannel channel)
     {
         super();
-        this._channel = chanel;
+        this._channel = channel;
+        if (channel instanceof SocketChannel)
+            _socket=((SocketChannel)channel).socket();
     }
     
     public boolean isBlocking()
     {
         return false;
+    }
+    
+    public void block(long millisecs)
+    {
+        Portable.throwNotSupported();
     }
 
     /* (non-Javadoc)
@@ -271,12 +283,100 @@ public class ChannelEndPoint implements EndPoint
     {
         return _channel;
     }
-    
-    /**
-     * @param channel The channel to set.
+
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getLocalAddr()
      */
-    public void setChannel(ByteChannel channel)
+    public String getLocalAddr()
     {
-        _channel = channel;
+        if (_socket==null)
+            return null;
+        
+        if (_local==null)
+            _local=(InetSocketAddress)_socket.getLocalSocketAddress();
+        
+       if (_local==null || _local.getAddress()==null || _local.getAddress().isAnyLocalAddress())
+           return Portable.ALL_INTERFACES;
+        
+        return _local.getAddress().getHostAddress();
     }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getLocalHost()
+     */
+    public String getLocalHost()
+    {
+        if (_socket==null)
+            return null;
+        
+        if (_local==null)
+            _local=(InetSocketAddress)_socket.getLocalSocketAddress();
+        
+       if (_local==null || _local.getAddress()==null || _local.getAddress().isAnyLocalAddress())
+           return Portable.ALL_INTERFACES;
+        
+        return _local.getAddress().getCanonicalHostName();
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getLocalPort()
+     */
+    public int getLocalPort()
+    {
+        if (_socket==null)
+            return 0;
+        
+        if (_local==null)
+            _local=(InetSocketAddress)_socket.getLocalSocketAddress();
+        return _local.getPort();
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getRemoteAddr()
+     */
+    public String getRemoteAddr()
+    {
+        if (_socket==null)
+            return null;
+        
+        if (_remote==null)
+            _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
+        
+        return _remote.getAddress().getHostAddress();
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getRemoteHost()
+     */
+    public String getRemoteHost()
+    {
+        if (_socket==null)
+            return null;
+        
+        if (_remote==null)
+            _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
+        
+        return _remote.getAddress().getCanonicalHostName();
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getRemotePort()
+     */
+    public int getRemotePort()
+    {
+        if (_socket==null)
+            return 0;
+        
+        if (_remote==null)
+            _remote=(InetSocketAddress)_socket.getRemoteSocketAddress();
+        return _remote.getPort();
+    }
+
 }

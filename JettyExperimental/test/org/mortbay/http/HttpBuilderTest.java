@@ -22,6 +22,8 @@ import junit.framework.TestCase;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
+import org.mortbay.io.ByteArrayEndPoint;
+import org.mortbay.io.SimpleBuffers;
 import org.mortbay.io.View;
 
 /**
@@ -32,7 +34,7 @@ import org.mortbay.io.View;
  */
 public class HttpBuilderTest extends TestCase
 {
-    public final static String CONTENT="The quick brown fox jumped\nover the lazy dog\n";
+    public final static String CONTENT="The quick brown fox jumped over the lazy dog.\nNow is the time for all good men to come to the aid of the party\nThe moon is blue to a fish in love.\n";
     public final static String[] connect={null,"keep-alive","close"};
 
     public HttpBuilderTest(String arg0)
@@ -49,10 +51,13 @@ public class HttpBuilderTest extends TestCase
     public void testHTTP()
     	throws Exception
     {
-        Buffer b=new ByteArrayBuffer(4096);
-        HttpBuilder hb = new HttpBuilder(b,null);
+        Buffer bb=new ByteArrayBuffer(8096);
+        Buffer sb=new ByteArrayBuffer(1500);
+        HttpFields fields = new HttpFields();
+        ByteArrayEndPoint endp = new ByteArrayEndPoint(new byte[0],4096);
+        HttpBuilder hb = new HttpBuilder(new SimpleBuffers(bb,sb),endp);
         Handler handler = new Handler();
-        HttpParser parser= new HttpParser(b,null, handler);
+        HttpParser parser=null;
         
         // For HTTP version
         for (int v=9;v<=11;v++)
@@ -61,27 +66,30 @@ public class HttpBuilderTest extends TestCase
             for (int r=0;r<tr.length;r++)
             {
                 // chunks = 1 to 3
-                for (int chunks=1;chunks<=3;chunks++)
+                for (int chunks=1;chunks<=6;chunks++)
                 {
                     // For none, keep-alive, close
                     for (int c=0;c<connect.length;c++)
                     {
                         String t="v="+v+",tr="+tr[r]+",chunks="+chunks+",connect="+connect[c];
                         
-                        b.clear();
-                        hb.reset();
-                        tr[r].build(v,hb,null,connect[c],null,chunks);
-                        System.out.println("RESPONSE: "+t+"\n"+b.toString()+(hb.isPersistent()?"...\n":"---\n"));
+                        hb.reset(true);
+                        endp.reset();
+                        fields.clear();
+                        
+                        tr[r].build(v,hb,null,connect[c],null,chunks, fields);
+                        String response=endp.getOut().toString();
+                        System.out.println("RESPONSE: "+t+"\n"+response+(hb.isPersistent()?"...\n":"---\n"));
                         
                         if (v==9)
                         {
                             assertFalse(t,hb.isPersistent());
                             if (tr[r].content!=null)
-                                assertEquals(t,tr[r].content, b.toString());
+                                assertEquals(t,tr[r].content, response);
                             continue;
                         }
                         
-                        parser.reset();
+                        parser=new HttpParser(new ByteArrayBuffer(response.getBytes()),null, handler);
                         try
                         {
                             parser.parse();
@@ -125,18 +133,19 @@ public class HttpBuilderTest extends TestCase
             this.content=content;
         }
         
-        void build(int version,HttpBuilder hb,String reason, String connection, String te, int chunks)
+        void build(int version,HttpBuilder hb,String reason, String connection, String te, int chunks, HttpFields fields)
         	throws Exception
         {
             values[2]=connection;
             values[3]=te;
-            hb.buildResponse(version,code,reason);
+            hb.setVersion(version);
+            hb.setResponse(code,reason);
             
             for (int i=0;i<headers.length;i++)
             {
                 if (values[i]==null)	
                     continue;
-                hb.addHeader(new ByteArrayBuffer(headers[i]),new ByteArrayBuffer(values[i]));
+                fields.put(new ByteArrayBuffer(headers[i]),new ByteArrayBuffer(values[i]));
             }
             
             
@@ -149,14 +158,25 @@ public class HttpBuilderTest extends TestCase
                 {
                     view.setPutIndex(i*inc);
                     view.setGetIndex((i-1)*inc);
-                    hb.addContent(view, false);
+                    if (hb.addContent(view, false) && hb.isState(HttpBuilder.STATE_HEADER))
+                        hb.completeHeader(fields, HttpBuilder.MORE);
+                    if (i%2==0)
+                    {
+                        if (hb.isState(HttpBuilder.STATE_HEADER))
+                            hb.completeHeader(fields, HttpBuilder.MORE);
+                        hb.flushBuffers();
+                    }
                 }
                 view.setPutIndex(buf.putIndex());
                 view.setGetIndex((chunks-1)*inc);
-                hb.addContent(view, true);
+                if(hb.addContent(view, true) && hb.isState(HttpBuilder.STATE_HEADER))
+                    hb.completeHeader(fields, HttpBuilder.LAST);
             }
             else
-                hb.complete();
+            {
+                hb.completeHeader(fields, HttpBuilder.LAST);
+            }
+            hb.complete();
         }
         
         public String toString()
