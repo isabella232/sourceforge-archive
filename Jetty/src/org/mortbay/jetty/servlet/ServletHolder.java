@@ -69,6 +69,9 @@ public class ServletHolder extends Holder
 
     /* ---------------------------------------------------------------- */
     /** Constructor.
+     * @param handler The ServletHandler instance for this servlet.
+     * @param name The name of the servlet.
+     * @param className The class name of the servlet.
      */
     ServletHolder(ServletHandler handler,
                   String name,
@@ -79,6 +82,12 @@ public class ServletHolder extends Holder
 
     /* ---------------------------------------------------------------- */
     /** Constructor. 
+     * @param handler The ServletHandler instance for this servlet.
+     * @param name The name of the servlet.
+     * @param className The class name of the servlet.
+     * @param forcedPath If non null, the request attribute
+     * javax.servlet.include.servlet_path will be set to this path before
+     * service is called.
      */
     ServletHolder(ServletHandler handler,
                   String name,

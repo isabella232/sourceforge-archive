@@ -125,7 +125,7 @@ context.addServlet("Dump","/dump/*",
 context.addServlet("Dump","/dump/session",
                    "org.mortbay.servlet.SessionDump");
 context.addServlet("JSP","*.jsp",
-                   "org.apache.jasper.JspServlet");
+                   "org.apache.jasper.servlet.JspServlet");
 context.addServlet("Default","/",
                    "org.mortbay.jetty.servlet.Default");
 </pre></small>

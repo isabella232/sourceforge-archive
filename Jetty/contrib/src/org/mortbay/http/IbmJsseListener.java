@@ -26,15 +26,16 @@ import org.mortbay.util.Password;
 
 
 /* ------------------------------------------------------------ */
-/** SSL Socket Listener for Sun's JSSE.
+/** SSL Socket Listener for IBM's JSSE.
  *
  * This specialization of JsseListener is an specific listener
- * using the Sun reference implementation.
+ * using the JSSE provider included with the IBM JVMs
  *
  * This is heavily based on the work from Court Demas, which in
  * turn is based on the work from Forge Research.
  *
  * @version $Id$
+ * @author Martin Cordova (mcordova@megaserv.com)
  * @author Greg Wilkins (gregw@mortbay.com)
  * @author Court Demas (court@kiwiconsulting.com)
  * @author Forge Research Pty Ltd  ACN 003 491 576

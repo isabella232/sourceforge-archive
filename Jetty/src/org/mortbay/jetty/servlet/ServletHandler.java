@@ -283,6 +283,15 @@ public class ServletHandler extends AbstractHttpHandler
     }
     
     /* ------------------------------------------------------------ */
+    /** Add a servlet.
+     * @param name The servlet name.
+     * @param pathSpec A path specification to map this servlet to.
+     * @param servletClass The class name of the servlet.
+     * @param forcedPath If non null, the request attribute
+     * javax.servlet.include.servlet_path will be set to this path before
+     * service is called.
+     * @return The ServletHolder for the servlet.
+     */
     public ServletHolder addServlet(String name,
                                     String pathSpec,
                                     String servletClass,
@@ -296,6 +305,12 @@ public class ServletHandler extends AbstractHttpHandler
     }
     
     /* ------------------------------------------------------------ */
+    /** Add a servlet.
+     * @param name The servlet name.
+     * @param pathSpec A path specification to map this servlet to.
+     * @param servletClass The class name of the servlet.
+     * @return The ServletHolder for the servlet.
+     */
     public ServletHolder addServlet(String name,
                                     String pathSpec,
                                     String servletClass)
