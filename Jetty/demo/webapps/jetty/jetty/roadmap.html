@@ -1,0 +1,242 @@
+
+<H1>Jetty Road Map&nbsp;&nbsp;<img src="/jetty/images/roadmap.gif" align=middle></H1>
+
+<H2>Stable Series: Jetty 4.2.x</H2>
+
+The plan for the stable series will continue maintenance tasks while focusing
+on integration and extensions such as:<UL>
+<LI>JBoss integration.
+<LI>Jonas integration.
+<LI>JMX extension.
+<LI>JettyPlus JNDI and JOTM integration.
+<LI>Others?
+</UL>
+
+The build environment needs to be updated to better support the variosu
+integration modules.
+
+<H2>Development Series: Jetty 5.0.x</H2>
+The servlet spec 2.4 development series will start Q2 2003.  The 2.4 spec is
+pretty incremental on the 2.3 spec, so this will be an evolution rather than
+revolution.  Much of the infrastructure needed is already in 4.2.x
+
+
+<H2>Experimental Series: Jetty 6.0 </H2>
+Jetty 6.0 development has started already.  This is focused on the development
+of brand new HTTP stack that is designed as blocking-agnostic plus includes
+a significant portability layer.  The intent is to get a HTTP stack that can
+run on everything from single threaded palm pilot running waba to the latest 
+gun JVM with non-blocking io on a SMP engine.
+<P>
+To support non blocking IO, the HttpHandler API will be significantly
+redesigned.  Non-servlet programmers will want to look at this API and it
+will be available Q4 2003.
+<P>
+Only once the HTTP stack is stable and tested, will servlets be considered
+for Jetty6.   As servlets are blocking by design, there is not a lot
+they can gain from Jetty5 (other than speed and instability :-).  Jetty 6 
+will not be considered for the stable series until at least late 2004.
+
+
+<H1>Jetty History</H1>
+You can't appreciate where you are going unless you understand where you have
+been.  So here is jetty's history in a nutshell:
+
+
+<table cellpadding=0 cellspacing=3>
+<tbody>
+<tr>
+<td valign=top align=right colspan="25%">
+<B>November 2002.</B>
+</td>
+<td>
+Jetty 4.2.0 released with even greater performance.
+The buffering and thread pooling were completely reworked.
+</td>
+</tr>
+
+<tr>
+<td valign=top align=right colspan="25%">
+<B>September 2002.</B>
+</td>
+<td>
+Jetty 4.1.0 released with greater performance and
+improved apache integration.
+</td>
+</tr>
+<tr>
+<td valign=top align=right colspan="25%">
+<B>June 2002.</B>
+</td>
+<td>
+Jetty 4.1.x development series starts, focused on improved 
+performance and greater simplicity. Also increase support for apache integration.
+</td>
+</tr>
+<tr>
+<td valign=top align=right colspan="25%">
+<B>March 2002.</B> 
+</td>
+<td>
+Jetty 4.0.0 release, supporting 2.3 servlet spec and 
+optional JDK 1.4 features.  This release has focused on 2.3 features while
+retaining Jetty's performance.
+</td>
+</tr>
+<tr>
+<td valign=top align=right colspan="25%">
+<B>October 2001.</B> 
+</td>
+<td>
+Jetty 4 development starts to support the 2.3
+servlet specification.
+</td>
+</tr>
+<tr>
+<td valign=top align=right colspan="25%">
+<B>September 2001.</B> 
+</td>
+<td>
+Jetty 3.1.0 released a change to the org.mortbay package 
+names, many performance improvements and a small restructure to support JMX
+management.
+</td>
+</tr>
+<tr>
+<td valign=top align=right colspan="25%">
+<B>January 2001.</B>
+</td>
+<td>
+Stability releases of Jetty 3 with increased performance. 
+</td>
+</tr>
+<tr>
+<td valign=top align=right colspan="25%">
+<B>October 2000.</B> 
+</td>
+<td>
+Jetty 3 released for  Java 1.2, Servlet 2.2 and
+the HTTP/1.1.  Passes Jakarta/watchdog servlet tests.   The code base 
+has been significantly trimmed and refined from Jetty2.
+</td>
+</tr>
+<tr>
+<td valign=top align=right colspan="25%">
+<B>December 1999.</B> 
+</td>
+<td>
+Jetty 3 development started for Java 1.2, Servlet 2.2 and
+the latest HTTP/1.1 RFC.
+</td>
+</tr>
+<tr>
+<td valign=top align=right colspan="25%">
+<B>July 1999.</B>
+</td>
+<td>
+Jetty 2.2.0 improved configuration and dynamic servlets.
+Many improvements and bug fixes contributed from the Open Source community.
+</td>
+</tr>
+<tr>
+<td valign=top align=right colspan="25%">
+<B>January 1999.</B> 
+</td>
+<td>
+Jetty 2.1.0 upgraded to JSDK 2.1 API.
+</td>
+</tr>
+<tr>
+<td valign=top align=right colspan="25%">
+<B>October 1998.</B> 
+</td>
+<td>
+Jetty 2.0.1 released as <A HREF="http://www.opensource.org">Open Source</A>
+</td>
+</tr>
+<tr>
+<td valign=top align=right colspan="25%">
+<B>October 1998.</B>
+</td>
+<td>
+Jetty 2.0 released with HTTP/1.1 support.
+</td>
+</tr>
+<tr>
+<td valign=top align=right colspan="25%">
+<B>December 1997.</B> 
+</td>
+<td>
+Jetty development finally progressed to a Release 1.0
+stage.  The package hierarchy was moved to a org.mortbay structure and
+merged with the other software packages of Mort Bay Consulting.
+The JSDK versions of the javax.servlets were included in the release
+in accordance with JavaSoft licensing requirements.
+</td>
+</tr>
+<tr>
+<td valign=top align=right colspan="25%">
+<B>February 1997.</B> 
+</td>
+<td>
+All involved agreed that MBServler was a terrible name,
+so many weeks of effort were put in to remove all references to that name.
+In the process the HttpHandler architecture was developed and support for
+the beta1.0 javax.servlet API added.  Jetty was picked as the new
+name because: <UL>
+<LI>it started with a J
+<LI>there is a little jetty in the Mort Bay Logo.  
+<LI>jetty:// kind of looks like http://
+<LI>you can pronounce j-80 or j-'eighty' as in port 80, the HTTP port.
+</UL>
+</td>
+</tr>
+<tr>
+<td valign=top align=right colspan="25%">
+<B>December 1996.</B> 
+</td>
+<td>
+The HTML generation package was used re-implemented and
+documented. Release V4.5B of MBServler and IssueTracker were made
+available.
+</td>
+</tr>
+<tr>
+<td valign=top align=right colspan="25%">
+<B>May 1996.</B>
+</td>
+<td>
+Mort Bay entered a partnership with
+<A href=http://www.iswitched.com>Intelligent Switched Systems</A>
+to develop telephony and WWW based authenticated service platforms.
+MBServler is used extensively in those platforms and was incrementally
+improved by the process.
+</td>
+</tr>
+<tr>
+<td valign=top align=right colspan="25%">
+<B>March 1996.</B>
+</td>
+<td>
+<A href=http://www.mortbay.com>Mort Bay Consulting Pty. Ltd.</A>
+took over the server and tracking application.  The server was
+renamed MBServler (a Servlet Serving Server) and ported to
+the then release alpha javax.servlet API.
+</td>
+</tr>
+<tr>
+<td valign=top align=right colspan="25%">
+<B>December 1995.</B>
+</td>
+<td>
+<A href=http://www.mortbay.com/people/gregw>Greg Wilkins</A>
+wrote a HTTP Server and WWW defect tracking
+application as an entry to the Sun Microsystems Australia Java programming
+contest.  Greg's entry won the contest.  This pre-dated Javasoft's
+announcement of Jeeves and the javax.servlet API, so the server defined
+its own API.
+</td>
+</tr>
+</tbody>
+</table>
+
