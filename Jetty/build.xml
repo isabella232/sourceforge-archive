@@ -220,6 +220,7 @@ release     - Cleanup for release
     <delete  file="${tarfile}"/>
     <tar tarfile="${tarfile}"
          basedir="${basedir}">
+         <exclude name="${tarfile}" />
          <exclude name="**/CVS/*" />
          <exclude name="classes/**/*" />
     </tar>

@@ -271,6 +271,7 @@ public class HttpConnection
 
             try
             {
+                _outputSetup=false;
                 _request.readHeader(getInputStream());
                 _listener.customizeRequest(this,_request);
             }

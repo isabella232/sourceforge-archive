@@ -31,18 +31,10 @@ read Y
     cvs $CVS_ARGS rtag -F Jetty_$TAG Jetty3
     cvs $CVS_ARGS export -r Jetty_$TAG Jetty3
     cd $HOME/Jetty3
-    make 
-    make install 
-    make jars
-    make rclean
-    rm -fr classes
-    mkdir logs    
-    rm -fr javadoc
-    JETTY_HOME=$HOME/Jetty3 bin/generateJavaDoc 
-
+    ant all
     cd ..
     mv Jetty3 Jetty-$VERSION
-    tar cfz /usr/local/archive/Jetty-${VERSION}.tgz Jetty-$VERSION
+    tar cfz /usr/local/archive/Jetty-${VERSION}.tgz --exclude Jetty-$VERSION/classes Jetty-$VERSION
     cd /usr/local/java/jetty
     tar xfz /usr/local/archive/Jetty-${VERSION}.tgz
 
