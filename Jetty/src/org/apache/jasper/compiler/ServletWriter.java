@@ -76,26 +76,47 @@ public class ServletWriter {
 
     // Current indent level:
     int indent = 0;
-    
+
     // The sink writer:
     PrintWriter writer;
     
+    // servlet line numbers start from 1, but we pre-increment
+    private int javaLine = 0;
+    private JspLineMap lineMap = new JspLineMap();
+
+
     public ServletWriter(PrintWriter writer) {
-        this.writer = writer;
+	this.writer = writer;
     }
 
     public void close() throws IOException {
-        writer.close();
+	writer.close();
     }
     
+    // -------------------- Access informations --------------------
+
+    public int getJavaLine() {
+        return javaLine;
+    }
+
+    public void setLineMap(JspLineMap map) {
+        this.lineMap = map;
+    }
+
+    public JspLineMap getLineMap() {
+        return lineMap;
+    }
+
+    // -------------------- Formatting --------------------
+
     public void pushIndent() {
-        if ((indent += TAB_WIDTH) > SPACES.length())
-            indent = SPACES.length();
+	if ((indent += TAB_WIDTH) > SPACES.length())
+	    indent = SPACES.length();
     }
 
     public void popIndent() {
-        if ((indent -= TAB_WIDTH) <= 0 )
-            indent = 0;
+	if ((indent -= TAB_WIDTH) <= 0 )
+	    indent = 0;
     }
 
     /**
@@ -125,65 +146,76 @@ public class ServletWriter {
      */
 
     public String quoteString(String s) {
-        // Turn null string into quoted empty strings:
-        if ( s == null )
-            return "null";
-        // Hard work:
-        if ( s.indexOf('"') < 0 && s.indexOf('\\') < 0 && s.indexOf ('\n') < 0
-             && s.indexOf ('\r') < 0)
-            return "\""+s+"\"";
-        StringBuffer sb  = new StringBuffer();
-        int          len = s.length();
-        sb.append('"');
-        for (int i = 0 ; i < len ; i++) {
-            char ch = s.charAt(i);
-            if ( ch == '\\' && i+1 < len) {
-                sb.append('\\');
-                sb.append('\\');
-                sb.append(s.charAt(++i));
-            } else if ( ch == '"' ) {
-                sb.append('\\');
-                sb.append('"');
-            } else if (ch == '\n') {
-                sb.append ("\\n");
-            }else if (ch == '\r') {
-           	sb.append ("\\r");
-            }else {
-                sb.append(ch);
-            }
-        }
-        sb.append('"');
-        return sb.toString();
+	// Turn null string into quoted empty strings:
+	if ( s == null )
+	    return "null";
+	// Hard work:
+	if ( s.indexOf('"') < 0 && s.indexOf('\\') < 0 && s.indexOf ('\n') < 0
+	     && s.indexOf ('\r') < 0)
+	    return "\""+s+"\"";
+	StringBuffer sb  = new StringBuffer();
+	int          len = s.length();
+	sb.append('"');
+	for (int i = 0 ; i < len ; i++) {
+	    char ch = s.charAt(i);
+	    if ( ch == '\\' && i+1 < len) {
+		sb.append('\\');
+		sb.append('\\');
+		sb.append(s.charAt(++i));
+	    } else if ( ch == '"' ) {
+		sb.append('\\');
+		sb.append('"');
+	    } else if (ch == '\n') {
+	        sb.append ("\\n");
+	    }else if (ch == '\r') {
+	   	sb.append ("\\r");
+	    }else {
+		sb.append(ch);
+	    }
+	}
+	sb.append('"');
+	return sb.toString();
     }
 
     public void println(String line) {
-        writer.println(SPACES.substring(0, indent)+line);
+        javaLine++;
+	writer.println(SPACES.substring(0, indent)+line);
     }
 
     public void println() {
-        writer.println("");
+        javaLine++;
+	writer.println("");
     }
 
     public void indent() {
-        writer.print(SPACES.substring(0, indent));
+	writer.print(SPACES.substring(0, indent));
     }
     
 
     public void print(String s) {
-        writer.print(s);
+        int index = 0;
+
+        // look for hidden newlines inside strings
+        while ((index=s.indexOf('\n',index)) > -1 ) {
+            javaLine++;
+            index++;
+        }
+
+	writer.print(s);
     }
 
     public void printMultiLn(String multiline) {
-        // Try to be smart (i.e. indent properly) at generating the code:
-        BufferedReader reader = 
+	// Try to be smart (i.e. indent properly) at generating the code:
+	BufferedReader reader = 
             new BufferedReader(new StringReader(multiline));
-        try {
-    	    for (String line = null ; (line = reader.readLine()) != null ; ) 
-                //		println(SPACES.substring(0, indent)+line);
-                println(line);
-        } catch (IOException ex) {
-            // Unlikely to happen, since we're acting on strings
-        }
+	try {
+    	    for (String line = null ; (line = reader.readLine()) != null ; ) {
+		//		println(SPACES.substring(0, indent)+line);
+		println(line);
+            }
+	} catch (IOException ex) {
+	    // Unlikely to happen, since we're acting on strings
+	}
     }
 
 

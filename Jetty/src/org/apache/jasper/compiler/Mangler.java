@@ -72,11 +72,6 @@ public interface Mangler {
      */
     String getClassName();
 
-    /** The package name. It is based on the .jsp path, with
-     *  all unsafe components escaped.
-     */
-    String getPackageName();
-
     /** The full name of the .java file, including
      *  version number ( based on className and outputDir )
      */

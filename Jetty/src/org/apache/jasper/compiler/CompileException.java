@@ -70,10 +70,10 @@ import org.apache.jasper.JasperException;
 public class CompileException extends JasperException {
     
     public CompileException(Mark m, String reason) {
-        super(m + " " + reason);
+	super(m + " " + reason);
     }
     
     public CompileException(String reason) {
-        super(reason);
+	super(reason);
     }
 }

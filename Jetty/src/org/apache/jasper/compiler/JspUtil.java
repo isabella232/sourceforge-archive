@@ -60,9 +60,6 @@
  */ 
 package org.apache.jasper.compiler;
 
-import org.mortbay.xml.XmlParser;
-import org.mortbay.util.Resource;
-
 import java.net.URL;
 
 import java.io.CharArrayWriter;
@@ -70,14 +67,24 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.FileInputStream;
 import java.util.Hashtable;
+import java.util.Vector;
 import java.util.Enumeration;
 
 import org.apache.jasper.Constants;
 import org.apache.jasper.JasperException;
 
+
+import org.w3c.dom.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.Attributes;
 import org.xml.sax.EntityResolver;
+import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 import org.xml.sax.InputSource;
+import org.xml.sax.helpers.AttributesImpl;
 
 /** 
  * This class has all the utility method(s).
@@ -85,11 +92,19 @@ import org.xml.sax.InputSource;
  *
  * @author Mandar Raje.
  * @author Rajiv Mordani.
+ * @author Danno Ferrin
+ * @author Pierre Delisle
  */
 public class JspUtil {
 
+    // Delimiters for request-time expressions (JSP and XML syntax)
     private static final String OPEN_EXPR  = "<%=";
     private static final String CLOSE_EXPR = "%>";
+    private static final String OPEN_EXPR_XML  = "%=";
+    private static final String CLOSE_EXPR_XML = "%";
+
+    private static ErrorHandler errorHandler = new MyErrorHandler();
+    private static EntityResolver entityResolver = new MyEntityResolver();
 
     public static char[] removeQuotes(char []chars) {
 	CharArrayWriter caw = new CharArrayWriter();
@@ -105,67 +120,170 @@ public class JspUtil {
 	return caw.toCharArray();
     }
 
-    // Checks if the token is a runtime expression.
-    public static boolean isExpression (String token) {
-	
-	if (token.startsWith(OPEN_EXPR) && token.endsWith(CLOSE_EXPR)) {
-	    return true;
-	}
+    public static char[] escapeQuotes (char []chars) {
+        // Prescan to convert %\> to %>
+        String s = new String(chars);
+        while (true) {
+            int n = s.indexOf("%\\>");
+            if (n < 0)
+                break;
+            StringBuffer sb = new StringBuffer(s.substring(0, n));
+            sb.append("%>");
+            sb.append(s.substring(n + 3));
+            s = sb.toString();
+        }
+        chars = s.toCharArray();
+        return (chars);
 
-	return false;
+
+        // Escape all backslashes not inside a Java string literal
+        /*
+        CharArrayWriter caw = new CharArrayWriter();
+        boolean inJavaString = false;
+        for (int i = 0; i < chars.length; i++) {
+            if (chars[i] == '"') inJavaString = !inJavaString;
+            // escape out the escape character
+            if (!inJavaString && (chars[i] == '\\')) caw.write('\\');
+            caw.write(chars[i]);
+        }
+        return caw.toCharArray();
+        */
     }
 
-    // Returns the "expression" part -- takin <%= and %> out.
-    public static String getExpr (String expression) {
+    /**
+     * Checks if the token is a runtime expression.
+     * In standard JSP syntax, a runtime expression starts with '<%' and
+     * ends with '%>'. When the JSP document is in XML syntax, a runtime
+     * expression starts with '%=' and ends with '%'.
+     *
+     * @param token The token to be checked
+     * return whether the token is a runtime expression or not.
+     */
+    public static boolean isExpression(String token, boolean isXml) {
+	String openExpr;
+	String closeExpr;
+	if (isXml) {
+	    openExpr = OPEN_EXPR_XML;
+	    closeExpr = CLOSE_EXPR_XML;
+	} else {
+	    openExpr = OPEN_EXPR;
+	    closeExpr = CLOSE_EXPR;
+	}
+	if (token.startsWith(openExpr) && token.endsWith(closeExpr)) {
+	    return true;
+	} else {
+	    return false;
+	}
+    }
+
+    /**
+     * @return the "expression" part of a runtime expression, 
+     * taking the delimiters out.
+     */
+    public static String getExpr (String expression, boolean isXml) {
 	String returnString;
+	String openExpr;
+	String closeExpr;
+	if (isXml) {
+	    openExpr = OPEN_EXPR_XML;
+	    closeExpr = CLOSE_EXPR_XML;
+	} else {
+	    openExpr = OPEN_EXPR;
+	    closeExpr = CLOSE_EXPR;
+	}
 	int length = expression.length();
-	
-	if (expression.startsWith(OPEN_EXPR) && expression.endsWith(CLOSE_EXPR)) {
-	    returnString = expression.substring (OPEN_EXPR.length(), length - CLOSE_EXPR.length());
+	if (expression.startsWith(openExpr) && 
+                expression.endsWith(closeExpr)) {
+	    returnString = expression.substring(
+                               openExpr.length(), length - closeExpr.length());
 	} else {
 	    returnString = "";
 	}
-
 	return returnString;
     }
 
-    // Parses the XML document contained in the InputStream.
-    public static XmlParser.Node parseXMLDoc(InputStream in,
-                                             String dtdResource, 
-                                             String dtdId)
-        throws JasperException 
+    /**
+     * Takes a potential expression and converts it into XML form
+     */
+    public static String getExprInXml(String expression) {
+        String returnString;
+        int length = expression.length();
+
+        if (expression.startsWith(OPEN_EXPR) 
+                && expression.endsWith(CLOSE_EXPR)) {
+            returnString = expression.substring (1, length - 1);
+        } else {
+            returnString = expression;
+        }
+
+        return escapeXml(returnString);
+    }
+
+    /**
+     * Parses the XML document contained in the InputStream.
+     *
+     * @deprecated Use ParserUtils.parseXMLDocument() instead
+     */
+    public static Document parseXMLDoc(String uri, InputStream in) 
+	throws JasperException 
     {
-	try
-        {
-            XmlParser.Node tld;
-            XmlParser parser = new XmlParser();
-            Resource resource=Resource.newSystemResource(dtdResource);
-            if (resource==null || !resource.exists())
-                resource=Resource.newResource(dtdResource);
-            parser.redirectEntity(dtdId,resource);
-            
-	    tld = parser.parse(in);
-	    return tld;
-	} catch ( SAXException sx ) {
-            throw new JasperException(Constants.
-				      getString("jsp.error.parse.error.in.TLD",
-						new Object[] {
-						    sx.getMessage()
-						}));
+	return parseXMLDocJaxp(uri, in);
+    }
+
+    /**
+     * Parses the XML document contained in the InputStream.
+     * This XML document is either web.xml or a tld.
+     * [The TLD has to be cached internally (see MyEntityResolver)]
+     *
+     * @deprecated Use ParserUtils.parseXMLDocument() instead
+     */
+    public static Document parseXMLDocJaxp(String uri, InputStream in)
+	throws JasperException
+    {
+	try {
+	    Document doc;
+	    DocumentBuilderFactory docFactory = 
+		DocumentBuilderFactory.newInstance();
+	    docFactory.setValidating(true);
+	    docFactory.setNamespaceAware(true);
+	    DocumentBuilder builder = docFactory.newDocumentBuilder();
+	    builder.setEntityResolver(entityResolver);
+	    builder.setErrorHandler(errorHandler);
+	    doc = builder.parse(in);
+	    return doc;
+	} catch (ParserConfigurationException ex) {
+            throw new JasperException(
+	        Constants.getString("jsp.error.parse.xml",
+				    new Object[]{uri, ex.getMessage()}));
+	} catch (SAXParseException ex) {
+            throw new JasperException(
+	        Constants.getString("jsp.error.parse.xml.line",
+				    new Object[]{uri,
+						 new Integer(ex.getLineNumber()),
+						 new Integer(ex.getColumnNumber()),
+						 ex.getMessage()}));
+	} catch (SAXException sx) {
+            throw new JasperException(
+                Constants.getString("jsp.error.parse.xml",
+				    new Object[]{uri, sx.getMessage()}));
         } catch (IOException io) {
-            throw new JasperException(Constants.
-				      getString("jsp.error.unable.to.open.TLD",
-						new Object[] {
-						    io.getMessage() }));
+            throw new JasperException(
+                Constants.getString("jsp.error.parse.xml",
+				    new Object[]{uri, io.toString()}));
 	}
     }
 
-    public static void checkAttributes (String typeOfTag, Hashtable attrs,
+    public static void checkAttributes (String typeOfTag, Attributes attrs,
     					ValidAttribute[] validAttributes, Mark start)
 					throws JasperException
     {
 	boolean valid = true;
-	Hashtable temp = (Hashtable)attrs.clone ();
+        // AttributesImpl.removeAttribute is broken, so we do this...
+        int tempLength = attrs.getLength();
+	Vector temp = new Vector(tempLength, 1);
+        for (int i = 0; i < tempLength; i++) {
+            temp.addElement(attrs.getQName(i));
+        }
 
 	/**
 	 * First check to see if all the mandatory attributes are present.
@@ -175,10 +293,11 @@ public class JspUtil {
 	String missingAttribute = null;
 
 	for (int i = 0; i < validAttributes.length; i++) {
-	        
+	    int attrPos;    
 	    if (validAttributes[i].mandatory) {
-	        if (temp.get (validAttributes[i].name) != null) {
-	            temp.remove (validAttributes[i].name);
+                attrPos = temp.indexOf(validAttributes[i].name);
+	        if (attrPos != -1) {
+	            temp.remove(attrPos);
 		    valid = true;
 		} else {
 		    valid = false;
@@ -200,18 +319,19 @@ public class JspUtil {
 	 * Check to see if there are any more attributes for the specified
 	 * tag.
 	 */
-	if (temp.size() == 0)
+        int attrLeftLength = temp.size();
+	if (attrLeftLength == 0)
 	    return;
 
 	/**
 	 * Now check to see if the rest of the attributes are valid too.
 	 */
-   	Enumeration enum = temp.keys ();
+   	//Enumeration enum = temp.keys ();
 	String attribute = null;
 
-	while (enum.hasMoreElements ()) {
+	for (int j = 0; j < attrLeftLength; j++) {
 	    valid = false;
-	    attribute = (String) enum.nextElement ();
+	    attribute = (String) temp.elementAt(j);
 	    for (int i = 0; i < validAttributes.length; i++) {
 	        if (attribute.equals(validAttributes[i].name)) {
 		    valid = true;
@@ -243,7 +363,31 @@ public class JspUtil {
 	return escString;
     }
     
-
+    /**
+     *  Escape the 5 entities defined by XML.
+     */
+    public static String escapeXml(String s) {
+        if (s == null) return null;
+        StringBuffer sb = new StringBuffer();
+        for(int i=0; i<s.length(); i++) {
+            char c = s.charAt(i);
+            if (c == '<') {
+                sb.append("&lt;");
+            } else if (c == '>') {
+                sb.append("&gt;");
+            } else if (c == '\'') {
+                sb.append("&apos;");
+            } else if (c == '&') {
+                sb.append("&amp;");
+            } else if (c == '"') {
+                sb.append("&quot;");
+            } else {
+                sb.append(c);
+            }
+        }
+        return sb.toString();
+    }
+    
     public static class ValidAttribute {
    	String name;
 	boolean mandatory;
@@ -257,35 +401,103 @@ public class JspUtil {
 	    this (name, false);
 	}
     }
+    
+    public static Hashtable attrsToHashtable(Attributes attrs) {
+        int len = attrs.getLength();
+        Hashtable table = new Hashtable(len);
+        for (int i=0; i<len; i++) {
+            table.put(attrs.getQName(i), attrs.getValue(i));
+        }
+        return table;
+    }
+
+    /**
+     * Get the data for the first child associated with the
+     * Element provided as argument. It is assumed that this
+     * first child is of type Text.
+     *
+     * @param e the DOM Element to read from 
+     * @return the data associated with the first child of the DOM
+     *  element.
+     */
+    public static String getElementChildTextData(Element e) {
+	String s = null;
+	Text t = (Text)e.getFirstChild();
+	if (t != null) {
+	    s = t.getData();
+	    if (s != null) {
+		s = s.trim();
+	    }
+	}
+	return s;
+    }
+
+    /**
+     * Convert a String value to 'boolean'.
+     * Besides the standard conversions done by
+     * Boolean.valueOf(s).booleanValue(), the value "yes"
+     * (ignore case) is also converted to 'true'. 
+     * If 's' is null, then 'false' is returned.
+     *
+     * @param s the string to be converted
+     * @return the boolean value associated with the string s
+     */
+    public static boolean booleanValue(String s) {
+	boolean b = false;
+	if (s != null) {
+	    if (s.equalsIgnoreCase("yes")) {
+		b = true;
+	    } else {
+		b = Boolean.valueOf(s).booleanValue();
+	    }
+	}
+	return b;
+    }
 }
 
 class MyEntityResolver implements EntityResolver {
-
-    String dtdId;
-    String dtdResource;
-    
-    public MyEntityResolver(String id, String resource) {
-	this.dtdId = id;
-	this.dtdResource = resource;
-    }
-    
     public InputSource resolveEntity(String publicId, String systemId)
-	throws SAXException, IOException
+	throws SAXException
     {
-	//System.out.println ("publicId = " + publicId);
-	//System.out.println ("systemId is " + systemId);
-	//System.out.println ("resource is " + dtdResource);
-	if (publicId.equals(dtdId)) {
-	    InputStream input =
-		this.getClass().getResourceAsStream(dtdResource);
-	    InputSource isrc =
-		new InputSource(input);
-	    return isrc;
+	for (int i=0; i<Constants.CACHED_DTD_PUBLIC_IDS.length; i++) {
+	    String cachedDtdPublicId = Constants.CACHED_DTD_PUBLIC_IDS[i];
+	    if (cachedDtdPublicId.equals(publicId)) {
+		String resourcePath = Constants.CACHED_DTD_RESOURCE_PATHS[i];
+		InputStream input =
+		    this.getClass().getResourceAsStream(resourcePath);
+		if (input == null) {
+		    throw new SAXException(
+                        Constants.getString("jsp.error.internal.filenotfound", 
+					    new Object[]{resourcePath}));
+		}
+		InputSource isrc =
+		    new InputSource(input);
+		return isrc;
+	    }
 	}
-	else {
-	    //System.out.println ("returning null though dtdURL is " + dtdURL);
-	    return null;
-	}
+	throw new SAXException(
+	    Constants.getString("jsp.error.parse.xml.invalidPublicId",
+				new Object[]{publicId}));
+    }
+}
+
+class MyErrorHandler implements ErrorHandler {
+    public void warning(SAXParseException ex)
+	throws SAXException
+    {
+	// We ignore warnings
+    }
+
+    public void error(SAXParseException ex)
+	throws SAXException
+    {
+	throw ex;
+    }
+
+    public void fatalError(SAXParseException ex)
+	throws SAXException
+    {
+	throw ex;
     }
 }
 

@@ -57,20 +57,16 @@
 
 package org.apache.jasper.servlet;
 
-import java.io.FileInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.IOException;
-
-import java.util.Hashtable;
-import java.util.Vector;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipEntry;
 import java.net.URL;
-
-import java.security.*;
+import java.net.URLClassLoader;
+import java.security.AccessController;
+import java.security.CodeSource;
+import java.security.PermissionCollection;
+import java.security.PrivilegedAction;
+import java.security.ProtectionDomain;
 
 import org.apache.jasper.JasperException;
 import org.apache.jasper.Constants;
@@ -79,257 +75,193 @@ import org.apache.jasper.JspEngineContext;
 import org.apache.jasper.Options;
 import org.apache.jasper.compiler.Compiler;
 
-
+import org.apache.jasper.logging.Logger;
 import javax.servlet.http.*;
 /**
  * This is a class loader that loads JSP files as though they were
  * Java classes. It calls the compiler to compile the JSP file into a
  * servlet and then loads the generated class. 
  *
- * This code is quite fragile and needs careful
- * treatment/handling/revisiting. I know this doesn't work very well
- * right now for:  
- * 
- * 	(a) inner classes
- *	(b) does not work at all for tag handlers that have inner
- *          classes; but that is likely to change with the new JSP PR2
- *          spec. 
- *
  * @author Anil K. Vijendran
  * @author Harish Prabandham
  */
-public class JasperLoader extends org.apache.jasper.runtime.JspLoader {
-//     ClassLoader parent;
-//     Options options;
-    Object pd;
+public class JasperLoader extends URLClassLoader {
 
-    /*
-     * This should be factoried out
+    protected class PrivilegedLoadClass
+        implements PrivilegedAction {
+
+        PrivilegedLoadClass() {
+        }
+         
+        public Object run() {
+            return Thread.currentThread().getContextClassLoader();
+        }
+
+    }
+
+    private PermissionCollection permissionCollection = null;
+    private CodeSource codeSource = null;
+    private String className = null;
+    private ClassLoader parent = null;
+    private SecurityManager securityManager = null;
+    private PrivilegedLoadClass privLoadClass = null;
+
+    JasperLoader(URL [] urls, String className, ClassLoader parent,
+		 PermissionCollection permissionCollection,
+		 CodeSource codeSource) {
+	super(urls,parent);
+	this.permissionCollection = permissionCollection;
+	this.codeSource = codeSource;
+	this.className = className;
+	this.parent = parent;
+        this.privLoadClass = new PrivilegedLoadClass();
+	this.securityManager = System.getSecurityManager();
+    }
+
+    /**
+     * Load the class with the specified name.  This method searches for
+     * classes in the same manner as <code>loadClass(String, boolean)</code>
+     * with <code>false</code> as the second argument.
+     *
+     * @param name Name of the class to be loaded
+     *
+     * @exception ClassNotFoundException if the class was not found
      */
-    public JasperLoader() {
-        super();
+    public Class loadClass(String name) throws ClassNotFoundException {
+
+        return (loadClass(name, false));
+
     }
 
-//     public void setParentClassLoader( ClassLoader cl) 
-//     {
-// 	this.parent = cl;
-//     }
-    
-//     public void setOptions( Options options) {
-// 	this.options = options;
-//     }
 
-    public void setProtectionDomain( Object pd ) {
-        this.pd=pd;
-    }
-    
-    protected synchronized Class loadClass(String name, boolean resolve)
-        throws ClassNotFoundException
-    {
-        if( debug>0) log("load " + name );
-        // First, check if the class has already been loaded
-        Class c = findLoadedClass(name);
-        if (c == null) {
-            try {
-                if (parent != null) {
-                    if(debug>0) log("load from parent " + name );
-                    c = parent.loadClass(name);
-                }
-                else {
-                    if(debug>0) log("load from system " + name );
-                    c = findSystemClass(name);
-                }
-            } catch (ClassNotFoundException e) {
-                // If still not found, then call findClass in order
-                // to find the class.
-                try {
-                    if(debug>0) log("local jsp loading " + name );
-                    c = findClass(name);
-                } catch (ClassNotFoundException ex) {
-                    throw ex;
-                }
-            }
+    /**
+     * Load the class with the specified name, searching using the following
+     * algorithm until it finds and returns the class.  If the class cannot
+     * be found, returns <code>ClassNotFoundException</code>.
+     * <ul>
+     * <li>Call <code>findLoadedClass(String)</code> to check if the
+     *     class has already been loaded.  If it has, the same
+     *     <code>Class</code> object is returned.</li>
+     * <li>If the <code>delegate</code> property is set to <code>true</code>,
+     *     call the <code>loadClass()</code> method of the parent class
+     *     loader, if any.</li>            
+     * <li>Call <code>findClass()</code> to find this class in our locally
+     *     defined repositories.</li>      
+     * <li>Call the <code>loadClass()</code> method of our parent
+     *     class loader, if any.</li>      
+     * </ul>
+     * If the class was found using the above steps, and the
+     * <code>resolve</code> flag is <code>true</code>, this method will then
+     * call <code>resolveClass(Class)</code> on the resulting Class object.
+     *                                     
+     * @param name Name of the class to be loaded
+     * @param resolve If <code>true</code> then resolve the class
+     *                                     
+     * @exception ClassNotFoundException if the class was not found
+     */                                    
+    public Class loadClass(String name, boolean resolve)
+        throws ClassNotFoundException {
+
+        Class clazz = null;                
+                                           
+        // (0) Check our previously loaded class cache
+        clazz = findLoadedClass(name);     
+        if (clazz != null) {               
+            if (resolve)                   
+                resolveClass(clazz);       
+            return (clazz);        
+        }                          
+                          
+        // (.5) Permission to access this class when using a SecurityManager
+	int dot = name.lastIndexOf('.');
+        if (System.getSecurityManager() != null) {     
+            if (dot >= 0) {                
+                try {                    
+                    securityManager.checkPackageAccess(name.substring(0,dot));
+                } catch (SecurityException se) {
+                    String error = "Security Violation, attempt to use " +
+                        "Restricted Class: " + name;
+                    System.out.println(error);
+                    throw new ClassNotFoundException(error);
+                }                          
+            }                              
         }
-        if (resolve) {
-            resolveClass(c);
-        }
-        return c;
-    }
-    public InputStream getResourceAsStream(String name) {
-        if( debug>0) log("getResourcesAsStream()" + name );
-        URL url = getResource(name);
-        try {
-            return url != null ? url.openStream() : null;
-        } catch (IOException e) {
-            return null;
-        }
-    }
-    
-    public URL getResource(String name) {
-        if( debug>0) log( "getResource() " + name );
-        if( parent != null )
-            return parent.getResource(name);
-        return super.getResource(name);
-    }
 
-    private static final int debug=0;
-
-    private void log( String s ) {
-        System.out.println("JspLoader: " + s );
-    }
-    
-    protected Class findClass(String className) throws ClassNotFoundException {
-        try {
-            int beg = className.lastIndexOf('.') == -1 ? 0 :
-                className.lastIndexOf('.')+1;
-            int end = className.lastIndexOf("_jsp_");
-
-            if (end <= 0) {     
-                // this is a class that the JSP file depends on 
-                // (example: class in a tag library)
-                byte[] classBytes = loadClassDataFromJar(className);
-                if (classBytes == null)
-                    throw new ClassNotFoundException(className);
-                return defClass(className, classBytes);
+	// Class is in a package, delegate to thread context class loader
+	if( !name.startsWith(Constants.JSP_PACKAGE_NAME) ) {
+            ClassLoader classLoader = null;
+	    if (System.getSecurityManager() != null) {
+                 classLoader = (ClassLoader)AccessController.doPrivileged(privLoadClass);
             } else {
-                String fileName = null;
-                String outputDir = options.getScratchDir().toString();
-            
-                if (className.indexOf('$', end) != -1) {
-                    // this means we're loading an inner class
-                    fileName = outputDir + File.separatorChar + 
-                        className.replace('.', File.separatorChar) + ".class";
-                } else {
-                    fileName = className.substring(beg, end) + ".class";
-                    fileName = outputDir + File.separatorChar + fileName;
-                }
-                byte [] classBytes = null;
-                /**
-                 * When using a SecurityManager and a JSP page itself triggers
-                 * another JSP due to an errorPage or from a jsp:include,
-                 * the loadClass must be performed with the Permissions of
-                 * this class using doPriviledged because the parent JSP
-                 * may not have sufficient Permissions.
-                 */
-                classBytes = loadClassDataFromFile(fileName);
-                if( classBytes == null ) {
-                    throw new ClassNotFoundException(Constants.getString(
-                                             "jsp.error.unable.loadclass", 
-                                              new Object[] {className})); 
-                }
-                return defClass(className, classBytes);
+	        classLoader = Thread.currentThread().getContextClassLoader();
             }
-        } catch (Exception ex) {
-            throw new ClassNotFoundException(Constants.getString(
-            				     "jsp.error.unable.loadclass", 
-                                              new Object[] {className}));
-        }
+            clazz = classLoader.loadClass(name);
+	    if( resolve )
+		resolveClass(clazz);
+	    return clazz;
+	}
+
+	// Only load classes for this JSP page
+	if( name.startsWith(Constants.JSP_PACKAGE_NAME + "." + className) ) {
+	    String classFile = name.substring(Constants.JSP_PACKAGE_NAME.length()+1) +
+		".class";
+	    byte [] cdata = loadClassDataFromFile(classFile);
+	    if( cdata == null )
+		throw new ClassNotFoundException(name);
+	    if( System.getSecurityManager() != null ) {
+		ProtectionDomain pd = new ProtectionDomain(
+			codeSource,permissionCollection);
+		clazz = defineClass(name,cdata,0,cdata.length,pd);
+	    } else {
+		clazz = defineClass(name,cdata,0,cdata.length);
+	    }
+	    if( clazz != null ) {
+		if( resolve )                
+		    resolveClass(clazz);
+		return clazz;
+	    }
+	}
+
+	throw new ClassNotFoundException(name);
     }
 
     /**
-     * Just a short hand for defineClass now... I suspect we might need to
-     * make this public at some point of time. 
+     * Get the Permissions for a CodeSource.
+     *
+     * Since this ClassLoader is only used for a JSP page in
+     * a web application context, we just return our preset
+     * PermissionCollection for the web app context.
+     *
+     * @param CodeSource where the code was loaded from
+     * @return PermissionCollection for CodeSource
      */
-    protected  Class defClass(String className, byte[] classData) {
-        return defineClass(className, classData, 0, classData.length);
+    protected final PermissionCollection getPermissions(CodeSource codeSource) {
+        return permissionCollection;
     }
 
+
     /**
-     * Load JSP class data from file, method may be called from
-     * within a doPriviledged if a SecurityManager is installed.
+     * Load JSP class data from file.
      */
     protected byte[] loadClassDataFromFile(String fileName) {
-        return doLoadClassDataFromFile( fileName );
-    }
-
-    /**
-     * Load JSP class data from file, method may be called from
-     * within a doPriviledged if a SecurityManager is installed.
-     */
-    protected byte[] doLoadClassDataFromFile(String fileName) {
         byte[] classBytes = null;
         try {
-            FileInputStream fin = new FileInputStream(fileName);
+            InputStream in = getResourceAsStream(fileName);
+            if (in == null) {
+		return null;
+	    }
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             byte buf[] = new byte[1024];
-            for(int i = 0; (i = fin.read(buf)) != -1; )
+            for(int i = 0; (i = in.read(buf)) != -1; )
                 baos.write(buf, 0, i);
-            fin.close();
-            baos.close();
+            in.close();     
+            baos.close();    
             classBytes = baos.toByteArray();
         } catch(Exception ex) {
-            return null;
-        }
+	    ex.printStackTrace();
+            return null;     
+        }                    
         return classBytes;
-    }
-
-//     private Vector jars = new Vector();
-    
-    private byte[] loadClassDataFromJar(String className) {
-        String entryName = className.replace('.','/')+".class";
-        InputStream classStream = null;
-        //System.out.println("Loading " + className);
-
-        for(int i = 0; i < jars.size(); i++) {
-            File thisFile = new File((String) jars.elementAt(i));
-            try {
-                //System.out.println(" - trying " + thisFile.getAbsolutePath());
-                // check if it exists...
-                if (!thisFile.exists()) {
-                    continue; 
-                };
-                
-                if (thisFile.isFile()) {
-                    ZipFile zip = new ZipFile(thisFile);
-                    ZipEntry entry = zip.getEntry(entryName);
-                    if (entry != null) {
-                        classStream = zip.getInputStream(entry);
-                        byte[] classData = getClassData(classStream);
-                        zip.close();
-                        return classData;
-                    } else {
-                        zip.close();
-                    }
-                } else { // its a directory...
-                    File classFile = 
-                        new File(thisFile,
-                                 entryName.replace('/', File.separatorChar));
-                    if (classFile.exists()) {
-                        classStream = new FileInputStream(classFile);
-                        byte[] classData = getClassData(classStream);
-                        classStream.close();
-                        return classData;
-                    }
-                }
-            } catch (IOException ioe) {
-                return null;
-            }
-        }
-        
-        return null;
-    }
-
-    private byte[] getClassData(InputStream istream) throws IOException {
-        byte[] buf = new byte[1024];
-        ByteArrayOutputStream bout = new ByteArrayOutputStream();
-        int num = 0;
-        while((num = istream.read(buf)) != -1) {
-            bout.write(buf, 0, num);
-        }
-
-        return bout.toByteArray();
-    }
-
-    public String toString() {
-        return "JspLoader1.1( " +  options.getScratchDir()   + " ) / " + parent;
-    }
-
-    boolean loadJSP(JspServlet jspS, String name, String classpath, 
-                    boolean isErrorPage, HttpServletRequest req,
-                    HttpServletResponse res) 
-        throws JasperException, FileNotFoundException 
-    {
-        return jspS.doLoadJSP( name, classpath, isErrorPage, req, res );
     }
 
 }

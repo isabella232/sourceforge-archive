@@ -111,8 +111,10 @@ public interface RequestDispatcher {
  * Uncommitted output in the response buffer is automatically cleared 
  * before the forward.
  *
- * <p>The request and response parameters must be the same
- * objects as were passed to the calling servlet's service method.
+ * <p>The request and response parameters must be either the same
+ * objects as were passed to the calling servlet's service method or be
+ * subclasses of the {@link ServletRequestWrapper} or {@link ServletResponseWrapper} classes
+ * that wrap them.
  *
  *
  * @param request		a {@link ServletRequest} object
@@ -148,8 +150,11 @@ public interface RequestDispatcher {
      * servlet cannot change the response status code or set headers;
      * any attempt to make a change is ignored.
      *
-     * <p>The request and response parameters must be the same
-     * objects as were passed to the calling servlet's service method.
+     * <p>The request and response parameters must be either the same
+     * objects as were passed to the calling servlet's service method or be
+     * subclasses of the {@link ServletRequestWrapper} or {@link ServletResponseWrapper} classes
+     * that wrap them.
+     * 
      *
      *
      * @param request 			a {@link ServletRequest} object 

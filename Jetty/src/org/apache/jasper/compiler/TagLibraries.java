@@ -57,6 +57,7 @@ package org.apache.jasper.compiler;
 import java.lang.reflect.Constructor;
 
 import java.util.Hashtable;
+import java.util.Enumeration;
 
 import javax.servlet.jsp.tagext.TagLibraryInfo;
 import javax.servlet.jsp.tagext.TagInfo;
@@ -77,7 +78,7 @@ public class TagLibraries {
     
     public TagLibraries(ClassLoader cl) {
         this.tagLibInfos = new Hashtable();
-        this.tagCaches = new Hashtable();
+	this.tagCaches = new Hashtable();
         this.cl = cl;
     }
     
@@ -106,11 +107,15 @@ public class TagLibraries {
     }
 
     public TagCache getTagCache(String prefix, String shortTagName) {
-        return (TagCache) tagCaches.get(new TagID(prefix, shortTagName));
+	return (TagCache) tagCaches.get(new TagID(prefix, shortTagName));
     }
 
     public void putTagCache(String prefix, String shortTagName, TagCache tc) {
-        tagCaches.put(new TagID(prefix, shortTagName), tc);
+	tagCaches.put(new TagID(prefix, shortTagName), tc);
+    }
+
+    public Enumeration getTagLibInfos() {
+	return tagLibInfos.elements();
     }
 
     private Hashtable tagLibInfos;
@@ -119,22 +124,22 @@ public class TagLibraries {
 
     private static class TagID {
 
-        private String prefix;
-        private String shortTagName;
+	private String prefix;
+	private String shortTagName;
 
-        public TagID(String prefix, String shortTagName) {
-            this.prefix = prefix;
-            this.shortTagName = shortTagName;
-        }
+	public TagID(String prefix, String shortTagName) {
+	    this.prefix = prefix;
+	    this.shortTagName = shortTagName;
+	}
 
-        public boolean equals(Object obj) {
-            return (prefix.equals(((TagID)obj).prefix)) &&
-                (shortTagName.equals(((TagID)obj).shortTagName));
-        }
+	public boolean equals(Object obj) {
+	    return (prefix.equals(((TagID)obj).prefix)) &&
+		(shortTagName.equals(((TagID)obj).shortTagName));
+	}
 
-        public int hashCode() {
-            return prefix.hashCode() + shortTagName.hashCode();
-        }
+	public int hashCode() {
+	    return prefix.hashCode() + shortTagName.hashCode();
+	}
     }
 }
 

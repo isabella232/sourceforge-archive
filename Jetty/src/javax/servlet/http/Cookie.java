@@ -405,8 +405,8 @@ public class Cookie implements Cloneable {
      * only over a secure protocol, or <code>false</code> if the
      * browser can send cookies using any protocol.
      *
-     * @return		<code>true</code> if the browser can use
-     *			any standard protocol; otherwise, <code>false</code>
+     * @return		<code>true</code> if the browser uses a secure protocol;
+     * 			 otherwise, <code>true</code>
      *
      * @see #setSecure
      *

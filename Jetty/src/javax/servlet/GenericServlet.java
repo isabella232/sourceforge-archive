@@ -235,7 +235,7 @@ public abstract class GenericServlet
      * servlet is being placed into service.  See {@link Servlet#init}.
      *
      * <p>This implementation stores the {@link ServletConfig}
-     * object it receives from the servlet container for alter use.
+     * object it receives from the servlet container for later use.
      * When overriding this form of the method, call 
      * <code>super.init(config)</code>.
      *
@@ -297,12 +297,7 @@ public abstract class GenericServlet
      */
      
     public void log(String msg) {
-        ServletContext context = getServletContext();
-        if (context==null)
-            System.err.println("GenericServlet.log(pre-init): "+
-                               getServletName()+": "+msg);
-        else
-            context.log(getServletName() + ": "+ msg);
+	getServletContext().log(getServletName() + ": "+ msg);
     }
    
    

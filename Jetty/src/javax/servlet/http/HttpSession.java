@@ -61,6 +61,7 @@
 package javax.servlet.http;
 
 import java.util.Enumeration;
+import javax.servlet.ServletContext;
 
 /**
  *
@@ -86,7 +87,13 @@ import java.util.Enumeration;
  * session, the session checks whether the object implements
  * {@link HttpSessionBindingListener}. If it does, 
  * the servlet notifies the object that it has been bound to or unbound 
- * from the session.
+ * from the session. Notifications are sent after the binding methods complete. 
+ * For session that are invalidated or expire, notifications are sent after
+ * the session has been invalidatd or expired.
+ *
+ * <p> When container migrates a session between VMs in a distributed container
+ * setting, all session atributes implementing the {@link HttpSessionActivationListener}
+ * interface are notified.
  * 
  * <p>A servlet should be able to handle cases in which
  * the client does not choose to join a session, such as when cookies are
@@ -158,7 +165,7 @@ public interface HttpSession {
      *
      * Returns the last time the client sent a request associated with
      * this session, as the number of milliseconds since midnight
-     * January 1, 1970 GMT. 
+     * January 1, 1970 GMT, and marked by the time the container recieved the request. 
      *
      * <p>Actions that your application takes, such as getting or setting
      * a value associated with the session, do not affect the access
@@ -178,7 +185,16 @@ public interface HttpSession {
     public long getLastAccessedTime();
     
     
-    
+    /**
+    * Returns the ServletContext to which this session belongs.
+    *    
+    * @return The ServletContext object for the web application
+    * @since 2.3
+    */
+
+    public ServletContext getServletContext();
+
+
     /**
      *
      * Specifies the time, in seconds, between client requests before the 
@@ -315,15 +331,25 @@ public interface HttpSession {
      * If an object of the same name is already bound to the session,
      * the object is replaced.
      *
-     * <p>After this method executes, and if the object
+     * <p>After this method executes, and if the new object
      * implements <code>HttpSessionBindingListener</code>,
      * the container calls 
-     * <code>HttpSessionBindingListener.valueBound</code>.
+     * <code>HttpSessionBindingListener.valueBound</code>. The container then   
+     * notifies any <code>HttpSessionAttributeListener</code>s in the web 
+     * application.
+     
+     * <p>If an object was already bound to this session of this name
+     * that implements <code>HttpSessionBindingListener</code>, its 
+     * <code>HttpSessionBindingListener.valueUnbound</code> method is called.
+     *
+     * <p>If the value passed in is null, this has the same effect as calling 
+     * <code>removeAttribute()<code>.
+     *
      *
      * @param name			the name to which the object is bound;
      *					cannot be null
      *
-     * @param value			the object to be bound; cannot be null
+     * @param value			the object to be bound
      *
      * @exception IllegalStateException	if this method is called on an
      *					invalidated session
@@ -366,7 +392,9 @@ public interface HttpSession {
      * <p>After this method executes, and if the object
      * implements <code>HttpSessionBindingListener</code>,
      * the container calls 
-     * <code>HttpSessionBindingListener.valueUnbound</code>.
+     * <code>HttpSessionBindingListener.valueUnbound</code>. The container
+     * then notifies any <code>HttpSessionAttributeListener</code>s in the web 
+     * application.
      * 
      * 
      *
@@ -386,7 +414,7 @@ public interface HttpSession {
     /**
      *
      * @deprecated 	As of Version 2.2, this method is
-     * 			replaced by {@link #setAttribute}
+     * 			replaced by {@link #removeAttribute}
      *
      * @param name				the name of the object to
      *						remove from this session
@@ -402,8 +430,8 @@ public interface HttpSession {
 
     /**
      *
-     * Invalidates this session and unbinds any objects bound
-     * to it.
+     * Invalidates this session then unbinds any objects bound
+     * to it. 
      *
      * @exception IllegalStateException	if this method is called on an
      *					already invalidated session

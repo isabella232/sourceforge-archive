@@ -68,77 +68,82 @@ import java.beans.*;
 
 import org.apache.jasper.Constants;
 
+import org.xml.sax.Attributes;
+
 /**
  * Generator for <jsp:setProperty .../>
  *
  * @author Mandar Raje
+ * @author Danno Ferrin
  */
 public class SetPropertyGenerator
     extends GeneratorBase
     implements ServiceMethodPhase 
 {
-    Hashtable attrs;
+    Attributes attrs;
     BeanRepository beanInfo;
     Mark start;
+    boolean isXml;
     
-    public SetPropertyGenerator (Mark start, Mark stop, Hashtable attrs,
-                                 BeanRepository beanInfo) {
-        this.attrs = attrs;
-        this.beanInfo = beanInfo;
-        this.start = start;
+    public SetPropertyGenerator (Mark start, Mark stop, Attributes attrs,
+				 BeanRepository beanInfo, boolean isXml) {
+	this.attrs = attrs;
+	this.beanInfo = beanInfo;
+	this.start = start;
+        this.isXml = isXml;
     }
     
     public void generate (ServletWriter writer, Class phase) 
-        throws JasperException {
-            String name     = getAttribute ("name");
-            String property = getAttribute ("property");
-            String param    = getAttribute ("param");
-            String value    = getAttribute ("value");
-            
-            if (property.equals("*")) {
-                
-                if (value != null) {
-                    String m = Constants.getString("jsp.error.setproperty.invalidSyantx");
-                    throw new CompileException(start, m);
-                }
-                
-                // Set all the properties using name-value pairs in the request.
-                writer.println("JspRuntimeLibrary.introspect(pageContext.findAttribute(" +
-                               "\"" + name + "\"), request);");		
-                
-            } else {
-                
-                if (value == null) {
-                    
-                    // Parameter name specified. If not same as property.
-                    if (param == null) param = property;
-                    
-                    writer.println("JspRuntimeLibrary.introspecthelper(pageContext." +
-                                   "findAttribute(\"" + name + "\"), \"" + property +
-                                   "\", request.getParameter(\"" + param + "\"), " +
-                                   "request, \"" + param + "\", false);");
-                } else {
-                    
-                    // value is a constant.
-                    if (!JspUtil.isExpression (value)) {
-                        writer.println("JspRuntimeLibrary.introspecthelper(pageContext." +
-                                       "findAttribute(\"" + name + "\"), \"" + property +
-                                       "\",\"" + JspUtil.escapeQueryString(value) +
-                                       "\",null,null, false);");
-                    } else {
-                        
-                        // This requires some careful handling.
-                        // int, boolean, ... are not Object(s).
-                        writer.println("JspRuntimeLibrary.handleSetProperty(pageContext." +
-                                       "findAttribute(\"" + name + "\"), \"" + property +
-                                       "\"," + JspUtil.getExpr(value) + ");");
-                    }
-                }
-            }
+	throws JasperException {
+	    String name     = getAttribute ("name");
+	    String property = getAttribute ("property");
+	    String param    = getAttribute ("param");
+	    String value    = getAttribute ("value");
+	    
+	    if (property.equals("*")) {
+		
+		if (value != null) {
+		    String m = Constants.getString("jsp.error.setproperty.invalidSyantx");
+		    throw new CompileException(start, m);
+		}
+		
+		// Set all the properties using name-value pairs in the request.
+		writer.println("JspRuntimeLibrary.introspect(pageContext.findAttribute(" +
+			       "\"" + name + "\"), request);");		
+		
+	    } else {
+		
+		if (value == null) {
+		    
+		    // Parameter name specified. If not same as property.
+		    if (param == null) param = property;
+		    
+		    writer.println("JspRuntimeLibrary.introspecthelper(pageContext." +
+				   "findAttribute(\"" + name + "\"), \"" + property +
+				   "\", request.getParameter(\"" + param + "\"), " +
+				   "request, \"" + param + "\", false);");
+		} else {
+		    
+		    // value is a constant.
+		    if (!JspUtil.isExpression (value, isXml)) {
+			writer.println("JspRuntimeLibrary.introspecthelper(pageContext." +
+				       "findAttribute(\"" + name + "\"), \"" + property +
+				       "\",\"" + JspUtil.escapeQueryString(value) +
+				       "\",null,null, false);");
+		    } else {
+			
+			// This requires some careful handling.
+			// int, boolean, ... are not Object(s).
+			writer.println("JspRuntimeLibrary.handleSetProperty(pageContext." +
+				       "findAttribute(\"" + name + "\"), \"" + property +
+				       "\"," + JspUtil.getExpr(value, isXml) + ");");
+		    }
+		}
+	    }
     }
     
     public String getAttribute(String name) {
-        return (attrs != null) ? (String) attrs.get(name) : null;
+	return (attrs != null) ? attrs.getValue(name) : null;
     }
 }
 

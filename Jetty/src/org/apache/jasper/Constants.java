@@ -60,7 +60,7 @@ import java.util.ResourceBundle;
 import java.util.MissingResourceException;
 import java.text.MessageFormat;
 
-import org.mortbay.util.*;
+import org.apache.jasper.logging.Logger;
 
 /**
  * Some constants and other global data that are used by the compiler and the runtime.
@@ -89,33 +89,41 @@ public class Constants {
     /**
      * These classes/packages are automatically imported by the
      * generated code. 
-     *
-     * FIXME: Need to trim this to what is there in PR2 and verify
-     *        with all our generators -akv.
      */
     public static final String[] STANDARD_IMPORTS = { 
-        "javax.servlet.*", "javax.servlet.http.*", "javax.servlet.jsp.*", 
-        "javax.servlet.jsp.tagext.*",
-        "java.io.PrintWriter", "java.io.IOException", "java.io.FileInputStream",
-        "java.io.ObjectInputStream", "java.util.Vector",
-        "org.apache.jasper.runtime.*", "java.beans.*",
-        "org.apache.jasper.JasperException"
+	"javax.servlet.*", 
+	"javax.servlet.http.*", 
+	"javax.servlet.jsp.*", 
+	"org.apache.jasper.runtime.*", 
     };
 
     /**
+     * FIXME
      * ServletContext attribute for classpath. This is tomcat specific. 
      * Other servlet engines can choose to have this attribute if they 
      * want to have this JSP engine running on them. 
      */
-    public static final String SERVLET_CLASSPATH = "org.apache.tomcat.jsp_classpath";
+    //public static final String SERVLET_CLASSPATH = "org.apache.tomcat.jsp_classpath";
+    public static final String SERVLET_CLASSPATH = "org.apache.catalina.jsp_classpath";
 
     /**
+     * FIXME
+     * Request attribute for <code>&lt;jsp-file&gt;</code> element of a
+     * servlet definition.  If present on a request, this overrides the
+     * value returned by <code>request.getServletPath()</code> to select
+     * the JSP page to be executed.
+     */
+    public static final String JSP_FILE = "org.apache.catalina.jsp_file";
+
+
+    /**
+     * FIXME
      * ServletContext attribute for classpath. This is tomcat specific. 
      * Other servlet engines can choose to have this attribute if they 
      * want to have this JSP engine running on them. 
      */
-    public static final String SERVLET_CLASS_LOADER = "org.apache.tomcat.classloader";
-
+    //public static final String SERVLET_CLASS_LOADER = "org.apache.tomcat.classloader";
+    public static final String SERVLET_CLASS_LOADER = "org.apache.catalina.classloader";
 
     /**
      * Default size of the JSP buffer.
@@ -130,6 +138,11 @@ public class Constants {
     public static final String PRECOMPILE = "jsp_precompile";
 
     /**
+     * The default package name for compiled jsp pages.
+     */
+    public static final String JSP_PACKAGE_NAME = "org.apache.jsp";
+
+    /**
      * Servlet context and request attributes that the JSP engine
      * uses. 
      */
@@ -138,32 +151,49 @@ public class Constants {
     public static final String TMP_DIR = "javax.servlet.context.tempdir";
 
     /**
-     * ProtectionDomain to use for JspLoader defineClass() for current
-     * Context when using a SecurityManager.
+     * Public Id and the Resource path (of the cached copy) 
+     * of the DTDs for tag library descriptors. 
      */
-    public static final String ATTRIB_JSP_ProtectionDomain = "tomcat.context.jsp.protection_domain";
+    public static final String TAGLIB_DTD_PUBLIC_ID_11 = 
+	"-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.1//EN";
+    public static final String TAGLIB_DTD_RESOURCE_PATH_11 = 
+	"/javax/servlet/jsp/resources/web-jsptaglibrary_1_1.dtd";
+    public static final String TAGLIB_DTD_PUBLIC_ID_12 = 
+	"-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN";
+    public static final String TAGLIB_DTD_RESOURCE_PATH_12 = 
+	"/javax/servlet/jsp/resources/web-jsptaglibrary_1_2.dtd";
 
     /**
-     * A token which is embedded in file names of the generated
-     * servlet. 
+     * Public Id and the Resource path (of the cached copy) 
+     * of the DTDs for web application deployment descriptors
      */
-    public static final String JSP_TOKEN = "_jsp_";
+    public static final String WEBAPP_DTD_PUBLIC_ID_22 = 
+	"-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN";
+    public static final String WEBAPP_DTD_RESOURCE_PATH_22 = 
+	"/javax/servlet/resources/web-app_2_2.dtd";
+    public static final String WEBAPP_DTD_PUBLIC_ID_23 = 
+	"-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN";
+    public static final String WEBAPP_DTD_RESOURCE_PATH_23 = 
+	"/javax/servlet/resources/web-app_2_3.dtd";
 
     /**
-     * ID and location of the DTD for tag library descriptors. 
+     * List of the Public IDs that we cache, and their
+     * associated location. This is used by 
+     * an EntityResolver to return the location of the
+     * cached copy of a DTD.
      */
-    public static final String 
-        TAGLIB_DTD_PUBLIC_ID = "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.1//EN";
-    public static final String
-        TAGLIB_DTD_RESOURCE = "/org/apache/jasper/resources/web-jsptaglib_1_1.dtd";
-
-    /**
-     * ID and location of the DTD for web-app deployment descriptors. 
-     */
-    public static final String 
-        WEBAPP_DTD_PUBLIC_ID = "-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN";
-    public static final String
-        WEBAPP_DTD_RESOURCE = "/org/apache/jasper/resources/web.dtd";
+    public static final String[] CACHED_DTD_PUBLIC_IDS = {
+	TAGLIB_DTD_PUBLIC_ID_11,
+	TAGLIB_DTD_PUBLIC_ID_12,
+	WEBAPP_DTD_PUBLIC_ID_22,
+	WEBAPP_DTD_PUBLIC_ID_23,
+    };
+    public static final String[] CACHED_DTD_RESOURCE_PATHS = {
+	TAGLIB_DTD_RESOURCE_PATH_11,
+	TAGLIB_DTD_RESOURCE_PATH_12,
+	WEBAPP_DTD_RESOURCE_PATH_22,
+	WEBAPP_DTD_RESOURCE_PATH_23,
+    };
     
     /**
      * Default URLs to download the pluging for Netscape and IE.
@@ -180,94 +210,78 @@ public class Constants {
     private static ResourceBundle resources;
     
     private static void initResources() {
-        try {
-            resources =
-                ResourceBundle.getBundle("org.apache.jasper.resources.messages");
-        } catch (MissingResourceException e) {
-            throw new Error("Fatal Error: missing resource bundle: "+e.getClassName());
-        }
+	try {
+	    resources =
+		ResourceBundle.getBundle("org.apache.jasper.resources.messages");
+	} catch (MissingResourceException e) {
+	    throw new Error("Fatal Error: missing resource bundle: "+e.getClassName());
+	}
     }
 
     /**
      * Get hold of a "message" or any string from our resources
      * database. 
      */
-    public static final String getString(String key)
-    {
+    public static final String getString(String key) {
         return getString(key, null);
     }
 
     /**
      * Format the string that is looked up using "key" using "args". 
      */
-    public static final String getString(String key, Object[] args)
-    {
-        if (Code.verbose())
-        {
-            for(int i=0;args!=null && i<args.length;i++)
-                Code.debug(key+" arg["+i+"] = ",args[i]);
-        }
-        
+    public static final String getString(String key, Object[] args) {
         if (resources == null) 
             initResources();
         
         try {
             String msg = resources.getString(key);
             if (args == null)
-                return "JASPER: "+msg;
+                return msg;
             MessageFormat form = new MessageFormat(msg);
-            return "JASPER: "+form.format(args);
-        }
-        catch (MissingResourceException ignore)
-        {
-            throw new Error("Fatal Error: missing resource: "+
-                            ignore.getClassName());
+            return form.format(args);
+        } catch (MissingResourceException ignore) {
+            throw new Error("Fatal Error: missing resource: "+ignore.getClassName());
         }
     }
 
-    public static final void debug(String key)
-    {
-        Code.debug(getString(key));
+    /** 
+     * Print a message into standard error with a certain verbosity
+     * level. 
+     * 
+     * @param key is used to look up the text for the message (using
+     *            getString()). 
+     * @param verbosityLevel is used to determine if this output is
+     *                       appropriate for the current verbosity
+     *                       level. 
+     */
+    public static final void message(String key, int verbosityLevel) {
+        message(key, null, verbosityLevel);
     }
 
-    public static final void debug(String key, Object[] args)
-    {
-        Code.debug(getString(key,args));
-    }
-    
-    public static final void message(String key)
-    {
-        Code.debug(getString(key));
+
+    /**
+     * Print a message into standard error with a certain verbosity
+     * level after formatting it using "args". 
+     *
+     * @param key is used to look up the message. 
+     * @param args is used to format the message. 
+     * @param verbosityLevel is used to determine if this output is
+     *                       appropriate for the current verbosity
+     *                       level. 
+     */
+    public static final void message(String key, Object[] args, int verbosityLevel) {
+	if (jasperLog == null) {
+	    jasperLog = Logger.getLogger("JASPER_LOG");
+	    if (jasperLog == null) {
+		jasperLog = Logger.getDefaultLogger();
+	    }
+	}
+
+	if (jasperLog != null) {
+	    jasperLog.log(getString(key, args), verbosityLevel);
+	}
     }
 
-    public static final void message(String key, Object[] args)
-    {
-        Code.debug(getString(key,args));
-    }
-        
-    public static final void warning(String key)
-    {
-        warning(getString(key));
-    }
-
-    public static final void warning(String key, Object[] args)
-    {
-        Code.warning(getString(key,args));
-    }
-        
-    public static final void fatal(String key)
-    {
-        Code.fail(getString(key));
-    }
-
-    public static final void fatal(String key, Object[] args)
-    {
-        Code.fail(getString(key,args));
-    }
+    public static Logger jasperLog = null;
 }
-
-
-
-
-
 

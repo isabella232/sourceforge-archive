@@ -62,17 +62,17 @@ package javax.servlet;
 
 
 /**
- * Defines an exception that a servlet throws to indicate
+ * Defines an exception that a servlet or filter throws to indicate
  * that it is permanently or temporarily unavailable. 
  *
- * <p>When a servlet is permanently unavailable, something is wrong
- * with the servlet, and it cannot handle
- * requests until some action is taken. For example, the servlet
- * might be configured incorrectly, or its state may be corrupted.
- * A servlet should log both the error and the corrective action
+ * <p>When a servlet or filter is permanently unavailable, something is wrong
+ * with the it, and it cannot handle
+ * requests until some action is taken. For example, a servlet
+ * might be configured incorrectly, or a filter's state may be corrupted.
+ * The component should log both the error and the corrective action
  * that is needed.
  *
- * <p>A servlet is temporarily unavailable if it cannot handle
+ * <p>A servlet or filter is temporarily unavailable if it cannot handle
  * requests momentarily due to some system-wide problem. For example,
  * a third-tier server might not be accessible, or there may be 
  * insufficient memory or disk storage to handle requests. A system
@@ -81,8 +81,8 @@ package javax.servlet;
  * <p>Servlet containers can safely treat both types of unavailable
  * exceptions in the same way. However, treating temporary unavailability
  * effectively makes the servlet container more robust. Specifically,
- * the servlet container might block requests to the servlet for a period
- * of time suggested by the servlet, rather than rejecting them until
+ * the servlet container might block requests to the servlet or filter for a period
+ * of time suggested by the exception, rather than rejecting them until
  * the servlet container restarts.
  *
  *

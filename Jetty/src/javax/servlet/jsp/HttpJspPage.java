@@ -60,16 +60,28 @@ import javax.servlet.http.*;
 import java.io.IOException;
 
 /**
- * This is the interface that a JSP processor-generated class for the
- * HTTP protocol must satisfy.
+ * The HttpJspPage interface describes the interaction that a JSP Page
+ * Implementation Class must satisfy when using the HTTP protocol.
+ *
+ * <p>
+ * The behaviour is identical to that of the JspPage, except for the signature
+ * of the _jspService method, which is now expressible in the Java type
+ * system and included explicitly in the interface.
+ * 
+ * @see JspPage
  */
 
 public interface HttpJspPage extends JspPage {
 
     /**
-     * _jspService corresponds to the body of the JSP page.
-     * This method is defined automatically by the JSP processor
-     * and should NEVER BE DEFINED BY THE JSP AUTHOR
+     * The _jspService()method corresponds to the body of the JSP page. This
+     * method is defined automatically by the JSP container and should never
+     * be defined by the JSP page author.
+     * <p>
+     * If a superclass is specified using the extends attribute, that
+     * superclass may choose to perform some actions in its service() method
+     * before or after calling the _jspService() method.  See using the extends
+     * attribute in the JSP_Engine chapter of the JSP specification.
      */
     public void _jspService(HttpServletRequest request,
 				HttpServletResponse response)

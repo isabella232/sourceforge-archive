@@ -66,11 +66,14 @@ import java.io.File;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
+import org.apache.jasper.compiler.TldLocationsCache;
+
 /**
  * A class to hold all init parameters specific to the JSP engine. 
  *
  * @author Anil K. Vijendran
  * @author Hans Bergsten
+ * @author Pierre Delisle
  */
 public interface Options {
     /**
@@ -94,11 +97,6 @@ public interface Options {
      */
     public boolean getSendErrorToClient();
  
-    /**
-     * Should we include debug information in compiled class?
-     */
-    public boolean getClassDebugInfo();
-
     /**
      * Class ID for use in the plugin tag when the browser is IE. 
      */
@@ -127,9 +125,17 @@ public interface Options {
     public String getJspCompilerPath();
     
     /**
-     * ProtectionDomain for this JSP Context when using a SecurityManager
+     * The cache for the location of the TLD's
+     * for the various tag libraries 'exposed'
+     * by the web application.
+     * A tag library is 'exposed' either explicitely in 
+     * web.xml or implicitely via the uri tag in the TLD 
+     * of a taglib deployed in a jar file (WEB-INF/lib).
+     *
+     * @returns the instance of the TldLocationsCache
+     * for the web-application.
      */
-    public Object getProtectionDomain();
+    public TldLocationsCache getTldLocationsCache();
 
     /**
      * Java platform encoding to generate the JSP

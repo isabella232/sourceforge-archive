@@ -58,38 +58,35 @@ package javax.servlet.jsp.tagext;
 import java.util.Hashtable;
 
 /**
- * Tag instance attribute(s)/value(s); often this data is fully static in the
- * case where none of the attributes have runtime expresssions as their values.
- * Thus this class is intended to expose an immutable interface to a set of
- * immutable attribute/value pairs.
+ * The (translation-time only) attribute/value information for a tag instance.
  *
- * This class is cloneable so implementations can create a static instance
- * and then just clone it before adding the request-time expressions.
+ * <p>
+ * TagData is only used as an argument to the isValid and getVariableInfo
+ * methods of TagExtraInfo, which are invoked at translation time.
  */
 
 public class TagData implements Cloneable {
+
     /**
      * Distinguished value for an attribute to indicate its value
-     * is a request-time expression which is not yet available because
-     * this TagData instance is being used at translation-time.
+     * is a request-time expression (which is not yet available because
+     * TagData instances are used at translation-time).
      */
-    // TODO -- revisit clonable; do we need a clone() method?
-    // TODO -- Should we just use an array?
-    // TODO -- should there be a factory?
 
     public static final Object REQUEST_TIME_VALUE = new Object();
 
+
     /**
-     * Constructor for a TagData
+     * Constructor for TagData.
      *
-     * For simplicity and speed, we are just using primitive types.
+     * <p>
      * A typical constructor may be
-     *
+     * <pre>
      * static final Object[][] att = {{"connection", "conn0"}, {"id", "query0"}};
      * static final TagData td = new TagData(att);
+     * </pre>
      *
-     * In an implementation that uses the clonable approach sketched
-     * above all values must be Strings except for those holding the
+     * All values must be Strings except for those holding the
      * distinguished object REQUEST_TIME_VALUE.
 
      * @param atts the static attribute and values.  May be null.
@@ -109,18 +106,20 @@ public class TagData implements Cloneable {
     }
 
     /**
-     * Constructor for a TagData
+     * Constructor for a TagData.
      *
      * If you already have the attributes in a hashtable, use this
      * constructor. 
      *
-
+     * @param attrs A hashtable to get the values from.
      */
     public TagData(Hashtable attrs) {
         this.attributes = attrs;
     }
 
     /**
+     * The value of the id attribute, if available.
+     *
      * @return the value of the id attribute or null
      */
 
@@ -129,20 +128,22 @@ public class TagData implements Cloneable {
     }
 
     /**
-     * @return the attribute's value object. Returns the
-     * distinguished object REQUEST_TIME_VALUE if the value is
-     * request time and we are using TagData at translation time.
-     * Returns null if the attribute is not set.
+     * The value of the attribute.
+     * Returns the distinguished object REQUEST_TIME_VALUE if
+     * the value is request time. Returns null if the attribute is not set.
+     *
+     * @return the attribute's value object
      */
-    // TODO -- means we cannot distinguish from an unset attribute an
-    // TODO -- one that is set to null.
 
     public Object getAttribute(String attName) {
 	return attributes.get(attName);
     }
 
     /**
-     * Set the value of this attribute to be 
+     * Set the value of an attribute.
+     *
+     * @param attName the name of the attribute
+     * @param value the value.
      */
     public void setAttribute(String attName,
 			     Object value) {
@@ -150,8 +151,9 @@ public class TagData implements Cloneable {
     }
 
     /**
-     * @return the attribute value string
+     * Get the value for a given attribute.
      *
+     * @return the attribute value string
      * @throw ClassCastException if attribute value is not a String
      */
 
@@ -165,7 +167,8 @@ public class TagData implements Cloneable {
     }
 
     /**
-     * Enumerates the attributes
+     * Enumerates the attributes.
+     *
      *@return An enumeration of the attributes in a TagData
      */
     public java.util.Enumeration getAttributes() {

@@ -66,6 +66,7 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.io.File;
 import java.io.ByteArrayOutputStream;
+import java.util.StringTokenizer;
 
 /**
   * A Plug-in class for specifying a 'jikes' compile.
@@ -78,6 +79,14 @@ public class JikesJavaCompiler implements JavaCompiler {
     static final int OUTPUT_BUFFER_SIZE = 1024;
     static final int BUFFER_SIZE = 512;
 
+    /*
+     * Contains extra classpath for Jikes use from Microsoft systems:
+     * Microsoft does not report it's internal classpath in 
+     * System.getProperty(java.class.path) which results in jikes to fail.  
+     * (Internal classpath with other JVMs contains for instance rt.jar).
+     */
+     static StringBuffer MicrosoftClasspath = null;
+
     String encoding;
     String classpath;
     String compilerPath = "jikes";
@@ -88,7 +97,7 @@ public class JikesJavaCompiler implements JavaCompiler {
      * Specify where the compiler can be found
      */ 
     public void setCompilerPath(String compilerPath) {
-        this.compilerPath = compilerPath;
+	this.compilerPath = compilerPath;
     }
 
     /**
@@ -102,7 +111,30 @@ public class JikesJavaCompiler implements JavaCompiler {
      * Set the class path for the compiler
      */ 
     public void setClasspath(String classpath) {
-      this.classpath = classpath;
+        //
+        // normalize the paths in the classpath.  this
+        // is really only an issue with jikes on windows.
+        //
+        // sometimes a path the looks like this:
+        //    /c:/tomcat/webapps/WEB-INF/classes
+        // will show up in the classpath.  in fact, this
+        // *always* happens with tomcat4.  jikes on windows
+        // will barf on this.  the following code will normalize
+        // paths like this (all paths, actually) so that jikes
+        // is happy :)
+        //
+        
+        StringBuffer buf = new StringBuffer(classpath.length());
+        StringTokenizer tok = new StringTokenizer(classpath,
+                                                  File.pathSeparator);
+        while (tok.hasMoreTokens()) {
+            String token = tok.nextToken();
+            File file = new File(token);
+            buf.append(file.toString());
+            buf.append(File.pathSeparator);
+        }
+        
+        this.classpath = buf.toString();
     }
 
     /**
@@ -124,49 +156,80 @@ public class JikesJavaCompiler implements JavaCompiler {
      * @param source - file name of the source to be compiled
      */ 
     public boolean compile(String source) {
-        Process p;
-        int exitValue = -1;
+	Process p;
+	int exitValue = -1;
+	String quote = "";
 
-        String[] compilerCmd = new String[] {
-          compilerPath,
-          //XXX - add encoding once Jikes supports it
-          "-classpath", classpath,
-          "-d", outdir,
-          // Only report errors, to be able to test on output in addition to exit code
-          "-nowarn",
-          source
-        };
+        // Used to dynamically load classpath if using Microsoft 
+        // virtual machine
+        if (MicrosoftClasspath==null) {
+            MicrosoftClasspath = new StringBuffer(200);
+            if (System.getProperty("java.vendor").startsWith("Microsoft")) {
+                quote = "\"";
+                //Get Microsoft classpath
+                String javaHome = System.getProperty("java.home") + 
+                                  "\\Packages";
+                File libDir=new File(javaHome);
+                String[] zips=libDir.list();
+                for(int i=0;i<zips.length;i++) {
+                    MicrosoftClasspath.append(";" + javaHome + "\\" + zips[i]);
+                }                       
+            } 
+        }
+
+        String[] compilerCmd = null;
+
+	if( outdir != null ) {
+	    compilerCmd = new String[] {
+        	quote + compilerPath + quote,
+        	//XXX - add encoding once Jikes supports it
+        	"-classpath", quote + classpath + MicrosoftClasspath + quote,
+        	"-d", quote + outdir + quote,
+        	"-nowarn",
+                "+E",
+        	quote + source + quote
+            };
+	} else {
+            compilerCmd = new String[] {
+                quote + compilerPath + quote,
+                //XXX - add encoding once Jikes supports it
+                "-classpath", quote + classpath + MicrosoftClasspath + quote,
+                "-nowarn",                
+                "+E",
+                quote + source + quote    
+            };
+	}
 
         ByteArrayOutputStream tmpErr = new ByteArrayOutputStream(OUTPUT_BUFFER_SIZE);
-        try {
-            p = Runtime.getRuntime().exec(compilerCmd);
-            
-            BufferedInputStream compilerErr = new
-                BufferedInputStream(p.getErrorStream());
+	try {
+	    p = Runtime.getRuntime().exec(compilerCmd);
+	    
+	    BufferedInputStream compilerErr = new
+		BufferedInputStream(p.getErrorStream());
 
-            StreamPumper errPumper = new StreamPumper(compilerErr, tmpErr);
+	    StreamPumper errPumper = new StreamPumper(compilerErr, tmpErr);
 
-            errPumper.start();
+	    errPumper.start();
 
             p.waitFor();
             exitValue = p.exitValue();
 
-            // Wait until the complete error stream has been read
+	    // Wait until the complete error stream has been read
             errPumper.join();
-            compilerErr.close();
+	    compilerErr.close();
 
-            p.destroy();
+	    p.destroy();
 
             // Write the compiler error messages, if any, to the real stream 
             tmpErr.close();
             tmpErr.writeTo(out);
             
-        } catch (IOException ioe) {
-            return false;
+	} catch (IOException ioe) {
+	    return false;
 
-        } catch (InterruptedException ie) {
-            return false;
-        }
+	} catch (InterruptedException ie) {
+	    return false;
+	}
 
         boolean isOkay = exitValue == 0;
         // Jikes returns 0 even when there are some types of errors. 
@@ -180,43 +243,43 @@ public class JikesJavaCompiler implements JavaCompiler {
     // Inner class for continually pumping the input stream during
     // Process's runtime.
     class StreamPumper extends Thread {
-        private BufferedInputStream stream;
-        private boolean endOfStream = false;
-        private boolean stopSignal  = false;
-        private int SLEEP_TIME = 5;
-        private OutputStream out;
+	private BufferedInputStream stream;
+	private boolean endOfStream = false;
+	private boolean stopSignal  = false;
+	private int SLEEP_TIME = 5;
+	private OutputStream out;
 
-        public StreamPumper(BufferedInputStream is, OutputStream out) {
-            this.stream = is;
-            this.out = out;
-        }
+	public StreamPumper(BufferedInputStream is, OutputStream out) {
+	    this.stream = is;
+	    this.out = out;
+	}
 
-        public void pumpStream()
-            throws IOException
-        {
-            byte[] buf = new byte[BUFFER_SIZE];
-            if (!endOfStream) {
-                int bytesRead=stream.read(buf, 0, BUFFER_SIZE);
+	public void pumpStream()
+	    throws IOException
+	{
+	    byte[] buf = new byte[BUFFER_SIZE];
+	    if (!endOfStream) {
+		int bytesRead=stream.read(buf, 0, BUFFER_SIZE);
 
-                if (bytesRead > 0) {
-                    out.write(buf, 0, bytesRead);
-                } else if (bytesRead==-1) {
-                    endOfStream=true;
-                }
-            }
-        }
+		if (bytesRead > 0) {
+		    out.write(buf, 0, bytesRead);
+		} else if (bytesRead==-1) {
+		    endOfStream=true;
+		}
+	    }
+	}
 
-        public void run() {
-            try {
-                //while (!endOfStream || !stopSignal) {
-                while (!endOfStream) {
-                    pumpStream();
-                    sleep(SLEEP_TIME);
-                }
-            } catch (InterruptedException ie) {
-            } catch (IOException ioe) {
-            }
-        }
+	public void run() {
+	    try {
+		//while (!endOfStream || !stopSignal) {
+		while (!endOfStream) {
+		    pumpStream();
+		    sleep(SLEEP_TIME);
+		}
+	    } catch (InterruptedException ie) {
+	    } catch (IOException ioe) {
+	    }
+	}
     }
 }
 

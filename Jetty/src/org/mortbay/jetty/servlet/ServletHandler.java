@@ -56,7 +56,6 @@ public class ServletHandler
     implements SecurityHandler.FormAuthenticator
 {
     /* ------------------------------------------------------------ */
-    public final static String __JSP_SERVLET="org.apache.jasper.servlet.JspServlet";
     public final static String __SERVLET_REQUEST="org.mortbay.jetty.Request";
     public final static String __SERVLET_HOLDER="org.mortbay.jetty.Holder";
     public final static String __J_URI="org.mortbay.jetty.URI";
@@ -335,19 +334,10 @@ public class ServletHandler
         request.setSessionId(pathParams);
         HttpSession session=request.getSession(false);
         if (session!=null)
-            Context.access(session);
+            _context.access(session);
     }
     
 
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return Number of valid sessions 
-     */
-    public int sessionCount()
-    {
-        return _context.sessionCount();
-    }
-    
     /* ----------------------------------------------------------------- */
     /** Handle request.
      * @param contextPath 
@@ -592,12 +582,6 @@ public class ServletHandler
                 _nameMap.remove(oldName);
             _nameMap.put(name,holder);
         }
-    }
-
-    /* ------------------------------------------------------------ */
-    public String getJSPClassName()
-    {
-        return __JSP_SERVLET;
     }
     
     /* ------------------------------------------------------------ */

@@ -80,7 +80,7 @@ public class StoredCharDataGenerator
     public StoredCharDataGenerator(Vector vector, String fileName, 
                                    int stringId, char[] chars) {
         this.stringId = stringId;
-        this.chars = chars;
+	this.chars = chars;
         this.vector = vector;
         this.fileName = fileName;
     }
@@ -97,23 +97,23 @@ public class StoredCharDataGenerator
     private final void generateInit(ServletWriter writer) {
         if (stringId == 0) {
             String name = writer.quoteString(fileName);
-            writer.println("ObjectInputStream oin = null;");
+            writer.println("java.io.ObjectInputStream oin = null;");
             writer.println("int numStrings = 0;");
             writer.println("try {");
             writer.pushIndent();
-            writer.println("FileInputStream fin = new FileInputStream("+name+");");
-            writer.println("oin = new ObjectInputStream(fin);");
+            writer.println("java.io.FileInputStream fin = new java.io.FileInputStream("+name+");");
+            writer.println("oin = new java.io.ObjectInputStream(fin);");
             writer.println("_jspx_html_data = (char[][]) oin.readObject();");
             writer.popIndent();
             writer.println("} catch (Exception ex) {");
             writer.pushIndent();
-            writer.println("throw new JasperException(\"Unable to open data file\");");
+            writer.println("throw new org.apache.jasper.runtime.JspException(\"Unable to open data file\");");
             writer.popIndent();
             writer.println("} finally {");
             writer.pushIndent();
             writer.println("if (oin != null)");
             writer.pushIndent();
-            writer.println("try { oin.close(); } catch (IOException ignore) { }");
+            writer.println("try { oin.close(); } catch (java.io.IOException ignore) { }");
             writer.popIndent();
             writer.popIndent();
             writer.println("}");

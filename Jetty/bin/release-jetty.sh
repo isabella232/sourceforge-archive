@@ -1,8 +1,8 @@
 #!/bin/bash
 
-if [ $# != 2 ]
+if [ $# != 2 -o $# != 3 ]
 then
-    echo "Usage - $0 <sourceforge user name> <version>" >&2
+    echo "Usage - $0 <sourceforge user name> <version> [<branch>]" >&2
     exit 1
 fi
 
@@ -10,6 +10,9 @@ CVS_RSH=ssh
 export CVS_RSH
 
 CVS_ARGS=-d$1@cvs.jetty.sourceforge.net:/cvsroot/jetty
+
+CVS_BRANCH=
+[ $# = 3 ] && CVS_BRANCH="-r $3"
 
 VERSION=$2
 TAG=$( echo $VERSION | sed 's/\./_/g' )
@@ -28,7 +31,7 @@ read Y
     cd $HOME
     unset JETTY_HOME
     [ -d Jetty ] && mv Jetty Jetty.cvs
-    cvs $CVS_ARGS rtag -F Jetty_$TAG Jetty
+    cvs $CVS_ARGS rtag $CVS_BRANCH -F Jetty_$TAG Jetty
     cvs $CVS_ARGS export -r Jetty_$TAG Jetty
     cd $HOME/Jetty
     rm -fr src/com webappsrc/com

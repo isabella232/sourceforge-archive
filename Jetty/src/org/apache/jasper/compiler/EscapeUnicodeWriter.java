@@ -77,46 +77,46 @@ public class EscapeUnicodeWriter extends Writer {
     private byte         bytes[] = new byte[6];
     
     public EscapeUnicodeWriter(OutputStream out) {
-        this.out = out;
+	this.out = out;
     }
     
     public void write(char buf[], int off, int len) 
-        throws IOException
+	throws IOException
     {
-        if (out == null)
-            throw new IOException(Constants.getString("jsp.error.stream.closed"));
+	if (out == null)
+	    throw new IOException(Constants.getString("jsp.error.stream.closed"));
         
-        int ci = off, end = off + len;
-        while ( --len >= 0 ) {
-            int ch = buf[off++] & 0xffff;
-            /*
-             * Write out unicode characters as \u0000
-             */
-            if ((ch < 0x20 || ch > 0x7e) && 
-                (ch != '\n' && ch != '\r' && ch != '\t')) {
-                bytes[0] = (byte) '\\';
-                bytes[1] = (byte) 'u';
-                bytes[2] = (byte) Character.forDigit((ch & 0xf000) >> 12, 16);
-                bytes[3] = (byte) Character.forDigit((ch & 0x0f00) >>  8, 16);
-                bytes[4] = (byte) Character.forDigit((ch & 0x00f0) >>  4, 16);
-                bytes[5] = (byte) Character.forDigit((ch & 0x000f) >>  0, 16);
-                out.write(bytes);
-            } else {
-                out.write((byte) ch);
-            }
-        }
+	int ci = off, end = off + len;
+	while ( --len >= 0 ) {
+	    int ch = buf[off++] & 0xffff;
+	    /*
+	     * Write out unicode characters as \u0000
+	     */
+	    if ((ch < 0x20 || ch > 0x7e) && 
+		(ch != '\n' && ch != '\r' && ch != '\t')) {
+		bytes[0] = (byte) '\\';
+		bytes[1] = (byte) 'u';
+		bytes[2] = (byte) Character.forDigit((ch & 0xf000) >> 12, 16);
+		bytes[3] = (byte) Character.forDigit((ch & 0x0f00) >>  8, 16);
+		bytes[4] = (byte) Character.forDigit((ch & 0x00f0) >>  4, 16);
+		bytes[5] = (byte) Character.forDigit((ch & 0x000f) >>  0, 16);
+		out.write(bytes);
+	    } else {
+		out.write((byte) ch);
+	    }
+	}
     }
     
     public void flush() throws IOException {
-        out.flush();
+	out.flush();
     }
     
     public void close() 
-        throws IOException
+	throws IOException
     {
-        if (out == null) 
-            return;
-        out.close();
-        out = null;
+	if (out == null) 
+	    return;
+	out.close();
+	out = null;
     }
 }

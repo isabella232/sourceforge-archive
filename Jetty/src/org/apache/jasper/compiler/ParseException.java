@@ -69,9 +69,9 @@ import org.apache.jasper.JasperException;
  */
 public class ParseException extends JasperException {
     public ParseException(Mark m, String reason) {
-        super(m + " " + reason);
+	super(m + " " + reason);
     }
     public ParseException(String reason) {
-        super(reason);
+	super(reason);
     }
 }

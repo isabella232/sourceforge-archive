@@ -78,54 +78,56 @@ public class CharDataGenerator
     private static final int MAXSIZE = 32 * 1024;
     
     public CharDataGenerator(char[] chars) {
-        this.chars = chars;
+	this.chars = chars;
     }
 
     public void generate(ServletWriter writer, Class phase) {
-        writer.indent();
-        int current	= 0;
-        int limit       = chars.length;
-        while (current < limit) {
-            int from = current;
-            int to = Math.min(current + MAXSIZE, limit);
-            generateChunk(writer, from, to);
-            current = to;
-        }
+	writer.indent();
+	int current	= 0;
+	int limit       = chars.length;
+	while (current < limit) {
+	    int from = current;
+	    int to = Math.min(current + MAXSIZE, limit);
+	    generateChunk(writer, from, to);
+	    current = to;
+	    writer.println();
+	}
     }
 
     private void generateChunk(ServletWriter writer, int from, int to) {
-        writer.print("out.write(\"");
-        // Generate the char data:
-        StringBuffer sb = new StringBuffer();
-        for (int i = from ; i < to ; i++) {
-            int ch = chars[i];
-            switch(ch) {
-            case '"':
-                sb.append("\\\"");
-                break;
-            case '\\':
-                sb.append("\\\\");
-                break;
-            case '\r':
-                continue;
-                /*
-                  case '\'':
-                  sb.append('\\');
-                  sb.append('\'');
-                  break;
-                */
-            case '\n':
-                sb.append("\\r\\n");
-                break;
-            case '\t':
-                sb.append("\\t");
-                break;
-            default:
-                sb.append((char) ch);
-            }
-        }
-        writer.print(sb.toString());
-        writer.print("\");\n");
+	writer.print("out.write(\"");
+	// Generate the char data:
+	StringBuffer sb = new StringBuffer();
+	for (int i = from ; i < to ; i++) {
+	    int ch = chars[i];
+	    switch(ch) {
+	    case '"':
+		sb.append("\\\"");
+		break;
+	    case '\\':
+		sb.append("\\\\");
+		break;
+	    case '\r':
+		continue;
+		/*
+		  case '\'':
+		  sb.append('\\');
+		  sb.append('\'');
+		  break;
+		*/
+	    case '\n':
+		sb.append("\\r\\n");
+		break;
+	    case '\t':
+		sb.append("\\t");
+		break;
+	    default:
+		sb.append((char) ch);
+	    }
+	}
+	writer.print(sb.toString());
+        writer.print("\");");
+        writer.println();
     }
 
 

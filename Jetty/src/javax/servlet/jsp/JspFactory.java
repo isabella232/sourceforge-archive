@@ -66,13 +66,17 @@ import javax.servlet.jsp.PageContext;
  * methods available to a JSP page at runtime for the purposes of creating
  * instances of various interfaces and classes used to support the JSP 
  * implementation.
- * </p>
  * <p>
  * A conformant JSP Engine implementation will, during it's initialization
  * instantiate an implementation dependent subclass of this class, and make 
  * it globally available for use by JSP implementation classes by registering
- * the instance created with this class via the static <code> setDefaultFactory() </code> method.
- * </p>
+ * the instance created with this class via the
+ * static <code> setDefaultFactory() </code> method.
+ * <p>
+ * The PageContext and the JspEngineInfo classes are the only implementation-dependent
+ * classes that can be created from the factory.
+ * <p>
+ * JspFactory objects should not be used by JSP page authors.
  */
 
 public abstract class JspFactory {
@@ -109,7 +113,7 @@ public abstract class JspFactory {
      *
      * <p>
      * This method is typically called early in the processing of the 
-     * _jspService() mehtod of a JSP implementation class in order to 
+     * _jspService() method of a JSP implementation class in order to 
      * obtain a PageContext object for the request being processed.
      * </p>
      * <p>
@@ -147,9 +151,9 @@ public abstract class JspFactory {
 
     /**
      * <p>
-     * called to release a previously allocated PageContext object. results
-     * in PageContext.release() being invoked. This method should be invoked
-     * prior to returning from the _jspService() method of a JSP implementation
+     * called to release a previously allocated PageContext object.
+     * Results in PageContext.release() being invoked.
+     * This method should be invoked prior to returning from the _jspService() method of a JSP implementation
      * class.
      * </p>
      *

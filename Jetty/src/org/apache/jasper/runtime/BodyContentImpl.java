@@ -86,8 +86,8 @@ public class BodyContentImpl extends BodyContent {
 
     public BodyContentImpl (JspWriter writer) {
         super(writer);
-        cb = new char[bufferSize];
-        nextChar = 0;
+	cb = new char[bufferSize];
+	nextChar = 0;
     }
 
     /**
@@ -97,30 +97,30 @@ public class BodyContentImpl extends BodyContent {
     public void write(int c) throws IOException {
         synchronized (lock) {
             if (nextChar >= bufferSize) {
-                reAllocBuff (0);
-            }
+	        reAllocBuff (0);
+	    }
             cb[nextChar++] = (char) c;
         }
     }
 
     private void reAllocBuff (int len) {
         //Need to re-allocate the buffer since it is to be
-        //unbounded according to the updated spec..
+	//unbounded according to the updated spec..
 
-        char[] tmp = new char [bufferSize];
-        System.arraycopy(cb, 0, tmp, 0, cb.length);
+	char[] tmp = null;
 
-        //XXX Should it be multiple of DEFAULT_BUFFER_SIZE??
+	//XXX Should it be multiple of DEFAULT_BUFFER_SIZE??
 
-        if (len <= Constants.DEFAULT_BUFFER_SIZE) {
-            cb = new char [bufferSize + Constants.DEFAULT_BUFFER_SIZE];
-            bufferSize += Constants.DEFAULT_BUFFER_SIZE;
-        } else {
-            cb = new char [bufferSize + len];
-            bufferSize += len;
-        }
-        System.arraycopy(tmp, 0, cb, 0, tmp.length);
-        tmp = null;
+	if (len <= Constants.DEFAULT_BUFFER_SIZE) {
+	    tmp = new char [bufferSize + Constants.DEFAULT_BUFFER_SIZE];
+	    bufferSize += Constants.DEFAULT_BUFFER_SIZE;
+	} else {
+	    tmp = new char [bufferSize + len];
+	    bufferSize += len;
+	}
+	System.arraycopy(cb, 0, tmp, 0, cb.length);
+	cb = tmp;
+	tmp = null;
     }
 
     /**
@@ -151,10 +151,10 @@ public class BodyContentImpl extends BodyContent {
             } 
 
             if (len >= bufferSize - nextChar)
-                   reAllocBuff (len);
+		   reAllocBuff (len);
 
             System.arraycopy(cbuf, off, cb, nextChar, len);
-            nextChar+=len;
+	    nextChar+=len;
         }
     }
 
@@ -163,7 +163,7 @@ public class BodyContentImpl extends BodyContent {
      * Writer class because it must suppress I/O exceptions.
      */
     public void write(char buf[]) throws IOException {
-        write(buf, 0, buf.length);
+	write(buf, 0, buf.length);
     }
 
     /**
@@ -176,11 +176,11 @@ public class BodyContentImpl extends BodyContent {
      */
     public void write(String s, int off, int len) throws IOException {
         synchronized (lock) {
-            if (len >= bufferSize - nextChar)
-                reAllocBuff(len);
+	    if (len >= bufferSize - nextChar)
+	        reAllocBuff(len);
 
             s.getChars(off, off + len, cb, nextChar);
-            nextChar += len;
+	    nextChar += len;
         }
     }
 
@@ -189,7 +189,7 @@ public class BodyContentImpl extends BodyContent {
      * because it must suppress I/O exceptions.
      */
     public void write(String s) throws IOException {
-        write(s, 0, s.length());
+	write(s, 0, s.length());
     }
 
 
@@ -202,9 +202,9 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void newLine() throws IOException {
-        synchronized (lock) {
-            write(lineSeparator);
-        }
+	synchronized (lock) {
+	    write(lineSeparator);
+	}
     }
 
     /**
@@ -219,7 +219,7 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void print(boolean b) throws IOException {
-        write(b ? "true" : "false");
+	write(b ? "true" : "false");
     }
 
     /**
@@ -233,7 +233,7 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void print(char c) throws IOException {
-        write(String.valueOf(c));
+	write(String.valueOf(c));
     }
 
     /**
@@ -249,7 +249,7 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void print(int i) throws IOException {
-        write(String.valueOf(i));
+	write(String.valueOf(i));
     }
 
     /**
@@ -265,7 +265,7 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void print(long l) throws IOException {
-        write(String.valueOf(l));
+	write(String.valueOf(l));
     }
 
     /**
@@ -281,7 +281,7 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void print(float f) throws IOException {
-        write(String.valueOf(f));
+	write(String.valueOf(f));
     }
 
     /**
@@ -297,7 +297,7 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void print(double d) throws IOException {
-        write(String.valueOf(d));
+	write(String.valueOf(d));
     }
 
     /**
@@ -313,7 +313,7 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void print(char s[]) throws IOException {
-        write(s);
+	write(s);
     }
 
     /**
@@ -328,10 +328,10 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void print(String s) throws IOException {
-        if (s == null) {
-            s = "null";
-        }
-        write(s);
+	if (s == null) {
+	    s = "null";
+	}
+	write(s);
     }
 
     /**
@@ -347,7 +347,7 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void print(Object obj) throws IOException {
-        write(String.valueOf(obj));
+	write(String.valueOf(obj));
     }
 
     /**
@@ -359,7 +359,7 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void println() throws IOException {
-        newLine();
+	newLine();
     }
 
     /**
@@ -370,10 +370,10 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void println(boolean x) throws IOException {
-        synchronized (lock) {
-            print(x);
-            println();
-        }
+	synchronized (lock) {
+	    print(x);
+	    println();
+	}
     }
 
     /**
@@ -384,10 +384,10 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void println(char x) throws IOException {
-        synchronized (lock) {
-            print(x);
-            println();
-        }
+	synchronized (lock) {
+	    print(x);
+	    println();
+	}
     }
 
     /**
@@ -398,10 +398,10 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void println(int x) throws IOException {
-        synchronized (lock) {
-            print(x);
-            println();
-        }
+	synchronized (lock) {
+	    print(x);
+	    println();
+	}
     }
 
     /**
@@ -412,10 +412,10 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void println(long x) throws IOException {
-        synchronized (lock) {
-            print(x);
-            println();
-        }
+	synchronized (lock) {
+	    print(x);
+	    println();
+	}
     }
 
     /**
@@ -426,10 +426,10 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void println(float x) throws IOException {
-        synchronized (lock) {
-            print(x);
-            println();
-        }
+	synchronized (lock) {
+	    print(x);
+	    println();
+	}
     }
 
     /**
@@ -440,10 +440,10 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void println(double x) throws IOException{
-        synchronized (lock) {
-            print(x);
-            println();
-        }
+	synchronized (lock) {
+	    print(x);
+	    println();
+	}
     }
 
     /**
@@ -454,10 +454,10 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void println(char x[]) throws IOException {
-        synchronized (lock) {
-            print(x);
-            println();
-        }
+	synchronized (lock) {
+	    print(x);
+	    println();
+	}
     }
 
     /**
@@ -468,10 +468,10 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void println(String x) throws IOException {
-        synchronized (lock) {
-            print(x);
-            println();
-        }
+	synchronized (lock) {
+	    print(x);
+	    println();
+	}
     }
 
     /**
@@ -482,10 +482,10 @@ public class BodyContentImpl extends BodyContent {
      */
 
     public void println(Object x) throws IOException {
-        synchronized (lock) {
-            print(x);
-            println();
-        }
+	synchronized (lock) {
+	    print(x);
+	    println();
+	}
     }
 
     /**
@@ -499,10 +499,8 @@ public class BodyContentImpl extends BodyContent {
 
     public void clear() throws IOException {
         synchronized (lock) {
-            cb = new char [Constants.DEFAULT_BUFFER_SIZE];
-            bufferSize = Constants.DEFAULT_BUFFER_SIZE;
-            nextChar = 0;
-        }
+	    nextChar = 0;
+	}
     }
 
     /**
@@ -528,8 +526,8 @@ public class BodyContentImpl extends BodyContent {
 
     public void close() throws IOException {
         synchronized (lock) {
-            cb = null;	
-        }
+	    cb = null;	
+	}
     }
 
     /**
@@ -561,7 +559,7 @@ public class BodyContentImpl extends BodyContent {
     public String getString() {
         return new String(cb, 0, nextChar);
     }
-        
+	
     /**
      * Write the contents of this BodyJspWriter into a Writer.
      * Subclasses are likely to do interesting things with the
@@ -572,17 +570,17 @@ public class BodyContentImpl extends BodyContent {
      */
     public void writeOut(Writer out) throws IOException {
         out.write(cb, 0, nextChar);
-        // Flush not called as the writer passed could be a BodyContent and
-        // it doesn't allow to flush.
+	// Flush not called as the writer passed could be a BodyContent and
+	// it doesn't allow to flush.
     }
 
 
     public static void main (String[] args) throws Exception {
-        char[] buff = {'f','o','o','b','a','r','b','a','z','y'};
+	char[] buff = {'f','o','o','b','a','r','b','a','z','y'};
    	BodyContentImpl bodyContent = new BodyContentImpl(new JspWriterImpl(
-                                                        null, 100, false));
-        bodyContent.println (buff);
-        System.out.println (bodyContent.getString ());
-        bodyContent.writeOut (new PrintWriter (System.out));
+							null, 100, false));
+	bodyContent.println (buff);
+	System.out.println (bodyContent.getString ());
+	bodyContent.writeOut (new PrintWriter (System.out));
     }
 }

@@ -63,14 +63,18 @@ package org.apache.jasper.compiler;
 
 import java.util.Hashtable;
 import java.util.Enumeration;
+import java.net.URLEncoder;
 
 import org.apache.jasper.JasperException;
 import org.apache.jasper.Constants;
+
+import org.xml.sax.Attributes;
 
 /**
  * Generator for <jsp:forward>
  *
  * @author Anil K. Vijendran
+ * @author Danno Ferrin
  */
 public class ForwardGenerator 
     extends GeneratorBase
@@ -79,67 +83,56 @@ public class ForwardGenerator
     String page;
     boolean isExpression = false;
     Hashtable params;
+    boolean isXml;
     
-    public ForwardGenerator(Mark start, Hashtable attrs, Hashtable param)
-        throws JasperException {
-            if (attrs.size() != 1)
-                throw new JasperException(Constants.getString("jsp.error.invalid.forward"));
-            
-            page = (String) attrs.get("page");
-            if (page == null)
-                throw new CompileException(start,
-                                           Constants.getString("jsp.error.invalid.forward"));
-            
-            this.params = param;
-            isExpression = JspUtil.isExpression (page);
+    public ForwardGenerator(Mark start, Attributes attrs, Hashtable param,
+                            boolean isXml)
+	throws JasperException {
+	    if (attrs.getLength() != 1)
+		throw new JasperException(Constants.getString("jsp.error.invalid.forward"));
+	    
+	    page = attrs.getValue("page");
+	    if (page == null)
+		throw new CompileException(start,
+					   Constants.getString("jsp.error.invalid.forward"));
+	    
+	    this.params = param;
+            this.isXml = isXml;
+	    isExpression = JspUtil.isExpression (page, isXml);
     }
     
     public void generate(ServletWriter writer, Class phase) {
-        boolean initial = true;
-        String sep = "?";	
+	char sep = '?';	
         writer.println("if (true) {");
         writer.pushIndent();
         writer.println("out.clear();");
-        writer.println("String _jspx_qfStr = \"\";");
-        
-        if (params.size() > 0) {
-            Enumeration en = params.keys();
-            while (en.hasMoreElements()) {
-                String key = (String) en.nextElement();
-                String []value = (String []) params.get(key);
-                if (initial == true) {
-                    sep = "?";
-                    initial = false;
-                } else sep = "&";
-                
-                if (value.length == 1 && JspUtil.isExpression(value[0]))
-                    writer.println("_jspx_qfStr = _jspx_qfStr + \"" + sep +
-                                   key + "=\" + " + JspUtil.getExpr(value[0]) + ";");
-                else {
-                    if (value.length == 1)
-                        writer.println("_jspx_qfStr = _jspx_qfStr + \"" + sep +
-                                       key + "=\" + \"" + value[0] + "\";");			
-                    else {
-                        for (int i = 0; i < value.length; i++) {
-                            if (!JspUtil.isExpression(value[i]))
-                                writer.println("_jspx_qfStr = _jspx_qfStr + \"" + sep +
-                                               key + "=\" + \"" + value[i] + "\";");
-                            else
-                                writer.println("_jspx_qfStr = _jspx_qfStr + \"" + sep +
-                                               key + "=\" +" + JspUtil.getExpr(value[i])+ ";");
-                            if (sep.equals("?")) sep = "&";			    
-                        }
-                    }
-                }
-            }
-        }
-        if (!isExpression)
+	writer.println("String _jspx_qfStr = \"\";");
+	
+	if (params != null && params.size() > 0) {
+	    Enumeration en = params.keys();
+	    while (en.hasMoreElements()) {
+		String key = (String) en.nextElement();
+		String []value = (String []) params.get(key);
+		
+		for (int i = 0; i < value.length; i++) {
+		    String v;
+		    if (JspUtil.isExpression(value[i], isXml))
+			v = JspUtil.getExpr(value[i], isXml);
+		    else
+			v = "\"" + URLEncoder.encode(value[i]) + "\"";
+		    writer.println("_jspx_qfStr = _jspx_qfStr + \"" + sep +
+			       key + "=\" +" + v + ";");
+		    sep = '&';			    
+		}
+	    }
+	}
+	if (!isExpression)
             writer.println("pageContext.forward(" +
-                           writer.quoteString(page) + " +  _jspx_qfStr);");
-        else
+			   writer.quoteString(page) + " +  _jspx_qfStr);");
+	else
             writer.println("pageContext.forward(" +
-                           JspUtil.getExpr (page) +  " +  _jspx_qfStr);");
-        
+			   JspUtil.getExpr (page, isXml) +  " +  _jspx_qfStr);");
+	
         writer.println("return;");
         writer.popIndent();
         writer.println("}");

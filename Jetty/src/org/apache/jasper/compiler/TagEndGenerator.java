@@ -61,15 +61,20 @@ import java.util.Stack;
 import javax.servlet.jsp.tagext.TagLibraryInfo;
 import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.VariableInfo;
+import javax.servlet.jsp.tagext.TagVariableInfo;
 import javax.servlet.jsp.tagext.TagData;
 import javax.servlet.jsp.tagext.Tag;
+import javax.servlet.jsp.tagext.IterationTag;
 import javax.servlet.jsp.tagext.BodyTag;
+import javax.servlet.jsp.tagext.TryCatchFinally;
 
+import org.xml.sax.Attributes;
 
 /**
  * Custom tag support.
  *
  * @author Anil K. Vijendran
+ * @author Danno Ferrin
  */
 public class TagEndGenerator
     extends TagGeneratorBase
@@ -78,13 +83,15 @@ public class TagEndGenerator
     String prefix, shortTagName;
     TagLibraryInfo tli;
     TagInfo ti;
-    Hashtable attrs;
+    Attributes attrs;
     TagLibraries libraries;
+    boolean hasBody;
 
     public TagEndGenerator(String prefix, String shortTagName,
-                           Hashtable attrs, TagLibraryInfo tli,
+                           Attributes attrs, TagLibraryInfo tli,
                            TagInfo ti, TagLibraries libraries,
-                           Stack tagHandlerStack, Hashtable tagVarNumbers)
+                           Stack tagHandlerStack, Hashtable tagVarNumbers,
+                           boolean hasBody)
     {
         setTagHandlerStack(tagHandlerStack);
         setTagVarNumbers(tagVarNumbers);
@@ -93,7 +100,8 @@ public class TagEndGenerator
         this.tli = tli;
         this.ti = ti;
         this.attrs = attrs;
-        this.libraries = libraries;
+	this.libraries = libraries;
+        this.hasBody = hasBody;
     }
 
     public void generate(ServletWriter writer, Class phase) {
@@ -101,52 +109,64 @@ public class TagEndGenerator
         String thVarName = tvd.tagHandlerInstanceName;
         String evalVarName = tvd.tagEvalVarName;
 
-        VariableInfo[] vi = ti.getVariableInfo(new TagData(attrs));
+	TagData tagData = 
+	    new TagData(JspUtil.attrsToHashtable(attrs));
+        VariableInfo[] vi = ti.getVariableInfo(tagData);
+	TagVariableInfo[] tvi = ti.getTagVariableInfos();
 
         Class tagHandlerClass =
-            libraries.getTagCache(prefix, shortTagName).getTagHandlerClass();
-        boolean implementsBodyTag = BodyTag.class.isAssignableFrom(tagHandlerClass);
+	    libraries.getTagCache(prefix, shortTagName).getTagHandlerClass();
+        boolean implementsIterationTag = 
+	    IterationTag.class.isAssignableFrom(tagHandlerClass);
+        boolean implementsBodyTag = 
+	    BodyTag.class.isAssignableFrom(tagHandlerClass);
+        boolean implementsTryCatchFinally = 
+	    TryCatchFinally.class.isAssignableFrom(tagHandlerClass);
 
-        writer.popIndent();
+	writer.popIndent();
 
-        if (implementsBodyTag)
-            writer.println("} while ("+thVarName+".doAfterBody() == BodyTag.EVAL_BODY_TAG);");
-        else
-            writer.println("} while (false);");
-
-        declareVariables(writer, vi, false, true, VariableInfo.AT_BEGIN);
-
-        if (implementsBodyTag) {
-            writer.popIndent(); // try
-
-            /** FIXME: REMOVE BEGIN */
-            //              writer.println("} catch (Throwable t) {");
-            //              writer.pushIndent();
-
-            //              writer.println("System.err.println(\"Caught: \");");
-            //              writer.println("t.printStackTrace();");
-
-            //              writer.popIndent();
-            /** FIXME: REMOVE END */
-
-            writer.println("} finally {");
-            writer.pushIndent();
-            writer.println("if ("+evalVarName+" != Tag.EVAL_BODY_INCLUDE)");
-            writer.pushIndent();
-            writer.println("out = pageContext.popBody();");
-            writer.popIndent();
-
-            writer.popIndent();
-            writer.println("}");
+        if (hasBody) {
+            if (implementsIterationTag)
+                writer.println("} while ("+thVarName+".doAfterBody() == javax.servlet.jsp.tagext.BodyTag.EVAL_BODY_AGAIN);");
+            else
+                writer.println("} while (false);");
         }
 
-        writer.popIndent(); // EVAL_BODY
-        writer.println("}");
+        declareVariables(writer, vi, tvi, tagData, false, true, VariableInfo.AT_BEGIN);
 
-        writer.println("if ("+thVarName+".doEndTag() == Tag.SKIP_PAGE)");
-        writer.pushIndent(); writer.println("return;"); writer.popIndent();
+        if (hasBody) {
+            if (implementsBodyTag) {
+                writer.popIndent(); // try
 
-        writer.popIndent(); // try
+                /** FIXME: REMOVE BEGIN */
+                //              writer.println("} catch (Throwable t) {");
+                //              writer.pushIndent();
+
+                //              writer.println("System.err.println(\"Caught: \");");
+                //              writer.println("t.printStackTrace();");
+
+                //              writer.popIndent();
+                /** FIXME: REMOVE END */
+
+                writer.println("} finally {");
+                writer.pushIndent();
+                writer.println("if ("+evalVarName+" != javax.servlet.jsp.tagext.Tag.EVAL_BODY_INCLUDE)");
+                writer.pushIndent();
+                writer.println("out = pageContext.popBody();");
+                writer.popIndent();
+
+                writer.popIndent();
+                writer.println("}");
+            }
+
+	    writer.popIndent(); // EVAL_BODY
+	    writer.println("}");
+        }
+
+	writer.println("if ("+thVarName+".doEndTag() == javax.servlet.jsp.tagext.Tag.SKIP_PAGE)");
+	writer.pushIndent(); writer.println("return;"); writer.popIndent();
+
+	writer.popIndent(); // try
 
         /** FIXME: REMOVE BEGIN */
         //          writer.println("} catch (Throwable t) {");
@@ -157,13 +177,24 @@ public class TagEndGenerator
         //          writer.popIndent();
         /** FIXME: REMOVE END */
 
-        writer.println("} finally {");
-        writer.pushIndent();
-        writer.println(thVarName+".release();");
-        writer.popIndent();
-        writer.println("}");
+	// TryCatchFinally
+	if (implementsTryCatchFinally) {
+	    writer.println("} catch (Throwable _jspx_exception) {");
+	    writer.pushIndent();
+	    writer.println(thVarName+".doCatch(_jspx_exception);");
+	    writer.popIndent();
+	}
+
+	writer.println("} finally {");
+	writer.pushIndent();
+	if (implementsTryCatchFinally) {
+	    writer.println(thVarName+".doFinally();");
+	}
+	writer.println(thVarName+".release();");
+	writer.popIndent();
+	writer.println("}");
 
         // Need to declare and update AT_END variables here.
-        declareVariables(writer, vi, true, true, VariableInfo.AT_END);
+        declareVariables(writer, vi, tvi, tagData, true, true, VariableInfo.AT_END);
     }
 }

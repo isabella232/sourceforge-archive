@@ -70,7 +70,7 @@ package org.apache.jasper;
 public class JasperException extends javax.servlet.ServletException {
     
     public JasperException(String reason) {
-        super(reason);
+	super(reason);
     }
 
     /**

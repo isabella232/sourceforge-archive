@@ -67,6 +67,7 @@ import java.lang.reflect.Method;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.beans.PropertyEditor;
 import java.beans.IntrospectionException;
 
 import org.apache.jasper.JasperException;
@@ -77,16 +78,19 @@ import org.apache.jasper.Constants;
  * tag. 
  *
  * @author Anil K. Vijendran (akv@eng.sun.com)
+ * @author Pierre Delisle
  */
 public class TagCache {
     String shortTagName;
     Hashtable methodMaps;
+    Hashtable propertyEditorMaps;
     BeanInfo tagClassInfo;
     Class tagHandlerClass;
     
     TagCache(String shortTagName) {
         this.shortTagName = shortTagName;
         this.methodMaps = new Hashtable();
+        this.propertyEditorMaps = new Hashtable();
     }
 
     private void addSetterMethod(String attrName, Method m) {
@@ -95,6 +99,14 @@ public class TagCache {
     
     Method getSetterMethod(String attrName) {
         return (Method) methodMaps.get(attrName);
+    }
+
+    private void addPropertyEditor(String attrName, Class peClass) {
+        propertyEditorMaps.put(attrName, peClass);
+    }
+    
+    Class getPropertyEditorClass(String attrName) {
+        return (Class) propertyEditorMaps.get(attrName);
     }
 
     void setTagHandlerClass(Class tagHandlerClass) 
@@ -112,6 +124,8 @@ public class TagCache {
                 */
                 if (pd[i].getWriteMethod() != null)
                     addSetterMethod(pd[i].getName(), pd[i].getWriteMethod());
+                if (pd[i].getPropertyEditorClass() != null)
+                    addPropertyEditor(pd[i].getName(), pd[i].getPropertyEditorClass());
             }
         } catch (IntrospectionException ex) {
             throw new JasperException(Constants.getString("jsp.error.unable.to_introspect",

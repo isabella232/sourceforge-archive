@@ -57,10 +57,13 @@ package org.apache.jasper.compiler;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.net.URL;
 
 import org.apache.jasper.JspCompilationContext;
 import org.apache.jasper.Constants;
 import org.apache.jasper.JasperException;
+
+import org.apache.jasper.logging.Logger;
 
 /**
  * JspCompiler is an implementation of Compiler with a funky code
@@ -76,245 +79,115 @@ import org.apache.jasper.JasperException;
  */
 public class JspCompiler extends Compiler implements Mangler {
     
-    String pkgName, javaFileName, classFileName;
+    String javaFileName, classFileName;
     String realClassName;
 
-    File jsp;
+    String jsp;
     String outputDir;
 
     //    ClassFileData cfd;
     boolean outDated;
-    static final int JSP_TOKEN_LEN= Constants.JSP_TOKEN.length();
 
+    Logger.Helper loghelper = new Logger.Helper("JASPER_LOG", "JspCompiler");
+    
     public JspCompiler(JspCompilationContext ctxt) throws JasperException {
         super(ctxt);
         
-        this.jsp = new File(ctxt.getJspFile());
+        this.jsp = ctxt.getJspFile();
         this.outputDir = ctxt.getOutputDir();
         this.outDated = false;
         setMangler(this);
-
-        // If the .class file exists and is outdated, compute a new
-        // class name
-        if( isOutDated() ) {
-            generateNewClassName();
-        }
     }
 
-    private void generateNewClassName() {
-        File classFile = new File(getClassFileName());
-        if (! classFile.exists()) {
-             String prefix = getPrefix(jsp.getPath());
-             realClassName= prefix + getBaseClassName() +
-                 Constants.JSP_TOKEN + "0";
-            return;
-        } 
-
-        String cn=getRealClassName();
-        String baseClassName = cn.
-            substring(0, cn.lastIndexOf(Constants.JSP_TOKEN));
-        int jspTokenIdx=cn.lastIndexOf(Constants.JSP_TOKEN);
-        String versionS=cn.substring(jspTokenIdx + JSP_TOKEN_LEN,
-                                     cn.length());
-        int number= Integer.valueOf(versionS).intValue();
-        number++;
-        realClassName = baseClassName + Constants.JSP_TOKEN + number;
-    }
-    
-    /** Return the real class name for the JSP, including package and
-     *   version.
-     *
-     *  This method is called when the server is started and a .class file
-     *  is found from a previous compile or when the .class file is older,
-     *  to find next version.
-     */
-    public final String getRealClassName() {
-        if( realClassName!=null ) return realClassName;
-
-        //	System.out.println("JspCompiler: extract class name and version ");
-        try {
-            realClassName = ClassName.getClassName( getClassFileName() );
-        } catch( JasperException ex) {
-            // ops, getClassName should throw something
-            ex.printStackTrace();
-            return null;
-        }
-        return realClassName;
-
-    }
-    
     public final String getClassName() {
-        // CFD gives you the whole class name
-        // This method returns just the class name sans the package
-
-        String cn=getRealClassName();
-        int lastDot = cn.lastIndexOf('.');
-        String className=null;
-        if (lastDot != -1) 
-            className = cn.substring(lastDot+1,
-                                     cn.length());
-        else // no package name case
-            className = cn;
-
-        return className;
+	if( realClassName == null )
+	    realClassName = getBaseClassName();
+        return realClassName;
     }
 
     public final String getJavaFileName() {
         if( javaFileName!=null ) return javaFileName;
-        javaFileName = getClassName() + ".java";
+	javaFileName = getClassName() + ".java";
  	if (outputDir != null && !outputDir.equals(""))
  	    javaFileName = outputDir + File.separatorChar + javaFileName;
-        return javaFileName;
+	return javaFileName;
     }
     
     public final String getClassFileName() {
         if( classFileName!=null) return classFileName;
 
-        //        computeClassFileName();
-        String prefix = getPrefix(jsp.getPath());
-        classFileName = prefix + getBaseClassName() + ".class";
-        if (outputDir != null && !outputDir.equals(""))
-            classFileName = outputDir + File.separatorChar + classFileName;
-        return classFileName;
+        classFileName = getClassName() + ".class";
+	if (outputDir != null && !outputDir.equals(""))
+	    classFileName = outputDir + File.separatorChar + classFileName;
+	return classFileName;
     }
 
-    
-    public static String [] keywords = { 
-        "abstract", "boolean", "break", "byte",
-        "case", "catch", "char", "class",
-        "const", "continue", "default", "do",
-        "double", "else", "extends", "final",
-        "finally", "float", "for", "goto",
-        "if", "implements", "import",
-        "instanceof", "int", "interface",
-        "long", "native", "new", "package",
-        "private", "protected", "public",
-        "return", "short", "static", "super",
-        "switch", "synchronized", "this",
-        "throw", "throws", "transient", 
-        "try", "void", "volatile", "while" 
-    };
 
-    public final String getPackageName() {
-        if( pkgName!=null) return pkgName;
-
-        // compute package name 
-        String pathName = jsp.getPath();
-        StringBuffer modifiedpkgName = new StringBuffer ();
-        int indexOfSepChar = pathName.lastIndexOf(File.separatorChar);
-        
-        if (indexOfSepChar == -1 || indexOfSepChar == 0)
-            pkgName = null;
-        else {
-            for (int i = 0; i < keywords.length; i++) {
-                char fs = File.separatorChar;
-                int index1 = pathName.indexOf(fs + keywords[i]);
-                int index2 = pathName.indexOf(keywords[i]);
-                if (index1 == -1 && index2 == -1) continue;
-                int index = (index2 == -1) ? index1 : index2;
-                while (index != -1) {
-                    String tmpathName = pathName.substring (0,index+1) + '%';
-                    pathName = tmpathName + pathName.substring (index+2);
-                    index = pathName.indexOf(fs + keywords[i]);
-                }
-            }
-            
-            // XXX fix for paths containing '.'.
-            // Need to be more elegant here.
-            pathName = pathName.replace('.','_');
-            
-            pkgName = pathName.substring(0, pathName.lastIndexOf(
-            		File.separatorChar)).replace(File.separatorChar, '.');
-            for (int i=0; i<pkgName.length(); i++) 
-                if (Character.isLetter(pkgName.charAt(i)) == true ||
-                    pkgName.charAt(i) == '.') {
-                    modifiedpkgName.append(pkgName.substring(i,i+1));
-                }
-                else
-                    modifiedpkgName.append(mangleChar(pkgName.charAt(i)));
-
-            if (modifiedpkgName.charAt(0) == '.') {
-                String modifiedpkgNameString = modifiedpkgName.toString();
-                pkgName = modifiedpkgNameString.
-                    substring(1, 
-                              modifiedpkgName.length ());
-            }
-            else 
-                pkgName = modifiedpkgName.toString();
-        }
-        return pkgName;
-    }
-
+    /**
+     * Convert the final path component to a valid base class name, maintaining
+     * uniqueness as required.
+     */
     private final String getBaseClassName() {
-        String className;
-        
-        if (jsp.getName().endsWith(".jsp"))
-            className = jsp.getName().substring(0, jsp.getName().length() - 4);
-        else
-            className = jsp.getName();
-            
-        
-        // Fix for invalid characters. If you think of more add to the list.
-        StringBuffer modifiedClassName = new StringBuffer();
-        for (int i = 0; i < className.length(); i++) {
-            if (Character.isLetterOrDigit(className.charAt(i)) == true)
-                modifiedClassName.append(className.substring(i,i+1));
+
+        int iSep = jsp.lastIndexOf('/') + 1;
+        int iEnd = jsp.length();
+        StringBuffer modifiedClassName = new StringBuffer(jsp.length() - iSep);
+	if (!Character.isJavaIdentifierStart(jsp.charAt(iSep))) {
+	    // If the first char is not a legal Java letter or digit,
+	    // prepend a '$'.
+	    modifiedClassName.append('$');
+	}
+        for (int i = iSep; i < iEnd; i++) {
+            char ch = jsp.charAt(i);
+            if (Character.isLetterOrDigit(ch))
+                modifiedClassName.append(ch);
+            else if (ch == '.')
+                modifiedClassName.append('$');
             else
-                modifiedClassName.append(mangleChar(className.charAt(i)));
+                modifiedClassName.append(mangleChar(ch));
         }
-        
-        return modifiedClassName.toString();
+        return (modifiedClassName.toString());
+
     }
 
-    private final String getPrefix(String pathName) {
-        if (pathName != null) {
-            StringBuffer modifiedName = new StringBuffer();
-            for (int i = 0; i < pathName.length(); i++) {
-                if (Character.isLetter(pathName.charAt(i)) == true)
-                    modifiedName.append(pathName.substring(i,i+1));
-                else
-                    modifiedName.append(mangleChar(pathName.charAt(i)));
- 	    }
-            return modifiedName.toString();
-        }
-        else 
-            return "";
-    }
 
+    /**
+     * Mangle the specified character to create a legal Java class name.
+     */
     private static final String mangleChar(char ch) {
 
-        if(ch == File.separatorChar) {
-            ch = '/';
-        }	
-        String s = Integer.toHexString(ch);
-        int nzeros = 5 - s.length();
-        char[] result = new char[6];
-        result[0] = '_';
-        for (int i = 1; i <= nzeros; i++)
-            result[i] = '0';
-        for (int i = nzeros+1, j = 0; i < 6; i++, j++)
-            result[i] = s.charAt(j);
-        return new String(result);
+	String s = Integer.toHexString(ch);
+	int nzeros = 5 - s.length();
+	char[] result = new char[6];
+	result[0] = '_';
+	for (int i = 1; i <= nzeros; i++)
+	    result[i] = '0';
+	for (int i = nzeros+1, j = 0; i < 6; i++, j++)
+	    result[i] = s.charAt(j);
+	return new String(result);
     }
+
 
     /**
      * Determines whether the current JSP class is older than the JSP file
      * from whence it came
      */
     public boolean isOutDated() {
-        File jspReal = null;
+        long jspRealLastModified = 0;
 
-        String realPath = ctxt.getRealPath(jsp.getPath());
-        if (realPath == null)
-            // Jetty - if it is null, probably in a war file, so it aint going to
-            // be outdated - or at least not our problem.
-            return false;
- 
-        jspReal = new File(realPath);
-        
+        try {
+            URL jspUrl = ctxt.getResource(jsp);
+            if (jspUrl == null)
+                return true;
+            jspRealLastModified = jspUrl.openConnection().getLastModified();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return true;
+        }
+
         File classFile = new File(getClassFileName());
         if (classFile.exists()) {
-            outDated = classFile.lastModified() < jspReal.lastModified();
+            outDated = classFile.lastModified() < jspRealLastModified;
         } else {
             outDated = true;
         }

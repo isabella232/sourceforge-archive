@@ -64,6 +64,7 @@ import javax.servlet.jsp.tagext.TagLibraryInfo;
 import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagAttributeInfo;
 import javax.servlet.jsp.tagext.VariableInfo;
+import javax.servlet.jsp.tagext.TagVariableInfo;
 import javax.servlet.jsp.tagext.TagData;
 import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.BodyTag;
@@ -74,10 +75,14 @@ import org.apache.jasper.Constants;
 
 import org.apache.jasper.compiler.ServletWriter;
 
+import org.xml.sax.Attributes;
+import org.xml.sax.helpers.AttributesImpl;
+
 /**
  * Custom tag support.
  *
  * @author Anil K. Vijendran
+ * @author Danno Ferrin
  */
 public class TagBeginGenerator
     extends TagGeneratorBase
@@ -85,7 +90,7 @@ public class TagBeginGenerator
 {
     String prefix;
     String shortTagName;
-    Hashtable attrs;
+    Attributes attrs;
     TagLibraryInfo tli;
     TagInfo ti;
     TagAttributeInfo[] attributes;
@@ -94,11 +99,14 @@ public class TagBeginGenerator
     TagData tagData;
     Mark start;
     TagLibraries libraries;
+    boolean hasBody;
+    boolean isXml;
 
 
-    public TagBeginGenerator(Mark start, String prefix, String shortTagName, Hashtable attrs,
-                             TagLibraryInfo tli, TagInfo ti, TagLibraries libraries,
-                             Stack tagHandlerStack, Hashtable tagVarNumbers)
+    public TagBeginGenerator(Mark start, String prefix, String shortTagName, Attributes attrs,
+			     TagLibraryInfo tli, TagInfo ti, TagLibraries libraries,
+                             Stack tagHandlerStack, Hashtable tagVarNumbers,
+                             boolean hasBody, boolean isXml)
         throws JasperException
     {
         setTagHandlerStack(tagHandlerStack);
@@ -106,13 +114,15 @@ public class TagBeginGenerator
         this.prefix = prefix;
         this.shortTagName = shortTagName;
         this.attrs = attrs;
-        this.tli = tli;
-        this.ti = ti;
-        this.attributes = ti.getAttributes();
-        this.baseVarName = getTagVarName(prefix, shortTagName);
-        this.thVarName = "_jspx_th_"+baseVarName;
-        this.start = start;
-        this.libraries = libraries;
+	this.tli = tli;
+	this.ti = ti;
+	this.attributes = ti.getAttributes();
+	this.baseVarName = getTagVarName(prefix, shortTagName);
+	this.thVarName = "_jspx_th_"+baseVarName;
+	this.start = start;
+	this.libraries = libraries;
+        this.hasBody = hasBody;
+	this.isXml = isXml;
     }
 
     public void init(JspCompilationContext ctxt) throws JasperException {
@@ -127,7 +137,7 @@ public class TagBeginGenerator
                 clz = cl.loadClass(ti.getTagClassName());
             } catch (Exception ex) {
                 throw new CompileException(start,
-                                           Constants.getString("jsp.error.unable.loadclass",
+					   Constants.getString("jsp.error.unable.loadclass",
                                                               new Object[] { ti.getTagClassName(),
                                                                              ex.getMessage()
                                                               }
@@ -141,13 +151,13 @@ public class TagBeginGenerator
     void validate() throws JasperException {
 
         // Sigh! I wish I didn't have to clone here.
-        Hashtable attribs = (Hashtable) attrs.clone();
+        Hashtable attribs = JspUtil.attrsToHashtable(attrs);
 
         // First make sure all required attributes are indeed present.
         for(int i = 0; i < attributes.length; i++)
             if (attributes[i].isRequired() && attribs.get(attributes[i].getName()) == null)
                 throw new CompileException(start,
-                                           Constants.getString("jsp.error.missing_attribute",
+					   Constants.getString("jsp.error.missing_attribute",
                                                               new Object[] {
                                                                   attributes[i].getName(),
                                                                   shortTagName
@@ -162,13 +172,13 @@ public class TagBeginGenerator
                 if (attr.equals(attributes[i].getName())) {
                     found = true;
                     if (attributes[i].canBeRequestTime() &&
-                        JspUtil.isExpression((String)attribs.get(attr)))
+			JspUtil.isExpression((String)attribs.get(attr), isXml))
                         attribs.put(attr, TagData.REQUEST_TIME_VALUE);
-                }
+		}
 
             if (!found)
                 throw new CompileException(start,
-                                           Constants.getString("jsp.error.bad_attribute",
+					   Constants.getString("jsp.error.bad_attribute",
                                                               new Object[] {
                                                                   attr
                                                               }
@@ -178,48 +188,67 @@ public class TagBeginGenerator
         tagData = new TagData(attribs);
         if (!ti.isValid(tagData))
             throw new CompileException(start,
-                                       Constants.getString("jsp.error.invalid_attributes"));
+				       Constants.getString("jsp.error.invalid_attributes"));
     }
 
+    /**
+     * Generates the code that sets the attributes of the tag bean.
+     * <BR><B>Precondition</B>: All attributes must be validated, specifically
+     * any attributes in the attribs field correspond to an exposed proeprty of
+     * the tag bean, and only those attributes that are to be run-time 
+     * expressions are encoded as such in the code<BR>
+     */
     private final void generateSetters(ServletWriter writer, String parent)
         throws JasperException
     {
         writer.println(thVarName+".setPageContext(pageContext);");
         writer.println(thVarName+".setParent("+parent+");");
 
-        if (attributes.length != 0)
-            for(int i = 0; i < attributes.length; i++) {
-                String attrValue = (String) attrs.get(attributes[i].getName());
-                if (attrValue != null) {
-                    String attrName = attributes[i].getName();
-                    Method m = tc.getSetterMethod(attrName);
-                    Class c[] = m.getParameterTypes();
-                    // assert(c.length > 0)
+        int attrsLength = attrs.getLength();
+        for(int i = 0; i < attrsLength; i++) {
+            String attrValue = attrs.getValue(i);
+            if (attrValue != null) {
+                String attrName = attrs.getQName(i);
+		    Method m = tc.getSetterMethod(attrName);
+                if (m == null)
+                    throw new CompileException
+                        (start, Constants.getString
+                         ("jsp.error.unable.to_find_method",
+                          new Object[] { attrName }));
 
-                    if (attributes[i].canBeRequestTime()) {
-                        if (JspUtil.isExpression(attrValue))
-                            attrValue = JspUtil.getExpr(attrValue);
-                        else
-                            attrValue = convertString(c[0], attrValue, writer, attrName);
-                    } else
-                        attrValue = convertString(c[0], attrValue, writer, attrName);
+                Class c[] = m.getParameterTypes();
+                // assert(c.length > 0)
 
-
-                    if (m == null)
-                        throw new CompileException
-                            (start, Constants.getString
-                             ("jsp.error.unable.to_find_method",
-                              new Object[] { attrName }));
-
-                    writer.println(thVarName+"."+m.getName()+"("+attrValue+");");
+                // match tld defined attribute to its element value
+                for(int j = 0; j < attributes.length; j++) {
+                    if (attrs.getQName(i).equals(attributes[j].getName())) {
+                        if (attributes[j].canBeRequestTime() && 
+                            JspUtil.isExpression(attrValue, isXml)) {
+                            attrValue = JspUtil.getExpr(attrValue, isXml);
+                        } else {
+                            attrValue = convertString(c[0], attrValue, writer, attrName,
+                                                      tc.getPropertyEditorClass(attrName));
+                        }
+                    }
                 }
+
+
+                writer.println(thVarName+"."+m.getName()+"("+attrValue+");");
             }
+        }
     }
 
-    public String convertString(Class c, String s, ServletWriter writer, String attrName)
+    public String convertString(Class c, String s, ServletWriter writer, String attrName,
+				Class propertyEditorClass)
         throws JasperException 
     {
-        if (c == String.class) {
+	if (propertyEditorClass != null) {
+	    return 
+		"(" + c.getName() + 
+		")JspRuntimeLibrary.getValueFromBeanInfoPropertyEditor(" +
+		c.getName() + ".class, \"" + attrName + "\", " + writer.quoteString(s) + ", " +
+		propertyEditorClass.getName() + ".class)";
+	} else if (c == String.class) {
             return writer.quoteString(s);
         } else if (c == boolean.class) {
             return Boolean.valueOf(s).toString();
@@ -231,7 +260,7 @@ public class TagBeginGenerator
             return "new Byte((byte)" + Byte.valueOf(s).toString() + ")";
         } else if (c == char.class) {
             // non-normative, because a normative method would fail to compile
-            if (s.length() > 1) {
+            if (s.length() > 0) {
                 char ch = s.charAt(0);
                 // this trick avoids escaping issues
                 return "((char) " + (int) ch + ")";
@@ -242,7 +271,7 @@ public class TagBeginGenerator
             }
         } else if (c == Character.class) {
             // non-normative, because a normative method would fail to compile
-            if (s.length() > 1) {
+            if (s.length() > 0) {
                 char ch = s.charAt(0);
                 // this trick avoids escaping issues
                 return "new Character((char) " + (int) ch + ")";
@@ -263,16 +292,29 @@ public class TagBeginGenerator
             return Integer.valueOf(s).toString();
         } else if (c == Integer.class) {
             return "new Integer(" + Integer.valueOf(s).toString() + ")";
+        } else if (c == short.class) {
+            return "((short) " + Short.valueOf(s).toString() + ")";
+        } else if (c == Short.class) {
+            return "new Short(" + Short.valueOf(s).toString() + ")";
         } else if (c == long.class) {
             return Long.valueOf(s).toString() + "l";
         } else if (c == Long.class) {
             return "new Long(" + Long.valueOf(s).toString() + "l)";
+        } else if (c == Object.class) {
+            return "new String(" + writer.quoteString(s) + ")";
+	} else {
+	    return "(" + c.getName() + 
+		")JspRuntimeLibrary.getValueFromPropertyEditorManager(" +
+		c.getName() + ".class, \"" + attrName + "\", " + writer.quoteString(s) + ")";
+        }
+	/* FIXME TOBEREMOVED
         } else {
              throw new CompileException
                     (start, Constants.getString
                      ("jsp.error.unable.to_convert_string",
                       new Object[] { c.getName(), attrName }));
         }
+	*/
     }   
     
     public void generateServiceMethodStatements(ServletWriter writer)
@@ -282,76 +324,69 @@ public class TagBeginGenerator
         String parent = top == null ? null : top.tagHandlerInstanceName;
 
         String evalVar = "_jspx_eval_"+baseVarName;
-        tagBegin(new TagVariableData(thVarName, evalVar));
+	tagBegin(new TagVariableData(thVarName, evalVar));
 
         writer.println("/* ----  "+prefix+":"+shortTagName+" ---- */");
 
         writer.println(ti.getTagClassName()+" "+thVarName+" = new "+ti.getTagClassName()+"();");
-
         generateSetters(writer, parent);
 
         VariableInfo[] vi = ti.getVariableInfo(tagData);
-
+	TagVariableInfo[] tvi = ti.getTagVariableInfos();
         // Just declare AT_BEGIN here...
-        declareVariables(writer, vi, true, false, VariableInfo.AT_BEGIN);
+        declareVariables(writer, vi, tvi, tagData, true, false, VariableInfo.AT_BEGIN);
 
-        writer.println("try {");
-        writer.pushIndent();
-
-
+	writer.println("try {");
+	writer.pushIndent();
 
         writer.println("int "+evalVar+" = "
                        +thVarName+".doStartTag();");
 
-        boolean implementsBodyTag = BodyTag.class.isAssignableFrom(tc.getTagHandlerClass());
-
+        boolean implementsBodyTag = 
+	    BodyTag.class.isAssignableFrom(tc.getTagHandlerClass());
         // Need to update AT_BEGIN variables here
-        declareVariables(writer, vi, false, true, VariableInfo.AT_BEGIN);
+        declareVariables(writer, vi, tvi, tagData, false, true, VariableInfo.AT_BEGIN);
 
         // FIXME: I'm not too sure if this is the right approach. I don't like
         //        throwing English language strings into the generated servlet.
         //        Perhaps, I'll just define an inner classes as necessary for these
         //        types of exceptions? -akv
 
-        if (implementsBodyTag) {
-            writer.println("if ("+evalVar+" == Tag.EVAL_BODY_INCLUDE)");
-            writer.pushIndent();
-            writer.println("throw new JspTagException(\"Since tag handler "+tc.getTagHandlerClass()+
-                           " implements BodyTag, it can't return Tag.EVAL_BODY_INCLUDE\");");
-            writer.popIndent();
-        } else {
-            writer.println("if ("+evalVar+" == BodyTag.EVAL_BODY_TAG)");
+        if (!implementsBodyTag) {
+            writer.println("if ("+evalVar+" == javax.servlet.jsp.tagext.BodyTag.EVAL_BODY_BUFFERED)");
             writer.pushIndent();
             writer.println("throw new JspTagException(\"Since tag handler "+tc.getTagHandlerClass()+
                            " does not implement BodyTag, it can't return BodyTag.EVAL_BODY_TAG\");");
             writer.popIndent();
         }
 
-        writer.println("if ("+evalVar+" != Tag.SKIP_BODY) {");
-        writer.pushIndent();
+        if (hasBody) {
+            writer.println("if ("+evalVar+" != javax.servlet.jsp.tagext.Tag.SKIP_BODY) {");
+	    writer.pushIndent();
 
-        if (implementsBodyTag) {
-            writer.println("try {");
-            writer.pushIndent();
+	    if (implementsBodyTag) {
+                writer.println("try {");
+                writer.pushIndent();
 
-            writer.println("if ("+evalVar+" != Tag.EVAL_BODY_INCLUDE) {");
-            writer.pushIndent();
+	        writer.println("if ("+evalVar+" != javax.servlet.jsp.tagext.Tag.EVAL_BODY_INCLUDE) {");
+	        writer.pushIndent();
 
-            writer.println("out = pageContext.pushBody();");
-            writer.println(thVarName+".setBodyContent((BodyContent) out);");
+	        writer.println("out = pageContext.pushBody();");
+	        writer.println(thVarName+".setBodyContent((javax.servlet.jsp.tagext.BodyContent) out);");
 
-            writer.popIndent();
-            writer.println("}");
+	        writer.popIndent();
+	        writer.println("}");
 
-            writer.println(thVarName+".doInitBody();");
+	        writer.println(thVarName+".doInitBody();");
+	    }
+
+	    writer.println("do {");
+	    writer.pushIndent();
         }
-
-        writer.println("do {");
-        writer.pushIndent();
         // Need to declare and update NESTED variables here
-        declareVariables(writer, vi, true, true, VariableInfo.NESTED);
+        declareVariables(writer, vi, tvi, tagData, true, true, VariableInfo.NESTED);
         // Need to update AT_BEGIN variables here
-        declareVariables(writer, vi, false, true, VariableInfo.AT_BEGIN);
+        declareVariables(writer, vi, tvi, tagData, false, true, VariableInfo.AT_BEGIN);
     }
 
     public void generate(ServletWriter writer, Class phase)
@@ -360,3 +395,4 @@ public class TagBeginGenerator
         generateServiceMethodStatements(writer);
     }
 }
+

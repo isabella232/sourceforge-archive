@@ -37,6 +37,7 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import javax.servlet.http.HttpUtils;
 
 
 /* ------------------------------------------------------------ */
@@ -386,7 +387,7 @@ public class ServletRequest
             {
                 for (int i=0;i<cookies.length;i++)
                 {
-                    if (Context.__SessionId.equals(cookies[i].getName()))
+                    if (SessionManager.__SessionId.equals(cookies[i].getName()))
                     {
                         _sessionId=cookies[i].getValue();
                         _sessionIdState = __SESSIONID_COOKIE;
@@ -398,10 +399,10 @@ public class ServletRequest
         }
             
         // check if there is a url encoded session param.
-        if (pathParams!=null && pathParams.startsWith(Context.__SessionId))
+        if (pathParams!=null && pathParams.startsWith(SessionManager.__SessionId))
         {
             String id =
-                pathParams.substring(Context.__SessionId.length()+1);
+                pathParams.substring(SessionManager.__SessionId.length()+1);
             Code.debug("Got Session ",id," from URL");
             
             try
@@ -440,11 +441,17 @@ public class ServletRequest
         
         String path=_httpRequest.getPath();
 
-        int prefix=path.indexOf(Context.__SessionUrlPrefix);
+        int prefix=path.indexOf(SessionManager.__SessionUrlPrefix);
         if (prefix!=-1)
             path = path.substring(0,prefix);
         
         return path;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public StringBuffer getRequestURL()
+    {
+        return HttpUtils.getRequestURL(this);
     }
     
     /* ------------------------------------------------------------ */
@@ -474,7 +481,7 @@ public class ServletRequest
             if (_context.getServletHandler().isUsingCookies())
             {
                 Cookie cookie =
-                    new Cookie(_context.__SessionId,_session.getId());
+                    new Cookie(SessionManager.__SessionId,_session.getId());
                 String path=getContextPath();
                 if (path==null || path.length()==0)
                     path="/";
@@ -557,6 +564,12 @@ public class ServletRequest
     }
     
     /* -------------------------------------------------------------- */
+    public void setCharacterEncoding(String encoding)
+    {
+        _httpRequest.setCharacterEncoding(encoding);
+    }
+    
+    /* -------------------------------------------------------------- */
     public String getCharacterEncoding()
     {
         return _httpRequest.getCharacterEncoding();
@@ -597,6 +610,14 @@ public class ServletRequest
         if (_mergedParameters==null)
             _mergedParameters=new ArrayList(2);
         _mergedParameters.add(parameters);
+    }
+    
+    /* -------------------------------------------------------------- */
+    public Map getParameterMap()
+    {
+        // XXX
+        Code.notImplemented();
+        return null;
     }
     
     /* -------------------------------------------------------------- */

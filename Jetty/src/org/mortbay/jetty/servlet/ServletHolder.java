@@ -208,43 +208,6 @@ public class ServletHolder
         {
             Code.debug("InitializeClass "+getClassName());
             
-            // XXX - This is horrible - got to find a better way.
-            if (getClassName().equals(_handler.getJSPClassName()))
-            {
-                Code.debug("Jasper hack");
-                ClassLoader jettyLoader=_handler.getHandlerContext().getClassLoader();
-                ClassLoader jasperLoader=(ClassLoader)
-                    _context.getAttribute("org.apache.tomcat.classloader");
-                if (jettyLoader!=null && jasperLoader==null)
-                {
-                    Code.debug("Fiddle classloader for Jasper: "+jettyLoader);
-                    _context.setAttribute("org.apache.tomcat.classloader",
-                                          jettyLoader);
-                }
-                
-                String classpath = getInitParameter("classpath");
-                String ctxClasspath =(jettyLoader instanceof ContextLoader)
-                    ?((ContextLoader)jettyLoader).getFileClassPath()
-                    :_handler.getHandlerContext().getClassPath();
-                String tomcatpath=(String)
-                    _context.getAttribute("org.apache.tomcat.jsp_classpath");
-
-                if (classpath==null && tomcatpath!=null)
-                {
-                    classpath=tomcatpath;
-                    Code.debug("Fiddle classpath for Jasper: "+classpath);
-                    setInitParameter("classpath",classpath);
-                }
-                
-                if ((classpath==null || classpath.length()==0) &&
-                    ctxClasspath!=null && ctxClasspath.length()>0)
-                {
-                    classpath=ctxClasspath;
-                    Code.debug("Fiddle classpath for Jasper: "+classpath);
-                    setInitParameter("classpath",classpath);
-                }            
-            }
-            
             ClassLoader loader=_context.getHandler().getClassLoader();
             Code.debug("Servlet loader ",loader);
             if (loader==null)

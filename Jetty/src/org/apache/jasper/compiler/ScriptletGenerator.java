@@ -77,12 +77,12 @@ public class ScriptletGenerator
     char[] chars;
     
     public ScriptletGenerator(char[] chars) {
-        this.chars = chars;
+	this.chars = chars;
     }
     
 
     public void generate(ServletWriter writer, Class phase) {
-        writer.printMultiLn(new String(JspUtil.removeQuotes(chars)));
+	writer.printMultiLn(new String(JspUtil.removeQuotes(chars)));
     }
     
 }

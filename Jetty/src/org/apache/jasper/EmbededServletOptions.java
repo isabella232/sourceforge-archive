@@ -66,11 +66,16 @@ import java.io.File;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
+import org.apache.jasper.logging.Logger;
+
+import org.apache.jasper.compiler.TldLocationsCache;
+
 /**
  * A class to hold all init parameters specific to the JSP engine. 
  *
  * @author Anil K. Vijendran
  * @author Hans Bergsten
+ * @author Pierre Delisle
  */
 public final class EmbededServletOptions implements Options {
     /**
@@ -101,20 +106,10 @@ public final class EmbededServletOptions implements Options {
     public boolean sendErrorToClient = false;
 
     /**
-     * Do we want to include debugging information in the class file?
-     */
-    public boolean classDebugInfo = false;
-
-    /**
      * I want to see my generated servlets. Which directory are they
      * in?
      */
     public File scratchDir;
-    /**
-     * When used with a Securitymanager, what ProtectionDomain to use.
-     */
-    private Object protectionDomain;
-
     
     /**
      * Need to have this as is for versions 4 and 5 of IE. Can be set from
@@ -137,6 +132,11 @@ public final class EmbededServletOptions implements Options {
      * Path of the compiler to use for compiling JSP pages.
      */
     public String jspCompilerPath = null;
+
+    /**
+     * Cache for the TLD locations
+     */
+    private TldLocationsCache tldLocationsCache = null;
 
     /**
      * Java platform encoding to generate the JSP
@@ -173,13 +173,6 @@ public final class EmbededServletOptions implements Options {
     }
  
     /**
-     * Should class files be compiled with debug information?
-     */
-    public boolean getClassDebugInfo() {
-        return classDebugInfo;
-    }
-
-    /**
      * Class ID for use in the plugin tag when the browser is IE. 
      */
     public String getIeClassId() {
@@ -193,12 +186,6 @@ public final class EmbededServletOptions implements Options {
         return scratchDir;
     }
 
-    /**
-     * ProtectionDomain for this JSP Context when using a SecurityManager
-     */
-    public final Object getProtectionDomain() {
-        return protectionDomain;
-    }
     /**
      * What classpath should I use while compiling the servlets
      * generated from JSP files?
@@ -222,6 +209,10 @@ public final class EmbededServletOptions implements Options {
         return jspCompilerPath;
     }
 
+    public TldLocationsCache getTldLocationsCache() {
+	return tldLocationsCache;
+    }
+
     public String getJavaEncoding() {
 	return javaEncoding;
     }
@@ -237,7 +228,7 @@ public final class EmbededServletOptions implements Options {
                 this.keepGenerated = true;
             else if (keepgen.equalsIgnoreCase("false"))
                 this.keepGenerated = false;
-            else Constants.warning ("jsp.warning.keepgen");
+            else Constants.message ("jsp.warning.keepgen", Logger.WARNING);
         }
             
 
@@ -247,34 +238,25 @@ public final class EmbededServletOptions implements Options {
                 this.largeFile = true;
             else if (largeFile.equalsIgnoreCase("false"))
                 this.largeFile = false;
-            else Constants.warning ("jsp.warning.largeFile");
+            else Constants.message ("jsp.warning.largeFile", Logger.WARNING);
         }
-        
+	
         String mapFile = config.getInitParameter("mappedfile"); 
         if (mapFile != null) {
             if (mapFile.equalsIgnoreCase("true"))
                 this.mappedFile = true;
             else if (mapFile.equalsIgnoreCase("false"))
                 this.mappedFile = false;
-            else Constants.warning ("jsp.warning.mappedFile");
+            else Constants.message ("jsp.warning.mappedFile", Logger.WARNING);
         }
-        
+	
         String senderr = config.getInitParameter("sendErrToClient");
         if (senderr != null) {
             if (senderr.equalsIgnoreCase("true"))
                 this.sendErrorToClient = true;
             else if (senderr.equalsIgnoreCase("false"))
                 this.sendErrorToClient = false;
-            else Constants.warning ("jsp.warning.sendErrToClient");
-        }
-
-        String debugInfo = config.getInitParameter("classdebuginfo");
-        if (debugInfo != null) {
-            if (debugInfo.equalsIgnoreCase("true"))
-                this.classDebugInfo  = true;
-            else if (debugInfo.equalsIgnoreCase("false"))
-                this.classDebugInfo  = false;
-            else Constants.warning ("jsp.warning.classDebugInfo");
+            else Constants.message ("jsp.warning.sendErrToClient", Logger.WARNING);
         }
 
         String ieClassId = config.getInitParameter("ieClassId");
@@ -301,28 +283,26 @@ public final class EmbededServletOptions implements Options {
             }
         }
                 
-        // Get the ProtectionDomain for this Context in case
-        // we are using a SecurityManager
-        protectionDomain = context.getAttribute(Constants.ATTRIB_JSP_ProtectionDomain);
         if (this.scratchDir == null) {
-            Constants.fatal("jsp.error.no.scratch.dir");
+            Constants.message("jsp.error.no.scratch.dir", Logger.FATAL);
             return;
         }
             
         if (!(scratchDir.exists() && scratchDir.canRead() &&
               scratchDir.canWrite() && scratchDir.isDirectory()))
-            Constants.fatal("jsp.error.bad.scratch.dir",
+            Constants.message("jsp.error.bad.scratch.dir",
                               new Object[] {
                                   scratchDir.getAbsolutePath()
-                              });
+                              }, Logger.FATAL);
                                   
         String jspCompilerPath = config.getInitParameter("jspCompilerPath");
         if (jspCompilerPath != null) {
             if (new File(jspCompilerPath).exists()) {
                 this.jspCompilerPath = jspCompilerPath;
             } else { 
-                Constants.fatal("jsp.warning.compiler.path.notfound",
-                                  new Object[] { jspCompilerPath });
+                Constants.message("jsp.warning.compiler.path.notfound",
+                                  new Object[] { jspCompilerPath }, 
+                                  Logger.FATAL);
             }
         }
 
@@ -331,11 +311,17 @@ public final class EmbededServletOptions implements Options {
             try {
                 this.jspCompilerPlugin = Class.forName(jspCompilerPlugin);
             } catch (ClassNotFoundException cnfe) {
-                Constants.fatal("jsp.warning.compiler.class.notfound",
-                                  new Object[] { jspCompilerPlugin });
+                Constants.message("jsp.warning.compiler.class.notfound",
+                                  new Object[] { jspCompilerPlugin },
+                                  Logger.FATAL);
             }
         }
-  
+
+        this.javaEncoding = config.getInitParameter("javaEncoding");
+
+	// Setup the global Tag Libraries location cache for this
+	// web-application.
+	tldLocationsCache = new TldLocationsCache(context);
     }
 }
 

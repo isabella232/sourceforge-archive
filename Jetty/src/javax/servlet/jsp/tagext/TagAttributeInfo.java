@@ -56,9 +56,10 @@
 package javax.servlet.jsp.tagext;
 
 /**
- * Information on Tag Attributes;
- * this class is instantiated from the Tag Library Descriptor file (TLD).
+ * Information on the attributes of a Tag, available at translation time.
+ * This class is instantiated from the Tag Library Descriptor file (TLD).
  *
+ * <p>
  * Only the information needed to generate code is included here.  Other information
  * like SCHEMA for validation belongs elsewhere.
  */
@@ -73,15 +74,15 @@ public class TagAttributeInfo {
 
     /**
      * Constructor for TagAttributeInfo.
-     * No public constructor; this class is to be instantiated only from the
+     * This class is to be instantiated only from the
      * TagLibrary code under request from some JSP code that is parsing a
      * TLD (Tag Library Descriptor).
      *
-     * @param name The name of the attribute
-     * @param type The name of the type of the attribute
-     * @param reqTime Can this attribute hold a request-time Attribute
+     * @param name The name of the attribute.
+     * @param required If this attribute is required in tag instances.
+     * @param type The name of the type of the attribute.
+     * @param reqTime Whether this attribute holds a request-time Attribute.
      */
-    // TODO -- add the content descriptor...
 
     public TagAttributeInfo(String name, boolean required,
                             String type, boolean reqTime)
@@ -93,7 +94,9 @@ public class TagAttributeInfo {
     }
 
     /**
-     * @returns the name of the attribute
+     * The name of this attribute.
+     *
+     * @return the name of the attribute
      */
 
     public String getName() {
@@ -101,7 +104,9 @@ public class TagAttributeInfo {
     }
 
     /**
-     * @returns the type of the attribute
+     * The type (as a String) of this attribute.
+     *
+     * @return the type of the attribute
      */
 
     public String getTypeName() {
@@ -109,7 +114,9 @@ public class TagAttributeInfo {
     }
 
     /**
-     * Can this attribute hold a request-time value?
+     * Whether this attribute can hold a request-time value.
+     *
+     * @return if the attribute can hold a request-time value.
      */
 
     public boolean canBeRequestTime() {
@@ -117,15 +124,20 @@ public class TagAttributeInfo {
     }
 
     /**
-     * Is this required or not?
+     * Whether this attribute is required.
+     *
+     * @return if the attribute is required.
      */
     public boolean isRequired() {
         return required;
     }
 
     /**
-     * Convenience method that goes through an array of TagAttributeInfo
+     * Convenience static method that goes through an array of TagAttributeInfo
      * objects and looks for "id".
+     *
+     * @param a An array of TagAttributeInfo
+     * @return The TagAttributeInfo reference with name "id"
      */
     public static TagAttributeInfo getIdAttribute(TagAttributeInfo a[]) {
 	for (int i=0; i<a.length; i++) {

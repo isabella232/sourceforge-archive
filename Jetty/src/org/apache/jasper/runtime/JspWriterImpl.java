@@ -101,7 +101,7 @@ public class JspWriterImpl extends JspWriter {
     protected boolean flushed = false;
 
     public JspWriterImpl() {
-        super( defaultCharBufferSize, true );
+	super( defaultCharBufferSize, true );
     }
 
     /**
@@ -128,18 +128,18 @@ public class JspWriterImpl extends JspWriter {
         super(sz, autoFlush);
         if (sz < 0)
             throw new IllegalArgumentException("Buffer size <= 0");
-        this.response = response;
+	this.response = response;
         cb = sz == 0 ? null : new char[sz];
-        nextChar = 0;
+	nextChar = 0;
     }
 
     void init( ServletResponse response, int sz, boolean autoFlush ) {
-        this.response= response;
-        if( sz > 0 && ( cb == null || sz > cb.length ) )
-            cb=new char[sz];
-        nextChar = 0;
-        this.autoFlush=autoFlush;
-        this.bufferSize=sz;
+	this.response= response;
+	if( sz > 0 && ( cb == null || sz > cb.length ) )
+	    cb=new char[sz];
+	nextChar = 0;
+	this.autoFlush=autoFlush;
+	this.bufferSize=sz;
     }
 
     /**
@@ -148,48 +148,48 @@ public class JspWriterImpl extends JspWriter {
      * may be invoked by PrintStream.
      */
     protected final void flushBuffer() throws IOException {
-        synchronized (lock) {
+	synchronized (lock) {
             if (bufferSize == 0)
                 return;
             flushed = true;
-            ensureOpen();
-            if (nextChar == 0)
-                return;
+	    ensureOpen();
+	    if (nextChar == 0)
+		return;
             initOut();
             out.write(cb, 0, nextChar);
-            nextChar = 0;
-        }
+	    nextChar = 0;
+	}
     }
 
     protected void initOut() throws IOException {
         if (out == null) {
             out = response.getWriter();
-            //System.out.println("JspWriterImpl: initOut: " + this + " " +out);
-        }
+	    //System.out.println("JspWriterImpl: initOut: " + this + " " +out);
+	}
     }
-        
+	
 
     /**
      * Discard the output buffer.
      */
     public final void clear() throws IOException {
-        synchronized (lock) {
+	synchronized (lock) {
             if (bufferSize == 0)
                 throw new IllegalStateException(Constants.getString("jsp.error.ise_on_clear"));
             if (flushed)
                 throw new IOException(Constants.getString("jsp.error.attempt_to_clear_flushed_buffer"));
             ensureOpen();
-            nextChar = 0;
-        }
+	    nextChar = 0;
+	}
     }
 
     public void clearBuffer() throws IOException {
-        synchronized (lock) {
+	synchronized (lock) {
             if (bufferSize == 0)
                 throw new IllegalStateException(Constants.getString("jsp.error.ise_on_clear"));
             ensureOpen();
-            nextChar = 0;
-        }
+	    nextChar = 0;
+	}
     }
 
     private final void bufferOverflow() throws IOException {
@@ -205,9 +205,9 @@ public class JspWriterImpl extends JspWriter {
             flushBuffer();
             if (out != null) {
                 out.flush();
-                // Also flush the response buffer.
-                response.flushBuffer();
-            }
+		// Also flush the response buffer.
+		response.flushBuffer();
+	    }
         }
     }
 
@@ -223,7 +223,7 @@ public class JspWriterImpl extends JspWriter {
             if (out != null)
                 out.close();
             out = null;
-            //            cb = null;
+	    //            cb = null;
         }
     }
 
@@ -236,8 +236,8 @@ public class JspWriterImpl extends JspWriter {
 
     /** check to make sure that the stream has not been closed */
     protected void ensureOpen() throws IOException {
-        if (response == null)
-            throw new IOException("Stream closed");
+	if (response == null)
+	    throw new IOException("Stream closed");
     }
 
 
@@ -268,8 +268,8 @@ public class JspWriterImpl extends JspWriter {
      * out of file descriptors and we're trying to print a stack trace.
      */
     private int min(int a, int b) {
-        if (a < b) return a;
-        return b;
+	if (a < b) return a;
+	return b;
     }
 
     /**
@@ -314,7 +314,7 @@ public class JspWriterImpl extends JspWriter {
                     flushBuffer();
                 else
                     bufferOverflow();
-                initOut();
+		initOut();
                 out.write(cbuf, off, len);
                 return;
             }
@@ -339,7 +339,7 @@ public class JspWriterImpl extends JspWriter {
      * Writer class because it must suppress I/O exceptions.
      */
     public void write(char buf[]) throws IOException {
-        write(buf, 0, buf.length);
+	write(buf, 0, buf.length);
     }
 
     /**
@@ -378,7 +378,7 @@ public class JspWriterImpl extends JspWriter {
      * because it must suppress I/O exceptions.
      */
     public void write(String s) throws IOException {
-        write(s, 0, s.length());
+	write(s, 0, s.length());
     }
 
 
@@ -393,9 +393,9 @@ public class JspWriterImpl extends JspWriter {
      */
     
     public void newLine() throws IOException {
-        synchronized (lock) {
-            write(lineSeparator);
-        }
+	synchronized (lock) {
+	    write(lineSeparator);
+	}
     }
 
 
@@ -411,7 +411,7 @@ public class JspWriterImpl extends JspWriter {
      * @param      b   The <code>boolean</code> to be printed
      */
     public void print(boolean b) throws IOException {
-        write(b ? "true" : "false");
+	write(b ? "true" : "false");
     }
 
     /**
@@ -423,7 +423,7 @@ public class JspWriterImpl extends JspWriter {
      * @param      c   The <code>char</code> to be printed
      */
     public void print(char c) throws IOException {
-        write(String.valueOf(c));
+	write(String.valueOf(c));
     }
 
     /**
@@ -437,7 +437,7 @@ public class JspWriterImpl extends JspWriter {
      * @see        java.lang.Integer#toString(int)
      */
     public void print(int i) throws IOException {
-        write(String.valueOf(i));
+	write(String.valueOf(i));
     }
 
     /**
@@ -451,7 +451,7 @@ public class JspWriterImpl extends JspWriter {
      * @see        java.lang.Long#toString(long)
      */
     public void print(long l) throws IOException {
-        write(String.valueOf(l));
+	write(String.valueOf(l));
     }
 
     /**
@@ -465,7 +465,7 @@ public class JspWriterImpl extends JspWriter {
      * @see        java.lang.Float#toString(float)
      */
     public void print(float f) throws IOException {
-        write(String.valueOf(f));
+	write(String.valueOf(f));
     }
 
     /**
@@ -479,7 +479,7 @@ public class JspWriterImpl extends JspWriter {
      * @see        java.lang.Double#toString(double)
      */
     public void print(double d) throws IOException {
-        write(String.valueOf(d));
+	write(String.valueOf(d));
     }
 
     /**
@@ -493,7 +493,7 @@ public class JspWriterImpl extends JspWriter {
      * @throws  NullPointerException  If <code>s</code> is <code>null</code>
      */
     public void print(char s[]) throws IOException {
-        write(s);
+	write(s);
     }
 
     /**
@@ -506,10 +506,10 @@ public class JspWriterImpl extends JspWriter {
      * @param      s   The <code>String</code> to be printed
      */
     public void print(String s) throws IOException {
-        if (s == null) {
-            s = "null";
-        }
-        write(s);
+	if (s == null) {
+	    s = "null";
+	}
+	write(s);
     }
 
     /**
@@ -523,7 +523,7 @@ public class JspWriterImpl extends JspWriter {
      * @see        java.lang.Object#toString()
      */
     public void print(Object obj) throws IOException {
-        write(String.valueOf(obj));
+	write(String.valueOf(obj));
     }
 
     /* Methods that do terminate lines */
@@ -539,7 +539,7 @@ public class JspWriterImpl extends JspWriter {
      * write method...  
      */
     public void println() throws IOException {
-        newLine();
+	newLine();
     }
 
     /**
@@ -548,10 +548,10 @@ public class JspWriterImpl extends JspWriter {
      * <code>{@link #println()}</code>.
      */
     public void println(boolean x) throws IOException {
-        synchronized (lock) {
-            print(x);
-            println();
-        }
+	synchronized (lock) {
+	    print(x);
+	    println();
+	}
     }
 
     /**
@@ -560,10 +560,10 @@ public class JspWriterImpl extends JspWriter {
      * #println()}</code>.
      */
     public void println(char x) throws IOException {
-        synchronized (lock) {
-            print(x);
-            println();
-        }
+	synchronized (lock) {
+	    print(x);
+	    println();
+	}
     }
 
     /**
@@ -572,10 +572,10 @@ public class JspWriterImpl extends JspWriter {
      * #println()}</code>.
      */
     public void println(int x) throws IOException {
-        synchronized (lock) {
-            print(x);
-            println();
-        }
+	synchronized (lock) {
+	    print(x);
+	    println();
+	}
     }
 
     /**
@@ -584,10 +584,10 @@ public class JspWriterImpl extends JspWriter {
      * <code>{@link #println()}</code>.
      */
     public void println(long x) throws IOException {
-        synchronized (lock) {
-            print(x);
-            println();
-        }
+	synchronized (lock) {
+	    print(x);
+	    println();
+	}
     }
 
     /**
@@ -596,10 +596,10 @@ public class JspWriterImpl extends JspWriter {
      * <code>{@link #println()}</code>.
      */
     public void println(float x) throws IOException {
-        synchronized (lock) {
-            print(x);
-            println();
-        }
+	synchronized (lock) {
+	    print(x);
+	    println();
+	}
     }
 
     /**
@@ -608,10 +608,10 @@ public class JspWriterImpl extends JspWriter {
      * #print(double)}</code> and then <code>{@link #println()}</code>.
      */
     public void println(double x) throws IOException {
-        synchronized (lock) {
-            print(x);
-            println();
-        }
+	synchronized (lock) {
+	    print(x);
+	    println();
+	}
     }
 
     /**
@@ -620,10 +620,10 @@ public class JspWriterImpl extends JspWriter {
      * <code>{@link #println()}</code>.
      */
     public void println(char x[]) throws IOException {
-        synchronized (lock) {
-            print(x);
-            println();
-        }
+	synchronized (lock) {
+	    print(x);
+	    println();
+	}
     }
 
     /**
@@ -632,10 +632,10 @@ public class JspWriterImpl extends JspWriter {
      * <code>{@link #println()}</code>.
      */
     public void println(String x) throws IOException {
-        synchronized (lock) {
-            print(x);
-            println();
-        }
+	synchronized (lock) {
+	    print(x);
+	    println();
+	}
     }
 
     /**
@@ -644,16 +644,16 @@ public class JspWriterImpl extends JspWriter {
      * <code>{@link #println()}</code>.
      */
     public void println(Object x) throws IOException {
-        synchronized (lock) {
-            print(x);
-            println();
-        }
+	synchronized (lock) {
+	    print(x);
+	    println();
+	}
     }
 
-    /** Package-level access.
+    /** Package-level access
      */
     void recycle() {
-        flushed = false;
-        nextChar = 0;
+	flushed = false;
+	nextChar = 0;
     }
 }

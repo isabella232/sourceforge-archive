@@ -65,6 +65,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
 import java.util.Locale;
+import java.util.Map;
 
 
 
@@ -153,6 +154,20 @@ public interface ServletRequest {
      */
 
     public String getCharacterEncoding();
+
+ /**
+     * Overrides the name of the character encoding used in the body of this
+     * request. This method must be called prior to reading request parameters
+     * or reading input using getReader().
+     * 
+     *
+     * @param		a <code>String</code> containing the name of 
+     *			the chararacter encoding.
+     * @throws		java.io.UnsupportedEncodingException if this is not a valid encoding
+     */
+
+    public void setCharacterEncoding(String env) throws java.io.UnsupportedEncodingException;
+
     
     
     
@@ -180,7 +195,7 @@ public interface ServletRequest {
      *
      * @return		a <code>String</code> containing the name 
      *			of the MIME type of 
-     * 			the request, or -1 if the type is not known
+     * 			the request, or null if the type is not known
      *
      */
 
@@ -283,7 +298,20 @@ public interface ServletRequest {
      */
 
     public String[] getParameterValues(String name);
-    
+ 
+    /** Returns a java.util.Map of the parameters of this request.
+     * Request parameters
+     * are extra information sent with the request.  For HTTP servlets,
+     * parameters are contained in the query string or posted form data.
+     *
+     * @return an immutable java.util.Map containing parameter names as 
+     * keys and parameter values as map values. The keys in the parameter
+     * map are of type String. The values in the parameter map are of type
+     * String array.
+     *
+     */
+
+    public Map getParameterMap();
     
     
 
@@ -352,7 +380,7 @@ public interface ServletRequest {
      * Retrieves the body of the request as character data using
      * a <code>BufferedReader</code>.  The reader translates the character
      * data according to the character encoding used on the body.
-     * Either this method or {@link #getReader} may be called to read the
+     * Either this method or {@link #getInputStream} may be called to read the
      * body, not both.
      * 
      *
@@ -394,12 +422,13 @@ public interface ServletRequest {
 
     /**
      * Returns the fully qualified name of the client that sent the
-     * request, or the IP address of the client if the name cannot be
-     * determined. For HTTP servlets, same as the value of the CGI variable 
+     * request. If the engine cannot or chooses not to resolve the hostname 
+     * (to improve performance), this method returns the dotted-string form of 
+     * the IP address. For HTTP servlets, same as the value of the CGI variable 
      * <code>REMOTE_HOST</code>.
      *
-     * @return		a <code>String</code> containing the fully qualified name 
-     *			of the client
+     * @return		a <code>String</code> containing the fully 
+     * qualified name of the client
      *
      */
 
@@ -418,6 +447,9 @@ public interface ServletRequest {
      * package names. Names beginning with <code>java.*</code>,
      * <code>javax.*</code>, and <code>com.sun.*</code>, are
      * reserved for use by Sun Microsystems.
+     *<br> If the value passed in is null, the effect is the same as
+     * calling {@link #removeAttribute}.
+     *
      *
      *
      * @param name			a <code>String</code> specifying 

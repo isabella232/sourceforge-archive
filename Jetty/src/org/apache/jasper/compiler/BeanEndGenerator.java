@@ -73,7 +73,7 @@ public class BeanEndGenerator extends GeneratorBase implements ServiceMethodPhas
     
 
     public void generate(ServletWriter writer, Class phase) {
-        writer.println("}");
+	writer.println("}");
     }
     
 }

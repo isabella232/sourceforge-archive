@@ -76,6 +76,7 @@
 
   <security-constraint>
     <web-resource-collection>
+      <web-resource-name>relax</web-resource-name>
       <url-pattern>/auth/relax/*</url-pattern>
       <http-method>GET</http-method>
       <http-method>HEAD</http-method>

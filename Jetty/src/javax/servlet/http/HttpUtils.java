@@ -67,15 +67,13 @@ import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 import java.io.IOException;
 
-
 /**
- * Provides a collection of methods that are useful
- * in writing HTTP servlets.
+ * @deprecated		As of Java(tm) Servlet API 2.3. 
+ *			These methods were only useful
+ *			with the default encoding and have been moved
+ *			to the request interfaces.
  *
- * @author	Various
- * @version 	$Version$
- *
- */
+*/
 
 
 public class HttpUtils {

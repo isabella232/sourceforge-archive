@@ -61,8 +61,33 @@ import java.io.IOException;
 import javax.servlet.jsp.*;
 
 /**
- * A JspWriter subclass that can be used to process body evaluations
- * so they can re-extracted later on.
+ * An encapsulation of the evaluation of the body of an action so it is
+ * available to a tag handler.  BodyContent is a subclass of JspWriter.
+ *
+ * <p>
+ * Note that the content of BodyContent is the result of evaluation, so
+ * it will not contain actions and the like, but the result of their
+ * invocation.
+ * 
+ * <p>
+ * BodyContent has methods to convert its contents into
+ * a String, to read its contents, and to clear the contents.
+ *
+ * <p>
+ * The buffer size of a BodyContent object is unbounded.  A
+ * BodyContent object cannot be in autoFlush mode.  It is not possible to
+ * invoke flush on a BodyContent object, as there is no backing stream.
+ *
+ * <p>
+ * Instances of BodyContent are created by invoking the pushBody and
+ * popBody methods of the PageContext class.  A BodyContent is enclosed
+ * within another JspWriter (maybe another BodyContent object) following
+ * the structure of their associated actions.
+ *
+ * <p>
+ * A BodyContent is made available to a BodyTag through a setBodyContent()
+ * call.  The tag handler can use the object until after the call to
+ * doEndTag().
  */
 
 public abstract class BodyContent extends JspWriter {
@@ -70,7 +95,7 @@ public abstract class BodyContent extends JspWriter {
     /**
      * Protected constructor.
      *
-     * Unbounded buffer,  no autoflushing.
+     * Unbounded buffer, no autoflushing.
      */
 
     protected BodyContent(JspWriter e) {
@@ -79,8 +104,11 @@ public abstract class BodyContent extends JspWriter {
     }
 
     /**
-     * Redefine flush().
-     * It is not valid to flush.
+     * Redefined flush() so it is not legal.
+     *
+     * <p>
+     * It is not valid to flush a BodyContent because there is no backing
+     * stream behind it.
      */
 
     public void flush() throws IOException {
@@ -88,7 +116,7 @@ public abstract class BodyContent extends JspWriter {
     }
 
     /**
-     * Clear the body.
+     * Clear the body without throwing any exceptions.
      */
     
     public void clearBody() {
@@ -102,26 +130,23 @@ public abstract class BodyContent extends JspWriter {
 
     /**
      * Return the value of this BodyContent as a Reader.
-     * Note: this is after evaluation!!  There are no scriptlets,
-     * etc in this stream.
      *
-     * @returns the value of this BodyContent as a Reader
+     * @return the value of this BodyContent as a Reader
      */
     public abstract Reader getReader();
 
+
     /**
      * Return the value of the BodyContent as a String.
-     * Note: this is after evaluation!!  There are no scriptlets,
-     * etc in this stream.
      *
-     * @returns the value of the BodyContent as a String
+     * @return the value of the BodyContent as a String
      */
     public abstract String getString();
 	
+
     /**
      * Write the contents of this BodyContent into a Writer.
-     * Subclasses are likely to do interesting things with the
-     * implementation so some things are extra efficient.
+     * Subclasses may optimize common invocation patterns.
      *
      * @param out The writer into which to place the contents of
      * this body evaluation
@@ -129,10 +154,11 @@ public abstract class BodyContent extends JspWriter {
 
     public abstract void writeOut(Writer out) throws IOException;
 
+
     /**
-     * Get the enclosing JspWriter
+     * Get the enclosing JspWriter.
      *
-     * @returns the enclosing JspWriter passed at construction time
+     * @return the enclosing JspWriter passed at construction time
      */
 
     public JspWriter getEnclosingWriter() {

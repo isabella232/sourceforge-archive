@@ -74,48 +74,49 @@ package org.apache.jasper.compiler;
 public class MappedCharDataGenerator extends CharDataGenerator {
     
     public MappedCharDataGenerator(char[] chars) {
-        super(chars);
+	super(chars);
     }
 
     public void generate(ServletWriter writer, Class phase) {
-        writer.indent();
-        writer.print("out.write(\"");
-        // Generate the char data:
-        int limit       = chars.length;
-        StringBuffer sb = new StringBuffer();
-        for (int i = 0 ; i < limit ; i++) {
-            int ch = chars[i];
-            switch(ch) {
-            case '"':
-                sb.append("\\\"");
-                break;
-            case '\\':
-                sb.append("\\\\");
-                break;
-            case '\r':
-                continue;
-                /*
-                  case '\'':
-                  sb.append('\\');
-                  sb.append('\'');
-                  break;
-                */
-            case '\n':
-                sb.append("\\r\\n");
-                writer.print(sb.toString());
-                writer.print("\");\n");
-                sb = new StringBuffer();
-                writer.indent();
-                writer.print("out.write(\"");
-                break;
-            case '\t':
-                sb.append("\\t");
-                break;
-            default:
-                sb.append((char) ch);
-            }
-        }
-        writer.print(sb.toString());
-        writer.print("\");\n");
+	writer.indent();
+	writer.print("out.write(\"");
+	// Generate the char data:
+	int limit       = chars.length;
+	StringBuffer sb = new StringBuffer();
+	for (int i = 0 ; i < limit ; i++) {
+	    int ch = chars[i];
+	    switch(ch) {
+	    case '"':
+		sb.append("\\\"");
+		break;
+	    case '\\':
+		sb.append("\\\\");
+		break;
+	    case '\r':
+		continue;
+		/*
+		  case '\'':
+		  sb.append('\\');
+		  sb.append('\'');
+		  break;
+		*/
+	    case '\n':
+		sb.append("\\r\\n");
+		writer.print(sb.toString());
+		writer.print("\");\n");
+		sb = new StringBuffer();
+		writer.indent();
+		writer.print("out.write(\"");
+		break;
+	    case '\t':
+		sb.append("\\t");
+		break;
+	    default:
+		sb.append((char) ch);
+	    }
+	}
+	writer.print(sb.toString());
+        writer.print("\");");
+        writer.println();
     }
 }

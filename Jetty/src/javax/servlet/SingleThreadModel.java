@@ -71,8 +71,7 @@ package javax.servlet;
  * instance of the servlet, or by maintaining a pool of servlet
  * instances and dispatching each new request to a free servlet.
  *
- * <p>If a servlet implements this interface, the servlet will
- * be thread safe. However, this interface does not prevent
+ * <p>This interface does not prevent
  * synchronization problems that result from servlets accessing shared
  * resources such as static class variables or classes outside
  * the scope of the servlet.

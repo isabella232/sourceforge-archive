@@ -217,10 +217,14 @@ public class WebApplicationContext extends ServletHandlerContext
     {
         // Get parser
         XmlParser xmlParser=_xmlParser==null?(new XmlParser()):_xmlParser;
-        Resource dtd=Resource.newSystemResource("org/mortbay/jetty/servlet/web.dtd");
-        xmlParser.redirectEntity("web.dtd",dtd);
-        xmlParser.redirectEntity("web-app_2_2.dtd",dtd);
-        xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN",dtd);
+        
+        Resource dtd22=Resource.newSystemResource("/javax/servlet/resources/web-app_2_2.dtd");
+        Resource dtd23=Resource.newSystemResource("/javax/servlet/resources/web-app_2_3.dtd");
+        xmlParser.redirectEntity("web-app_2_2.dtd",dtd22);
+        xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN",dtd22);
+        xmlParser.redirectEntity("web.dtd",dtd23);
+        xmlParser.redirectEntity("web-app_2_3.dtd",dtd23);
+        xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN",dtd22);
 
         // Find the webapp
         resolveWebApp();
@@ -478,8 +482,16 @@ public class WebApplicationContext extends ServletHandlerContext
                 else if ("security-role".equals(name))
                     initSecurityRole(node);
                 else if ("env-entry".equals(name))
-                    Code.debug("No implementation: ",node);
+                    Code.warning("Not implemented: "+node);
+                else if ("filter".equals(name))
+                    Code.warning("Not implemented: "+node);
+                else if ("filter-mapping".equals(name))
+                    Code.warning("Not implemented: "+node);
+                else if ("listener".equals(name))
+                    Code.warning("Not implemented: "+node);
                 else if ("ejb-ref".equals(name))
+                    Code.debug("No implementation: ",node);
+                else if ("ejb-local-ref".equals(name))
                     Code.debug("No implementation: ",node);
                 else
                 {
@@ -524,7 +536,7 @@ public class WebApplicationContext extends ServletHandlerContext
             // There is no class, so look for a jsp file
             jspFile=node.getString("jsp-file",false,true);
             if (jspFile!=null)
-                className=_servletHandler.getJSPClassName();
+                className="org.apache.jasper.servlet.JspServlet";
             else
             {
                 Code.warning("Missing servlet-class|jsp-file in "+node);

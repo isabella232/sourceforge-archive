@@ -65,6 +65,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.MalformedURLException;
 import java.util.Enumeration;
+import java.util.Set;
 
 
 /**
@@ -107,17 +108,19 @@ public interface ServletContext {
      * <p>This method allows servlets to gain
      * access to the context for various parts of the server, and as
      * needed obtain {@link RequestDispatcher} objects from the context.
-     * The given path must be absolute (beginning with "/") and is 
-     * interpreted based on the server's document root. 
+     * The given path must be begin with "/", is interpreted relative 
+     * to the server's document root and is matched against the context roots of
+     * other web applications hosted on this container.
      * 
      * <p>In a security conscious environment, the servlet container may
      * return <code>null</code> for a given URL.
      *       
-     * @param uripath 	a <code>String</code> specifying the absolute URL of 
-     *			a resource on the server
-     *
+     * @param uripath 	a <code>String</code> specifying the context path of
+     *			another web application in the container.
      * @return		the <code>ServletContext</code> object that
-     *			corresponds to the named URL
+     *			corresponds to the named URL, or null if either
+			none exists or the container wishes to restrict 
+     * 			this access.
      *
      * @see 		RequestDispatcher
      *
@@ -130,7 +133,7 @@ public interface ServletContext {
     /**
      * Returns the major version of the Java Servlet API that this
      * servlet container supports. All implementations that comply
-     * with Version 2.2 must have this method
+     * with Version 2.3 must have this method
      * return the integer 2.
      *
      * @return 		2
@@ -144,10 +147,10 @@ public interface ServletContext {
     /**
      * Returns the minor version of the Servlet API that this
      * servlet container supports. All implementations that comply
-     * with Version 2.2 must have this method
-     * return the integer 2.
+     * with Version 2.3 must have this method
+     * return the integer 3.
      *
-     * @return 		2
+     * @return 		3
      *
      */
 
@@ -171,6 +174,35 @@ public interface ServletContext {
      */
 
     public String getMimeType(String file);
+    
+    /**
+    * Returns a directory-like listing of all the paths to resources within the web application whose longest sub-path
+    * matches the supplied path argument. Paths indicating subdirectory paths end with a '/'. The returned paths are all 
+    * relative to the root of the web application and have a leading '/'. For example, for a web application 
+    * containing<br><br>
+
+    * /welcome.html<br>
+    * /catalog/index.html<br>
+    * /catalog/products.html<br>
+    * /catalog/offers/books.html<br>
+    * /catalog/offers/music.html<br>
+    * /customer/login.jsp<br>
+    * /WEB-INF/web.xml<br>
+    * /WEB-INF/classes/com.acme.OrderServlet.class,<br><br>
+    *
+    * getResourcePaths("/") returns {"/welcome.html", "/catalog/", "/customer/", "/WEB-INF/"}<br>
+    * getResourcePaths("/catalog/") returns {"/catalog/index.html", "/catalog/products.html", "/catalog/offers/"}.<br>
+	   
+
+
+    *@param the partial path used to match the resources, which must start with a /
+    *@return a Set containing the directory listing, or null if there are no resources in the web application whose path
+	* begins with the supplied path.
+
+    * @since Servlet 2.3
+    */
+    
+    public Set getResourcePaths(String path);
     
     
 
@@ -439,9 +471,10 @@ public interface ServletContext {
     
     /**
      * Returns a <code>String</code> containing the real path 
-     * for a given virtual path. For example, the virtual path "/index.html"
-     * has a real path of whatever file on the server's filesystem would be
-     * served by a request for "/index.html".
+     * for a given virtual path. For example, the path "/index.html"
+     * returns the absolute file path on the server's filesystem would be
+     * served by a request for "http://host/contextPath/index.html",
+     * where contextPath is the context path of this ServletContext..
      *
      * <p>The real path returned will be in a form
      * appropriate to the computer and operating system on
@@ -589,9 +622,13 @@ public interface ServletContext {
      *
      * Binds an object to a given attribute name in this servlet context. If
      * the name specified is already used for an attribute, this
-     * method will remove the old attribute and bind the name
-     * to the new attribute.
-     *
+     * method will replace the attribute with the new to the new attribute.
+     * <p>If listeners are configured on the <code>ServletContext</code> the  
+     * container notifies them accordingly.
+     * <p>
+     * If a null value is passed, the effect is the same as calling 
+     * <code>removeAttribute()</code>.
+     * 
      * <p>Attribute names should follow the same convention as package
      * names. The Java Servlet API specification reserves names
      * matching <code>java.*</code>, <code>javax.*</code>, and
@@ -619,6 +656,10 @@ public interface ServletContext {
      * the servlet context. After removal, subsequent calls to
      * {@link #getAttribute} to retrieve the attribute's value
      * will return <code>null</code>.
+
+     * <p>If listeners are configured on the <code>ServletContext</code> the 
+     * container notifies them accordingly.
+
      *
      *
      * @param name	a <code>String</code> specifying the name 
@@ -627,11 +668,17 @@ public interface ServletContext {
      */
 
     public void removeAttribute(String name);
+    
+    /**
+     * Returns the name of this web application correponding to this ServletContext as specified in the deployment
+     * descriptor for this web application by the display-name element.
+     *
+     *
+     * @return	    The name of the web application or null if no name has been declared in the deployment descriptor.
+     * @since Servlet 2.3
+     */
+    
+    public String getServletContextName();
 }
-
-
-
-
-
 
 

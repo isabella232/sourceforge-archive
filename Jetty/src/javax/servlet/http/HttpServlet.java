@@ -269,8 +269,8 @@ public abstract class HttpServlet extends GenericServlet
 
 
 
-    /*
-     * Private method; not a Javadoc comment
+    /**
+     * 
      *
      * <p>Receives an HTTP HEAD request from the protected
      * <code>service</code> method and handles the
@@ -305,7 +305,7 @@ public abstract class HttpServlet extends GenericServlet
      *					could not be handled
      */
 
-    private void doHead(HttpServletRequest req, HttpServletResponse resp)
+    protected void doHead(HttpServletRequest req, HttpServletResponse resp)
 	throws ServletException, IOException
     {
 	NoBodyResponse response = new NoBodyResponse(resp);
@@ -918,6 +918,9 @@ class NoBodyResponse implements HttpServletResponse {
 
     public void reset() throws IllegalStateException
       { resp.reset(); }
+      
+      public void resetBuffer() throws IllegalStateException
+      { resp.resetBuffer(); }
 
     public boolean isCommitted()
       { return resp.isCommitted(); }

@@ -571,6 +571,16 @@ abstract public class HttpMessage
         return _characterEncoding;
     }
     
+    /* ------------------------------------------------------------ */
+    /** Set Character Encoding. 
+     * @param encoding An encoding that can override the encoding set
+     * from the ContentType field.
+     */
+    public void setCharacterEncoding(String encoding)
+    {
+        _characterEncoding=encoding;
+    }
+    
     /* -------------------------------------------------------------- */
     /** Mime Type.
      * The mime type is extracted from the contenttype field when set.

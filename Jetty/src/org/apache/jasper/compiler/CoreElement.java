@@ -74,5 +74,5 @@ interface CoreElement {
      * the action corresponding to this core tag.
      */
     boolean accept(ParseEventListener listener, JspReader reader, Parser parser) 
-        throws JasperException;
+	throws JasperException;
 }

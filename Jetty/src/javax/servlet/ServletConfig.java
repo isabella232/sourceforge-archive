@@ -69,29 +69,32 @@ import java.util.Enumeration;
  * A servlet configuration object used by a servlet container
  * used to pass information to a servlet during initialization. 
  *
- * <p>The configuration information contains initialization parameters,
- * which are a set of name/value pairs, and a {@link ServletContext} object,
- * which gives the servlet information about the server.
- *
- * @author 	Various
- * @version 	$Version$
- *
- * @see 	ServletContext
- *
  */
  
 public interface ServletConfig {
-
-
-
+    
 
     /**
-     * Returns a reference to the {@link ServletContext} in which the servlet
+     * Returns the name of this servlet instance.
+     * The name may be provided via server administration, assigned in the 
+     * web application deployment descriptor, or for an unregistered (and thus
+     * unnamed) servlet instance it will be the servlet's class name.
+     *
+     * @return		the name of the servlet instance
+     *
+     *
+     *
+     */
+
+    public String getServletName();
+
+    /**
+     * Returns a reference to the {@link ServletContext} in which the caller
      * is executing.
      *
      *
      * @return		a {@link ServletContext} object, used
-     *			by the servlet to interact with its servlet 
+     *			by the caller to interact with its servlet 
      *                  container
      * 
      * @see		ServletContext
@@ -100,10 +103,6 @@ public interface ServletConfig {
 
     public ServletContext getServletContext();
     
-    
-    
-    
-
     /**
      * Returns a <code>String</code> containing the value of the 
      * named initialization parameter, or <code>null</code> if 
@@ -118,8 +117,7 @@ public interface ServletConfig {
      */
 
     public String getInitParameter(String name);
-    
-    
+
 
     /**
      * Returns the names of the servlet's initialization parameters
@@ -136,20 +134,6 @@ public interface ServletConfig {
      */
 
     public Enumeration getInitParameterNames();
-    
 
-    /**
-     * Returns the name of this servlet instance.
-     * The name may be provided via server administration, assigned in the 
-     * web application deployment descriptor, or for an unregistered (and thus
-     * unnamed) servlet instance it will be the servlet's class name.
-     *
-     * @return		the name of the servlet instance
-     *
-     *
-     *
-     */
-
-    public String getServletName();
 
 }

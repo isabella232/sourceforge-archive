@@ -202,8 +202,10 @@ public class ServletResponse implements HttpServletResponse
     }
     
     /* ------------------------------------------------------------ */
-    void resetBuffer()
+    public void resetBuffer()
     {
+        if (isCommitted())
+            throw new IllegalStateException("committed");
         _httpResponse.getOutputStream().resetBuffer();
     }
     
@@ -314,7 +316,7 @@ public class ServletResponse implements HttpServletResponse
         // XXX not implemented
         
         // Already encoded
-        int prefix=url.indexOf(Context.__SessionUrlPrefix);
+        int prefix=url.indexOf(SessionManager.__SessionUrlPrefix);
         if (prefix!=-1)
         {
             int suffix=url.indexOf("?",prefix);
@@ -322,8 +324,8 @@ public class ServletResponse implements HttpServletResponse
                 suffix=url.indexOf("#",prefix);
 
             if (suffix<=prefix)
-                return url.substring(0,prefix+Context.__SessionUrlPrefix.length())+id;
-            return url.substring(0,prefix+Context.__SessionUrlPrefix.length())+id+
+                return url.substring(0,prefix+SessionManager.__SessionUrlPrefix.length())+id;
+            return url.substring(0,prefix+SessionManager.__SessionUrlPrefix.length())+id+
                 url.substring(suffix);
         }        
         
@@ -332,9 +334,9 @@ public class ServletResponse implements HttpServletResponse
         if (suffix<0)
             suffix=url.indexOf('#');
         if (suffix<0)
-            return url+Context.__SessionUrlPrefix+id;
+            return url+SessionManager.__SessionUrlPrefix+id;
         return url.substring(0,suffix)+
-            Context.__SessionUrlPrefix+id+url.substring(suffix);
+            SessionManager.__SessionUrlPrefix+id+url.substring(suffix);
     }
 
     /* ------------------------------------------------------------ */

@@ -82,20 +82,39 @@ import java.util.Enumeration;
 
 public interface HttpServletRequest extends ServletRequest {
 
-
+    /**
+    * String identifier for Basic authentication. Value "BASIC"
+    */
+    public static final String BASIC_AUTH = "BASIC";
+    /**
+    * String identifier for Basic authentication. Value "FORM"
+    */
+    public static final String FORM_AUTH = "FORM";
+    /**
+    * String identifier for Basic authentication. Value "CLIENT_CERT"
+    */
+    public static final String CLIENT_CERT_AUTH = "CLIENT_CERT";
+    /**
+    * String identifier for Basic authentication. Value "DIGEST"
+    */
+    public static final String DIGEST_AUTH = "DIGEST";
 
     /**
      * Returns the name of the authentication scheme used to protect
-     * the servlet, for example, "BASIC" or "SSL," or <code>null</code>
-     * if the servlet was not protected. 
+     * the servlet. All servlet containers support basic, form and client 
+     * certificate authentication, and may additionally support digest 
+     * authentication.
+     * If the servlet is not authenticated <code>null</code> is returned. 
      *
      * <p>Same as the value of the CGI variable AUTH_TYPE.
      *
      *
-     * @return		a <code>String</code> specifying the name of
-     *			the authentication scheme, or
-     *			<code>null</code> if the request was not
-     *			authenticated
+     * @return		one of the static members BASIC_AUTH, 
+     *			FORM_AUTH, CLIENT_CERT_AUTH, DIGEST_AUTH
+     *			(suitable for == comparison) 
+     *			indicating the authentication scheme, or 
+     *			<code>null</code> if the request was 
+     *			not authenticated.     
      *
      */
    
@@ -204,11 +223,13 @@ public interface HttpServletRequest extends ServletRequest {
      * @param name		a <code>String</code> specifying the
      *				header name
      *
-     * @return			a <code>Enumeration</code> containing the
-     *				values of the requested
-     *				header, or <code>null</code>
-     *				if the request does not
-     *				have any headers of that name
+     * @return			an <code>Enumeration</code> containing
+     *                  	the values of the requested header. If
+     *                  	the request does not have any headers of
+     *                  	that name return an empty
+     *                  	enumeration. If 
+     *                  	the container does not allow access to
+     *                  	header information, return null
      *
      */			
 
@@ -235,6 +256,7 @@ public interface HttpServletRequest extends ServletRequest {
      *				if the servlet container does not
      *				allow servlets to use this method,
      *				<code>null</code>
+     *				
      *
      */
 
@@ -301,7 +323,8 @@ public interface HttpServletRequest extends ServletRequest {
      * <p>Same as the value of the CGI variable PATH_INFO.
      *
      *
-     * @return		a <code>String</code> specifying 
+     * @return		a <code>String</code>, decoded by the
+     *			web container, specifying 
      *			extra path information that comes
      *			after the servlet path but before
      *			the query string in the request URL;
@@ -324,6 +347,8 @@ public interface HttpServletRequest extends ServletRequest {
      * <p>If the URL does not have any extra path information,
      * this method returns <code>null</code>.
      *
+     * The web container does not decode thins string.
+     *
      *
      * @return		a <code>String</code> specifying the
      *			real path, or <code>null</code> if
@@ -344,7 +369,7 @@ public interface HttpServletRequest extends ServletRequest {
      * of the request.  The context path always comes first in a request
      * URI.  The path starts with a "/" character but does not end with a "/"
      * character.  For servlets in the default (root) context, this method
-     * returns "".
+     * returns "". The container does not decode this string.
      *
      *
      * @return		a <code>String</code> specifying the
@@ -364,11 +389,12 @@ public interface HttpServletRequest extends ServletRequest {
      * Returns the query string that is contained in the request
      * URL after the path. This method returns <code>null</code>
      * if the URL does not have a query string. Same as the value
-     * of the CGI variable QUERY_STRING.
+     * of the CGI variable QUERY_STRING. 
      *
      * @return		a <code>String</code> containing the query
      *			string or <code>null</code> if the URL 
-     *			contains no query string
+     *			contains no query string. The value is not
+     *			decoded by the container.
      *
      */
 
@@ -465,19 +491,20 @@ public interface HttpServletRequest extends ServletRequest {
      *
      * Returns the part of this request's URL from the protocol
      * name up to the query string in the first line of the HTTP request.
+     * The web container does not decode this String.
      * For example:
      *
-     * <blockquote>
+     * 
+
      * <table>
-     * <tr align=left><th>First line of HTTP request<th>
-     * <th>Returned Value
+     * <tr align=left><th>First line of HTTP request      </th>
+     * <th>     Returned Value</th>
      * <tr><td>POST /some/path.html HTTP/1.1<td><td>/some/path.html
      * <tr><td>GET http://foo.bar/a.html HTTP/1.0
-     * <td><td>http://foo.bar/a.html
+     * <td><td>/a.html
      * <tr><td>HEAD /xyz?a=b HTTP/1.1<td><td>/xyz
      * </table>
-     * </blockquote>
-     *
+     *      
      * <p>To reconstruct an URL with a scheme and host, use
      * {@link HttpUtils#getRequestURL}.
      *
@@ -491,7 +518,25 @@ public interface HttpServletRequest extends ServletRequest {
 
     public String getRequestURI();
     
-    
+    /**
+     *
+     * Reconstructs the URL the client used to make the request.
+     * The returned URL contains a protocol, server name, port
+     * number, and server path, but it does not include query
+     * string parameters.
+     * 
+     * <p>Because this method returns a <code>StringBuffer</code>,
+     * not a string, you can modify the URL easily, for example,
+     * to append query parameters.
+     *
+     * <p>This method is useful for creating redirect messages
+     * and for reporting errors.
+     *
+     * @return		a <code>StringBuffer</code> object containing
+     *			the reconstructed URL
+     *
+     */
+    public StringBuffer getRequestURL();
     
 
     /**
@@ -505,7 +550,8 @@ public interface HttpServletRequest extends ServletRequest {
      *
      * @return		a <code>String</code> containing
      *			the name or path of the servlet being
-     *			called, as specified in the request URL 
+     *			called, as specified in the request URL,
+     *			decoded.
      *
      *
      */
@@ -528,7 +574,9 @@ public interface HttpServletRequest extends ServletRequest {
      *
      * <p>To make sure the session is properly maintained,
      * you must call this method before 
-     * the response is committed.
+     * the response is committed. If the container is using cookies
+     * to maintain session integrity and is asked to create a new session
+     * when the response is committed, an IllegalStateException is thrown.
      *
      *
      *

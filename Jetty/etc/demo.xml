@@ -65,6 +65,12 @@
     <Arg type="boolean">false</Arg> <!-- dont expand war -->
   </Call>
 
+  <Call name="addWebApplication">
+    <Arg>/examples/*</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/examples</Arg>
+    <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
+    <Arg type="boolean">false</Arg> <!-- dont expand war -->
+  </Call>
 
   <Call name="addContext">
     <Arg>/demo/*</Arg>
@@ -159,6 +165,15 @@
       <New class="org.mortbay.http.HashUserRealm">
         <Arg>Jetty Demo Realm</Arg>
         <Arg><SystemProperty name="jetty.home" default="."/>/etc/demoRealm.properties</Arg>
+      </New>
+    </Arg>
+  </Call>
+
+  <Call name="addRealm">
+    <Arg>
+      <New class="org.mortbay.http.HashUserRealm">
+        <Arg>Example Form-Based Authentication Area</Arg>
+        <Arg><SystemProperty name="jetty.home" default="."/>/etc/examplesRealm.properties</Arg>
       </New>
     </Arg>
   </Call>

@@ -67,9 +67,10 @@ package org.apache.jasper;
 
 import org.apache.jasper.compiler.JspReader;
 import org.apache.jasper.compiler.ServletWriter;
-//import org.apache.jasper.runtime.JspLoader;
 import org.apache.jasper.compiler.TagLibraries;
 import java.io.IOException;
+import java.net.URL;
+import java.net.MalformedURLException;
 import org.apache.jasper.compiler.Compiler;
 
 /**
@@ -77,11 +78,9 @@ import org.apache.jasper.compiler.Compiler;
  * engine. This is a per-request/per-context data structure. Some of
  * the instance variables are set at different points.
  *
- * JspLoader creates this object and passes this off to the "compiler"
- * subsystem, which then initializes the rest of the variables. 
- *
  * @author Anil K. Vijendran
  * @author Harish Prabandham
+ * @author Pierre Delisle
  */
 public interface JspCompilationContext {
 
@@ -106,10 +105,6 @@ public interface JspCompilationContext {
      */
     public ClassLoader getClassLoader();
 
-    /** Add a jar to the classpath used by the loader.
-     */
-    public void addJar( String jar ) throws IOException ;
-
     /**
      * Are we processing something that has been declared as an
      * errorpage? 
@@ -124,6 +119,13 @@ public interface JspCompilationContext {
     public String getOutputDir();
     
     /**
+     * What is the scratch directory we are generating code into?
+     * FIXME: In some places this is called scratchDir and in some
+     * other places it is called outputDir.
+     */
+    public String getJavacOutputDir();
+
+    /**
      * Path of the JSP URI. Note that this is not a file name. This is
      * the context rooted URI of the JSP file. 
      */
@@ -136,15 +138,9 @@ public interface JspCompilationContext {
     public String getServletClassName();
     
     /**
-     * The package name into which the servlet class is generated. 
+     * The package name into which the servlet class is generated.
      */
     public String getServletPackageName();
-
-    /**
-     * Utility method to get the full class name from the package and
-     * class name. 
-     */
-    public String getFullClassName();
 
     /**
      * Full path name of the Java file into which the servlet is being
@@ -174,10 +170,10 @@ public interface JspCompilationContext {
     
     public void setWriter(ServletWriter writer);
     
-    public void setServletClassName(String servletClassName);
+    void setServletClassName(String servletClassName);
     
     public void setServletPackageName(String servletPackageName);
-    
+
     public void setServletJavaFileName(String servletJavaFileName);
     
     public void setErrorPage(boolean isErrPage);
@@ -203,11 +199,31 @@ public interface JspCompilationContext {
      */
     public java.io.InputStream getResourceAsStream(String res);
 
+    public java.net.URL getResource(String res) throws MalformedURLException;
+
     /** 
      * Gets the actual path of a URI relative to the context of
      * the compilation.
      */
     public String getRealPath(String path);
 
+    static interface Interface1 {
+    }
+
+    /**
+     * Get the 'location' of the TLD associated with 
+     * a given taglib 'uri'.
+     * 
+     * @returns An array of two Strings. The first one is
+     * real path to the TLD. If the path to the TLD points
+     * to a jar file, then the second string is the
+     * name of the entry for the TLD in the jar file.
+     * Returns null if the uri is not associated to
+     * a tag library 'exposed' in the web application.
+     * A tag library is 'exposed' either explicitely in 
+     * web.xml or implicitely via the uri tag in the TLD 
+     * of a taglib deployed in a jar file (WEB-INF/lib).
+     */
+    public String[] getTldLocation(String uri) throws JasperException;
 }
 

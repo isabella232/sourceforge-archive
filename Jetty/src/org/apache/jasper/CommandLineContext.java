@@ -73,23 +73,24 @@ import org.apache.jasper.compiler.TagLibraries;
 import org.apache.jasper.compiler.CommandLineCompiler;
 import org.apache.jasper.compiler.Compiler;
 
-//import org.apache.jasper.runtime.JspLoader;
-// Use the jasper loader - the only function used is to add a jar
-import org.apache.jasper.servlet.JasperLoader;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.net.MalformedURLException;
 
 /**
  * Holds data used on a per-page compilation context that would otherwise spill
  * over to other pages being compiled.  Things like the taglib classloaders
  * and directives.
  *
- *@author Danno Ferrin
+ * @author Danno Ferrin
+ * @author Pierre Delisle
  */
 public class CommandLineContext implements JspCompilationContext {
 
     String classPath;
     JspReader reader;
     ServletWriter writer;
-    JasperLoader loader;
+    URLClassLoader loader;
     boolean errPage;
     String jspFile;
     String servletClassName;
@@ -101,21 +102,19 @@ public class CommandLineContext implements JspCompilationContext {
     String uriBase;
     File uriRoot;
 
-    boolean packageNameLocked;
-    boolean classNameLocked;
     boolean outputInDirs;
 
-    public CommandLineContext(JasperLoader newLoader, String newClassPath,
+    public CommandLineContext(String newClassPath,
                               String newJspFile, String newUriBase,
                               String newUriRoot, boolean newErrPage,
                               Options newOptions)
     throws JasperException
     {
-        loader = newLoader;
         classPath = newClassPath;
         uriBase = newUriBase;
         String tUriRoot = newUriRoot;
         jspFile = newJspFile;
+        // hack fix for resolveRelativeURI
         errPage = newErrPage;
         options = newOptions;
 
@@ -171,10 +170,6 @@ public class CommandLineContext implements JspCompilationContext {
         return loader;
     }
 
-    public void addJar( String jar ) throws IOException  {
-        loader.addJar( jar );
-    }
-    
     /**
      * Are we processing something that has been declared as an
      * errorpage? 
@@ -193,6 +188,15 @@ public class CommandLineContext implements JspCompilationContext {
     }
     
     /**
+     * What is the scratch directory we are generating code into?
+     * FIXME: In some places this is called scratchDir and in some
+     * other places it is called outputDir.
+     */
+    public String getJavacOutputDir() {
+        return options.getScratchDir().toString();
+    }
+
+    /**
      * Path of the JSP URI. Note that this is not a file name. This is
      * the context rooted URI of the JSP file. 
      */
@@ -209,37 +213,18 @@ public class CommandLineContext implements JspCompilationContext {
     }
     
     /**
-     * The package name into which the servlet class is generated. 
+     * The package name for the generated class.
      */
     public String getServletPackageName() {
         return servletPackageName;
     }
 
     /**
-     * Utility method to get the full class name from the package and
-     * class name. 
-     */
-    public String getFullClassName() {
-        String pkg = getServletPackageName();
-        if (pkg != null) {
-            pkg += ".";
-        } else {
-            pkg = "";
-        }
-        return pkg + getServletClassName();
-   }
-
-    /**
      * Full path name of the Java file into which the servlet is being
      * generated. 
      */
     public String getServletJavaFileName() {
-        if (outputInDirs) {
-            return getServletPackageName().replace('.', File.separatorChar)
-                   + servletJavaFileName;
-        } else {
-            return servletJavaFileName;
-        }
+        return servletJavaFileName;
     }
 
     /**
@@ -264,6 +249,10 @@ public class CommandLineContext implements JspCompilationContext {
         return options;
     }
 
+    public void setClassLoader(URLClassLoader loader) {
+	this.loader = loader;
+    }
+
     public void setContentType(String contentType) {
         this.contentType = contentType;
     }
@@ -277,19 +266,11 @@ public class CommandLineContext implements JspCompilationContext {
     }
     
     public void setServletClassName(String servletClassName) {
-        if (classNameLocked) {
-            //System.out.println("Did not change clazz to " + servletClassName);
-        } else {
-            this.servletClassName = servletClassName;
-        }
+        this.servletClassName = servletClassName;
     }
-    
+
     public void setServletPackageName(String servletPackageName) {
-        if (packageNameLocked) {
-            //System.out.println("Did not change pkg to " + servletPackageName);
-        } else {
-            this.servletPackageName = servletPackageName;
-        }
+        this.servletPackageName = servletPackageName;
     }
     
     public void setServletJavaFileName(String servletJavaFileName) {
@@ -298,14 +279,6 @@ public class CommandLineContext implements JspCompilationContext {
     
     public void setErrorPage(boolean isErrPage) {
         errPage = isErrPage;
-    }
-
-    public void lockPackageName() {
-        packageNameLocked = true;
-    }
-
-    public void lockClassName() {
-        classNameLocked = true;
     }
 
     public void setOutputInDirs(boolean newValue) {
@@ -331,7 +304,9 @@ public class CommandLineContext implements JspCompilationContext {
      * uses current file as the base.
      */
     public String resolveRelativeUri(String uri) {
-        if (uri.startsWith("/")) {
+        // sometimes we get uri's massaged from File(String), so check for
+        // a root directory deperator char
+        if (uri.startsWith("/") || uri.startsWith(File.separator)) {
             return uri;
         } else {
             return uriBase + uri;
@@ -366,6 +341,11 @@ public class CommandLineContext implements JspCompilationContext {
         return in;
     }
 
+    public URL getResource(String res) 
+	throws MalformedURLException
+    {
+	return loader.getResource(res);
+    }
 
     /** 
      * Gets the actual path of a URI relative to the context of
@@ -380,5 +360,10 @@ public class CommandLineContext implements JspCompilationContext {
         return f.getAbsolutePath();
     }
 
+    public String[] getTldLocation(String uri) throws JasperException {
+	String[] location = 
+	    options.getTldLocationsCache().getLocation(uri);
+	return location;
+    }
 }
 

@@ -175,9 +175,14 @@ public interface HttpServletResponse extends ServletResponse {
     public String encodeRedirectUrl(String url);
 
     /**
-     * Sends an error response to the client using the specified status
-     * code and descriptive message.  The server generally creates the 
-     * response to look like a normal server error page.
+     * Sends an error response to the client using the specified
+     * status clearing the buffer.  The server defaults to creating the 
+     * response to look like an HTML-formatted server error page containing the specified message, setting the content type
+     * to "text/html", leaving cookies and other headers unmodified.
+     *
+     * If an error-page declaration has been made for the web application
+     * corresponding to the status code passed in, it will be served back in 
+     * preference to the suggested msg parameter. 
      *
      * <p>If the response has already been committed, this method throws 
      * an IllegalStateException.
@@ -188,16 +193,13 @@ public interface HttpServletResponse extends ServletResponse {
      * @param	msg	the descriptive message
      * @exception	IOException	If an input or output exception occurs
      * @exception	IllegalStateException	If the response was committed
-     *						before this method call
      */
-
+   
     public void sendError(int sc, String msg) throws IOException;
 
     /**
-     * Sends an error response to the client using the specified
-     * status.  The server generally creates the 
-     * response to look like a normal server error page.
-     *
+     * Sends an error response to the client using the specified status
+     * code and clearing the buffer. 
      * <p>If the response has already been committed, this method throws 
      * an IllegalStateException.
      * After using this method, the response should be considered
@@ -206,6 +208,7 @@ public interface HttpServletResponse extends ServletResponse {
      * @param	sc	the error status code
      * @exception	IOException	If an input or output exception occurs
      * @exception	IllegalStateException	If the response was committed
+     *						before this method call
      */
 
     public void sendError(int sc) throws IOException;
@@ -213,8 +216,11 @@ public interface HttpServletResponse extends ServletResponse {
     /**
      * Sends a temporary redirect response to the client using the
      * specified redirect location URL.  This method can accept relative URLs;
-     * the servlet container will convert the relative URL to an absolute URL
-     * before sending the response to the client.
+     * the servlet container must convert the relative URL to an absolute URL
+     * before sending the response to the client. If the location is relative 
+     * without a leading '/' the container interprets it as relative to
+     * the current request URI. If the location is relative with a leading
+     * '/' the container interprets it as relative to the servlet container root.
      *
      * <p>If the response has already been committed, this method throws 
      * an IllegalStateException.
@@ -325,8 +331,11 @@ public interface HttpServletResponse extends ServletResponse {
      * Sets the status code for this response.  This method is used to
      * set the return status code when there is no error (for example,
      * for the status codes SC_OK or SC_MOVED_TEMPORARILY).  If there
-     * is an error, the <code>sendError</code> method should be used
+     * is an error, and the caller wishes to invoke an <error-page> defined
+     * in the web applicaion, the <code>sendError</code> method should be used
      * instead.
+     * <p> The container clears the buffer and sets the Location header, preserving
+     * cookies and other headers.
      *
      * @param	sc	the status code
      *
@@ -461,6 +470,15 @@ public interface HttpServletResponse extends ServletResponse {
      */
 
     public static final int SC_USE_PROXY = 305;
+
+     /**
+     * Status code (307) indicating that the requested resource 
+     * resides temporarily under a different URI. The temporary URI
+     * <em>SHOULD</em> be given by the <code><em>Location</em></code> 
+     * field in the response.
+     */
+
+     public static final int SC_TEMPORARY_REDIRECT = 307;
 
     /**
      * Status code (400) indicating the request sent by the client was

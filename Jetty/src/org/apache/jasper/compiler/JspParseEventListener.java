@@ -76,23 +76,32 @@ import java.net.MalformedURLException;
 
 import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagLibraryInfo;
+import javax.servlet.jsp.tagext.ValidationMessage;
 
+import org.apache.jasper.JasperError;
 import org.apache.jasper.JasperException;
 import org.apache.jasper.Constants;
 import org.apache.jasper.JspCompilationContext;
+import org.apache.jasper.logging.Logger;
 
-
+import org.xml.sax.Attributes;
 
 /**
  * JSP code generator "backend".
  *
  * @author Anil K. Vijendran
+ * @author Pierre Delisle
+ * @author Danno Ferrin
  */
-public class JspParseEventListener extends BaseJspListener {
+public class JspParseEventListener implements ParseEventListener {
 
     private static CommentGenerator commentGenerator = new JakartaCommentGenerator();
 
+    protected JspReader reader;
+    protected ServletWriter writer;
+
     JspCompilationContext ctxt;
+    ParserController parserCtl;
 
     String jspServletBase = Constants.JSP_SERVLET_BASE;
     String serviceMethodName = Constants.SERVICE_METHOD_NAME;
@@ -134,47 +143,60 @@ public class JspParseEventListener extends BaseJspListener {
     private Stack tagHandlerStack;
     private Hashtable tagVarNumbers;
 
+    // The XML Outputter where the XML stream of the JSP page
+    // is generated.
+    private XmlOutputter xo = new XmlOutputter();
+
     final void addGenerator(Generator gen) throws JasperException {
         gen.init(ctxt);
         generators.addElement(gen);
     }
 
     public static void setCommentGenerator(CommentGenerator generator) {
-        if ( null == commentGenerator) {
-            throw new IllegalArgumentException("null == generator");
-        }
+	if ( null == commentGenerator) {
+	    throw new IllegalArgumentException("null == generator");
+	}
 
-        commentGenerator = generator;
+	commentGenerator = generator;
+    }
+
+    public void setReader(JspReader reader) {
+	this.reader = reader;
+    }
+
+    public void setTemplateInfo(Mark start, Mark stop) {
     }
 
     /*
      * Package private since I want everyone to come in through
      * org.apache.jasper.compiler.Main.
      */
-    JspParseEventListener(JspCompilationContext ctxt) {
-        super(ctxt.getReader(), ctxt.getWriter());
+    JspParseEventListener(JspCompilationContext ctxt,
+			  ParserController parserCtl) {
+	this.reader = ctxt.getReader();
+	this.writer = ctxt.getWriter();
         this.ctxt = ctxt;
-        this.beanInfo = new BeanRepository(ctxt.getClassLoader());
+        this.parserCtl = parserCtl;
+	this.beanInfo = new BeanRepository(ctxt.getClassLoader());
         this.libraries = new TagLibraries(ctxt.getClassLoader());
 
         // FIXME: Is this good enough? (I'm just taking the easy way out - akv)
         if (ctxt.getOptions().getLargeFile())
-            dataFile = ctxt.getOutputDir() + File.separatorChar +
-                ctxt.getServletPackageName() + "_" +
+            dataFile = ctxt.getOutputDir() +
                 ctxt.getServletClassName() + ".dat";
     }
 
     public void beginPageProcessing() throws JasperException {
-        for(int i = 0; i < Constants.STANDARD_IMPORTS.length; i++)
-            imports.addElement(Constants.STANDARD_IMPORTS[i]);
+	for(int i = 0; i < Constants.STANDARD_IMPORTS.length; i++)
+	    imports.addElement(Constants.STANDARD_IMPORTS[i]);
     }
 
     public void endPageProcessing() throws JasperException {
-        generateHeader();
-        writer.println();
-        generateAll(ServiceMethodPhase.class);
-        writer.println();
-        generateFooter();
+	generateHeader();
+	writer.println();
+	generateAll(ServiceMethodPhase.class);
+	writer.println();
+	generateFooter();
         if (ctxt.getOptions().getLargeFile())
             try {
                 ObjectOutputStream o
@@ -213,13 +235,12 @@ public class JspParseEventListener extends BaseJspListener {
     }
 
     private void generateAll(Class phase) throws JasperException {
-
-        for(int i = 0; i < generators.size(); i++) {
+	for(int i = 0; i < generators.size(); i++) {
             Generator gen = (Generator) generators.elementAt(i);
             if (phase.isInstance(gen)) {
                 gen.generate(writer, phase);
             }
-        }
+	}
 
     }
 
@@ -232,41 +253,41 @@ public class JspParseEventListener extends BaseJspListener {
             writer.println();
         }
 
-        Enumeration e = imports.elements();
-        while (e.hasMoreElements())
-            writer.println("import "+(String) e.nextElement()+";");
+	Enumeration e = imports.elements();
+	while (e.hasMoreElements())
+	    writer.println("import "+(String) e.nextElement()+";");
 
-        writer.println();
-        generateAll(FileDeclarationPhase.class);
-        writer.println();
+	writer.println();
+	generateAll(FileDeclarationPhase.class);
+	writer.println();
 
-        writer.print("public class "+servletClassName+ " extends ");
-        writer.print(extendsClass.equals("") ? jspServletBase : extendsClass);
+	writer.print("public class "+servletClassName+ " extends ");
+	writer.print(extendsClass.equals("") ? jspServletBase : extendsClass);
 
-        if (singleThreaded)
-            interfaces.addElement("SingleThreadModel");
+	if (singleThreaded)
+	    interfaces.addElement("SingleThreadModel");
 
-        if (interfaces.size() != 0) {
-            writer.println();
-            writer.println("     implements ");
+	if (interfaces.size() != 0) {
+	    writer.println();
+	    writer.println("     implements ");
 
-            for(int i = 0; i < interfaces.size() - 1; i++)
-                writer.println(" "+interfaces.elementAt(i)+",");
-            writer.println(" "+interfaces.elementAt(interfaces.size()-1));
-        }
+	    for(int i = 0; i < interfaces.size() - 1; i++)
+		writer.println(" "+interfaces.elementAt(i)+",");
+	    writer.println(" "+interfaces.elementAt(interfaces.size()-1));
+	}
 
-        writer.println(" {");
+	writer.println(" {");
 
-        writer.pushIndent();
-        writer.println();
-        generateAll(ClassDeclarationPhase.class);
-        writer.println();
+	writer.pushIndent();
+	writer.println();
+	generateAll(ClassDeclarationPhase.class);
+	writer.println();
 
-        writer.println("static {");
-        writer.pushIndent();
-        generateAll(StaticInitializerPhase.class);
-        writer.popIndent();
-        writer.println("}");
+	writer.println("static {");
+	writer.pushIndent();
+	generateAll(StaticInitializerPhase.class);
+	writer.popIndent();
+	writer.println("}");
 
         writer.println("public "+servletClassName+"( ) {");
         writer.println("}");
@@ -275,106 +296,115 @@ public class JspParseEventListener extends BaseJspListener {
         writer.println("private static boolean _jspx_inited = false;");
         writer.println();
 
-        writer.println("public final void _jspx_init() throws JasperException {");
+        writer.println("public final void _jspx_init() throws org.apache.jasper.runtime.JspException {");
         writer.pushIndent();
-        generateAll(InitMethodPhase.class);
+	generateAll(InitMethodPhase.class);
         writer.popIndent();
         writer.println("}");
         writer.println();
 
 
-        writer.println("public void "+serviceMethodName+"("+
-                       "HttpServletRequest request, "+
-                       "HttpServletResponse  response)");
+	writer.println("public void "+serviceMethodName+"("+
+		       "HttpServletRequest request, "+
+		       "HttpServletResponse  response)");
 
-        writer.println("    throws IOException, ServletException {");
-        writer.pushIndent();
-        writer.println();
+	writer.println("    throws java.io.IOException, ServletException {");
+	writer.pushIndent();
+	writer.println();
         writer.println("JspFactory _jspxFactory = null;");
         writer.println("PageContext pageContext = null;");
 
-        if (genSessionVariable)
-            writer.println("HttpSession session = null;");
+	if (genSessionVariable)
+	    writer.println("HttpSession session = null;");
 
-        if (ctxt.isErrorPage())
+	if (ctxt.isErrorPage())
             writer.println("Throwable exception = (Throwable) request.getAttribute(\"javax.servlet.jsp.jspException\");");
 
 
-        writer.println("ServletContext application = null;");
-        writer.println("ServletConfig config = null;");
-        writer.println("JspWriter out = null;");
+	writer.println("ServletContext application = null;");
+	writer.println("ServletConfig config = null;");
+	writer.println("JspWriter out = null;");
         writer.println("Object page = this;");
-        writer.println("String  _value = null;");
-        writer.println("try {");
-        writer.pushIndent();
+	writer.println("String  _value = null;");
+	writer.println("try {");
+	writer.pushIndent();
 
-        writer.println();
+	writer.println();
+        writer.println("if (_jspx_inited == false) {");
+        writer.pushIndent();
+	writer.println("synchronized (this) {");
+        writer.pushIndent();
         writer.println("if (_jspx_inited == false) {");
         writer.pushIndent();
         writer.println("_jspx_init();");
         writer.println("_jspx_inited = true;");
         writer.popIndent();
         writer.println("}");
+        writer.popIndent();
+        writer.println("}");
+        writer.popIndent();
+        writer.println("}");
 
-        writer.println("_jspxFactory = JspFactory.getDefaultFactory();");
-        if (this.contentTypeDir == true)
-            writer.println("response.setContentType(" +
-                           writer.quoteString(servletContentType)
-                           + ");");
-        else
-            writer.println("response.setContentType(\"" +
-                           servletContentType +
-                           ";charset=8859_1\");");
-        writer.println("pageContext = _jspxFactory.getPageContext(this, request, response,\n"
-                                        + "\t\t\t"
-                                        + writer.quoteString(error) + ", "
-                                        + genSessionVariable + ", "
-                                        + bufferSize + ", "
-                                        + autoFlush
-                                        + ");");
-        writer.println();
+	writer.println("_jspxFactory = JspFactory.getDefaultFactory();");
+	if (this.contentTypeDir == true)
+	    writer.println("response.setContentType(" +
+			   writer.quoteString(servletContentType)
+			   + ");");
+	else
+	    writer.println("response.setContentType(\"" +
+			   servletContentType +
+			   ";charset=ISO-8859-1\");");
+	writer.println("pageContext = _jspxFactory.getPageContext(this, request, response,\n"
+					+ "\t\t\t"
+					+ writer.quoteString(error) + ", "
+					+ genSessionVariable + ", "
+					+ bufferSize + ", "
+					+ autoFlush
+					+ ");");
+	writer.println();
 
-        writer.println("application = pageContext.getServletContext();");
-        writer.println("config = pageContext.getServletConfig();");
+	writer.println("application = pageContext.getServletContext();");
+	writer.println("config = pageContext.getServletConfig();");
 
-        if (genSessionVariable)
-            writer.println("session = pageContext.getSession();");
+	if (genSessionVariable)
+	    writer.println("session = pageContext.getSession();");
 
         writer.println("out = pageContext.getOut();");
     }
 
     private void generateFooter() throws JasperException {
-        writer.popIndent();
-        //writer.println("} catch (Throwable t) {");
-        writer.println("} catch (Exception ex) {");
+	writer.popIndent();
+	writer.println("} catch (Throwable t) {");
+	writer.pushIndent();
+        writer.println("if (out != null && out.getBufferSize() != 0)");
         writer.pushIndent();
-        writer.println("if (out.getBufferSize() != 0)");
-        writer.pushIndent();
-        writer.println("out.clearBuffer();");
-        writer.popIndent();
-        writer.println("pageContext.handlePageException(ex);");
-        writer.popIndent();
-        writer.println("} finally {");
-        writer.pushIndent();
-        /* Do stuff here for finally actions... */
-        //writer.println("out.close();");
-        writer.println("out.flush();");
-        writer.println("_jspxFactory.releasePageContext(pageContext);");
-        writer.popIndent();
-        writer.println("}");
-        // Close the service method:
-        writer.popIndent();
-        writer.println("}");
+	writer.println("out.clearBuffer();");
+	writer.popIndent();
+	writer.println("if (pageContext != null) pageContext.handlePageException(t);");
+	writer.popIndent();
+	writer.println("} finally {");
+	writer.pushIndent();
+	/* Do stuff here for finally actions... */
+	writer.println("if (_jspxFactory != null) _jspxFactory.releasePageContext(pageContext);");
+	writer.popIndent();
+	writer.println("}");
+	// Close the service method:
+	writer.popIndent();
+	writer.println("}");
 
-        // Close the class definition:
-        writer.popIndent();
-        writer.println("}");
+	// Close the class definition:
+	writer.popIndent();
+	writer.println("}");
     }
 
 
-    public void handleComment(Mark start, Mark stop) throws JasperException {
-        Constants.debug("jsp.message.htmlcomment",
-                          new Object[] { reader.getChars(start, stop) });
+    public void handleComment(Mark start, Mark stop, char[] text) 
+	throws JasperException 
+    {
+        Constants.message("jsp.message.htmlcomment",
+			  new Object[] { text },
+			  Logger.DEBUG);
+	//@@@ xo
     }
 
     interface PageDirectiveHandler {
@@ -404,6 +434,7 @@ public class JspParseEventListener extends BaseJspListener {
     static final String errorPageStr = "errorPage";
     static final String isErrorPageStr = "isErrorPage";
     static final String contentTypeStr = "contentType";
+    static final String pageEncodingStr = "pageEncoding";
 
 
     PageDirectiveHandlerInfo[] pdhis = new PageDirectiveHandlerInfo[] {
@@ -417,6 +448,7 @@ public class JspParseEventListener extends BaseJspListener {
         new PageDirectiveHandlerInfo(infoStr, new InfoHandler()),
         new PageDirectiveHandlerInfo(isErrorPageStr, new IsErrorPageHandler()),
         new PageDirectiveHandlerInfo(contentTypeStr, new ContentTypeHandler()),
+        new PageDirectiveHandlerInfo(pageEncodingStr, new PageEncodingHandler()),
         new PageDirectiveHandlerInfo(errorPageStr, new ErrorPageHandler())
     };
 
@@ -431,12 +463,31 @@ public class JspParseEventListener extends BaseJspListener {
         {
             if (listener.contentTypeDir == true)
                 throw new CompileException(start,
-                                           Constants.getString("jsp.error.page.multiple.contenttypes"));
+					   Constants.getString("jsp.error.page.multiple.contenttypes"));
             listener.contentTypeDir = true;
             if (contentType == null)
                 throw new CompileException(start,
-                                           Constants.getString("jsp.error.page.invalid.contenttype"));
+					   Constants.getString("jsp.error.page.invalid.contenttype"));
             listener.servletContentType = contentType;
+        }
+    }
+
+    static final class PageEncodingHandler implements PageDirectiveHandler {
+        public void handlePageDirectiveAttribute(JspParseEventListener listener,
+                                                 String pageEncoding,
+                                                 Mark start, Mark stop)
+            throws JasperException
+        {
+            if (pageEncoding == null)
+                throw new CompileException(start,
+					   Constants.getString("jsp.error.page.invalid.pageencoding"));
+	    // We do nothing with pageEncoding.
+	    // This is handled by the parser
+	    // to set the encoding type on the reader before we even
+	    // start parsing the page.
+	    // No restriction on one such attribute per translation unit.
+	    // We can have one per page.
+	    // FIXME: we do not track multiple occurrences per page 
         }
     }
 
@@ -448,11 +499,11 @@ public class JspParseEventListener extends BaseJspListener {
         {
             if (listener.sessionDir == true)
                 throw new CompileException (start,
-                                            Constants.getString("jsp.error.page.multiple.session"));
+					    Constants.getString("jsp.error.page.multiple.session"));
             listener.sessionDir = true;
             if (session == null)
                 throw new CompileException (start,
-                                            Constants.getString("jsp.error.page.invalid.session"));
+					    Constants.getString("jsp.error.page.invalid.session"));
             if (session.equalsIgnoreCase("true"))
                 listener.genSessionVariable = true;
             else if (session.equalsIgnoreCase("false"))
@@ -470,7 +521,7 @@ public class JspParseEventListener extends BaseJspListener {
         {
             if (listener.bufferDir == true)
                 throw new CompileException(start,
-                                           Constants.getString("jsp.error.page.multiple.buffer"));
+					   Constants.getString("jsp.error.page.multiple.buffer"));
             listener.bufferDir = true;
             if (buffer != null) {
                 if (buffer.equalsIgnoreCase("none"))
@@ -478,7 +529,7 @@ public class JspParseEventListener extends BaseJspListener {
                 else {
                     Integer i = null;
                     try {
-                        int ind = buffer.indexOf('k');
+                        int ind = buffer.indexOf("k");
                         String num;
                         if (ind == -1)
                             num = buffer;
@@ -487,14 +538,14 @@ public class JspParseEventListener extends BaseJspListener {
                         i = new Integer(num);
                     } catch (NumberFormatException n) {
                         throw new CompileException(start, Constants.getString(
-                                        "jsp.error.page.invalid.buffer"));
+					"jsp.error.page.invalid.buffer"));
                     }
                     listener.bufferSize = i.intValue()*1024;
                 }
             }
             else
                 throw new CompileException(start,
-                                           Constants.getString("jsp.error.page.invalid.buffer"));
+					   Constants.getString("jsp.error.page.invalid.buffer"));
         }
     }
 
@@ -506,12 +557,12 @@ public class JspParseEventListener extends BaseJspListener {
         {
             if (listener.autoFlushDir == true)
                 throw new CompileException(start,
-                                           Constants.getString("jsp.error.page.multiple.autoflush"));
+					   Constants.getString("jsp.error.page.multiple.autoflush"));
 
             listener.autoFlushDir = true;
             if (autoflush == null)
                 throw new CompileException(start,
-                                           Constants.getString("jsp.error.page.invalid.autoflush"));
+					   Constants.getString("jsp.error.page.invalid.autoflush"));
 
             if (autoflush.equalsIgnoreCase("true"))
                 listener.autoFlush = true;
@@ -519,7 +570,7 @@ public class JspParseEventListener extends BaseJspListener {
                 listener.autoFlush = false;
             else
                 throw new CompileException(start,
-                                           Constants.getString("jsp.error.page.invalid.autoflush"));
+					   Constants.getString("jsp.error.page.invalid.autoflush"));
         }
     }
 
@@ -531,12 +582,12 @@ public class JspParseEventListener extends BaseJspListener {
         {
             if (listener.threadsafeDir == true)
                 throw new CompileException(start,
-                                           Constants.getString("jsp.error.page.multiple.threadsafe"));
+					   Constants.getString("jsp.error.page.multiple.threadsafe"));
 
             listener.threadsafeDir = true;
             if (threadsafe == null)
                 throw new CompileException (start,
-                                            Constants.getString("jsp.error.page.invalid.threadsafe"));
+					    Constants.getString("jsp.error.page.invalid.threadsafe"));
 
             if (threadsafe.equalsIgnoreCase("true"))
                 listener.singleThreaded = false;
@@ -544,7 +595,7 @@ public class JspParseEventListener extends BaseJspListener {
                 listener.singleThreaded = true;
             else
                 throw new CompileException (start,
-                                            Constants.getString("jsp.error.page.invalid.threadsafe"));
+					    Constants.getString("jsp.error.page.invalid.threadsafe"));
         }
     }
 
@@ -556,12 +607,12 @@ public class JspParseEventListener extends BaseJspListener {
         {
             if (listener.infoDir == true)
                 throw new CompileException (start,
-                                            Constants.getString("jsp.error.page.multiple.info"));
+					    Constants.getString("jsp.error.page.multiple.info"));
 
             listener.infoDir = true;
             if (info == null)
                 throw new CompileException(start,
-                                           Constants.getString("jsp.error.page.invalid.info"));
+					   Constants.getString("jsp.error.page.invalid.info"));
 
             GeneratorWrapper gen = listener. new GeneratorWrapper(new InfoGenerator(info),
                                                                   start, stop);
@@ -577,12 +628,12 @@ public class JspParseEventListener extends BaseJspListener {
         {
             if (listener.iserrorpageDir == true)
                 throw new CompileException (start,
-                                            Constants.getString("jsp.error.page.multiple.iserrorpage"));
+					    Constants.getString("jsp.error.page.multiple.iserrorpage"));
 
             listener.iserrorpageDir = true;
             if (iserrorpage == null)
                 throw new CompileException(start,
-                                           Constants.getString("jsp.error.page.invalid.iserrorpage"));
+					   Constants.getString("jsp.error.page.invalid.iserrorpage"));
 
             if (iserrorpage.equalsIgnoreCase("true"))
                 listener.ctxt.setErrorPage(true);
@@ -590,7 +641,7 @@ public class JspParseEventListener extends BaseJspListener {
                 listener.ctxt.setErrorPage(false);
             else
                 throw new CompileException(start,
-                                           Constants.getString("jsp.error.page.invalid.iserrorpage"));
+					   Constants.getString("jsp.error.page.invalid.iserrorpage"));
         }
     }
 
@@ -602,7 +653,7 @@ public class JspParseEventListener extends BaseJspListener {
         {
             if (listener.errorpageDir == true)
                 throw new CompileException(start,
-                                           Constants.getString("jsp.error.page.multiple.errorpage"));
+					   Constants.getString("jsp.error.page.multiple.errorpage"));
 
             listener.errorpageDir = true;
             if (errorpage != null)
@@ -618,13 +669,13 @@ public class JspParseEventListener extends BaseJspListener {
         {
             if (listener.languageDir == true)
                 throw new CompileException(start,
-                                           Constants.getString("jsp.error.page.multiple.language"));
+					   Constants.getString("jsp.error.page.multiple.language"));
 
             listener.languageDir = true;
             if (language != null)
                 if (!language.equalsIgnoreCase("java"))
                     throw new CompileException(start,
-                                               Constants.getString("jsp.error.page.nomapping.language")+language);
+					       Constants.getString("jsp.error.page.nomapping.language")+language);
         }
     }
 
@@ -650,41 +701,42 @@ public class JspParseEventListener extends BaseJspListener {
         {
             if (listener.extendsDir == true)
                 throw new CompileException(start,
-                                           Constants.getString("jsp.error.page.multiple.extends"));
+					   Constants.getString("jsp.error.page.multiple.extends"));
 
             listener.extendsDir = true;
             if (extendsClzz != null)  {
                 listener.extendsClass = extendsClzz;
 
-                /*
-                 * If page superclass is top level class (i.e. not in a pkg)
-                 * explicitly import it. If this is not done, the compiler
-                 * will assume the extended class is in the same pkg as
-                 * the generated servlet.
-                 */
-                if (extendsClzz.indexOf('.') == -1)  {
+		/*
+		 * If page superclass is top level class (i.e. not in a pkg)
+		 * explicitly import it. If this is not done, the compiler
+		 * will assume the extended class is in the same pkg as
+		 * the generated servlet.
+		 */
+		if (extendsClzz.indexOf(".") == -1)  {
                     listener.imports.addElement(extendsClzz);
-                }
+		}
             }
         }
     }
 
     public void handleDirective(String directive, Mark start,
-                                Mark stop, Hashtable attrs)
-        throws JasperException
+				Mark stop, Attributes attrs)
+	throws JasperException
     {
-        Constants.debug("jsp.message.handling_directive",
-                          new Object[] { directive, attrs });
+        Constants.message("jsp.message.handling_directive",
+                          new Object[] { directive, attrs },
+                          Logger.DEBUG);
 
-        if (directive.equals("page")) {
-            Enumeration e = attrs.keys();
-            String attr;
-            while (e.hasMoreElements()) {
-                attr = (String) e.nextElement();
+	if (directive.equals("page")) {
+	    int attrsLength = attrs.getLength();
+	    String attr;
+	    for (int j = 0; j < attrsLength; j++) {
+		attr = attrs.getQName(j);
                 for(int i = 0; i < pdhis.length; i++) {
                     PageDirectiveHandlerInfo pdhi = pdhis[i];
                     if (attr.equals(pdhi.attribute)) {
-                        String value = (String) attrs.get(pdhi.attribute);
+                        String value = (String) attrs.getValue(pdhi.attribute);
                         pdhi.handler.handlePageDirectiveAttribute(this, value,
                                                                   start, stop);
                     }
@@ -695,40 +747,48 @@ public class JspParseEventListener extends BaseJspListener {
         // Do some validations...
         if (bufferSize == 0 && autoFlush == false)
             throw new CompileException(start, Constants.getString(
-            				"jsp.error.page.bad_b_and_a_combo"));
+	    				"jsp.error.page.bad_b_and_a_combo"));
 
-        if (directive.equals("taglib")) {
-            String uri = (String) attrs.get("uri");
-            String prefix = (String) attrs.get("prefix");
-            try {
-                TagLibraryInfo tl = new TagLibraryInfoImpl(ctxt,
-                                                               prefix,
-                                                               uri);
-                libraries.addTagLibrary(prefix, tl);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                Object[] args = new Object[] { uri, ex.getMessage() };
-                throw new CompileException(start, Constants.getString("jsp.error.badtaglib",
-                                                              args));
-            }
+	if (directive.equals("taglib")) {
+	    String uri = attrs.getValue("uri");
+	    String prefix = attrs.getValue("prefix");
+            processTaglibDirective(uri, prefix);
+
+            //Add xmlns to root element for each taglib
+            xo.addRootNamespaces(prefix, uri);
         }
 
-        if (directive.equals("include")) {
-            String file = (String) attrs.get("file");
-            String encoding = (String) attrs.get("encoding");
-
-            if (file == null)
-                throw new CompileException(start,
-                                           Constants.getString("jsp.error.include.missing.file"));
+	else if (directive.equals("include")) {
+	    String file = attrs.getValue("file");
+	    if (file == null)
+		throw new CompileException(start,
+					   Constants.getString("jsp.error.include.missing.file"));
 
             // jsp.error.include.bad.file needs taking care of here??
+	    /* NOT COMPILED
             try {
                 reader.pushFile(file, encoding);
             } catch (FileNotFoundException fnfe) {
                 throw new CompileException(start,
-                                           Constants.getString("jsp.error.include.bad.file"));
+					   Constants.getString("jsp.error.include.bad.file"));
             }
-        }
+	    */
+	    try {
+		parserCtl.parse(file);
+	    } catch (FileNotFoundException ex) {
+		throw new CompileException(
+					   start,
+					   Constants.getString("jsp.error.file.not.found",
+							       new Object[]{file}));
+	    } catch (Exception ex) {
+		throw new CompileException(start,
+					   ex.getMessage());
+	    }
+	}
+
+	else if (!directive.equals("include")) {
+	    xo.append("jsp:directive." + directive, attrs, true);
+	}
     }
 
 
@@ -760,123 +820,172 @@ public class JspParseEventListener extends BaseJspListener {
         }
 
         public void generate(ServletWriter out, Class phase)
-                                throws JasperException
-        {
+				throws JasperException
+	{
             if (phase.isInstance(generator)) {
                 boolean genCoords = generator.generateCoordinates(phase);
                 if (genCoords) {
-                    commentGenerator.generateStartComment
-                        (generator, out, start, stop);
+		    commentGenerator.generateStartComment
+			(generator, out, start, stop);
                 }
                 generator.generate(out, phase);
                 if (genCoords) {
-                    commentGenerator.generateEndComment
-                        (generator, out, start, stop);
+		    commentGenerator.generateEndComment
+			(generator, out, start, stop);
                 }
             }
         }
     }
 
-    public void handleDeclaration(Mark start, Mark stop, Hashtable attrs)
-        throws JasperException
+    public void handleDeclaration(Mark start, Mark stop, Attributes attrs,
+				  char[] text)
+	throws JasperException
     {
         Generator gen
-            = new GeneratorWrapper(new DeclarationGenerator(reader.getChars(
-            			   start, stop)), start, stop);
-        addGenerator(gen);
+            = new GeneratorWrapper(new DeclarationGenerator(text), start, stop);
+	addGenerator(gen);
+        xo.append("jsp:declaration", attrs, text);
     }
 
-    public void handleScriptlet(Mark start, Mark stop, Hashtable attrs)
-        throws JasperException
+    public void handleScriptlet(Mark start, Mark stop, Attributes attrs,
+				char[] text)
+	throws JasperException
     {
         Generator gen
-            = new GeneratorWrapper(new ScriptletGenerator(reader.getChars(
-            			   start, stop)), start, stop);
-        addGenerator(gen);
+            = new GeneratorWrapper(new ScriptletGenerator(text), start, stop);
+	addGenerator(gen);
+	xo.append("jsp:scriptlet", attrs, text);
     }
 
-    public void handleExpression(Mark start, Mark stop, Hashtable attrs)
-        throws JasperException
+    public void handleExpression(Mark start, Mark stop, Attributes attrs,
+				 char[] text)
+	throws JasperException
     {
         Generator gen
-            = new GeneratorWrapper(new ExpressionGenerator(reader.getChars(
-            			   start, stop)), start, stop);
-        addGenerator(gen);
+            = new GeneratorWrapper(new ExpressionGenerator(text), start, stop);
+	addGenerator(gen);
+	xo.append("jsp:expression", attrs, text);
     }
 
-    public void handleBean(Mark start, Mark stop, Hashtable attrs)
+    public void handleBean(Mark start, Mark stop, Attributes attrs)
         throws JasperException
     {
-        Generator gen
-            = new GeneratorWrapper(new BeanGenerator(start, attrs, beanInfo,
-                                                     genSessionVariable),
-                                   start, stop);
-
-        addGenerator(gen);
+        handleBean(start, stop, attrs, false);
     }
 
-    public void handleBeanEnd(Mark start, Mark stop, Hashtable attrs)
+    public void handleBean(Mark start, Mark stop, Attributes attrs,
+                           boolean isXml)
         throws JasperException
+    {
+        Generator gen =
+            new GeneratorWrapper(
+                new BeanGenerator(start, attrs, beanInfo,
+                                  genSessionVariable, isXml),
+                start, stop);
+        addGenerator(gen);
+        xo.append("jsp:useBean", attrs, false);
+    }
+
+    public void handleBeanEnd(Mark start, Mark stop, Attributes attrs)
+	throws JasperException
     {
         Generator gen
             = new GeneratorWrapper(new BeanEndGenerator(),
                                    start, stop);
-        // End the block started by useBean body.
-        addGenerator(gen);
+	// End the block started by useBean body.
+	addGenerator(gen);
+	xo.append("jsp:useBean");
     }
 
-    public void handleGetProperty(Mark start, Mark stop, Hashtable attrs)
-        throws JasperException
+    public void handleGetProperty(Mark start, Mark stop, Attributes attrs)
+	throws JasperException
     {
         Generator gen
             = new GeneratorWrapper(new GetPropertyGenerator(start, stop, attrs,
-            			   beanInfo), start, stop);
+	    			   beanInfo), start, stop);
 
-        addGenerator(gen);
+	addGenerator(gen);
+	xo.append("jsp:getProperty", attrs, true);
     }
 
-    public void handleSetProperty(Mark start, Mark stop, Hashtable attrs)
+    public void handleSetProperty(Mark start, Mark stop, Attributes attrs)
         throws JasperException
     {
-        Generator gen
-            = new GeneratorWrapper(new SetPropertyGenerator(start, stop, attrs,
-            			   beanInfo), start, stop);
-
-        addGenerator(gen);
+        handleSetProperty(start, stop, attrs, false);
     }
 
-    public void handlePlugin(Mark start, Mark stop, Hashtable attrs,
-    				Hashtable param, String fallback)
+    public void handleSetProperty(Mark start, Mark stop, Attributes attrs, 
+                                  boolean isXml)
         throws JasperException
     {
-        Constants.debug("jsp.message.handling_plugin",
-                          new Object[] { attrs });
-
-        Generator gen = new GeneratorWrapper (new PluginGenerator (start, attrs,
-                                              param, fallback), start, stop);
-        addGenerator (gen);
-    }
-
-    public void handleForward(Mark start, Mark stop, Hashtable attrs, Hashtable param)
-        throws JasperException
-    {
-        Generator gen
-            = new GeneratorWrapper(new ForwardGenerator(start, attrs, param),
-                                   start, stop);
-
+        Generator gen = 
+            new GeneratorWrapper(
+                new SetPropertyGenerator(start, stop, attrs, beanInfo, isXml),
+                start, stop);
         addGenerator(gen);
+        xo.append("jsp:setProperty", attrs, true);
     }
 
-    public void handleInclude(Mark start, Mark stop, Hashtable attrs, Hashtable param)
-        throws JasperException
+    public void handlePlugin(Mark start, Mark stop, Attributes attrs,
+    			     Hashtable param, String fallback)
+	throws JasperException
     {
-        Generator gen
-            = new GeneratorWrapper(new IncludeGenerator(start, attrs, param),
-                                   start, stop);
-
-        addGenerator(gen);
+	handlePlugin(start, stop, attrs, param, fallback, false);
     }
 
+    public void handlePlugin(Mark start, Mark stop, Attributes attrs,
+    			     Hashtable param, String fallback, boolean isXml)
+	throws JasperException
+    {
+	Generator gen = 
+            new GeneratorWrapper(
+                new PluginGenerator(start, attrs, param, fallback, isXml), 
+                start, stop);
+	addGenerator (gen);
+	//@@@ xo
+    }
+
+    public void handleForward(Mark start, Mark stop, Attributes attrs, 
+                              Hashtable param)
+	throws JasperException
+    {
+	handleForward(start, stop, attrs, param, false);
+    }
+
+    public void handleForward(Mark start, Mark stop, Attributes attrs, 
+                              Hashtable param, boolean isXml)
+	throws JasperException
+    {
+        Generator gen = 
+            new GeneratorWrapper(
+                new ForwardGenerator(start, attrs, param, isXml),
+                start, stop);
+	addGenerator(gen);
+	xo.append("jsp:forward", attrs, false);
+	xo.append("jsp:param", param);
+	xo.append("jsp:forward");
+    }
+
+    public void handleInclude(Mark start, Mark stop, Attributes attrs, 
+                              Hashtable param)
+	throws JasperException
+    {
+	handleInclude(start, stop, attrs, param, false);
+    }
+
+    public void handleInclude(Mark start, Mark stop, Attributes attrs, 
+                              Hashtable param, boolean isXml)
+	throws JasperException
+    {
+        Generator gen = 
+            new GeneratorWrapper(
+                new IncludeGenerator(start, attrs, param, isXml),
+                start, stop);
+	addGenerator(gen);
+	xo.append("jsp:include", attrs, false);
+	xo.append("jsp:param", param);
+	xo.append("jsp:include");
+    }
 
     public void handleCharData(Mark start, Mark stop, char[] chars) throws JasperException {
         GeneratorBase cdg;
@@ -885,42 +994,172 @@ public class JspParseEventListener extends BaseJspListener {
             cdg = new StoredCharDataGenerator(vector, dataFile, stringId++, chars);
         else if(ctxt.getOptions().getMappedFile())
             cdg = new MappedCharDataGenerator(chars);
-        else
-            cdg = new CharDataGenerator(chars);
+	else
+	    cdg = new CharDataGenerator(chars);
 
 
         Generator gen
             = new GeneratorWrapper(cdg,
                                    start, stop);
 
-        addGenerator(gen);
+	addGenerator(gen);
     }
 
-    public void handleTagBegin(Mark start, Mark stop, Hashtable attrs, String prefix,
-                               String shortTagName, TagLibraryInfo tli,
-                               TagInfo ti)
-        throws JasperException
+    public void handleTagBegin(Mark start, Mark stop, 
+                               Attributes attrs, String prefix,
+			       String shortTagName, TagLibraryInfo tli,
+			       TagInfo ti, boolean hasBody)
+	throws JasperException
     {
-        TagBeginGenerator tbg = new TagBeginGenerator(start, prefix, shortTagName, attrs,
-            tli, ti, libraries, getTagHandlerStack(), getTagVarNumbers());
-        Generator gen = new GeneratorWrapper(tbg, start, stop);
+	handleTagBegin(start, stop, attrs, prefix, shortTagName, tli, ti, 
+                       hasBody, false);
+    }
 
-        addGenerator(gen);
+    public void handleTagBegin(Mark start, Mark stop, 
+                               Attributes attrs, String prefix,
+			       String shortTagName, TagLibraryInfo tli,
+			       TagInfo ti, boolean hasBody, boolean isXml)
+	throws JasperException
+    {
+        TagBeginGenerator tbg = 
+            new TagBeginGenerator(start, prefix, shortTagName, attrs,
+	                          tli, ti, libraries, getTagHandlerStack(), 
+                                  getTagVarNumbers(), hasBody, isXml);
+        Generator gen = new GeneratorWrapper(tbg, start, stop);
+	addGenerator(gen);
+        xo.append(prefix+":"+shortTagName, attrs, false);
     }
 
     public void handleTagEnd(Mark start, Mark stop, String prefix,
-                             String shortTagName, Hashtable attrs,
-                             TagLibraryInfo tli, TagInfo ti)
-        throws JasperException
+			     String shortTagName, Attributes attrs,
+                             TagLibraryInfo tli, TagInfo ti, boolean hasBody)
+	throws JasperException
     {
         TagEndGenerator teg = new TagEndGenerator(prefix, shortTagName, attrs,
-            tli, ti, libraries, getTagHandlerStack(), getTagVarNumbers());
+	    tli, ti, libraries, getTagHandlerStack(), getTagVarNumbers(), hasBody);
         Generator gen = new GeneratorWrapper(teg, start, stop);
 
-        addGenerator(gen);
+	addGenerator(gen);
+        xo.append(prefix+":"+shortTagName);
     }
 
     public TagLibraries getTagLibraries() {
-        return libraries;
+	return libraries;
+    }
+
+    public void handleRootEnd() {
+	xo.rootEnd();
+    }
+    
+    public void handleRootBegin(Attributes attrs) 
+	throws JasperException 
+    {
+        int attrsLength = attrs.getLength();
+        for (int i = 0; i < attrsLength; i++) {
+	    String qName = attrs.getQName(i);
+	    if (qName.startsWith("xmlns:")) {
+		String prefix = qName.substring(6);
+		if (!prefix.equals("jsp")) {
+		    String uri = attrs.getValue(i);
+		    //System.out.println("prefix: " + prefix);
+		    //System.out.println("uri: " + uri);
+		    if (uri.startsWith("urn:jsptld:")) {
+			uri = uri.substring(11);
+		    }
+		    processTaglibDirective(uri, prefix);
+		}
+	    }
+        }
+        xo.addRootAttrs(attrs);
+    }
+    
+    public void handleUninterpretedTagBegin(Mark start, Mark stop,
+					    String rawName, Attributes attrs) 
+	throws JasperException
+    {
+        UninterpretedTagBeginGenerator gen = 
+	    new UninterpretedTagBeginGenerator(rawName, attrs);
+        Generator genWrapper = new GeneratorWrapper(gen, start, stop);
+	addGenerator(genWrapper);
+        xo.append(rawName, attrs, false);
+    }
+
+    public void handleUninterpretedTagEnd(Mark start, Mark stop,
+					  String rawName, char[] data)
+	throws JasperException
+    {
+	if (data != null) {
+	    handleCharData(start, stop, data);
+            xo.append(data);
+	}
+        UninterpretedTagEndGenerator gen = 
+	    new UninterpretedTagEndGenerator(rawName);
+        Generator genWrapper = new GeneratorWrapper(gen, start, stop);
+	addGenerator(genWrapper);
+        xo.append(rawName);
+    }
+
+    public void handleJspCdata(Mark start, Mark stop, char[] data)
+	throws JasperException
+    {
+	if (data != null) {
+	    handleCharData(start, stop, data);
+            // xo.append("jsp:cdata", null, data);
+            xo.append("jsp:text", null, data);
+	}
+    }
+
+    /**
+     * validate the XML stream of the JSP document against the
+     * libraries used by the document.
+     */
+    public void validate() throws JasperException {
+	StringBuffer errMessage = new StringBuffer();
+        Enumeration enum = libraries.getTagLibInfos();
+        boolean hasErrors = false;
+        while (enum.hasMoreElements()) {
+            TagLibraryInfo tli = (TagLibraryInfo)enum.nextElement();
+	    //@@@ remove cast when TagLibraryInfo is fixed in spec
+
+	    ValidationMessage[] errors =
+	      ((TagLibraryInfoImpl)tli).validate(xo.getPageData());
+            if ((errors != null) && (errors.length != 0)) {
+                hasErrors = true;
+                errMessage.append("<h3>");
+                errMessage.append(Constants.getString(
+                       "jsp.error.taglibraryvalidator.invalidpage",
+                       new Object[]{tli.getShortName()}));
+                errMessage.append("</h3>");
+                for (int i = 0; i < errors.length; i++) {
+                    errMessage.append("<p>");
+                    errMessage.append(errors[i].getId());
+                    errMessage.append(": ");
+                    errMessage.append(errors[i].getMessage());
+                    errMessage.append("</p>");
+                }
+            }
+        }
+	if (hasErrors)
+            throw new JasperError(errMessage.toString());
+    }
+
+    /**
+     * Process a taglib directive. This can happen either via the
+     * JSP taglib directive (in JSP syntax) or via xmlns in <jsp:root>
+     * (in XML syntax).
+     */
+    private void processTaglibDirective(String uri, String prefix)
+	throws JasperException
+    {
+	TagLibraryInfo tl = null;
+	
+	String[] location = 
+	    ctxt.getTldLocation(uri);
+	if (location == null) {
+	    tl = new TagLibraryInfoImpl(ctxt, prefix, uri);
+	} else {
+	    tl = new TagLibraryInfoImpl(ctxt, prefix, uri, location);
+	}
+	libraries.addTagLibrary(prefix, tl);
     }
 }

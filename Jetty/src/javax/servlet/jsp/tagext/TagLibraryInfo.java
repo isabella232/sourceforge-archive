@@ -62,14 +62,19 @@ import java.net.URL;
 import java.io.InputStream;
 
 /**
- * Information on the Tag Library;
- * this class is instantiated from the Tag Library Descriptor file (TLD).
+ * Translation-time information associated with a taglib directive, and its
+ * underlying TLD file.
+ *
+ * Most of the information is directly from the TLD, except for
+ * the prefix and the uri values used in the taglib directive
+ *
+ *
  */
 
 abstract public class TagLibraryInfo {
 
     /**
-     * Constructor
+     * Constructor.
      *
      * This will invoke the constructors for TagInfo, and TagAttributeInfo
      * after parsing the TLD file.
@@ -83,10 +88,13 @@ abstract public class TagLibraryInfo {
 	this.uri    = uri;
     }
 
-    // TODO -- want a package private constructor with data spelled out?
+
+    // ==== methods accessing taglib information =======
 
     /**
-     * @return the URI from the <%@ taglib directive for this library
+     * The value of the uri attribute from the <%@ taglib directive for this library.
+     *
+     * @returns the value of the uri attribute
      */
    
     public String getURI() {
@@ -94,7 +102,9 @@ abstract public class TagLibraryInfo {
     }
 
     /**
-     * @return the prefix assigned to this taglib from the <%taglib directive
+     * The prefix assigned to this taglib from the <%taglib directive
+     *
+     * @returns the prefix assigned to this taglib from the <%taglib directive
      */
 
     public String getPrefixString() {
@@ -104,46 +114,69 @@ abstract public class TagLibraryInfo {
     // ==== methods using the TLD data =======
 
     /**
-     * @return the prefered short name for the library
+     * The preferred short name (prefix) as indicated in the TLD.
+     * This may be used by authoring tools as the preferred prefix
+     * to use when creating an include directive for this library.
+     *
+     * @returns the preferred short name for the library
      */
     public String getShortName() {
         return shortname;
     }
 
     /**
-     * @return a reliable URN to a TLD like this
+     * The "reliable" URN indicated in the TLD.
+     * This may be used by authoring tools as a global identifier
+     * (the uri attribute) to use when creating a taglib directive
+     * for this library.
+     *
+     * @returns a reliable URN to a TLD like this
      */
     public String getReliableURN() {
         return urn;
     }
 
+
     /**
-     * @return the info string for this tag lib
+     * Information (documentation) for this TLD.
+     *
+     * @returns the info string for this tag lib
      */
    
     public String getInfoString() {
         return info;
     }
 
+
     /**
-     * The required version.
-     * TODO -- minimal?
+     * A string describing the required version of the JSP container.
+     * 
+     * @returns the (minimal) required version of the JSP container.
+     * @seealso JspEngineInfo.
      */
    
     public String getRequiredVersion() {
         return jspversion;
     }
 
+
     /**
-     * @return the tags defined in this tag lib
+     * An array describing the tags that are defined in this tag library.
+     *
+     * @returns the tags defined in this tag lib
      */
    
     public TagInfo[] getTags() {
         return tags;
     }
 
+
     /**
-     * Get the TagInfo for a given tag name
+     * Get the TagInfo for a given tag name, looking through all the
+     * tags in this tag library.
+     *
+     * @param shortname The short name (no prefix) of the tag
+     * @returns the TagInfo for that tag. 
      */
 
     public TagInfo getTag(String shortname) {

@@ -7,12 +7,6 @@
 
 <H1>WebApp JSP Snoop page</H1>
 
-<H2>Context information</H2>
-<PRE>
-ClassLoader=<%= this.getClass().getClassLoader() %>
-ThreadContextClassLoader=<%= Thread.currentThread().getContextClassLoader() %>
-</PRE>
-
 <H2>Request information</H2>
 
 <TABLE>
@@ -172,6 +166,18 @@ ThreadContextClassLoader=<%= Thread.currentThread().getContextClassLoader() %>
 <%
 	}
 %>
+
+<H2>Context information</H2>
+<PRE>
+ClassLoader=<%= this.getClass().getClassLoader() %>
+ThreadContextClassLoader=<%= Thread.currentThread().getContextClassLoader() %>
+
+Class from context classpath = <%= org.mortbay.webapps.jetty.JettyPage.class %>
+Class from system classpath = <%= org.xml.sax.Parser.class %>
+
+getServletContext().getResourcePaths("/WEB-INF") = <%= getServletContext().getResourcePaths("/WEB-INF") %>
+</PRE>
+
 
 </BODY>
 </HTML>

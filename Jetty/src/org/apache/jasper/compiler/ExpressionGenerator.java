@@ -73,11 +73,11 @@ public class ExpressionGenerator
     char[] chars;
     
     public ExpressionGenerator(char[] chars) {
-        this.chars = chars;
+	this.chars = chars;
     }
     
     public void generate(ServletWriter writer, Class phase) {
-        writer.println("out.print("+new String(JspUtil.removeQuotes(chars))+");");
+	writer.println("out.print("+new String(JspUtil.escapeQuotes(chars))+");");
     }
 }
 
