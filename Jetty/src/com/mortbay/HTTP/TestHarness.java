@@ -27,9 +27,7 @@ import java.util.List;
  */
 public class TestHarness
 {
-    public static String CRLF = HttpFields.__CRLF;
-       
-    public final static String __CRLF = "\015\012";
+    public final static String CRLF = "\015\012";
     public static String __userDir =
         System.getProperty("user.dir",".");
     public static URL __userURL=null;

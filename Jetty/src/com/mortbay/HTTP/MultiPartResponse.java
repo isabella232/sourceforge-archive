@@ -20,10 +20,17 @@ import java.io.Writer;
 */
 public class MultiPartResponse
 {
+    private static final byte[] __CRLF="\015\012".getBytes();
+    private static final byte[] __DASHDASH="--".getBytes();
+    
     /* ------------------------------------------------------------ */
     private String boundary =
         "com.mortbay.HTTP.MultiPartResponse.boundary."+
         Long.toString(System.currentTimeMillis(),36);
+    
+    private byte[] boundaryBytes = boundary.getBytes();
+
+    /* ------------------------------------------------------------ */
     public String getBoundary()
     {
         return boundary;
@@ -67,11 +74,14 @@ public class MultiPartResponse
          throws IOException
     {
         if (inPart)
-            out.write(HttpFields.__CRLF.getBytes());
+            out.write(__CRLF);
         inPart=true;
-        out.write(("--"+boundary+HttpFields.__CRLF).getBytes());
-        out.write(("Content-type: "+contentType+
-                   HttpFields.__CRLF+HttpFields.__CRLF).getBytes());
+        out.write(__DASHDASH);
+        out.write(boundaryBytes);
+        out.write(__CRLF);
+        out.write(("Content-type: "+contentType).getBytes());
+        out.write(__CRLF);
+        out.write(__CRLF);
     }
     
     /* ------------------------------------------------------------ */
@@ -81,16 +91,19 @@ public class MultiPartResponse
          throws IOException
     {
         if (inPart)
-            out.write(HttpFields.__CRLF.getBytes());
+            out.write(__CRLF);
         inPart=true;
-        out.write(("--"+boundary+HttpFields.__CRLF).getBytes());
-        out.write(("Content-type: "+contentType+HttpFields.__CRLF).getBytes());
+        out.write(__DASHDASH);
+        out.write(boundaryBytes);
+        out.write(__CRLF);
+        out.write(("Content-type: "+contentType).getBytes());
+        out.write(__CRLF);
         for (int i=0;headers!=null && i<headers.length;i++)
         {
             out.write(headers[i].getBytes());
-            out.write(HttpFields.__CRLF.getBytes());
+            out.write(__CRLF);
         }
-        out.write(HttpFields.__CRLF.getBytes());
+        out.write(__CRLF);
     }
         
     /* ------------------------------------------------------------ */
@@ -102,8 +115,11 @@ public class MultiPartResponse
          throws IOException
     {
         if (inPart)
-            out.write(HttpFields.__CRLF.getBytes());
-        out.write(("--"+boundary+"--"+HttpFields.__CRLF).getBytes());
+            out.write(__CRLF);
+        out.write(__DASHDASH);
+        out.write(boundaryBytes);
+        out.write(__DASHDASH);
+        out.write(__CRLF);
         inPart=false;
     }
     

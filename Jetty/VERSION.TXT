@@ -1,7 +1,7 @@
 Jetty3 Versions
 --------------
 
- + Some buffer optimization
+ + Many major and minor optimizations
  + Separation of URL params in HttpHandler API.
  + Fixed handling of default mime types
  + Allow contextpaths without leading /

@@ -957,6 +957,8 @@ public class ResourceHandler extends NullHandler
     {
         Resource resource;
         long lastModified;
+        String lastModifiedString;
+        String sizeString;
         byte[] bytes;
         String encoding;
 
@@ -1029,6 +1031,7 @@ public class ResourceHandler extends NullHandler
             synchronized(_cacheMap)
             {
                 lastModified--;
+                lastModifiedString=null;
                 _cacheMap.remove(resource.toString());
 
                 if (prev==null)
@@ -1071,7 +1074,6 @@ public class ResourceHandler extends NullHandler
                     if (_leastRecentlyUsed==this && tp!=null)
                         _leastRecentlyUsed=tp;
                 }
-                
             }
         }
   
@@ -1082,8 +1084,13 @@ public class ResourceHandler extends NullHandler
             Code.debug("HIT: ",resource);
             response.setField(HttpFields.__ContentType,encoding);
             if (count != -1)
-                 response.setIntField(HttpFields.__ContentLength, (int) count);
-            response.setDateField(HttpFields.__LastModified,lastModified);
+            {
+                if (count==bytes.length)
+                    response.setField(HttpFields.__ContentLength,sizeString);
+                else
+                    response.setIntField(HttpFields.__ContentLength,(int)count);
+            }
+            response.setField(HttpFields.__LastModified,lastModifiedString);
 
             if (_acceptRanges)
                 response.setField(HttpFields.__AcceptRanges,"bytes");
@@ -1095,7 +1102,9 @@ public class ResourceHandler extends NullHandler
         {
             this.resource=resource;
             lastModified=resource.lastModified();
+            lastModifiedString=HttpFields.__dateSend.format(new Date(lastModified));
             bytes = new byte[(int)resource.length()];
+            sizeString=Integer.toString(bytes.length);
             Code.debug("LOAD: ",resource);
      
             InputStream in=resource.getInputStream();

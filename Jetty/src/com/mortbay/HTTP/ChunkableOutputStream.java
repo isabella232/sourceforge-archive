@@ -392,7 +392,7 @@ public class ChunkableOutputStream extends FilterOutputStream
         
         // Do we need to commit?
         boolean commiting=false;
-        if (!_committed && (size>0 || (_rawWriter!=null && _rawWriter.size()>0)))
+        if (!_committed && (size>0 || (_rawWriter!=null && _rawWriter.length()>0)))
         {
             // this may recurse to flush so set committed now
             _committed=true;
@@ -434,8 +434,8 @@ public class ChunkableOutputStream extends FilterOutputStream
                 }
                 
                 // Pre write the raw writer to the buffer
-                if (_rawWriter!=null && _rawWriter.size()>0)
-                    _buffer.prewrite(_rawWriter.getBuf(),0,_rawWriter.size());
+                if (_rawWriter!=null && _rawWriter.length()>0)
+                    _buffer.prewrite(_rawWriter.getBuf(),0,_rawWriter.length());
                 
                 // Handle any trailers
                 if (_trailer!=null && endChunking)
@@ -551,14 +551,5 @@ public class ChunkableOutputStream extends FilterOutputStream
     {
         if (o!=null)
             write(o.toString().getBytes());
-    }
-    
-    /* ------------------------------------------------------------ */
-    /* ------------------------------------------------------------ */
-    private static class RawOutputStream extends ByteArrayOutputStream
-    {
-        RawOutputStream(int size){super(size);}
-        byte[] getBuf(){return buf;}
-        int getCount(){return count;}
     }
 }

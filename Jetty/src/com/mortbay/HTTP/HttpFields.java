@@ -239,8 +239,8 @@ public class HttpFields
     public final static String __separators = ", \t";    
 
     /* ------------------------------------------------------------ */
-    public final static String __CRLF = "\015\012";
-    public final static String __COLON = ": ";
+    public final static char[] __CRLF = {'\015','\012'};
+    public final static char[] __COLON = {':',' '};
 
     /* -------------------------------------------------------------- */
     public final static DateCache __dateCache = 

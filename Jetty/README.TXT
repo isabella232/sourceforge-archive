@@ -421,6 +421,6 @@ security).
 
 The minimal server can be run from the command line with 
 
- java -cp lib/com.mortbay.http.jar com.mortbay.HTTP.HttpServer
+ java -cp com.mortbay.http.jar com.mortbay.HTTP.HttpServer
 
 

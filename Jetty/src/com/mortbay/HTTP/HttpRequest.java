@@ -522,11 +522,7 @@ public class HttpRequest extends HttpMessage
     {
         HttpConnection connection = getHttpConnection();
         if (connection!=null)
-        {
-            InetAddress addr = connection.getRemoteAddr();
-            if (addr!=null)
-                return addr.getHostAddress();
-        }
+            return connection.getRemoteHost();
         return "127.0.0.1";
     }
     

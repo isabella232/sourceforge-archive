@@ -55,6 +55,7 @@ public class HttpConnection
     private HttpResponse _response;
     private Thread _handlingThread;
     private InetAddress _remoteAddr;
+    private String _remoteHost;
     private HttpServer _httpServer;
     private Object _connection;
     private HashMap _codingParams;
@@ -98,7 +99,22 @@ public class HttpConnection
     {
         return _remoteAddr;
     }
-
+    
+    /* ------------------------------------------------------------ */
+    /** Get the Remote address as a String.
+     * @return the remote address
+     */
+    public String getRemoteHost()
+    {
+        if (_remoteHost==null)
+        {
+            if (_remoteAddr==null)
+                return "127.0.0.1";
+            _remoteHost=_remoteAddr.getHostAddress();
+        }
+        return _remoteHost;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Get the connections InputStream.
      * @return the connections InputStream
