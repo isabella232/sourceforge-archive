@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+Jetty-5.0.0RC0
  + ServletContext attributes wrap HttpContext attributes.
  + Factored out XML based config from WebApplicationContext
  + Improved RequestLog performance
@@ -8,6 +9,16 @@ Jetty Versions
  + Default servlet respectes servlet path
  + Fixed setCharacterEncoding for parameters.
  + Fixed DOS problem
+ + Worked around bad jboss URL handler in XMLParser
+ + Forced close of connections over stop/start
+
+Jetty-4.2.20pre0
+ + Worked around bad jboss URL handler in XMLParser
+ + Forced close of connections over stop/start
+ + HttpFields protected headers
+
+Jetty-4.2.19 - 19 Mar 2004
+ + Fixed DOS attack problem
 
 Jetty-5.0.beta2 - 12 Feb 2004
  + Added skeleton JMX MBean for jetty plus
@@ -27,6 +38,14 @@ Jetty-5.0.beta2 - 12 Feb 2004
  + Added experimental NIO listeners again.
  + fixed filter dispatch configuration.
  + fixed lazy authentication with FORMs
+ 
+Jetty-4.2.18 - 1 Mar 2004
+ + Added log4j context repository to jettyplus
+ + NPE guard for no-listener junit deployment
+ + Improved log performance
+ + Fixed j2se 1.3 problem with HttpFields
+ + Suppress some more IOExceptions
+ + Default servlet respectes servlet path
 
 Jetty-4.2.17 - 1 Feb 2004
  + Fixed busy loop in threadpool run  

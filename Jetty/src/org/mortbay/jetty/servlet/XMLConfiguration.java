@@ -80,7 +80,7 @@ public class XMLConfiguration extends WebApplicationContext.Configuration
             Resource dftResource=Resource.newSystemResource(defaultsDescriptor);
             if(dftResource==null)
                 dftResource=Resource.newResource(defaultsDescriptor);
-            XmlParser.Node defaultConfig=xmlParser.parse(dftResource.getURL().toString());
+            XmlParser.Node defaultConfig=xmlParser.parse(dftResource.getURL());
             initialize(defaultConfig);
         }
     }
@@ -101,9 +101,20 @@ public class XMLConfiguration extends WebApplicationContext.Configuration
             else
             {
                 XmlParser.Node config=null;
-                config=xmlParser.parse(web.getURL().toString());
+                config=xmlParser.parse(web.getURL());
                 initialize(config);
             }
+            
+            configureJettyWeb();
+        }
+    }
+    
+    protected void configureJettyWeb() throws Exception
+    {
+        Resource webInf=getWebApplicationContext().getWebInf();
+        // handle any WEB-INF descriptors
+        if(webInf!=null&&webInf.isDirectory())
+        {
             // do jetty.xml file
             Resource jetty=webInf.addPath("web-jetty.xml");
             if(!jetty.exists())
@@ -117,6 +128,7 @@ public class XMLConfiguration extends WebApplicationContext.Configuration
             }
         }
     }
+    
 
     /* ------------------------------------------------------------ */
     protected void initialize(XmlParser.Node config) throws ClassNotFoundException,UnavailableException

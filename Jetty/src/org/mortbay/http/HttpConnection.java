@@ -898,6 +898,7 @@ public class HttpConnection
 
         // Normal handling.
         HttpContext context=null;
+        boolean stats=false;
         try
         {   
             // Assume the connection is not persistent,
@@ -910,18 +911,22 @@ public class HttpConnection
 
             // Read requests
             readRequest();
+            if (_listener==null || !_listener.isStarted())
+            {
+                // dead connection
+                _response.destroy();
+                _response=null;
+                _persistent=false;
+                return false;
+            }
+            
             _listener.customizeRequest(this,_request);
             if (_request.getState()!=HttpMessage.__MSG_RECEIVED)
                 throw new HttpException(HttpResponse.__400_Bad_Request);
             
             // We have a valid request!
             statsRequestStart();
-            if (log.isDebugEnabled())
-            {
-                _response.setField("Jetty-Request",
-                                   _request.getRequestLine());
-                if(log.isDebugEnabled())log.debug("REQUEST:\n"+_request);
-            }
+            stats=true;
             
             // Pick response version, we assume that _request.getVersion() == 1
             _dotVersion=_request.getDotVersion();
@@ -970,8 +975,6 @@ public class HttpConnection
                 verifyHTTP_1_0();
             else if (_dotVersion!=-1)
                 throw new HttpException(HttpResponse.__505_HTTP_Version_Not_Supported);
-            
-            if(LogSupport.isTraceEnabled(log))log.trace("IN is "+(_inputStream.isChunking()?"chunked":"not chunked")+" Content-Length="+_inputStream.getContentLength());
 
             // handle HttpListener handlers
             if (!_request.isHandled() && _listener.getHttpHandler()!=null)
@@ -1079,7 +1082,8 @@ public class HttpConnection
             }
             
             // stats & logging
-            statsRequestEnd();       
+            if (stats)
+                statsRequestEnd();       
             if (context!=null)
                 context.log(_request,_response,bytes_written);
         }
