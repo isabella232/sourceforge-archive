@@ -126,8 +126,8 @@
       <Arg><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.request.log</Arg>
       <Set name="retainDays">90</Set>
       <Set name="append">true</Set>
-      <Set name="extended">false</Set>
-      <Set name="buffered">false</Set>
+      <Set name="extended">true</Set>
+      <Set name="logLatency">true</Set>
       <Set name="LogTimeZone">GMT</Set>
     </New>
   </Set>

@@ -12,10 +12,14 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Locale;
 import java.util.TimeZone;
+
+import javax.servlet.http.Cookie;
+
 import org.mortbay.util.Code;
 import org.mortbay.util.DateCache;
 import org.mortbay.util.RolloverFileOutputStream;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.UrlEncoded;
 
 
 /* ------------------------------------------------------------ */
@@ -30,7 +34,6 @@ public class NCSARequestLog implements RequestLog
     private String _filename;
     private boolean _extended;
     private boolean _append;
-    private boolean _buffered;
     private int _retainDays;
     private boolean _closeOut;
     private boolean _preferProxiedForAddress;
@@ -38,7 +41,7 @@ public class NCSARequestLog implements RequestLog
     private Locale _logLocale=Locale.US;
     private String _logTimeZone=TimeZone.getDefault().getID();
     private String[] _ignorePaths;
-    private boolean _logCookies=false;
+    private boolean _logLatency=false;
     
     private transient OutputStream _out;
     private transient OutputStream _fileOut;
@@ -54,7 +57,6 @@ public class NCSARequestLog implements RequestLog
         _extended=true;
         _append=true;
         _retainDays=31;
-        _buffered=false;
     }
     
     /* ------------------------------------------------------------ */
@@ -71,7 +73,6 @@ public class NCSARequestLog implements RequestLog
         _append=true;
         _retainDays=31;
         setFilename(filename);
-        _buffered=(filename!=null);
     }
 
     /* ------------------------------------------------------------ */
@@ -115,25 +116,13 @@ public class NCSARequestLog implements RequestLog
             return ((RolloverFileOutputStream)_fileOut).getDatedFilename();
         return null;
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** Is output buffered.
-     * @return True if the log output is buffered (which can increase performance).
+    /**
+     * @deprecated ignored
      */
-    public boolean isBuffered()
-    {
-        return _buffered;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /** Set output buffering.
-     * @param buffered True if the log output is buffered (which can increase performance).
-     */
-    public void setBuffered(boolean buffered)
-    {
-        _buffered = buffered;
-    }
-    
+    public void setBuffered(boolean b)
+    {}
     
     /* ------------------------------------------------------------ */
     /** 
@@ -244,20 +233,20 @@ public class NCSARequestLog implements RequestLog
 
     /* ------------------------------------------------------------ */
     /**
-     * @return Returns the logCookies.
+     * @return Returns true if logging latency
      */
-    boolean getLogCookies()
+    public boolean getLogLatency()
     {
-        return _logCookies;
+        return _logLatency;
     }
     
     /* ------------------------------------------------------------ */
     /**
-     * @param logCookies If true, cookies are logged instead of the HTTP version
+     * @param logLatency If true, latency is logged at the end of the log line
      */
-    void setLogCookies(boolean logCookies)
+    public void setLogLatency(boolean logLatency)
     {
-        _logCookies = logCookies;
+        _logLatency = logLatency;
     }
     
     /* ------------------------------------------------------------ */
@@ -290,10 +279,7 @@ public class NCSARequestLog implements RequestLog
         else
             _fileOut=System.err;
 
-        if (_buffered)
-            _out=new BufferedOutputStream(_fileOut);
-        else
-            _out=_fileOut;
+        _out=_fileOut;
 
         if (_ignorePaths!=null && _ignorePaths.length>0)
         {
@@ -363,16 +349,13 @@ public class NCSARequestLog implements RequestLog
             buf.append((user==null)?"-":user);
             buf.append(" [");
             buf.append(_logDateCache.format(request.getTimeStamp()));
-            buf.append(_logCookies?"] ":"] \"");
+            buf.append("] \"");
             buf.append(request.getMethod());
             buf.append(' ');
             buf.append(request.getURI());
             buf.append(' ');
-            if (_logCookies)
-                appendCookies(buf,request);
-            else
-                buf.append(request.getVersion());
-            buf.append(_logCookies?" ":"\" ");
+            buf.append(request.getVersion());
+            buf.append("\" ");
             int status=response.getStatus();    
             buf.append((char)('0'+((status/100)%10)));
             buf.append((char)('0'+((status/10)%10)));
@@ -405,10 +388,14 @@ public class NCSARequestLog implements RequestLog
                 _writer.write(log);
                 if (_extended)
                     logExtended(request,response,_writer);
+                
+                if (_logLatency)
+                    _writer.write(" "+(System.currentTimeMillis()-request.getTimeStamp()));
+                
                 _writer.write(StringUtil.__LINE_SEPARATOR);
-                if (!_buffered)
-                     _writer.flush();
+                _writer.flush();
             }
+            
         }
         catch(IOException e)
         {
@@ -423,20 +410,6 @@ public class NCSARequestLog implements RequestLog
      */
     private void appendCookies(StringBuffer buf, HttpRequest request)
     {
-        Cookie[] cookies = request.getCookies();
-        if (cookies==null || cookies.length==0)
-            buf.append('-');
-        else
-        {
-            for (int i=0;i<cookies.length;i++)
-            {
-                if (i!=0)
-                    buf.append('&');
-                buf.append(cookies[i].getName());
-                buf.append('=');
-                buf.append(UrlEncoded.encodeString(cookies[i].getValue()));
-            }
-        }
     }
 
     /* ------------------------------------------------------------ */
@@ -476,6 +449,24 @@ public class NCSARequestLog implements RequestLog
             log.write(agent);
             log.write('"');
         }
+        
+        Cookie[] cookies = request.getCookies();
+        if (cookies==null || cookies.length==0)
+            log.write('-');
+        else
+        {
+            log.write(" \"");
+            for (int i=0;i<cookies.length;i++)
+            {
+                if (i!=0)
+                    log.write(';');
+                log.write(cookies[i].getName());
+                log.write('=');
+                log.write(cookies[i].getValue());
+            }
+            log.write("\"");
+        }
+
     }
 }
 
