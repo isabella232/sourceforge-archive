@@ -912,7 +912,8 @@ public class HttpConnection
             // Common fields on the response
             _response.setVersion(HttpMessage.__HTTP_1_1);
             _response.setField(HttpFields.__Date,_request.getTimeStampStr());
-            _response.setField(HttpFields.__Server,Version.__VersionDetail);
+            if (!Version.__paranoid)
+                _response.setField(HttpFields.__Server,Version.__VersionDetail);
             
             // Handle Connection header field
             Enumeration connectionValues =
