@@ -44,6 +44,7 @@ $Id$
   <Call name="addContext">
     <Arg>/</Arg>   
     <Set name="realmName">Jetty Demo Realm</Set>
+    <Set name="authenticator"><New class="org.mortbay.http.BasicAuthenticator"/></Set>
    
     <Call name="addHandler">
       <Arg><New class="org.mortbay.http.handler.SecurityHandler"/></Arg>  
