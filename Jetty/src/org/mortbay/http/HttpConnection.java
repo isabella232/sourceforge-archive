@@ -666,7 +666,6 @@ public class HttpConnection
     private void exception(Throwable e)
     {
 	try{
-            Code.debug(e);
 	    boolean gotIOException = false;
             if (e instanceof HttpException)
             {
@@ -674,16 +673,21 @@ public class HttpConnection
                     Code.warning(e.toString());
                 else
                     Code.warning(_request.getRequestLine()+" "+e.toString());
+                Code.debug(e);
             }
             else if (e instanceof IOException)
 	    {
                 // Assume browser closed connection
                 gotIOException = true;
+                if (Code.verbose())
+                    Code.debug(e);
+                else if (Code.debug())
+                    Code.debug(e.toString());
 	    }
 	    else 
             {
                 if (_request==null)
-                    Code.warning(e.toString());
+                    Code.warning(e);
                 else
                     Code.warning(_request.getRequestLine(),e);
             }
@@ -798,7 +802,13 @@ public class HttpConnection
             {
                 if (_request.getState()!=HttpMessage.__MSG_RECEIVED)
                 {
-                    Code.debug("Bad request: ",e);
+                    if (Code.debug())
+                    {
+                        if (Code.verbose())
+                            Code.debug(e);
+                        else
+                            Code.debug(e.toString());
+                    }
                     _persistent=false;
                     _response.destroy();
                     _response=null;

@@ -73,7 +73,7 @@ $Id$
 
   <Call name="addWebApplication">
     <Arg>/</Arg>
-    <Arg><SystemProperty name="jetty.home" default="."/>/webapps/<SystemProperty name="jetty.webapp" default="default"/></Arg>
+    <Arg><SystemProperty name="jetty.webapp" default="./webapps/default"/></Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml/</Arg>
   </Call>
 

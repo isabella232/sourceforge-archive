@@ -35,6 +35,9 @@
 #   Command to invoke Java. If not set, $JAVA_HOME/bin/java will be
 #   used.
 #
+# JAVA_OPTIONS
+#   Extra options to pass to the JVM
+#
 # JETTY_HOME 
 #   Where Jetty is installed. If not set, the script will try go
 #   guess it by first looking at the invocation path for the script,
