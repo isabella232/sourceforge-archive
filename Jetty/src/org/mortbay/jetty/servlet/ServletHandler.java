@@ -406,6 +406,21 @@ public class ServletHandler extends AbstractHttpHandler
     }   
     
     /* ------------------------------------------------------------ */
+    /** Get Servlets.
+     * @return Array of defined servlets
+     */
+    public ServletHolder[] getServlets()
+    {
+        // Sort and Initialize servlets
+        HashSet holder_set = new HashSet(_nameMap.size());
+        holder_set.addAll(_nameMap.values());
+        ServletHolder holders [] = (ServletHolder [])
+            holder_set.toArray(new ServletHolder [holder_set.size()]);
+        java.util.Arrays.sort (holders);
+        return holders;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Initialize load-on-startup servlets.
      * Called automatically from start if autoInitializeServlet is true.
      */
@@ -415,12 +430,7 @@ public class ServletHandler extends AbstractHttpHandler
         MultiException mx = new MultiException();
         
         // Sort and Initialize servlets
-        HashSet holder_set = new HashSet(_servletMap.size()+_nameMap.size());
-        holder_set.addAll(_servletMap.values());
-        holder_set.addAll(_nameMap.values());
-        ServletHolder holders [] = (ServletHolder [])
-            holder_set.toArray(new ServletHolder [holder_set.size()]);
-        java.util.Arrays.sort (holders);        
+        ServletHolder[] holders = getServlets();
         for (int i=0; i<holders.length; i++)
         {
             try{holders[i].start();}
@@ -438,12 +448,7 @@ public class ServletHandler extends AbstractHttpHandler
         throws InterruptedException
     {
         // Sort and Initialize servlets
-        HashSet holder_set = new HashSet(_servletMap.size()+_nameMap.size());
-        holder_set.addAll(_servletMap.values());
-        holder_set.addAll(_nameMap.values());
-        ServletHolder holders [] = (ServletHolder [])
-            holder_set.toArray(new ServletHolder [holder_set.size()]);
-        java.util.Arrays.sort (holders);
+        ServletHolder[] holders = getServlets();
         
         super.stop();
         

@@ -67,8 +67,8 @@ public class ServletHolder extends Holder
      * @param className The class name of the servlet.
      */
     public ServletHolder(ServletHandler handler,
-                  String name,
-                  String className)
+                         String name,
+                         String className)
     {
         super(handler,(name==null)?className:name,className);
     }

@@ -95,6 +95,7 @@ public class HttpServer implements LifeCycle,
     private boolean _chunkingForced=false;
     private RequestLog _requestLog;
     private int _requestsPerGC ;
+    private boolean _resolveRemoteHost =false;
     
     private transient int _gcRequests;
     private transient HttpContext _notFoundContext=null;
@@ -1007,7 +1008,23 @@ public class HttpServer implements LifeCycle,
         return _virtualHostMap;
     }
 
-
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if the remote host name of connections is resolved.
+     */
+    public boolean getResolveRemoteHost()
+    {
+        return _resolveRemoteHost;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param resolveRemoteHost True if the remote host name of connections is resolved.
+     */
+    public void setResolveRemoteHost(boolean resolveRemoteHost)
+    {
+        _resolveRemoteHost = resolveRemoteHost;
+    }
 
     /* ------------------------------------------------------------ */
     /** Reset statistics.

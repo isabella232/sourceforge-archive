@@ -104,6 +104,12 @@ public class Holder
         return (String)_initParams.get(param);
     }
 
+    /* ---------------------------------------------------------------- */
+    public Map getInitParameters()
+    {
+        return _initParams;
+    }
+    
     /* ------------------------------------------------------------ */
     public Enumeration getInitParameterNames()
     {

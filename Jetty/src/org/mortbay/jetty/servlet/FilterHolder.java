@@ -180,6 +180,24 @@ public class FilterHolder
     }
 
     /* ------------------------------------------------------------ */
+    public String[] getPaths()
+    {
+        if (_pathSpecs==null)
+            return null;
+        int s = _pathSpecs.keySet().size();
+        return (String[]) _pathSpecs.keySet().toArray(new String[s]);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public String[] getServlets()
+    {
+        if (_servlets==null)
+            return null;
+        int s = LazyList.size(_servlets);
+        return (String[])LazyList.getList(_servlets).toArray(new String[s]);
+    }
+    
+    /* ------------------------------------------------------------ */
     public String toString()
     {
         StringBuffer buf = new StringBuffer();

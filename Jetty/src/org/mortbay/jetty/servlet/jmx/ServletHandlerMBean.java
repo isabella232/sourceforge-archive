@@ -53,21 +53,12 @@ public class ServletHandlerMBean extends HttpHandlerMBean
         ObjectName[] on=getComponentMBeans(new Object[]{sm},null);
         return on[0];
     }
+
     
     /* ------------------------------------------------------------ */
-    public String[] getServlets()
+    public ObjectName[] getServlets()
     {
-        PathMap sm = _servletHandler.getServletMap();
-        String[] s = new String[sm.size()];
-        int i=0;
-        Iterator iter = sm.entrySet().iterator();
-        while(iter.hasNext())
-        {
-            Map.Entry entry = (Map.Entry)iter.next();
-            s[i++]=entry.toString();
-        }
-        
-        return s;
+        return getComponentMBeans(_servletHandler.getServlets(),null);   
     }
     
     /* ------------------------------------------------------------ */

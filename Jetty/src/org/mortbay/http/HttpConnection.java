@@ -70,6 +70,7 @@ public class HttpConnection
     private int _requests;
     private Object _object;
     private HttpTunnel _tunnel ;
+    private boolean _resolveRemoteHost;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -111,6 +112,10 @@ public class HttpConnection
         
         _request = new HttpRequest(this);
         _response = new HttpResponse(this);
+
+        _resolveRemoteHost =
+            _listener!=null &&
+            _listener.getHttpServer().getResolveRemoteHost();
     }
 
     /* ------------------------------------------------------------ */
@@ -155,9 +160,18 @@ public class HttpConnection
     {
         if (_remoteHost==null)
         {
-            if (_remoteInetAddress==null)
-                return "localhost";
-            _remoteHost=_remoteInetAddress.getHostName();
+            if (_resolveRemoteHost)
+            {
+                if (_remoteInetAddress==null)
+                    return "localhost";
+                _remoteHost=_remoteInetAddress.getHostName();
+            }
+            else
+            {
+                if (_remoteInetAddress==null)
+                    return "127.0.0.1";
+                _remoteHost=getRemoteAddr();
+            }
         }
         return _remoteHost;
     }
