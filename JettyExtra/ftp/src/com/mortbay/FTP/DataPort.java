@@ -264,29 +264,25 @@ public class DataPort extends Thread
          throws IOException
     {
         // Setup streams
-        boolean closeOut=false;
         if (out!=null)
             in=connection.getInputStream();
-        else if (in!=null)
-        {
-            closeOut=true;
+        else 
             out=connection.getOutputStream();
-        }
-
+        
         try{
             // Copy in to out
             IO.copy(in,out);
         }
         finally{
-            if (closeOut && out!=null)
+            if (out!=null)
             {
-                try{
+                try
+                {
                     out.flush();
                     out.close();
                 }
-                catch(IOException e){
-                    Code.debug("Exception ignored",e);
-                }       
+                catch(IOException e)
+                {Code.debug("Exception ignored",e);}       
             }
             if (connection!=null)
                 connection.close();

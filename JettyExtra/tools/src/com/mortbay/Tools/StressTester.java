@@ -28,19 +28,33 @@ public class  StressTester
         if (args.length < 3) 
             usage();
         
-        new StressTester().stress(args[0], args[1], args[2]);
+        if (args.length == 5) 
+            new StressTester().stress(args[0], args[1],
+                                      args[2],
+                                      Integer.parseInt(args[3]),
+                                      Integer.parseInt(args[4]));
+        else
+            new StressTester().stress(args[0], args[1], args[2]);
     }
 
-    static void usage() {
+    static void usage()
+    {
         System.err.println("StressTester -- stress a WWW server");
         System.err.println("usage:");
-        System.err.println("java com.mortbay.Jetty.StressTester <n-threads> <baseURL> <URLFile>");
+        System.err.println("java com.mortbay.Jetty.StressTester <n-threads> <baseURL> <URLFile> [ <burstSize> <idleSecs> ]");
         System.err.println();
         System.exit(1);
     }
 
 
     void stress(String snthreads, String baseURL, String URLFile) 
+        throws Exception 
+    {
+        stress(snthreads,baseURL,URLFile,-1,0);
+    }
+    
+    void stress(String snthreads, String baseURL, String URLFile,
+                int burstSize,int idleSecs) 
         throws Exception 
     {
         FileReader f = new FileReader(URLFile);
@@ -58,7 +72,7 @@ public class  StressTester
 
         Thread[] threads = new Thread[nthreads];
         for(int it = 0; it < nthreads; it++ ) {
-            Runnable r = new URLGetter(Integer.toString(it) , baseURL, urls);
+            Runnable r = new URLGetter(Integer.toString(it) , baseURL, urls,burstSize,idleSecs);
             threads[it] = new Thread(r);
         }
 
@@ -91,12 +105,18 @@ public class  StressTester
         String   _id;
         String   _baseURL;
         String[] _urls;
+        int _burst;
+        int _idle;
     
         /* ------------------------------------------------------------ */
-        public URLGetter(String id, String baseURL, String[] urls) {
+        public URLGetter(String id, String baseURL, String[] urls,
+                         int burstSize,int idleSecs)
+        {
             this._id      = id;
             this._baseURL = baseURL;
             this._urls    = urls;
+            this._burst   = burstSize;
+            this._idle    = idleSecs;
         }
     
         /* ------------------------------------------------------------ */
@@ -105,7 +125,7 @@ public class  StressTester
             Random random = new Random(this.hashCode());
             int bytes = 0;
             int requests = 0;
-            for (int iurl = 5*_urls.length;iurl-->0;)
+            for (int iurl = _urls.length;iurl-->0;)
             {
                 requests++;
                 int n = new Float((_urls.length-1) * random.nextFloat()).intValue();
@@ -118,6 +138,12 @@ public class  StressTester
                 catch (Exception e) {
                     System.err.println(id() + " error [" + iurl + "] " + e.toString() + " : " + url);
                 }
+
+                if (_burst>0 && requests%_burst==0)
+                {
+                    try{Thread.sleep(_idle*1000);}
+                    catch(Exception e){}
+                }    
             }
             System.err.println(id() + " finished, " +
                                requests + " requests, " +

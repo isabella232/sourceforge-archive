@@ -21,6 +21,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.Writer;
 import java.net.InetAddress;
 import java.net.Socket;
@@ -353,6 +355,24 @@ public class Ftp
         FileOutputStream file = new FileOutputStream(localName);
         startGet(remoteName,file);
     }
+    
+    /* -------------------------------------------------------------------- */
+    /** Start get file
+     * Start a file transfer remote file to local inputStream. 
+     * Completion of the transfer can be monitored with the transferComplete() or
+     * waitUntilTransferComplete() methods.
+     * @param remoteName Remote file name
+     * @return InputStream, the data fetched may be read from this inputStream.
+     * @exception FtpException For local problems or negative server responses
+     */
+    public synchronized InputStream startGet(String remoteName)
+         throws FtpException,IOException
+    {
+        PipedOutputStream pout = new PipedOutputStream();
+        PipedInputStream pin = new PipedInputStream(pout);
+        startGet(remoteName,pout);
+        return pin;
+    }
 
     /* -------------------------------------------------------------------- */
     /** Start get file
@@ -404,6 +424,25 @@ public class Ftp
     {
         FileInputStream file = new FileInputStream(localName);
         startPut(file,remoteName);
+    }
+    
+    /* -------------------------------------------------------------------- */
+    /** Start put file
+     * Start a file transfer local file to input remote file.
+     * Completion of the transfer can be monitored with the transferComplete() or
+     * waitUntilTransferComplete() methods.
+     * @param remoteName Remote file name
+     * @return OutputStream Data written to this output stream is sent
+     * to the remote file.
+     * @exception FtpException For local problems or negative server responses
+     */
+    public synchronized OutputStream startPut(String remoteName)
+         throws FtpException, IOException
+    {
+        PipedOutputStream pout = new PipedOutputStream();
+        PipedInputStream pin = new PipedInputStream(pout);
+        startPut(pin,remoteName);
+        return pout;
     }
 
 
@@ -874,6 +913,98 @@ public class Ftp
         waitUntilTransferComplete();
     }
 
+
+    /* -------------------------------------------------------------------- */
+    /** Delete remote directory
+     * @param remoteName The remote directory name
+     * @exception FtpException For local problems or negative server responses
+     */
+    public synchronized void rmdir(String remoteName)
+        throws FtpException, IOException
+    {
+        waitUntilTransferComplete();
+        cmd("RMD "+remoteName);
+        in.waitForCompleteOK();
+        Code.debug("Deleted "+remoteName);
+    }
+
+
+    /* -------------------------------------------------------------------- */
+    /**
+     * 
+     * 
+     */
+    public synchronized String getLastModifiedTime(String remoteName)
+        throws FtpException, IOException
+    {
+        waitUntilTransferComplete();
+        cmd("MDTM "+remoteName);
+        CmdReply reply = in.waitForCompleteOK();
+        return reply.text;
+    }
+
+
+    /* -------------------------------------------------------------------- */
+    /**
+     * Get a directory listing from the remote server.
+     * @return Array of file information.
+     * @exception FtpException For local problems or negative server responses
+     */
+    public synchronized Vector list( String mask )
+        throws FtpException, IOException
+    {
+        Code.debug("list [",mask,"]");
+        waitUntilTransferComplete();
+
+        ByteArrayOutputStream bout = new ByteArrayOutputStream();
+        transferException=null;
+        transferDataPort = new DataPort(this,bout);
+        try{
+            cmd(transferDataPort.getFtpPortCommand());
+            in.waitForCompleteOK();
+            if( mask == null ) {
+                cmd("LIST");
+            }
+            else {
+                cmd( "LIST "+mask );
+            }
+            in.waitForPreliminaryOK();
+            waitUntilTransferComplete();
+        }
+        catch(FtpReplyException e)
+        {
+            transferDataPort.close();
+            transferDataPort=null;
+            // Return null if there was no directory.
+            if ("550".equals(e.reply.code))
+                return null;
+            throw e;
+        }
+        catch(FtpException e)
+        {
+            transferDataPort.close();
+            transferDataPort=null;
+            throw e;
+        }
+        catch(IOException e)
+        {
+            transferDataPort.close();
+            transferDataPort=null;
+            throw e;
+        }
+
+        LineInput in = new LineInput(
+                                     new ByteArrayInputStream(bout.toByteArray()));
+
+        Vector listVector = new Vector();
+        String file;
+        while((file=in.readLine())!=null)
+            listVector.addElement(file);
+
+        Code.debug("Got list "+listVector.toString());
+        return listVector;
+    } 
+
     /* -------------------------------------------------------------------- */
     public static void main(String[] args)
     {
@@ -970,4 +1101,5 @@ public class Ftp
         }
     }
 
+   
 }
