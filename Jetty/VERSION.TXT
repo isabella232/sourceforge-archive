@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-4.1.D3 - 5 July 2002
+Jetty-4.1.B0 - 13 July 2002
  + Added work around of JDK1.4 bug with NIO listener
  + Moved 3rd party jars to $JETTY_HOME/ext
  + Fixed ThreadPool bug when minThreads <= CPUs
