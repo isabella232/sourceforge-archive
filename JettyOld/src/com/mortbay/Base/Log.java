@@ -256,7 +256,7 @@ public class Log
     
     /*-------------------------------------------------------------------*/
     public static synchronized void message(String tag,
-                                            String msg,
+                                            Object msg,
                                             Frame frame)
     {
         long time = System.currentTimeMillis();
@@ -271,7 +271,7 @@ public class Log
      * @param time The time stamp of the message.
      */
     public void message(String tag,
-                        String msg,
+                        Object msg,
                         Frame frame,
                         long time)
     {
@@ -286,7 +286,7 @@ public class Log
     /* ------------------------------------------------------------ */
     /** Log an event
      */
-    public static void event(String message, int stackDepth)
+    public static void event(Object message, int stackDepth)
     {
         Log.message(Log.EVENT,message,new Frame(stackDepth));
     }
@@ -294,7 +294,7 @@ public class Log
     /* ------------------------------------------------------------ */
     /** Log an event
      */
-    public static void event(String message)
+    public static void event(Object message)
     {
         Log.message(Log.EVENT,message,new Frame(1));
     }
@@ -302,7 +302,7 @@ public class Log
     /* ------------------------------------------------------------ */
     /** Log an warning
      */
-    public static void warning(String message, int stackDepth)
+    public static void warning(Object message, int stackDepth)
     {
         Log.message(Log.WARN,message,new Frame(1));
     }
@@ -310,7 +310,7 @@ public class Log
     /* ------------------------------------------------------------ */
     /** Log an warning
      */
-    public static void warning(String message)
+    public static void warning(Object message)
     {
         Log.message(Log.WARN,message,new Frame(1));
     }
