@@ -120,149 +120,160 @@ public class Launcher {
             String line = cfg.readLine();
             while (line != null)
             {
-                if ((line.length() > 0) && (!line.startsWith("#")))
+                try
                 {
-                    if (_debug) System.err.println(">"+line);
-                    StringTokenizer st = new StringTokenizer(line);
-                    String subject = st.nextToken();
-                    boolean include_subject = true;
-                    String condition=null;
-                    while (include_subject && st.hasMoreTokens())
+                    if ((line.length() > 0) && (!line.startsWith("#")))
                     {
-                        condition = st.nextToken();
-                        if (condition.equals("never"))
+                        if (_debug) System.err.println(">"+line);
+                        StringTokenizer st = new StringTokenizer(line);
+                        String subject = st.nextToken();
+                        boolean include_subject = true;
+                        String condition=null;
+                        while (include_subject && st.hasMoreTokens())
                         {
-                            include_subject = false;
+                            condition = st.nextToken();
+                            if (condition.equals("never"))
+                            {
+                                include_subject = false;
+                            }
+                            else if (condition.equals("always"))
+                            {
+                            }
+                            else if (condition.equals("available"))
+                            {
+                                String class_to_check = st.nextToken();
+                                include_subject &= isAvailable(class_to_check);
+                            }
+                            else if (condition.equals("!available"))
+                            {
+                                String class_to_check = st.nextToken();
+                                include_subject &=!isAvailable(class_to_check);
+                            }
+                            else if (condition.equals("java"))
+                            {
+                                String operator = st.nextToken();
+                                String version = st.nextToken();
+                                ver.parse(version);
+                                include_subject &=
+                                    (operator.equals("<") && java_version.compare(ver)<0) ||
+                                    (operator.equals(">") && java_version.compare(ver)>0) ||
+                                    (operator.equals("<=") && java_version.compare(ver)<=0) ||
+                                    (operator.equals("=<") && java_version.compare(ver)<=0) ||
+                                    (operator.equals("=>") && java_version.compare(ver)>=0) ||
+                                    (operator.equals(">=") && java_version.compare(ver)>=0) ||
+                                    (operator.equals("==") && java_version.compare(ver)==0) ||
+                                    (operator.equals("!=") && java_version.compare(ver)!=0);
+                            }
+                            else if (condition.equals("nargs"))
+                            {
+                                String operator = st.nextToken();
+                                int number = Integer.parseInt(st.nextToken());
+                                include_subject &=
+                                    (operator.equals("<") && args.length<number) ||
+                                    (operator.equals(">") && args.length>number) ||
+                                    (operator.equals("<=") && args.length<=number) ||
+                                    (operator.equals("=<") && args.length<=number) ||
+                                    (operator.equals("=>") && args.length>=number) ||
+                                    (operator.equals(">=") && args.length>=number) ||
+                                    (operator.equals("==") && args.length==number) ||
+                                    (operator.equals("!=") && args.length!=number);
+                            }
+                            else
+                            {
+                                System.err.println("ERROR: Unknown condition: "+condition);
+                            }
                         }
-                        else if (condition.equals("always"))
+                        
+                        String file=subject.startsWith("/")
+                            ?(subject.replace('/',File.separatorChar))
+                            :(home+File.separatorChar+subject.replace('/',File.separatorChar));
+                        
+                        if (_debug)
+                            System.err.println("subject="+subject+
+                                               " file="+file+
+                                               " condition="+condition+
+                                               " include_subject="+include_subject);
+                        
+                        // ok, should we include?
+                        if (subject.endsWith("/*"))
                         {
+                            // directory of JAR files
+                            File extdir = new File(file.substring(0,file.length()-1));
+                            File[] jars = extdir.listFiles(new FilenameFilter()
+                                {
+                                    public boolean accept(File dir, String name)
+                                    {
+                                        String namelc = name.toLowerCase();
+                                        return namelc.endsWith(".jar") || name.endsWith(".zip");
+                                        
+                                    }
+                                } );
+                            
+                            
+                            for (int i=0; i<jars.length; i++)
+                            {
+                                String jar = jars[i].getCanonicalPath();
+                                if (!done.containsKey(jar))
+                                {
+                                    done.put(jar,jar);
+                                    if (include_subject)
+                                    {
+                                        if (classpath.addComponent(jar) && _debug)
+                                            System.err.println("Adding JAR from directory: "+jar);
+                                    }
+                                }
+                            }
                         }
-                        else if (condition.equals("available"))
+                        else if (subject.endsWith("/"))
                         {
-                            String class_to_check = st.nextToken();
-                            include_subject &= isAvailable(class_to_check);
+                            // class directory
+                            File cd = new File(file);
+                            String d = cd.getCanonicalPath();
+                            if (!done.containsKey(d))
+                            {
+                                done.put(d,d);
+                                if (include_subject)
+                                {
+                                    if (classpath.addComponent(d) && _debug)
+                                        System.err.println("Adding directory: "+d);
+                                }
+                            }
                         }
-                        else if (condition.equals("!available"))
+                        else if (subject.toLowerCase().endsWith(".xml"))
                         {
-                            String class_to_check = st.nextToken();
-                            include_subject &=!isAvailable(class_to_check);
+                            // Config file
+                            File f = new File(file);                        
+                            if (f.exists() && include_subject)
+                                _xml.add(f.getCanonicalPath());
                         }
-                        else if (condition.equals("java"))
+                        else if (subject.toLowerCase().endsWith(".class"))
                         {
-                            String operator = st.nextToken();
-                            String version = st.nextToken();
-                            ver.parse(version);
-                            include_subject &=
-                                (operator.equals("<") && java_version.compare(ver)<0) ||
-                                (operator.equals(">") && java_version.compare(ver)>0) ||
-                                (operator.equals("<=") && java_version.compare(ver)<=0) ||
-                                (operator.equals("=<") && java_version.compare(ver)<=0) ||
-                                (operator.equals("=>") && java_version.compare(ver)>=0) ||
-                                (operator.equals(">=") && java_version.compare(ver)>=0) ||
-                                (operator.equals("==") && java_version.compare(ver)==0) ||
-                                (operator.equals("!=") && java_version.compare(ver)!=0);
-                        }
-                        else if (condition.equals("nargs"))
-                        {
-                            String operator = st.nextToken();
-                            int number = Integer.parseInt(st.nextToken());
-                            include_subject &=
-                                (operator.equals("<") && args.length<number) ||
-                                (operator.equals(">") && args.length>number) ||
-                                (operator.equals("<=") && args.length<=number) ||
-                                (operator.equals("=<") && args.length<=number) ||
-                                (operator.equals("=>") && args.length>=number) ||
-                                (operator.equals(">=") && args.length>=number) ||
-                                (operator.equals("==") && args.length==number) ||
-                                (operator.equals("!=") && args.length!=number);
+                            // Class
+                            _classname = subject.substring(0,subject.length()-6);
                         }
                         else
                         {
-                            System.err.println("ERROR: Unknown condition: "+condition);
-                        }
-                    }
-
-                    String file=subject.startsWith("/")
-                        ?(subject.replace('/',File.separatorChar))
-                        :(home+File.separatorChar+subject.replace('/',File.separatorChar));
-
-                    if (_debug)
-                        System.err.println("subject="+subject+
-                                           " file="+file+
-                                           " condition="+condition+
-                                           " include_subject="+include_subject);
-                    
-                    // ok, should we include?
-                    if (file.endsWith("/*"))
-                    {
-                        // directory of JAR files
-                        File extdir = new File(file.substring(0,file.length()-1));
-                        File[] jars = extdir.listFiles(new FilenameFilter()
+                            // single JAR file
+                            File f = new File(file);                        
+                            String d = f.getCanonicalPath();
+                            if (!done.containsKey(d))
                             {
-                                public boolean accept(File dir, String name)
-                                {
-                                    String namelc = name.toLowerCase();
-                                    return namelc.endsWith(".jar") || name.endsWith(".zip");
-                                    
-                                }
-                            } );
-                        
-                        
-                        for (int i=0; i<jars.length; i++)
-                        {
-                            String jar = jars[i].getCanonicalPath();
-                            if (!done.containsKey(jar))
-                            {
-                                done.put(jar,jar);
+                                done.put(d,d);
                                 if (include_subject)
                                 {
-                                    if (classpath.addComponent(jar) && _debug)
-                                        System.err.println("Adding JAR from directory: "+jar);
+                                    if (classpath.addComponent(d) &&_debug)
+                                        System.err.println("Adding single JAR: "+d);
                                 }
                             }
                         }
                     }
-                    else if (file.endsWith("/"))
+                }
+                catch (Exception e)
+                {
+                    if (_debug)
                     {
-                        // class directory
-                        File cd = new File(file);
-                        String d = cd.getCanonicalPath();
-                        if (!done.containsKey(d))
-                        {
-                            done.put(d,d);
-                            if (include_subject)
-                            {
-                                if (classpath.addComponent(d) && _debug)
-                                    System.err.println("Adding directory: "+d);
-                            }
-                        }
-                    }
-                    else if (file.toLowerCase().endsWith(".xml"))
-                    {
-                        // Config file
-                        File f = new File(file);                        
-                        if (f.exists() && include_subject)
-                            _xml.add(f.getCanonicalPath());
-                    }
-                    else if (file.toLowerCase().endsWith(".class"))
-                    {
-                        // Class
-                        _classname = subject.substring(0,subject.length()-6);
-                    }
-                    else
-                    {
-                        // single JAR file
-                        File f = new File(file);                        
-                        String d = f.getCanonicalPath();
-                        if (!done.containsKey(d))
-                        {
-                            done.put(d,d);
-                            if (include_subject)
-                            {
-                                if (classpath.addComponent(d) &&_debug)
-                                    System.err.println("Adding single JAR: "+d);
-                            }
-                        }
+                        System.err.println(line);
+                        e.printStackTrace();
                     }
                 }
                 line = cfg.readLine();
