@@ -68,7 +68,7 @@
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Add a HTTPS SSL listener on port 8843                           -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
-  <!-- UNCOMMENT TO ACTIVATE 
+  <!-- UNCOMMENT TO ACTIVATE
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.SunJsseListener">
@@ -87,6 +87,30 @@
   </Call>
   -->
 
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- Add a HTTPS SSL listener on port 8843 with PKCS12 keystore  -->
+  <!-- using bouncycastle.org provider configured in java.security -->
+  <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+  <!-- UNCOMMENT TO ACTIVATE
+  <Call name="addListener">
+    <Arg>
+      <New class="org.mortbay.http.SunJsseListener">
+        <Set name="Port">8444</Set>
+        <Set name="MinThreads">5</Set>
+        <Set name="MaxThreads">100</Set>
+        <Set name="MaxIdleTimeMs">30000</Set>
+        <Set name="MaxReadTimeMs">60000</Set>
+        <Set name="MaxStopTimeMs">5000</Set>
+        <Set name="LowResourcePersistTimeMs">2000</Set>
+        <Set name="Keystore"><SystemProperty name="jetty.home" default="."/>/etc/jettydemo.p12</Set>
+        <Set name="KeystoreType">PKCS12</Set>
+        <Set name="KeystoreProviderName">BC</Set>
+	    <Set name="Password">jettydemo</Set>
+	    <Set name="KeyPassword">jettydemo</Set>
+      </New>
+    </Arg>
+  </Call>
+  -->
 
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Add a AJP13 listener on port 8009                               -->

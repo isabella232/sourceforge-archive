@@ -12,6 +12,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.KeyStore;
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLPeerUnverifiedException;
@@ -40,15 +41,28 @@ import org.mortbay.util.ThreadedServer;
  * @author Greg Wilkins (gregw@mortbay.com)
  * @author Court Demas (court@kiwiconsulting.com)
  * @author Forge Research Pty Ltd  ACN 003 491 576
+ * @author Jan Hlavatý
  **/
 public abstract class JsseListener extends SocketListener
 {
     /** String name of keystore location path property. */
     public static final String KEYSTORE_PROPERTY = "jetty.ssl.keystore";
+    
+    /** String name of keystore type property */
+    public static final String KEYSTORE_TYPE_PROPERTY = "jetty.ssl.keystore.type";
+    
+    /** Default keystore type */
+    public static final String DEFAULT_KEYSTORE_TYPE = System.getProperty(KEYSTORE_TYPE_PROPERTY, KeyStore.getDefaultType());
+
+    /** String name of keystore provider name property */
+    public static final String KEYSTORE_PROVIDER_NAME_PROPERTY = "jetty.ssl.keystore.provider.name";
 
     /** Default value for the keystore location path. */
     public static final String DEFAULT_KEYSTORE  =
         System.getProperty("user.home" ) + File.separator + ".keystore";
+
+    /** Default value for keystore provider name. null = use default */
+    public static final String DEFAULT_KEYSTORE_PROVIDER_NAME = System.getProperty(KEYSTORE_PROVIDER_NAME_PROPERTY);
 
     /** String name of keystore password property. */
     public static final String PASSWORD_PROPERTY = "jetty.ssl.password";
@@ -214,7 +228,7 @@ public abstract class JsseListener extends SocketListener
      * type String.</li>
      * <li> an attribute named "javax.servlet.request.key_size" of
      * type Integer.</li>
-     * <li> an attribute named "avax.servlet.request.X509Certificate" of
+     * <li> an attribute named "javax.servlet.request.X509Certificate" of
      * type java.security.cert.X509Certificate[].
      * This is an array of objects of type X509Certificate, the order
      * of this array is defined as being in ascending order of

@@ -44,6 +44,8 @@ public class SunJsseListener extends JsseListener
     private String _keystore=DEFAULT_KEYSTORE ;
     private transient Password _password;
     private transient Password _keypassword;
+    private String _keystore_type = DEFAULT_KEYSTORE_TYPE;
+    private String _keystore_provider_name = DEFAULT_KEYSTORE_PROVIDER_NAME;
 
     /* ------------------------------------------------------------ */
     static
@@ -73,6 +75,27 @@ public class SunJsseListener extends JsseListener
     public void setKeyPassword(String password)
     {
         _keypassword = Password.getPassword(KEYPASSWORD_PROPERTY,password,null);
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    public void setKeystoreType(String keystore_type)
+    {
+        _keystore_type = keystore_type;
+    }
+    public String getKeystoreType()
+    {
+        return _keystore_type;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setKeystoreProviderName(String name)
+    {
+        _keystore_provider_name = name;
+    }
+    public String getKeystoreProviderName()
+    {
+        return _keystore_provider_name;
     }
     
     /* ------------------------------------------------------------ */
@@ -120,7 +143,18 @@ public class SunJsseListener extends JsseListener
                                                 _password.toString());
         Log.event(KEYPASSWORD_PROPERTY+"="+_keypassword.toStarString());
 
-        KeyStore ks = KeyStore.getInstance( "JKS" );
+
+        KeyStore ks = null;
+
+        Log.event(KEYSTORE_TYPE_PROPERTY+"="+_keystore_type);
+        if (_keystore_provider_name != null) {
+            Log.event(KEYSTORE_PROVIDER_NAME_PROPERTY+"="+_keystore_provider_name);
+            ks = KeyStore.getInstance(_keystore_type,_keystore_provider_name);
+        } else {
+            ks = KeyStore.getInstance(_keystore_type);
+            Log.event(KEYSTORE_PROVIDER_NAME_PROPERTY+"=[DEFAULT]");
+        }
+        
         ks.load( new FileInputStream( new File( _keystore ) ),
                  _password.toString().toCharArray());
         
