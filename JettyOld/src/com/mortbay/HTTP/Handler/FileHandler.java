@@ -367,7 +367,7 @@ public class FileHandler extends NullHandler
     /* ------------------------------------------------------------ */
     void setAllowHeader(HttpResponse response){
 	if (allowHeader == null){
-	    StringBuffer sb = new StringBuffer();
+	    StringBuffer sb = new StringBuffer(128);
 	    sb.append(HttpRequest.GET);
 	    sb.append(" ");
 	    sb.append(HttpRequest.HEAD);

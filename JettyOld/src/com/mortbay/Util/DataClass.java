@@ -150,7 +150,7 @@ public class DataClass
      */
     public static String toString(java.lang.Object object)
     {
-	StringBuffer buf = new StringBuffer();
+	StringBuffer buf = new StringBuffer(256);
 	itemToString(object,buf,0);
 	return buf.toString();
     }

@@ -46,8 +46,6 @@ public class Include extends Element
 
 	Code.debug("IncludeTag("+directory+","+fileName+")");
 
-	StringBuffer buf = new StringBuffer();
-
 	try{
 	    File file = new File(directory,fileName);
 	    if (file.isDirectory())

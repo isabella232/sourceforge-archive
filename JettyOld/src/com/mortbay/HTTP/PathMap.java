@@ -341,7 +341,7 @@ public class PathMap extends Dictionary
     /* --------------------------------------------------------------- */
     public String toString()
     {
-	StringBuffer buf = new StringBuffer();
+	StringBuffer buf = new StringBuffer(512);
 	buf.append("{\n");
 	Enumeration e = paths.elements();
 	while (e.hasMoreElements())

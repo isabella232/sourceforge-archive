@@ -71,7 +71,7 @@ public class Log
     /*-------------------------------------------------------------------*/
     /** Shared static instances, reduces object creation at expense
      * of lock contention in multi threaded debugging */
-    private static StringBuffer __stringBuffer = new StringBuffer();
+    private static StringBuffer __stringBuffer = new StringBuffer(512);
     
     /*-------------------------------------------------------------------*/
     public static Log instance()

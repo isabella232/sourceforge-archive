@@ -210,7 +210,7 @@ public class UrlEncoded extends Hashtable
 	       &&(index < encoded.length()))
 	{
 	    if(result==null)
-		result=new StringBuffer();
+		result=new StringBuffer(128);
 	    
 	    result.append(encoded.substring (index, marker));
 	    
@@ -249,7 +249,7 @@ public class UrlEncoded extends Hashtable
     {
 	Enumeration keys=keys();
 	String separator="";
-	StringBuffer result = new StringBuffer();
+	StringBuffer result = new StringBuffer(128);
 	while(keys.hasMoreElements())
 	{
 	    String key = keys.nextElement().toString();

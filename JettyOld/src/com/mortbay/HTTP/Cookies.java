@@ -103,7 +103,7 @@ public class Cookies
     /* -------------------------------------------------------------- */
     public String toString()
     {
-	StringBuffer buf = new StringBuffer();
+	StringBuffer buf = new StringBuffer(128);
 	Enumeration e = cookies.elements();
 	String s = "";
 	
@@ -123,7 +123,7 @@ public class Cookies
     /* -------------------------------------------------------------- */
     public static String toString(Cookie cookie)
     {
-    	StringBuffer buf = new StringBuffer();
+    	StringBuffer buf = new StringBuffer(128);
 	buf.append(cookie.getName());
 	buf.append('=');
 	buf.append(cookie.getValue());

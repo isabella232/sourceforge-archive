@@ -530,11 +530,7 @@ public class HttpRequest extends HttpHeader
      */
     public  String getRemoteAddr()
     {
-	String remoteAddr=connection.getInetAddress().toString();
-	int slash = remoteAddr.indexOf("/");
-	if (slash>=0)
-	    remoteAddr=remoteAddr.substring(slash+1);
-	return remoteAddr;
+        return connection.getInetAddress().getHostAddress();
     }
     
     /* -------------------------------------------------------------- */
@@ -607,7 +603,7 @@ public class HttpRequest extends HttpHeader
 		      return a[0];
 		  default:
 		      {
-			  StringBuffer buf = new StringBuffer();
+			  StringBuffer buf = new StringBuffer(128);
 			  for (int i=0;i<a.length;i++)
 			  {
 			      if (i!=0)
@@ -1034,7 +1030,7 @@ public class HttpRequest extends HttpHeader
 	}
 
 	// rebuild requestline
-	StringBuffer rl = new StringBuffer();
+	StringBuffer rl = new StringBuffer(len);
 	rl.append(buf,s1,s2-s1+2);
 	rl.append(buf,s3,e3-s3+1);
 	rl.append(" ");

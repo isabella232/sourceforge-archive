@@ -47,7 +47,7 @@ public class Test
     
     /*-------------------------------------------------------------------*/
     private String testCase;
-    private StringBuffer reportBuf=new StringBuffer();
+    private StringBuffer reportBuf=new StringBuffer(512);
     private boolean passed = true;
     
     /*-------------------------------------------------------------------*/

@@ -42,7 +42,7 @@ public class HtmlFilter extends HttpFilter
 {    
     /* ------------------------------------------------------------- */
     int state=0;
-    StringBuffer tagBuf = new StringBuffer();
+    StringBuffer tagBuf = new StringBuffer(128);
     
     /* ------------------------------------------------------------- */
     public void write(byte[]  b)

@@ -623,7 +623,7 @@ public class Code
 	    if (code.isDebugOnFor(frame))
 	    {
 		frame.complete();
-		StringBuffer buf = new StringBuffer();
+		StringBuffer buf = new StringBuffer(256);
 		synchronized(buf)
 		{
 		    buf.append(m);
@@ -648,7 +648,7 @@ public class Code
 	    if (code.isDebugOnFor(frame))
 	    {
 		frame.complete();
-		StringBuffer buf = new StringBuffer();
+		StringBuffer buf = new StringBuffer(256);
 		synchronized(buf)
 		{   
 		    formatObject(buf,ex);
@@ -672,7 +672,7 @@ public class Code
 	    if (code.isDebugOnFor(frame))
 	    {
 		frame.complete();
-		StringBuffer buf = new StringBuffer();
+		StringBuffer buf = new StringBuffer(256);
 		synchronized(buf)
 		{   
 		    formatObject(buf,o);
@@ -696,7 +696,7 @@ public class Code
 	    if (code.isDebugOnFor(frame))
 	    {
 		frame.complete();
-		StringBuffer buf = new StringBuffer();
+		StringBuffer buf = new StringBuffer(256);
 		synchronized(buf)
 		{   
 		    formatObject(buf,o1);
@@ -721,7 +721,7 @@ public class Code
 	    if (code.isDebugOnFor(frame))
 	    {
 		frame.complete();
-		StringBuffer buf = new StringBuffer();
+		StringBuffer buf = new StringBuffer(256);
 		synchronized(buf)
 		{   
 		    formatObject(buf,o1);
@@ -747,7 +747,7 @@ public class Code
 	    if (code.isDebugOnFor(frame))
 	    {
 		frame.complete();
-		StringBuffer buf = new StringBuffer();
+		StringBuffer buf = new StringBuffer(256);
 		synchronized(buf)
 		{   
 		    formatObject(buf,o1);
@@ -775,7 +775,7 @@ public class Code
 	    if (code.isDebugOnFor(frame))
 	    {
 		frame.complete();
-		StringBuffer buf = new StringBuffer();
+		StringBuffer buf = new StringBuffer(256);
 		synchronized(buf)
 		{   
 		    formatObject(buf,o1);
@@ -803,7 +803,7 @@ public class Code
 	    if (code.isDebugOnFor(frame))
 	    {
 		frame.complete();
-		StringBuffer buf = new StringBuffer();
+		StringBuffer buf = new StringBuffer(256);
 		synchronized(buf)
 		{   
 		    formatObject(buf,o1);
@@ -832,7 +832,7 @@ public class Code
 	    if (code.isDebugOnFor(frame))
 	    {
 		frame.complete();
-		StringBuffer buf = new StringBuffer();
+		StringBuffer buf = new StringBuffer(256);
 		synchronized(buf)
 		{   
 		    formatObject(buf,o1);
@@ -862,7 +862,7 @@ public class Code
 	    if (code.isDebugOnFor(frame))
 	    {
 		frame.complete();
-		StringBuffer buf = new StringBuffer();
+		StringBuffer buf = new StringBuffer(256);
 		synchronized(buf)
 		{   
 		    formatObject(buf,o1);
@@ -893,7 +893,7 @@ public class Code
 	    if (code.isDebugOnFor(frame))
 	    {
 		frame.complete();
-		StringBuffer buf = new StringBuffer();
+		StringBuffer buf = new StringBuffer(256);
 		synchronized(buf)
 		{   
 		    buf.append("Ignored");

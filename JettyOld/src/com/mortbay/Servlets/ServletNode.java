@@ -76,7 +76,7 @@ public class ServletNode
     /* ------------------------------------------------------------ */
     private String getRelativeUrlPath(int level)
     {
-	StringBuffer sb = new StringBuffer();
+	StringBuffer sb = new StringBuffer(32);
 	int depth = address.size() - level;
 	for (int i=0;i<depth;i++)
 	{

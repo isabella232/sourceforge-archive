@@ -276,7 +276,7 @@ public class PropertyTreeEditor
 	    form.addButtonArea("Action");
 	    form.addButton("load", "Load");
 	    page.add(form);
-	    page.add(new Link(myUrl+"/save.prp",
+	    page.add(new Link(myUrl+"/save/save.prp",
 			      new Heading(3, "Save Tree to Disk")));
 	    page.add("</TD></TR></TABLE>");
 	}

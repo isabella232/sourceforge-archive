@@ -97,7 +97,7 @@ public abstract class Element
 	if (attributes==null && attributeMap==null)
 	    return noAttributes;
 
-	StringBuffer buf = new StringBuffer();
+	StringBuffer buf = new StringBuffer(128);
 	if(attributes!=null && attributes.length()>0)
 	    buf.append(attributes);
 	

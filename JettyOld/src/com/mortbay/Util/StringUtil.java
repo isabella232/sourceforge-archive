@@ -63,19 +63,23 @@ public class StringUtil
      */
     public static String replace(String s, String sub, String with)
     {
-	StringBuffer buf = new StringBuffer(s.length()*2);
-
 	int c=0;
-	int i=0;
-	while ((i=s.indexOf(sub,c))!=-1)
+	int i=s.indexOf(sub,c);
+	if (i == -1)
+	    return s;
+    
+	StringBuffer buf = new StringBuffer(s.length()+with.length());
+
+	do
 	{
 	    buf.append(s.substring(c,i));
 	    buf.append(with);
 	    c=i+sub.length();
-	}
+	} while ((i=s.indexOf(sub,c))!=-1);
+    
 	if (c<s.length())
-	   buf.append(s.substring(c,s.length()));
-	
+	    buf.append(s.substring(c,s.length()));
+    
 	return buf.toString();
     }
     
@@ -85,7 +89,7 @@ public class StringUtil
      */
     public static void main(String[] args)
     {
-        StringBuffer b = new StringBuffer();
+        StringBuffer b = new StringBuffer(256);
         for(int i=32;i<127;i++)
         {
             b.append((char) i);
