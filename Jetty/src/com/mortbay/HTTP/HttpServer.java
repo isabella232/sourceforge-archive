@@ -6,7 +6,6 @@
 package com.mortbay.HTTP;
 
 import com.mortbay.HTTP.Handler.NotFoundHandler;
-import com.mortbay.HTTP.Handler.Servlet.ServletHandler;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.DateCache;
 import com.mortbay.Util.InetAddrPort;
@@ -801,17 +800,18 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     }
     
     /* ------------------------------------------------------------ */
-    /** Find servlet handler.
-     * Find a servlet handler for a URI.  This method is provided for
+    /** Find handler.
+     * Find a handler for a URI.  This method is provided for
      * the servlet context getContext method to search for another
      * context by URI.  A list of hosts may be passed to qualify the
      * search.
      * @param uri URI that must be satisfied by the servlet handler 
      * @param hosts null or a list of virtual hosts names to search
-     * @return ServletHandler
+     * @return HttpHandler
      */
-    public ServletHandler findServletHandler(String uri,
-                                             List hosts)
+    public HttpHandler findHandler(Class handlerClass,
+                                   String uri,
+                                   List hosts)
     {
         for (int h=0; h<hosts.size() ; h++)
         {
@@ -836,8 +836,8 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
                             HandlerContext context=
                                 (HandlerContext)contextList.get(j);
                             
-                            ServletHandler handler =
-                                context.getServletHandler();
+                            HttpHandler handler =
+                                context.getHandler(handlerClass);
 
                             if (handler!=null)
                                 return handler;

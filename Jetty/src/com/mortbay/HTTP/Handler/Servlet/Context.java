@@ -91,9 +91,11 @@ public class Context implements ServletContext, HttpSessionContext
         HandlerContext context=
             _handlerContext;
 
-        ServletHandler handler=context.getHttpServer()
-            .findServletHandler(uri,context.getHosts());
-
+        ServletHandler handler= (ServletHandler)
+            context.getHttpServer()
+            .findHandler(com.mortbay.HTTP.Handler.Servlet.ServletHandler.class,
+                         uri,context.getHosts());
+        
         if (handler!=null)
             return handler.getContext();
         return null;

@@ -508,7 +508,7 @@ public class HandlerContext implements LifeCycle
      * Resource aliases map resource uri's within a context.
      * They may optionally be used by a handler when looking for
      * a resource.  The only known user is
-     * #com.mortbay.HTTP.Handler.Servlet.Context.
+     * com.mortbay.HTTP.Handler.Servlet.Context.
      * @param alias 
      * @param uri 
      */
