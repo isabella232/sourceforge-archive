@@ -2,7 +2,7 @@
 // Copyright (c) 2002 Mort Bay Consulting (Australia) Pty. Ltd.
 // $Id$
 // ========================================================================
-package org.mortbay.jetty.launcher;
+package org.mortbay.start;
 
 /**
  * Utility class for parsing and comparing version strings.

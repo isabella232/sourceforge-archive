@@ -3,7 +3,7 @@
 // $Id$
 // ========================================================================
 
-package org.mortbay.jetty.launcher;
+package org.mortbay.start;
 
 import java.util.StringTokenizer;
 import java.net.URL;
@@ -26,27 +26,27 @@ import java.io.InputStreamReader;
 /**
  * @author Jan Hlavaty (hlavac@code.cz)
  * @version $Revision$
- */
- 
- /* TODO:
+
+  TODO:
    - finish possible jetty.home locations
    - use File.toURI.toURL() on JDK 1.4+
    - better handling of errors (i.e. when jetty.home cannot be autodetected...)
    - include entries from lib _when needed_
  */
  
-public class Launcher {
+public class Main
+{
     private String _classname = null;
     private File _home_dir = null;
     private Classpath _classpath = new Classpath();
-    private boolean _debug = Boolean.getBoolean("org.mortbay.jetty.launcher.debug");
+    private boolean _debug = Boolean.getBoolean("org.mortbay.start.debug");
     private ArrayList _xml = new ArrayList();
         
     public static void main(String[] args)
     {
         try
         {
-            new Launcher().run(args);
+            new Main().run(args);
         } catch (Exception e)
         {
             e.printStackTrace();
@@ -355,7 +355,7 @@ public class Launcher {
                 InputStream cpcfg = null;
                 try
                 {
-                    cpcfg = new java.io.FileInputStream(_home_dir.getPath()+File.separatorChar+"etc"+File.separatorChar+"classpath.config");
+                    cpcfg = new java.io.FileInputStream(_home_dir.getPath()+File.separatorChar+"etc"+File.separatorChar+"start.config");
                 }
                 catch (java.io.FileNotFoundException e)
                 {
@@ -364,11 +364,11 @@ public class Launcher {
                 if (cpcfg == null)
                 {
                     if (_debug) System.err.println("Configuring classpath from default resource");
-                    cpcfg = getClass().getClassLoader().getResourceAsStream("org/mortbay/jetty/launcher/classpath.config");
+                    cpcfg = getClass().getClassLoader().getResourceAsStream("org/mortbay/start/start.config");
                 }
                 else
                 {
-                    if (_debug) System.err.println("Configuring classpath from etc/classpath.config");
+                    if (_debug) System.err.println("Configuring classpath from etc/start.config");
                 }
                 configureClasspath(_home_dir.getPath(), _classpath, cpcfg,args);
                 cpcfg.close();
