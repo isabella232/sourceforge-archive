@@ -240,13 +240,13 @@ then
       # for example: /etc/jetty.d/
       # sort the files before adding them to the list of CONFIGS
       XML_FILES=`ls ${CONF}/*.xml | sort | tr "\n" " "` 
-      for CONF in ${XML_FILES} ;
+      for FILE in ${XML_FILES} ;
       do
-         if [ -r "$CONF" ] && [ -f "$CONF" ] ;
+         if [ -r "$FILE" ] && [ -f "$FILE" ] ;
          then
-            CONFIGS="$CONFIGS $CONF" ;
+            CONFIGS="$CONFIGS $FILE" ;
          else
-           echo "** WARNING: Cannot read '$CONF' specified in '$JETTY_CONF'" ;
+           echo "** WARNING: Cannot read '$FILE' specified in '$JETTY_CONF'" ;
          fi
       done
     else
@@ -368,7 +368,7 @@ fi
 # Build the classpath with Jetty's bundled libraries.
 #####################################################
 CP=`ls $JETTY_HOME/lib/*.jar | tr "\n" "$PATH_SEPARATOR"`
-CLASSPATH="$CP $CLASPATH"
+CLASSPATH="$CP $CLASSPATH"
 
 #####################################################
 # Add jetty properties to Java VM options.
