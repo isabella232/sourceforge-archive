@@ -349,6 +349,7 @@
   <!--       to find out why this is stupid.                                -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <!-- UNCOMMENT For compliant behaviour
+  -->
   <filter>
     <filter-name>jsr154</filter-name>
     <filter-class>org.mortbay.jetty.servlet.JSR154Filter</filter-class>
@@ -356,12 +357,11 @@
   </filter>
   <filter-mapping>
       <filter-name>jsr154</filter-name>
-      <url-pattern>/</url-pattern>
+      <url-pattern>/*</url-pattern>
       <dispatcher>REQUEST</dispatcher>
       <dispatcher>FORWARD</dispatcher>
       <dispatcher>INCLUDE</dispatcher>
   </filter-mapping>
-  -->
   
 </web-app>
 

@@ -220,6 +220,7 @@
   <Call name="addWebApplication">
     <Arg>/</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/root</Arg>
+    <Set name="defaultsDescriptor">org/mortbay/jetty/servlet/webdefault.xml</Set>
   </Call>
 
 
@@ -230,6 +231,8 @@
   <Call name="addWebApplication">
     <Arg>/jetty/*</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/demo/webapps/jetty</Arg>
+    <Set name="defaultsDescriptor">org/mortbay/jetty/servlet/webdefault.xml</Set>
+
     <!-- See demo/webapps/jetty/WEB-INF/jetty-web.xml for more configuration       -->
     <!-- That configuration could go here, but is more flexible in a separate file -->
   </Call>
