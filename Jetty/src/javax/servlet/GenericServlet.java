@@ -119,7 +119,6 @@ public abstract class GenericServlet
      */
 
     public void destroy() {
-	log("destroy");
     }
     
     
@@ -254,7 +253,6 @@ public abstract class GenericServlet
 
     public void init(ServletConfig config) throws ServletException {
 	this.config = config;
-	log("init");
 	this.init();
     }
 

@@ -5,6 +5,7 @@
 
 package org.mortbay.jetty.servlet;
 
+import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpServer;
 import javax.servlet.ServletContext;
@@ -33,6 +34,16 @@ public class ServletHttpContext extends HttpContext
         super();
     }
 
+    /* ------------------------------------------------------------ */
+    /** Get the ThreadLocal HttpConnection.
+     * Get the ThreadLocal HttpConnection.
+     * @return HttpConnection for this thread.
+     */
+    protected HttpConnection getHttpConnection()
+    {
+        return super.getHttpConnection();
+    }
+    
     /* ------------------------------------------------------------ */
     /** Set the ServletContext.
      * Called by the ServletHandler to 

@@ -43,6 +43,9 @@ public class HttpConnection
     implements OutputObserver
 {
     /* ------------------------------------------------------------ */
+    private static ThreadLocal __threadConnection=new ThreadLocal();
+    
+    /* ------------------------------------------------------------ */
     protected HttpRequest _request;
     protected HttpResponse _response;
 
@@ -113,6 +116,16 @@ public class HttpConnection
         _response = new HttpResponse(this);
     }
 
+    /* ------------------------------------------------------------ */
+    /** Get the ThreadLocal HttpConnection.
+     * The ThreadLocal HttpConnection is set by the handle() method.
+     * @return HttpConnection for this thread.
+     */
+    static HttpConnection getHttpConnection()
+    {
+        return (HttpConnection)__threadConnection.get();
+    }
+    
     /* ------------------------------------------------------------ */
     /** Get the Remote address.
      * @return the remote address
@@ -778,18 +791,29 @@ public class HttpConnection
      * connection.  The method only returns once all requests have been
      * handled, an error has been returned to the requestor or the
      * connection has been closed.
-     * The handleNext() is called in a loop until it returns false,
+     * The handleNext() is called in a loop until it returns false.
+     * <P>
+     * The Connection is set as a ThreadLocal of the calling thread and is
+     * available via the getHttpConnection() method.
      */
     public final void handle()
     {
-        while(_listener.isStarted())
+        __threadConnection.set(this);
+        try
         {
-            if (!handleNext())
-                break;
-            if (_request!=null)
-                _request.recycle(this);
-            if (_response!=null)
-                _response.recycle(this);
+            while(_listener.isStarted())
+            {
+                if (!handleNext())
+                    break;
+                if (_request!=null)
+                    _request.recycle(this);
+                if (_response!=null)
+                    _response.recycle(this);
+            }
+        }
+        finally
+        {
+            __threadConnection.set(null);
         }
     }
     

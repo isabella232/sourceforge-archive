@@ -144,7 +144,6 @@ public class HttpContext implements LifeCycle
      */
     public HttpContext()
     {}
-
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -157,6 +156,16 @@ public class HttpContext implements LifeCycle
         setContextPath(contextPathSpec);
     }
 
+    /* ------------------------------------------------------------ */
+    /** Get the ThreadLocal HttpConnection.
+     * Get the ThreadLocal HttpConnection.
+     * @return HttpConnection for this thread.
+     */
+    protected HttpConnection getHttpConnection()
+    {
+        return HttpConnection.getHttpConnection();
+    }
+    
     /* ------------------------------------------------------------ */
     void setHttpServer(HttpServer httpServer)
     {

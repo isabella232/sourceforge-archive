@@ -435,6 +435,8 @@ public class HttpResponse extends HttpMessage
     public void sendRedirect(String location)
         throws IOException
     {
+        if (isCommitted())
+            throw new IllegalStateException("Commited");
         _header.put(HttpFields.__Location,location);
         setStatus(__302_Moved_Temporarily);
         commitHeader();

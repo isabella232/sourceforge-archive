@@ -29,6 +29,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
 import org.mortbay.http.ChunkableOutputStream;
+import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpMessage;
@@ -196,8 +197,14 @@ public class Dispatcher implements RequestDispatcher
     {
         HttpServletRequest httpServletRequest=(HttpServletRequest)servletRequest;
         HttpServletResponse httpServletResponse=(HttpServletResponse)servletResponse;
-        ServletHttpRequest servletHttpRequest=ServletHttpRequest.unwrap(servletRequest);
-        ServletHttpResponse servletHttpResponse=servletHttpRequest.getServletHttpResponse();
+
+        HttpConnection httpConnection=
+            ((ServletHttpContext)_servletHandler.getHttpContext()).getHttpConnection();
+        ServletHttpRequest servletHttpRequest= (httpConnection!=null)
+            ?(ServletHttpRequest)httpConnection.getRequest().getWrapper()
+            :ServletHttpRequest.unwrap(servletRequest);
+        ServletHttpResponse servletHttpResponse=
+            servletHttpRequest.getServletHttpResponse();
 
         try
         {
@@ -205,17 +212,12 @@ public class Dispatcher implements RequestDispatcher
             DispatcherRequest request = new DispatcherRequest(httpServletRequest);
             DispatcherResponse response = new DispatcherResponse(httpServletResponse);
 
+            
             if (forward)
-            {
                 // Reset any output done so far.
                 servletResponse.resetBuffer();
-                servletHttpResponse.resetBuffer();
-            }
             else
-            {
                 response.setLocked(true);
-            }
-            
 
             // Merge parameters
             String query=_query;
