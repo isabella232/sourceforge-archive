@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
+
 import org.mortbay.util.Code;
 import org.mortbay.util.IO;
 
@@ -27,7 +29,7 @@ public class HttpTunnel
 {
     private Socket _socket;
     private Thread _thread;
-    private int _timeoutMs;
+    private int _timeoutMs=30000;
     private InputStream _in;
     private OutputStream _out;
 
@@ -41,12 +43,25 @@ public class HttpTunnel
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param socket The tunnel socket.
-     * @param timeoutMs The maximum time to wait for a read on the tunnel. Note that
-     * sotimer exceptions are ignored by the tunnel.
+     * @deprecated Use version with timeout
      */
-    public HttpTunnel(Socket socket, int timeoutMs)
+    public HttpTunnel(Socket socket)
     {
         _socket= socket;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param socket The tunnel socket.
+     * @param timeoutMs The maximum time to wait for a read on the tunnel. Note that
+     * sotimer exceptions are ignored by the tunnel as they may be set to a short period
+     * for IE bug.
+     */
+    public HttpTunnel(Socket socket, int timeoutMs)
+        throws SocketException
+    {
+        _socket= socket;
+        _timeoutMs=timeoutMs;
     }
 
     /* ------------------------------------------------------------ */
