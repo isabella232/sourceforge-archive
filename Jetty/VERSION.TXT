@@ -2,13 +2,13 @@ Jetty Versions
 --------------
 
 Jetty-4.1.0RC2 - 15 August 2002
- + Updated to Jasper2 (4_1_9 tag)
  + Conveninace setClassLoaderJava2Compliant method.
  + Clear interrupted status in ThreadPool
  + Fixed HttpFields cache overflow
  + Improved ByteArrayPool to handle multiple sizes.
  + Added HttpListener.bufferReserve
  + Use system line separator for log files.
+ + Updated to Jasper2 (4_1_9 tag)
 
 Jetty-4.1.0RC1 - 11 August 2002
  + Fixed forward query string handling

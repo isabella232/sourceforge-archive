@@ -22,7 +22,8 @@ Jetty can be started by
  + Setting the classpath to the appropriate jars in $JETTY_HOME/lib 
  + Adding to the classpath any jars from $JETTY_HOME/ext that your 
    java environment does not provide.
- + If using JSPs, add the tools.jar from your JRE lib to the classpath.
+ + If using JSPs, add the tools.jar from your JRE lib and ant.jar from jakarta-ant-1.5
+   to the classpath.
  + Running "java org.mortbay.jetty.Server <configfile>"
 
 
@@ -47,7 +48,8 @@ If using JDK 1.3, you can still run this way, but you must add the
 libraries from the ext to your classpath.
 
 Note that this start method will not allow JSPs to work, unless
-you have the tools.jar from your JDK in your system classpath.
+you have the tools.jar from your JDK and ant.jar from jakarta-ant
+in your system classpath.
 
 The other start methods below will set this classpath if possible.
 
@@ -157,9 +159,8 @@ To use JMX the classpath must also include:
 
 To run JSP with the JDK compiler, you will also need to add the
 jar containing the JDK compiler (if you wish to use another compiler
-you will have to configure jasper):
-
-   $JDK_HOME/lib/tools.jar
+you will have to configure jasper) and the ant.jar from jakarta-ant 1.5 
+or later.
 
 
 

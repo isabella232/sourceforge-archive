@@ -71,8 +71,6 @@ Other targets:
   <property name="servlet.jar"     value="${lib}/javax.servlet.jar"/>
   <property name="jasper.jar"      value="${lib}/org.apache.jasper.jar"/>
 
-  <property name="tools.jar"       value="${env.JAVA_HOME}/lib/tools.jar"/>
-
   <property name="jvmarg"  value="-Djetty.home=${jetty.home} -Djetty.log=${jetty.home}/logs" />
 
   <!-- ==================================================================== -->
