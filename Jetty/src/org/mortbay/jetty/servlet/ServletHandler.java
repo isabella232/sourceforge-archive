@@ -90,7 +90,6 @@ public class ServletHandler
     /* ------------------------------------------------------------ */
     private PathMap _servletMap=new PathMap();
     private Map _nameMap=new HashMap();
-    private HttpContext _httpContext;
     private Context _context;
     private ClassLoader _loader;
     private String _dynamicServletPathSpec;
@@ -390,9 +389,9 @@ public class ServletHandler
         if (isStarted())
             return;
         
-        _httpContext=getHttpContext();
-        _resourceHandler=(ResourceHandler)_httpContext.getHandler(ResourceHandler.class);
-        _sessionManager.start();
+        _resourceHandler=(ResourceHandler)getHttpContext().getHandler(ResourceHandler.class);
+        if (_sessionManager!=null)
+            _sessionManager.start();
         
         // Initialize classloader
         _loader=getHttpContext().getClassLoader();
@@ -447,7 +446,6 @@ public class ServletHandler
         }      
         _loader=null;
         _context=null;
-        _httpContext=null;
         super.stop();
     }
 
@@ -761,7 +759,7 @@ public class ServletHandler
             uriInContext=URI.canonicalPath(uriInContext);
             if (uriInContext==null)
                 return Collections.EMPTY_SET;
-            Resource resource=_httpContext.getResource(uriInContext);
+            Resource resource=getHttpContext().getResource(uriInContext);
             if (resource==null || !resource.isDirectory())
                 return Collections.EMPTY_SET;
             String[] contents=resource.list();
@@ -792,7 +790,7 @@ public class ServletHandler
         throws MalformedURLException
     {        
         try{
-            Resource resource = _httpContext.getResource(uriInContext);
+            Resource resource = getHttpContext().getResource(uriInContext);
             if (resource!=null && resource.exists())
                 return resource.getURL();
         }
@@ -835,7 +833,7 @@ public class ServletHandler
         if (__Slosh2Slash)
             path=path.replace('\\','/');
         
-        Resource baseResource=_httpContext.getBaseResource();
+        Resource baseResource=getHttpContext().getBaseResource();
         if (baseResource==null )
             return null;
 
@@ -904,10 +902,10 @@ public class ServletHandler
         public ServletContext getContext(String uri)
         {        
             ServletHandler handler= (ServletHandler)
-                _httpContext.getHttpServer()
+                getHttpContext().getHttpServer()
                 .findHandler(org.mortbay.jetty.servlet.ServletHandler.class,
                              uri,
-                             _httpContext.getVirtualHosts());
+                             getHttpContext().getVirtualHosts());
             if (handler!=null)
                 return handler.getServletContext();
             return null;
@@ -928,7 +926,7 @@ public class ServletHandler
         /* ------------------------------------------------------------ */
         public String getMimeType(String file)
         {
-            return _httpContext.getMimeByExtension(file);
+            return getHttpContext().getMimeByExtension(file);
         }
 
         /* ------------------------------------------------------------ */
@@ -1042,7 +1040,7 @@ public class ServletHandler
          */
         public String getInitParameter(String param)
         {
-            return _httpContext.getInitParameter(param);
+            return getHttpContext().getInitParameter(param);
         }
 
         /* ------------------------------------------------------------ */
@@ -1052,7 +1050,7 @@ public class ServletHandler
          */
         public Enumeration getInitParameterNames()
         {
-            return _httpContext.getInitParameterNames();
+            return getHttpContext().getInitParameterNames();
         }
 
     
@@ -1067,15 +1065,15 @@ public class ServletHandler
             if ("javax.servlet.context.tempdir".equals(name))
             {
                 // Initialize temporary directory
-                Object t = _httpContext.getAttribute("javax.servlet.context.tempdir");
+                Object t = getHttpContext().getAttribute("javax.servlet.context.tempdir");
 
                 if (t instanceof File)
                     return (File)t;
                 
-                return _httpContext.getTempDirectory();
+                return getHttpContext().getTempDirectory();
             }
 
-            return _httpContext.getAttribute(name);
+            return getHttpContext().getAttribute(name);
         }
 
         /* ------------------------------------------------------------ */
@@ -1084,7 +1082,7 @@ public class ServletHandler
          */
         public Enumeration getAttributeNames()
         {
-            return _httpContext.getAttributeNames();
+            return getHttpContext().getAttributeNames();
         }
 
         /* ------------------------------------------------------------ */
@@ -1100,7 +1098,7 @@ public class ServletHandler
                 Code.warning("Servlet attempted update of "+name);
                 return;
             }
-            _httpContext.setAttribute(name,value);
+            getHttpContext().setAttribute(name,value);
         }
 
         /* ------------------------------------------------------------ */
@@ -1115,14 +1113,14 @@ public class ServletHandler
                 Code.warning("Servlet attempted update of "+name);
                 return;
             }
-            _httpContext.removeAttribute(name);
+            getHttpContext().removeAttribute(name);
         }
     
         /* ------------------------------------------------------------ */
         public String getServletContextName()
         {
-            if (_httpContext instanceof WebApplicationContext)
-                return ((WebApplicationContext)_httpContext).getDisplayName();
+            if (getHttpContext() instanceof WebApplicationContext)
+                return ((WebApplicationContext)getHttpContext()).getDisplayName();
             return null;
         }
     }

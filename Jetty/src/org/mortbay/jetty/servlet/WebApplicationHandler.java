@@ -65,7 +65,8 @@ public class WebApplicationHandler extends ServletHandler
     private Map _filterMap=new HashMap();
     private List _pathFilters=new ArrayList();
     private MultiMap _servletFilterMap=new MultiMap();
-    private boolean _acceptRanges=true;    
+    private boolean _acceptRanges=true;
+    private boolean _started=false;
     
     /* ------------------------------------------------------------ */
     public boolean isAcceptRanges()
@@ -125,6 +126,12 @@ public class WebApplicationHandler extends ServletHandler
         
         return holder;
     }
+
+    /* ------------------------------------------------------------ */
+    public boolean isStarted()
+    {
+        return _started&&super.isStarted();
+    }
     
     /* ----------------------------------------------------------------- */
     public synchronized void start()
@@ -132,6 +139,10 @@ public class WebApplicationHandler extends ServletHandler
     {
         // Start filters
         MultiException mex = new MultiException();
+        
+        try {super.start();}
+        catch (Exception e){mex.add(e);}
+        
         Iterator iter = _filterMap.values().iterator();
         while (iter.hasNext())
         {
@@ -143,8 +154,7 @@ public class WebApplicationHandler extends ServletHandler
         Code.debug("Path Filters: "+_pathFilters);
         Code.debug("Servlet Filters: "+_servletFilterMap);
 
-        try {super.start();}
-        catch (Exception e){mex.add(e);}
+        _started=true;
         
         mex.ifExceptionThrow();
     }
@@ -153,17 +163,23 @@ public class WebApplicationHandler extends ServletHandler
     public synchronized void stop()
         throws  InterruptedException
     {
-        super.stop();
-        
         // Stop filters
-        Iterator iter = _filterMap.values().iterator();
-        while (iter.hasNext())
+        try
         {
-            FilterHolder holder = (FilterHolder)iter.next();
-            holder.stop();
+            Iterator iter = _filterMap.values().iterator();
+            while (iter.hasNext())
+            {
+                FilterHolder holder = (FilterHolder)iter.next();
+                holder.stop();
+            }
+            super.stop();
         }
-
+        finally
+        {
+            _started=false;
+        }
     }
+    
     
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,
@@ -172,6 +188,9 @@ public class WebApplicationHandler extends ServletHandler
                        HttpResponse httpResponse)
          throws IOException
     {
+        if (!_started)
+            return;
+        
         // Handle TRACE
         if (HttpRequest.__TRACE.equals(httpRequest.getMethod()))
         {
