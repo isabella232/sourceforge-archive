@@ -99,6 +99,18 @@ public class ServletHandler
     }
     
     /* ------------------------------------------------------------ */
+    public void initialize(HttpContext context)
+    {
+        super.initialize(context);
+        if (context instanceof ServletHttpContext)
+        {
+            ServletHttpContext servletHttpContext= (ServletHttpContext)context;
+            servletHttpContext.setServletHandler(this);
+            servletHttpContext.setServletContext(_context);
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
     public ServletContext getServletContext() { return _context; }
 
     /* ------------------------------------------------------------ */

@@ -382,7 +382,7 @@ public class WebApplicationContext extends ServletHttpContext
         // Context listeners
         if (_contextListeners!=null && _servletHandler!=null)
         {
-            ServletContextEvent event = new ServletContextEvent(_servletHandler.getServletContext());
+            ServletContextEvent event = new ServletContextEvent(getServletContext());
             for (int i=0;i<_contextListeners.size();i++)
                 ((ServletContextListener)_contextListeners.get(i))
                     .contextInitialized(event);
@@ -405,7 +405,7 @@ public class WebApplicationContext extends ServletHttpContext
         // Context listeners
         if (_contextListeners!=null && _servletHandler!=null)
         {
-            ServletContextEvent event = new ServletContextEvent(_servletHandler.getServletContext());
+            ServletContextEvent event = new ServletContextEvent(getServletContext());
             super.stop();
             for (int i=0;i<_contextListeners.size();i++)
                 ((ServletContextListener)_contextListeners.get(i))
@@ -461,7 +461,7 @@ public class WebApplicationContext extends ServletHttpContext
         if (_contextAttributeListeners!=null && _servletHandler!=null)
         {
             ServletContextAttributeEvent event =
-                new ServletContextAttributeEvent(_servletHandler.getServletContext(),
+                new ServletContextAttributeEvent(getServletContext(),
                                                  name,
                                                  old!=null?old:value);
             for (int i=0;i<_contextAttributeListeners.size();i++)
@@ -489,7 +489,7 @@ public class WebApplicationContext extends ServletHttpContext
         if (old !=null && _contextAttributeListeners!=null && _servletHandler!=null)
         {
             ServletContextAttributeEvent event =
-                new ServletContextAttributeEvent(_servletHandler.getServletContext(),
+                new ServletContextAttributeEvent(getServletContext(),
                                                  name,old);
             for (int i=0;i<_contextAttributeListeners.size();i++)
             {

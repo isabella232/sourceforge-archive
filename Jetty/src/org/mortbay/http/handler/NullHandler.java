@@ -55,6 +55,7 @@ abstract public class NullHandler implements HttpHandler
     
     /* ------------------------------------------------------------ */
     /** Initialize with a HttpContext.
+     * Called by addHandler methods of HttpContext.
      * @param configuration Must be the HttpContext of the handler
      */
     public void initialize(HttpContext context)
