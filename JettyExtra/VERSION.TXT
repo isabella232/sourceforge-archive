@@ -1,6 +1,8 @@
 JettyExtra Versions
 --------------------
 
+JettyExtra-4.0.B0
+  + Version number same as Jetty release.
   + New JMX package structure for autodiscovery
   + postUnregister destroys mbean
   + Use Jetty4 eventlistener
