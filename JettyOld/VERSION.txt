@@ -9,7 +9,6 @@ Release 2.1.4 - 26 March 1999
     Sorry if this breaks your servlets - it is a pain!
   + fixed bug in getRealPath
   + getPathTranslated now call getRealPath with pathInfo (as per spec).
-  + added Back link to JettyLaf that uses referer.
 
 Release 2.1.3 - 19 March 1999
   + Added support for suffixes to PathMap
