@@ -149,6 +149,14 @@ public class PropertyTree extends Properties
 	return null;
     }
     /* ------------------------------------------------------------ */
+    /** To remove nested PropertyTrees */
+    public Object removeTree(Object key){
+	Vector v = getTokens(key.toString());
+	if (v != null)
+	    return removeSubTree(0, v);
+	return null;
+    }
+    /* ------------------------------------------------------------ */
     public void list(PrintStream out){
 	PrintWriter writer = new PrintWriter(new OutputStreamWriter(out));
 	list(writer);
@@ -217,6 +225,15 @@ public class PropertyTree extends Properties
 	    return retv;
 	}
 	String elem = key.elementAt(index).toString();
+	// Special case handling if they are trying to put a PropertyTree.
+	if (value instanceof PropertyTree && index + 1 == key.size()){
+	    if (elem.equals("*")){
+		retv = defaultValues;
+		defaultValues = (PropertyTree)value;
+		return retv;
+	    }
+	    return children.put(elem, value);
+	}
 	Object val = children.get(elem);
 	// Check if there is a node there already...
 	if (val != null && val instanceof PropertyTree)
@@ -242,6 +259,18 @@ public class PropertyTree extends Properties
 	PropertyTree subnode = getSubNode(elem, false);
 	if (subnode == null) return null;
 	return subnode.getSubTree(index+1, key);
+    }
+    /* ------------------------------------------------------------ */
+    private PropertyTree removeSubTree(int index, Vector key){
+	if (index == key.size()){
+	    children.clear();
+	    if (defaultValues != this) defaultValues = null;
+	    return this;
+	}
+	String elem = key.elementAt(index).toString();
+	PropertyTree subnode = getSubNode(elem, false);
+	if (subnode == null) return null;
+	return subnode.removeSubTree(index + 1, key);
     }
     /* ------------------------------------------------------------ */
     private PropertyTree getSubNode(String name){
