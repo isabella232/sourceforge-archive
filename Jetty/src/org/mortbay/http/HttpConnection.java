@@ -536,6 +536,8 @@ public class HttpConnection
         if (_firstWrite)
             return;
         _firstWrite=true;
+        if (_response.isCommitted())
+            return;
         
         // Determine how to limit content length and
         // enable output transfer encodings 
