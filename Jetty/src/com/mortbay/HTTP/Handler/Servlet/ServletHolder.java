@@ -38,16 +38,16 @@ import javax.servlet.UnavailableException;
 public class ServletHolder
     extends AbstractMap
     implements ServletConfig
-{   
+{
     /* ---------------------------------------------------------------- */
     private ServletHandler _handler;
     private Context _context;
     private boolean _singleThreadModel;
-    
+
     private Class _servletClass=null;
     private Stack _servlets=new Stack();
     private GenericServlet _servlet=null;
-    private String _name=null;    
+    private String _name=null;
     private String _className ;
     private Map _initParams ;
     private boolean _initOnStartup =false;
@@ -55,7 +55,7 @@ public class ServletHolder
     /* ---------------------------------------------------------------- */
     /** Construct a Servlet property mostly from the servers config
      * file.
-     * @param handler ServletHandler 
+     * @param handler ServletHandler
      * @param className Servlet class name (fully qualified)
      */
     public ServletHolder(ServletHandler handler,
@@ -74,13 +74,13 @@ public class ServletHolder
             put("classpath",_handler.getHandlerContext().getClassPath());
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     public String getServletName()
     {
         return _name;
     }
-    
+
     /* ------------------------------------------------------------ */
     public void setServletName(String name)
     {
@@ -96,26 +96,26 @@ public class ServletHolder
     {
         return _className;
     }
-    
+
     /* ------------------------------------------------------------ */
     public void setClassName(String className)
     {
         _className = className;
     }
 
-    
+
     /* ------------------------------------------------------------ */
     public boolean isInitOnStartup()
     {
         return _initOnStartup;
     }
-    
+
     /* ------------------------------------------------------------ */
     public void setInitOnStartup(boolean b)
     {
         _initOnStartup = b;
     }
-    
+
     /* ------------------------------------------------------------ */
     public void initialize()
     {
@@ -152,7 +152,7 @@ public class ServletHolder
             throw new UnavailableException(e.toString());
         }
     }
-    
+
     /* ---------------------------------------------------------------- */
     /** Destroy.
      */
@@ -162,7 +162,7 @@ public class ServletHolder
         if (_servlet!=null)
             _servlet.destroy();
         _servlet=null;
-                
+
         // Destroy stack of servlets
         while (_servlets!=null && _servlets.size()>0)
         {
@@ -172,8 +172,8 @@ public class ServletHolder
         _servlets=new Stack();
         _servletClass=null;
     }
-    
-    
+
+
     /* ------------------------------------------------------------ */
     /** Get the servlet.
      * The state of the servlet is unknown, specially if using
@@ -186,7 +186,7 @@ public class ServletHolder
         try{
             if (_servletClass==null)
                 initializeClass();
-            
+
             if (_servlet==null)
             {
                 GenericServlet newServlet =
@@ -197,7 +197,7 @@ public class ServletHolder
                     _singleThreadModel =
                         newServlet instanceof
                         javax.servlet.SingleThreadModel;
-                    
+
                     if (_servlet==null && !_singleThreadModel)
                         _servlet=newServlet;
                 }
@@ -215,10 +215,10 @@ public class ServletHolder
         }    
     }
 
-    
+
     /* ---------------------------------------------------------------- */
-    /** 
-     * @return 
+    /**
+     * @return
      */
     public javax.servlet.ServletContext getServletContext()
     {
@@ -245,7 +245,7 @@ public class ServletHolder
             return null;
         return obj.toString();
     }
-    
+
     /* ------------------------------------------------------------ */
     public Enumeration getInitParameterNames()
     {
@@ -253,7 +253,7 @@ public class ServletHolder
             return Collections.enumeration(Collections.EMPTY_LIST);
         return Collections.enumeration(_initParams.keySet());
     }
-    
+
     /* --------------------------------------------------------------- */
     /** Service a request with this servlet.
      */
@@ -264,11 +264,11 @@ public class ServletHolder
                IOException
     {
         GenericServlet useServlet=null;
-        
+
         // reference pool to protect from reloads
         Stack pool=_servlets;
-        
-        if (_singleThreadModel)    
+
+        if (_singleThreadModel)
         {
             // try getting a servlet from the pool of servlets
             try{useServlet = (GenericServlet)pool.pop();}
@@ -279,8 +279,8 @@ public class ServletHolder
                 {
                     if (_servletClass==null)
                         initializeClass();
-            
-                    useServlet = 
+
+                    useServlet =
                             (GenericServlet) _servletClass.newInstance();
                     useServlet.init(this);
                 }
@@ -307,11 +307,11 @@ public class ServletHolder
                         {
                             if (_servletClass==null)
                                 initializeClass();
-                            useServlet = 
+                            useServlet =
                                 (GenericServlet) _servletClass.newInstance();
                             useServlet.init(this);
                             _servlet = useServlet;
-                            
+
                             _singleThreadModel =
                                 _servlet instanceof
                                 javax.servlet.SingleThreadModel;
@@ -337,7 +337,7 @@ public class ServletHolder
                 // yes so use it.
                 useServlet = _servlet;
         }
-        
+
         // Check that we got one in the end
         if (useServlet==null)
             throw new UnavailableException("Could not construct servlet");
@@ -382,7 +382,7 @@ public class ServletHolder
             _initParams=new HashMap(3);
         return _initParams.put(name,value);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get the name of the Servlet
      * @return Servlet name
@@ -391,5 +391,5 @@ public class ServletHolder
     {
         return _name;
     }
-    
+
 }
