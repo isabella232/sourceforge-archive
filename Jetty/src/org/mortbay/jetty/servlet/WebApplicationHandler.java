@@ -136,12 +136,19 @@ public class WebApplicationHandler extends ServletHandler
     public synchronized void start()
         throws Exception
     {
-        // Start filters
+        // Start Servlet Handler
+        super.start();
+        Code.debug("Path Filters: "+_pathFilters);
+        Code.debug("Servlet Filters: "+_servletFilterMap);
+        _started=true;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void initializeServlets()
+        throws Exception
+    {
+        // initialize Filters
         MultiException mex = new MultiException();
-        
-        try {super.start();}
-        catch (Exception e){mex.add(e);}
-        
         Iterator iter = _filterMap.values().iterator();
         while (iter.hasNext())
         {
@@ -149,11 +156,10 @@ public class WebApplicationHandler extends ServletHandler
             try{holder.start();}
             catch(Exception e) {mex.add(e);}
         }
-        
-        Code.debug("Path Filters: "+_pathFilters);
-        Code.debug("Servlet Filters: "+_servletFilterMap);
 
-        _started=true;
+        // initialize Servlets
+        try {super.initializeServlets();}
+        catch (Exception e){mex.add(e);}
         
         mex.ifExceptionThrow();
     }
@@ -162,16 +168,18 @@ public class WebApplicationHandler extends ServletHandler
     public synchronized void stop()
         throws  InterruptedException
     {
-        // Stop filters
         try
         {
+            // Stop servlets
+            super.stop();
+            
+            // Stop filters
             Iterator iter = _filterMap.values().iterator();
             while (iter.hasNext())
             {
                 FilterHolder holder = (FilterHolder)iter.next();
                 holder.stop();
             }
-            super.stop();
         }
         finally
         {
