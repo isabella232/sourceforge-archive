@@ -10,10 +10,13 @@ import com.mortbay.Util.Log;
 import com.mortbay.Util.InetAddrPort;
 import com.mortbay.Util.ThreadPool;
 import com.mortbay.Util.ThreadedServer;
+import com.mortbay.Jetty.Servlet.ServletSSL;
 import java.io.File;
 import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.cert.X509Certificate;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLServerSocket;
@@ -37,22 +40,27 @@ import javax.net.ssl.SSLSocket;
  **/
 public abstract class JsseListener extends SocketListener
 {
-    // location of the keystore (defaults to ~/.keystore)
+    /** String name of keystore location path property. */
     public static final String KEYSTORE_PROPERTY = "jetty.ssl.keystore";
+
+    /** Default value for the keystore location path. (~/.keystore) */
     public static final String DEFAULT_KEYSTORE  =
         System.getProperty("user.home" ) + File.separator + ".keystore";
 
-    // password for the keystore
+    /** String name of keystore password property. */
     public static final String PASSWORD_PROPERTY = "jetty.ssl.password";
-    // password for the key password
+    
+    /** String name of key password property. */
     public static final String KEYPASSWORD_PROPERTY = "jetty.ssl.keypassword";
-
-    /* ------------------------------------------------------------ */
+    
+    /** The name of the SSLSession attribute that wil contain any
+     * cached information.
+     */
+    static final String CACHED_INFO_ATTR
+	= CachedInfo.class.getName();
+	
+    /** Set to true if we require client certificate authentication. */
     private boolean _needClientAuth = false;
-    public void setNeedClientAuth(boolean needClientAuth)
-    {
-        _needClientAuth = needClientAuth;
-    }
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -86,7 +94,21 @@ public abstract class JsseListener extends SocketListener
         }
     }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * Set the value of the needClientAuth property
+     * @param needClientAuth true iff we require client
+     * certificate authentication.
+     */
+    public void setNeedClientAuth(boolean needClientAuth)
+    {
+        _needClientAuth = needClientAuth;
+    }
+
     /* --------------------------------------------------------------- */
+    /** Returns "https".
+     * @returns "https".
+     */
     public String getDefaultScheme()
     {
         return "https";
@@ -95,7 +117,6 @@ public abstract class JsseListener extends SocketListener
     /* ------------------------------------------------------------ */
     protected abstract SSLServerSocketFactory createFactory()
         throws Exception;
-    
         
     /* ------------------------------------------------------------ */
     /** 
@@ -134,58 +155,10 @@ public abstract class JsseListener extends SocketListener
         catch( Exception e )
         {
             Code.warning(e);
-            throw new IOException("Could not create JsseListener socket: "+e.toString());
+            throw new IOException("Could not create JsseListener: "
+				  +e.toString());
         }
         return socket;
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Allow the Listener a chance to customise the request.
-     * before the server does its stuff.
-     * <br> This allows extra attributes to be set for SSL connections.
-     */
-    protected void customizeRequest(Socket socket,
-                                    HttpRequest request)
-    {
-        if (!(socket instanceof javax.net.ssl.SSLSocket))
-            return; // I'm tempted to let it throw an exception...
-
-        try
-        {
-            SSLSocket sslSocket = (SSLSocket) socket;
-            SSLSession sslSession = sslSocket.getSession();
-
-            //request.setScheme("https");
-            try
-            {
-                javax.security.cert.X509Certificate[] chain
-                    = sslSession.getPeerCertificateChain();
-                
-                request.setAttribute("javax.servlet.request.X509Certificate",
-                                     ((chain.length > 0) ? chain[0] : null));
-                request.setAttribute(
-                    "javax.servlet.request.X509Certificate_chain", chain);
-            }
-            catch (SSLPeerUnverifiedException ignore) {}
-
-            request.setAttribute("javax.servlet.request.cipher_suite",
-                                 sslSession.getCipherSuite());
-            request.setAttribute("javax.servlet.request.ssl_peer_host",
-                                 sslSession.getPeerHost());
-            request.setAttribute("javax.servlet.request.ssl_session",
-                                 new String(sslSession.getId()));
-
-            String valueNames[] = sslSession.getValueNames();
-            for (int i=0; i<valueNames.length; i++)
-                request.setAttribute(
-                    "javax.servlet.request.ssl_value," + valueNames[i],
-                    sslSession.getValue(valueNames[i]));
-            
-        }
-        catch (Exception e)
-        {
-            Code.warning(e);
-        }
     }
 
     /* ------------------------------------------------------------ */
@@ -210,5 +183,148 @@ public abstract class JsseListener extends SocketListener
             Code.warning(e);
             throw new IOException( e.getMessage() );
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Allow the Listener a chance to customise the request.
+     * before the server does its stuff.
+     * <br> This allows the required  attributes to be set for SSL
+     * requests.
+     * <br> The requirements of the Servlet specs are:
+     * <ul>
+     * <li> an attribute named "javax.servlet.request.cipher_suite" of
+     * type String.</li>
+     * <li> an attribute named "javax.servlet.request.key_size" of
+     * type Integer.</li>
+     * <li> an attribute named "avax.servlet.request.X509Certificate" of
+     * type java.security.cert.X509Certificate[].
+     * This is an array of objects of type X509Certificate, the order
+     * of this array is defined as being in ascending order of
+     * trust. The first certificate in the chain is the one set by the
+     * client, the next is the one used to authenticate the first, and
+     * so on.
+     * </li>
+     * </ul>
+     *
+     * @param socket The Socket the request arrived on. This should be
+     * a javax.net.ssl.SSLSocket.
+     * @param request HttpRequest to be customised.
+     */
+    protected void customizeRequest(Socket socket,
+                                    HttpRequest request)
+    {
+        if (!(socket instanceof javax.net.ssl.SSLSocket))
+            return; // I'm tempted to let it throw an exception...
+
+        try
+        {
+            SSLSocket sslSocket = (SSLSocket) socket;
+            SSLSession sslSession = sslSocket.getSession();
+	    String cipherSuite = sslSession.getCipherSuite();
+	    Integer keySize;
+	    X509Certificate[] certs;
+
+	    CachedInfo cachedInfo
+		= (CachedInfo) sslSession.getValue(CACHED_INFO_ATTR);
+	    if (cachedInfo != null)
+	    {
+		keySize = cachedInfo.getKeySize();
+		certs = cachedInfo.getCerts();
+	    }
+	    else
+	    {
+		keySize = new Integer(ServletSSL.deduceKeyLength(cipherSuite));
+		certs = getCertChain(sslSession);
+		cachedInfo = new CachedInfo(keySize, certs);
+		sslSession.putValue(CACHED_INFO_ATTR, cachedInfo);
+	    }
+
+	    if (certs != null)
+		request.setAttribute("javax.servlet.request.X509Certificate",
+				     certs);
+	    else if (_needClientAuth) // Sanity check
+		throw new HttpException(HttpResponse.__403_Forbidden);
+		
+            request.setAttribute("javax.servlet.request.cipher_suite",
+				 cipherSuite);
+	    request.setAttribute("javax.servlet.request.key_size",
+				 keySize);
+        }
+        catch (Exception e)
+        {
+            Code.warning(e);
+        }
+    }
+
+    /**
+     * Return the chain of X509 certificates used to negotiate the SSL
+     * Session.
+     *<p> Note: in order to do this we must 
+     * convert a javax.security.cert.X509Certificate[], as used
+     * by JSSE to a java.security.cert.X509Certificate[],as required
+     * by the Servlet specs.
+     * @param sslSession the javax.net.ssl.SSLSession to use as
+     * the source of the cert chain.
+     * @return the chain of java.security.cert.X509Certificates
+     *  used to negotiate the SSL connection.
+     *  <br>Will be null if the chain is missing or empty.
+     */
+    private static X509Certificate[]
+	getCertChain(SSLSession sslSession)
+    {
+	try {
+	    javax.security.cert.X509Certificate javaxCerts[]
+		= sslSession.getPeerCertificateChain();
+	    if (javaxCerts == null || javaxCerts.length == 0)
+		return null;
+
+	    int length = javaxCerts.length;
+	    X509Certificate[] javaCerts
+		= new X509Certificate[length];
+	    
+	    java.security.cert.CertificateFactory cf =
+		java.security.cert.CertificateFactory.getInstance("X.509");
+	    for (int i = 0; i < length; i++)
+	    {
+		byte bytes[] = javaxCerts[i].getEncoded();
+		ByteArrayInputStream stream =
+		    new ByteArrayInputStream(bytes);
+		javaCerts[i] = (X509Certificate)
+		    cf.generateCertificate(stream);
+	    }
+
+	    return javaCerts;
+	} catch (SSLPeerUnverifiedException pue) {
+	    return null;
+        } catch (Exception e) {
+	    Code.warning(e);
+            return null;
+        }
+    }
+
+    /**
+     * Simple bundle of information that is cached in the SSLSession.
+     * Stores the effective keySize and the client certificate chain.
+     */
+    private class CachedInfo
+    {
+	private Integer _keySize;
+	private X509Certificate[] _certs;
+
+	CachedInfo(Integer keySize, X509Certificate[] certs)
+	{
+	    this._keySize = keySize;
+	    this._certs = certs;
+	}
+
+	Integer getKeySize()
+	{
+	    return _keySize;
+	}
+
+	X509Certificate[] getCerts()
+	{
+	    return _certs;
+	}
     }
 }
