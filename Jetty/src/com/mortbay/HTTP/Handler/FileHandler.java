@@ -267,6 +267,9 @@ public class FileHandler extends NullHandler
                                           indexFiles.elementAt(i));
                     if (index.isFile())
                     {
+			// Check modified dates
+			if (!checkGetHeader(request,response,index))
+			    return;
                         sendFile(request,response,filename,index);
                         indexSent=true;
                         break;

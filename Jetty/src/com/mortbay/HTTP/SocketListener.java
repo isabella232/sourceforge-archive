@@ -89,13 +89,10 @@ public class SocketListener
         try
         {
             Log.event("Accepted "+socket);
-            ChunkableInputStream in  =
-                new ChunkableInputStream(socket.getInputStream());
-            ChunkableOutputStream out =
-                new ChunkableOutputStream(socket.getOutputStream());
-
             HttpConnection connection =
-                new HttpConnection(this,socket.getInetAddress(),in,out);
+                new HttpConnection(this,socket.getInetAddress(),
+				   socket.getInputStream(),
+				   socket.getOutputStream());
             connection.handle();
         }
         catch ( Exception e ){

@@ -289,24 +289,29 @@ public class ChunkableOutputStream extends FilterOutputStream
         
         if (Code.verbose())
             Code.debug("endChunking()");
+        try
+	{
+	    flush();
+	    
+	    notify(OutputObserver.__CLOSING);
         
-        flush();
-        
-        notify(OutputObserver.__CLOSING);
-        
-        // send last chunk and revert to normal output
-        Writer writer = getRawWriter();
-        writer.write(__CHUNK_EOF);
+	    // send last chunk and revert to normal output
+	    Writer writer = getRawWriter();
+	    writer.write(__CHUNK_EOF);
 	
-        if (_trailer!=null)
-            _trailer.write(writer);
-        else
-            writer.write(__CRLF);
-        writeRawWriter();
-	_realOut.flush();
-        _chunking=false;
-        resetStream();
-        notify(OutputObserver.__CLOSED);
+	    if (_trailer!=null)
+		_trailer.write(writer);
+	    else
+		writer.write(__CRLF);
+	    writeRawWriter();
+	    _realOut.flush();
+        }
+	finally
+	{
+	    _chunking=false;
+	    resetStream();
+	    notify(OutputObserver.__CLOSED);
+	}
     }
     
     /* ------------------------------------------------------------ */
@@ -441,30 +446,35 @@ public class ChunkableOutputStream extends FilterOutputStream
             if (!_committed)
                 notify(OutputObserver.__COMMITING);
 
-            // If output has not been nulled by HEAD
-            if (!_nulled)
-            {
-                if (_chunking)
-                {
-                    Writer writer=getRawWriter();
-                    String size = Integer.toString(_buffer.size(),16);
-                    writer.write(size);
-                    writer.write(';');
-                    writer.write(__CRLF);
-                    writeRawWriter();
-                    _buffer.writeTo(_realOut);
-                    _realOut.write(__CRLF_B);
-                }
-                else
-                {
-                    _buffer.writeTo(_realOut);
-                }
-                _realOut.flush();
-            }
-            _buffer.reset();
-            if (!_committed)
+	    try
+	    {
+		// If output has not been nulled by HEAD
+		if (!_nulled)
+		{
+		    if (_chunking)
+		    {
+			Writer writer=getRawWriter();
+			String size = Integer.toString(_buffer.size(),16);
+			writer.write(size);
+			writer.write(';');
+			writer.write(__CRLF);
+			writeRawWriter();
+			_buffer.writeTo(_realOut);
+			_realOut.write(__CRLF_B);
+		    }
+		    else
+		    {
+			_buffer.writeTo(_realOut);
+		    }
+		    _realOut.flush();
+		}
+	    }
+	    finally
+	    {
+		_buffer.reset();
                 notify(OutputObserver.__COMMITED);
-            _committed=true;
+		_committed=true;
+	    }
         }
     }
 

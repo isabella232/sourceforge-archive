@@ -56,7 +56,11 @@ public class HttpConnection
     {
         _listener=listener;
         _remoteAddr=remoteAddr;
+	if (in instanceof ChunkableInputStream)
+	    throw new IllegalArgumentException("InputStream is already chunkable");
         _inputStream=new ChunkableInputStream(in);
+	if (out instanceof ChunkableOutputStream)
+	    throw new IllegalArgumentException("OutputStream is already chunkable");
         _outputStream=new ChunkableOutputStream(out);
         _outputStream.addObserver(this);
     }
@@ -414,8 +418,7 @@ public class HttpConnection
             if (Code.debug())
                 Code.warning(e);
             else
-                // XXX    Code.warning(e.toString());
-                Code.warning(e);
+                Code.warning(e.toString());
             
             _persistent=false;
             if (!_outputStream.isCommitted())
