@@ -424,12 +424,6 @@ Headers   may be modified or OutputStream filters added. </li>
 <table border="0" width="70%" cellpadding="2" cellspacing="10">
    <tbody>
    <tr>
-   <td align="left" valign="top"><a href="/javadoc/org/mortbay/http/handler/NullHandler.html">
-       NullHandler</a></td>
-   <td align="left" valign="top">      An abstract base implementation of 
-the interface.</td>
-   </tr>
-   <tr>
    <td align="left" valign="top"><a href="/javadoc/org/mortbay/http/handler/ResourceHandler.html">
        ResourceHandler</a></td>
    <td align="left" valign="top">      Serve static content from the resource
@@ -440,6 +434,12 @@ the interface.</td>
    <td align="left" valign="top"><a href="/javadoc/org/mortbay/http/handler/SecurityHandler.html">
        SecurityHandler</a></td>
    <td align="left" valign="top">      Provide BASIC and FORM authentication.</td>
+   </tr>
+   <tr>
+   <td align="left" valign="top"><a href="/javadoc/org/mortbay/http/handler/ContentEncodingHandler.html">
+       ContentEncodingHandler</a></td>
+   <td align="left" valign="top">      Provides content encoding such as gzip and compress for requests and response content.
+    More efficient than the servlet filter implementation.</td>
    </tr>
    <tr>
    <td align="left" valign="top"><a href="/javadoc/org/mortbay/http/handler/HTAccessHandler.html">
@@ -462,6 +462,12 @@ the interface.</td>
    <td align="left" valign="top"><a href="/javadoc/org/mortbay/http/handler/ForwardHandler.html">
        ForwardHandler</a></td>
    <td align="left" valign="top">      Forward a request to another URL</td>
+   </tr>
+   <tr>
+   <td align="left" valign="top"><a href="/javadoc/org/mortbay/http/handler/NullHandler.html">
+       NullHandler</a></td>
+   <td align="left" valign="top">      An abstract base implementation of 
+the interface, used for to derive other handlers.</td>
    </tr>
          
   </tbody>   

@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-4.0.RC1 - wait for it....
+Jetty-4.0.RC1 - 06 March 2002
  + Added ContentEncodingHandler for compression.
  + Fixed filter vs forward bug.
  + Improved efficiency of quality list handling

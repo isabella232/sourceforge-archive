@@ -93,7 +93,10 @@
     </Call>
 
     <Call name="addHandler">
-      <Arg><New class="org.mortbay.http.handler.ContentEncodingHandler"></New></Arg>
+      <Arg><New class="org.mortbay.http.handler.ContentEncodingHandler">
+           <Call name="addPathSpec"><Arg>/images/*</Arg></Call>
+           <Set name="minimumLength">512</Set>
+      </New></Arg> 
     </Call>
 
     <Call name="addHandler">

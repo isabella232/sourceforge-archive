@@ -8,6 +8,19 @@ package org.mortbay.http;
 import java.util.Map;
 import org.mortbay.util.Code;
 
+/* ------------------------------------------------------------ */
+/** HTTP content and transfer encodings.
+ * This class or derivations of it, are used by the HttpServer to
+ * apply transer and content encodings to requests and responses.
+ *
+ * This implementation handles the identity, gzip and deflate
+ * encodings. The class can be specialized to handle more encodings
+ * and an instance registered with HttpServer.
+ *
+ * @see HttpServer
+ * @version 1.0 Wed Mar  6 2002
+ * @author Greg Wilkins (gregw)
+ */
 public class HttpEncoding
 {
     /* ------------------------------------------------------------ */
@@ -19,7 +32,7 @@ public class HttpEncoding
     }
     
     /* ------------------------------------------------------------ */
-    /** Enable transfer encodings.
+    /** Enable encodings on InputStream.
      * @param in 
      * @param coding Coding enumeration
      * @exception HttpException 
@@ -55,8 +68,7 @@ public class HttpEncoding
     }
     
     /* ------------------------------------------------------------ */
-    /** Enable a transfer encoding.
-     * Enable a transfer encoding on a ChunkableOutputStream.
+    /** Enable a encoding on a ChunkableOutputStream.
      * @param out
      * @param coding Coding name 
      * @param parameters Coding parameters or null

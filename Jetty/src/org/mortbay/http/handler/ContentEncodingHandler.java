@@ -19,13 +19,37 @@ import org.mortbay.http.HttpResponse;
 import org.mortbay.http.HttpEncoding;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.OutputObserver;
+import org.mortbay.http.PathMap;
 import org.mortbay.util.Code;
 
 /* ------------------------------------------------------------ */
-/** Handler to test TE transfer encoding.
- * If 'gzip' or 'deflate' is in the query string, the
- * response is given that transfer encoding
+/** Content Encoding Handler.
+ * This handler can perform decoding or encoding of the content for
+ * requests and responses.
  *
+ * Encodings supported are provided by an instance of the HttpEncoding
+ * class registered with the HttpServer instance. The default
+ * implementation understands identity, gzip and deflate.
+ *
+ * If an incoming request has a known content-encoding, then a input
+ * filter stream is inserted to decode the content and the
+ * content-ecoding header is removed so that subsequent filters or
+ * servlets will not attempt to decode again.
+ *
+ * If a request indicates that it will accept a known encoding, then
+ * an OutputObserver is attached to the responses output stream.  If
+ * at the time it is committing there is content within the size
+ * limits, then an output filter is attached and a content-encoding
+ * header inserted.    If a content-encoding header already exists,
+ * nothing is done as it is assume that a filter or serlvet has
+ * already performed the encoding.
+ *
+ * If path specification are added to the handler, then it is only
+ * triggered on requests with matching paths.
+ *
+ * It is far more efficient to use this handler than compression
+ * filters within webapplications.
+ * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -35,6 +59,7 @@ public class ContentEncodingHandler
 {
     private HttpEncoding _httpEncoding;
     private int _minimumLength=512;
+    private PathMap _pathMap;
     
     /* ------------------------------------------------------------ */
     public void initialize(HttpContext context)
@@ -54,6 +79,18 @@ public class ContentEncodingHandler
     {
         return _minimumLength;
     }
+
+    /* ------------------------------------------------------------ */
+    /** Add a PathSpecification.
+     * Restrict the actions of this handler to matching paths.
+     * @param pathSpec 
+     */
+    public void addPathSpec(String pathSpec)
+    {
+        if (_pathMap==null)
+            _pathMap=new PathMap();
+        _pathMap.put(pathSpec,pathSpec);
+    }
     
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,
@@ -62,9 +99,13 @@ public class ContentEncodingHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
+        // check path
+        if (_pathMap!=null && _pathMap.getMatch(pathInContext)==null)
+            return;
+
         // Handle request encoding
         String encoding=request.getField(HttpFields.__ContentEncoding);
-        if (encoding!=null)
+        if (encoding!=null && _httpEncoding.knownEncoding(encoding))
         {
             Map encodingParams=null;
             if (encoding.indexOf(";")>0)
@@ -100,6 +141,13 @@ public class ContentEncodingHandler
     }
     
     /* ------------------------------------------------------------ */
+    /** Output Notification Method.
+     * The COMMITING event notification is used to test and trigger
+     * output encoding.
+     * @param out The output stream.
+     * @param event The notified event.
+     * @param data The associated response object.
+     */
     public void outputNotify(ChunkableOutputStream out, int event, Object data)
     {
         switch (event)
@@ -144,8 +192,13 @@ public class ContentEncodingHandler
           default:
         }
     }
-    
 
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        return "ContentEncodingHandler>"+_minimumLength+
+            (_pathMap==null?"[]":(_pathMap.keySet().toString()));
+    }
 }
 
 
