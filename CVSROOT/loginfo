@@ -24,4 +24,4 @@
 #DEFAULT (echo ""; id; echo %s; date; cat) >> $CVSROOT/CVSROOT/commitlog
 # or
 #DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
-DEFAULT mail -s "[jetty-cvs] %{sVv}" gregw@mortbay.com
+DEFAULT mail -s "[jetty-cvs] %{sVv}" jetty-cvslog@lists.sourceforge.net
