@@ -10,21 +10,22 @@
 package com.mortbay.HTTP.Handler;
 import com.mortbay.HTTP.HandlerContext;
 
+import java.io.*;
+import java.net.*;
+
+
 import com.mortbay.HTTP.HttpException;
 import com.mortbay.HTTP.HttpFields;
 import com.mortbay.HTTP.HttpRequest;
 import com.mortbay.HTTP.HttpResponse;
 import com.mortbay.Util.*;
+import com.mortbay.Util.URI;
 
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.StringTokenizer;
-
-import java.io.*;
-import java.net.*;
-
 
 /* ------------------------------------------------------------ */
 /** Handler to authenticate access using the Apache's .htaccess files.
