@@ -77,9 +77,9 @@ the Ant optional tasks from:
     </path>
 
     <path id="classpath">
+      <path refid="extpath" />
       <pathelement path="${classes1.4}" />
       <pathelement path="${classes}" />
-      <path refid="extpath" />
     </path>
 
     <property name="expanded.classpath" refid="classpath"/>

@@ -93,6 +93,7 @@
         <include name="org/**/*.dtd" />
         <include name="org/**/*.xml" />
         <exclude name="org/mortbay/util/Frame.java" />
+        <exclude name="org/mortbay/util/Resource.java" />
         <exclude name="org/mortbay/util/FileResource.java" />
         <exclude name="org/mortbay/util/LoggerLogSink.java" />
         <exclude name="org/mortbay/http/handler/ProxyHandler.java" />
