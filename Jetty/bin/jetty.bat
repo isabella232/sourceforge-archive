@@ -165,7 +165,6 @@ if not x==x%CONFIG_LINES (
 
 :no_conf_jetty
 
-echo CONFIGS=%CONFIGS%
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Run the demo server if there's nothing else to run
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -176,16 +175,6 @@ if not x==x%CONFIGS% goto have_configs
 :have_configs
 echo CONFIGS=%CONFIGS%
 
-::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Check if the admin servlet was added.
-:: Add it if not.
-:: It will be needed to stop jetty cleanly.
-::::::::::::::::::::::::::::::::::::::::::::::::::::::
-::@TODO Find a way to do this !!!
-::HAS_ADMIN=`cat %CONFIGS% | grep "admin.xml"`
-::if ""="%HAS_ADMIN%" (
-::  set CONFIGS="%CONFIGS} ${JETTY_HOME%\etc\admin.xml"
-::)
 
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Check where logs should go.

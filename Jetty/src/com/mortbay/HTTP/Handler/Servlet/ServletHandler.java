@@ -150,6 +150,7 @@ public class ServletHandler extends NullHandler
     
     /* ----------------------------------------------------------------- */
     public synchronized void start()
+        throws Exception
     {        
         _context.setHandlerContext(getHandlerContext());
         
@@ -193,6 +194,8 @@ public class ServletHandler extends NullHandler
             ServletHolder holder = (ServletHolder)i.next();
             holder.destroy();
         }
+        if (_context!=null)
+            _context.stop();
         super.stop();
     }
     

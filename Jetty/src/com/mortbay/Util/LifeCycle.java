@@ -34,7 +34,8 @@ public interface LifeCycle
     /* ------------------------------------------------------------ */
     /** Start the LifeCycle.
      */
-    public void start();
+    public void start()
+        throws Exception;
     
     /* ------------------------------------------------------------ */
     /** Stop the LifeCycle.

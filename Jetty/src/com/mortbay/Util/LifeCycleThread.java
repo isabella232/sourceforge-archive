@@ -77,6 +77,7 @@ public abstract class LifeCycleThread implements LifeCycle, Runnable
     /** 
      */
     public synchronized void start()
+        throws Exception
     {
         if (_running)
         {

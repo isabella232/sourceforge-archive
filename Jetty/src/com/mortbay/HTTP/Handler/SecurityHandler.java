@@ -44,45 +44,30 @@ public class SecurityHandler extends NullHandler
     UserRealm _realm ;
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @return 
-     */
     public UserRealm getUserRealm()
     {        
         return _realm;
     }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @return 
-     */
     public String getRealmName()
     {        
         return _realmName;
     }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @param authRealm 
-     */
     public void setRealmName(String realmName)
     {
         _realmName=realmName;
     }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @return 
-     */
     public String getAuthMethod()
     {
         return _authMethod;
     }
     
     /* ------------------------------------------------------------ */
-    /** 
-     * @param authRealm 
-     */
     public void setAuthMethod(String method)
     {
         if (!__BASIC_AUTH.equals(method))
@@ -107,6 +92,7 @@ public class SecurityHandler extends NullHandler
 
     /* ------------------------------------------------------------ */
     public void start()
+        throws Exception
     {
         if (_realmName!=null && _realmName.length()>0)
         {

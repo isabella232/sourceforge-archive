@@ -144,7 +144,7 @@ public class Debug extends HttpServlet
                 if ("on".equals(request.getParameter("LSS"+s)))
                 {
                     if(!sinks[s].isStarted())
-                        sinks[s].start();
+                        try{sinks[s].start();}catch(Exception e){Code.warning(e);}
                 }
                 else
                 {

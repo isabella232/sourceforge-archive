@@ -17,6 +17,7 @@ import com.mortbay.Util.IO;
 import com.mortbay.Util.Resource;
 import com.mortbay.Util.StringUtil;
 import com.mortbay.Util.LifeCycle;
+import com.mortbay.Util.MultiException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -200,6 +201,13 @@ public class HandlerContext implements LifeCycle
         "zip","application/zip",
         "z","application/compress"
     };
+    
+    private final static Map __dftMimeMap = new HashMap();
+    static
+    {        
+        for (int i=0; i<__mimeType.length; i+=2)
+            __dftMimeMap.put(__mimeType[i],__mimeType[i+1]);
+    }
     
     final static String[] __encodings =
     {
@@ -914,12 +922,6 @@ public class HandlerContext implements LifeCycle
     /* ------------------------------------------------------------ */
     public synchronized Map getMimeMap()
     {
-        if (_mimeMap==null)
-        {
-            _mimeMap = new HashMap((__mimeType.length*3)/4);
-            for (int i=0; i<__mimeType.length; i+=2)
-                _mimeMap.put(__mimeType[i],__mimeType[i+1]);
-        }
         return _mimeMap;
     }
     
@@ -953,7 +955,10 @@ public class HandlerContext implements LifeCycle
                     break;
                 
                 String ext=StringUtil.asciiToLowerCase(filename.substring(i+1));
-                type = (String)_mimeMap.get(ext);
+                if (_mimeMap!=null)
+                    type = (String)_mimeMap.get(ext);
+                if (type==null)
+                    type=(String)__dftMimeMap.get(ext);
             }
         }
 
@@ -967,7 +972,9 @@ public class HandlerContext implements LifeCycle
      */
     public void setMimeMapping(String extension,String type)
     {
-        getMimeMap().put(extension,type);
+        if (_mimeMap==null)
+            _mimeMap=new HashMap();
+        _mimeMap.put(extension,type);
     }
 
     
@@ -1183,9 +1190,12 @@ public class HandlerContext implements LifeCycle
     /** Start all handlers then listeners.
      */
     public synchronized void start()
+        throws Exception
     {
         if (_httpServer==null)
             throw new IllegalStateException("No server for "+this);
+
+        MultiException mx = new MultiException();
         
         _started=true;
 
@@ -1231,13 +1241,15 @@ public class HandlerContext implements LifeCycle
             {
                 HttpHandler handler=(HttpHandler)handlers.next();
                 if (!handler.isStarted())
-                    handler.start();
+                    try{handler.start();}catch(Exception e){mx.add(e);}
             }
         }
         finally
         {
             thread.setContextClassLoader(lastContextLoader);
         }
+
+        mx.ifExceptionThrow();
     }
     
     /* ------------------------------------------------------------ */

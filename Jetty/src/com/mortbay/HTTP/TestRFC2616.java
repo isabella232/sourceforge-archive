@@ -129,7 +129,7 @@ public class TestRFC2616
     
     /* --------------------------------------------------------------- */
     public TestRFC2616()
-        throws IOException
+        throws Exception
     {
 	if (testFiles == null) {
 		docRoot = new File(defaultTestRoot);

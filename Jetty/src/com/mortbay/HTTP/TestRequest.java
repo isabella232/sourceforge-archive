@@ -243,6 +243,16 @@ public class TestRequest
             t.checkEquals(c.getMimeByExtension("blah/my.index.html"),"text/html","index.html");
             t.checkEquals(c.getMimeByExtension("blah/my.style.css"),"text/css","index.html");
             t.checkEquals(c.getMimeByExtension("blah/my.doc.pdf"),"application/pdf","index.html");
+            
+            t.checkEquals(c.getMimeByExtension("index.HTML"),"text/html","index.html");
+            t.checkEquals(c.getMimeByExtension("style.CSS"),"text/css","index.html");
+            t.checkEquals(c.getMimeByExtension("doc.PDF"),"application/pdf","index.html");
+            t.checkEquals(c.getMimeByExtension("blah/index.htMl"),"text/html","index.html");
+            t.checkEquals(c.getMimeByExtension("blah/style.cSs"),"text/css","index.html");
+            t.checkEquals(c.getMimeByExtension("blah/doc.pDf"),"application/pdf","index.html");
+            t.checkEquals(c.getMimeByExtension("blah/my.index.Html"),"text/html","index.html");
+            t.checkEquals(c.getMimeByExtension("blah/my.style.Css"),"text/css","index.html");
+            t.checkEquals(c.getMimeByExtension("blah/my.doc.Pdf"),"application/pdf","index.html");
         }
         catch(Exception e)
         {

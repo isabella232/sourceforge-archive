@@ -77,6 +77,8 @@ $Id$
     <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml/</Arg>
   </Call>
 
+  <Set name="ChunkingForced" type="boolean">false</Set>
+
   <Call name="addContext">
     <Arg>/</Arg>
     <Set name="ClassPath"><SystemProperty name="jetty.home" default="."/>/servlets/</Set>
@@ -95,6 +97,9 @@ $Id$
       <Arg>JSP</Arg>
       <Arg>*.jsp,*.jsP,*.jSp,*.jSP,*.Jsp,*.JsP,*.JSp,*.JSP</Arg>
       <Arg>org.apache.jasper.servlet.JspServlet</Arg>
+    </Call>
+    <Call name="getResourceHandler">
+      <Set name="AcceptRanges" type="boolean">false</Set>
     </Call>
   </Call>
 

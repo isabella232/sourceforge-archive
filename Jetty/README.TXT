@@ -388,3 +388,25 @@ SASL Authentication
 -------------------
 A SASL listener is included in the Jetty3Extra release
 
+
+PDF and Adobe Acrobat support
+-----------------------------
+Adobe Acrobat pluggin for IE has a problem handling chunked content and the
+partial implementation of ranges supported by Jetty.  If you are serving
+PDF files from Jetty, then you will need to configure the HttpServer to
+not force chunking and the ResourceHandler to not accept ranges:
+
+<Configure  class="com.mortbay.HTTP.HttpServer">
+  ...
+  <Set name="ChunkingForced" type="boolean">false</Set>
+  ...
+   
+  <Call name="addWebApplication">
+      ...
+      <Call name="getResourceHandler">
+         <Set name="AcceptRanges" type="boolean">false</Set>
+      </Call>
+  </Call>
+  ...
+</Configure>
+

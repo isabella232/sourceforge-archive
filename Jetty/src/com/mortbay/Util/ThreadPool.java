@@ -10,6 +10,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.lang.reflect.InvocationTargetException;
 
 /* ------------------------------------------------------------ */
 /** A pool of threads.
@@ -280,6 +281,7 @@ public class ThreadPool
      * Construct the minimum number of threads.
      */
     synchronized public void start()
+        throws Exception
     {
         getName();
         if (_running)
@@ -402,29 +404,15 @@ public class ThreadPool
     /* Start a new Thread.
      */
     private synchronized void newThread()
+        throws InvocationTargetException,IllegalAccessException,InstantiationException
     {
-        try
-        {
-            Runnable runner = new PoolThreadRunnable();
-            Object[] args = {runner};
-            Thread thread=
-                (Thread)_constructThread.newInstance(args);
-            thread.setName(_name+"-"+(_threadId++));
-            _threadSet.add(thread);
-            thread.start();
-        }
-        catch( java.lang.reflect.InvocationTargetException e )
-        {
-            Code.fail(e);
-        }
-        catch( IllegalAccessException e )
-        {
-            Code.fail(e);
-        }
-        catch( InstantiationException e )
-        {
-            Code.fail(e);
-        }
+        Runnable runner = new PoolThreadRunnable();
+        Object[] args = {runner};
+        Thread thread=
+            (Thread)_constructThread.newInstance(args);
+        thread.setName(_name+"-"+(_threadId++));
+        _threadSet.add(thread);
+        thread.start();
     }
     
   
@@ -492,7 +480,7 @@ public class ThreadPool
         throws InterruptedException
     {
         if (!_running)
-            start();
+            throw new IllegalStateException("Not started");
         
         if (job==null)
         {
@@ -584,7 +572,8 @@ public class ThreadPool
                                 _running &&
                                 job!=null &&
                                 _threadSet.size()<_maxThreads)
-                                newThread();
+                                try{newThread();}
+                                catch(Exception e){Code.warning(e);}
                         }
                     }
 

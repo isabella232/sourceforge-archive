@@ -113,18 +113,25 @@ public class Service
     
     /* ------------------------------------------------------------ */
     private static void startAll()
-    { 
-        if (_configs!=null)
+    {
+        try
         {
-            synchronized(_configs)
+            if (_configs!=null)
             {
-                for(int i=0;i<_servers.size();i++)
+                synchronized(_configs)
                 {
-                    HttpServer server = (HttpServer)_servers.get(i);
-                    if (!server.isStarted())
-                        server.start();
+                    for(int i=0;i<_servers.size();i++)
+                    {
+                        HttpServer server = (HttpServer)_servers.get(i);
+                        if (!server.isStarted())
+                            server.start();
+                    }
                 }
             }
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
         }
     }
     

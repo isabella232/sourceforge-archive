@@ -682,10 +682,14 @@ public class HttpConnection
             {
               case 1:
                   {
-                      _response.removeField(HttpFields.__ContentLength);
-                      _response.setField(HttpFields.__TransferEncoding,
+                      if (_response.getField(HttpFields.__ContentLength)==null ||
+                         _listener.getHttpServer().isChunkingForced())
+                      {
+                          _response.removeField(HttpFields.__ContentLength);
+                          _response.setField(HttpFields.__TransferEncoding,
                                          HttpFields.__Chunked);
-                      _outputStream.setChunking();
+                          _outputStream.setChunking();
+                      }
                       break;
                   }
               case 0:

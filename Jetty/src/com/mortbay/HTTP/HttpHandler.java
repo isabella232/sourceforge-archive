@@ -29,7 +29,8 @@ public interface HttpHandler extends LifeCycle
     /** Start the handler.
      * All requests are ignored until start is called.
      */
-    public void start();
+    public void start() throws Exception;
+    
     
     /* ------------------------------------------------------------ */
     /** Stop the handler.

@@ -289,16 +289,16 @@ abstract public class ThreadedServer extends ThreadPool
   		else
   		    socket.setSoLinger(false,0);
   	    }
-            catch ( Exception e ){Code.ignore(e);}
+            catch(Exception e){Code.ignore(e);}
             
             handleConnection(socket); 
 
         }
-        catch ( Exception e ){Code.warning("Connection problem",e);}
+        catch(Exception e){Code.warning("Connection problem",e);}
         finally
         {
             try {socket.close();}
-            catch ( Exception e ){Code.warning("Connection problem",e);}
+            catch(Exception e){Code.warning("Connection problem",e);}
         }
     }
     
@@ -353,7 +353,7 @@ abstract public class ThreadedServer extends ThreadPool
                 s.setSoTimeout(_maxReadTimeMs);
             return s;
         }
-        catch ( java.net.SocketException e )
+        catch(java.net.SocketException e)
         {
             // XXX - this is caught and ignored due strange
             // exception from linux java1.2.v1a
@@ -389,6 +389,7 @@ abstract public class ThreadedServer extends ThreadPool
     /* Start the ThreadedServer listening
      */
     synchronized public void start()
+        throws Exception
     {
         if (isStarted())
         {
@@ -396,30 +397,23 @@ abstract public class ThreadedServer extends ThreadPool
             return;
         }
 
-        try
+        _listen=newServerSocket(_address,
+                                getMaxThreads()>0?(getMaxThreads()+1):50);
+        if (_address==null)
+            _address=new InetAddrPort(_listen.getInetAddress(),_listen.getLocalPort());
+        else
         {
-            _listen=newServerSocket(_address,
-                                    getMaxThreads()>0?(getMaxThreads()+1):50);
-            if (_address==null)
-                _address=new InetAddrPort(_listen.getInetAddress(),_listen.getLocalPort());
-            else
-            {
-                if(_address.getInetAddress()==null)
-                    _address.setInetAddress(_listen.getInetAddress());
-                if(_address.getPort()==0)
-                    _address.setPort(_listen.getLocalPort());
-            }
-            
-            _soTimeOut=getMaxIdleTimeMs();
-            if (_soTimeOut>0)
-                _listen.setSoTimeout(_soTimeOut);
-            
-            super.start();
+            if(_address.getInetAddress()==null)
+                _address.setInetAddress(_listen.getInetAddress());
+            if(_address.getPort()==0)
+                _address.setPort(_listen.getLocalPort());
         }
-        catch(IOException e)
-        {
-            Code.warning(e);
-        }        
+        
+        _soTimeOut=getMaxIdleTimeMs();
+        if (_soTimeOut>0)
+            _listen.setSoTimeout(_soTimeOut);
+        
+        super.start();
     }
 
     /* --------------------------------------------------------------- */

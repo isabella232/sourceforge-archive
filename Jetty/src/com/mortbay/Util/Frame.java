@@ -106,6 +106,7 @@ public class Frame
     {   
         // Extract stack components, after we look for the Frame constructor
  	// itself and pull that off the stack!
+        _lineStart = 0;
  	_lineStart = _stack.indexOf("Frame.<init>(",_lineStart);
         _lineStart = _stack.indexOf(__lineSeparator,_lineStart)+
  	    __lineSeparatorLen;

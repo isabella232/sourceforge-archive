@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.ConcurrentModificationException;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
@@ -32,7 +33,6 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionContext;
-
 
 /* --------------------------------------------------------------------- */
 /** Jetty Servlet Context.
@@ -445,7 +445,7 @@ public class Context implements ServletContext, HttpSessionContext
     }
 
     /* ------------------------------------------------------------ */
-    public HttpSession newSession()
+    public synchronized HttpSession newSession()
     {
         HttpSession session = new Session();
         session.setMaxInactiveInterval(_dftMaxIdleSecs);
@@ -473,21 +473,30 @@ public class Context implements ServletContext, HttpSessionContext
     {
         _dftMaxIdleSecs = timeoutMinutes*60;;
 
+        // Adjust scavange delay to 25% of timeout
+        scavengeDelay=_dftMaxIdleSecs*250;
+        if (scavengeDelay>60000)
+            scavengeDelay=60000;
+        
         // Start the session scavenger if we haven't already
         if (_scavenger == null)
             _scavenger = new SessionScavenger();
     }
 
+    /* ------------------------------------------------------------ */
+    public void stop()
+    {
+        if (_scavenger!=null)
+            _scavenger.interrupt();
+        _scavenger=null;
+    }
+    
     /* -------------------------------------------------------------- */
     /** Find sessions that have timed out and invalidate them.
      *  This runs in the SessionScavenger thread.
      */
-    private synchronized void scavenge()
+    private void scavenge()
     {
-        // Set our priority high while we have the sessions locked
-        int oldPriority = Thread.currentThread().getPriority();
-        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-
         long now = System.currentTimeMillis();
 
         // Since Hashtable enumeration is not safe over deletes,
@@ -495,15 +504,33 @@ public class Context implements ServletContext, HttpSessionContext
         ArrayList staleSessions = null;
 
         // For each session
-        for (Iterator i = _sessions.values().iterator(); i.hasNext(); )
+        try
         {
-            Session session = (Session)i.next();
-            long idleTime = session.maxIdleMillis;
-            if (idleTime > 0 && session.accessed + idleTime < now) {
-                // Found a stale session, add it to the list
-                if (staleSessions == null)
-                    staleSessions = new ArrayList(5);
-                staleSessions.add(session);
+            for (Iterator i = _sessions.values().iterator(); i.hasNext(); )
+            {
+                Session session = (Session)i.next();
+                long idleTime = session.maxIdleMillis;
+                if (idleTime > 0 && session.accessed + idleTime < now) {
+                    // Found a stale session, add it to the list
+                    if (staleSessions == null)
+                        staleSessions = new ArrayList(5);
+                    staleSessions.add(session);
+                }
+            }
+        }
+        catch(ConcurrentModificationException e)
+        {
+            Code.ignore(e);
+            // Oops something changed while we were looking.
+            // Lock the context and try again.
+            // Set our priority high while we have the sessions locked
+            int oldPriority = Thread.currentThread().getPriority();
+            Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
+            synchronized(this)
+            {
+                staleSessions=null;
+                scavenge();
+                Thread.currentThread().setPriority(oldPriority);
             }
         }
 
@@ -514,8 +541,6 @@ public class Context implements ServletContext, HttpSessionContext
                 ((Session)staleSessions.get(i)).invalidate();
             }
         }
-
-        Thread.currentThread().setPriority(oldPriority);
     }
 
     /* ------------------------------------------------------------ */
@@ -526,7 +551,7 @@ public class Context implements ServletContext, HttpSessionContext
     
     /* ------------------------------------------------------------ */
     // how often to check - XXX - make this configurable
-    final static int scavengeDelay = 30000;
+    private int scavengeDelay = 30000;
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -538,8 +563,10 @@ public class Context implements ServletContext, HttpSessionContext
             while (true) {
                 try {
                     sleep(scavengeDelay);
-                } catch (InterruptedException ex) {}
-                Context.this.scavenge();
+                    Context.this.scavenge();
+                }
+                catch (InterruptedException ex) { break; }
+                catch (Exception ex) {Code.warning(ex);}
             }
         }
 
@@ -638,7 +665,7 @@ public class Context implements ServletContext, HttpSessionContext
             throws IllegalStateException
         {
             if (invalid) throw new IllegalStateException();
-
+            
             Iterator iter = _values.keySet().iterator();
             while (iter.hasNext())
             {
@@ -647,7 +674,10 @@ public class Context implements ServletContext, HttpSessionContext
                 iter.remove();
                 unbindValue(key, value);
             }
-            Context.this._sessions.remove(id);
+            synchronized (Context.this)
+            {
+                Context.this._sessions.remove(id);
+            }
             invalid=true;
         }
 

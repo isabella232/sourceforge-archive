@@ -68,6 +68,7 @@ abstract public class NullHandler implements HttpHandler
     
     /* ----------------------------------------------------------------- */
     public void start()
+        throws Exception
     {
         if (_context==null)
             throw new IllegalStateException("No context for "+this);        

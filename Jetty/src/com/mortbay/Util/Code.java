@@ -69,6 +69,8 @@ public class Code
     /*-------------------------------------------------------------------*/
     private static final String __lock="LOCK";
     private static final Class[] __noArgs=new Class[0];
+    private static final String[] __nestedEx =
+        {"getTargetException","getTargetError","getException"};
 
     /*-------------------------------------------------------------------*/
     /** Shared static instances, reduces object creation at expense
@@ -1026,55 +1028,49 @@ public class Code
                 synchronized(__writerBuffer)
                 {
                     __writerBuffer.setLength(0);
-                    while(ex!=null)
-                    {
-                        ex.printStackTrace(__out);
-
-                        try
-                        {
-                            Method getTargetException =
-                                ex.getClass().getMethod("getTargetException",__noArgs);
-                            ex=(Throwable)
-                                getTargetException.invoke(ex,null);
-                            __out.println("Target Exception:");
-                            continue;
-                        }
-                        catch(Exception ignore){}
-                        
-                        try
-                        {
-                            Method getTargetException =
-                                ex.getClass().getMethod("getTargetError",__noArgs);
-                            ex=(Throwable)
-                                getTargetException.invoke(ex,null);
-                            __out.println("Target Error:");
-                            continue;
-                        }
-                        catch(Exception ignore){}
-                        
-                        try
-                        {
-                            Method getException =
-                                ex.getClass().getMethod("getException",__noArgs);
-                            ex=(Throwable)
-                                getException.invoke(ex,null);
-                            __out.println("Exception:");
-                            continue;
-                        }
-                        catch(Exception ignore){}
-                        
-                        ex=null;
-                    }
-                
-                __out.flush();
-                buf.append(__writerBuffer.toString());
+                    expandThrowable(ex);
+                    __out.flush();
+                    buf.append(__writerBuffer.toString());
                 }
             }
         }
         else
             buf.append(o.toString());   
     }
-    
+
+    /* ------------------------------------------------------------ */
+    private static void expandThrowable(Throwable ex)
+    {
+        ex.printStackTrace(__out);
+
+        if (ex instanceof MultiException)
+        {
+            MultiException mx = (MultiException)ex;
+            
+            for (int i=0;i<mx.size();i++)
+            {
+                __out.println("getException("+i+"):");
+                ex=mx.getException(i);
+                expandThrowable(ex);
+            }
+        }
+        else
+        {
+            for (int i=0;i<__nestedEx.length;i++)
+            {
+                try
+                {
+                    Method getTargetException =
+                        ex.getClass().getMethod(__nestedEx[i],__noArgs);
+                    ex=(Throwable)
+                        getTargetException.invoke(ex,null);
+                    __out.println(__nestedEx[i]+"():");
+                    expandThrowable(ex);
+                }
+                catch(Exception ignore){}
+            }
+        }
+    }
     
     /*-------------------------------------------------------------------*/
     private static String formatThrowable(String msg,Throwable ex)

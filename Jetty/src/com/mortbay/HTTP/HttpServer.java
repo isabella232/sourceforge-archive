@@ -13,6 +13,7 @@ import com.mortbay.Util.InetAddrPort;
 import com.mortbay.Util.LifeCycle;
 import com.mortbay.Util.Log;
 import com.mortbay.Util.LogSink;
+import com.mortbay.Util.MultiException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -72,6 +73,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     private HashMap _hostMap = new HashMap(3);
     
     private HandlerContext _notFoundContext=null;
+    private boolean _chunkingForced=true;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -106,7 +108,10 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     /** Start all handlers then listeners.
      */
     public synchronized void start()
+        throws Exception
     {
+        MultiException mex = new MultiException();
+        
         if (Code.verbose(99))
         {
             Code.debug("LISTENERS: ",_listeners);
@@ -114,14 +119,15 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
         }   
 
         if (_logSink!=null)
-            _logSink.start();
+            try{_logSink.start();}catch(Exception e){mex.add(e);}
+        
         
         Iterator contexts = getHandlerContexts().iterator();
         while(contexts.hasNext())
         {
             HandlerContext context=(HandlerContext)contexts.next();
             if (!context.isStarted())
-                context.start();
+                try{context.start();}catch(Exception e){mex.add(e);}
         }
         
         Iterator listeners = getListeners().iterator();
@@ -130,8 +136,10 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
             HttpListener listener =(HttpListener)listeners.next();
             listener.setHttpServer(this);
             if (!listener.isStarted())
-                listener.start();
+                try{listener.start();}catch(Exception e){mex.add(e);}
         }
+
+        mex.ifExceptionThrow();
     }
     
     /* ------------------------------------------------------------ */
@@ -664,6 +672,23 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     {
         if (_logSink!=null)
         {
+            add(logSink);
+            if(isStarted())
+            {
+                try
+                {
+                    _logSink.start();
+                }
+                catch(Exception e)
+                {
+                    Code.warning(e);
+                    return;
+                }
+            }
+        }
+        
+        if (_logSink!=null)
+        {
             try{
                 remove(_logSink);
                 _logSink.stop();
@@ -679,13 +704,6 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
         }	
             
         _logSink=logSink;
-        
-        if (_logSink!=null)
-        {
-            add(logSink);
-            if(isStarted())
-                _logSink.start();
-        }
     }
     
     /* ------------------------------------------------------------ */
@@ -775,8 +793,7 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
                 _notFoundContext=addContext(null,"/");
                 Log.event("Adding NotFoundHandler to "+_notFoundContext);
                 _notFoundContext.addHandler(new NotFoundHandler());
-                _notFoundContext.start();
-               
+                try{_notFoundContext.start();}catch(Exception e){Code.warning(e);}
             }
             if (!_notFoundContext.handle(request,response))
                 response.sendError(response.__404_Not_Found);
@@ -961,5 +978,22 @@ public class HttpServer extends BeanContextSupport implements LifeCycle
     Map getHostMap()
     {
         return _hostMap;
-    }    
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean isChunkingForced()
+    {
+        return _chunkingForced;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set Chunking Forced.
+     * @param forced If true, chunking is used for all HTTP/1.1
+     * responses, even if a content-length was known.
+     */
+    public void setChunkingForced(boolean forced)
+    {
+         _chunkingForced=forced;
+    }
+    
 }

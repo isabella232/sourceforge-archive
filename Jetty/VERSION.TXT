@@ -1,15 +1,20 @@
 Jetty Versions
 --------------
- 
+
+Jetty-3.1.rc2 - 30 Mar 2001
+ + Lifecycle.start() may throw Exception
+ + Added MultiException to throw multiple nested exceptions. 
  + Improved logging of nested exceptions.
+ + Only one instance of default MIME map.
  + Use reference JAXP1.1 for XML parsing.
  + Version 1.1 of configuration dtd supports New objects.
  + Improved handling of Primitive classes in XmlConfig
  + Renamed getConnection to getHttpConnection
  + fixed getLocales handling of quality params
  + fixed getParameter(name) handling for multiple values.
+ + added options to turn off ranges and chunking to support acrobat requests.
 
-Jetty-3.1.rc1 - 18 Mar 2001y
+Jetty-3.1.rc1 - 18 Mar 2001
  + Moved JMX and SASL handling to Jetty3Extra release
  + Fixed problem with ServletContext.getContext(uri)
  + Added Jetty documentation pages from JettyWiki

@@ -51,7 +51,8 @@ public class ResourceHandler extends NullHandler
     private int _maxCachedFileSize =40960;
     private Resource _baseResource=null;
     private boolean _handleGeneralOptionsQuery=true;
- 
+    private boolean _acceptRanges=false;
+    
     /* ------------------------------------------------------------ */
     List _indexFiles =new ArrayList(2);
     {
@@ -91,7 +92,19 @@ public class ResourceHandler extends NullHandler
     {
         _delAllowed = delAllowed;
     }
- 
+
+    /* ------------------------------------------------------------ */
+    public boolean isAcceptRanges()
+    {
+        return _acceptRanges;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setAcceptRanges(boolean ar)
+    {
+        _acceptRanges=ar;
+    }
+    
     /* ------------------------------------------------------------ */
     public List getIndexFiles()
     {
@@ -159,23 +172,16 @@ public class ResourceHandler extends NullHandler
  
     /* ----------------------------------------------------------------- */
     public synchronized void start()
+        throws Exception
     {
-        try
-        {
-            _baseResource=getHandlerContext().getBaseResource();
-
-            Log.event("ResourceHandler started in "+ _baseResource);
-            _mostRecentlyUsed=null;
-            _leastRecentlyUsed=null;
-            if (_maxCachedFiles>0 && _maxCachedFileSize>0)
-                _cacheMap=new HashMap();
-            super.start();
-        }
-        catch(Exception e)
-        {
-            Code.warning(e);
-            throw new Error(e.toString());
-        }
+        _baseResource=getHandlerContext().getBaseResource();
+        
+        Log.event("ResourceHandler started in "+ _baseResource);
+        _mostRecentlyUsed=null;
+        _leastRecentlyUsed=null;
+        if (_maxCachedFiles>0 && _maxCachedFileSize>0)
+            _cacheMap=new HashMap();
+        super.start();
     }
  
     /* ----------------------------------------------------------------- */
@@ -974,7 +980,8 @@ public class ResourceHandler extends NullHandler
             if (length != -1) 
                 response.setIntField(HttpFields.__ContentLength, (int) count);
             response.setDateField(HttpFields.__LastModified,resource.lastModified());
-            response.setField(HttpFields.__AcceptRanges,"bytes");
+            if (_acceptRanges)
+                response.setField(HttpFields.__AcceptRanges,"bytes");
         }
 
         public void requestDone()
@@ -1125,7 +1132,9 @@ public class ResourceHandler extends NullHandler
             if (count != -1)
                  response.setIntField(HttpFields.__ContentLength, (int) count);
             response.setDateField(HttpFields.__LastModified,lastModified);
-            response.setField(HttpFields.__AcceptRanges,"bytes");
+
+            if (_acceptRanges)
+                response.setField(HttpFields.__AcceptRanges,"bytes");
         }
 
         /* ------------------------------------------------------------ */

@@ -66,6 +66,7 @@ public class SocketListener
 
     /* --------------------------------------------------------------- */
     public void start()
+        throws Exception
     {
         super.start();
         Log.event("Started SocketListener on "+getInetAddrPort());

@@ -22,7 +22,15 @@ public class IO extends ThreadPool
     public static int bufferSize = 8192;
     
     /* ------------------------------------------------------------------- */
-    private static class Singleton {static final IO __instance=new IO();}
+    private static class Singleton {
+        static final IO __instance=new IO();
+        static
+        {
+            try{__instance.start();}
+            catch(Exception e){Code.fail(e);}
+        }
+    }
+    
     public static IO instance()
     {
         return Singleton.__instance;
