@@ -238,6 +238,8 @@ public class HttpTests
             pm.put("/bbb/*.b","/bbb/*.b");
             pm.put("/bbb/xxx.b","/bbb/xxx.b");
             pm.put("/ccc/*.c","/ccc/*.c");
+	    pm.put("|","|");
+	    
             
             test.checkEquals(pm.longestMatch("/aaa"),"/aaa%","/aaa==/aaa%");
             test.checkEquals(pm.longestMatch("/aaa.a"),"*.a","/aaa.a==*.a");
@@ -248,7 +250,8 @@ public class HttpTests
             test.checkEquals(pm.longestMatch("/bbb/bbb.b"),"/bbb/*.b","/aaa/bbb.b==/bbb/*.b");
             test.checkEquals(pm.longestMatch("/bbb/xxx.b"),"/bbb/xxx.b","/aaa/xxx.b==/bbb/xxx.b");
             test.checkEquals(pm.longestMatch("anything"),"*","anything==*");
-            
+            test.checkEquals(pm.longestMatch("/"),"|","/==|");
+            test.checkEquals(pm.longestMatch("/acdefg"),"*","/abcdefg==*");
         }
         catch(Exception e)
         {
