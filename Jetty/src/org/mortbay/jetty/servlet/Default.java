@@ -458,22 +458,34 @@ public class Default extends HttpServlet
             response.sendError(HttpResponse.__403_Forbidden);
             return;
         }
-        
+
         Code.debug("sendDirectory: "+resource);
-        String base = URI.addPaths(request.getRequestURI(),"/");
-        ByteArrayISO8859Writer dir = _httpContext
-            .getDirectoryListing(resource,base,parent);
-        if (dir==null)
+
+        byte[] data=null;
+        if (resource instanceof CachedResource)
+            data=((CachedResource)resource).getCachedData();
+        
+        if (data==null)
         {
-            response.sendError(HttpResponse.__403_Forbidden,
-                               "No directory");
-            return;
+            String base = URI.addPaths(request.getRequestURI(),"/");
+            ByteArrayISO8859Writer dir = _httpContext
+                .getDirectoryListing(resource,base,parent);
+            if (dir==null)
+            {
+                response.sendError(HttpResponse.__403_Forbidden,
+                                   "No directory");
+                return;
+            }
+            data=dir.getBuf();
+            if (resource instanceof CachedResource)
+                ((CachedResource)resource).setCachedData(data);
         }
+        
         response.setContentType("text/html");
-        response.setContentLength(dir.length());
+        response.setContentLength(data.length);
         
         if (!request.getMethod().equals(HttpRequest.__HEAD))
-            dir.writeTo(response.getOutputStream());
+            response.getOutputStream().write(data);
     }
 
 

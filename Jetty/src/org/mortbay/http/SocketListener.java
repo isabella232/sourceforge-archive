@@ -185,9 +185,16 @@ public class SocketListener
         try
         {
             if (_lowResourcePersistTimeMs>0 && isLowOnResources())
+            {
                 socket.setSoTimeout(_lowResourcePersistTimeMs);
-            else if (socket.getSoTimeout()!=getMaxIdleTimeMs())
+                connection.setThrottled(true);
+            }
+            else
+            {
                 socket.setSoTimeout(getMaxIdleTimeMs());
+                connection.setThrottled(false);
+            }
+            
         }
         catch(Exception e)
         {
@@ -228,8 +235,11 @@ public class SocketListener
     {
         try
         {
-            if (socket.getSoTimeout()!=getMaxIdleTimeMs())
+            if (request.getHttpConnection().isThrottled())
+            {
                 socket.setSoTimeout(getMaxIdleTimeMs());
+                request.getHttpConnection().setThrottled(false);
+            }
         }
         catch(Exception e)
         {
@@ -254,9 +264,12 @@ public class SocketListener
             Socket socket=(Socket)(connection.getConnection());
 
             if (_lowResourcePersistTimeMs>0 && isLowOnResources())
+            {
                 socket.setSoTimeout(_lowResourcePersistTimeMs);
-            else if (socket.getSoTimeout()!=getMaxIdleTimeMs())
-                socket.setSoTimeout(getMaxIdleTimeMs());
+                connection.setThrottled(true);
+            }
+            else
+                connection.setThrottled(false);
         }
         catch(Exception e)
         {

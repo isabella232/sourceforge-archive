@@ -695,6 +695,11 @@ public class HttpContext implements LifeCycle,
     
     /* ------------------------------------------------------------ */
     /** Get a resource from the context.
+     * Cached Resources are returned if the resource fits within the LRU
+     * cache.  Directories may have CachedResources returned, but the
+     * caller must use the CachedResource.setCachedData method to set the
+     * formatted directory content.
+     *
      * @param pathInContext 
      * @return Resource
      * @exception IOException 
@@ -728,13 +733,16 @@ public class HttpContext implements LifeCycle,
 
             // Is it an existing file?
             long len = resource.length();
-            if (resource.exists() &&
-                !resource.isDirectory())
+            if (resource.exists())
             {
                 // Is it badly named?
-                if (pathInContext.endsWith("/"))
+                if (!resource.isDirectory() && pathInContext.endsWith("/"))
                     return null;
-                
+
+                // Guess directory length.
+                if (resource.isDirectory())
+                    len=resource.list().length*100;
+              
                 // Is it cacheable?
                 if (len>0 && len<_maxCachedFileSize && len<_maxCacheSize)
                 {

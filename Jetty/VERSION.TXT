@@ -9,6 +9,7 @@ Jetty Versions
  + String comparison of If-Modified-Since headers.
  + Touch files when expanding jars
  + Deprecated maxReadTime.
+ + Cache directory listings.
 
 Jetty-4.1.0 - 22 September 2002
  + Fixed CGI+windows security hole.

@@ -30,7 +30,7 @@ public class CachedResource extends Resource
 {
     Resource _resource;
     long _lastModified;
-    byte[] _buf;
+    byte[] _buf ;
     String[] _list;
     
     /* ------------------------------------------------------------ */
@@ -250,4 +250,18 @@ public class CachedResource extends Resource
         if (_buf!=null)
             os.write(_buf, (int) startByte, (int) count);
     }
+    
+    /* ------------------------------------------------------------ */
+    public byte[] getCachedData()
+    {
+        return _buf;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setCachedData(byte[] buf)
+    {
+        _buf = buf;
+    }
+
+    
 }

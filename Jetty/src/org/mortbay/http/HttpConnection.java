@@ -67,7 +67,8 @@ public class HttpConnection
     private Object _connection;
     private HashMap _codingParams;
     private ArrayList _codings;
-
+    private boolean _throttled ;
+    
     private boolean _statsOn;
     private long _tmpTime;
     private long _openTime;
@@ -292,6 +293,26 @@ public class HttpConnection
         return _listener.getPort();
     }
 
+    /* ------------------------------------------------------------ */
+    /** 
+     * @return True if this connections state has been altered due
+     * to low resources. 
+     */
+    public boolean isThrottled()
+    {
+        return _throttled;
+    }
+    
+     /* ------------------------------------------------------------ */
+    /** 
+     * @param throttled True if this connections state has been altered due
+     * to low resources. 
+     */
+    public void setThrottled(boolean throttled)
+    {
+        _throttled = throttled;
+    }
+    
     /* ------------------------------------------------------------ */
     /** Get associated object.
      * Used by a particular HttpListener implementation to associate
