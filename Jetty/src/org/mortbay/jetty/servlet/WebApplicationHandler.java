@@ -505,7 +505,6 @@ public class WebApplicationHandler extends ServletHandler
             throw new IllegalStateException("Named dispatch must be to an explicitly named servlet");
         }
         
-        
         if (_filterChainsCached)
         {
             synchronized(this)
@@ -536,7 +535,6 @@ public class WebApplicationHandler extends ServletHandler
                     filters=LazyList.add(filters,mapping.getHolder());
             }
         }
-        
 
         FilterChain chain = null;
         if (_filterChainsCached)
@@ -568,7 +566,7 @@ public class WebApplicationHandler extends ServletHandler
         
         // Build list of filters
         Object filters= null;
-        
+    
         // Path filters
         for (int i= 0; i < _pathFilters.size(); i++)
         {
