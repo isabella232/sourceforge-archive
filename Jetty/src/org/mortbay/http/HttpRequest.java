@@ -996,24 +996,16 @@ public class HttpRequest extends HttpMessage
                     {                   
                         String n;
                         String v;
-                        if (c.startsWith("JSESSION_ID="))
-                        {
-                            n="JSESSION_ID";
-                            v=c.substring(12);    
-                        }
-                        else
-                        {
-                            int e = c.indexOf('=');
-                            if (e>0)
-                            {
-                                n=c.substring(0,e);
-                                v=c.substring(e+1);
-                            }
-                            else
-                            {
-                                n=c;
-                                v="";
-                            }
+			int e = c.indexOf('=');
+			if (e>0)
+			{
+			    n=c.substring(0,e);
+			    v=c.substring(e+1);
+			}
+			else
+			{
+			    n=c;
+			    v="";
                         }
                         
                         // Handle quoted values
