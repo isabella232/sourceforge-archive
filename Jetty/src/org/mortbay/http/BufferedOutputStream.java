@@ -162,27 +162,38 @@ public class BufferedOutputStream
      */
     public void flush()
         throws IOException
-    {      
-        if (!_commited)
+    {
+        try
         {
-            _commited=true;
-            if (_commitObserver!=null)
-                _commitObserver.outputNotify(this,OutputObserver.__COMMITING,null);
+            if (!_commited)
+            {
+                _commited=true;
+                if (_commitObserver!=null)
+                    _commitObserver.outputNotify(this,OutputObserver.__COMMITING,null);
+            }
+            
+            wrapBuffer();
+            
+            // Add headers
+            if (_httpMessageWriter.size()>0)
+            {
+                prewrite(_httpMessageWriter.getBuf(),0,_httpMessageWriter.size());
+                _httpMessageWriter.resetWriter();
+            }
+            
+            if (size()>0)
+                writeTo(_out);
         }
-
-        wrapBuffer();
-        
-        // Add headers
-        if (_httpMessageWriter.size()>0)
+        catch (IOException e)
         {
-            prewrite(_httpMessageWriter.getBuf(),0,_httpMessageWriter.size());
-            _httpMessageWriter.resetWriter();
+            throw new EOFException(e);
         }
-
-        if (size()>0)
-            writeTo(_out);
-        reset(_preReserve);
+        finally
+        {
+            reset(_preReserve);
+        }
     }
+    
     
     /* ------------------------------------------------------------ */
     /** Wrap Buffer.

@@ -735,7 +735,6 @@ public class HttpConnection
     {
 	try{
 	    _persistent=false;
-	    boolean gotIOException = false;
             int error_code=HttpResponse.__500_Internal_Server_Error;
             
             if (e instanceof HttpException)
@@ -748,27 +747,20 @@ public class HttpConnection
                     Code.warning(_request.getRequestLine()+" "+e.toString());
                 Code.debug(e);
             }
+            else if (e instanceof EOFException)
+            {
+                Code.ignore(e);
+                return;
+            }
             else
-            {    
+            {
                 _request.setAttribute("javax.servlet.error.exception_type",e.getClass());
                 _request.setAttribute("javax.servlet.error.exception",e);
 
-                if (e instanceof IOException)
-                {
-                    // Assume browser closed connection
-                    gotIOException = true;
-                    if (Code.verbose())
-                        Code.debug(e);
-                    else if (Code.debug())
-                        Code.debug(e.toString());
-                }
-                else 
-                {
-                    if (_request==null)
-                        Code.warning(e);
-                    else
-                        Code.warning(_request.getRequestLine(),e);
-                }
+                if (_request==null)
+                    Code.warning(e);
+                else
+                    Code.warning(_request.getRequestLine(),e);
             }
             
 	    if (_response != null && !_response.isCommitted())
@@ -777,15 +769,6 @@ public class HttpConnection
 		_response.removeField(HttpFields.__TransferEncoding);
 		_response.setField(HttpFields.__Connection,HttpFields.__Close);
 		_response.sendError(error_code);
-
-                // probabluy not browser so be more verbose
-		if (gotIOException)
-                {
-                    if (_request==null)
-                        Code.warning(e);
-                    else
-                        Code.warning(_request.getRequestLine(),e);
-                }
 	    }
 	}
         catch(Exception ex)

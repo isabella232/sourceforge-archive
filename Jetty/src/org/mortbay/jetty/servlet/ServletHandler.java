@@ -39,6 +39,7 @@ import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
+import org.mortbay.http.EOFException;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
@@ -589,8 +590,9 @@ public class ServletHandler extends AbstractHttpHandler
                 throw (HttpException)th;
             if (th.getClass().equals(IOException.class))
                 throw (IOException)th;
-
-            if (!Code.debug() && th instanceof java.io.IOException)
+            if (th instanceof EOFException)
+                throw (IOException)th;
+            else if (!Code.debug() && th instanceof java.io.IOException)
                 Code.warning("Exception for "+httpRequest.getURI()+": "+th);
             else
             {

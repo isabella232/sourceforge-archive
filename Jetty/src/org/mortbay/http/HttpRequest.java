@@ -212,7 +212,7 @@ public class HttpRequest extends HttpMessage
         {
             line_buffer=in.readLineBuffer();
             if (line_buffer==null)
-                throw new InterruptedIOException("EOF");
+                throw new EOFException();
         }
         while(line_buffer.size==0);
         
@@ -794,7 +794,7 @@ public class HttpRequest extends HttpMessage
                             {
                                  len=in.read(content,offset,content_length-offset);
                                  if (len <= 0)
-                                     throw new IOException("Premature EOF reading params");
+                                     throw new EOFException();
                                  offset+=len;
                             }
 
@@ -803,6 +803,10 @@ public class HttpRequest extends HttpMessage
                             if (encoding==null)
                                 encoding=StringUtil.__ISO_8859_1;
                             UrlEncoded.decodeTo(content,_parameters,encoding);
+                        }
+                        catch (EOFException e)
+                        {
+                            Code.ignore(e);
                         }
                         catch (IOException e)
                         {
