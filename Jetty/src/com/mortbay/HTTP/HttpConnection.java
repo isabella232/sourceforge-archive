@@ -845,22 +845,10 @@ public class HttpConnection
                 {
                   case 0:
                       {
-                          // Netscape does not like empty 200s with
-                          // keep-alive
-                          if (_response.getStatus()==200)
-                          {
-                              _close=true;
-                              _persistent=false;
-                              _response.setField(HttpFields.__Connection,
-                                                 HttpFields.__Close);
-                          }
-                          else
-                          {
-                              _response.setIntField(HttpFields.__ContentLength,0);
-                              // Keep it alive
-                              _response.setField(HttpFields.__Connection,
-                                                 HttpFields.__KeepAlive);
-                          }
+			  _close=true;
+			  _persistent=false;
+			  _response.setField(HttpFields.__Connection,
+					     HttpFields.__Close);
                       }
                       break;
                   case 1:

@@ -210,6 +210,7 @@ public class ChunkableOutputStream extends FilterOutputStream
 
         // discard current buffer and set it to output
         _buffer.reset();
+	_bytes=0;
         out=_buffer;
         _filters=0;
         _written=false;

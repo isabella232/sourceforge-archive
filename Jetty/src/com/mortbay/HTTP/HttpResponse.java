@@ -413,6 +413,12 @@ public class HttpResponse extends HttpMessage
     {
         _header.put(HttpFields.__Location,location);
         setStatus(__302_Moved_Temporarily);
+	ChunkableOutputStream out=getOutputStream();
+	if (out!=null) {
+	    out.resetBuffer();
+	    out.nullOutput();
+	}
+	
         commitHeader();
     }
 

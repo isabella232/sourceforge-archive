@@ -279,7 +279,7 @@ abstract public class HttpMessage
 
         if (HttpFields.__ContentType.equals(name))
             setMimeAndEncoding(value);
-        
+
         return (String) fields.put(name,value);
     }
 
