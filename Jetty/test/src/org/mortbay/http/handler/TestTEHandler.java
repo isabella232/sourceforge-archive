@@ -8,7 +8,6 @@ package org.mortbay.http.handler;
 import java.io.IOException;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
-import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
 
@@ -20,7 +19,7 @@ import org.mortbay.http.HttpResponse;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class TestTEHandler extends NullHandler
+public class TestTEHandler extends AbstractHttpHandler
 {
     /* ------------------------------------------------------------ */
     public void handle(String pathInContext,

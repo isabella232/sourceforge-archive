@@ -9,26 +9,19 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FilterOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.URL;
-import java.text.DateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
+import org.mortbay.http.handler.AbstractHttpHandler;
 import org.mortbay.http.handler.DumpHandler;
 import org.mortbay.http.handler.NotFoundHandler;
-import org.mortbay.http.handler.NullHandler;
 import org.mortbay.http.handler.ResourceHandler;
 import org.mortbay.http.handler.TestTEHandler;
 import org.mortbay.util.Code;
-import org.mortbay.util.IO;
-import org.mortbay.util.LineInput;
 import org.mortbay.util.Resource;
 import org.mortbay.util.TestCase;
 import org.mortbay.util.ThreadPool;
@@ -1358,9 +1351,6 @@ public class TestRFC2616
         try {
           TestRFC2616 listener = new TestRFC2616();
 
-          int id = 0;
-
-
           //
           // test various valid range specs that have not been 
           // tested yet
@@ -1577,7 +1567,7 @@ public class TestRFC2616
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public class RedirectHandler extends NullHandler
+    public class RedirectHandler extends AbstractHttpHandler
     {
         /* ------------------------------------------------------------ */
         public void handle(String pathInContext,
