@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.10pre1 - 2 June 2003
  + Fixed JSP code visibility problem introduced in Jetty-4.2.10pre0
  + Added stop.jar
  + Added SSO implementation for FORM authentication.
