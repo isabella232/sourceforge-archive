@@ -357,7 +357,7 @@ public class HttpResponse extends HttpMessage
                     request.setState(HttpMessage.__MSG_RECEIVED);
                     // Do a forward to the error page resource.
                     setContentType(HttpFields.__TextHtml);
-                    getHttpContext().handle(0,error_page,null,request,this);
+                    getHttpContext().handle(error_page,null,request,this);
                 }
                 else
                     Code.warning("Error "+code+" while serving error page for "+

@@ -302,7 +302,7 @@ public class ServletHolder extends Holder
         }    
     }
     
-    /* --------------------------------------------------------------- */
+    /* ------------------------------------------------------------ */
     /** Service a request with this servlet.
      */
     public void handle(ServletRequest request,

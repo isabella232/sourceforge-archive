@@ -65,6 +65,7 @@ import org.mortbay.util.Log;
 import org.mortbay.util.LogSink;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
+import org.mortbay.util.StringUtil;
 import org.mortbay.util.URI;
 
 
@@ -450,78 +451,6 @@ public class ServletHandler
     }
 
     /* ------------------------------------------------------------ */
-    /** Get or create a ServletRequest.
-     * Create a new or retrieve a previously created servlet request
-     * that wraps the http request.
-     * @param httpRequest 
-     * @return HttpServletRequest wrapping the passed HttpRequest.
-     */
-    public HttpServletRequest getHttpServletRequest(String pathInContext,
-                                                    String pathParams,
-                                                    HttpRequest httpRequest,
-                                                    HttpResponse httpResponse)
-    {
-        // Look for a previously built servlet request.
-        ServletHttpRequest servletHttpRequest =
-            (ServletHttpRequest)httpRequest.getWrapper();
-        
-        if (servletHttpRequest==null)
-            servletHttpRequest=newWrappers(pathInContext,
-                                           pathParams,
-                                           httpRequest,
-                                           httpResponse,
-                                           getHolderEntry(pathInContext));
-        
-        return servletHttpRequest; 
-    }
-
-    /* ------------------------------------------------------------ */
-    /** Get Servlet Response.
-     * GetHttpServletRequest must have been called first.
-     * @param httpResponse 
-     * @return HttpServletRespone wrapping the passed HttpResponse.
-     */
-    public HttpServletResponse getHttpServletResponse(HttpResponse httpResponse)
-    {
-        return (HttpServletResponse) httpResponse.getWrapper();
-    }
-    
-    /* ------------------------------------------------------------ */
-    private ServletHttpRequest newWrappers(String pathInContext,
-                                           String pathParams,
-                                           HttpRequest httpRequest,
-                                           HttpResponse httpResponse,
-                                           Map.Entry entry)
-    {
-        // Build the request and response.
-        ServletHttpRequest servletHttpRequest =
-            new ServletHttpRequest(this,pathInContext,httpRequest);
-        httpRequest.setWrapper(servletHttpRequest);
-        ServletHttpResponse servletHttpResponse =
-            new ServletHttpResponse(servletHttpRequest,httpResponse);
-        httpResponse.setWrapper(servletHttpResponse);
-        
-        // Handle the session ID
-        servletHttpRequest.setSessionId(pathParams);
-        HttpSession session=servletHttpRequest.getSession(false);
-        if (session!=null)
-            ((SessionManager.Session)session).access();
-        
-        // Look for a servlet
-        if (entry!=null)
-        {
-            String servletPathSpec=(String)entry.getKey();            
-            servletHttpRequest.setServletPaths(PathMap.pathMatch(servletPathSpec,
-                                                                 pathInContext),
-                                               PathMap.pathInfo(servletPathSpec,
-                                                                pathInContext),
-                                               (ServletHolder)entry.getValue());
-        }
-        Code.debug("Servlet request for ",entry);
-        return servletHttpRequest;
-    }
-
-    /* ------------------------------------------------------------ */
     HttpSession getHttpSession(String id)
     {
         return _sessionManager.getHttpSession(id);
@@ -556,40 +485,70 @@ public class ServletHandler
         if (!isStarted())
             return;
         
+        // Handle TRACE
+        if (HttpRequest.__TRACE.equals(httpRequest.getMethod()))
+        {
+            handleTrace(httpRequest,httpResponse);
+            return;
+        }
+        
+        Code.debug("handle ",httpRequest);
+
+        // Check if this is re-entrant
+        ServletHttpRequest request = (ServletHttpRequest) httpRequest.getWrapper();
+        ServletHttpResponse response = (ServletHttpResponse) httpResponse.getWrapper();
+        boolean reentrant=false;
+        if (request==null)
+        {
+            // Build the request and response.
+            request = new ServletHttpRequest(this,pathInContext,httpRequest);
+            response = new ServletHttpResponse(request,httpResponse);
+            httpRequest.setWrapper(request);
+            httpResponse.setWrapper(response);
+        }
+        else if (request.getPathInContext()==null)
+        {
+            // Recycled request
+            request.recycle(this,pathInContext);
+        }
+        else
+        {
+            Code.warning("XXX - REENTRANT");
+            reentrant=true;
+        }
+        
+        // Look for the servlet
+        Map.Entry servlet=getHolderEntry(pathInContext);
+        ServletHolder servletHolder=servlet==null?null:(ServletHolder)servlet.getValue();
+        Code.debug("servlet=",servlet);
+            
         try
         {
-            ServletHttpRequest request=null;
-            ServletHttpResponse response=null;
-            ServletHolder holder=null;
-            
-            // handling
-            Code.debug("ServletHandler: ",pathInContext);
-
-            Map.Entry entry=getHolderEntry(pathInContext);
-            if (entry==null)
-                return;
-                
-            request=newWrappers(pathInContext,
-                                pathParams,
-                                httpRequest,
-                                httpResponse,
-                                entry);
-            holder = request.getServletHolder();
-            response = request.getServletHttpResponse();
-
-            // service request
-            if (holder!=null)
+            // Do the first time through stuff.
+            if (!reentrant)
             {
-                //service request
-                holder.handle(request,response);
-                response.flushBuffer();
+                // Adjust request paths
+                if (servlet!=null)
+                {
+                    String servletPathSpec=(String)servlet.getKey(); 
+                    request.setServletPaths(PathMap.pathMatch(servletPathSpec,pathInContext),
+                                            PathMap.pathInfo(servletPathSpec,pathInContext),
+                                            servletHolder);
+                }
                 
-                // reset output
-                response.setOutputState(ServletHttpResponse.NO_OUT);
-                Code.debug("Handled by ",holder);
-                if (!httpResponse.isCommitted())
-                    httpResponse.commit();
+                // Handle the session ID
+                request.setSessionId(pathParams);
+                HttpSession session=request.getSession(false);
+                if (session!=null)
+                    ((SessionManager.Session)session).access();
+                
+                Code.debug("session=",session);
+                
             }
+
+            // Do that funky filter and servlet thang!
+            if (servletHolder!=null)
+                dispatch(pathInContext,request,response,servletHolder);
         }
         catch(Exception e)
         {
@@ -609,45 +568,85 @@ public class ServletHandler
                 throw (HttpException)th;
             if (th.getClass().equals(IOException.class))
                 throw (IOException)th;
-            
-            Code.warning("Servlet Exception for "+httpRequest.getURI(),th);
-            Code.debug(httpRequest);
+
+            if (!Code.debug() && th instanceof java.io.IOException)
+                Code.warning("Exception for "+httpRequest.getURI()+": "+th);
+            else
+            {
+                Code.warning("Exception for "+httpRequest.getURI(),th);
+                Code.debug(httpRequest);
+            }
             
             httpResponse.getHttpConnection().forceClose();
-            httpResponse.setField(HttpFields.__Connection,HttpFields.__Close);
             if (!httpResponse.isCommitted())
             {
-                httpRequest.setAttribute("javax.servlet.error.exception_type",th.getClass());
-                httpRequest.setAttribute("javax.servlet.error.exception",th);
-                httpResponse.sendError(th instanceof UnavailableException
-                                       ?HttpResponse.__503_Service_Unavailable
-                                       :HttpResponse.__500_Internal_Server_Error);
+                request.setAttribute("javax.servlet.error.exception_type",th.getClass());
+                request.setAttribute("javax.servlet.error.exception",th);
+                response.sendError(th instanceof UnavailableException
+                                   ?HttpResponse.__503_Service_Unavailable
+                                   :HttpResponse.__500_Internal_Server_Error,
+                                   e.getMessage());
             }
             else
                 Code.debug("Response already committed for handling ",th);
         }
         catch(Error e)
-        {
-            Code.warning("Servlet Error for "+httpRequest.getURI(),e);
+        {   
+            Code.warning("Error for "+httpRequest.getURI(),e);
             Code.debug(httpRequest);
+            
             httpResponse.getHttpConnection().forceClose();
-            httpResponse.setField(HttpFields.__Connection,HttpFields.__Close);
             if (!httpResponse.isCommitted())
             {
-                httpRequest.setAttribute("javax.servlet.error.exception_type",e.getClass());
-                httpRequest.setAttribute("javax.servlet.error.exception",e);
-                httpResponse.sendError(HttpResponse.__500_Internal_Server_Error);
+                request.setAttribute("javax.servlet.error.exception_type",e.getClass());
+                request.setAttribute("javax.servlet.error.exception",e);
+                response.sendError(HttpResponse.__500_Internal_Server_Error,
+                                   e.getMessage());
             }
             else
                 Code.debug("Response already committed for handling ",e);
         }
         finally
         {
-            httpRequest.setWrapper(null);
-            httpResponse.setWrapper(null);
+            if (servletHolder!=null)
+            {
+                httpRequest.setHandled(true);
+                response.flushBuffer();
+                if (!httpResponse.isCommitted())
+                    httpResponse.commit();
+            }
+        
+            request.recycle(null,null);
+            response.recycle();
         }
     }
 
+    /* ------------------------------------------------------------ */
+    /** Dispatch to a servletHolder.
+     * This method may be specialized to insert extra handling in the
+     * dispatch of a request to a specific servlet. This is used by
+     * WebApplicatonHandler to implement dispatched filters.
+     * The default implementation simply calls
+     * ServletHolder.handle(request,response)
+     * @param pathInContext The path used to select the servlet holder.
+     * @param request 
+     * @param response 
+     * @param servletHolder 
+     * @exception ServletException 
+     * @exception UnavailableException 
+     * @exception IOException 
+     */
+    void dispatch(String pathInContext,
+                  HttpServletRequest request,
+                  HttpServletResponse response,
+                  ServletHolder servletHolder)
+        throws ServletException,
+               UnavailableException,
+               IOException
+    {
+        servletHolder.handle(request,response);
+    }
+    
     
     /* ------------------------------------------------------------ */
     /** ServletHolder matching path.
@@ -1100,6 +1099,5 @@ public class ServletHandler
                 return ((WebApplicationContext)getHttpContext()).getDisplayName();
             return null;
         }
-    }
-    
+    }    
 }

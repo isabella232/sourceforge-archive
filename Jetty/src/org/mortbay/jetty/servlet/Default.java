@@ -570,14 +570,3 @@ public class Default extends HttpServlet
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-

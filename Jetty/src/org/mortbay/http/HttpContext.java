@@ -1477,7 +1477,12 @@ public class HttpContext implements LifeCycle
             }
         }
         
-        String pathInContext = request.getPath();
+        String pathInContext = URI.canonicalPath(request.getPath());
+        if (pathInContext==null)
+        {
+            // Must be a bad request.
+            throw new HttpException(response.__400_Bad_Request);
+        }
         
         String contextPath=null;
         if (_contextPath.length()>1)
@@ -1514,7 +1519,7 @@ public class HttpContext implements LifeCycle
 
         try
         {
-            return handle(0,pathInContext,pathParams,request,response);
+            return handle(pathInContext,pathParams,request,response);
         }
         finally
         {
@@ -1527,7 +1532,6 @@ public class HttpContext implements LifeCycle
     /* ------------------------------------------------------------ */
     /** Handler request.
      * Call each HttpHandler until request is handled.
-     * @param firstHandler The index of the first handler to call.
      * @param pathInContext Path in context
      * @param pathParams Path parameters such as encoded Session ID
      * @param request 
@@ -1536,21 +1540,12 @@ public class HttpContext implements LifeCycle
      * @exception HttpException 
      * @exception IOException 
      */
-    public boolean handle(int firstHandler,
-                          String pathInContext,
+    public boolean handle(String pathInContext,
                           String pathParams,
                           HttpRequest request,
                           HttpResponse response)
         throws HttpException, IOException
-    {
-        if (pathInContext!=null)
-        {
-            pathInContext=URI.canonicalPath(pathInContext);
-            if (pathInContext==null)
-                // Must be a bad request.
-                throw new HttpException(response.__400_Bad_Request);
-        }
-                
+    {           
         // Save the thread context loader
         Thread thread = Thread.currentThread();
         ClassLoader lastContextLoader=thread.getContextClassLoader();
@@ -1562,7 +1557,7 @@ public class HttpContext implements LifeCycle
             response.setHttpContext(this);
             
             HttpHandler[] handlers=getHandlers();
-            for (int k=firstHandler;k<handlers.length;k++)
+            for (int k=0;k<handlers.length;k++)
             {
                 HttpHandler handler = handlers[k];
                 

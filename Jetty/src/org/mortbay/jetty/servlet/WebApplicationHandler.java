@@ -177,9 +177,15 @@ public class WebApplicationHandler extends ServletHandler
             _started=false;
         }
     }
-    
-    
-    /* ------------------------------------------------------------ */
+
+    /* ----------------------------------------------------------------- */
+    /** Handle request.
+     * @param contextPath 
+     * @param pathInContext 
+     * @param httpRequest 
+     * @param httpResponse 
+     * @exception IOException 
+     */
     public void handle(String pathInContext,
                        String pathParams,
                        HttpRequest httpRequest,
@@ -188,196 +194,128 @@ public class WebApplicationHandler extends ServletHandler
     {
         if (!_started)
             return;
-        
-        // Handle TRACE
-        if (HttpRequest.__TRACE.equals(httpRequest.getMethod()))
-        {
-            handleTrace(httpRequest,httpResponse);
-            return;
-        }
-        
-        // Extract and check filename
-        pathInContext=URI.canonicalPath(pathInContext);
-        if (pathInContext==null)
-            throw new HttpException(HttpResponse.__403_Forbidden);
-        
-        Code.debug("handle ",httpRequest);
-
-        // Check if this is re-entrant
-        ServletHttpRequest request = (ServletHttpRequest) httpRequest.getWrapper();
-        ServletHttpResponse response = (ServletHttpResponse) httpResponse.getWrapper();
-        boolean reentrant=true;
-        if (request==null)
-        {
-            reentrant=false;
-            // Build the request and response.
-            request = new ServletHttpRequest(this,pathInContext,httpRequest);
-            response = new ServletHttpResponse(request,httpResponse);
-            httpRequest.setWrapper(request);
-            httpResponse.setWrapper(response);
-        }
-        else if (request.getPathInContext()==null)
-        {
-            // Recycled request
-            reentrant=false;
-            request.recycle(this,pathInContext);
-        }
-
         try
         {
-            // protect web-inf and meta-inf
-            String pathParamsLC=URI.canonicalPath(StringUtil.asciiToLowerCase(pathInContext));
-            if(pathParamsLC.startsWith("/web-inf") || pathParamsLC.startsWith("/meta-inf" ))
-            {
-                response.sendError(HttpResponse.__403_Forbidden);
-                return;
-            }
-            
-            // Look for the servlet
-            Map.Entry servlet=getHolderEntry(pathInContext);
-            Code.debug("servlet=",servlet);
-            
-            // Build list of filters
-            LazyList filters = null;
-            
-            // Do the first time through stuff.
-            if (!reentrant)
-            {
-                // Adjust request paths
-                if (servlet!=null)
-                {
-                    String servletPathSpec=(String)servlet.getKey(); 
-                    request.setServletPaths(PathMap.pathMatch(servletPathSpec,pathInContext),
-                                            PathMap.pathInfo(servletPathSpec,pathInContext),
-                                            (ServletHolder)servlet.getValue());
-                }
-                
-                // Handle the session ID
-                request.setSessionId(pathParams);
-                HttpSession session=request.getSession(false);
-                if (session!=null)
-                    ((SessionManager.Session)session).access();
-                
-                Code.debug("session=",session);
-                
-                // Security Check
-                if (!getHttpContext().checkSecurityContstraints
-                    (pathInContext,httpRequest,httpResponse))
-                return;
-                
-                // Path filters
-                for (int i=0;i<_pathFilters.size();i++)
-                {
-                    FilterHolder holder=(FilterHolder)_pathFilters.get(i);
-                    if (holder.appliesTo(pathInContext))
-                        filters=LazyList.add(filters,holder);
-                }
-                
-                // Servlet filters
-                if (servlet!=null && _servletFilterMap.size()>0)
-                {
-                    Object o=_servletFilterMap
-                        .get(((ServletHolder)servlet.getValue()).getName());
-                    if (o!=null)
-                    {
-                        if (o instanceof List)
-                        filters=LazyList.add(filters,(List)o);
-                        else
-                            filters=LazyList.add(filters,o);
-                    }    
-                }
-                Code.debug("filters=",filters);
-            }
-            
-            // Do the handling thang
-            if (LazyList.size(filters)>0)
-            {
-                Chain chain=new Chain(pathInContext,filters,servlet);
-                chain.doFilter(request,response);
-            }
-            else
-            {
-                // Call servlet
-                if (servlet!=null)
-                {
-                    ServletHolder holder = (ServletHolder)servlet.getValue();
-                    if (Code.verbose()) Code.debug("call servlet ",holder);
-                    holder.handle(request,response);
-                }
-                else // Not found
-                    notFound(request,response);
-            }
-        }
-        catch(Exception e)
-        {
-            Code.debug(e);
-            
-            Throwable th=e;
-            if (e instanceof ServletException)
-            {
-                if (((ServletException)e).getRootCause()!=null)
-                {
-                    Code.debug("Extracting root cause from ",e);
-                    th=((ServletException)e).getRootCause();
-                }
-            }
-            
-            if (th instanceof HttpException)
-                throw (HttpException)th;
-            if (th.getClass().equals(IOException.class))
-                throw (IOException)th;
-
-            if (!Code.debug() && th instanceof java.io.IOException)
-                Code.warning("Exception for "+httpRequest.getURI()+": "+th);
-            else
-            {
-                Code.warning("Exception for "+httpRequest.getURI(),th);
-                Code.debug(httpRequest);
-            }
-            
-            httpResponse.getHttpConnection().forceClose();
-            if (!httpResponse.isCommitted())
-            {
-                request.setAttribute("javax.servlet.error.exception_type",th.getClass());
-                request.setAttribute("javax.servlet.error.exception",th);
-                response.sendError(th instanceof UnavailableException
-                                   ?HttpResponse.__503_Service_Unavailable
-                                   :HttpResponse.__500_Internal_Server_Error,
-                                   e.getMessage());
-            }
-            else
-                Code.debug("Response already committed for handling ",th);
-        }
-        catch(Error e)
-        {   
-            Code.warning("Error for "+httpRequest.getURI(),e);
-            Code.debug(httpRequest);
-            
-            httpResponse.getHttpConnection().forceClose();
-            if (!httpResponse.isCommitted())
-            {
-                request.setAttribute("javax.servlet.error.exception_type",e.getClass());
-                request.setAttribute("javax.servlet.error.exception",e);
-                response.sendError(HttpResponse.__500_Internal_Server_Error,
-                                   e.getMessage());
-            }
-            else
-                Code.debug("Response already committed for handling ",e);
+            super.handle(pathInContext,pathParams,httpRequest,httpResponse);
         }
         finally
         {
             httpRequest.setHandled(true);
-            response.flushBuffer();
-            response.setOutputState(ServletHttpResponse.NO_OUT);
             if (!httpResponse.isCommitted())
                 httpResponse.commit();
-            request.recycle(null,null);
-            response.recycle();
         }
     }
     
     
+    /* ------------------------------------------------------------ */
+    void dispatch(String pathInContext,
+                  HttpServletRequest request,
+                  HttpServletResponse response,
+                  ServletHolder servletHolder)
+        throws ServletException,
+               UnavailableException,
+               IOException
+    {
+        // Determine request type.
+        int requestType=0;
 
+        if (request instanceof Dispatcher.DispatcherRequest)
+        {
+            // Forward or include
+            requestType=((Dispatcher.DispatcherRequest)request).getFilterType();
+        }
+        else
+        {
+            // Error or request
+            ServletHttpRequest servletHttpRequest=(ServletHttpRequest)request;
+            ServletHttpResponse servletHttpResponse=(ServletHttpResponse)response;
+            HttpRequest httpRequest=servletHttpRequest.getHttpRequest();
+            HttpResponse httpResponse=servletHttpResponse.getHttpResponse();
+
+            if (httpResponse.getStatus()!=HttpResponse.__200_OK)
+            {
+                // Error
+                requestType=FilterHolder.__ERROR;
+            }
+            else
+            {
+                // Request
+                requestType=FilterHolder.__REQUEST;
+                // protect web-inf and meta-inf
+                if (StringUtil.startsWithIgnoreCase(pathInContext,"/web-inf")  ||
+                    StringUtil.startsWithIgnoreCase(pathInContext,"/meta-inf"))
+                {
+                    response.sendError(HttpResponse.__403_Forbidden);
+                    return;
+                }
+                
+                // Security Check
+                if (!getHttpContext().checkSecurityContstraints
+                    (pathInContext,
+                     servletHttpRequest.getHttpRequest(),
+                     servletHttpResponse.getHttpResponse()))
+                    return;
+            }
+        }
+        
+        // Build list of filters
+        LazyList filters = null;
+        
+        // Path filters
+        if (pathInContext!=null && _pathFilters.size()>0)
+        {
+            for (int i=0;i<_pathFilters.size();i++)
+            {
+                FilterHolder holder=(FilterHolder)_pathFilters.get(i);
+                if (holder.appliesTo(pathInContext,requestType))
+                    filters=LazyList.add(filters,holder);
+            }
+        }
+        
+        // Servlet filters
+        if (servletHolder!=null && _servletFilterMap.size()>0)
+        {
+            Object o=_servletFilterMap.get(servletHolder.getName());
+            if (o!=null)
+            {
+                if (o instanceof List)
+                {
+                    List list=(List)o;
+                    for (int i=0;i<list.size();i++)
+                    {
+                        FilterHolder holder = (FilterHolder)list.get(i);
+                        if (holder.appliesTo(requestType))
+                            filters=LazyList.add(filters,holder);
+                    }
+                }
+                else
+                {
+                    FilterHolder holder = (FilterHolder)o;
+                    if (holder.appliesTo(requestType))
+                        filters=LazyList.add(filters,holder);
+                } 
+            }
+        }
+        Code.debug("filters=",filters);
+        
+        // Do the handling thang
+        if (LazyList.size(filters)>0)
+        {
+            Chain chain=new Chain(pathInContext,filters,servletHolder);
+            chain.doFilter(request,response);
+        }
+        else
+        {
+            // Call servlet
+            if (servletHolder!=null)
+            {
+                if (Code.verbose()) Code.debug("call servlet ",servletHolder);
+                servletHolder.handle(request,response);
+            }
+            else // Not found
+                notFound(request,response);
+        }
+    }
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -387,16 +325,16 @@ public class WebApplicationHandler extends ServletHandler
         String _pathInContext;
         int _filter=0;
         LazyList _filters;
-        Map.Entry _servlet;
+        ServletHolder _servletHolder;
 
         /* ------------------------------------------------------------ */
         Chain(String pathInContext,
               LazyList filters,
-              Map.Entry servlet)
+              ServletHolder servletHolder)
         {
             _pathInContext=pathInContext;
             _filters=filters;
-            _servlet=servlet;
+            _servletHolder=servletHolder;
         }
         
         /* ------------------------------------------------------------ */
@@ -417,11 +355,10 @@ public class WebApplicationHandler extends ServletHandler
             }
 
             // Call servlet
-            if (_servlet!=null)
+            if (_servletHolder!=null)
             {
-                ServletHolder holder = (ServletHolder)_servlet.getValue();
-                if (Code.verbose()) Code.debug("call servlet ",holder);
-                holder.handle(request,response);
+                if (Code.verbose()) Code.debug("call servlet ",_servletHolder);
+                _servletHolder.handle(request,response);
             }
             else // Not found
                 notFound((HttpServletRequest)request,

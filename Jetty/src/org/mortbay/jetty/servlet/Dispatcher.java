@@ -65,7 +65,7 @@ public class Dispatcher implements RequestDispatcher
     ServletHolder _holder=null;
     String _pathSpec;
     String _uriInContext;
-    String _path;
+    String _pathInContext;
     String _query;
     boolean _include;
     
@@ -87,13 +87,12 @@ public class Dispatcher implements RequestDispatcher
         Code.debug("Dispatcher for ",servletHandler,",",uriInContext,",",query);
 
         _uriInContext=uriInContext;
-        String pathInContext=URI.decodePath(_uriInContext);
         
         _servletHandler=servletHandler;
-        _path=URI.canonicalPath(pathInContext);
+        _pathInContext=URI.canonicalPath(URI.decodePath(_uriInContext));
         _query=query;
 
-        Map.Entry entry=_servletHandler.getHolderEntry(_path);
+        Map.Entry entry=_servletHandler.getHolderEntry(_pathInContext);
         if(entry!=null)
         {
             _pathSpec=(String)entry.getKey();
@@ -122,7 +121,7 @@ public class Dispatcher implements RequestDispatcher
     /* ------------------------------------------------------------ */
     public boolean isNamed()
     {
-        return _path==null;
+        return _pathInContext==null;
     }
     
     /* ------------------------------------------------------------ */
@@ -171,7 +170,7 @@ public class Dispatcher implements RequestDispatcher
         if (isNamed())
         {
             // No further modifications required.
-            _holder.handle(request,response);
+            _servletHandler.dispatch(null,request,response,_holder);
         }
         else
         {
@@ -189,10 +188,10 @@ public class Dispatcher implements RequestDispatcher
             // Adjust servlet paths
             servletHttpRequest.setServletHandler(_servletHandler);
             request.setPaths(_servletHandler.getHttpContext().getContextPath(),
-                             PathMap.pathMatch(_pathSpec,_path),
-                             PathMap.pathInfo(_pathSpec,_path),
+                             PathMap.pathMatch(_pathSpec,_pathInContext),
+                             PathMap.pathInfo(_pathSpec,_pathInContext),
                              query);
-            _holder.handle(request,response);
+            _servletHandler.dispatch(_pathInContext,request,response,_holder);
             
             if (!_include)
                 response.close();
@@ -211,7 +210,7 @@ public class Dispatcher implements RequestDispatcher
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private class DispatcherRequest extends HttpServletRequestWrapper
+    class DispatcherRequest extends HttpServletRequestWrapper
     {
         String _contextPath;
         String _servletPath;
@@ -225,7 +224,21 @@ public class Dispatcher implements RequestDispatcher
             super(request);
         }
 
+        /* ------------------------------------------------------------ */
+        int getFilterType()
+        {
+            return _include?FilterHolder.__INCLUDE:FilterHolder.__FORWARD;
+        }
 
+        /* ------------------------------------------------------------ */
+        String getPathInContext()
+        {
+            if (_pathInContext!=null)
+                return _pathInContext;
+            else
+                return URI.addPaths(getServletPath(),getPathInfo());
+        }
+        
         /* ------------------------------------------------------------ */
         public String getRequestURI()
         {
@@ -387,7 +400,7 @@ public class Dispatcher implements RequestDispatcher
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private class DispatcherResponse extends HttpServletResponseWrapper
+    class DispatcherResponse extends HttpServletResponseWrapper
     {
         private ServletOutputStream _out=null;
         private PrintWriter _writer=null;

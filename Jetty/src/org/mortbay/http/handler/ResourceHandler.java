@@ -149,11 +149,6 @@ public class ResourceHandler extends NullHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
-        // Extract and check filename
-        pathInContext=URI.canonicalPath(pathInContext);
-        if (pathInContext==null)
-            throw new HttpException(HttpResponse.__403_Forbidden);
-            
         boolean endsWithSlash= pathInContext.endsWith("/");
         Resource resource = getHttpContext().getResource(pathInContext);
 
@@ -257,7 +252,7 @@ public class ResourceHandler extends NullHandler
                     String ipath=URI.addPaths(pathInContext,welcome);
                     URI uri=request.getURI();
                     uri.setPath(URI.addPaths(uri.getPath(),welcome));
-                    getHttpContext().handle(0,ipath,pathParams,request,response);
+                    getHttpContext().handle(ipath,pathParams,request,response);
                     return;
                 }
 

@@ -22,10 +22,32 @@ import org.mortbay.http.PathMap;
 public class FilterHolder
     extends Holder
 {
+    /* ------------------------------------------------------------ */
+    public static final int
+        __REQUEST=1,
+        __FORWARD=2,
+        __INCLUDE=4,
+        __ERROR=8;
+
+    public static int type(String type)
+    {
+        if ("request".equalsIgnoreCase(type))
+            return __REQUEST;
+        if ("forward".equalsIgnoreCase(type))
+            return __FORWARD;
+        if ("include".equalsIgnoreCase(type))
+            return __INCLUDE;
+        if ("error".equalsIgnoreCase(type))
+            return __ERROR;
+        return 0;
+    }
+    
+    /* ------------------------------------------------------------ */
     private Filter _filter;
     private Config _config;
     private PathMap _pathSpecs;
-    
+    private int _applyTo;
+        
     /* ---------------------------------------------------------------- */
     public FilterHolder(HttpHandler httpHandler,
                         String name,
@@ -35,6 +57,28 @@ public class FilterHolder
     }
 
     /* ------------------------------------------------------------ */
+    /** Add a type that this filter applies to.
+     * @param type Of __REQUEST, __FORWARD, __INCLUDE or __ERROR
+     */
+    public void applyTo(int type)
+    {
+        _applyTo|=type;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Add a type that this filter applies to.
+     * @param type "REQUEST", "FORWARD", "INCLUDE" or "ERROR"
+     */
+    public void applyTo(String type)
+    {
+        _applyTo|=type(type);
+    }
+
+    
+    /* ------------------------------------------------------------ */
+    /** Add A path spec that this filter applies to.
+     * @param pathSpec 
+     */
     public void addPathSpec(String pathSpec)
     {
         if (_pathSpecs==null)
@@ -47,12 +91,27 @@ public class FilterHolder
     {
         return _pathSpecs!=null;
     }
-    
 
     /* ------------------------------------------------------------ */
-    public boolean appliesTo(String path)
+    /** Check if this filter applies.
+     * @param type The type of request: __REQUEST,__FORWARD,__INCLUDE or __ERROR.
+     * @return True if this filter applies
+     */
+    public boolean appliesTo(int type)
+    {
+        return(_applyTo&type)!=0 ;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Check if this filter applies to a path.
+     * @param path The path to check.
+     * @param type The type of request: __REQUEST,__FORWARD,__INCLUDE or __ERROR.
+     * @return True if this filter applies
+     */
+    public boolean appliesTo(String path, int type)
     {
         return
+            (_applyTo&type)!=0 &&
             _pathSpecs!=null &&
             _pathSpecs.getMatch(path)!=null;
     }
