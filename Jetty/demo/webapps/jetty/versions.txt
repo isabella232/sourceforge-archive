@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Moved admin port to 8081 to avoid JBuilder
+ + Made Frame members private and fixed test harness
  + cookies with maxAge==0 expire on 1 jan 1970
  + setCookie always has equals
 
