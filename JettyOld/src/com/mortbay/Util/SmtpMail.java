@@ -66,7 +66,7 @@ public class SmtpMail implements Runnable
     // ---------------------------------------------------------------------
     final public void send( ) 
     {	
-	thread = new Thread(this);
+	thread = new Thread(this,"SMTP mailer");
 	thread.start();
     }
     

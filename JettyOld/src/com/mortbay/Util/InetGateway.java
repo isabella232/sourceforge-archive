@@ -219,7 +219,7 @@ public class InetGateway extends ThreadedServer
 			    catch(Exception e) { Code.ignore(e); }
 			}	
 		    }
-		}).start();
+		},"InetGateway").start();
 
 		// Use this thread to copy local in to remote out
 		IO.copy(localIn,remoteOut);

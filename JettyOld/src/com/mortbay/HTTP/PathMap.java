@@ -82,7 +82,13 @@ import java.net.MalformedURLException;
  * /aaa/bbb/ccc<BR>
  * /aaa/bbbbbb
  * </TD></TR>
- * 
+ * <P>
+ * Path suffixes are also supported. For example for /aaa/bbb/ccc.c the
+ * match priorities are:<UL>
+ * <LI>An exact match /aaa/bbb/ccc.c
+ * <LI>A path qualified wildcard /aaa/bbb/*.c
+ * <LI>A null path wildcard *.c
+ * <LI>A non wild pathspec eg /aaa/bbb%					  
  * </TABLE>
  * 
  * @version $Id$
@@ -91,14 +97,15 @@ import java.net.MalformedURLException;
 public class PathMap extends Dictionary
 {
     /* --------------------------------------------------------------- */
-    Vector paths=new Vector();
     Hashtable pathMap=new Hashtable();
+    Hashtable absoluteMap=new Hashtable();
+    WildMap wildMap=new WildMap();
     
     /* --------------------------------------------------------------- */
     /** Construct empty PathMap
      */
-    public PathMap(){
-    }
+    public PathMap()
+    {}
     
     /* --------------------------------------------------------------- */
     /** Construct from dictionary PathMap
@@ -128,23 +135,99 @@ public class PathMap extends Dictionary
      */
     public Object put(String pathSpec, Object object)
     {
-	Object o = pathMap.put(pathSpec,object);
-	if (o==null)
+	Object o=pathMap.put(pathSpec,object);
+	PathValue pv = new PathValue(pathSpec,object);
+	if (pathSpec.length()==0)
+	    absoluteMap.put(pathSpec,pv);
+	else
 	{
-	    int pathLen=pathSpec.length();
-	    for (int i=paths.size();i>=0;i--)
+	    int last=pathSpec.length()-1;
+	    String path=pathSpec.substring(0,last);
+	    char c = pathSpec.charAt(last);
+	    switch(c)
 	    {
-		if (i==0)
-		    paths.insertElementAt(pathSpec,0);
-		else if (paths.elementAt(i-1).toString().length()<=pathLen)
-		{
-		    paths.insertElementAt(pathSpec,i);
-		    break;
-		}
+	      case '$':
+		  absoluteMap.put(path,pv);
+		  break;
+		  
+	      case '%':
+		  absoluteMap.put(path,pv);
+		  wildMap.put(path+"/*",pv);
+		  break;
+		  
+	      case '|':
+		  absoluteMap.put(path,pv);
+		  absoluteMap.put(path+"/",pv);
+		  break;
+		  
+	      case '*':
+		  absoluteMap.put(path,pv);
+		  wildMap.put(pathSpec,pv);
+		  break;
+		  
+	      default:
+		  int s = pathSpec.indexOf("*");
+		  if (s==0)
+		  {
+		      absoluteMap.put(pathSpec.substring(1),pv);
+		      wildMap.put(pathSpec,pv);
+		  }
+		  else if (s>=0)
+		  {
+		      absoluteMap.put(pathSpec.substring(0,s)+
+				      pathSpec.substring(s+1),pv);
+		      wildMap.put(pathSpec,pv);
+		  }
+		  else
+		  {
+		      absoluteMap.put(pathSpec,pv);
+		      wildMap.put(pathSpec+"*",pv);
+		  }
+		  break;
 	    }
 	}
 	
 	return o;
+    }
+    
+    /* --------------------------------------------------------------- */
+    /** Add a single path match to the PathMap
+     * @param pathSpec The path specification.
+     * @param object Th eobject the path maps to
+     */
+    public Object put(Object pathSpec, Object object) 
+    {
+	return put((String)pathSpec,object);
+    }
+    
+    /* --------------------------------------------------------------- */
+    /** Get the object that is mapped by the longest path specification
+     * that matches the path
+     */
+    public Object match(String path)
+    {
+	PathValue pv = (PathValue) absoluteMap.get(path);
+	if (pv!=null)
+	    return pv.value;
+	pv = (PathValue) wildMap.get(path);
+	if (pv!=null)
+	    return pv.value;
+	return null;
+    }
+    
+    /* --------------------------------------------------------------- */
+    /** Get the pathSpec that is mapped by the longest path specification
+     * that matches the path
+     */
+    public String matchSpec(String path)
+    {
+	PathValue pv = (PathValue) absoluteMap.get(path);
+	if (pv!=null)
+	    return pv.pathSpec;
+	pv = (PathValue) wildMap.get(path);
+	if (pv!=null)
+	    return pv.pathSpec;
+	return null;
     }
     
     /* --------------------------------------------------------------- */
@@ -162,15 +245,22 @@ public class PathMap extends Dictionary
     }
     
     /* --------------------------------------------------------------- */
+    /** Get the longest matching path specification
+     * @deprecated use match
+     */
+    public String longestMatch(String path)
+    {
+	return matchSpec(path);
+    }
+    
+    /* --------------------------------------------------------------- */
     /** Get the object that is mapped by the longest path specification
      * that matches the path
+     * @deprecated use match
      */
     public Object getLongestMatch(String path)
     {
-	Object lkey = longestMatch(path);
-	if (lkey==null)
-	    return null;
-	return pathMap.get(longestMatch(path));
+	return match(path);
     }
     
     /* --------------------------------------------------------------- */
@@ -182,24 +272,71 @@ public class PathMap extends Dictionary
     /* --------------------------------------------------------------- */
     public Enumeration keys()
     {
-	return paths.elements();
-    }
-    
-    /* --------------------------------------------------------------- */
-    /** Add a single path match to the PathMap
-     * @param pathSpec The path specification (must be a String)
-     * @param object Th eobject the path maps to
-     */
-    public Object put(Object  pathSpec, Object  object) 
-    {
-	return put((String)pathSpec,object);
+	return pathMap.keys();
     }
     
     /* --------------------------------------------------------------- */  
-    public Object remove(Object  key)
+    public Object remove(Object pathSpec)
     {
-	paths.removeElement(key);
-	return pathMap.remove(key);
+	return remove((String)pathSpec);
+    }
+    
+    /* --------------------------------------------------------------- */  
+    public Object remove(String pathSpec)
+    {
+	Object o=pathMap.remove(pathSpec);
+	
+	if (pathSpec.length()==0)
+	    absoluteMap.remove(pathSpec);
+	else
+	{
+	    int last=pathSpec.length()-1;
+	    String path=pathSpec.substring(0,last);
+	    char c = pathSpec.charAt(last);
+	    switch(c)
+	    {
+	      case '$':
+		  absoluteMap.remove(path);
+		  break;
+		  
+	      case '%':
+		  absoluteMap.remove(path);
+		  wildMap.remove(path+"/*");
+		  break;
+		  
+	      case '|':
+		  absoluteMap.remove(path);
+		  absoluteMap.remove(path+"/");
+		  break;
+		  
+	      case '*':
+		  absoluteMap.remove(path);
+		  wildMap.remove(pathSpec);
+		  break;
+		  
+	      default:
+		  int s = pathSpec.indexOf("*");
+		  if (s==0)
+		  {
+		      absoluteMap.remove(pathSpec.substring(1));
+		      wildMap.remove(pathSpec);
+		  }
+		  else if (s>=0)
+		  {
+		      absoluteMap.remove(pathSpec.substring(0,s)+
+				      pathSpec.substring(s+1));
+		      wildMap.remove(pathSpec);
+		  }
+		  else
+		  {
+		      absoluteMap.remove(pathSpec);
+		      wildMap.remove(pathSpec+"*");
+		  }
+		  break;
+	    }
+	}
+	
+	return o;	
     }
     
     /* --------------------------------------------------------------- */
@@ -211,57 +348,10 @@ public class PathMap extends Dictionary
     /* --------------------------------------------------------------- */
     public void clear()
     {
-	paths.removeAllElements();
 	pathMap.clear();
-    }
-    
-
-    /* --------------------------------------------------------------- */
-    /** Get the longest matching path specification
-     */
-    public String longestMatch(String path)
-    {
-	int tl=path.length();
-	
-	for (int i = paths.size();i-->0;)
-	{
-	    String tryPath = (String) paths.elementAt(i);
-	    int tpl = tryPath.length();
-	    if (tpl==0)
-		return tryPath;
-	    
-	    switch (tryPath.charAt(tpl-1))
-	    {
-	      case '|':
-		  if (tl==tpl && path.charAt(tpl-1)=='/' &&
-		      path.startsWith(tryPath.substring(0,tpl-1)))
-		      return tryPath;
-		  if (tl==tpl-1 &&
-		      path.equals(tryPath.substring(0,tpl-1)))
-		      return tryPath;
-		  break;
-		  
-	      case '%':
-		  if (tl>=tpl && path.charAt(tpl-1)=='/' &&
-		      path.startsWith(tryPath.substring(0,tpl-1)))
-		      return tryPath;
-		  
-	      case '$':
-		if(tryPath.length()==(tl+1) &&
-		   tryPath.startsWith(path))
-		    return tryPath;
-		  break;
-	      default:
-		  if (tpl<=tl && path.startsWith(tryPath))
-		  {
-		      //Code.debug("Matched "+tryPath);
-		      return tryPath;
-		  }
-		  break;
-	    }
-	       
-	}
-	return null;
+	absoluteMap.clear();
+	wildMap.holders.removeAllElements();
+	wildMap.cache=null;
     }
     
     /* --------------------------------------------------------------- */
@@ -271,6 +361,12 @@ public class PathMap extends Dictionary
     public static String pathInfo(String pathSpec, String path)
 	throws MalformedURLException
     {
+	int s = pathSpec.indexOf("*");
+	if (s>=0)
+	    pathSpec=pathSpec.substring(0,s);
+	if (pathSpec.length()==0)
+	    return path;
+	
 	switch (pathSpec.charAt(pathSpec.length()-1))
 	{
 	  case '|':
@@ -295,6 +391,12 @@ public class PathMap extends Dictionary
      */
     public static String match(String pathSpec, String path)
     {
+	int s = pathSpec.indexOf("*");
+	if (s>=0)
+	    pathSpec=pathSpec.substring(0,s);
+	if (pathSpec.length()==0)
+	    return pathSpec;
+	
 	int psl = pathSpec.length();
 	int pl = path.length();
 
@@ -343,14 +445,14 @@ public class PathMap extends Dictionary
     {
 	StringBuffer buf = new StringBuffer(512);
 	buf.append("{\n");
-	Enumeration e = paths.elements();
+	Enumeration e = pathMap.keys();
 	while (e.hasMoreElements())
 	{
 	    String pathSpec= (String)e.nextElement();
 	    buf.append("    ");
 	    buf.append(pathSpec);
 	    buf.append(" = ");
-	    buf.append(pathMap.get(pathSpec).toString());
+	    buf.append(pathMap.get(pathSpec));
 	    buf.append("\n");
 	}
 	buf.append("}");
@@ -373,6 +475,12 @@ public class PathMap extends Dictionary
 				   String pathSpec,
 				   String newPath)
     {
+	int s = pathSpec.indexOf("*");
+	if (s>=0)
+	    pathSpec=pathSpec.substring(0,s);
+	if (pathSpec.length()==0)
+	    return newPath+oldPath;
+	
 	String result = null;
 	
 	String match=match(pathSpec,oldPath);
@@ -393,7 +501,136 @@ public class PathMap extends Dictionary
 		   "' resulted with ",result);
 	return result;
     }
+
+
+    /* =============================================================== */
+    private static class PathValue
+    {
+	String pathSpec;
+	Object value;
+	PathValue(String pathSpec,Object value)
+	{
+	    this.pathSpec=pathSpec;
+	    this.value=value;
+	}
+    }
     
+    /* =============================================================== */
+    private static class Holder
+    {
+	Object value;
+	String prefix="";
+	int pl=0;
+	String suffix="";
+	int sl=0;
+	int tl=0;
+
+	Holder(String wild, Object value)
+	{
+	    this.value=value;
+	    int star;
+	    if ((star=wild.indexOf('*'))>=0)
+	    {
+		prefix=wild.substring(0,star);
+		suffix=wild.substring(star+1);
+		pl=prefix.length();
+		sl=suffix.length();
+		tl=pl+sl;
+	    }
+	    else
+	    {
+		prefix=wild;
+		pl=wild.length();
+		tl=pl;
+	    }
+	}
+
+	public boolean equals(Object o)
+	{
+	    if (o instanceof Holder)
+	    {
+		Holder h=(Holder)o;
+		return h==this ||
+		    (prefix.equals(h.prefix) &&
+		     suffix.equals(h.suffix));
+	    }
+	    return false;
+	}
+
+	public int hashCode()
+	{
+	    return prefix.hashCode()+suffix.hashCode();
+	}
+
+	public String toString()
+	{
+	    return prefix+"*"+suffix;
+	}
+    }
+
+    /* =============================================================== */
+    static class WildMap
+    {
+	Vector holders = new Vector();
+	Holder[] cache = null;
+
+	public Holder put(String wildPath, Object v)
+	{
+	    Holder holder=new Holder(wildPath,v);
+	    cache=null;
+	    
+	    for (int i=holders.size();i-->0;)
+	    {
+		Holder h=(Holder)holders.elementAt(i);
+		if (h.equals(holder))
+		{
+		    holders.setElementAt(holder,i);
+		    return h;
+		}
+		else
+		{
+		    if (h.sl>holder.sl)
+			continue;
+		    if (h.sl==holder.sl && h.pl >holder.pl)
+			continue;
+		    holders.insertElementAt(holder,i+1);
+		    return null;
+		}
+	    }
+	    holders.insertElementAt(holder,0);
+	    return null;
+	}
+	
+	public Object get(String path)
+	{
+	    if (cache==null)
+	    {
+		cache=new Holder[holders.size()];
+		holders.copyInto(cache);
+	    }
+	    
+	    for (int i=cache.length;i-->0;)
+	    {
+		if (path.endsWith(cache[i].suffix) &&
+		    path.startsWith(cache[i].prefix) &&
+		    path.length()>=(cache[i].suffix.length()+
+				    cache[i].prefix.length()))
+		    return cache[i].value;
+	    }
+	    return null;
+	}
+	
+	public void remove(String path)
+	{
+	    cache=null;
+	    Holder holder=new Holder(path,null);
+	    holders.removeElement(holder);
+	}
+    }
 }
+
+
+
+
 
 

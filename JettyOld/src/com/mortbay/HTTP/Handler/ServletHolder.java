@@ -97,6 +97,29 @@ public class ServletHolder implements ServletConfig
     }
 
     /* ---------------------------------------------------------------- */
+    /** 
+     * Construct a Servlet Holder from an already instantiated 
+     * and initialized servlet.
+     * This is useful for back-end applications that need to 
+     * customize/initialize on their own a servlet front-end.
+     *
+     * @param name Servlet name
+     * @param sl The servlet object
+     */
+    public ServletHolder(String name, GenericServlet sl)
+    {
+      this.name = name;
+      this.initParams=new Hashtable();
+      this.servletClass = sl.getClass();
+      this.servlet = sl;
+      singleThreadModel =
+            javax.servlet.SingleThreadModel.class
+            .isAssignableFrom(servletClass);
+      
+    }
+
+
+    /* ---------------------------------------------------------------- */
     /** Set server
      */
     void setServer(HttpServer server)

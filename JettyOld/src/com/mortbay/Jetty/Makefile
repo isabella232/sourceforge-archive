@@ -22,6 +22,7 @@ INSTALLFILES := \
 	etc/ParamDemo.prp \
 	etc/JettyDemo.prp \
 	etc/NSRoamDemo.prp \
+	etc/gnujsp.prp \
         classes/HelloWorldServlet.class \
 	$(wildcard FileBase/Images/*.gif) \
 	$(wildcard FileBase/*.txt) \

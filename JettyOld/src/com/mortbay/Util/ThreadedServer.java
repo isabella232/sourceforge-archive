@@ -204,7 +204,7 @@ abstract public class ThreadedServer implements Runnable
 	    
 	if( serverThread == null )
 	{
-	    serverThread = new Thread( this );
+	    serverThread = new Thread( this, "ThreadedServer" );
 	    serverThread.start();
 	}
     }

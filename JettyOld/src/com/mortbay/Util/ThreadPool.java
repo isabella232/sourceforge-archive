@@ -102,6 +102,7 @@ public class ThreadPool
 	/* ------------------------------------------------------------ */
 	public PoolThread(Runnable runnable)
 	{
+	    super("PoolThread");
 	    _runnable=runnable;
 	    Code.debug("New ",_runnable);
 	    start();
@@ -110,6 +111,7 @@ public class ThreadPool
 	/* ------------------------------------------------------------ */
 	public PoolThread()
 	{
+	    super("PoolThread");
 	    Code.debug("New ");
 	    start();
 	}

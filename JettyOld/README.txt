@@ -51,6 +51,11 @@ The Jetty server may be run in the other modes as follows:
         cd $JETTY_HOME
 	java com.mortbay.Jetty.Server [configFile]
 
+    An example config file is in $JETTY_HOME/etc:
+
+        cd $JETTY_HOME
+	java com.mortbay.Jetty.Server etc/JettyServer.prp
+
   + To run a HTTP file server, in the current directory:
 
         java com.mortbay.HTTP.Configure.FileServer [port]

@@ -168,6 +168,11 @@ public class DemoIndex extends IndexServlet
 		"Property Trees",
 		"/Jetty/Demo/propertytree.html",
 		"Nested Properties objects with wildcard default values"
+	    },
+	    {
+		"Java Server Pages",
+		"/Jetty/Demo/jsp.html",
+		"GNUJSP implementation of Java Server Pages"
 	    }
 	};
 	section.put("Items",demoItems);

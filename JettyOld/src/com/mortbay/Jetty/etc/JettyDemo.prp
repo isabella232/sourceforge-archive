@@ -97,6 +97,7 @@ ServerA./.Translate./Proxy%: http://localhost:8080/
 ServerA./.Filter./	   : com.mortbay.HTTP.Filter.HtmlFilter
 
 ServerA./.Servlet./Dump%            : Dump=com.mortbay.Servlets.Dump?./etc/ParamDemo.prp
+ServerA./.Servlet.*.DUMP           : Dump=com.mortbay.Servlets.Dump?./etc/ParamDemo.prp
 ServerA./.Servlet./Session          : Session=com.mortbay.Servlets.SessionDump
 ServerA./.Servlet./PropertyTree     : PropertyTree=com.mortbay.Servlets.PropertyTreeEditor
 ServerA./.Servlet./Config$          : Config=com.mortbay.Servlets.ConfigDump
@@ -115,6 +116,8 @@ ServerA./.Servlet./Jetty/Info|      : Index=com.mortbay.Jetty.DemoIndex
 ServerA./.Servlet./Jetty/Demo|      : Index=com.mortbay.Jetty.DemoIndex
 ServerA./.Servlet./Jetty/Program|   : Index=com.mortbay.Jetty.DemoIndex
 ServerA./.Servlet./Jetty/Config|    : Index=com.mortbay.Jetty.DemoIndex
+ServerA./.Directory./JSP/           : ./FileBase/jsp
+ServerA./.Servlet./jsp/*.jsp        : gnujsp=org.gjt.jsp.JSPServlet?./etc/gnujsp.prp
 
 ServerA./.Directory./      : ./FileBase
 ServerA./.Directory.allowPut : false

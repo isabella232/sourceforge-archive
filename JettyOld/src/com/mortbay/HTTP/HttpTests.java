@@ -90,9 +90,58 @@ public class HttpTests
     /* --------------------------------------------------------------- */
     public static void pathMap()
     {
-	Test test = new Test("com.mortbay.HTTP.PathMap");
+	Test test =null;
 
 	try{
+	    test = new Test("com.mortbay.HTTP.PathMap$WildMap");
+
+	    com.mortbay.HTTP.PathMap$WildMap wm =
+		new com.mortbay.HTTP.PathMap$WildMap();
+	    String[] h1 = {"*","p*","pp*","*s","p*s","pp*s","*ss","p*ss","pp*ss"};
+	    wm.put(h1[5],h1[5]);wm.put(h1[6],h1[6]);wm.put(h1[1],h1[1]);
+	    wm.put(h1[7],h1[7]);wm.put(h1[0],h1[0]);wm.put(h1[3],h1[3]);
+	    wm.put(h1[2],h1[2]);wm.put(h1[8],h1[8]);wm.put(h1[4],h1[4]);
+	    test.checkEquals(wm.holders.size(),9,"9 Holders");
+	    wm.get("");
+	    for (int i=9;i-->0;)
+		test.checkEquals(h1[i],wm.cache[i].value,"order"+i);
+	    wm.put(h1[5],h1[5]);wm.put(h1[4],h1[4]);wm.put(h1[8],h1[8]);
+	    wm.put(h1[7],h1[7]);wm.put(h1[3],h1[3]);wm.put(h1[2],h1[2]);
+	    wm.put(h1[6],h1[6]);wm.put(h1[0],h1[0]);wm.put(h1[1],h1[1]);
+	    test.checkEquals(wm.holders.size(),9,"9 Holders");
+	    wm.get("");
+	    for (int i=9;i-->0;)
+		test.checkEquals(h1[i],wm.cache[i].value,"order"+i);
+	    
+	    String[] h2 ={ "*","x*","xx*","*y","x*y","xx*y","*yy","z*yy","yy*yy"};
+	    
+	    wm.put(h2[5],h2[5]);wm.put(h2[4],h2[4]);wm.put(h2[8],h2[8]);
+	    wm.put(h2[0],h2[0]);wm.put(h2[3],h2[3]);wm.put(h2[6],h2[6]);
+	    wm.put(h2[7],h2[7]);wm.put(h2[2],h2[2]);wm.put(h2[1],h2[1]);
+	    test.checkEquals(wm.holders.size(),17,"17 Holders");
+	    wm.get("");
+	    for (int i=9;i-->1;)
+	    {
+		test.checkEquals(h2[i],wm.cache[2*i].value,"order2-"+i);
+		test.checkEquals(h1[i],wm.cache[2*i-1].value,"order1-"+i);
+	    }
+	    test.checkEquals(h1[0],wm.cache[0].value,"order1-0");
+	    
+	    test.checkEquals(wm.get("ppss"),h1[8],"match1");
+	    test.checkEquals(wm.get("pppsss"),h1[8],"match2");
+	    test.checkEquals(wm.get("ppxxss"),h1[8],"match3");
+	    test.checkEquals(wm.get("pxxs"),h1[4],"match4");
+	    test.checkEquals(wm.get("pppyy"),h2[6],"match5");
+	    test.checkEquals(wm.get(""),h2[0],"match6");
+	    test.checkEquals(wm.get("X"),h2[0],"match7");
+	    test.checkEquals(wm.get("xxx"),h2[2],"match8");
+	    test.checkEquals(wm.get("yyy"),h2[6],"match9");
+	    test.checkEquals(wm.get("yyyy"),h2[8],"matchA");
+	    
+	    
+	    
+	    
+	    test = new Test("com.mortbay.HTTP.PathMap");
 	    PathMap pm = new PathMap();
 	    test.checkEquals(pm.longestMatch("x"),null,"empty");
 	    pm.put("aaa","a");
@@ -130,8 +179,6 @@ public class HttpTests
 	    test.checkEquals(pm.longestMatch("yyy/"),"yyy|","trail / match");
 	    test.checkEquals(pm.longestMatch("yyy/zzz"),null,"trail / mis");
 
-	    System.err.println(pm);
-
 	    test.checkEquals(PathMap.match("aaa","aaa/bbb"),"aaa","matching part 1");
 	    test.checkEquals(PathMap.match("aaa/","aaa/bbb"),"aaa/","matching part 2");
 	    test.checkEquals(PathMap.match("aaa%","aaa/bbb"),"aaa/","matching part 3");
@@ -151,13 +198,35 @@ public class HttpTests
 	    test.checkEquals(PathMap.match("aaa/bbb$",
 				   "aaa/bbb/"),null,"matching part 11");
 	    test.checkEquals(PathMap.match("aaa/bbb|",
-				   "aaa/bbb/"),"aaa/bbb/","matching part 12");
+					   "aaa/bbb/"),"aaa/bbb/","matching part 12");
 
+
+	    pm = new PathMap();
+	    pm.put("/aaa%","/aaa%");
+	    pm.put("/aaa/bbb/ccc%","/aaa/bbb/ccc%");
+	    pm.put("*.a","*.a");
+	    pm.put("*.b","*.b");
+	    pm.put("*","*");
+	    pm.put("/bbb/","/bbb/");
+	    pm.put("/bbb/*.b","/bbb/*.b");
+	    pm.put("/bbb/xxx.b","/bbb/xxx.b");
+	    pm.put("/ccc/*.c","/ccc/*.c");
+	    
+	    test.checkEquals(pm.longestMatch("/aaa"),"/aaa%","/aaa==/aaa%");
+	    test.checkEquals(pm.longestMatch("/aaa.a"),"*.a","/aaa.a==*.a");
+	    test.checkEquals(pm.longestMatch("/aaa/bbb/ccc/aaa.a"),"*.a","/aaa/bbb/ccc/aaa.a==*.a");
+	    test.checkEquals(pm.longestMatch("/aaa/bbb/ccc/aaa.c"),"/aaa/bbb/ccc%","/aaa/bbb/ccc/aaa.c==/aaa/bbb/ccc%");
+	    test.checkEquals(pm.longestMatch("/bbb/ccc"),"/bbb/","/bbb/ccc==/bbb/");
+	    test.checkEquals(pm.longestMatch("/aaa/bbb.b"),"*.b","/aaa/bbb.b==*.b");
+	    test.checkEquals(pm.longestMatch("/bbb/bbb.b"),"/bbb/*.b","/aaa/bbb.b==/bbb/*.b");
+	    test.checkEquals(pm.longestMatch("/bbb/xxx.b"),"/bbb/xxx.b","/aaa/xxx.b==/bbb/xxx.b");
+	    test.checkEquals(pm.longestMatch("anything"),"*","anything==*");
+	    
 	}
 	catch(Exception e)
 	{
 	    test.check(false,e.toString());
-	    Code.debug("failed",e);
+	    Code.warning(e);
 	}
     }
     

@@ -23,6 +23,7 @@ public class IO extends Thread
     /* ------------------------------------------------------------------- */
     private IO(InputStream in, OutputStream out)
     {
+	super("IO InputStream->OutputStream");
 	this.in=in;
 	this.out=out;
 	start();
@@ -31,6 +32,7 @@ public class IO extends Thread
     /* ------------------------------------------------------------------- */
     private IO(Reader in, Writer out)
     {
+	super("IO Reader->Writer");
 	this.read=in;
 	this.write=out;
 	start();

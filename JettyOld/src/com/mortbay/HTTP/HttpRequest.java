@@ -283,10 +283,15 @@ public class HttpRequest extends HttpHeader
 	  case '|':
 	  case '%':
 	  case '$':
+	  case '*':
 	      servletPath=servletPath.substring(0,servletPath.length()-1);
 	      break;
 	  default:
-	      break;
+	      int s = servletPath.indexOf("*");
+	      if (s==0)
+		  servletPath="";
+	      else if (s>=0)
+		  servletPath=servletPath.substring(0,s);
 	}
 	
 	Code.debug("SetServletPath '"+servletPath+

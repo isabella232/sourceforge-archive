@@ -37,6 +37,7 @@ public class DataPort extends Thread
     /* ------------------------------------------------------------------- */
     DataPort(Ftp ftp,InputStream in)
     {
+	super("FTP data port in");
 	synchronized(this){
 	    this.in = in;
 	    this.ftp= ftp;
@@ -54,6 +55,7 @@ public class DataPort extends Thread
     /* ------------------------------------------------------------------- */
     DataPort(Ftp ftp, OutputStream out)
     {
+	super("FTP data port out");
 	synchronized(this){
 	    this.out = out;
 	    this.ftp= ftp;
