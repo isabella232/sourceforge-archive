@@ -70,14 +70,9 @@ public class TestCase
      */
     public void check(boolean b,String check)
     {
-        reportBuf.append(testCase+" : "+check+" - ");
-        if (b)
+        if (!b)
         {
-            reportBuf.append(pass);
-            Code.debug(check," OK");
-        }
-        else
-        {
+            reportBuf.append(testCase+" : "+check+" - ");
             Frame frame = new Frame(1);
             passed=false;
             reportBuf.append(fail + " at " + frame);
@@ -119,16 +114,15 @@ public class TestCase
                                  String subString, String check)
     {
         int index=-1;
-        reportBuf.append(testCase+" : "+check+" - ");
         if ((string==null && subString==null)
             || (string!=null && (subString==null ||
                                  (index=string.indexOf(subString,offset))>=0)))
         {
-            reportBuf.append(pass);
-            Code.debug(check," OK");
+          // do nothing
         }
         else
         {
+            reportBuf.append(testCase+" : "+check+" - ");
             Frame frame = new Frame(2);
             passed=false;
             reportBuf.append(fail + " at " + frame);
@@ -137,8 +131,8 @@ public class TestCase
             reportBuf.append('"' + subString + "\" not contained in \"" +
                              string.substring(offset) + '"');
             Code.debug(check," FAILED");
+            reportBuf.append('\n');
         }
-        reportBuf.append('\n');
         return index;
     }
     
@@ -161,11 +155,11 @@ public class TestCase
                                  String subString, String check)
     {
         int index=-1;
-        reportBuf.append(testCase+" : "+check+" - ");
         if ((string==null && subString==null)
             || (string!=null && (subString==null ||
                                  (index=string.indexOf(subString,offset))>=0)))
         {
+            reportBuf.append(testCase+" : "+check+" - ");
             Frame frame = new Frame(1);
             passed=false;
             reportBuf.append(fail + " at " + frame);
@@ -174,13 +168,8 @@ public class TestCase
             reportBuf.append('"' + subString + "\" IS contained in \"" +
                              string.substring(offset) + '"');
             Code.debug(check," FAILED");
+            reportBuf.append('\n');
         }
-        else
-        {
-            reportBuf.append(pass);
-            Code.debug(check," OK");
-        }
-        reportBuf.append('\n');
         return index;
     }
     
@@ -265,14 +254,13 @@ public class TestCase
      */
     private void commonCheckEquals(Object o1,Object o2,String check)
     {
-        reportBuf.append(testCase+" : "+check+" - ");
         if (o1==o2 || ( o1!=null && o1.equals(o2)))
         {
-            reportBuf.append(pass);
-            Code.debug(3,check+" OK");
+          // do nothing
         }
         else
         {
+            reportBuf.append(testCase+" : "+check+" - ");
             Frame frame = new Frame(2);
             passed=false;
             reportBuf.append(fail + " at " + frame);
@@ -281,8 +269,8 @@ public class TestCase
             reportBuf.append(((o1!=null)?(o1.toString()):"null") + " != " +
                              ((o2!=null)?(o2.toString()):"null"));
             Code.debug(3,check+" FAILED");
+            reportBuf.append('\n');
         }
-        reportBuf.append('\n');
     }
 
     /*-------------------------------------------------------------------*/
@@ -295,13 +283,11 @@ public class TestCase
         while (e.hasMoreElements())
         {
             TestCase t = (TestCase) e.nextElement();
-            System.err.print("\nTest Case: "+t.testCase);
-            if (t.passed)
-                System.err.println("  - passed");
-            else
+            if (! t.passed) {
+                System.err.print("\nTest Case: "+t.testCase);
                 System.err.println("  - FAILED");
-                
-            System.err.println(t.reportBuf.toString());
+                System.err.println(t.reportBuf.toString());
+            }
         }
 
         System.err.println("\nTEST SUMMARY:");
@@ -310,15 +296,11 @@ public class TestCase
         while (e.hasMoreElements())
         {
             TestCase t = (TestCase) e.nextElement();
-            System.err.print("Test Case: "+t.testCase);
-            if (t.passed)
-                System.err.println("  - passed");
-            else
+            if (!t.passed)
             {
-                if (t.testCase.equals(SelfFailTest))
-                    System.err.println("  - failed as expected");
-                else
+                if (!t.testCase.equals(SelfFailTest))
                 {
+                    System.err.print("Test Case: "+t.testCase);
                     System.err.println("  - FAILED");
                     failed=true;
                 }

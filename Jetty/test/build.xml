@@ -75,7 +75,6 @@ the Ant optional tasks from:
   <!-- ==================================================================== -->
   <target name="prepare">
     <mkdir dir="${test.classes}" />
-    <echo message="${java.class.path}" />      
     <available property="junit.task.available" 
                classname="org.apache.tools.ant.taskdefs.optional.junit.JUnitTask" />
     <available property="junit.available" 
