@@ -921,9 +921,9 @@ public class HandlerContext implements LifeCycle
             // If no parent, then try this classes loader as parent
             if (_parent==null)
                 _parent=this.getClass().getClassLoader();
-            
-            Code.debug("Init classloader from "+_classPath+
-                       ", "+_parent+" for "+this);
+
+            Code.debug("Init classloader from ",_classPath,
+                       ", ",_parent," for ",this);
             
             if (_classPath==null || _classPath.length()==0)
                 _loader=_parent;

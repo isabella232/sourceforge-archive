@@ -44,13 +44,19 @@ public class Resource
         if (url==null)
             return null;
 
-        if( url.toExternalForm().startsWith( "file:"))
+        String urls=url.toExternalForm();
+        if( urls.startsWith( "file:"))
         {
             URLConnection connection=url.openConnection();
             Permission perm = connection.getPermission();
             if (perm instanceof java.io.FilePermission)
             {
                 File file =new File(perm.getName());
+                if (urls.indexOf("..")>=0)
+                {
+                    file=new File(file.getCanonicalPath());
+                    url=file.toURL();
+                }
                 if (file.isDirectory() && !url.getFile().endsWith("/"))
                     url=new URL(url.toString()+"/");
                 return new FileResource(url,connection,file);
