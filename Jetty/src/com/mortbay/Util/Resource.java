@@ -19,14 +19,14 @@ import java.security.Permission;
 
 /* ------------------------------------------------------------ */
 /**
- * Class that represents a resource accessible through the file or URL 
+ * Class that represents a resource accessible through the file or URL
  * <p>
  *
  * @version $Id$
- * @author Nuno Preguiça 
+ * @author Nuno Preguiça
  * @author Greg Wilkins (gregw)
  */
-public class Resource 
+public class Resource
 {
     protected URL _url;
     protected String _urlString;
@@ -34,16 +34,16 @@ public class Resource
     protected InputStream _in=null;
 
     /* ------------------------------------------------------------ */
-    /** 
-     * @param url 
-     * @return 
+    /**
+     * @param url
+     * @return
      */
     public static Resource newResource(URL url)
         throws IOException
     {
         if (url==null)
             return null;
-        
+
         if( url.toExternalForm().startsWith( "file:"))
         {
             URLConnection connection=url.openConnection();
@@ -65,7 +65,7 @@ public class Resource
         {
             return new JarResource(url);
         }
-        
+
         return new Resource(url,null);
     }
 
@@ -73,8 +73,8 @@ public class Resource
     /** Construct a resource from a string.
      * If the string is not a URL, it is treated as an absolute or
      * relative file path.
-     * @param resource. 
-     * @return 
+     * @param resource.
+     * @return
      */
     public static Resource newResource(String resource)
         throws MalformedURLException, IOException
@@ -95,16 +95,16 @@ public class Resource
             else
                 Code.warning(e);
         }
-        
+
         return newResource(url);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Construct a resource from a string.
      * If the string is not a URL, it is treated as an absolute or
      * relative file path.
-     * @param resource. 
-     * @return 
+     * @param resource.
+     * @return
      */
     public static Resource newSystemResource(String resource)
         throws IOException
@@ -117,7 +117,7 @@ public class Resource
         return newResource(url);
     }
 
-    
+
     /* ------------------------------------------------------------ */
     protected Resource(URL url, URLConnection connection)
     {
@@ -147,9 +147,9 @@ public class Resource
     {
         release();
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** Release any resources held by the resource 
+    /** Release any resources held by the resource
      */
     public void release()
     {
@@ -158,13 +158,13 @@ public class Resource
             try{_in.close();}catch(IOException e){Code.ignore(e);}
             _in=null;
         }
-        
+
         if (_connection!=null)
         {
             _connection=null;
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * Returns true if the respresenetd resource exists.
@@ -194,7 +194,7 @@ public class Resource
         return exists() && _url.toString().endsWith("/");
     }
 
-    
+
     /* ------------------------------------------------------------ */
     /**
      * Returns the last modified time
@@ -213,7 +213,7 @@ public class Resource
      */
     public long length()
     {
-        if (checkConnection())  
+        if (checkConnection())
             return _connection.getContentLength();
         return -1;
     }
@@ -236,7 +236,7 @@ public class Resource
     {
         return null;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * Returns the name of the resource
@@ -245,7 +245,7 @@ public class Resource
     {
         return _url.toExternalForm();
     }
-        
+
     /* ------------------------------------------------------------ */
     /**
      * Returns an input stream to the resource
@@ -253,7 +253,7 @@ public class Resource
     public synchronized InputStream getInputStream()
         throws java.io.IOException
     {
-        if (!checkConnection())  
+        if (!checkConnection())
             throw new IOException( "Invalid resource");
 
         if( _in != null)
@@ -266,7 +266,7 @@ public class Resource
         return _connection.getInputStream();
     }
 
-    
+
     /* ------------------------------------------------------------ */
     /**
      * Returns an output stream to the resource
@@ -297,7 +297,7 @@ public class Resource
         throw new SecurityException( "RenameTo not supported");
     }
 
-    
+
     /* ------------------------------------------------------------ */
     /**
      * Returns a list of resource names contained in the given resource
@@ -307,7 +307,7 @@ public class Resource
         return null;
     }
 
-    
+
     /* ------------------------------------------------------------ */
     /**
      * Returns the resource contained inside the current resource with the
@@ -318,7 +318,9 @@ public class Resource
     {
         if (path==null)
             return null;
-        
+
+        path = path.replace('\\','/');
+
         // XXX - need to check for ../ which might take us
         // out-side of resourcebase - or at least make sure we
         // never see that here.
@@ -326,7 +328,7 @@ public class Resource
         {
             Code.notImplemented();
         }
-        
+
         String resourceBase = _url.toExternalForm();
         if( path.startsWith( "./"))
             path = path.substring( 2);
@@ -344,18 +346,18 @@ public class Resource
     }
 
     /* ------------------------------------------------------------ */
-    /** 
-     * @return 
+    /**
+     * @return
      */
     public String toString()
     {
         return _urlString;
     }
-        
+
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * @param o
-     * @return 
+     * @return
      */
     public boolean equals( Object o)
     {

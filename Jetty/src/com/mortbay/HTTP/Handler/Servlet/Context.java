@@ -46,21 +46,21 @@ public class Context implements ServletContext, HttpSessionContext
     ServletHandler getHandler(){return _handler;}
 
     /* ------------------------------------------------------------ */
-    /** Constructor. 
-     * @param handler 
+    /** Constructor.
+     * @param handler
      */
     Context(ServletHandler handler)
     {
         _handler=handler;
     }
-    
+
     /* ------------------------------------------------------------ */
     public String getContextPath()
     {
         return _handler.getHandlerContext().getContextPath();
     }
-    
-    
+
+
     /* ------------------------------------------------------------ */
     public ServletContext getContext(String uri)
     {
@@ -74,13 +74,13 @@ public class Context implements ServletContext, HttpSessionContext
             return handler.getContext();
         return null;
     }
-    
+
     /* ------------------------------------------------------------ */
     public int getMajorVersion()
     {
         return 2;
     }
-    
+
     /* ------------------------------------------------------------ */
     public int getMinorVersion()
     {
@@ -92,7 +92,7 @@ public class Context implements ServletContext, HttpSessionContext
     {
         return _handler.getHandlerContext().getMimeByExtension(file);
     }
-    
+
     /* ------------------------------------------------------------ */
     public URL getResource(String uri)
         throws MalformedURLException
@@ -111,7 +111,7 @@ public class Context implements ServletContext, HttpSessionContext
             return null;
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     public InputStream getResourceAsStream(String uri)
     {
@@ -131,7 +131,7 @@ public class Context implements ServletContext, HttpSessionContext
         }
         return null;
     }
-    
+
     /* ------------------------------------------------------------ */
     public RequestDispatcher getRequestDispatcher(String uriInContext)
     {
@@ -148,7 +148,7 @@ public class Context implements ServletContext, HttpSessionContext
                 pathInContext=uriInContext.substring(0,q);
                 query=uriInContext.substring(q+1);
             }
-            
+
             return new Dispatcher(this,pathInContext,query);
         }
         catch(Exception e)
@@ -157,7 +157,7 @@ public class Context implements ServletContext, HttpSessionContext
             return null;
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     public RequestDispatcher getNamedDispatcher(String name)
     {
@@ -182,55 +182,52 @@ public class Context implements ServletContext, HttpSessionContext
         Code.warning("No longer supported");
         return null;
     }
-    
+
     /* ------------------------------------------------------------ */
     public Enumeration getServlets()
     {
         Code.warning("No longer supported");
         return null;
     }
-    
+
     /* ------------------------------------------------------------ */
     public Enumeration getServletNames()
     {
         Code.warning("No longer supported");
         return null;
     }
-    
+
     /* ------------------------------------------------------------ */
     public void log(String msg)
     {
         Log.message(Log.EVENT,msg,new Frame(2));
     }
-    
+
     /* ------------------------------------------------------------ */
     public void log(Exception e, String msg)
     {
         Code.warning(msg,e);
     }
-    
+
     /* ------------------------------------------------------------ */
     public void log(String msg, Throwable th)
     {
         Code.warning(msg,th);
     }
-    
+
     /* ------------------------------------------------------------ */
     public String getRealPath(String path)
     {
         if(Code.debug())
             Code.debug("getRealPath of ",path," in ",this);
-        
+
         Resource resourceBase=_handler.getHandlerContext().getResourceBase();
         if (resourceBase==null )
             return null;
-        
+
         try{
             Resource resource = resourceBase.addPath(path);
-            File file = resource.getFile();
-            if (file==null)
-                return null;
-            return file.getAbsolutePath();
+            return resource.getName();
         }
         catch(IOException e)
         {
@@ -238,13 +235,13 @@ public class Context implements ServletContext, HttpSessionContext
             return null;
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     public String getServerInfo()
     {
         return Version.__Version;
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get context init parameter.
      * Delegated to HandlerContext.
@@ -258,7 +255,7 @@ public class Context implements ServletContext, HttpSessionContext
     {
         return _handler.getHandlerContext().getInitParameter(param);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get context init parameter names.
      * Delegated to HandlerContext.
@@ -268,7 +265,7 @@ public class Context implements ServletContext, HttpSessionContext
     {
         return _handler.getHandlerContext().getInitParameterNames();
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get context attribute.
      * Delegated to HandlerContext.
@@ -301,10 +298,10 @@ public class Context implements ServletContext, HttpSessionContext
             }
             Code.debug("TempDir=",tempDir);
         }
-        
+
         return _handler.getHandlerContext().getAttribute(name);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Get context attribute names.
      * Delegated to HandlerContext.
@@ -313,7 +310,7 @@ public class Context implements ServletContext, HttpSessionContext
     {
         return _handler.getHandlerContext().getAttributeNames();
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Set context attribute names.
      * Delegated to HandlerContext.
@@ -331,7 +328,7 @@ public class Context implements ServletContext, HttpSessionContext
         else
             _handler.getHandlerContext().setAttribute(name,value);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Remove context attribute.
      * Delegated to HandlerContext.
@@ -356,7 +353,7 @@ public class Context implements ServletContext, HttpSessionContext
     public final static String __SessionId  = "jessionid";
     public final static int __distantFuture = 60*60*24*7*52*20;
     private static long __nextSessionId = System.currentTimeMillis();
-    
+
     // Setting of max inactive interval for new sessions
     // -1 means no timeout
     private int _defaultMaxIdleTime = -1;
@@ -364,34 +361,34 @@ public class Context implements ServletContext, HttpSessionContext
     private Map _sessions = new HashMap();
 
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * @deprecated From HttpSessionContext
-     */   
+     */
     public Enumeration getIds()
     {
         return Collections.enumeration(Collections.EMPTY_LIST);
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @deprecated From HttpSessionContext
-     */   
+     */
     public HttpSession getSession(String id)
     {
         return null;
     }
-     
+
     /* ------------------------------------------------------------ */
-    /** 
-     * @param id 
-     * @return 
+    /**
+     * @param id
+     * @return
      */
     HttpSession getHttpSession(String id)
     {
         HttpSession s = (HttpSession)_sessions.get(id);
         return s;
     }
-    
+
     /* ------------------------------------------------------------ */
     public HttpSession newSession()
     {
@@ -406,28 +403,28 @@ public class Context implements ServletContext, HttpSessionContext
     {
         ((Session)session).accessed();
     }
-    
+
     /* ------------------------------------------------------------ */
     public static boolean isValid(HttpSession session)
     {
         return !(((Session)session).invalid);
     }
-    
+
     /* -------------------------------------------------------------- */
     /** Set the default session timeout.
      *  @param  default The timeout in minutes
      */
     public void setSessionTimeout(int timeoutMinutes)
-    {   
+    {
         _defaultMaxIdleTime = timeoutMinutes*60;;
-        
+
         // Start the session scavenger if we haven't already
         if (_scavenger == null)
             _scavenger = new SessionScavenger();
     }
 
     /* -------------------------------------------------------------- */
-    /** Find sessions that have timed out and invalidate them. 
+    /** Find sessions that have timed out and invalidate them.
      *  This runs in the SessionScavenger thread.
      */
     private synchronized void scavenge()
@@ -435,13 +432,13 @@ public class Context implements ServletContext, HttpSessionContext
         // Set our priority high while we have the sessions locked
         int oldPriority = Thread.currentThread().getPriority();
         Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
-                
+
         long now = System.currentTimeMillis();
-                
+
         // Since Hashtable enumeration is not safe over deletes,
         // we build a list of stale sessions, then go back and invalidate them
         ArrayList staleSessions = null;
-                
+
         // For each session
         for (Iterator i = _sessions.values().iterator(); i.hasNext(); )
         {
@@ -454,7 +451,7 @@ public class Context implements ServletContext, HttpSessionContext
                 staleSessions.add(session);
             }
         }
-                
+
         // Remove the stale sessions
         if (staleSessions != null)
         {
@@ -462,23 +459,23 @@ public class Context implements ServletContext, HttpSessionContext
                 ((Session)staleSessions.get(i)).invalidate();
             }
         }
-                
+
         Thread.currentThread().setPriority(oldPriority);
     }
 
     /* ------------------------------------------------------------ */
-    /** 
-     * @return 
+    /**
+     * @return
      */
     public String toString()
     {
         return "Servlet"+_handler.getHandlerContext().toString();
     }
-    
-    
+
+
     // how often to check - XXX - make this configurable
     final static int scavengeDelay = 30000;
-    
+
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* -------------------------------------------------------------- */
@@ -488,7 +485,7 @@ public class Context implements ServletContext, HttpSessionContext
         public void run() {
             while (true) {
                 try {
-                    sleep(scavengeDelay); 
+                    sleep(scavengeDelay);
                 } catch (InterruptedException ex) {}
                 Context.this.scavenge();
             }
@@ -499,8 +496,8 @@ public class Context implements ServletContext, HttpSessionContext
             setDaemon(true);
             this.start();
         }
-        
-    }   // SessionScavenger    
+
+    }   // SessionScavenger
 
 
     /* ------------------------------------------------------------ */
@@ -528,14 +525,14 @@ public class Context implements ServletContext, HttpSessionContext
             if (_defaultMaxIdleTime>=0)
                 maxIdleTime=_defaultMaxIdleTime*1000;
         }
-        
+
         /* ------------------------------------------------------------- */
         void accessed()
         {
             newSession=false;
             accessed=System.currentTimeMillis();
         }
-        
+
         /* ------------------------------------------------------------- */
         public String getId()
             throws IllegalStateException
@@ -543,7 +540,7 @@ public class Context implements ServletContext, HttpSessionContext
             if (invalid) throw new IllegalStateException();
             return id;
         }
-        
+
         /* ------------------------------------------------------------- */
         public long getCreationTime()
             throws IllegalStateException
@@ -551,7 +548,7 @@ public class Context implements ServletContext, HttpSessionContext
             if (invalid) throw new IllegalStateException();
             return created;
         }
-        
+
         /* ------------------------------------------------------------- */
         public long getLastAccessedTime()
             throws IllegalStateException
@@ -559,36 +556,36 @@ public class Context implements ServletContext, HttpSessionContext
             if (invalid) throw new IllegalStateException();
             return accessed;
         }
-        
+
         /* ------------------------------------------------------------- */
         public int getMaxInactiveInterval()
         {
             return (int)(maxIdleTime / 1000);
         }
-        
+
         /* ------------------------------------------------------------- */
         /**
          * @deprecated
-         */   
+         */
         public HttpSessionContext getSessionContext()
             throws IllegalStateException
         {
             if (invalid) throw new IllegalStateException();
             return Context.this;
         }
-        
+
         /* ------------------------------------------------------------- */
         public void setMaxInactiveInterval(int i)
         {
             maxIdleTime = (long)i * 1000;
         }
-        
+
         /* ------------------------------------------------------------- */
         public synchronized void invalidate()
             throws IllegalStateException
         {
             if (invalid) throw new IllegalStateException();
-            
+
             // Call valueUnbound on all the HttpSessionBindingListeners
             // To avoid iterator problems, don't actually remove them
             Iterator iter = _sessions.keySet().iterator();
@@ -601,7 +598,7 @@ public class Context implements ServletContext, HttpSessionContext
             Context.this._sessions.remove(id);
             invalid=true;
         }
-        
+
         /* ------------------------------------------------------------- */
         public boolean isNew()
             throws IllegalStateException
@@ -609,7 +606,7 @@ public class Context implements ServletContext, HttpSessionContext
             if (invalid) throw new IllegalStateException();
             return newSession;
         }
-        
+
 
         /* ------------------------------------------------------------ */
         public Object getAttribute(String name)
@@ -624,7 +621,7 @@ public class Context implements ServletContext, HttpSessionContext
             if (invalid) throw new IllegalStateException();
             return Collections.enumeration(_values.keySet());
         }
-        
+
         /* ------------------------------------------------------------ */
         public void setAttribute(String name, Object value)
         {
@@ -637,7 +634,7 @@ public class Context implements ServletContext, HttpSessionContext
                 bindValue(name, value);
             }
         }
-        
+
         /* ------------------------------------------------------------ */
         public void removeAttribute(String name)
         {
@@ -645,7 +642,7 @@ public class Context implements ServletContext, HttpSessionContext
             Object value=_values.remove(name);
             unbindValue(name, value);
         }
-        
+
         /* ------------------------------------------------------------- */
         /**
          * @deprecated 	As of Version 2.2, this method is
@@ -656,7 +653,7 @@ public class Context implements ServletContext, HttpSessionContext
         {
             return getAttribute(name);
         }
-        
+
         /* ------------------------------------------------------------- */
         /**
          * @deprecated 	As of Version 2.2, this method is
@@ -669,7 +666,7 @@ public class Context implements ServletContext, HttpSessionContext
             String[] a = new String[_values.size()];
             return (String[])_values.keySet().toArray(a);
         }
-        
+
         /* ------------------------------------------------------------- */
         /**
          * @deprecated 	As of Version 2.2, this method is
@@ -681,7 +678,7 @@ public class Context implements ServletContext, HttpSessionContext
         {
             setAttribute(name,value);
         }
-        
+
         /* ------------------------------------------------------------- */
         /**
          * @deprecated 	As of Version 2.2, this method is
@@ -709,6 +706,6 @@ public class Context implements ServletContext, HttpSessionContext
             if (value!=null && value instanceof HttpSessionBindingListener)
                 ((HttpSessionBindingListener)value)
                     .valueUnbound(new HttpSessionBindingEvent(this,name));
-        }        
-    }    
+        }
+    }
 }
