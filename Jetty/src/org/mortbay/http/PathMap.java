@@ -151,33 +151,29 @@ public class PathMap extends HashMap implements Externalizable
             
             old = super.put(spec,object);
             
-            // Look for the entry that was just created.
-            Iterator iter=_entrySet.iterator();
-            while(iter.hasNext())
+            // Make entry that was just created.
+            Entry entry = new Entry(spec,object);
+
+            if (entry.getKey().equals(spec))
             {
-                Map.Entry entry =
-                    (Map.Entry)iter.next();
-                if (entry.getKey().equals(spec))
+                if (spec.equals("/*"))
+                    _prefixDefault=entry;
+                else if (spec.endsWith("/*"))
                 {
-                    if (spec.equals("/*"))
-                        _prefixDefault=entry;
-                    else if (spec.endsWith("/*"))
-                    {
-                        _prefixMap.put(spec.substring(0,spec.length()-2),entry);
-                        _exactMap.put(spec.substring(0,spec.length()-1),entry);
-                        _exactMap.put(spec.substring(0,spec.length()-2),entry);
-                    }
-                    else if (spec.startsWith("*."))
-                        _suffixMap.put(spec.substring(2),entry);
-                    else if (spec.equals("/"))
-                    {    
-                        _default=entry;
-                        _defaultSingletonList=
-                            SingletonList.newSingletonList(_default);
-                    }
-                    else
-                        _exactMap.put(spec,entry);
+                    _prefixMap.put(spec.substring(0,spec.length()-2),entry);
+                    _exactMap.put(spec.substring(0,spec.length()-1),entry);
+                    _exactMap.put(spec.substring(0,spec.length()-2),entry);
                 }
+                else if (spec.startsWith("*."))
+                    _suffixMap.put(spec.substring(2),entry);
+                else if (spec.equals("/"))
+                {    
+                    _default=entry;
+                    _defaultSingletonList=
+                        SingletonList.newSingletonList(_default);
+                }
+                else
+                    _exactMap.put(spec,entry);
             }
         }
             
@@ -465,5 +461,42 @@ public class PathMap extends HashMap implements Externalizable
                 path = base + "/" + info;
         return path;
     }
-    
+ 
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private static class Entry implements Map.Entry
+    {
+        private Object key;
+        private Object value;
+        private transient String string;
+
+        Entry(Object key, Object value)
+        {
+            this.key=key;
+            this.value=value;
+        }
+
+        public Object getKey()
+        {
+            return key;
+        }
+        
+        public Object getValue()
+        {
+            return value;
+        }
+
+        public Object setValue(Object o)
+        {
+            throw new UnsupportedOperationException();
+        }
+
+        public String toString()
+        {
+            if (string==null)
+                string=key+"="+value;
+            return string;
+        }
+    }
 }
