@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+ + Reverted to 302 for all redirections as all clients do not understand 303
+ + Created statsLock sync objects to avoid deadlock when stopping.
+
 Jetty-4.1.0RC3 - 28 August 2002
  + Fixed security problem for suffix matching with trailing "/" 
  + addWebApplications encodes paths to allow for spaces in file names.

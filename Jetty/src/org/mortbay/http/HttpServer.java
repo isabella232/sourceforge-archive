@@ -112,6 +112,7 @@ public class HttpServer implements LifeCycle,
     
     /* ------------------------------------------------------------ */
     private boolean _statsOn=false;
+    private transient Object _statsLock;
     private transient long _statsStartedAt=0;
     private transient int _connections;
     private transient int _connectionsOpen;
@@ -146,6 +147,7 @@ public class HttpServer implements LifeCycle,
     {
         setAnonymous(anonymous);
         _virtualHostMap.setIgnoreCase(true);
+        _statsLock=new Object[0];
     }
     
     /* ------------------------------------------------------------ */
@@ -701,7 +703,7 @@ public class HttpServer implements LifeCycle,
     }
     
     /* ------------------------------------------------------------ */
-    /** Stop all listeners then handlers.
+    /** Stop all listeners then all contexts.
      * Equivalent to stop(false);
      * @exception InterruptedException If interrupted, stop may not have
      * been called on everything.
@@ -713,9 +715,10 @@ public class HttpServer implements LifeCycle,
     }
     
     /* ------------------------------------------------------------ */
-    /** Stop all listeners then handlers.
-     * @param graceful If true and statistics are on, then this method will wait
-     * for requestsActive to go to zero before calling stop()
+    /** Stop all listeners then all contexts.
+     * @param graceful If true and statistics are on for a context,
+     * then this method will wait for requestsActive to go to zero
+     * before stopping that context.
      */
     public synchronized void stop(boolean graceful)
         throws InterruptedException
@@ -1139,51 +1142,65 @@ public class HttpServer implements LifeCycle,
     public long getRequestsDurationMax() {return _requestsDurationMax;}
     
     /* ------------------------------------------------------------ */
-    synchronized void statsOpenConnection()
+    void statsOpenConnection()
     {
-        if (++_connectionsOpen > _connectionsOpenMax)
-            _connectionsOpenMax=_connectionsOpen;
+        synchronized(_statsLock)
+        {
+            if (++_connectionsOpen > _connectionsOpenMax)
+                _connectionsOpenMax=_connectionsOpen;
+        }
     }
     
     /* ------------------------------------------------------------ */
-    synchronized void statsGotRequest()
+    void statsGotRequest()
     {
-        if (++_requestsActive > _requestsActiveMax)
-            _requestsActiveMax=_requestsActive;
+        synchronized(_statsLock)
+        {
+            if (++_requestsActive > _requestsActiveMax)
+                _requestsActiveMax=_requestsActive;
+        }
     }
     
-    /* ------------------------------------------------------------ */
-    synchronized void statsEndRequest(long duration,boolean ok)
-    {
-        _requests++;
-        if (!ok)
-            _errors++;
-        if (--_requestsActive<0)
-            _requestsActive=0;
-        if (duration>_requestsDurationMax)
-            _requestsDurationMax=duration;
-        if (_requestsDurationAve==0)
-            _requestsDurationAve=duration*128;
-        _requestsDurationAve=_requestsDurationAve-_requestsDurationAve/128+duration;
-    }
     
     /* ------------------------------------------------------------ */
-    synchronized void statsCloseConnection(long duration,int requests)
+    void statsEndRequest(long duration,boolean ok)
     {
-        _connections++;
-        _connectionsOpen--;
-        if (_connectionsOpen<0)
-            _connectionsOpen=0;
-        if (duration>_connectionsDurationMax)
-            _connectionsDurationMax=duration;
-        if (_connectionsDurationAve==0)
-            _connectionsDurationAve=128*duration;
-        _connectionsDurationAve=_connectionsDurationAve-_connectionsDurationAve/128+duration;
-        if (requests>_connectionsRequestsMax)
-            _connectionsRequestsMax=requests;
-        if (_connectionsRequestsAve==0)
-            _connectionsRequestsAve=16;
-        _connectionsRequestsAve=_connectionsRequestsAve-_connectionsRequestsAve/16+requests;
+        synchronized(_statsLock)
+        {
+            _requests++;
+            if (!ok)
+                _errors++;
+            if (--_requestsActive<0)
+                _requestsActive=0;
+            if (duration>_requestsDurationMax)
+                _requestsDurationMax=duration;
+            if (_requestsDurationAve==0)
+                _requestsDurationAve=duration*128;
+            _requestsDurationAve=_requestsDurationAve-_requestsDurationAve/128+duration;
+        }
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    void statsCloseConnection(long duration,int requests)
+    {
+        synchronized(_statsLock)
+        {
+            _connections++;
+            _connectionsOpen--;
+            if (_connectionsOpen<0)
+                _connectionsOpen=0;
+            if (duration>_connectionsDurationMax)
+                _connectionsDurationMax=duration;
+            if (_connectionsDurationAve==0)
+                _connectionsDurationAve=128*duration;
+            _connectionsDurationAve=_connectionsDurationAve-_connectionsDurationAve/128+duration;
+            if (requests>_connectionsRequestsMax)
+                _connectionsRequestsMax=requests;
+            if (_connectionsRequestsAve==0)
+                _connectionsRequestsAve=16;
+            _connectionsRequestsAve=_connectionsRequestsAve-_connectionsRequestsAve/16+requests;
+        }
     }
     
     

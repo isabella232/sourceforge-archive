@@ -145,6 +145,7 @@ public class HttpContext implements LifeCycle,
     private transient String[] _hostsArray;
 
     /* ------------------------------------------------------------ */
+    transient Object _statsLock;
     transient long _statsStartedAt;
     transient int _requests;
     transient int _requestsActive;
@@ -160,7 +161,9 @@ public class HttpContext implements LifeCycle,
     /** Constructor. 
      */
     public HttpContext()
-    {}
+    {
+        _statsLock=new Object[0];
+    }
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -169,6 +172,7 @@ public class HttpContext implements LifeCycle,
      */
     public HttpContext(HttpServer httpServer,String contextPathSpec)
     {
+        this();
         setHttpServer(httpServer);
         setContextPath(contextPathSpec);
     }
@@ -1557,7 +1561,7 @@ public class HttpContext implements LifeCycle,
         
         if (_statsOn)
         {
-            synchronized(this)
+            synchronized(_statsLock)
             {
                 _requests++;
                 _requestsActive++;
@@ -1896,18 +1900,21 @@ public class HttpContext implements LifeCycle,
     {return _statsOn?(System.currentTimeMillis()-_statsStartedAt):0;}
     
     /* ------------------------------------------------------------ */
-    public synchronized void statsReset()
+    public void statsReset()
     {
-        if (_statsOn)
-            _statsStartedAt=System.currentTimeMillis();
-        _requests=0;
-        _requestsActive=0;
-        _requestsActiveMax=0;
-        _responses1xx=0;
-        _responses2xx=0;
-        _responses3xx=0;
-        _responses4xx=0;
-        _responses5xx=0;
+        synchronized(_statsLock)
+        {
+            if (_statsOn)
+                _statsStartedAt=System.currentTimeMillis();
+            _requests=0;
+            _requestsActive=0;
+            _requestsActiveMax=0;
+            _responses1xx=0;
+            _responses2xx=0;
+            _responses3xx=0;
+            _responses4xx=0;
+            _responses5xx=0;
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -1985,7 +1992,7 @@ public class HttpContext implements LifeCycle,
     {
         if (_statsOn)
         {
-            synchronized(this)
+            synchronized(_statsLock)
             {
                 if (--_requestsActive<0)
                     _requestsActive=0;
