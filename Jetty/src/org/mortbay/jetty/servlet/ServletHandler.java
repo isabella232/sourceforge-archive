@@ -13,6 +13,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.AbstractCollection;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -102,7 +103,8 @@ public class ServletHandler
     private String _formLoginPage;
     private String _formErrorPage;
     private ResourceHandler _resourceHandler;
-    
+    private List _sessionListeners=new ArrayList();
+
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
@@ -139,11 +141,28 @@ public class ServletHandler
     {
         if (isStarted())
             throw new IllegalStateException("Started");
+
         if (getHttpContext()!=null && _sessionManager!=null)
-            _sessionManager.initialize(null);
+	{
+	  _sessionManager.initialize(null);
+	  for (Iterator i=_sessionListeners.iterator();i.hasNext();)
+	  {
+	    EventListener listener=(EventListener)i.next();
+	    _sessionManager.removeEventListener(listener);
+	  }
+	}
+
         _sessionManager=sm;
+
         if (getHttpContext()!=null)
-            _sessionManager.initialize(this);
+	{
+	  for (Iterator i=_sessionListeners.iterator();i.hasNext();)
+	    {
+	      EventListener listener=(EventListener)i.next();
+	      _sessionManager.addEventListener(listener);
+	    }
+	  _sessionManager.initialize(this);
+	}
     }
     
     /* ------------------------------------------------------------ */
@@ -349,7 +368,10 @@ public class ServletHandler
             (listener instanceof HttpSessionAttributeListener) ||
             (listener instanceof HttpSessionBindingListener) ||
             (listener instanceof HttpSessionListener))
-            _sessionManager.addEventListener(listener);
+	{
+	  _sessionManager.addEventListener(listener);
+	  _sessionListeners.add(listener);
+	}
         else 
             throw new IllegalArgumentException(listener.toString());
     }
@@ -361,7 +383,10 @@ public class ServletHandler
             (listener instanceof HttpSessionAttributeListener) ||
             (listener instanceof HttpSessionBindingListener) ||
             (listener instanceof HttpSessionListener))
-            _sessionManager.removeEventListener(listener);
+          {
+	    _sessionManager.removeEventListener(listener);
+	    _sessionListeners.remove(_sessionListeners.indexOf(listener));
+	  }
     }
     
     /* ------------------------------------------------------------ */
