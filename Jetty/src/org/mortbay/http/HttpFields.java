@@ -101,7 +101,9 @@ public class HttpFields
         __RequestRange = "Request-Range",
         __Referer = "Referer",
         __TE = "TE",
-        __UserAgent = "User-Agent";
+        __UserAgent = "User-Agent",
+        __XForwardedFor = "X-Forwarded-For";
+    
 
     /* ------------------------------------------------------------ */
     /** Response Fields.

@@ -190,7 +190,6 @@ public class ProxyHandler extends AbstractHttpHandler
             }
 
             // check connection header
-            connection.setRequestProperty("Via","1.1 (jetty)");
             String connectionHdr = request.getField(HttpFields.__Connection);
             if (connectionHdr!=null &&
                 (connectionHdr.equalsIgnoreCase(HttpFields.__KeepAlive)||
@@ -198,6 +197,7 @@ public class ProxyHandler extends AbstractHttpHandler
                 connectionHdr=null;
 
             // copy headers
+            boolean xForwardedFor=false;
             Enumeration enum = request.getFieldNames();
             while (enum.hasMoreElements())
             {
@@ -213,9 +213,18 @@ public class ProxyHandler extends AbstractHttpHandler
                 {
                     String val = (String)vals.nextElement();
                     if (val!=null)
+                    {
                         connection.addRequestProperty(hdr,val);
+                        xForwardedFor|=HttpFields.__XForwardedFor.equalsIgnoreCase(hdr);
+                    }
                 }
-            }           
+            }
+
+            // Proxy headers
+            connection.setRequestProperty("Via","1.1 (jetty)");
+            if (!xForwardedFor)
+                connection.addRequestProperty(HttpFields.__XForwardedFor,
+                                              request.getRemoteAddr());
 
             // a little bit of cache control
             String cache_control = request.getField(HttpFields.__CacheControl);
