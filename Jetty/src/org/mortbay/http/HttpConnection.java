@@ -374,7 +374,7 @@ public class HttpConnection
     {        
         // Check Host Field exists
         String host=_request.getField(HttpFields.__Host);
-        if (host==null || host.length()==0)
+        if (host==null)
             throw new HttpException(_response.__400_Bad_Request);
         
         // check and enable requests transfer encodings.

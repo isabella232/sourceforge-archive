@@ -96,7 +96,7 @@ public class ChunkingInputStream extends InputStream
         throws IOException
     {
         int len = _in.available();
-        if (len<=_chunkSize)
+        if (len<=_chunkSize || _chunkSize==0)
             return len;
         return _chunkSize;
     }
@@ -167,8 +167,17 @@ public class ChunkingInputStream extends InputStream
         int i=line.indexOf(';');
         if (i>0)
             line=line.substring(0,i).trim();
-        _chunkSize = Integer.parseInt(line,16);
-        
+        try
+        {
+            _chunkSize = Integer.parseInt(line,16);
+        }
+        catch (NumberFormatException e)
+        {
+            _chunkSize=-1;
+            Code.warning("Bad Chunk:"+line);
+            Code.debug(e);
+        }
+                 
         // check for EOF
         if (_chunkSize==0)
         {

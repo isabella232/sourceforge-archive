@@ -24,8 +24,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import javax.servlet.http.Cookie;
 import org.mortbay.util.B64Code;
+import org.mortbay.util.ByteArrayOutputStream2;
 import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
+import org.mortbay.util.IO;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.QuotedStringTokenizer;
@@ -420,7 +422,7 @@ public class HttpRequest extends HttpMessage
         _hostPort=_header.get(HttpFields.__Host);
         _host=_hostPort;
         _port=0;
-        if (_host!=null)
+        if (_host!=null && _host.length()>0)
         {
             int colon=_host.indexOf(':');
             if (colon>=0)
@@ -774,29 +776,19 @@ public class HttpRequest extends HttpMessage
                     HttpRequest.__POST.equals(getMethod()))
                 {
                     int content_length = getIntField(HttpFields.__ContentLength);
-                    if (content_length<0)
-                        Code.warning("No contentLength for "+
-                                     HttpFields.__WwwFormUrlEncode);
-                    else if (content_length==0)
-                    {
+                    if (content_length==0)
                         Code.debug("No form content");
-                    }
                     else
                     {
                         try
                         {
                             // Read the content
-                            byte[] content=new byte[content_length];
+                            ByteArrayOutputStream2 bout =
+                                new ByteArrayOutputStream2(content_length>0?content_length:4096);
                             InputStream in = getInputStream();
-                            int offset=0;
-                            int len=0;
-                            while ((content_length - offset) > 0)
-                            {
-                                 len=in.read(content,offset,content_length-offset);
-                                 if (len <= 0)
-                                     throw new EOFException();
-                                 offset+=len;
-                            }
+                            IO.copy(in,bout);
+                            
+                            byte[] content=bout.getBuf();
 
                             // Add form params to query params
                             String encoding=getCharacterEncoding();
