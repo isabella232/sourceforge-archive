@@ -597,8 +597,9 @@ abstract public class ThreadedServer
                     _threadSet.remove(thread);
                 notify();
             }
-            Code.debug("Stopped listening on " + listen+
-                       "\nthreads="+_threadSet.size());
+	    if (_threadSet!=null)
+		Code.debug("Stopped listening on " + listen+
+			   "\nthreads="+_threadSet.size());
         }
     }
 }
