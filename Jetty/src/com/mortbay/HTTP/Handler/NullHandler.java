@@ -25,6 +25,7 @@ public class NullHandler implements HttpHandler
     private boolean _started=false;
     private boolean _destroyed=true;
     private HandlerContext _context;
+    private String _name;
     
     /* ------------------------------------------------------------ */
     /** 
@@ -98,7 +99,23 @@ public class NullHandler implements HttpHandler
     {
 	Code.warning("NullHandler called for "+contextPathSpec);
     }
-    
+
+    /* ------------------------------------------------------------ */
+  public String toString()
+  {
+    if(_name==null)
+    {
+      _name=this.getClass().getName();
+      if (!Code.debug())
+      {
+	int i=_name.lastIndexOf(".");
+        _name=_name.substring(i+1);
+      }
+      _name+=" in "+_context;
+    }
+    return _name;
+  }    
+
 }
 
 

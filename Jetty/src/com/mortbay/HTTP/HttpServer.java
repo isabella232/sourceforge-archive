@@ -318,7 +318,7 @@ public class HttpServer implements LifeCycle
      * @param host The virtual host or null for all hosts.
      * @param contextPathSpec 
      * @param i Index among contexts of same host and pathSpec.
-     * @return The HandlerContext of null.
+     * @return The HandlerContext or null.
      */
     public HandlerContext getContext(String host, String contextPathSpec, int i)
     {
@@ -341,7 +341,7 @@ public class HttpServer implements LifeCycle
 
     
     /* ------------------------------------------------------------ */
-    /** 
+    /** Get or create context. 
      * @param host The virtual host or null for all hosts.
      * @param contextPathSpec 
      * @return HandlerContext. If multiple contexts exist for the same
@@ -349,7 +349,7 @@ public class HttpServer implements LifeCycle
      * If no context exists, a new context is defined.
      */
     public HandlerContext getContext(String host, String contextPathSpec)
-    {
+    { 
 	HandlerContext hc=null;
 
 	PathMap contextMap=(PathMap)_hostMap.get(host);
@@ -393,6 +393,9 @@ public class HttpServer implements LifeCycle
 	}
 
 	contextList.add(context);
+	String name=(host==null
+		     ?"":(host+":"))+contextPathSpec;
+	context.addName(name);    
     }
 
     

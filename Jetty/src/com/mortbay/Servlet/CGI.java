@@ -90,20 +90,20 @@ public class CGI extends HttpServlet
   public void service(HttpServletRequest req, HttpServletResponse res) 
     throws ServletException, IOException
   {
-    Code.debug("System.Properties : " + System.getProperties().toString());
+    Code.debug("CGI: System.Properties : " + System.getProperties().toString());
 
     Enumeration p=req.getParameterNames();
     while (p.hasMoreElements())
     {
       String name  = p.nextElement().toString();
-      Code.debug("Parameter - "+name+" : "+req.getParameter(name));
+      Code.debug("CGI: Parameter - "+name+" : "+req.getParameter(name));
     }
 
     Enumeration h = req.getHeaderNames();
     while (h.hasMoreElements())
     {
       String name  = h.nextElement().toString();
-      Code.debug("Header - "+name+" : "+req.getHeader(name));
+      Code.debug("CGI: Header - "+name+" : "+req.getHeader(name));
     }
 
     String exe = req.getPathInfo();

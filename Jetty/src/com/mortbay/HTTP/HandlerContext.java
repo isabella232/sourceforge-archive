@@ -41,7 +41,8 @@ public class HandlerContext
     private String _classPath;
     private Resource _resourceBase;
     private Map _attributes = new HashMap(11);
-    private Map _mimeMap ;
+    private Map _mimeMap;
+    private String _name;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -52,6 +53,15 @@ public class HandlerContext
 	_httpServer=httpServer;
     }
     
+    /* ------------------------------------------------------------ */
+    void addName(String name)
+    {
+      if (_name==null)
+	_name=name;
+      else
+	_name=_name+" "+name;
+    }
+
     /* ------------------------------------------------------------ */
     public HttpServer getHttpServer()
     {
@@ -593,9 +603,12 @@ public class HandlerContext
 	getMimeByExtension("default");
 	_mimeMap.put(extension,type);
     }
-    
-
-    
+     
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        return "Context["+_name+"]"; 
+    }
 }
 
 
