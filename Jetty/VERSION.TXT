@@ -9,6 +9,7 @@ Jetty-4.0.3 - 20 June 2002
  + Protect session.getAttributeNames from concurrent modifications.
  + Allow session manager to be initialized when set.
  + Fixed japanese locale
+ + Allow coma separated cookies and headers
 
 Jetty-4.0.2 - 6 June 2002
  + Fixed web.dtd references.

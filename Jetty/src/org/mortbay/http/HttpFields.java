@@ -579,6 +579,7 @@ public class HttpFields
                     while (e.hasMoreElements())
                     {
                         String value=(String)e.nextElement();
+                        
                         tok=new QuotedStringTokenizer(value,separators,false,false);
                         if (tok.hasMoreElements())
                             return true;
@@ -592,7 +593,9 @@ public class HttpFields
                 {
                     if (!hasMoreElements())
                         throw new NoSuchElementException();
-                    return tok.nextElement();
+                    String next = (String) tok.nextElement();
+                    if (next!=null)next=next.trim();
+                    return next;
                 }
             };
     }

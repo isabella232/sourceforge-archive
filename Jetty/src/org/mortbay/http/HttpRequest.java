@@ -840,7 +840,7 @@ public class HttpRequest
             int version=0;
             Cookie cookie=null;
 
-            Enumeration enum =_header.getValues(HttpFields.__Cookie,";");            
+            Enumeration enum =_header.getValues(HttpFields.__Cookie,",;");            
             while (enum.hasMoreElements())
             {
                 try
