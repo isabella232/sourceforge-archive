@@ -41,7 +41,7 @@ public class BasicAuthenticator implements Authenticator
         {
             try
             {
-                Code.debug("Credentials: "+credentials);
+                Code.debug("Credentials: ",credentials);
                 credentials = credentials.substring(credentials.indexOf(' ')+1);
                 credentials = B64Code.decode(credentials,StringUtil.__ISO_8859_1);
                 int i = credentials.indexOf(':');

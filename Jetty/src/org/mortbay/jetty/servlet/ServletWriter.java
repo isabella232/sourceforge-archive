@@ -34,9 +34,10 @@ class ServletWriter extends PrintWriter
     
     /* ------------------------------------------------------------ */
     ServletWriter(OutputStream os)
+        throws IOException
     {
         super((os instanceof HttpOutputStream) 
-              ?((HttpOutputStream)os).getISO8859Writer()
+              ?((HttpOutputStream)os).getWriter(null)
               :new OutputStreamWriter(os));
         this.os=os;
     }
@@ -45,9 +46,8 @@ class ServletWriter extends PrintWriter
     ServletWriter(OutputStream os, String encoding)
         throws IOException
     {
-        super(((os instanceof HttpOutputStream) &&
-               (StringUtil.__ISO_8859_1.equals(encoding)))
-              ?((HttpOutputStream)os).getISO8859Writer()
+        super((os instanceof HttpOutputStream)
+              ?((HttpOutputStream)os).getWriter(encoding)
               :new OutputStreamWriter(os,encoding));
         this.os=os;
         this.encoding=encoding;

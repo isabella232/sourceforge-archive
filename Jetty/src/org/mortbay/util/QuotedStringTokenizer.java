@@ -24,8 +24,9 @@ import java.util.StringTokenizer;
 public class QuotedStringTokenizer
     extends StringTokenizer
 {
+    private final static String __delim="\t\n\r";
     private String _string;
-    private String _delim = "\t\n\r";
+    private String _delim = __delim;
     private boolean _returnQuotes=false;
     private boolean _returnTokens=false;
     private StringBuffer _token;

@@ -72,7 +72,8 @@ public class HttpOutputStream
     private int _bufferSize;
     private int _headerReserve;
     private boolean _bufferHeaders;
-    private ISO8859Writer _iso8859writer;
+    private HttpWriter _iso8859writer;
+    private HttpWriter _utf8writer;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -375,6 +376,9 @@ public class HttpOutputStream
         if (_iso8859writer!=null)
             _iso8859writer.destroy();
         _iso8859writer=null;
+        if (_utf8writer!=null)
+            _utf8writer.destroy();
+        _utf8writer=null;
     }
     
     /* ------------------------------------------------------------ */
@@ -543,21 +547,54 @@ public class HttpOutputStream
     }
 
     /* ------------------------------------------------------------ */
-    public Writer getISO8859Writer()
+    private Writer getISO8859Writer()
+        throws IOException
     {
         if (_iso8859writer==null)
-            _iso8859writer=new ISO8859Writer();
+            _iso8859writer=new HttpWriter(StringUtil.__ISO_8859_1);
         return _iso8859writer;
+    }
+    
+    /* ------------------------------------------------------------ */
+    private Writer getUTF8Writer()
+        throws IOException
+    {
+        if (_utf8writer==null)
+            _utf8writer=new HttpWriter("UTF-8");
+        return _utf8writer;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public Writer getWriter(String encoding)
+        throws IOException
+    {
+        if (encoding==null ||
+            StringUtil.__ISO_8859_1.equalsIgnoreCase(encoding)  ||
+            "ISO8859_1".equalsIgnoreCase(encoding))
+            return getISO8859Writer();
+
+        if ("UTF-8".equalsIgnoreCase(encoding) ||
+            "UTF8".equalsIgnoreCase(encoding))
+            return getUTF8Writer();
+
+        return new OutputStreamWriter(this,encoding);
     }
     
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    private class ISO8859Writer extends Writer
+    private class HttpWriter extends Writer
     {
         private OutputStreamWriter _writer=null;
         private boolean _writting=false;
         private byte[] _buf = ByteArrayPool.getByteArray();
+        private String _encoding;
+        
+        /* -------------------------------------------------------- */
+        HttpWriter(String encoding)
+        {
+            _encoding=encoding;
+        }
         
         /* -------------------------------------------------------- */
         public Object getLock()
@@ -690,7 +727,7 @@ public class HttpOutputStream
         {
             if (_writer==null)
                 _writer = new OutputStreamWriter(HttpOutputStream.this,
-                                                 StringUtil.__ISO_8859_1);
+                                                 _encoding);
             _writting=true;
             _writer.write(ca,offset,length);
         }
@@ -722,6 +759,7 @@ public class HttpOutputStream
             ByteArrayPool.returnByteArray(_buf);
             _buf=null;
             _writer=null;
+            _encoding=null;
         }
     }
 }

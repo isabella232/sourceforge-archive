@@ -53,11 +53,21 @@ public class ServletHttpResponse implements HttpServletResponse
         OUTPUTSTREAM_OUT=1,
         WRITER_OUT=2;
 
-    private static ServletWriter __nullServletWriter =
-            new ServletWriter(IO.getNullStream());
-    
-    private static ServletOut __nullServletOut =
-            new ServletOut(IO.getNullStream());
+    private static ServletWriter __nullServletWriter;
+    private static ServletOut __nullServletOut;
+    static
+    {
+        try{
+            __nullServletWriter =
+                new ServletWriter(IO.getNullStream());
+            __nullServletOut =
+                new ServletOut(IO.getNullStream());
+        }
+        catch (Exception e)
+        {
+            Code.fail(e);
+        }
+    }
     
     private static Map __charSetMap = new HashMap();
     static
