@@ -285,7 +285,9 @@ public class ServletResponse implements HttpServletResponse
     public String encodeURL(String url) 
     {
         // should not encode if cookies in evidence
-        if (_servletRequest==null || _servletRequest.isRequestedSessionIdFromCookie())
+        if (_servletRequest==null ||
+            _servletRequest.isRequestedSessionIdFromCookie() &&
+            _servletRequest.getContext().getServletHandler().isUsingCookies())
             return url;        
         
         // get session;

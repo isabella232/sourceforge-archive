@@ -112,7 +112,6 @@ public class Frame
  	_lineStart = _stack.indexOf("Frame.<init>(",_lineStart);
         if (_lineStart==-1)
         {
-            new Throwable().printStackTrace();
             // JIT has inlined Frame constructor
             _lineStart =
                 _stack.indexOf(__lineSeparator)+__lineSeparatorLen;

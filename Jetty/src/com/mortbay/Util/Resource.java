@@ -360,16 +360,7 @@ public class Resource
         path = canonicalPath(path);
 
         String resourceBase = _url.toExternalForm();
-        if( resourceBase.endsWith( "/"))
-            if( path.startsWith( "/"))
-                path = resourceBase + path.substring( 1);
-            else
-                path = resourceBase + path;
-        else
-            if( path.startsWith( "/"))
-                path = resourceBase + path;
-            else
-                path = resourceBase + "/" + path;
+        path=URI.addPaths(resourceBase,path);
         return newResource(new URL(path));
     }
 

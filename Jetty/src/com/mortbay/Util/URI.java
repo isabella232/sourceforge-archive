@@ -547,6 +547,55 @@ public class URI
     {
         return new URI(this);
     }
+
+
+    /* ------------------------------------------------------------ */
+    /** Add two URI path segments.
+     * Handles null and empty paths, path and query params (eg ?a=b or
+     * ;JSESSIONID=xxx) and avoids duplicate '/'
+     * @param p1 URI path segment 
+     * @param p2 URI path segment
+     * @return Legally combined path segments.
+     */
+    public static String addPaths(String p1, String p2)
+    {
+        if (p1==null || p1.length()==0)
+        {
+            if (p2==null || p2.length()==0)
+                return p1;
+            return p2;
+        }
+        if (p2==null || p2.length()==0)
+            return p1;
+
+        String p3=null;
+        
+        int split=p1.indexOf(";");
+        if (split<0)
+            split=p1.indexOf("?");
+        if (split==0)
+            return p2+p1;
+        else if (split>=0)
+        {
+            p3=p1.substring(split);
+            p1=p1.substring(0,split);
+        }
+
+        if (p1.endsWith("/"))
+        {
+            if (p2.startsWith("/"))
+                return p3==null?(p1+p2.substring(1)):(p1+p2.substring(1)+p3);
+            else
+                return p3==null?(p1+p2):(p1+p2+p3);
+        }
+        else
+        {
+            if (p2.startsWith("/"))
+                return p3==null?(p1+p2):(p1+p2+p3);
+            else
+                return p3==null?(p1+'/'+p2):(p1+'/'+p2+p3);
+        }
+    }
     
 }
 

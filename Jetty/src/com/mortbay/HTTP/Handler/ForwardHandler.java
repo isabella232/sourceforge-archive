@@ -15,6 +15,7 @@ import com.mortbay.HTTP.PathMap;
 import com.mortbay.Util.UrlEncoded;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.Log;
+import com.mortbay.Util.URI;
 import java.io.IOException;
 import java.util.Map;
 
@@ -89,9 +90,13 @@ public class ForwardHandler extends NullHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
+
+        if (Code.verbose())
+            Code.debug("Look for "+pathInContext+" in "+_forward);
+        
         String newPath=null;
         String query=null;
-        if (_root!=null && "/".equals(pathInContext))
+        if (_root!=null && ("/".equals(pathInContext) || pathInContext.startsWith("/;")))
             newPath=_root;
         else
         {
@@ -110,7 +115,7 @@ public class ForwardHandler extends NullHandler
                 String info=PathMap.pathInfo((String)entry.getKey(),pathInContext);
                 Code.debug("Forward: match:\"", match, "\" info:",
                            info, "\" query:", query);
-                newPath=match+(info==null?"":info);
+                newPath=info==null?match:(URI.addPaths(match,info));
             }
         }
         

@@ -634,7 +634,91 @@ public class TestHarness
             uri=(URI)uri.clone();
             test.checkEquals(uri.toString(),
                              "/test/nasty&%3F%20URI?c=%26&d=+%3F","clone");
+
+
+            test.checkEquals(URI.addPaths(null,null),null,"null+null");
+            test.checkEquals(URI.addPaths(null,""),null,"null+");
+            test.checkEquals(URI.addPaths(null,"bbb"),"bbb","null+bbb");
+            test.checkEquals(URI.addPaths(null,"/"),"/","null+/");
+            test.checkEquals(URI.addPaths(null,"/bbb"),"/bbb","null+/bbb");
             
+            test.checkEquals(URI.addPaths("",null),"","+null");
+            test.checkEquals(URI.addPaths("",""),"","+");
+            test.checkEquals(URI.addPaths("","bbb"),"bbb","+bbb");
+            test.checkEquals(URI.addPaths("","/"),"/","+/");
+            test.checkEquals(URI.addPaths("","/bbb"),"/bbb","+/bbb");
+            
+            test.checkEquals(URI.addPaths("aaa",null),"aaa","aaa+null");
+            test.checkEquals(URI.addPaths("aaa",""),"aaa","aaa+");
+            test.checkEquals(URI.addPaths("aaa","bbb"),"aaa/bbb","aaa+bbb");
+            test.checkEquals(URI.addPaths("aaa","/"),"aaa/","aaa+/");
+            test.checkEquals(URI.addPaths("aaa","/bbb"),"aaa/bbb","aaa+/bbb");
+            
+            test.checkEquals(URI.addPaths("/",null),"/","/+null");
+            test.checkEquals(URI.addPaths("/",""),"/","/+");
+            test.checkEquals(URI.addPaths("/","bbb"),"/bbb","/+bbb");
+            test.checkEquals(URI.addPaths("/","/"),"/","/+/");
+            test.checkEquals(URI.addPaths("/","/bbb"),"/bbb","/+/bbb");
+            
+            test.checkEquals(URI.addPaths("aaa/",null),"aaa/","aaa/+null");
+            test.checkEquals(URI.addPaths("aaa/",""),"aaa/","aaa/+");
+            test.checkEquals(URI.addPaths("aaa/","bbb"),"aaa/bbb","aaa/+bbb");
+            test.checkEquals(URI.addPaths("aaa/","/"),"aaa/","aaa/+/");
+            test.checkEquals(URI.addPaths("aaa/","/bbb"),"aaa/bbb","aaa/+/bbb");
+            
+            test.checkEquals(URI.addPaths(";JS",null),";JS",";JS+null");
+            test.checkEquals(URI.addPaths(";JS",""),";JS",";JS+");
+            test.checkEquals(URI.addPaths(";JS","bbb"),"bbb;JS",";JS+bbb");
+            test.checkEquals(URI.addPaths(";JS","/"),"/;JS",";JS+/");
+            test.checkEquals(URI.addPaths(";JS","/bbb"),"/bbb;JS",";JS+/bbb");
+            
+            test.checkEquals(URI.addPaths("aaa;JS",null),"aaa;JS","aaa;JS+null");
+            test.checkEquals(URI.addPaths("aaa;JS",""),"aaa;JS","aaa;JS+");
+            test.checkEquals(URI.addPaths("aaa;JS","bbb"),"aaa/bbb;JS","aaa;JS+bbb");
+            test.checkEquals(URI.addPaths("aaa;JS","/"),"aaa/;JS","aaa;JS+/");
+            test.checkEquals(URI.addPaths("aaa;JS","/bbb"),"aaa/bbb;JS","aaa;JS+/bbb");
+            
+            test.checkEquals(URI.addPaths("aaa/;JS",null),"aaa/;JS","aaa;JS+null");
+            test.checkEquals(URI.addPaths("aaa/;JS",""),"aaa/;JS","aaa;JS+");
+            test.checkEquals(URI.addPaths("aaa/;JS","bbb"),"aaa/bbb;JS","aaa;JS+bbb");
+            test.checkEquals(URI.addPaths("aaa/;JS","/"),"aaa/;JS","aaa;JS+/");
+            test.checkEquals(URI.addPaths("aaa/;JS","/bbb"),"aaa/bbb;JS","aaa;JS+/bbb");
+            
+            test.checkEquals(URI.addPaths("?A=1",null),"?A=1","?A=1+null");
+            test.checkEquals(URI.addPaths("?A=1",""),"?A=1","?A=1+");
+            test.checkEquals(URI.addPaths("?A=1","bbb"),"bbb?A=1","?A=1+bbb");
+            test.checkEquals(URI.addPaths("?A=1","/"),"/?A=1","?A=1+/");
+            test.checkEquals(URI.addPaths("?A=1","/bbb"),"/bbb?A=1","?A=1+/bbb");
+            
+            test.checkEquals(URI.addPaths("aaa?A=1",null),"aaa?A=1","aaa?A=1+null");
+            test.checkEquals(URI.addPaths("aaa?A=1",""),"aaa?A=1","aaa?A=1+");
+            test.checkEquals(URI.addPaths("aaa?A=1","bbb"),"aaa/bbb?A=1","aaa?A=1+bbb");
+            test.checkEquals(URI.addPaths("aaa?A=1","/"),"aaa/?A=1","aaa?A=1+/");
+            test.checkEquals(URI.addPaths("aaa?A=1","/bbb"),"aaa/bbb?A=1","aaa?A=1+/bbb");
+            
+            test.checkEquals(URI.addPaths("aaa/?A=1",null),"aaa/?A=1","aaa?A=1+null");
+            test.checkEquals(URI.addPaths("aaa/?A=1",""),"aaa/?A=1","aaa?A=1+");
+            test.checkEquals(URI.addPaths("aaa/?A=1","bbb"),"aaa/bbb?A=1","aaa?A=1+bbb");
+            test.checkEquals(URI.addPaths("aaa/?A=1","/"),"aaa/?A=1","aaa?A=1+/");
+            test.checkEquals(URI.addPaths("aaa/?A=1","/bbb"),"aaa/bbb?A=1","aaa?A=1+/bbb");
+            
+            test.checkEquals(URI.addPaths(";JS?A=1",null),";JS?A=1",";JS?A=1+null");
+            test.checkEquals(URI.addPaths(";JS?A=1",""),";JS?A=1",";JS?A=1+");
+            test.checkEquals(URI.addPaths(";JS?A=1","bbb"),"bbb;JS?A=1",";JS?A=1+bbb");
+            test.checkEquals(URI.addPaths(";JS?A=1","/"),"/;JS?A=1",";JS?A=1+/");
+            test.checkEquals(URI.addPaths(";JS?A=1","/bbb"),"/bbb;JS?A=1",";JS?A=1+/bbb");
+            
+            test.checkEquals(URI.addPaths("aaa;JS?A=1",null),"aaa;JS?A=1","aaa;JS?A=1+null");
+            test.checkEquals(URI.addPaths("aaa;JS?A=1",""),"aaa;JS?A=1","aaa;JS?A=1+");
+            test.checkEquals(URI.addPaths("aaa;JS?A=1","bbb"),"aaa/bbb;JS?A=1","aaa;JS?A=1+bbb");
+            test.checkEquals(URI.addPaths("aaa;JS?A=1","/"),"aaa/;JS?A=1","aaa;JS?A=1+/");
+            test.checkEquals(URI.addPaths("aaa;JS?A=1","/bbb"),"aaa/bbb;JS?A=1","aaa;JS?A=1+/bbb");
+            
+            test.checkEquals(URI.addPaths("aaa/;JS?A=1",null),"aaa/;JS?A=1","aaa;JS?A=1+null");
+            test.checkEquals(URI.addPaths("aaa/;JS?A=1",""),"aaa/;JS?A=1","aaa;JS?A=1+");
+            test.checkEquals(URI.addPaths("aaa/;JS?A=1","bbb"),"aaa/bbb;JS?A=1","aaa;JS?A=1+bbb");
+            test.checkEquals(URI.addPaths("aaa/;JS?A=1","/"),"aaa/;JS?A=1","aaa;JS?A=1+/");
+            test.checkEquals(URI.addPaths("aaa/;JS?A=1","/bbb"),"aaa/bbb;JS?A=1","aaa;JS?A=1+/bbb");
             
         }
         catch(Exception e){

@@ -60,7 +60,8 @@ public class ServletHandler extends NullHandler
     private String _dynamicServletPathSpec;
     private Map _dynamicInitParams ;
     private boolean _serveDynamicSystemServlets=false;
-
+    private boolean _usingCookies=false;
+    
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
@@ -84,6 +85,9 @@ public class ServletHandler extends NullHandler
     /* ------------------------------------------------------------ */
     public Map getDynamicInitParams() { return _dynamicInitParams; }
 
+    /* ------------------------------------------------------------ */
+    public boolean isUsingCookies() { return _usingCookies; }
+    
     /* ------------------------------------------------------------ */
     /** 
      * @return True if dynamic servlets can be on the non-context classpath
@@ -146,6 +150,15 @@ public class ServletHandler extends NullHandler
     public ClassLoader getClassLoader()
     {
         return _loader;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param sc If true, cookies are used for sessions
+     */
+    public void setUsingCookies(boolean uc)
+    {
+        _usingCookies=uc;
     }
     
     /* ----------------------------------------------------------------- */
