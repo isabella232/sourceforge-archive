@@ -516,7 +516,8 @@ public class HttpContext implements LifeCycle,
     }
 
     /* ------------------------------------------------------------ */
-    /**
+    /** Set a context attribute.
+     * Attributes are cleared when the context is stopped.
      * @param name attribute name
      * @param value attribute value
      */
@@ -1832,6 +1833,8 @@ public class HttpContext implements LifeCycle,
         }
         _cache.clear();
 	_constraintMap.clear();
+        if (_attributes!=null)
+            _attributes.clear();
         Log.event("Stopped "+this);
     }
 
@@ -1856,8 +1859,6 @@ public class HttpContext implements LifeCycle,
         _parent=null;
         _loader=null;
         _resourceBase=null;
-        if (_attributes!=null)
-            _attributes.clear();
         _attributes=null;
         if (_initParams!=null)
             _initParams.clear();

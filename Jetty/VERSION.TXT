@@ -5,6 +5,7 @@ Jetty Versions
  + Reuse empty LogSink slots.
  + HTAccessHandler checks realm as well as htpassword.
  + Clear context listeners after stop.
+ + Clear context attributes after stop.
 
 Jetty-4.2.4rc0 - 12 December 2002
  + Simplified ThreadedServer
