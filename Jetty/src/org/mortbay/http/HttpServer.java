@@ -833,11 +833,7 @@ public class HttpServer implements LifeCycle
                                    String uri,
                                    String[] vhosts)
     {
-        System.err.println("handlerClass="+handlerClass);
-        System.err.println("uri="+uri);
         uri = URI.stripPath(uri);
-        System.err.println("stripped="+uri);
-        System.err.println("vhosts.length="+vhosts.length);
 
         if (vhosts==null || vhosts.length==0)
             vhosts=__noVirtualHost;
@@ -845,8 +841,6 @@ public class HttpServer implements LifeCycle
         for (int h=0; h<vhosts.length ; h++)
         {
             String host = vhosts[h];
-            
-            System.err.println("host="+host);
             
             PathMap contextMap=(PathMap)_virtualHostMap.get(host);
             if (contextMap!=null)
@@ -860,7 +854,6 @@ public class HttpServer implements LifeCycle
                         Map.Entry entry=
                             (Map.Entry)
                             contextLists.get(i);
-                        System.err.println("entry="+entry);
                         
                         String contextPath=(String)entry.getKey();
                         List contextList = (List)entry.getValue();
@@ -869,12 +862,9 @@ public class HttpServer implements LifeCycle
                         {
                             HttpContext context=
                                 (HttpContext)contextList.get(j);
-                            System.err.println("context="+context);
-                            
+
                             HttpHandler handler = context.getHandler(handlerClass);
 
-                            System.err.println("handler="+handler);
-                            
                             if (handler!=null)
                                 return handler;
                         }

@@ -322,8 +322,6 @@ public class WebApplicationHandler extends ServletHandler
         }
         catch(Exception e)
         {
-            System.err.println("Exception "+e);
-            
             Code.debug(e);
             
             Throwable th=e;
@@ -340,9 +338,17 @@ public class WebApplicationHandler extends ServletHandler
                 throw (HttpException)th;
             if (th.getClass().equals(IOException.class))
                 throw (IOException)th;
+
+            if (Code.debug())
+            {
+                Code.warning("Exception for "+httpRequest.getURI(),th);
+                Code.debug(httpRequest);
+            }
+            else
+            {
+                Code.warning("Exception for "+httpRequest.getURI()+": "+th);
+            }
             
-            Code.warning("Servlet Exception for "+httpRequest.getURI(),th);
-            Code.debug(httpRequest);
             
             httpResponse.getHttpConnection().forceClose();
             if (!httpResponse.isCommitted())
@@ -359,10 +365,17 @@ public class WebApplicationHandler extends ServletHandler
         }
         catch(Error e)
         {
-            System.err.println("Error "+e);
             
-            Code.warning("Servlet Error for "+httpRequest.getURI(),e);
-            Code.debug(httpRequest);
+            if (Code.debug())
+            {
+                Code.warning("Error for "+httpRequest.getURI(),e);
+                Code.debug(httpRequest);
+            }
+            else
+            {
+                Code.warning("Error for "+httpRequest.getURI()+": "+e);
+            }
+            
             httpResponse.getHttpConnection().forceClose();
             if (!httpResponse.isCommitted())
             {

@@ -1014,7 +1014,7 @@ public class HttpFields
                     _index[info.hashCode()]=_fields.size();
                 else if (info._singleValued)
                 {
-                    Code.warning("Ignored duplicate single value header: "+field);
+                    Code.debug("Ignored duplicate single value header: ",field);
                     continue;
                 }
                 else

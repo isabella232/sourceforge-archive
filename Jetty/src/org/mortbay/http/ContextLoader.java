@@ -108,7 +108,6 @@ public class ContextLoader extends URLClassLoader
                             lib.deleteOnExit();
                         }
                         File jar=File.createTempFile("Jetty-",".jar",lib);
-                        System.err.println("LIB="+jar);
                         
                         jar.deleteOnExit();
                         Code.debug("Extract ",resource," to ",jar);
