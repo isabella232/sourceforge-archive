@@ -130,7 +130,7 @@ public class SocketListener
      */
     public int getLowResources()
     {
-        return _lowResources=0;
+        return _lowResources;
     }
     
     /* ------------------------------------------------------------ */
