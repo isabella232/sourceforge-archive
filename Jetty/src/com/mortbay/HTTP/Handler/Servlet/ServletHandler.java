@@ -60,7 +60,7 @@ public class ServletHandler extends NullHandler
     private String _dynamicServletPathSpec;
     private Map _dynamicInitParams ;
     private boolean _serveDynamicSystemServlets=false;
-    private boolean _usingCookies=false;
+    private boolean _usingCookies=true;
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
