@@ -55,6 +55,8 @@ public class Main
             OutputStream out=s.getOutputStream();
             out.write((_key+"\r\nstop\r\n").getBytes());
             out.flush();
+            s.shutdownOutput();
+            s.close();
         }
         catch (Exception e)
         {
