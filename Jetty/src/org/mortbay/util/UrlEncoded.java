@@ -164,53 +164,68 @@ public class UrlEncoded extends MultiMap
     {
         if (charset==null)
             charset=StringUtil.__ISO_8859_1;
+
         synchronized(map)
         {
-            String token;
-            String name;
-            String value;
-
-            StringTokenizer tokenizer =
-                new StringTokenizer(content, "&", false);
-
-            while ((tokenizer.hasMoreTokens()))
+            String key = null;
+            String value = null;
+            int mark=-1;
+            boolean encoded=false;
+            for (int i=0;i<content.length();i++)
             {
-                token = tokenizer.nextToken();
-                
-                // breaking it at the "=" sign
-                int i = token.indexOf('=');
-                if (i<0)
+                char c = content.charAt(i);
+                switch (c)
                 {
-                    name=decodeString(token,charset);
-                    value="";
+                  case '&':
+                      value = encoded
+                          ?decodeString(content,mark+1,i-mark,charset)
+                          :content.substring(mark+1,i);
+                      
+                      mark=i;
+                      encoded=false;
+                      if (key != null)
+                      {
+                          map.add(key,value);
+                          key = null;
+                      }
+                      break;
+                  case '=':
+                      key = encoded
+                          ?decodeString(content,mark+1,i-mark,charset)
+                          :content.substring(mark+1,i);
+                      mark=i;
+                      encoded=false;
+                      break;
+                  case '+':
+                      encoded=true;
+                      break;
+                  case '%':
+                      encoded=true;
+                      break;
                 }
-                else
-                {
-                    name=decodeString(token.substring(0,i++),
-                                      charset);
-                    if (i>=token.length())
-                        value="";
-                    else
-                        value = decodeString(token.substring(i),
-                                             charset);
-                }
-
-                // Add value to the map
-                if (name.length() > 0)
-                    map.add(name,value);
+            }
+            if (key != null)
+            {
+                value =  encoded
+                    ?decodeString(content,mark+1,content.length()-mark,charset)
+                    :content.substring(mark+1);
+                map.add(key,value);
             }
         }
     }
-
+    
     /* -------------------------------------------------------------- */
     /** Decoded parameters to Map.
      * @param data the byte[] containing the encoded parameters
      */
-    public static void decodeTo(byte[] data, MultiMap map, String encoding)
+    public static void decodeTo(byte[] data, MultiMap map, String charset)
     {
         if (data == null || data.length == 0)
             return;
 
+        if (charset==null)
+            charset=StringUtil.__ISO_8859_1;
+        
         synchronized(map)
         {
             try
@@ -226,7 +241,7 @@ public class UrlEncoded extends MultiMap
                     switch ((char) c)
                     {
                       case '&':
-                          value = new String(data, 0, ox, encoding);
+                          value = new String(data, 0, ox, charset);
                           if (key != null)
                           {
                               map.add(key,value);
@@ -235,7 +250,7 @@ public class UrlEncoded extends MultiMap
                           ox = 0;
                           break;
                       case '=':
-                          key = new String(data, 0, ox, encoding);
+                          key = new String(data, 0, ox, charset);
                           ox = 0;
                           break;
                       case '+':
@@ -252,7 +267,7 @@ public class UrlEncoded extends MultiMap
                 }
                 if (key != null)
                 {
-                    value = new String(data, 0, ox, encoding);
+                    value = new String(data, 0, ox, charset);
                     map.add(key,value);
                 }
             }
@@ -270,7 +285,7 @@ public class UrlEncoded extends MultiMap
      */
     public static String decodeString(String encoded)
     {
-        return decodeString(encoded,StringUtil.__ISO_8859_1);
+        return decodeString(encoded,0,encoded.length(),StringUtil.__ISO_8859_1);
     }
     
     /* -------------------------------------------------------------- */
@@ -280,14 +295,24 @@ public class UrlEncoded extends MultiMap
      */
     public static String decodeString(String encoded,String charset)
     {
+        return decodeString(encoded,0,encoded.length(),charset);
+    }
+    
+            
+    /* -------------------------------------------------------------- */
+    /** Decode String with % encoding.
+     * This method makes the assumption that the majority of calls
+     * will need no decoding.
+     */
+    public static String decodeString(String encoded,int offset,int length,String charset)
+    {
         if (charset==null)
             charset=StringUtil.__ISO_8859_1;
-        int len=encoded.length();
         byte[] bytes=null;
         int n=0;
         StringBuffer buf=null;
         
-        for (int i=0;i<len;i++)
+        for (int i=offset;i<length;i++)
         {
             char c = encoded.charAt(i);
             if (c<0||c>0xff)
@@ -297,7 +322,7 @@ public class UrlEncoded extends MultiMap
             {
                 if (buf==null)
                 {
-                    buf=new StringBuffer(len);
+                    buf=new StringBuffer(length);
                     for (int j=0;j<i;j++)
                         buf.append(encoded.charAt(j));
                 }
@@ -310,7 +335,7 @@ public class UrlEncoded extends MultiMap
                 }        
                 buf.append(' ');
             }
-            else if (c=='%' && (i+2)<len)
+            else if (c=='%' && (i+2)<length)
             {
                 byte b;
                 char cn = encoded.charAt(i+1);
@@ -330,13 +355,13 @@ public class UrlEncoded extends MultiMap
                 
                 if (buf==null)
                 {
-                    buf=new StringBuffer(len);
+                    buf=new StringBuffer(length);
                     for (int j=0;j<i;j++)
                         buf.append(encoded.charAt(j));
                 }
                 i+=2;
                 if (bytes==null)
-                    bytes=new byte[len];
+                    bytes=new byte[length];
                 bytes[n++]=b;
             }
             else if (buf!=null)

@@ -28,6 +28,7 @@ import org.mortbay.util.Code;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LineInput;
+import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringMap;
 import org.mortbay.util.StringUtil;
@@ -99,6 +100,8 @@ public class HttpRequest extends HttpMessage
     private boolean _paramsExtracted;
     private boolean _handled;
     private Cookie[] _cookies;
+    private String[] _lastCookies;
+    private boolean _cookiesExtracted;
     private long _timeStamp;
     private String _timeStampStr;
     private UserPrincipal _userPrincipal;
@@ -879,106 +882,157 @@ public class HttpRequest extends HttpMessage
      */
     public Cookie[] getCookies()
     {
-        if (_cookies!=null)
+        if (_cookies!=null && _cookiesExtracted)
             return _cookies;
 
         try
         {
+            // Handle no cookies
             if(!_header.containsKey(HttpFields.__Cookie))
             {
                 _cookies=__noCookies;
+                _cookiesExtracted=true;
+                _lastCookies=null;
                 return _cookies;
             }
+
+            // Check if cookie headers match last cookies
+            if (_lastCookies!=null)
+            {                
+                int last=0;
+                Enumeration enum =_header.getValues(HttpFields.__Cookie);
+                while (enum.hasMoreElements())
+                {
+                    String c = (String)enum.nextElement();
+                    if (last>=_lastCookies.length ||
+                        !c.equals(_lastCookies[last]))
+                    {
+                        _lastCookies=null;
+                        break;
+                    }
+                    last++;
+                }
+                if (_lastCookies!=null)
+                {
+                    _cookiesExtracted=true;
+                    return _cookies;
+                }    
+            }
             
+            // Get ready to parse cookies (Expensive!!!)
             LazyList cookies=null;
+            LazyList lastCookies=null;
+            
             int version=0;
             Cookie cookie=null;
 
-            Enumeration enum =_header.getValues(HttpFields.__Cookie,",;");            
+            // For each cookie header
+            Enumeration enum =_header.getValues(HttpFields.__Cookie);            
             while (enum.hasMoreElements())
             {
-                try
+                // Save a copy of the unparsed header as cache.
+                String hdr = enum.nextElement().toString();
+                lastCookies=LazyList.add(lastCookies,hdr);
+
+                // Parse the header
+                QuotedStringTokenizer tok=new QuotedStringTokenizer(hdr,",;",false,false);
+                while (tok.hasMoreElements())
                 {
-                    String c = enum.nextElement().toString();
-                    String n;
-                    String v;
-                    if (c.startsWith("JSESSION_ID="))
-                    {
-                        n="JSESSION_ID";
-                        v=c.substring(12);    
-                    }
-                    else
-                    {
-                        int e = c.indexOf('=');
-                        if (e>0)
+                    String c=(String)tok.nextElement();
+                    if (c!=null)
+                        c=c.trim();
+                    
+                    try
+                    {                   
+                        String n;
+                        String v;
+                        if (c.startsWith("JSESSION_ID="))
                         {
-                            n=c.substring(0,e);
-                            v=c.substring(e+1);
+                            n="JSESSION_ID";
+                            v=c.substring(12);    
                         }
                         else
                         {
-                            n=c;
-                            v="";
-                        }
-                    }
-                    
-                    // Handle quoted values
-                    if (version>0)
-                        v=StringUtil.unquote(v);
-                    
-                    // Ignore $ names
-                    if (n.startsWith("$"))
-                    {
-                        if ("$version".equalsIgnoreCase(n))
-                        {
-                            int comma=v.indexOf(',');
-                            if (comma>=0)
-                            {   
-                                version=Integer.parseInt
-                                    (StringUtil.unquote(v.substring(0,comma)));
-                                v=v.substring(comma+1);
-                                int e=v.indexOf('=');
-                                if (e>0)
-                                {
-                                    n=v.substring(0,e);
-                                    v=v.substring(e+1);
-                                    v=StringUtil.unquote(v);
-                                }
-                                else
-                                {
-                                    n=v;
-                                    v="";
-                                }
+                            int e = c.indexOf('=');
+                            if (e>0)
+                            {
+                                n=c.substring(0,e);
+                                v=c.substring(e+1);
                             }
                             else
-                                continue;
+                            {
+                                n=c;
+                                v="";
+                            }
                         }
-                        else
+                        
+                        // Handle quoted values
+                        if (version>0)
+                            v=StringUtil.unquote(v);
+                        
+                        // Ignore $ names
+                        if (n.startsWith("$"))
                         {
-                            if ("$path".equalsIgnoreCase(n) && cookie!=null)
-                                cookie.setPath(v);
-                            else if ("$domain".equalsIgnoreCase(n)&&cookie!=null)
-                                cookie.setDomain(v);
-                            continue;
+                            if ("$version".equalsIgnoreCase(n))
+                            {
+                                int comma=v.indexOf(',');
+                                if (comma>=0)
+                                {   
+                                    version=Integer.parseInt
+                                        (StringUtil.unquote(v.substring(0,comma)));
+                                    v=v.substring(comma+1);
+                                    int e=v.indexOf('=');
+                                    if (e>0)
+                                    {
+                                        n=v.substring(0,e);
+                                        v=v.substring(e+1);
+                                        v=StringUtil.unquote(v);
+                                    }
+                                    else
+                                    {
+                                        n=v;
+                                        v="";
+                                    }
+                                }
+                                else
+                                    continue;
+                            }
+                            else
+                            {
+                                if ("$path".equalsIgnoreCase(n) && cookie!=null)
+                                    cookie.setPath(v);
+                                else if ("$domain".equalsIgnoreCase(n)&&cookie!=null)
+                                    cookie.setDomain(v);
+                                continue;
+                            }
                         }
+                        
+                        v=URI.decodePath(v);
+                        cookie=new Cookie(n,v);
+                        if (version>0)
+                            cookie.setVersion(version);
+                        cookies=LazyList.add(cookies,cookie);
                     }
-                
-                    v=URI.decodePath(v);
-                    cookie=new Cookie(n,v);
-                    if (version>0)
-                        cookie.setVersion(version);
-                    cookies=LazyList.add(cookies,cookie);
-                }
-                catch(Exception e)
-                {
-                    Code.ignore(e);
-                    Code.warning("Bad Cookie received: "+e.toString());
+                    catch(Exception e)
+                    {
+                        Code.ignore(e);
+                        Code.warning("Bad Cookie received: "+e.toString());
+                    }
                 }
             }
 
-            _cookies=new Cookie[LazyList.size(cookies)];
-            for (int i=0;i<_cookies.length;i++)
+            int l=LazyList.size(cookies);
+            if (_cookies==null || _cookies.length!=l)
+                _cookies=new Cookie[l];
+            for (int i=0;i<l;i++)
                 _cookies[i]=(Cookie)LazyList.get(cookies,i);
+            _cookiesExtracted=true;
+            
+            l=LazyList.size(lastCookies);
+            _lastCookies=new String[l];
+            for (int i=0;i<l;i++)
+                _lastCookies[i]=(String)LazyList.get(lastCookies,i);
+            
         }
         catch(Exception e)
         {
@@ -1049,7 +1103,7 @@ public class HttpRequest extends HttpMessage
             _parameters.clear();
         _paramsExtracted=false;
         _handled=false;
-        _cookies=null;
+        _cookiesExtracted=false;
         _timeStamp=0;
         _timeStampStr=null;
         _authUser=null;
@@ -1071,6 +1125,7 @@ public class HttpRequest extends HttpMessage
         _hostPort=null;
         _te=null;
         _cookies=null;
+        _lastCookies=null;
         _timeStampStr=null;
         _userPrincipal=null;
         _authUser=null;
