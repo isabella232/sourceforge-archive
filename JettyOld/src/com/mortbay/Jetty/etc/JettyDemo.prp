@@ -65,8 +65,8 @@ main.javadoc.HANDLERS                              : File;NotFound
 main.javadoc.File.CLASS			           : com.mortbay.HTTP.Handler.FileHandler
 main.javadoc.File.PROPERTY.FILES.Javadoc.PATHS     : /javadoc
 main.javadoc.File.PROPERTY.FILES.Javadoc.DIRECTORY : ./javadoc
-main.javadoc.File.PROPERTY.FILES.Servlet.PATHS     : ./javadoc/javax/servlet%
-main.javadoc.File.PROPERTY.FILES.Servlet.DIRECTORY : src/javax/servlet/javadoc
+main.javadoc.File.PROPERTY.FILES.Servlet.PATHS     : /javadoc/javax/servlet
+main.javadoc.File.PROPERTY.FILES.Servlet.DIRECTORY : ./src/javax/servlet/javadoc
 main.javadoc.NotFound.CLASS		  : com.mortbay.HTTP.Handler.NotFoundHandler
 
 # ------------------------------------------------------------------------
