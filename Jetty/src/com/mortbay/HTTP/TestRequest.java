@@ -47,6 +47,7 @@ public class TestRequest
     {   
         testRequestLine();
         testParameters();
+        testMimeTypes();
     }
 
     /* --------------------------------------------------------------- */
@@ -223,4 +224,32 @@ public class TestRequest
             t.check(false,e.toString());
         }
     }
+
+    /* --------------------------------------------------------------- */
+    public static void testMimeTypes()
+    {        
+        Test t = new Test("com.mortbay.HTTP.HandlerContext.getMimeByExtension");
+        try
+        {
+            HandlerContext c = new HandlerContext(null,"/");
+            c.getMimeMap();
+            
+            t.checkEquals(c.getMimeByExtension("index.html"),"text/html","index.html");
+            t.checkEquals(c.getMimeByExtension("style.css"),"text/css","index.html");
+            t.checkEquals(c.getMimeByExtension("doc.pdf"),"application/pdf","index.html");
+            t.checkEquals(c.getMimeByExtension("blah/index.html"),"text/html","index.html");
+            t.checkEquals(c.getMimeByExtension("blah/style.css"),"text/css","index.html");
+            t.checkEquals(c.getMimeByExtension("blah/doc.pdf"),"application/pdf","index.html");
+            t.checkEquals(c.getMimeByExtension("blah/my.index.html"),"text/html","index.html");
+            t.checkEquals(c.getMimeByExtension("blah/my.style.css"),"text/css","index.html");
+            t.checkEquals(c.getMimeByExtension("blah/my.doc.pdf"),"application/pdf","index.html");
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            t.check(false,e.toString());
+        }
+    }
+
+    
 }

@@ -161,6 +161,12 @@ public class ThreadPool
     }
 
     /* ------------------------------------------------------------ */
+    public Class getThreadClass()
+    {
+        return _threadClass;
+    }
+    
+    /* ------------------------------------------------------------ */
     /** Handle a job.
      * Unless the job is an instance of Runnable, then
      * this method must be specialized by a derived class.

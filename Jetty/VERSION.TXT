@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
-
+ 
+ + Improved logging of nested exceptions.
  + Use reference JAXP1.1 for XML parsing.
  + Version 1.1 of configuration dtd supports New objects.
  + Improved handling of Primitive classes in XmlConfig

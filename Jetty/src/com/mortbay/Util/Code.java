@@ -1026,43 +1026,53 @@ public class Code
                 synchronized(__writerBuffer)
                 {
                     __writerBuffer.setLength(0);
-                    ex.printStackTrace(__out);
-
-                    try
+                    while(ex!=null)
                     {
-                        Method getTargetException =
-                            ex.getClass().getMethod("getTargetException",
-                                                  __noArgs);
-                        ex=(Throwable)
-                            getTargetException.invoke(ex,null);
-                        __out.println("Target Exception:");
                         ex.printStackTrace(__out);
-                    }
-                    catch(Exception ignore)
-                    {}
-                    
-                    try
-                    {
-                        Method getException =
-                            ex.getClass().getMethod("getException",
-                                                  __noArgs);
-                        ex=(Throwable)
-                            getException.invoke(ex,null);
-                        __out.println("Exception:");
-                        ex.printStackTrace(__out);
-                    }
-                    catch(Exception ignore)
-                    {}
 
-                    __out.print("--");
-                    __out.flush();
-                    buf.append(__writerBuffer.toString());
+                        try
+                        {
+                            Method getTargetException =
+                                ex.getClass().getMethod("getTargetException",__noArgs);
+                            ex=(Throwable)
+                                getTargetException.invoke(ex,null);
+                            __out.println("Target Exception:");
+                            continue;
+                        }
+                        catch(Exception ignore){}
+                        
+                        try
+                        {
+                            Method getTargetException =
+                                ex.getClass().getMethod("getTargetError",__noArgs);
+                            ex=(Throwable)
+                                getTargetException.invoke(ex,null);
+                            __out.println("Target Error:");
+                            continue;
+                        }
+                        catch(Exception ignore){}
+                        
+                        try
+                        {
+                            Method getException =
+                                ex.getClass().getMethod("getException",__noArgs);
+                            ex=(Throwable)
+                                getException.invoke(ex,null);
+                            __out.println("Exception:");
+                            continue;
+                        }
+                        catch(Exception ignore){}
+                        
+                        ex=null;
+                    }
+                
+                __out.flush();
+                buf.append(__writerBuffer.toString());
                 }
             }
         }
         else
-            buf.append(o.toString());
-        
+            buf.append(o.toString());   
     }
     
     
