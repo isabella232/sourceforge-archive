@@ -1,0 +1,174 @@
+<P>
+<H1>Non-XA DataSources</H1>
+
+Whilst the <code>org.mortbay.jetty.plus.JotmService</code> provides support for JTA and DataSources that can participate in distributed transactions, JettyPlus also supports non-XA DataSources. The <code>org.mortbay.jetty.plus.AbstractDataSourceService</code> provides the basis for pluggable DataSource and connection pooling implementations. A default implementation is provided that allows you to use any <code>javax.sql.DataSource</code> for non-pooled connections and that uses XAPool internally to provide the pool for pooled connections. By subclassing <code>AbstractDataSourceService</code>, you may <a href="#alternate">add other types of connection pooling</a> implementations to JettyPlus. 
+
+<P>
+The general method of configuring the <code>org.mortbay.jetty.plus.DefaultDataSourceService</code> in your JettyPlus xml configuration file is as follows:
+
+<code><pre>
+
+  &lt;Call name="addService"&gt;
+    &lt;Arg&gt;
+      &lt;New class="org.mortbay.jetty.plus.DefaultDataSourceService"&gt;
+        &lt;Set name="Name"&gt;DataSourceService&lt;/Set&gt; <font color="blue">&lt;!-- name of the service --&gt;</font>
+
+         <font color="blue">&lt;!-- repeat this section to add more DataSource definitions --&gt;</font>
+         &lt;Call name="addDataSource"&gt; 
+             &lt;Arg&gt;jdbc/xyz&lt;/Arg&gt;<font color="blue">  &lt;!-- name for app to lookup relative to java:comp/env --&gt;</font>   
+             &lt;New class=......&gt;<font color="blue">   &lt;!-- class for javax.sql.DataSource implementation --&gt;</font>
+	     <font color="blue">&lt;!-- configure the particular DataSource implementation --&gt;</font> 
+             &lt;/New&gt;
+         &lt;/Call&gt; 
+	 <font color="blue">&lt;!-- end of DataSource definition --&gt;</font>
+
+         <font color="blue"> &lt;!-- repeat this section to add more pooled datasources --&gt;</font>
+         &lt;Call name="addConnectionPoolDataSource"&gt;
+             &lt;Arg&gt;jdbc/postgres&lt;/Arg&gt;<font color="blue">&lt;!-- name for app to lookup relative to java:comp/env --&gt;</font>
+             &lt;New class=......&gt;<font color="blue">      &lt;!-- class for javax.sql.ConnectionPoolDataSource implementation --&gt;</font>
+	     <font color="blue">&lt;!-- configure the particular javax.sql.ConnectionPoolDataSource implementation --&gt;</font>
+             &lt;/New&gt;
+         &lt;/Call&gt;
+	 <font color="blue">&lt;!-- end of ConnectionPolDataSource definition --&gt;</font>
+
+       &lt;/New&gt;
+     &lt;/Arg&gt;
+   &lt;/Call&gt; 
+   </pre></code>
+</ul>
+<P>
+As this mechanism is extremely flexible, let's now consider some of the different ways in which you can configure DataSource resources:
+</P>
+
+<H2>Configuration Scenarios</H2>
+
+<H3>1 Using a vendor-supplied javax.sql.DataSource that does internal connection pooling, or pooling not required</H3>
+The following example configures a Postgres DataSource that does its own connection pooling.  You can configure any javax.sql.DataSource implementation.
+
+<code><pre>
+         &lt;Call name="addDataSource"&gt;
+            &lt;Arg&gt;jdbc/mydatabase&lt;/Arg&gt;
+            &lt;Arg&gt;
+             &lt;New class="org.postgresql.jdbc3.Jdbc3PoolingDataSource"&gt;
+                &lt;Set name="DataSourceName"&gt;Database on localhost&lt;/Set&gt;
+                &lt;Set name="ServerName"&gt;localhost&lt;/Set&gt;
+                &lt;Set name="DatabaseName"&gt;database&lt;/Set&gt;
+                &lt;Set name="PortNumber"&gt;5432&lt;/Set&gt;
+                &lt;Set name="User"&gt;postgres&lt;/Set&gt;
+                &lt;Set name="Password"&gt;password&lt;/Set&gt;
+                &lt;Set name="MaxConnections"&gt;50&lt;/Set&gt;
+                &lt;Set name="InitialConnections"&gt;5&lt;/Set&gt;
+             &lt;/New&gt;
+            &lt;/Arg&gt;
+           &lt;/Call&gt;
+</pre></code>
+
+
+
+<H3>2 No vendor-supplied DataSource available, pooling not required</H3>
+If you only have a JDBC driver class, you can use the XAPool <code>org.enhydra.jdbc.standard.StandardDataSource</code> class to provide a non-pooling javax.sql.DataSource. Eg:
+
+<code><pre>
+         &lt;Call name="addDataSource"&gt;
+             &lt;Arg&gt;jdbc/hsqldb&lt;/Arg&gt;  
+             <font color="blue">&lt;!-- Configure the DataSource impl                        --&gt;</font>
+             &lt;Arg&gt;
+               &lt;New class="org.enhydra.jdbc.standard.StandardDataSource"&gt;
+                 &lt;Set name="DriverName"&gt;org.hsqldb.jdbcDriver&lt;/Set&gt;
+                 &lt;Set name="Url"&gt;jdbc:hsqldb:extra/etc/tmtest&lt;/Set&gt;
+                 &lt;Set name="User"&gt;sa&lt;/Set&gt;
+                 &lt;Set name="Password"&gt;&lt;/Set&gt;
+                <font color="blue">&lt;!-- bug work around only for StandardDataSource:      --&gt;</font>
+                 &lt;Set name="Logger"&gt;
+                   &lt;New class="org.enhydra.jdbc.util.Logger"&gt;
+                     &lt;Arg&gt;
+                       &lt;Call class="org.apache.commons.logging.LogFactory" name="getLog"&gt;
+                         &lt;Arg&gt;org.enhydra.jdbc.xapool&lt;/Arg&gt;
+                       &lt;/Call&gt;
+                     &lt;/Arg&gt;
+                   &lt;/New&gt;
+                 &lt;/Set&gt;                 
+               &lt;/New&gt;
+             &lt;/Arg&gt;
+         &lt;/Call&gt;
+</pre></code>
+  
+
+ 
+<H3>3 Using JettyPlus connection pooling where vendor supports JDBC2 javax.sql.ConnectionPoolDataSource</H3>
+If your JDBC provider does not do connection pooling internally, you can use JettyPlus's default connection pooling implementation (or <a href="#alternate">write your own replacement connection pool</a>). If your JDBC vendor implements the JDBC2 specification, ie implements the <code>javax.sql.ConnectionPoolDataSource</code> interface, you can configure connection pooling by using the <code>addConnectionPoolDataSource()</code> method. The following example uses Postgres:
+
+<code><pre>
+         &lt;Call name="addConnectionPoolDataSource"&gt;
+            &lt;Arg&gt;jdbc/mydatabase&lt;/Arg&gt;
+            &lt;Arg&gt;
+             &lt;New class="org.postgresql.jdbc3.Jdbc3ConnectionPool"&gt;
+                &lt;Set name="DataSourceName"&gt;Database on localhost&lt;/Set&gt;
+                &lt;Set name="ServerName"&gt;localhost&lt;/Set&gt;
+                &lt;Set name="DatabaseName"&gt;database&lt;/Set&gt;
+                &lt;Set name="PortNumber"&gt;5432&lt;/Set&gt;
+                &lt;Set name="User"&gt;postgres&lt;/Set&gt;
+                &lt;Set name="Password"&gt;password&lt;/Set&gt;
+             &lt;/New&gt;
+            &lt;/Arg&gt;
+           <font color="blue">&lt;!-- configure the pool:                                  --&gt;</font>
+           &lt;Set name="user"&gt;postgress&lt;/Set&gt;
+           &lt;Set name="password"&gt;password&lt;/Set&gt;
+           &lt;Set name="minSize"&gt;1&lt;/Set&gt;
+           &lt;Set name="maxSize"&gt;5&lt;/Set&gt;
+        &lt;/Call&gt;
+</pre></code>
+
+<H3>4 Using JettyPlus connection pooling without JDBC2 support</H3>
+If your JDBC provider does <b>not</b> support the JDBC2 specification, you can use the <code>org.enhydra.jdbc.standard.StandardConnectionPoolDataSource</code> class to create a DataSource that pools connections:
+<code><pre>
+         &lt;Call name="addConnectionPoolDataSource"&gt;
+           &lt;Arg&gt;jdbc/myPooledDataSource&lt;/Arg&gt;
+           &lt;Arg&gt;                               
+             &lt;New class="org.enhydra.jdbc.standard.StandardConnectionPoolDataSource"&gt;
+                 &lt;Set name="DriverName"&gt;org.hsqldb.jdbcDriver&lt;/Set&gt;
+                 &lt;Set name="Url"&gt;jdbc:hsqldb:extra/etc/tmtest&lt;/Set&gt;
+                 &lt;Set name="User"&gt;sa&lt;/Set&gt;
+                 &lt;Set name="Password"&gt;&lt;/Set&gt;
+                 &lt;!-- workaround for XAPool bug:                      --&gt;
+                 &lt;Set name="Logger"&gt;
+                   &lt;New class="org.enhydra.jdbc.util.Logger"&gt;
+                     &lt;Arg&gt;
+                       &lt;Call class="org.apache.commons.logging.LogFactory" name="getLog"&gt;
+                         &lt;Arg&gt;org.enhydra.jdbc.xapool&lt;/Arg&gt;
+                       &lt;/Call&gt;
+                     &lt;/Arg&gt;
+                   &lt;/New&gt;
+                 &lt;/Set&gt;                              
+             &lt;/New&gt;
+           &lt;/Arg&gt;
+           <font color="blue">&lt;!-- configure the pool:                                  --&gt;</font>
+           &lt;Set name="user"&gt;sa&lt;/Set&gt;   
+           &lt;Set name="password"&gt;&lt;/Set&gt;
+           &lt;Set name="minSize"&gt;1&lt;/Set&gt;
+           &lt;Set name="maxSize"&gt;5&lt;/Set&gt; 
+         &lt;/Call&gt;        
+</pre></code>
+
+
+
+
+
+<a name="alternate"><H1>Plugging in an alternate DataSourceService</H1></a>
+If you would like to use a different connection pooling mechanism other than the default supplied with the JettyPlus distribution, you can code your own DataSourceService.
+<P>
+You will need to subclass the <code>org.mortbay.jetty.plus.AbstractDataSourceService</code> and provide an implementation for the following method:
+<P>
+<code><pre>
+        public DataSource createPooledDataSource (String jndiName, javax.sql.ConnectionPoolDataSource cpds) 
+	throws Exception;
+</pre></code>
+<P>
+Notice that the method returns a <code>javax.sql.DataSource</code> object. This is the object will be bound into JNDI for application code to lookup in <code>java:comp/env</code>, and must work with your pooling mechanism.  The abstract base class ensures that the DataSource impl returned by this method will be available for linking to webapplication's <code>&lt;resource-ref&gt;</code> and <code>&lt;resource-env-ref&gt;</code> elements.
+</P>
+
+<P>Of course, you are also free to add and expose other methods in order to configure your pooling mechanism.</P>
+
+<P>You must then make your class available on to the JettyPlus classpath. Perhaps the easiest way to do this is to create a jar of your implemenation class, and place it in <code>$JETTY_HOME/extra/lib</code>. Put any auxiliary jars into <code>$JETTY_HOME/extra/ext</code>.
+</P>
+<P>Now all you have to do is call your service implementation in your JettyPlus xml configuration file, and you're all done!</P>
