@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Better recycling of HttpRequests.
+
 Jetty-4.1.D1 - 8 June 2002
  + Recycle servlet requests and responses
  + Added simple buffer pool.

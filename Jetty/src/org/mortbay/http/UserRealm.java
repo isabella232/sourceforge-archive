@@ -49,7 +49,7 @@ public interface UserRealm
      * associated with other contexts.
      * @param user A UserPrincipal allocated from this realm.
      */
-    public void dissassociate(UserPrincipal user);
+    public void disassociate(UserPrincipal user);
     
     /* ------------------------------------------------------------ */
     /** Push role onto a Principal.

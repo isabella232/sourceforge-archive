@@ -1505,8 +1505,8 @@ public class HttpContext implements LifeCycle
         finally
         {
             UserPrincipal user = request.getUserPrincipal();
-            if (_userRealm!=null && user!=null)
-                _userRealm.dissassociate(user);
+            if (_userRealm!=null)
+                _userRealm.disassociate(user);
         }
     }
 

@@ -125,7 +125,7 @@ public class HashUserRealm extends HashMap implements UserRealm
     }
     
     /* ------------------------------------------------------------ */
-    public void dissassociate(UserPrincipal user)
+    public void disassociate(UserPrincipal user)
     {
     }
     

@@ -670,6 +670,8 @@ public abstract class HttpMessage
         _connection=connection;
         _characterEncoding=null;
         _mimeType=null;
+        if (_attributes!=null)
+            _attributes.clear();
     }
     
     /* ------------------------------------------------------------ */
