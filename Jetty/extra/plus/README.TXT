@@ -17,13 +17,6 @@ This will produce the following jars in $jetty.home/extra/lib:
     + org.mortbay.jetty.plus.jar
         This is the main JettyPlus jar file
 
-    + org.mortbay.jetty.plus.resource.jar
-        This contains property and xml config files:
-           + carol.properties
-	       The JNDI service configuration file
-	   + log4j.xml
-	       The log4j configuration file
-
     + org.mortbay.jaas.jar
         The JAAS integration 
 
@@ -44,23 +37,17 @@ Demonstration webapps are available for both JAAS and JettyPlus:
 
    Related files:
 
-      + $jetty.home/extra/etc/jettyplus.xml
-        The Jetty server config file
-      
-      + $jetty.home/extra/etc/tmtest.properties
-         Database property file for hsqldb
+     + $jetty.home/extra/etc/jaas.xml
+       The Jetty server configuration file
 
-      + $jetty.home/extra/etc/tmtest.script
-         Database configuration script
+     + $jetty.home/extra/etc/login.conf
+       The JAAS login config file
 
-      + $jetty.home/extra/plus/resources/carol.properties
-         JNDI config file
+     + $jetty.home/extra/etc/jaas.policy
+       J2SDK policy permission file
 
-      + $jetty.home/extra/plus/resources/log4j.xml
-         Log4j config file
 
-      NOTE: if you modify any files in $jetty.home/extra/plus/resources, then ensure that you rerun the "ant jars"
-            target to re-create the org.mortbay.jetty.plus.jar file.
+
 
 
 + ant run.jettyplus.demo
@@ -73,12 +60,18 @@ Demonstration webapps are available for both JAAS and JettyPlus:
 
   Related files:
 
-     + $jetty.home/extra/etc/jettyplus.xml
-       The Jetty server configuration file
+      + $jetty.home/extra/etc/jettyplus.xml
+        The Jetty server config file
+      
+      + $jetty.home/extra/etc/tmtest.properties
+         Database property file for hsqldb
 
-     + $jetty.home/extra/etc/login.conf
-       The JAAS login config file
+      + $jetty.home/extra/etc/tmtest.script
+         Database configuration script
 
-     + $jetty.home/extra/etc/jaas.policy
-       J2SDK policy permission file
+      + $jetty.home/extra/resources/carol.properties
+         JNDI config file
+
+      + $jetty.home/extra/resources/log4j.xml
+         Log4j config file
 

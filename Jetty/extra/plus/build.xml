@@ -33,6 +33,7 @@ Other targets:
   <property name="jaas.webapp.classes"   value="${jaas.webapp.webinf}/classes"/>
   <property name="jaas.jar"              value="${lib}/org.mortbay.jaas.jar"/>
   <property name="policy.file"           value="${etc}/jaas.policy"/>
+  
 
 
   <!-- ==================================================================== -->
@@ -46,26 +47,38 @@ Other targets:
   <!-- ==================================================================== -->
   <target name="classpath" depends="is.jdk1.4.available" if="jdk1.4.available">
     <path id="extpath">
+     <fileset dir="${jetty.ext}">
+        <include name="*.jar"/>
+        <include name="*.JAR"/>
+        <include name="*.zip"/>
+        <include name="*.ZIP"/>
+     </fileset>
       <fileset dir="${ext}">
-        <include name="*.jar"/>
-        <include name="*.JAR"/>
-        <include name="*.zip"/>
-        <include name="*.ZIP"/>
-       </fileset>
-       <fileset dir="${jetty.ext}">
-        <include name="*.jar"/>
-        <include name="*.JAR"/>
-        <include name="*.zip"/>
-        <include name="*.ZIP"/>
-       </fileset>
+        <include name="hsqldb.jar"/>
+     </fileset>
     </path>
 
+    <path id="resourcepath">
+     <fileset dir="${basedir}/../resources">
+        <include name="*.xml"/>
+        <include name="*.properties"/>
+     </fileset>
+    </path>
+
+    <path id="libpath">
+     <fileset dir="${lib}">
+        <include name="org.mortbay.jaas.jar"/>
+        <include name="org.mortbay.jetty.plus.jar"/>
+     </fileset>
+    </path>
     <path id="classpath">
       <pathelement location="${jetty.jar}" />
       <pathelement location="${servlet.jar}" />
       <pathelement location="${mortbay.jmx.jar}" />
       <path refid="extpath" />
     </path>
+
+
 
     <property name="expanded.classpath" refid="classpath"/>
     <echo message="classpath=${expanded.classpath}" level="info"/>
@@ -244,6 +257,7 @@ Other targets:
   <target name="run.jettyplus.demo" depends="build.jettyplus.webapp" 
           description="Run a JettyPlus webapp demo"> 
      <java fork="true" jar="${jetty.home}/start.jar" dir="${jetty.home}"> 
+       <jvmarg value="-Dlog4j.configuration=log4j.xml"/>
        <jvmarg value="-Djetty.server=org.mortbay.jetty.plus.Server"/>      
        <arg value="${etc}/jettyplus.xml"/>
      </java>
@@ -287,6 +301,7 @@ Other targets:
      </java>
 -->
      <java fork="true" classname="org.mortbay.jetty.Server" dir="${jetty.home}"> 
+       <jvmarg value="-Dlog4j.configuration=log4j.xml"/>
        <jvmarg value="-Dinstall.dir=${install.dir}"/>
        <jvmarg value="-Djetty.home=${jetty.home}"/>
        <jvmarg value="-Djdk.home=${jdk.home}"/>
@@ -295,8 +310,9 @@ Other targets:
        <jvmarg value="-Djava.security.auth.login.config=${etc}/login.conf"/>
        <arg value="${etc}/jaas.xml"/>
        <classpath>
+	 <path refid="resourcepath"/>
          <path refid="classpath"/>
-	 <pathelement path="${jaas.jar}"/> 
+	 <path refid="libpath"/>
        </classpath>
      </java>
   </target>
