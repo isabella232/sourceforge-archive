@@ -719,6 +719,17 @@ public class HttpFields
     /** Destroy the header.
      * Help the garbage collector by null everything that we can.
      */
+    public void clear()
+    {
+        _map.clear();
+        _names.clear();
+        _readOnlyNames=null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Destroy the header.
+     * Help the garbage collector by null everything that we can.
+     */
     public void destroy()
     {
         _map.clear();

@@ -11,14 +11,15 @@ import com.mortbay.HTTP.HandlerContext;
 import com.mortbay.HTTP.HashUserRealm;
 import com.mortbay.HTTP.HttpServer;
 import com.mortbay.HTTP.SecurityConstraint;
+import com.mortbay.HTTP.SocketListener;
 import com.mortbay.Util.Code;
 import com.mortbay.Util.InetAddrPort;
 import com.mortbay.Util.RolloverFileLogSink;
 
 
 /* ------------------------------------------------------------ */
-/** 
- *
+/** Demo Jetty Server.
+ * Programmatically configure HttpServer instances for demo site.
  * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
@@ -39,7 +40,10 @@ public class Demo
             // Admin server
             HttpServer admin = new HttpServer();
             admin.addRealm(realm);
-            admin.addListener(new InetAddrPort("127.0.0.1:8888"));
+            SocketListener listener = (SocketListener)
+                admin.addListener(new InetAddrPort("127.0.0.1:8888"));
+            listener.setMaxIdleTimeMs(60000);
+            listener.setMaxReadTimeMs(60000);
             context=admin.addContext(null,"/");
             context.setRealm("Jetty Demo Realm");
             context.addSecurityConstraint
@@ -55,10 +59,22 @@ public class Demo
             server.addRealm(realm);
             
             if (arg.length==0)
-                server.addListener(new InetAddrPort(8080));
+            {
+                listener = (SocketListener)
+                    server.addListener(new InetAddrPort(8080));
+                listener.setMaxIdleTimeMs(60000);
+                listener.setMaxReadTimeMs(60000);
+            }
             else
+            {
                 for (int l=0;l<arg.length;l++)
-                    server.addListener(new InetAddrPort(arg[l]));
+                {
+                    listener = (SocketListener)
+                        server.addListener(new InetAddrPort(arg[l]));
+                    listener.setMaxIdleTimeMs(60000);
+                    listener.setMaxReadTimeMs(60000);
+                }
+            }
             
             // Configure handlers
             server.addWebApplication(null,"/jetty/*",

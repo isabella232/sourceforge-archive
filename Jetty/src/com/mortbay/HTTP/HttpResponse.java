@@ -477,7 +477,19 @@ public class HttpResponse extends HttpMessage
     }
     
     /* ------------------------------------------------------------ */
-    /** Destroy the header.
+    /** Recycle the response.
+     */
+    public void recycle(HttpConnection connection)
+    {
+        super.recycle(connection);
+        _status=__200_OK;
+        _version=__HTTP_1_0;
+        _state=__MSG_EDITABLE;
+        _reason=null;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Destroy the response.
      * Help the garbage collector by null everything that we can.
      */
     public void destroy()

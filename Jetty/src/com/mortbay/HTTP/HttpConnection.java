@@ -204,9 +204,18 @@ public class HttpConnection
         {
             try
             {
-                _request = new HttpRequest(this);
-                _response = new HttpResponse(this);
-        
+                // Create or recycle connection
+                if (_request!=null)
+                    _request.recycle(this);
+                else
+                    _request = new HttpRequest(this);
+
+                if (_response!=null)
+                    _response.recycle(this);
+                else
+                    _response = new HttpResponse(this);
+                
+                
                 // Assume the connection is not persistent,
                 // unless told otherwise.
                 _persistent=false;
@@ -227,6 +236,9 @@ public class HttpConnection
                 catch(IOException e)
                 {
                     Code.ignore(e);
+                    _persistent=false;
+                    _response.destroy();
+                    _response=null;
                     return;
                 }
                 logRequest=true;
@@ -357,30 +369,31 @@ public class HttpConnection
                 else
                 {
                     try{
-                        _response.commit();
+                        if (_response!=null)
+                            _response.commit();
                         _outputStream.flush();
                         _outputStream.close();
                     }
                     catch(IOException e) {exception(e);}
                 }
-                    
+
+                // Log request and response
                 if (Code.debug())
                     Code.debug("RESPONSE:\n",_response);
-                
-                if (logRequest && _httpServer!=null)
+                if (logRequest && _httpServer!=null && _response!=null)
                     _httpServer.log(_request,_response);
-            
-                if (_request!=null)
-                    _request.destroy();
-                if (_response!=null)
-                    _response.destroy();
-            
-                _request=null;;
-                _response=null;
             }    
         }while(_persistent);
         
-        _handlingThread=null; 
+        // Destroy request and response
+        if (_request!=null)
+            _request.destroy();
+        if (_response!=null)
+            _response.destroy();
+        _request=null;
+        _response=null;
+        _handlingThread=null;
+        
         try{
             close();
         }

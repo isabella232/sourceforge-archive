@@ -10,6 +10,7 @@
 <H2>Context information</H2>
 <PRE>
 ClassLoader=<%= this.getClass().getClassLoader() %>
+ThreadContextClassLoader=<%= Thread.currentThread().getContextClassLoader() %>
 </PRE>
 
 <H2>Request information</H2>

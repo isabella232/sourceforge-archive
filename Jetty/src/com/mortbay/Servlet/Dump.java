@@ -154,7 +154,7 @@ public class Dump extends HttpServlet
             table.newRow();
             table.newHeading()
                 .cell().nest(new Font(2,true))
-                .add("<BR>Interface javax.servlet.* Attributes")
+                .add("<BR>Request Attributes")
                 .attribute("COLSPAN","2")
                 .left();
             String name;
@@ -165,6 +165,21 @@ public class Dump extends HttpServlet
                 table.newRow();
                 table.addHeading(name+":&nbsp;").cell().right();
                 table.addCell(sreq.getAttribute(name));
+            }
+            
+            table.newRow();
+            table.newHeading()
+                .cell().nest(new Font(2,true))
+                .add("<BR>Context Attributes")
+                .attribute("COLSPAN","2")
+                .left();
+            a = getServletContext().getAttributeNames();
+            while (a.hasMoreElements())
+            {
+                name=(String)a.nextElement();
+                table.newRow();
+                table.addHeading(name+":&nbsp;").cell().right();
+                table.addCell(getServletContext().getAttribute(name));
             }
             
             table.newRow();

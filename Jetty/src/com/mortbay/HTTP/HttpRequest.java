@@ -13,6 +13,7 @@ import com.mortbay.Util.StringUtil;
 import com.mortbay.Util.URI;
 import com.mortbay.Util.UrlEncoded;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.net.InetAddress;
@@ -70,6 +71,7 @@ public class HttpRequest extends HttpMessage
     private int _port;
     private List _te;
     private MultiMap _parameters;
+    private boolean _paramsExtracted;
     private boolean _handled;
     private Cookie[] _cookies;
     private Map _attributes;
@@ -147,7 +149,7 @@ public class HttpRequest extends HttpMessage
         
         
         if (line_buffer==null)
-            throw new IOException("EOF");
+            throw new InterruptedIOException("EOF");
         if (line_buffer.size==in.__maxLineLength)
             throw new HttpException(HttpResponse.__414_Request_URI_Too_Large);
         decodeRequestLine(line_buffer.buffer,line_buffer.size);
@@ -192,7 +194,7 @@ public class HttpRequest extends HttpMessage
         {
             writer.write(_method);
             writer.write(' ');
-            writer.write(_uri!=null?URI.encodePath(_uri.toString()):"null");
+            writer.write(_uri!=null?_uri.toString():"null");
             writer.write(' ');
             writer.write(_version);
             writer.write(HttpFields.__CRLF);
@@ -582,7 +584,7 @@ public class HttpRequest extends HttpMessage
         
         // Check sufficient params
         if (s3<0 || e1<0 || e3<s2 )
-            throw new HttpException(400,"for "+new String(buf,0,len));
+            throw new IOException("Bad Request: "+new String(buf,0,len));
 
         // get method
         _method=new String(buf,s1,s2-s1+1);
@@ -687,9 +689,15 @@ public class HttpRequest extends HttpMessage
     /* ------------------------------------------------------------ */
     /* Extract Paramters from query string and/or form content.
      */
-    private void extractParameters()
+    private synchronized void extractParameters()
     {
-        _parameters=new MultiMap(_uri.getUnmodifiableParameters());
+        if (_paramsExtracted)
+            return;
+        _paramsExtracted=true;
+        if (_parameters==null)
+            _parameters=new MultiMap(_uri.getUnmodifiableParameters());
+        else
+            _parameters.putAll(_uri.getUnmodifiableParameters());
         
         if (_state==__MSG_RECEIVED)
         {
@@ -750,7 +758,7 @@ public class HttpRequest extends HttpMessage
      */
     public MultiMap getParameters()
     {
-        if (_parameters==null)
+        if (!_paramsExtracted)
             extractParameters();
         return _parameters;
     }
@@ -762,7 +770,7 @@ public class HttpRequest extends HttpMessage
      */
     public Set getParameterNames()
     {
-        if (_parameters==null)
+        if (!_paramsExtracted)
             extractParameters();
         return _parameters.keySet();
     }
@@ -774,7 +782,7 @@ public class HttpRequest extends HttpMessage
      */
     public String getParameter(String name)
     {
-        if (_parameters==null)
+        if (!_paramsExtracted)
             extractParameters();
         return _parameters.getString(name);
     }
@@ -786,7 +794,7 @@ public class HttpRequest extends HttpMessage
      */
     public List getParameterValues(String name)
     {
-        if (_parameters==null)
+        if (!_paramsExtracted)
             extractParameters();
         return _parameters.getValues(name);
     }
@@ -957,6 +965,26 @@ public class HttpRequest extends HttpMessage
     public Principal getUserPrincipal()
     {
         return (Principal)getAttribute(UserPrincipal.__ATTR);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Recycle the request.
+     */
+    public void recycle(HttpConnection connection)
+    {
+        super.recycle(connection);
+        _method=null;
+        _uri=null;
+        _host=null;
+        _port=0;
+        _te=null;
+        if (_parameters!=null)
+            _parameters.clear();
+        _paramsExtracted=false;
+        _handled=false;
+        _cookies=null;
+        if (_attributes!=null)
+            _attributes.clear();
     }
     
     /* ------------------------------------------------------------ */

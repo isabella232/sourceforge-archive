@@ -222,7 +222,6 @@ public class UrlEncoded extends MultiMap
     
     /* ------------------------------------------------------------ */
     /** Perform URL encoding.
-     * Simply calls URLEncoder.encode
      * @param string 
      * @return encoded string.
      */

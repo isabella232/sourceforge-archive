@@ -477,12 +477,22 @@ class ServletRequest
     /* -------------------------------------------------------------- */
     public void setAttribute(String name, Object value)
     {
+        if (name.startsWith("com.mortbay.HTTP"))
+        {
+            Code.warning("Servlet attempted update of "+name);
+            return;
+        }
         _httpRequest.setAttribute(name,value);
     }
     
     /* -------------------------------------------------------------- */
     public void removeAttribute(String name)
     {
+        if (name.startsWith("com.mortbay.HTTP"))
+        {
+            Code.warning("Servlet attempted update of "+name);
+            return;
+        }
         _httpRequest.removeAttribute(name);
     }
     

@@ -329,6 +329,11 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public void setAttribute(String name, Object value)
     {
+        if (name.startsWith("com.mortbay.HTTP"))
+        {
+            Code.warning("Servlet attempted update of "+name);
+            return;
+        }
         _handler.getHandlerContext().setAttribute(name,value);
     }
 
@@ -339,6 +344,11 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public void removeAttribute(String name)
     {
+        if (name.startsWith("com.mortbay.HTTP"))
+        {
+            Code.warning("Servlet attempted update of "+name);
+            return;
+        }
         _handler.getHandlerContext().removeAttribute(name);
     }
 

@@ -66,8 +66,6 @@ abstract public class HttpMessage
     protected HttpMessage()
     {
         _header=new HttpFields();
-        if (Code.verbose(999))
-            Code.debug("New");
     }
     
     /* ------------------------------------------------------------ */
@@ -77,13 +75,9 @@ abstract public class HttpMessage
     {
         _header=new HttpFields();
         _connection=connection;
-        if (Code.verbose(999))
-            Code.debug("New ",connection);
     }
 
     /* ------------------------------------------------------------ */
-    /** 
-     */
     protected void reset()
     {
         _state=__MSG_EDITABLE;
@@ -91,22 +85,15 @@ abstract public class HttpMessage
         _trailer=null;
 
         // XXX - also need to cancel any encodings added to output stream!
-        
     }
     
     /* ------------------------------------------------------------ */
-    /** XXX
-     * @return 
-     */
     public HttpConnection getConnection()
     {
         return _connection;
     }
 
     /* ------------------------------------------------------------ */
-    /** XXX
-     * @return 
-     */
     public ChunkableInputStream getInputStream()
     {
         if (_connection==null)
@@ -115,17 +102,12 @@ abstract public class HttpMessage
     }
     
     /* ------------------------------------------------------------ */
-    /** XXX
-     * @return 
-     */
     public ChunkableOutputStream getOutputStream()
     {
         if (_connection==null)
             return null;
         return _connection.getOutputStream();
     }
-    
-
     
     /* ------------------------------------------------------------ */
     /** Get the message state.
@@ -526,13 +508,27 @@ abstract public class HttpMessage
     }
     
     /* ------------------------------------------------------------ */
-    /** Destroy the header.
+    /** Recycle the message.
+     */
+    public void recycle(HttpConnection connection)
+    {
+        _state=__MSG_EDITABLE;
+        _version=null;
+        _dotVersion=0;
+        _header.clear();
+        if (_trailer!=null)
+            _trailer.destroy();        
+        _trailer=null;
+        _acceptTrailer=false;
+        _connection=connection;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Destroy the message.
      * Help the garbage collector by nulling everything that we can.
      */
     public void destroy()
     {
-        if (Code.verbose(999))
-            Code.debug("Destroy");
         if (_header!=null)
             _header.destroy();
         if (_trailer!=null)
@@ -540,6 +536,7 @@ abstract public class HttpMessage
         _header=null;
         _trailer=null;
     }
+    
     /* ------------------------------------------------------------ */
     /** Convert to String.
      * The message header is converted to a String.

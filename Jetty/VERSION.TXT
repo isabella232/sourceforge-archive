@@ -1,11 +1,18 @@
 Jetty Versions
 --------------
- + fixed bug with URL encoded sessionid. 
+
+ + Set MaxReadTimeMs in all examples
+ + Further clean up of the connection close actions
  + Moved unused classes from com.mortbay.Util to com.mortbay.Tools in 
    new distribution package.
  + Handle mime suffixes containing dots. 
  + Added gz tgz tar.gz .z mime mappings.
  + Fixed default mimemap initialization bug
+ + Optimized persistent connections by recycling objects
+ + Added HandlerContext.setHttpServerAccess for trusted contexts.
+ + Set the thread context class loader in HandlerContext.handle
+ + Prevent servlet setAttribute calls to protected context attributes.
+ + Removed redundant context attributes.
 
 Jetty-3.0.0.rc2 - 29 Oct 2000
  + Replaced ISO-8859-1 literals with StringUtil static

@@ -126,7 +126,10 @@ abstract public class ThreadedServer extends ThreadPool
     }
 
     /* ------------------------------------------------------------ */
-    /** 
+    /** Set Max Read Time.
+     * Setting this to a none zero value results in setSoTimeout being
+     * called for all accepted sockets.  This causes an
+     * InterruptedIOException if a read blocks for this period of time.
      * @param ms 
      */
     public void setMaxReadTimeMs(int ms)
@@ -287,6 +290,8 @@ abstract public class ThreadedServer extends ThreadPool
      * May be overriden by derived class
      * to create specialist serversockets (eg SSL).
      * @param serverSocket
+     * @param timeout The time to wait for a connection. Normally
+     *                 passed the ThreadPool maxIdleTime.
      * @return Accepted Socket
      */
     protected Socket acceptSocket(ServerSocket serverSocket,

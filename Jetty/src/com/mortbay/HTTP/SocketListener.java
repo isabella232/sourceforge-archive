@@ -14,7 +14,14 @@ import java.net.Socket;
 
 /* ------------------------------------------------------------ */
 /** Socket HTTP Listener.
- * 
+ * The behaviour of the listener can be controlled with the
+ * attributues of the ThreadedServer and ThreadPool from which it is
+ * derived. Specifically: <PRE>
+ * MinThreads    - Minumum threads waiting to service requests.
+ * MaxThread     - Maximum thread that will service requests.
+ * MaxIdleTimeMs - Time for an idle thread to wait for a request.
+ * MaxReadTimeMs - Time that a read on a request can block.
+ * </PRE>
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */

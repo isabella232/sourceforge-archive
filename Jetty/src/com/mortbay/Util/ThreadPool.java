@@ -246,6 +246,8 @@ public class ThreadPool
     
     /* ------------------------------------------------------------ */
     /** Set the maximum thread idle time.
+     * Threads that are idle for longer than this period may be
+     * destroyed.
      * @param maxIdleTimeMs Max idle time in ms.
      */
     public void setMaxIdleTimeMs(int maxIdleTimeMs)

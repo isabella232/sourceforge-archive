@@ -51,12 +51,6 @@ import java.util.Map;
  */
 public class HandlerContext implements LifeCycle
 {
-    public final static String
-        __ResourceBase="com.mortbay.HTTP.HandlerContext.resourceBase",
-        __ClassPath="com.mortbay.HTTP.HandlerContext.classPath",
-        __ClassLoader="com.mortbay.HTTP.HandlerContext.classLoader",
-        __MimeMap="com.mortbay.HTTP.HandlerContext.mimeMap";
-    
     private HttpServer _httpServer;
     private List _handlers=new ArrayList(3);
     private String _classPath;
@@ -73,7 +67,8 @@ public class HandlerContext implements LifeCycle
     private String _contextPath;
     private String _name;
     private boolean _redirectNullPath=true;
-
+    private boolean _httpServerAccess=false;
+    
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param httpServer 
@@ -149,8 +144,6 @@ public class HandlerContext implements LifeCycle
      */
     public Object getAttribute(String name)
     {
-        if (__ClassLoader.equals(name))
-            return getClassLoader();
         return _attributes.get(name);
     }
 
@@ -170,19 +163,7 @@ public class HandlerContext implements LifeCycle
      */
     public synchronized void setAttribute(String name, Object value)
     {
-        if (__ResourceBase.equals(name))
-            setResourceBase(value.toString());
-        else if (__ClassPath.equals(name))
-            setClassPath(value.toString());
-        else if (__ClassLoader.equals(name))
-            setClassLoader((ClassLoader)value);
-        else if (__MimeMap.equals(name))
-        {
-            _mimeMap=(Map)value;
-            _attributes.put(name,value);
-        }
-        else
-            _attributes.put(name,value);
+        _attributes.put(name,value);
     }
 
     
@@ -192,19 +173,7 @@ public class HandlerContext implements LifeCycle
      */
     public synchronized void removeAttribute(String name)
     {
-        if (__ResourceBase.equals(name))
-            setResourceBase((String)null);
-        else if (__ClassPath.equals(name))
-            setClassPath(null);
-        else if (__ClassLoader.equals(name))
-            setClassLoader(null);
-        else if (__MimeMap.equals(name))
-        {
-            _mimeMap=null;
-            _attributes.remove(name);
-        }
-        else
-            _attributes.remove(name);
+        _attributes.remove(name);
     }
     
     /* ------------------------------------------------------------ */
@@ -263,7 +232,6 @@ public class HandlerContext implements LifeCycle
     public void setClassPath(String classPath)
     {
         _classPath=classPath;
-        _attributes.put(__ClassPath,classPath);
         if (isStarted())
             Code.warning("classpath set while started");
     }
@@ -300,7 +268,6 @@ public class HandlerContext implements LifeCycle
         _parent=loader;
         if (isStarted())
             Code.warning("classpath set while started");
-        _attributes.put(__ClassLoader,loader);
     }
    
     /* ------------------------------------------------------------ */
@@ -314,7 +281,6 @@ public class HandlerContext implements LifeCycle
     {
         Code.debug("resourceBase=",resourceBase," for ", this);
         _resourceBase=resourceBase;
-        _attributes.put(__ResourceBase,_resourceBase.toString());
     }
     
     /* ------------------------------------------------------------ */
@@ -328,8 +294,6 @@ public class HandlerContext implements LifeCycle
     {
         try{
             _resourceBase=Resource.newResource(resourceBase);
-            _attributes.put(__ResourceBase,
-                            _resourceBase.toString());
             Code.debug("resourceBase=",_resourceBase," for ", this);
         }
         catch(IOException e)
@@ -495,7 +459,18 @@ public class HandlerContext implements LifeCycle
     public void setMimeMap(Map mimeMap)
     {
         _mimeMap = mimeMap;
-        _attributes.put(__MimeMap,_mimeMap);
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set HttpServer Access.
+     * If true then the HttpServer instance is available as a
+     * context attribute "com.mortbay.HTTP.HttpServer".
+     * This should only been done for trusted contexts.
+     * @param access 
+     */
+    public void setHttpServerAccess(boolean access)
+    {
+        _httpServerAccess=access;
     }
     
     /* ------------------------------------------------------------ */
@@ -859,35 +834,48 @@ public class HandlerContext implements LifeCycle
             response.sendError(302);
             return true;
         }	  
-            
-        List handlers=getHandlers();
-        for (int k=0;k<handlers.size();k++)
+
+        // Save the thread context loader
+        Thread thread = Thread.currentThread();
+        ClassLoader lastContextLoader=thread.getContextClassLoader();
+        try
         {
-            HttpHandler handler =
-                (HttpHandler)handlers.get(k);
-
-            if (!handler.isStarted())
-            {
-                Code.debug(handler," not started in ",this);
-                continue;
-            }
+            if (_loader!=null)
+                thread.setContextClassLoader(_loader);
             
-            if (Code.debug())
-                Code.debug("Try handler ",handler);
-                                
-            handler.handle(pathInContext,
-                           request,
-                           response);
-
-            if (request.isHandled())
+            List handlers=getHandlers();
+            for (int k=0;k<handlers.size();k++)
             {
+                HttpHandler handler =
+                    (HttpHandler)handlers.get(k);
+                
+                if (!handler.isStarted())
+                {
+                    Code.debug(handler," not started in ",this);
+                    continue;
+                }
+                
                 if (Code.debug())
-                    Code.debug("Handled by ",handler);
-                response.complete();
-                return true;
+                    Code.debug("Try handler ",handler);
+                
+                handler.handle(pathInContext,
+                               request,
+                               response);
+                
+                if (request.isHandled())
+                {
+                    if (Code.debug())
+                        Code.debug("Handled by ",handler);
+                    response.complete();
+                    return true;
+                }
             }
+            return false;
         }
-        return false;
+        finally
+        {
+            thread.setContextClassLoader(lastContextLoader);
+        }
     }
     
     
@@ -913,6 +901,9 @@ public class HandlerContext implements LifeCycle
             throw new IllegalStateException("No server for "+this);
         
         _started=true;
+
+        setAttribute("com.mortbay.HTTP.HttpServer",
+                     _httpServerAccess?_httpServer:null);
         
         // setup the context loader
         _loader=null;
@@ -929,7 +920,6 @@ public class HandlerContext implements LifeCycle
                 _loader=_parent;
             else
                 _loader=new ContextLoader(_classPath,_parent);
-            _attributes.put(__ClassLoader,_loader);
         }
         
         // Start the handlers
