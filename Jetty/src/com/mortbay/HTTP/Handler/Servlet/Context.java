@@ -411,7 +411,7 @@ public class Context implements ServletContext, HttpSessionContext
 
     // Setting of max inactive interval for new sessions
     // -1 means no timeout
-    private int _defaultMaxIdleTime = -1;
+    private int _dftMaxIdleSecs = -1;
     private SessionScavenger _scavenger = null;
     private Map _sessions = new HashMap();
 
@@ -448,7 +448,7 @@ public class Context implements ServletContext, HttpSessionContext
     public HttpSession newSession()
     {
         HttpSession session = new Session();
-        session.setMaxInactiveInterval(_defaultMaxIdleTime);
+        session.setMaxInactiveInterval(_dftMaxIdleSecs);
         _sessions.put(session.getId(),session);
         return session;
     }
@@ -471,7 +471,7 @@ public class Context implements ServletContext, HttpSessionContext
      */
     public void setSessionTimeout(int timeoutMinutes)
     {
-        _defaultMaxIdleTime = timeoutMinutes*60;;
+        _dftMaxIdleSecs = timeoutMinutes*60;;
 
         // Start the session scavenger if we haven't already
         if (_scavenger == null)
@@ -498,7 +498,7 @@ public class Context implements ServletContext, HttpSessionContext
         for (Iterator i = _sessions.values().iterator(); i.hasNext(); )
         {
             Session session = (Session)i.next();
-            long idleTime = session.maxIdleTime;
+            long idleTime = session.maxIdleMillis;
             if (idleTime > 0 && session.accessed + idleTime < now) {
                 // Found a stale session, add it to the list
                 if (staleSessions == null)
@@ -562,7 +562,7 @@ public class Context implements ServletContext, HttpSessionContext
         boolean newSession=true;
         long created=System.currentTimeMillis();
         long accessed=created;
-        long maxIdleTime = -1;
+        long maxIdleMillis = -1;
         String id=null;
 
         /* ------------------------------------------------------------- */
@@ -574,8 +574,8 @@ public class Context implements ServletContext, HttpSessionContext
                 __nextSessionId+=created%4096;
                 this.id=Long.toString(idtmp,30+(int)(created%7));
             }
-            if (_defaultMaxIdleTime>=0)
-                maxIdleTime=_defaultMaxIdleTime*1000;
+            if (_dftMaxIdleSecs>=0)
+                maxIdleMillis=_dftMaxIdleSecs*1000;
         }
 
         /* ------------------------------------------------------------- */
@@ -613,7 +613,7 @@ public class Context implements ServletContext, HttpSessionContext
         public int getMaxInactiveInterval()
         {
             if (invalid) throw new IllegalStateException();
-            return (int)(maxIdleTime / 1000);
+            return (int)(maxIdleMillis / 1000);
         }
 
         /* ------------------------------------------------------------- */
@@ -628,9 +628,9 @@ public class Context implements ServletContext, HttpSessionContext
         }
 
         /* ------------------------------------------------------------- */
-        public void setMaxInactiveInterval(int i)
+        public void setMaxInactiveInterval(int secs)
         {
-            maxIdleTime = (long)i * 1000;
+            maxIdleMillis = (long)secs * 1000;
         }
 
         /* ------------------------------------------------------------- */

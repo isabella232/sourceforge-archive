@@ -827,68 +827,75 @@ public class HttpRequest extends HttpMessage
             QuotedStringTokenizer tok = new QuotedStringTokenizer(cookieStr,";");
             while (tok.hasMoreTokens())
             {
-                String c = tok.nextToken();
-                int e = c.indexOf("=");
-                String n;
-                String v;
-                if (e>0)
+                try
                 {
-                    n=c.substring(0,e).trim();
-                    v=c.substring(e+1).trim();
-                }
-                else
-                {
-                    n=c.trim();
-                    v="";
-                }
-
-                // Handle quoted values
-                if (version>0)
-                    v=StringUtil.unquote(v);
-                
-                // Ignore $ names
-                if (n.startsWith("$"))
-                {
-                    if ("$version".equalsIgnoreCase(n))
+                    String c = tok.nextToken();
+                    int e = c.indexOf("=");
+                    String n;
+                    String v;
+                    if (e>0)
                     {
-                        int coma=v.indexOf(",");
-                        if (coma>=0)
-                        {   
-                            version=Integer.parseInt
-                                (StringUtil.unquote(v.substring(0,coma)));
-                            v=v.substring(coma+1);
-                            e=v.indexOf("=");
-                            if (e>0)
-                            {
-                                n=v.substring(0,e).trim();
-                                v=v.substring(e+1).trim();
-                                v=StringUtil.unquote(v);
-                            }
-                            else
-                            {
-                                n=v.trim();
-                                v="";
-                            }
-                        }
-                        else
-                            continue;
+                        n=c.substring(0,e).trim();
+                        v=c.substring(e+1).trim();
                     }
                     else
                     {
-                        if ("$path".equalsIgnoreCase(n) && cookie!=null)
-                            cookie.setPath(v);
-                        else if ("$domain".equalsIgnoreCase(n)&&cookie!=null)
-                            cookie.setDomain(v);
-                        continue;
+                        n=c.trim();
+                        v="";
                     }
+                    
+                    // Handle quoted values
+                    if (version>0)
+                        v=StringUtil.unquote(v);
+                    
+                    // Ignore $ names
+                    if (n.startsWith("$"))
+                    {
+                        if ("$version".equalsIgnoreCase(n))
+                        {
+                            int coma=v.indexOf(",");
+                            if (coma>=0)
+                            {   
+                                version=Integer.parseInt
+                                    (StringUtil.unquote(v.substring(0,coma)));
+                                v=v.substring(coma+1);
+                                e=v.indexOf("=");
+                                if (e>0)
+                                {
+                                    n=v.substring(0,e).trim();
+                                    v=v.substring(e+1).trim();
+                                    v=StringUtil.unquote(v);
+                                }
+                                else
+                                {
+                                    n=v.trim();
+                                    v="";
+                                }
+                            }
+                            else
+                                continue;
+                        }
+                        else
+                        {
+                            if ("$path".equalsIgnoreCase(n) && cookie!=null)
+                                cookie.setPath(v);
+                            else if ("$domain".equalsIgnoreCase(n)&&cookie!=null)
+                                cookie.setDomain(v);
+                            continue;
+                        }
+                    }
+                
+                    v=UrlEncoded.decodeString(v);
+                    cookie=new Cookie(n,v);
+                    if (version>0)
+                        cookie.setVersion(version);
+                    cookies.add(cookie);
                 }
-                
-                
-                v=UrlEncoded.decodeString(v);
-                cookie=new Cookie(n,v);
-                if (version>0)
-                    cookie.setVersion(version);
-                cookies.add(cookie);
+                catch(Exception e)
+                {
+                    Code.ignore(e);
+                    Code.warning("Bad Cookie received: "+e.toString());
+                }
             }
 
             _cookies=new Cookie[cookies.size()];
