@@ -276,7 +276,7 @@ public class ThreadPool
     public void stop()
         throws InterruptedException
     {
-        synchronized(this)
+        synchronized(_pool)
         {
             if (_reserved!=null)
             {
@@ -313,7 +313,7 @@ public class ThreadPool
     public void shrink()
         throws InterruptedException
     {
-        synchronized(this)
+        synchronized(_pool)
         {
             if (_reserved!=null)
             {
@@ -340,7 +340,7 @@ public class ThreadPool
         {
             PoolThread thread = null;
 
-            synchronized(this)
+            synchronized(_pool)
             {
                 if (_reserved==null)
                     thread=(PoolThread)_pool.get(getMaxIdleTimeMs());
@@ -367,7 +367,7 @@ public class ThreadPool
     protected boolean reserveThread()
         throws InterruptedException
     {
-        synchronized(this)
+        synchronized(_pool)
         {
             try
             {
@@ -511,20 +511,12 @@ public class ThreadPool
                 {
                     synchronized(this)
                     {
-                        boolean got=_job!=null;
                         _job=null;
                         _threadPool=null;
                         try
                         {
                             if (_pool!=null)
-                            {
-                                if (got)
-                                {
-                                    _pool.put(this);
-                                }
-                                else
-                                    _pool.shrink();
-                            }
+                                _pool.put(this);
                         }
                         catch (InterruptedException e){Code.ignore(e);}
                     }

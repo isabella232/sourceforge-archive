@@ -1,12 +1,15 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.3 - 2 December 2002
+ + Removed aggressive threadpool shrinkage to avoid deadlock on SMP machines. 
  + Fixed some typos
  + Added links to Jetty Powered page
  + Clean up of ThreadedServer.stop()
  + Updated bat scripts
  + Added PKCS12Import class to import PKCS12 key directly 
  + removed old HttpContext.setDirAllowed()
+ + added main() to org.mortbay.http.Version
 
 Jetty-4.2.2 - 20 November 2002
  + Fixed sendRedirect for non http URLS

@@ -37,18 +37,16 @@ public class Version
         
         Package p = Version.class.getPackage();
         if (p!=null)
-        {
-            __Version="Jetty/"+p.getImplementationVersion();
-        }
+            __VersionImpl="Jetty/"+p.getImplementationVersion();
         
         if (!__paranoid)
         {
-            __VersionDetail=__Version+" ("+
+            __VersionDetail=__VersionImpl+" ("+
                 System.getProperty("os.name")+" "+
                 System.getProperty("os.version")+" "+
                 System.getProperty("os.arch")+")";
 
-            __ServletEngine=__Version+" (Servlet 2.3; JSP 1.2; java "+
+            __ServletEngine=__VersionImpl+" (Servlet 2.3; JSP 1.2; java "+
                 System.getProperty("java.version")+")";
         }
     }
@@ -61,6 +59,13 @@ public class Version
     {
         // System.err.println(__notice);
     }
-    
+
+    public static void main(String[] arg)
+    {
+        System.out.println("org.mortbay.http.Version="+__Version);
+        System.out.println("org.mortbay.http.VersionImpl="+__VersionImpl);
+        System.out.println("org.mortbay.http.VersionDetail="+__VersionDetail);
+        System.out.println("org.mortbay.http.ServletEngine="+__ServletEngine);
+    }
 }
 

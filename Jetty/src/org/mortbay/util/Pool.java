@@ -360,7 +360,6 @@ public class Pool
         if (_pondLife[id]!=null)
             _pondLife[id].poolClosing();
     }
-
     
     /* ------------------------------------------------------------ */
     private void stopPondLife(int id)

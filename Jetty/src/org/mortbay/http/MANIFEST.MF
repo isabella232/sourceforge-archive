@@ -11,7 +11,6 @@ Main-Class: org.mortbay.http.HttpServer
 
 Name: org/mortbay/http/
 Specification-Title: HTTP Server
-Specification-Version: 1.1
 Implementation-Title: Mort Bay HTTP Server
 
 Name: org/mortbay/util/
