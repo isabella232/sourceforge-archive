@@ -46,6 +46,24 @@ class FileResource extends URLResource
             Log.event("Checking Resource aliases");
     }
     
+    /* ------------------------------------------------------------------------------- */
+    /** setCheckAliases.
+     * @param checkAliases True of resource aliases are to be checked for (eg case insensitivity or 8.3 short names) and treated as not found.
+     */
+    public static void setCheckAliases(boolean checkAliases)
+    {
+        __checkAliases=checkAliases;
+    }
+
+    /* ------------------------------------------------------------------------------- */
+    /** getCheckAliases.
+     * @return True of resource aliases are to be checked for (eg case insensitivity or 8.3 short names) and treated as not found.
+     */
+    public static boolean getCheckAliases()
+    {
+        return __checkAliases;
+    }
+    
     /* ------------------------------------------------------------ */
     private File _file;
     private transient URL _alias=null;

@@ -6,9 +6,39 @@ Jetty-4.2.20pre0
  + Forced close of connections over stop/start
  + HttpFields protected headers
 
+Jetty-5.0.0RC0
+ + ServletContext attributes wrap HttpContext attributes.
+ + Factored out XML based config from WebApplicationContext
+ + Improved RequestLog performance
+ + Fixed j2se 1.3 problem with HttpFields
+ + Default servlet respectes servlet path
+ + Fixed setCharacterEncoding for parameters.
+ + Fixed DOS problem
+ + Worked around bad jboss URL handler in XMLParser
+ + Forced close of connections over stop/start
+
 Jetty-4.2.19 - 19 Mar 2004
  + Fixed DOS attack problem
 
+Jetty-5.0.beta2 - 12 Feb 2004
+ + Added skeleton JMX MBean for jetty plus
+ + Fixed HEAD with empty chunk bug.
+ + Fixed jetty.home/work handling
+ + Fixed setDate thread safety
+ + Fixed SessionManager init
+ + Improved low thread handling
+ + FileResource better handles non sun JVM
+ + Monitor closes socket before exit
+ + Updated to Japser 5.0.16
+ + RequestDispatcher uses request encoding for query params
+ + Fixed busy loop in threadpool run
+ + Reorganized ServletHolder init
+ + Added log4j context repository to jettyplus
+ + NPE guard for no-listener junit deployment
+ + Added experimental NIO listeners again.
+ + fixed filter dispatch configuration.
+ + fixed lazy authentication with FORMs
+ 
 Jetty-4.2.18 - 1 Mar 2004
  + Added log4j context repository to jettyplus
  + NPE guard for no-listener junit deployment
@@ -30,14 +60,37 @@ Jetty-4.2.16 - 30 Jan 2004
  + RequestDispatcher uses request encoding for query params
  + Update jasper to 4.2.29
 
-Jetty-4.2.15 - 24 Dec 2003
+Jetty-5.0.beta1 - 24 December 2003
+ + SecurityConstraints not reset by stop() on custom context
+ + Fixed UnixCrypt handling in HTAccessHandler
+ + Added patch for JBoss realm single sign on
+ + Reorganized FAQ
+ + Env variables for CGI
+ + Removed support for old JBoss clustering
+
+Jetty-4.2.15 - 24 December 2003
  + SecurityConstraints not reset by stop() on custom context
  + Fixed UnixCrypt handling in HTAccessHandler
  + Added patch for JBoss realm single sign on
  + Environment variables for CGI
  + Removed support for old JBoss clustering
+                                                                                                
+Jetty-5.0.beta0 - 22 November 2003
+ + Removed support for HTTP trailers
+ + PathMap uses own Map.Entry impl for IBM JVMs 
+ + Use ${jetty.home}/work or WEB-INF/work for temp directories if present
+ + Protect ThreadPool.run() from interrupted exceptions
+ + Added org.mortbay.http.ErrorHandler for error pages.
+ + Fixed init race in HttpFields cache
+ + Allow per listener handlers
+ + Added MsieSslHandler to handle browsers that don't grok persistent SSL (msie 5)
+ + Respect content length when decoding form content.
+ + JBoss integration uses writer rather than stream for XML config handling
+ + Expire pages that contain set-cookie as per RFC2109 recommendation
+ + Updated jasper to 5.0.14beta
+ + Removed the CMR/CMP distributed session implementation
 
-Jetty-4.2.15rc0 - 24 Nov 2003
+Jetty-4.2.15rc0 - 22 November 2003
  + PathMap uses own Map.Entry impl for IBM JVMs 
  + Race in HttpFields cache
  + Use ${jetty.home}/work or WEB-INF/work for temp directories if present
@@ -46,17 +99,32 @@ Jetty-4.2.15rc0 - 24 Nov 2003
  + JsseListener checks UserAgent for browsers that can't grok persistent SSL (msie5)
  + Removed the CMR/CMP distributed session implementation
 
-Jetty-4.2.14 - 4 November 2003
- + Respect content length when decoding form content.
+Jetty-4.2.14 - 04 November 2003
+ + respect content length when decoding form content.
  + JBoss integration uses writer rather than stream for XML config handling
  + Fixed NPE in SSO
  + Expire pages that contain set-cookie as per RFC2109 recommendation
 
+Jetty-5.0.alpha3 - 19 October 2003
+ + Reworked Dispatcher to better support cross context sessions.
+ + Use File.toURI().toURL() when jdk 1.2 alternative is available.
+ + Priority added to ThreadPool
+ + replaced win32 service with http://wrapper.tanukisoftware.org
+ + FileClassPath derived from walk of classloader hierarchy.
+ + Implemented security constraint combinations
+ + Set TransactionManager on JettyPlus datasources and pools
+ + Fixed null pointer if no sevices configured for JettyPlus
+ + Updated jasper and examples to 5.0.12
+ + Lazy authentication if no auth constraint.
+ + Restore servlet handler after dispatch
+ + Allow customization of HttpConnections
+ + Failed requests excluded from duration stats
+
 Jetty-4.2.14RC1 - 19 October 2003
  + Reworked Dispatcher to better support cross context sessions.
- + Added UserRealm.logout and arrange for form auth & session invalidation to call it
+ + Added UserRealm.logout and arrange for form auth  
  + Allow customization of HttpConnections
- + Failed requests excluded from duration stats.
+ + Failed requests excluded from 
 
 Jetty-4.2.14RC0 - 7 October 2003
  + Correctly setup context classloader in cross context dispatch.
@@ -71,7 +139,39 @@ Jetty-4.2.14RC0 - 7 October 2003
  + Set TransactionManager on JettyPlus datasources and pools
  + Fixed null pointer if no sevices configured for JettyPlus
  + Fixed comments with embedded double dashes on jettyplus.xml file
- + Improved JMX start mechanism
+
+Jetty-5.0.alpha2 - 19 September 2003
+ + Use commons logging.
+ + Use log4j if extra is present.
+ + Improved JMX start.
+ + Update jakarta examples
+ + Correctly setup context classloader in cross context dispatch.
+ + Turn off validation without non-xerces errors
+ + minor doco updates.
+ + moved mailing lists to sourceforge.
+ + Put a semi busy loop into proxy tunnels for IE problems
+ + MultipartRequest supports multi value headers.
+ + XML entity resolution uses URLs not Resources
+ + Implemented ServletRequestListeners as optional filter.
+ + Moved error page mechanism to be webapp only.
+ + Fixed error page handling of IO and Servlet exceptions.
+
+Jetty-5.0.alpha1 - 12 August 2003
+ + Switched to mx4j
+ + Improve combinations of Security Constraints
+ + Implemented locale encoding mapping.
+ + Synced with 4.2.12
+ + Updated to Jasper 5.0.7
+ + Server javadoc from war
+
+Jetty-5.0.alpha0 - 16 Jul 2003
+ + Compiled against 2.4 servlet spec.
+ + Implemented remote/local addr/port methods
+ + Updated authentication so that a normal Principal is used.
+ + updated to jasper 5.0.3
+ + Implemented setCharaterEncoding 
+ + Implemented filter-mapping <dispatcher> element
+ + Implemented Dispatcher forward attributes.
 
 Jetty-4.2.12 - 12 August 2003
  + Restore max inactive interval for session manager
