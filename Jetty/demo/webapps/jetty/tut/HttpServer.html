@@ -644,10 +644,12 @@ public class SimpleServer
     // Create a port listener
     SocketListener listener=new SocketListener();
     listener.setPort(8181);
+    server.addListener(listener);
 
     // Create a context 
     HttpContext context = new HttpContext();
     context.setContextPath("/mystuff/*");
+    server.addContext(context);
       
     // Create a servlet container
     ServletHandler servlets = new ServletHandler();
@@ -660,7 +662,7 @@ public class SimpleServer
     String home = System.getProperty("jetty.home",".");
     context.setResourceBase(home+"/demo/webapps/jetty/tut/");
     context.addHandler(new ResourceHandler());
-      
+
     // Start the http server
     server.start ();
   }
