@@ -1,6 +1,11 @@
 Jetty Versions
 --------------
 
+ + fix for adding recognized EventListeners
+ + fix commons logging imports to IbmJsseListener
+ + added new contributed shell start/stop script
+ + excluded ErrorPageHandler from standard build in extra/jdk1.2 build
+
 Jetty-5.1.0 - 14 November 2004
 
 Jetty-5.1.RC1 - 24 October 2004
