@@ -6,6 +6,7 @@
 package com.mortbay.HTTP;
 
 import com.mortbay.Util.Code;
+import com.mortbay.Util.Log;
 import com.mortbay.Util.InetAddrPort;
 import com.mortbay.Util.ThreadPool;
 import com.mortbay.Util.ThreadedServer;
@@ -45,6 +46,13 @@ public abstract class JsseListener extends SocketListener
     public static final String PASSWORD_PROPERTY = "jetty.ssl.password";
     // password for the key password
     public static final String KEYPASSWORD_PROPERTY = "jetty.ssl.keypassword";
+
+    /* ------------------------------------------------------------ */
+    private boolean _needClientAuth = false;
+    public void setNeedClientAuth(boolean needClientAuth)
+    {
+        _needClientAuth = needClientAuth;
+    }
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -119,7 +127,10 @@ public abstract class JsseListener extends SocketListener
                                                p_acceptQueueSize,
                                                p_address.getInetAddress() );
             }
-        }
+
+	    socket.setNeedClientAuth(_needClientAuth);
+	    Log.event("JsseListener.needClientAuth=" + _needClientAuth);
+	}
         catch( Exception e )
         {
             Code.warning(e);
