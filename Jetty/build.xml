@@ -220,7 +220,7 @@
     <jar jarfile="${servlet.jar}" basedir="${classes}" >
        <include name="javax/servlet/**" />
        <manifest>    
-         <attribute name="Sealed" value="true"/>
+         <attribute name="Sealed" value="${jar.sealed}"/>
          <attribute name="Built-By" value="${user.name}"/>
          <attribute name="Specification-Title" value="Java API for Servlets"/>
          <attribute name="Specification-Version" value="2.4"/>
@@ -237,7 +237,7 @@
   <target name="jetty.jar" depends="classes,servlet.jar" >
     <jar jarfile="${jetty.jar}">
        <manifest>    
-         <attribute name="Sealed" value="true"/>
+         <attribute name="Sealed" value="${jar.sealed}"/>
          <attribute name="Built-By" value="${user.name}"/>
          <attribute name="Specification-Version" value="${RELEASE.MAJOR}"/>
          <attribute name="Implementation-Version" value="${RELEASE.MAJOR.MINOR}"/>
