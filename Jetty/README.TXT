@@ -52,8 +52,9 @@ For example
 
   java -jar start.jar etc/admin.xml etc/demo.xml
 
-For more details see $JETTY_HOME/launcher/README.txt
-
+On some systems with graphical file browsers, it may be possible to start
+jetty by double clicking on this jar file. For more details see 
+$JETTY_HOME/launcher/README.txt
 
 
 JDK 1.4 Quick start

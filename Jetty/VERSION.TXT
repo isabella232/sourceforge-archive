@@ -3,7 +3,9 @@ Jetty Versions
 
 Jetty-4.1.0RC3 - 28 August 2002
  + Fixed security problem for suffix matching with trailing "/" 
+ + addWebApplications encodes paths to allow for spaces in file names.
  + Improved handling of PUT,DELETE & MOVE.
+ + Improved handling of path encoding in Resources for bad JVMs
  + Added buffering to request log
  + Created and integrated the Jetty Launcher
  + Made Resource canonicalize it's base path for directories
