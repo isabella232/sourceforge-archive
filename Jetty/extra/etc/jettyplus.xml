@@ -22,25 +22,56 @@
 
 
   <!-- =============================================================== -->
-  <!-- Add a transaction manager                                       -->
+  <!-- Add a transaction manager and datasources                       -->
   <!-- =============================================================== -->
   <Call name="addService">
     <Arg>
       <New class="org.mortbay.jetty.plus.JotmService">
         <Set name="Name">TransactionMgr</Set>
-           <Call name="addDataSource">
-           <Arg>jdbc/myDB</Arg>
-           <Arg>org.hsqldb.jdbcDriver</Arg>
-           <Arg>jdbc:hsqldb:extra/etc/tmtest</Arg>
-           <Arg>sa</Arg>
-           <Arg></Arg>
-           <Arg>8</Arg>
-           <Arg>4</Arg>
-           <Arg>15</Arg>
+         <!-- set up a pooled DataSource -->
+         <Call name="addPooledDataSource">
+             <Arg>jdbc/myDB</Arg>   <!-- client lookup jndi name of datasource  -->
+             <!-- set up the datasource -->
+             <Arg>
+               <!-- Uncomment one of the following types of XADataSource        -->
+               <!-- according to your type of database:                         -->
+               <!-- New class="org.enhydra.jdbc.sybase.SybaseXADataSource"      -->
+               <!-- New class="org.enhydra.jdbc.informix.InformixXADataSource"  -->
+               <!-- New class="org.enhydra.jdbc.oracle.OracleXADataSource"      -->
+               <New class="org.enhydra.jdbc.standard.StandardXADataSource">
+                 <Set name="DriverName">org.hsqldb.jdbcDriver</Set>
+                 <Set name="Url">jdbc:hsqldb:extra/etc/tmtest</Set>
+                 <Set name="User">sa</Set>
+                 <Set name="Password"></Set>
+                 <!-- Uncomment to setup isolation level as required            -->
+                 <!--
+                 <Set name="TransactionIsolation"><Get class="java.sql.Connection" name="TRANSACTION_SERIALIZABLE"/></Set> 
+                 -->
+               </New>
+             </Arg>
+             <!-- set up a pool for the datasource -->
+             <Arg>
+               <New class="org.enhydra.jdbc.pool.StandardXAPoolDataSource">
+                 <Arg type="Integer">4</Arg>          <!-- initial size of pool -->                
+                 <Set name="MinSize">4</Set>                
+                 <Set name="MaxSize">15</Set> 
+                 <!-- Uncomment to setup other pool params as required          -->
+                 <!--
+                 <Set name="SleepTime">10</Set>
+                 <Set name="LifeTime">10</Set>
+                 <Set name="DeadLockMaxWait">10</Set>
+                 <Set name="DeadLockRetryWait">10</Set>
+                 <Set name="LoginTimeout">10</Set>
+                 <Set name="Debug" type="boolean">true</Set>
+                 -->
+               </New>
+             </Arg>               
         </Call>
      </New>
    </Arg>
   </Call>
+
+
 
 
   <!-- =============================================================== -->
