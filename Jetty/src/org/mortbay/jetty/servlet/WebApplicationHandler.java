@@ -217,7 +217,7 @@ public class WebApplicationHandler extends ServletHandler
             }
 
             // Set listeners and config on new listener.
-            if (sm != null && sm != sm)
+            if (sm != null && old != sm)
             {
                 if (_sessionListeners != null)
                 {
