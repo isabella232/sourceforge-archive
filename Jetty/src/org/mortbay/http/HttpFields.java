@@ -322,7 +322,7 @@ public class HttpFields
     public static String formatDate(long date, boolean cookie)
     {
         StringBuffer buf = new StringBuffer(32);
-        GregorianCalendar gc = new GregorianCalendar(__GMT);
+        HttpCal gc = new HttpCal();
         gc.setTimeInMillis(date);
         formatDate(buf,gc,cookie);
         return buf.toString();
@@ -347,7 +347,7 @@ public class HttpFields
      */
     public static String formatDate(StringBuffer buf, long date, boolean cookie)
     {
-        GregorianCalendar gc = new GregorianCalendar(__GMT);
+        HttpCal gc = new HttpCal();
         gc.setTimeInMillis(date);
         formatDate(buf,gc,cookie);
         return buf.toString();
@@ -369,8 +369,9 @@ public class HttpFields
         int year = calendar.get(Calendar.YEAR);
         int century = year/100;
         year=year%100;
-        
-        int epoch=(int)((calendar.getTimeInMillis()/1000) % (60*60*24));
+
+        long tm = (calendar instanceof HttpCal)?(((HttpCal)calendar).getTimeInMillis()):calendar.getTime().getTime();
+        int epoch=(int)((tm/1000) % (60*60*24));
         int seconds=epoch%60;
         epoch=epoch/60;
         int minutes=epoch%60;
@@ -625,7 +626,7 @@ public class HttpFields
     private int _version;
     private SimpleDateFormat _dateReceive[]; 
     private StringBuffer _dateBuffer;
-    private Calendar _calendar;
+    private HttpCal _calendar;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -1078,7 +1079,7 @@ public class HttpFields
         if (_dateBuffer==null)
         {
             _dateBuffer=new StringBuffer(32);
-            _calendar=new GregorianCalendar(__GMT);
+            _calendar=new HttpCal();
         }
         _dateBuffer.setLength(0);
         _calendar.setTimeInMillis(date);
@@ -1097,7 +1098,7 @@ public class HttpFields
         if (_dateBuffer==null)
         {
             _dateBuffer=new StringBuffer(32);
-            _calendar=new GregorianCalendar(__GMT);
+            _calendar=new HttpCal();
         }
         _dateBuffer.setLength(0);
         _calendar.setTimeInMillis(date);
@@ -1560,5 +1561,33 @@ public class HttpFields
         public boolean hasNext() {return (_i<_fields.size());}
         public Object next() {return new Entry(_i++);}
         public void remove() { throw new UnsupportedOperationException();}
+    }
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* handle 1.3 protected methods                        */
+    private static class HttpCal extends GregorianCalendar
+    {
+        HttpCal()
+        {
+            super(__GMT);
+        }
+
+        /* ------------------------------------------------------------------------------- */
+        /**
+         * @see java.util.Calendar#setTimeInMillis(long)
+         */
+        public void setTimeInMillis(long arg0)
+        {
+            super.setTimeInMillis(arg0);
+        }
+        /* ------------------------------------------------------------------------------- */
+        /**
+         * @see java.util.Calendar#getTimeInMillis()
+         */
+        public long getTimeInMillis()
+        {
+            return super.getTimeInMillis();
+        }
     }
 }
