@@ -6,6 +6,7 @@
 package com.mortbay.Util;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,11 +83,23 @@ public class ResourcePath
                 }
                 else
                 {
-                    // Assume it is a zip resource
                     Set filenames = new HashSet();
-                    ZipInputStream zin =
-                        new ZipInputStream(resource.getInputStream());
-                    Code.notImplemented();
+                    InputStream in =resource.getInputStream();
+
+                    // XXX -Lets extract it to a temp file for now
+                    file=File.createTempFile("Jetty",".zip");
+                    file.deleteOnExit();
+                    FileOutputStream out = new FileOutputStream(file);
+                    IO.copy(in,out);
+                    out.close();
+                    
+                    _paths.add(new ZipFile(file));
+                    LoadedFile lc=new LoadedFile();
+                    lc.resource=resource;
+                    lc.lastModified=System.currentTimeMillis();
+                    _loaded.add(lc);
+                    if (Code.verbose(100))
+                        Code.debug("Jar ",file," from ",resource);
                 }
             }
             catch(IOException e)
