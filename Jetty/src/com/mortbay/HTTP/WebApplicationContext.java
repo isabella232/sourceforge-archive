@@ -167,9 +167,7 @@ public class WebApplicationContext extends HandlerContext
                 if ("display-name".equals(name))
                     initDisplayName(node);
                 else if ("description".equals(name))
-                {
-                    Code.warning("Not implemented: "+name);
-                    System.err.println(node);
+                {                   
                 }
                 else if ("distributable".equals(name))
                 {
@@ -185,10 +183,7 @@ public class WebApplicationContext extends HandlerContext
                 else if ("session-config".equals(name))
                     initSessionConfig(node);
                 else if ("mime-mapping".equals(name))
-                {
-                    Code.warning("Not implemented: "+name);
-                    System.err.println(node);
-                }
+                    initMimeConfig(node);
                 else if ("welcome-file-list".equals(name))
                     initWelcomeFileList(node);
                 else if ("error-page".equals(name))
@@ -351,6 +346,17 @@ public class WebApplicationContext extends HandlerContext
             int timeout = Integer.parseInt(tNode.toString(false,true));
             _context.setSessionTimeout(timeout);
         }
+    }
+    
+    /* ------------------------------------------------------------ */
+    private void initMimeConfig(XmlParser.Node node)
+    {
+        String extension= node.getString("extension",false,true);
+        if (extension!=null && extension.startsWith("."))
+            extension=extension.substring(1);
+        
+        String mimeType= node.getString("mime-type",false,true);
+        setMimeMapping(extension,mimeType);
     }
     
     /* ------------------------------------------------------------ */

@@ -185,6 +185,18 @@ If this proves to be a problem for you, then unpack your WAR files
 
 
 
+Unimplemented WebApplication features
+-------------------------------------
+The following WebApplication tags are not implemented:
+ 
+  <distributable>
+  <error-page>
+  <tag-lib>
+  <env-entry>
+  <ejb-ref>
+
+  <load-on-startup>  - ordering is not supported.
+
 
 
 

@@ -13,6 +13,7 @@ Jetty Versions
  + Set the thread context class loader in HandlerContext.handle
  + Prevent servlet setAttribute calls to protected context attributes.
  + Removed redundant context attributes.
+ + Implemented mime mapping in webapplications
 
 Jetty-3.0.0.rc2 - 29 Oct 2000
  + Replaced ISO-8859-1 literals with StringUtil static
