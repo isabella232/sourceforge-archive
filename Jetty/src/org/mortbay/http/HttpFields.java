@@ -163,10 +163,6 @@ public class HttpFields
                     if (!name.equals(_lname))
                         __info.put(_lname,this);
                 }
-                else
-                {
-                    Code.debug(this," not cached");
-                }
             }
         }
 
@@ -881,9 +877,7 @@ public class HttpFields
             for (int i=0;i<__dateReceive.length;i++)
             {
                 try{
-                    Code.debug("TRY ",val," against ",__dateReceive[i].toPattern());
                     Date date=(Date)__dateReceive[i].parseObject(val);
-                    Code.debug("GOT ",date);
                     return date.getTime();
                 }
                 catch(java.lang.Exception e)
@@ -1051,7 +1045,6 @@ public class HttpFields
                     {
                         synchronized(__values)
                         {
-                            Code.debug("Learnt ",info._name,": ",value);
                             __values.put(value,value);
                         }
                     }

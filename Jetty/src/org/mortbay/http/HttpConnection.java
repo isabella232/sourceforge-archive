@@ -879,7 +879,6 @@ public class HttpConnection
             
             if (_dotVersion>1)
             {
-                Code.debug("Respond to HTTP/1.X with HTTP/1.1");
                 _version=HttpMessage.__HTTP_1_1;
                 _dotVersion=1;
             }

@@ -714,7 +714,7 @@ public class HttpContext implements LifeCycle,
             CachedResource cached = (CachedResource)_cache.get(pathInContext);
             if (cached!=null)
             {
-                Code.debug("CACHE HIT: ",cached);
+                if (Code.verbose()) Code.debug("CACHE HIT: ",cached);
                 CachedMetaData cmd = (CachedMetaData)cached.getAssociate();
                 if (cmd!=null && cmd.isValid())
                     return cached;
@@ -722,7 +722,7 @@ public class HttpContext implements LifeCycle,
 
             // Make the resource
             resource=_resourceBase.addPath(pathInContext);
-            Code.debug("CACHE MISS: ",resource);
+            if (Code.verbose()) Code.debug("CACHE MISS: ",resource);
             if (resource==null)
                 return null;
 

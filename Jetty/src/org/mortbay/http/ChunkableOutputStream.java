@@ -215,9 +215,6 @@ public class ChunkableOutputStream extends FilterOutputStream
         if (_committed)
             throw new IllegalStateException("Output committed");
 
-        if (Code.verbose())
-            Code.debug("resetBuffer()");
-        
         // Shutdown filters without observation
         ArrayList save_observers=_observers;
         _observers=null;
@@ -324,9 +321,6 @@ public class ChunkableOutputStream extends FilterOutputStream
     {
         if (isChunking())
             throw new IllegalStateException("Chunking");
-        
-        if (Code.verbose())
-            Code.debug("resetStream()");
         
         _trailer=null;
         _committed=false;
