@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
  
-Jetty-3.0.0.rc6 - 19 Nov 2000
+Jetty-3.0.0.rc6 - 20 Nov 2000
  + RequestDispatcher.forward() only resets buffer, not headers.
  + Added ServletWriter that can be disabled.
  + Resource gets systemresources from it's own classloader.
@@ -30,6 +30,8 @@ Jetty-3.0.0.rc6 - 19 Nov 2000
  + Map tablib configuration to resource aliases.
  + Implemented customizable error pages.
  + Simple stats in ContextLoader.
+ + Allow HttpMessage state to be manipulated.
+ + Allow multiple set cookies.
 
 Jetty-3.0.0.rc5 - 12 Nov 2000
  + Default writer encoding set by mime type if not explicitly set.

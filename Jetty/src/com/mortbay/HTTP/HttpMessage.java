@@ -126,9 +126,20 @@ abstract public class HttpMessage
      * </PRE>
      * @return the state.
      */
-    public synchronized int getState()
+    public int getState()
     {
         return _state;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Set the message state.
+     * This method should be used by experts only as it can prevent
+     * normal handling of a request/response.
+     * @param state 
+     */
+    public void setState(int state)
+    {
+        _state=state;
     }
     
     /* ------------------------------------------------------------ */
