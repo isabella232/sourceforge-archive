@@ -21,6 +21,7 @@ Other targets:
   <property name="loadbalancer"   value="${basedir}/loadbalancer"/>
   <property name="ftp"            value="${basedir}/ftp"/>
   <property name="jdk1.2"         value="${basedir}/jdk1.2"/>
+  <property name="ibmjsse"        value="${basedir}/ibmjsse"/>
 
 
 
@@ -48,6 +49,10 @@ Other targets:
     <ant antfile="${jdk1.2}/build.xml" inheritAll="false"/>
   </target>
 
+  <target name="do.ibmjsse">
+    <ant antfile="${ibmjsse}/build.xml" inheritAll="false"/>
+  </target>
+
 
   <!-- ==================================================================== -->
   <!-- Test                                                                -->
@@ -71,6 +76,10 @@ Other targets:
     <ant antfile="${jdk1.2}/build.xml" inheritAll="false" target="test"/>
   </target>
 
+  <target name="test.ibmjsse">
+    <ant antfile="${ibmjsse}/build.xml" inheritAll="false" target="test"/>
+  </target>
+
 
   <!-- ==================================================================== -->
   <!-- Clean                                                                -->
@@ -92,6 +101,10 @@ Other targets:
 
   <target name="clean.jdk1.2">
     <ant antfile="${jdk1.2}/build.xml" inheritAll="false" target="clean"/>
+  </target>
+
+  <target name="clean.ibmjsse">
+    <ant antfile="${ibmjsse}/build.xml" inheritAll="false" target="clean"/>
   </target>
 
 </project>

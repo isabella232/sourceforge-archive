@@ -146,8 +146,6 @@ public class DigestAuthenticator implements Authenticator
     /* ------------------------------------------------------------ */
     private static class Digest extends Credential
     {
-        private static MessageDigest __md;
-
         String method=null;
         String username = null;
         String realm = null;
@@ -172,38 +170,34 @@ public class DigestAuthenticator implements Authenticator
                 :credentials.toString();
             
             try{
-                synchronized(DigestAuthenticator.Digest.class)
-                {
-                    if (__md==null)
-                        __md = MessageDigest.getInstance("MD5");
+                MessageDigest md = MessageDigest.getInstance("MD5");
                 
-                    // calc A1 digest
-                    __md.reset();
-                    __md.update(username.getBytes(StringUtil.__ISO_8859_1));
-                    __md.update((byte)':');
-                    __md.update(realm.getBytes(StringUtil.__ISO_8859_1));
-                    __md.update((byte)':');
-                    __md.update(password.getBytes(StringUtil.__ISO_8859_1));
-                    byte[] ha1=__md.digest();
-                    
-                    // calc A2 digest
-                    __md.reset();
-                    __md.update(method.getBytes(StringUtil.__ISO_8859_1));
-                    __md.update((byte)':');
-                    __md.update(uri.getBytes(StringUtil.__ISO_8859_1));
-                    byte[] ha2=__md.digest();
-                    
-                    // calc digest
-                    __md.update(TypeUtil.toString(ha1,16).getBytes(StringUtil.__ISO_8859_1));
-                    __md.update((byte)':');
-                    __md.update(nonce.getBytes(StringUtil.__ISO_8859_1));
-                    __md.update((byte)':');
-                    __md.update(TypeUtil.toString(ha2,16).getBytes(StringUtil.__ISO_8859_1));
-                    byte[] digest=__md.digest();
-                    
-                    // check digest
-                    return (TypeUtil.toString(digest,16).equalsIgnoreCase(response));
-                }
+                // calc A1 digest
+                md.reset();
+                md.update(username.getBytes(StringUtil.__ISO_8859_1));
+                md.update((byte)':');
+                md.update(realm.getBytes(StringUtil.__ISO_8859_1));
+                md.update((byte)':');
+                md.update(password.getBytes(StringUtil.__ISO_8859_1));
+                byte[] ha1=md.digest();
+
+                // calc A2 digest
+                md.reset();
+                md.update(method.getBytes(StringUtil.__ISO_8859_1));
+                md.update((byte)':');
+                md.update(uri.getBytes(StringUtil.__ISO_8859_1));
+                byte[] ha2=md.digest();
+                
+                // calc digest
+                md.update(TypeUtil.toString(ha1,16).getBytes(StringUtil.__ISO_8859_1));
+                md.update((byte)':');
+                md.update(nonce.getBytes(StringUtil.__ISO_8859_1));
+                md.update((byte)':');
+                md.update(TypeUtil.toString(ha2,16).getBytes(StringUtil.__ISO_8859_1));
+                byte[] digest=md.digest();
+                
+                // check digest
+                return (TypeUtil.toString(digest,16).equalsIgnoreCase(response));
             }
             catch (Exception e)
             {Code.warning(e);}
