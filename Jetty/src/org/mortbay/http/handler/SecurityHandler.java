@@ -15,6 +15,7 @@ import org.mortbay.http.HashUserRealm;
 import org.mortbay.http.HttpHandler;
 import org.mortbay.http.UserRealm;
 import org.mortbay.http.UserPrincipal;
+import java.security.Principal;
 import org.mortbay.util.B64Code;
 import org.mortbay.util.Code;
 import org.mortbay.util.StringUtil;
@@ -336,13 +337,18 @@ public class SecurityHandler extends NullHandler
 
         // Check if user is in a role that is suitable
         boolean inRole=false;
-        while(roles.hasNext())
+        Principal principal=request.getUserPrincipal();
+        if (principal!=null && principal instanceof UserPrincipal)
         {
-            String role=roles.next().toString();            
-            if (request.isUserInRole(role))
+            UserPrincipal userPrincipal= (UserPrincipal)principal;
+            while(roles.hasNext())
             {
-                inRole=true;
-                break;
+                String role=roles.next().toString();            
+                if (userPrincipal.isUserInRole(role))
+                {
+                    inRole=true;
+                    break;
+                }
             }
         }
 
