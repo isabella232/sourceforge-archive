@@ -54,12 +54,7 @@ import java.text.*;
 public class Log 
 {
     /*-------------------------------------------------------------------*/
-    public static final String EVENT ="LOG.EVENT";
-    public static String getEVENT()
-    {
-	return EVENT;
-    }
-    
+    public final static String EVENT ="LOG.EVENT";
     public final static String WARN="LOG.WARN";
     public final static String CODE_ASSERT="CODE.ASSERT";
     public final static String CODE_WARN="CODE.WARN";
@@ -73,7 +68,6 @@ public class Log
     public static char STACKSIZE = 's';
     public static char STACKTRACE = 'S';
     public static char ONELINE = 'O';
-
     
     /*-------------------------------------------------------------------*/
     public LogSink[] _sinks = null;
@@ -81,16 +75,19 @@ public class Log
     private boolean _needInit = true;
 
     /*-------------------------------------------------------------------*/
-    private static Log __instance = new Log();
-
-    /*-------------------------------------------------------------------*/
-    /** Shared static instances, reduces object creation at expense
-     * of lock contention in multi threaded debugging */
-    private static StringBuffer __stringBuffer = new StringBuffer(512);
+    private static Log __instance = null;
     
     /*-------------------------------------------------------------------*/
     public static Log instance()
     {   
+        if (__instance==null)
+        {
+            synchronized(WARN)
+            {
+                if (__instance==null)
+                    __instance=new Log();
+            }
+        }
         return __instance;
     }
     
@@ -249,9 +246,9 @@ public class Log
     
     
     /*-------------------------------------------------------------------*/
-    public static synchronized void message(String tag,
-                                            String msg,
-                                            Frame frame)
+    public static void message(String tag,
+			       String msg,
+			       Frame frame)
     {
         long time = System.currentTimeMillis();
         instance().message(tag,msg,frame,time);
@@ -264,10 +261,10 @@ public class Log
      * @param frame The frame that generated the message.
      * @param time The time stamp of the message.
      */
-    public void message(String tag,
-                        String msg,
-                        Frame frame,
-                        long time)
+    public synchronized void message(String tag,
+				     String msg,
+				     Frame frame,
+				     long time)
     {
 	if (_needInit)
 	    defaultInit();
