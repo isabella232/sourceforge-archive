@@ -418,15 +418,20 @@ abstract public class ThreadedServer extends ThreadPool
                 while(_listen!=null && _address!=null)
                 {
                     try{
-                        Code.debug("Self connect to close listener ",_address);
                         InetAddress addr=_address.getInetAddress();
-                        if (addr==null)
+                        if (addr==null || addr.toString().startsWith("0.0.0.0"))
                             addr=InetAddress.getLocalHost();
-                        new Socket(addr,_address.getPort()).close();
+                        Code.debug("Self connect to close listener ",addr,
+                                   ":"+_address.getPort());
+                        Socket socket = new
+                            Socket(addr,_address.getPort());
+                        Thread.yield();
+                        socket.close();
                     }
                     catch(IOException e)
                     {
                         Code.ignore(e);
+                        break; // this aint working
                     }
                 }
             }
@@ -451,11 +456,15 @@ abstract public class ThreadedServer extends ThreadPool
                 if (_listen!=null && _address!=null)
                 {
                     try{
-                        Code.warning("Trying self connect to close listener");
                         InetAddress addr=_address.getInetAddress();
-                        if (addr==null)
+                        if (addr==null || addr.toString().startsWith("0.0.0.0"))
                             addr=InetAddress.getLocalHost();
-                        new Socket(addr,_address.getPort()).close();
+                        Code.debug("Self connect to close listener ",addr,
+                                   ":"+_address.getPort());
+
+                        Socket socket=new Socket(addr,_address.getPort());
+                        Thread.yield();
+                        socket.close();
                     }
                     catch(IOException e)
                     {

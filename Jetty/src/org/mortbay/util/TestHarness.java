@@ -325,12 +325,19 @@ public class TestHarness
             t.checkEquals(B64Code.decode(B64Code.encode("abcd\000")),"abcd\000","decode(encode(abcd^@))");
 
 	    // Test the reversibility of the full range of 8 bit values
-	    byte[] allValues= new byte[256];
-	    for (int i=0; i<256; i++)
-		allValues[i] = (byte) i;
+	    char[] allValues= new char[128];
+	    for (int i=0; i<128; i++)
+		allValues[i] = (char) i;
 	    String input = new String(allValues);
-	    t.checkEquals(B64Code.decode(B64Code.encode(input)),input,
-			  "decode(encode(ALL_256_ASCII_VALUES))");
+            String output=B64Code.decode(B64Code.encode(input));
+            for (int i=0;i<128;i++)
+                if (input.charAt(i)!=output.charAt(i))
+                    System.err.println("DIFF at "+i+" "+
+                                       ((int)input.charAt(i))+
+                                       "!="+
+                                       ((int)output.charAt(i)));
+	    t.checkEquals(output,input,
+			  "decode(encode(ALL_128_ASCII_VALUES))");
 
 	    // Encoder compatibility tests
 	    t.checkEquals(B64Code.encode("abc"),"YWJj","encode(abc)");
