@@ -1,8 +1,8 @@
 Jetty Versions
 --------------
 
-Jetty-4.2.12
- + restore max inactive interval for session manager
+Jetty-4.2.12 - 12 August 2003
+ + Restore max inactive interval for session manager
  + Removed protection of org.mortbay.http attributes
  + Fixed parameter ordering for a forward request.
  + Fixed up HTAccessHandler
@@ -10,6 +10,8 @@ Jetty-4.2.12
  + Added missing S to some OPTIONS strings
  + Added open method to threaded server.
  + FORMAuthenticator does 403 with empty error page.
+ + Fixed MIME types for chemicals
+ + Padding for IE in RootNotFoundHandler
 
 Jetty-4.2.11 - 12 July 2003
  + Fixed race in servlet initialization code.
