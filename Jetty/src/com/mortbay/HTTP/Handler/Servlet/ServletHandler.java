@@ -162,46 +162,15 @@ public class ServletHandler extends NullHandler
 	    }
 	    
 	    
-	    Code.debug("Looking for servlet at ",path);
-	    
-	    List matches=_servletMap.getMatches(path);
+	    // Build servlet request and response
+	    ServletRequest request =
+		new ServletRequest(contextPath,
+				   httpRequest,
+				   _context);
+	    ServletResponse response =
+		new ServletResponse(request,httpResponse);
 
-	    for (int i=0;i<matches.size();i++)
-	    {
-		com.sun.java.util.collections.Map.Entry entry =
-		    (com.sun.java.util.collections.Map.Entry)matches.get(i);
-		String servletPathSpec=(String)entry.getKey();
-		ServletHolder holder = (ServletHolder)entry.getValue();
-		
-		Code.debug("Pass request to servlet at ",entry);
-		
-		// Build servlet request and response
-		ServletRequest request =
-		    new ServletRequest(contextPath,
-				       PathMap.pathMatch(servletPathSpec,path),
-				       PathMap.pathInfo(servletPathSpec,path),
-				       httpRequest,
-				       _context);
-		ServletResponse response =
-		    new ServletResponse(request,httpResponse);
-
-		// Check session stuff
-		HttpSession session=null;
-		if ((session=request.getSession(false))!=null)
-		    Context.access(session);
-		
-		// try service request
-		holder.handle(request,response);
-		
-		// Break if the response has been updated
-		if (httpResponse.isDirty())
-		{
-		    Code.debug("Handled by ",entry);
-		    if (!httpResponse.isCommitted())
-			httpResponse.commit();
-		    break;
-		}
-	    }
+	    handle(path,request,response);
 	}
 	catch(Exception e)
 	{
@@ -211,7 +180,45 @@ public class ServletHandler extends NullHandler
 	}
     }
 
-    
+
+    void handle(String path,ServletRequest request, ServletResponse response)
+	throws IOException, ServletException, UnavailableException
+    {
+	Code.debug("Looking for servlet at ",path);
+	HttpResponse httpResponse=response.getHttpResponse();
+	
+	List matches=_servletMap.getMatches(path);
+	
+	for (int i=0;i<matches.size();i++)
+	{
+	    com.sun.java.util.collections.Map.Entry entry =
+		(com.sun.java.util.collections.Map.Entry)matches.get(i);
+	    String servletPathSpec=(String)entry.getKey();
+	    ServletHolder holder = (ServletHolder)entry.getValue();
+	    
+	    Code.debug("Pass request to servlet at ",entry);
+	    request.setServletPath(PathMap.pathMatch(servletPathSpec,path),
+				   PathMap.pathInfo(servletPathSpec,path));
+	    
+	    // Check session stuff
+	    HttpSession session=null;
+	    if ((session=request.getSession(false))!=null)
+		Context.access(session);
+	    
+	    // try service request
+	    holder.handle(request,response);
+	    
+	    // Break if the response has been updated
+	    if (httpResponse.isDirty())
+	    {
+		Code.debug("Handled by ",entry);
+		if (!httpResponse.isCommitted())
+		    httpResponse.commit();
+		break;
+	    }
+	}
+    }
+	
     /* ------------------------------------------------------------ */
     /** 
      * @param servletName 

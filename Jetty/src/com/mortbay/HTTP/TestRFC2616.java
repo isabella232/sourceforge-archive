@@ -943,9 +943,17 @@ public class TestRFC2616
             Code.debug("RESPONSE: ",response);
             offset=t.checkContains(response,offset,
                                    "HTTP/1.0 200 OK\015\012","19.6.2 Keep-alive 1")+1;
-            offset=t.checkContains(response,offset,
-                                   "/R1","19.6.2 Keep-alive 1")+1;
+	    offset=t.checkContains(response,offset,
+				   "Connection: keep-alive",
+				   "19.6.2 Keep-alive 1")+1;
+	    
+	    offset=t.checkContains(response,offset,
+				   "<HTML>",
+				   "19.6.2 Keep-alive 1")+1;
             
+            offset=t.checkContains(response,offset,
+				   "/R1","19.6.2 Keep-alive 1")+1;
+	    
             offset=t.checkContains(response,offset,
                                    "HTTP/1.0 200 OK\015\012","19.6.2 Keep-alive 2")+11;
             offset=t.checkContains(response,offset,

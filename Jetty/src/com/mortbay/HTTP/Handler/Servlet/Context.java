@@ -698,6 +698,12 @@ public class Context implements ServletContext, HttpSessionContext
 		throw new IllegalStateException("Request is committed");
 	    
 	    Code.notImplemented();
+
+	    // XXX - no this is totally wrong as it needs to go to
+	    // the level of HandlerContext?????????????????????
+	    
+	    _handler.handle(_path,servletRequest,servletResponse);
+	    
 	    
 //  	    HttpRequest req = (HttpRequest) request;
 //  	    HttpResponse res = (HttpResponse) response;

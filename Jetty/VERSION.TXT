@@ -1,5 +1,8 @@
 Jetty-3.0.A97 - in progress
-   + Added WML mapping
+   + Less verbose debug
+   + Better tuned SocketListener parameters
+   + Started RequestDispatcher implementation.
+   + Added WML mappings
    + Fixed makefiles for BSD ls
    + Fixed persistent commits with no content (eg redirect+keep-alive). 
    + Implemented servlet isSecure().

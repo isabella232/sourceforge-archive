@@ -58,20 +58,21 @@ class ServletRequest
      * @param request 
      */
     ServletRequest(String contextPath,
-		   String servletPath,
-		   String pathInfo,
 		   HttpRequest request,
 		   Context context)
     {
-	if (servletPath==null)
-	    throw new Error("null servletPath");
-	
 	_contextPath=contextPath;
-        _servletPath=servletPath;
-	_pathInfo=pathInfo;
         _httpRequest=request;
 	_context=context;
     }
+
+    /* ------------------------------------------------------------ */
+    void setServletPath(String servletPath,String pathInfo)
+    {
+        _servletPath=servletPath;
+	_pathInfo=pathInfo;
+    }
+    
     
     /* ------------------------------------------------------------ */
     HttpRequest getHttpRequest()

@@ -92,10 +92,12 @@ public class SummaryFilterOutputStream extends FilterOutputStream
         throws IOException
     {
         out.write(b,off,len);
-        StringBuffer buf=new StringBuffer("=============================================================================\n"+
-                                          len+
-                                          _msg+
-                                          "-----------------------------------------------------------------------------\n");
+        StringBuffer buf=new
+	    StringBuffer("=============================================================================\n"+
+			 Thread.currentThread().getName()+": "+
+			 len+
+			 _msg+
+			 "-----------------------------------------------------------------------------\n");
         int i=0;
         for (i=0; (_size==0 || i<_size) && i<len; i++)
         {

@@ -29,7 +29,8 @@ public class SocketListener
     SocketListener(HttpServer server, InetAddrPort address)
         throws IOException
     {
-        super(address,1,5,300000,300000);
+	// XXX NEED TO CONFIGURE THREAD LIMITS AND TIMEOUTS
+        super(address,3,255,30000,5000);
         _server=server;
     }
 
@@ -88,7 +89,7 @@ public class SocketListener
     {
         try
         {
-            Code.debug("Accepted ",socket);
+            Code.debug("ACCEPT:",socket);
             HttpConnection connection =
                 new HttpConnection(this,socket.getInetAddress(),
 				   socket.getInputStream(),
@@ -100,9 +101,16 @@ public class SocketListener
         }
         finally
         {
+	    Code.debug("CLOSE: "+socket);
             try {socket.close();}
             catch ( Exception e ){Code.warning("Connection problem",e);}
             socket=null;
         }
     }
 }
+
+
+
+
+
+

@@ -468,7 +468,11 @@ public class HttpResponse extends HttpMessage
      */
     public synchronized void commit()
 	throws IOException
-    {	
+    {
+	// XXX - should be able to avoid this recursion protection!
+	if (isCommitted())
+	    return;
+	
 	_connection.commitResponse();
 	super.commit();
 	HttpRequest request=getRequest();

@@ -41,7 +41,12 @@ public class HttpConnection
     private HttpResponse _response;
     private Thread _handlingThread;
     private InetAddress _remoteAddr;
-    
+
+    /* ------------------------------------------------------------ */
+    private static final DateCache __dateCache=
+	new DateCache("dd/MMM/yyyy:HH:mm:ss");
+
+
     /* ------------------------------------------------------------ */
     /** Constructor.
      * @param listener The listener that created this connection.
@@ -243,14 +248,16 @@ public class HttpConnection
     {
         _request = new HttpRequest(this);
         _response = new HttpResponse(this);
-        
+
+	
         // Assume the connection is not persistent, unless told otherwise.
         _persistent=false;
         _close=false;
         _keepAlive=false;
         _http1_0=true;
         _http1_1=false;
-        
+	boolean logRequest=false;
+	
         try
         {       
             Code.debug("Wait for request header...");
@@ -268,17 +275,17 @@ public class HttpConnection
                 Code.ignore(e);
                 return false;
             }
-            
+            logRequest=true;
+	    
             if (_request.getState()!=HttpMessage.__MSG_RECEIVED)
                 throw new HttpException(_response.__400_Bad_Request);
-	    
-	    Log.message("HTTP",
-	                _request.getHost()+
-	                ":"+
-			_request.getRequestLine(),null);
-	    if (Code.verbose(100))
-		Code.debug("Request:",_request.toString());
 
+	    if (Code.debug())
+	    {
+		_response.setField("Jetty-Request",_request.getRequestLine());
+		Code.debug("REQUEST:\n"+_request.toString());
+	    }
+	    
             // Pick response version
             _version=_request.getVersion();
             if (HttpMessage.__HTTP_0_9.equals(_version))
@@ -325,11 +332,9 @@ public class HttpConnection
                         _response.setField(HttpFields.__Connection,
                                            HttpFields.__Close);
                     }
-                    else if (token.equals(HttpFields.__KeepAlive))
+                    else if (token.equals(HttpFields.__KeepAlive) && _http1_0)
                     {
                         _keepAlive=true;
-                        _response.setField(HttpFields.__Connection,
-                                           HttpFields.__KeepAlive);
                     }
                     
                     // Remove headers for HTTP/1.0 requests
@@ -353,7 +358,6 @@ public class HttpConnection
             
             // service the request
             service(_request,_response);
-            
 
             // Complete the request
             if (_persistent)
@@ -392,7 +396,9 @@ public class HttpConnection
                 _response.commit();
                 _outputStream.close();
             }
-                
+	    
+	    Code.debug("RESPONSE:\n"+_response.toString());
+	    
         }
         catch (HttpException e)
         {
@@ -416,12 +422,8 @@ public class HttpConnection
         {
             // Handle Exception by sending 500 error code (if output not
             // committed) and closing connection.
-
-            if (Code.debug())
-                Code.warning(e);
-            else
-                Code.warning(e.toString());
-            
+	    Code.warning(_request.toString()+":\n"+_request.toString(),e);
+	    
             _persistent=false;
             if (!_response.isCommitted())
             {
@@ -448,6 +450,52 @@ public class HttpConnection
 	}
         finally
         {
+	    // Log request - XXX should be in HttpHandler
+	    if (logRequest && _request!=null && _response!=null)
+	    {
+		int length =
+		    _response.getIntField(HttpFields.__ContentLength);
+		String bytes = ((length>=0)?Long.toString(length):"-");
+		String user = (String)_request.getAttribute(HttpRequest.__AuthUser);
+		if (user==null)
+		    user = "-";
+
+		String referer = _request.getField(HttpFields.__Referer);
+		if (referer==null)
+		    referer="-";
+		else
+		    referer="\""+referer+"\"";
+		
+		String agent = _request.getField(HttpFields.__UserAgent);
+		if (agent==null)
+		agent="-";
+		else
+		    agent="\""+agent+"\"";
+
+		String addr="127.0.0.1";
+		if (_remoteAddr!=null)
+		    addr=_remoteAddr.getHostAddress();
+		
+		String log= addr +
+		    " - "+
+		    user +
+		    " [" +
+		    __dateCache.format(System.currentTimeMillis())+
+		    "] \""+
+		    _request.getRequestLine()+
+		    "\" "+
+		    referer +
+		    " " +
+		    _response.getStatus()+
+		    " " +
+		    bytes +
+		    " - " +
+		    agent;
+		System.out.println(log);
+	    }
+	    
+
+	    
             if (_request!=null)
                 _request.destroy();
 	    _request=null;
@@ -610,7 +658,7 @@ public class HttpConnection
         switch(action)
         {
           case OutputObserver.__FIRST_WRITE:
-              Code.debug("notify FIRST_WRITE ");
+              if(Code.verbose()) Code.debug("notify FIRST_WRITE ");
 	      
               // Determine how to limit content length and
               // enable output transfer encodings 
@@ -635,6 +683,9 @@ public class HttpConnection
                           _response.setField(HttpFields.__Connection,
                                              HttpFields.__Close);
                       }
+		      else if (_keepAlive)
+			  _response.setField(HttpFields.__Connection,
+					     HttpFields.__KeepAlive);
                   }
               }
               else if (_http1_0)
@@ -694,27 +745,25 @@ public class HttpConnection
               break;
               
           case OutputObserver.__RESET_BUFFER:
-              Code.debug("notify RESET_BUFFER");
+              if(Code.verbose()) Code.debug("notify RESET_BUFFER");
               break;
               
           case OutputObserver.__COMMITING:
-              Code.debug("notify COMMITING");
-              // XXX Unchunked 1.1 requests with content length could
-              // be made persistent here.
+              if(Code.verbose()) Code.debug("notify COMMITING");
 	      _response.commit();
               break;
               
           case OutputObserver.__COMMITED:
-              Code.debug("notify COMMITED");
+              if(Code.verbose()) Code.debug("notify COMMITED");
               break;
               
           case OutputObserver.__CLOSING:
-              Code.debug("notify CLOSING");
+              if(Code.verbose()) Code.debug("notify CLOSING");
 	      _response.complete();
               break;
               
           case OutputObserver.__CLOSED:
-              Code.debug("notify CLOSED");
+              if(Code.verbose()) Code.debug("notify CLOSED");
               break;
         }
     }
@@ -733,7 +782,12 @@ public class HttpConnection
 	    !_response.containsField(HttpFields.__ContentLength))
 	{
 	    if(_persistent)
+	    {
 		_response.setIntField(HttpFields.__ContentLength,0);
+		if (_http1_0)
+		    _response.setField(HttpFields.__Connection,
+				       HttpFields.__KeepAlive);
+	    }
 	    else
 	    {
 		_close=true;
@@ -743,3 +797,4 @@ public class HttpConnection
 	}
     }
 }
+

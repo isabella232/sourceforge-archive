@@ -41,6 +41,12 @@ public class ServletResponse implements HttpServletResponse
     }
 
     /* ------------------------------------------------------------ */
+    HttpResponse getHttpResponse()
+    {
+	return _httpResponse;
+    }
+    
+    /* ------------------------------------------------------------ */
     void commit()
 	throws IOException
     {

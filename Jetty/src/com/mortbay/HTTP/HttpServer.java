@@ -418,21 +418,16 @@ public class HttpServer implements LifeCycle
 				    (HttpHandler)handlers.get(k);
 	    
 				if (Code.verbose(9))
-				{
 				    Code.debug("Try handler ",handler);
-				    handler.handle(contextPathSpec,
-						   request,
-						   response);
-				    if (request.isHandled())
-					Code.debug("Handled by ",handler);
-				}
-				else
-				    handler.handle(contextPathSpec,
-						   request,
-						   response);
+				
+				handler.handle(contextPathSpec,
+					       request,
+					       response);
 
 				if (request.isHandled())
 				{
+				    if (Code.verbose(9))
+					Code.debug("Handled by ",handler);
 				    response.complete();
 				    return;
 				}
