@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + ServletContext attributes wrap HttpContext attributes.
  + Factored out XML based config from WebApplicationContext
  + Improved RequestLog performance
  + Fixed j2se 1.3 problem with HttpFields

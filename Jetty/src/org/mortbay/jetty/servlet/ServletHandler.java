@@ -89,6 +89,7 @@ public class ServletHandler extends AbstractHttpHandler
     /* ------------------------------------------------------------ */
     protected PathMap _servletMap=new PathMap();
     protected Map _nameMap=new HashMap();
+    protected Map _attributes=new HashMap(3);
     protected String _formLoginPage;
     protected String _formErrorPage;
     protected SessionManager _sessionManager;
@@ -342,6 +343,8 @@ public class ServletHandler extends AbstractHttpHandler
         if (isStarted())
             return;
         
+        _attributes.clear();
+
         if (_sessionManager!=null)
             _sessionManager.start();
         
@@ -844,6 +847,7 @@ public class ServletHandler extends AbstractHttpHandler
     /* ------------------------------------------------------------ */
     class Context implements ServletContext
     {
+        
         /* -------------------------------------------------------- */
         ServletHandler getServletHandler()
         {
@@ -872,7 +876,7 @@ public class ServletHandler extends AbstractHttpHandler
         /* ------------------------------------------------------------ */
         public int getMinorVersion()
         {
-            return 3;
+            return 4;
         }
 
         /* ------------------------------------------------------------ */
@@ -1005,7 +1009,7 @@ public class ServletHandler extends AbstractHttpHandler
     
         /* ------------------------------------------------------------ */
         /** Get context attribute.
-         * Delegated to HttpContext.
+         * Tries ServletHandler attributes and then delegated to HttpContext.
          * @param name attribute name.
          * @return attribute
          */
@@ -1022,37 +1026,45 @@ public class ServletHandler extends AbstractHttpHandler
                 return getHttpContext().getTempDirectory();
             }
 
+            if (_attributes.containsKey(name))
+                return _attributes.get(name);
             return getHttpContext().getAttribute(name);
         }
 
         /* ------------------------------------------------------------ */
         /** Get context attribute names.
-         * Delegated to HttpContext.
+         * Combines ServletHandler and HttpContext attributes.
          */
         public Enumeration getAttributeNames()
         {
-            return getHttpContext().getAttributeNames();
+            if (_attributes.size()==0)
+                return getHttpContext().getAttributeNames();
+            HashSet set=new HashSet(_attributes.keySet());
+            Enumeration e=getHttpContext().getAttributeNames();
+            while(e.hasMoreElements())
+                set.add(e.nextElement());
+            return Collections.enumeration(set);
         }
 
         /* ------------------------------------------------------------ */
         /** Set context attribute names.
-         * Delegated to HttpContext.
+         * Sets the ServletHandler attributes and may hide HttpContext attributes.
          * @param name attribute name.
          * @param value attribute value
          */
         public void setAttribute(String name, Object value)
         {
-            getHttpContext().setAttribute(name,value);
+            _attributes.put(name,value);
         }
 
         /* ------------------------------------------------------------ */
         /** Remove context attribute.
-         * Delegated to HttpContext.
+         * Puts a null into the ServletHandler attributes and may hide a HttpContext attribute.
          * @param name attribute name.
          */
         public void removeAttribute(String name)
         {
-            getHttpContext().removeAttribute(name);
+            _attributes.put(name, null);
         }
     
         /* ------------------------------------------------------------ */

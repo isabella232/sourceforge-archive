@@ -1673,6 +1673,7 @@ public class HttpContext extends ResourceCache
             _loader=null;
         }
         _cache.clear();
+        
         super.stop();
         
         log.info("Stopped "+this);
