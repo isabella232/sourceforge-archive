@@ -19,9 +19,8 @@ base. The aims of the Jetty 3 developement include:
 
 Quick start on Unix
 ===================
-
 run:
-  $JETTY_HOME/bin/jetty.sh start admin demo
+  $JETTY_HOME/bin/jetty.sh run demo
 
 Browse to:
   http://localhost:8080
@@ -29,6 +28,17 @@ Browse to:
 If this doesn't work - you will need to read some more and setup the
 environment.
 
+
+Quick start on Windows
+======================
+run:
+  %JETTY_HOME%/bin/jetty.sh run demo
+
+Browse to:
+  http://localhost:8080
+
+If this doesn't work - you will need to read some more and setup the
+environment.
 
 
 Environment
@@ -76,7 +86,7 @@ xml files etc/admin.xml etc/demo.xml and can be run with the command:
 There is also a Unix start/stop script bin/jetty.sh which can run
 the demo with:
 
-  bin/jetty.sh start admin demo
+  bin/jetty.sh run demo
 
 This script finds the JVM and sets the CLASSPATH, so it can be used as 
 an /etc/init.d script and also looks for xml config files in 

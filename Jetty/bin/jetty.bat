@@ -168,7 +168,7 @@ if not ""=="%CONFIG_LINES" (
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Run the demo server if there's nothing else to run
 ::::::::::::::::::::::::::::::::::::::::::::::::::::::
-if not ""=="%CONFIGS%" goto have_configs
+if not x==x%CONFIGS% goto have_configs
   set CONFIGS=%JETTY_HOME%\etc\demo.xml %JETTY_HOME%\etc\admin.xml
 
 
@@ -254,6 +254,7 @@ echo RUN_CMD        =  %RUN_CMD%
 :::::::::::::::::::::::::::::::::::::::::::::::::::
 
 if not "%ACTION%"=="start" goto try_stop
+        set RUN_CMD=%JAVA% -DLOG_FILE=%JETTY_LOG%\yyyy_mm_dd.jetty.log %JAVA_OPTIONS% com.mortbay.Jetty.Server %CONFIGS%
         echo "Starting Jetty: "
         echo "STARTED `date`" >>%JETTY_LOG%\jetty.out
         start %RUN_CMD% >> %JETTY_LOG%\jetty.out

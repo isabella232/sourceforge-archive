@@ -111,8 +111,8 @@ public class Log
                     if (com.mortbay.Util.LogSink.class.isAssignableFrom(sinkClass)) {
                         sink = (LogSink)sinkClass.newInstance();
                         sink.setOptions(_logOptions);
-                        __instance.add(sink);
                         sink.start();
+                        __instance.add(sink);
                     }
                     else
                         // Can't use Code.fail here, that's what we're setting up

@@ -97,7 +97,7 @@ public class WriterLogSink
     public WriterLogSink()
         throws IOException
     {
-        String _filename=System.getProperty("LOG_FILE");
+        _filename=System.getProperty("LOG_FILE");
         if (_filename==null)
             _out=new PrintWriter(System.err);
     }
@@ -387,6 +387,7 @@ public class WriterLogSink
             
             if (_rollover!=null && !_rollover.isAlive())
                 _rollover.start();
+            
         }
         catch(IOException e)
         {
