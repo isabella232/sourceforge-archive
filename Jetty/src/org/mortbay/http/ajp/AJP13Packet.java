@@ -26,7 +26,10 @@ import org.mortbay.util.StringUtil;
 public class AJP13Packet
 {
     /* ------------------------------------------------------------ */
+    public static final int __MAX_BUF=8192;
     public static final int __HDR_SIZE=4;
+    public static final int __DATA_HDR=7;
+    public static final int __MAX_DATA=__MAX_BUF-__DATA_HDR;
 
     public static final byte
         __FORWARD_REQUEST=2,
@@ -386,6 +389,7 @@ public class AJP13Packet
     public void setDataSize(int s)
     {
         _bytes=s+__HDR_SIZE;
+        
         _buf[2]=(byte)((s>>8) & 0xFF);
         _buf[3]=(byte)(s & 0xFF);
         if (_buf[4]==__SEND_BODY_CHUNK)
@@ -424,6 +428,10 @@ public class AJP13Packet
           case __END_RESPONSE:    b.append("END_RESPONSE  )}:");break;
           case __GET_BODY_CHUNK:  b.append("GET_BODY_CHUNK  :");break;
         }
+        
+        if (max==0)
+            return b.toString();
+        
         b.append("\n");
         
         for (int i=0;i<_bytes;i++)

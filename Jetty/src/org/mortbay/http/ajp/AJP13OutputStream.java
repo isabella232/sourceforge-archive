@@ -28,7 +28,11 @@ public class AJP13OutputStream extends BufferedOutputStream
     /* ------------------------------------------------------------ */
     AJP13OutputStream(OutputStream out,int bufferSize)
     {
-        super(out,bufferSize,7,7,0);
+        super(out,
+              AJP13Packet.__MAX_BUF*2,
+              AJP13Packet.__DATA_HDR,
+              AJP13Packet.__DATA_HDR,
+              0);
         setFixed(true);
         _packet=new AJP13Packet(_buf);
         
@@ -78,6 +82,7 @@ public class AJP13OutputStream extends BufferedOutputStream
         _ajpResponse.setDataSize();
 
         write(_ajpResponse);
+        
         _ajpResponse.resetData();
     }
     
@@ -93,7 +98,6 @@ public class AJP13OutputStream extends BufferedOutputStream
         throws IOException
     {
         super.flush();
-
         if (_complete && !_completed)
         {
             _completed=true;
@@ -113,6 +117,7 @@ public class AJP13OutputStream extends BufferedOutputStream
     {
         _complete=true;
         flush();
+        System.err.println();
     }
     
     /* ------------------------------------------------------------ */
@@ -121,6 +126,7 @@ public class AJP13OutputStream extends BufferedOutputStream
         _complete=false;
         _completed=false;
         super.resetStream();
+        System.err.println();
     }
     
     /* ------------------------------------------------------------ */
@@ -148,12 +154,10 @@ public class AJP13OutputStream extends BufferedOutputStream
         if (size()==0)
             return;
 
-        prewrite(_buf,0,7);
+        prewrite(_buf,0,AJP13Packet.__DATA_HDR);
         _packet.resetData();
         _packet.addByte(AJP13Packet.__SEND_BODY_CHUNK);
-        _packet.setDataSize(size()-4);
-
-        // System.out.println(Thread.currentThread()+" AJP13 buf "+_packet.toString());
+        _packet.setDataSize(size()-AJP13Packet.__HDR_SIZE);
     }
     
     /* ------------------------------------------------------------ */
@@ -162,5 +166,43 @@ public class AJP13OutputStream extends BufferedOutputStream
     {
         Code.notImplemented();
     }
-    
+   
+    /* ------------------------------------------------------------ */
+    public void writeTo(OutputStream out)
+        throws IOException
+    {
+        System.err.println("writeTo "+size());
+        int sz = size();
+        
+//         if (s<=AJP13Packet.__MAX_BUF)
+//         {
+//             super.writeTo(out);
+//             return;
+//         }
+
+        System.err.println("\noffset="+preReserve());
+        
+        int data=sz-AJP13Packet.__DATA_HDR;
+
+        while (data>AJP13Packet.__MAX_DATA)
+        {   
+            _packet.setDataSize(AJP13Packet.__MAX_BUF-AJP13Packet.__HDR_SIZE);
+            System.err.println("data="+data);
+            System.err.println("len ="+AJP13Packet.__MAX_BUF);
+            out.write(_buf,0,AJP13Packet.__MAX_BUF);
+
+            data-=AJP13Packet.__MAX_DATA;
+            System.arraycopy(_buf,AJP13Packet.__MAX_BUF,
+                             _buf,AJP13Packet.__DATA_HDR,
+                             data);
+        }
+            
+        int len=data+AJP13Packet.__DATA_HDR;
+        _packet.setDataSize(len-AJP13Packet.__HDR_SIZE);
+        
+        System.err.println("Data="+data);
+        System.err.println("Len ="+len);
+        out.write(_buf,0,len);
+        
+    }
 }
