@@ -148,7 +148,7 @@ This is equivalent to:
 
 -->
 <!ELEMENT SystemProperty EMPTY>
-<!ATTLIST SystemProperty %NAMEATTR; default NMTOKEN #IMPLIED>
+<!ATTLIST SystemProperty %NAMEATTR; default CDATA #IMPLIED>
 
 
 

@@ -46,7 +46,7 @@ public class XmlParser
     private Stack _observers = new Stack();
     
     /* ------------------------------------------------------------ */
-    /** Constructor. 
+    /** Construct
      * @exception ParserConfigurationException 
      */
     public XmlParser()
@@ -54,6 +54,26 @@ public class XmlParser
         try
         {
             SAXParserFactory factory = SAXParserFactory.newInstance();
+            factory.setValidating(!Boolean.getBoolean("org.mortbay.xml.XmlParser.NotValidating"));
+            _parser = factory.newSAXParser();
+        }
+        catch(Exception e)
+        {
+            Code.warning(e);
+            throw new Error(e.toString());
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @exception ParserConfigurationException 
+     */
+    public XmlParser(boolean validating)
+    {
+        try
+        {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            factory.setValidating(validating);
             _parser = factory.newSAXParser();
         }
         catch(Exception e)

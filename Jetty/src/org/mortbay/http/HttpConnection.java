@@ -327,16 +327,16 @@ public class HttpConnection
         boolean input_encodings=false;
         if (transfer_coding!=null)
         {
-            if (_codingParams==null)
-            {
-                _codingParams=new HashMap(7);
-                _codings=new ArrayList(4);
-            }
+            if (_codings==null)
+                _codings=new ArrayList(2);
             else
             {
-                _codingParams.clear();
                 _codings.clear();
+                if (_codingParams!=null)
+                    _codingParams.clear();
             }
+            
+
             
             while(transfer_coding.hasMoreElements())
                 _codings.add(transfer_coding.nextElement());
@@ -344,6 +344,8 @@ public class HttpConnection
             for(int i=_codings.size();i-->0;)
             {        
                 String value=_codings.get(i).toString();
+                if (_codingParams==null && value.indexOf(';')>0)
+                    _codingParams=new HashMap(7);
                 String coding=HttpFields.valueParameters(value,_codingParams);
                 
                 if (HttpFields.__Identity.equalsIgnoreCase(coding))

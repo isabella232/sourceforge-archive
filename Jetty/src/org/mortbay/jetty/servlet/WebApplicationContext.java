@@ -431,14 +431,15 @@ public class WebApplicationContext extends ServletHttpContext
         if (_contextListeners!=null && _servletHandler!=null)
         {
             ServletContextEvent event = new ServletContextEvent(getServletContext());
-            super.stop();
             for (int i=0;i<_contextListeners.size();i++)
                 ((ServletContextListener)_contextListeners.get(i))
                     .contextDestroyed(event);
         }
-        else
-            super.stop();
 
+        // Stop the context
+        super.stop();
+
+        // clean up
         if (_resourceHandler!=null)
             removeHttpHandler(_resourceHandler);
         _resourceHandler=null;

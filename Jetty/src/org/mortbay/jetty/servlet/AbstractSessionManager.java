@@ -445,9 +445,11 @@ public abstract class AbstractSessionManager implements SessionManager
                         new HttpSessionBindingEvent(this,key,value);
                     
                     for(int i=0;i<_sessionAttributeListeners.size();i++)
+                    {
                         ((HttpSessionAttributeListener)
                          _sessionAttributeListeners.get(i))
                             .attributeRemoved(event);
+                    }
                 }
             }
             synchronized (AbstractSessionManager.this)

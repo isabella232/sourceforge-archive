@@ -141,6 +141,7 @@ public class LazyList extends AbstractList
         return list;
     }
     
+    
     /* ------------------------------------------------------------ */
     /** Get the real List from a LazyList.
      * 

@@ -391,6 +391,9 @@ public class ServletHandler
     public synchronized void stop()
         throws InterruptedException
     {
+        // Stop the session manager
+        _sessionManager.stop();
+        
         // Stop servlets
         Iterator i = _servletMap.values().iterator();
         while (i.hasNext())
@@ -398,7 +401,6 @@ public class ServletHandler
             ServletHolder holder = (ServletHolder)i.next();
             holder.stop();
         }      
-        _sessionManager.stop();
         _loader=null;
         _context=null;
         _httpContext=null;

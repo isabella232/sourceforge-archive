@@ -2,6 +2,8 @@ Jetty Versions
 --------------
 
 Jetty-4.0.RC1 - wait for it....
+ + XmlParser is validating by default. use o.m.x.XmlParser.NotValidating property to change.
+ + contextDestroyed event sent before destruction.
  + Minor changes to make HttpServer work on J2ME CVM
  + Warn if jdk 1.4 classes used on JVM <1.4
  + WebApplication will use ContextLoader even without WEB-INF directory.
