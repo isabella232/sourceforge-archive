@@ -90,13 +90,6 @@ public class HtmlFilter extends HttpFilter
         info = new Hashtable();
         if(response!=null)
         {
-            long now = System.currentTimeMillis();
-            response.setDateHeader(HttpHeader.LastModified, now);
-            response.setDateHeader(HttpHeader.Expires, 0);
-            response.setHeader(HttpHeader.ContentLength, null);
-            response.setHeader("Pragma", "no-cache");
-            response.setHeader("Cache-Control", "no-cache,no-store");
-
             String connection_header =response.getHeader(response.Connection);
             if (connection_header!=null)
             {
