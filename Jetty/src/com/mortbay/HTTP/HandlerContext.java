@@ -740,16 +740,10 @@ public class HandlerContext implements LifeCycle
     
     /* ------------------------------------------------------------ */
     /** Setup context for serving dynamic servlets.
-     * Conveniance method.  A Dynamic servlet is one which is mapped from a
-     * URL containing the class name of the servlet - which is dynamcially
-     * loaded when the first request is received.
-     * @param serve If true and there is no DynamicHandler instance in the
-     * context, a dynamicHandler is added. If false, all DynamicHandler
-     * instances are removed from the context.
-     * @deprecated Use setServingDynamicServlets(String)
      */
     public synchronized void setServingDynamicServlets(boolean serve)
     {
+        Code.warning("Using deprecated setServingDynamicServlets(boolean)");
         setDynamicServletPathSpec(serve?"/":null);
     }
 

@@ -103,9 +103,6 @@ public class ServletHandler extends NullHandler
             !dynamicServletPathSpec.equals("/") &&
             !dynamicServletPathSpec.endsWith("/*"))
             throw new IllegalArgumentException("dynamicServletPathSpec must end with /*");
-        
-        if ("/".equals(dynamicServletPathSpec))
-            dynamicServletPathSpec=null;
             
         _dynamicServletPathSpec=dynamicServletPathSpec;
     }
