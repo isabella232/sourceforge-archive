@@ -84,7 +84,6 @@ public class WebApplicationContext extends HandlerContext
 	    }
 
 	    // Set the classpath
-	    System.err.println("CLASSPATH="+classPath);
 	    if (classPath.length()>0)
 		setClassPath(classPath);
 	    

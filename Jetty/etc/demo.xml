@@ -73,8 +73,8 @@ $ID: $
         <Set name="MinThreads">5</Set>
         <Set name="MaxThreads">255</Set>
         <Set name="MaxIdleTimeMs">50000</Set>
-	<Set name="Password">fish2bike</Set>
-	<Set name="KeyPassword">woman2man</Set>
+	<Set name="Password">password</Set>
+	<Set name="KeyPassword">password</Set>
       </New>
     </Arg>
   </Call>
@@ -83,6 +83,10 @@ $ID: $
   <Call name="addWebApplication">
     <Arg>/</Arg>
     <Arg>file:<SystemProperty name="user.dir"/>/webapps/jetty/</Arg>
+    <Call name="addUser">
+      <Arg>admin</Arg>
+      <Arg>OBF:1u2a1toa1w8v1tok1u30</Arg>
+    </Call>
   </Call>
 
   <Call name="addContext">

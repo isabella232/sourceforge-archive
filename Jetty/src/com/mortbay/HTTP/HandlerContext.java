@@ -355,6 +355,23 @@ public class HandlerContext
 	sh.addSecurityConstraint(pathSpec,sc);
     }
 
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param username 
+     * @param password 
+     */
+    public  void addUser(String username, String password)
+    {
+	SecurityHandler sh=getSecurityHandler();
+	if (sh==null)
+	{
+	    sh=new SecurityHandler();
+	    _handlers.add(0,sh);
+	}
+	sh.addUser(username,password);
+    }
+    
     
     /* ------------------------------------------------------------ */
     /** 

@@ -187,9 +187,9 @@ public class ServletResponse implements HttpServletResponse
 	if (end<0)
 	    end=url.indexOf('#');
 	if (end<0)
-	    return url+";sessionid="+id+"_";
+	    return url+";jsessionid="+id+"_";
 	return url.substring(0,end)+
-	    ";sessionid="+id+"_"+
+	    ";jsessionid="+id+"_"+
 	    url.substring(end);
     }
 

@@ -188,31 +188,45 @@ public class SecurityHandler extends NullHandler
             request.setAttribute(HttpRequest.__AuthUser,user);
             request.setAttribute(HttpRequest.__AuthType,"BASIC");
 
-	    if ("jetty".equals(user))
-	    {
-		Code.warning("SECURITY HOLE!!!!!!!!!!");
-		return true;
-	    }
-
 	    if (_authRealmMap!=null)
 	    {
-		String realPassword=(String)_authRealmMap.get(user);
-		if (realPassword!=null && realPassword.equals(password))
-		    return true;
-		
+		String pw=(String)_authRealmMap.get(user);
+		if (pw!=null)
+		{
+		    Password dpw=new Password(user,pw);
+		    if (password.equals(dpw.toString()))
+			return true;
+		}
+		    
 		if (Code.debug())
-		    Code.warning("'"+realPassword+"'!='"+password+"'");
+		    Code.warning("'"+pw+"'!='"+password+"'");
 	    }
         }
         
         Code.debug("Unauthorized in "+_authRealm);
-        
+	response.setField(HttpFields.__ContentType,"text/html");
         response.setStatus(HttpResponse.__401_Unauthorized);
         response.setField(HttpFields.__WwwAuthenticate,
                           "basic realm=\""+_authRealm+'"');
+	OutputStream out = response.getOutputStream();
+	out.write("<HTML><BODY><H1>Authentication Failed</H1></BODY></HTML>"
+		  .getBytes());
+	out.flush();
         response.commit();
         request.setHandled(true);
 	return false;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @param username 
+     * @param password 
+     */
+    public synchronized void addUser(String username, String password)
+    {
+	if (_authRealmMap==null)
+	    _authRealmMap=new HashMap();
+	_authRealmMap.put(username,password);
     }
     
 }
