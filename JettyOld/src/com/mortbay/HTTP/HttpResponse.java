@@ -26,20 +26,15 @@ import java.net.MalformedURLException;
  * <p><h4>Note</h4>
  * By default, responses will only use chunking if requested by the
  * by setting the transfer encoding header.  However, if
- * the java property CHUNK_BY_DEFAULT is set, then chunking is
- * used if no content length is set. The chunking default may also
- * be set on a per servlet holder basis.
-
+ * the chunkByDefault is set, then chunking is
+ * used if no content length is set.
+ *
  * @see com.mortbay.HTTP.HttpServer
  * @version $Id$
  * @author Greg Wilkins
 */
 public class HttpResponse extends HttpHeader implements HttpServletResponse
-{
-    /* ---------------------------------------------------------------- */
-    public final static boolean chunkByDefaultDefault =
-	System.getProperty("CHUNK_BY_DEFAULT")!=null;
-    
+{    
     /* -------------------------------------------------------------- */
     public final static String MIME_Version ="MIME-Version"   ;
     public final static String Server ="Server"   ;
@@ -91,7 +86,7 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
     private Vector filters=null;
     private HttpRequest request=null;
     private Observable observable=null;
-    private boolean chunkByDefault=chunkByDefaultDefault;
+    private boolean chunkByDefault=false;
     private boolean doNotClose=false;
     private int outputState=0;
     
@@ -448,6 +443,9 @@ public class HttpResponse extends HttpHeader implements HttpServletResponse
 	setStatus(code,msg);
 	writeHeaders();
 
+	if (writer!=null)
+	    writer.flush();
+	outputState=0;
 	PrintWriter out = getWriter();
 	out.println("<HTML><HEAD><TITLE>Error "+code+"</TITLE>");
 	out.println("<BODY><H2>HTTP ERROR: "+

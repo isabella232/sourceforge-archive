@@ -15,7 +15,7 @@ import java.util.*;
 
 
 /* ---------------------------------------------------------------- */
-/** Abstract HTTP Server Configuration
+/** Abstract HTTP Server Configuration.
  * This interface defines the  methods that the HttpServer calls
  * to configure itself.
  * It decouples the server from the configuration technology used.
@@ -26,8 +26,8 @@ import java.util.*;
 public interface HttpConfiguration 
 {
     // The name of the default session max idle time attribute
-    public static final String DefaultSessionMaxIdleTime = 
-        "DefaultSessionMaxIdleTime";
+    public static final String SessionMaxInactiveInterval = 
+        "SessionMaxInactiveInterval";
 
     /* ------------------------------------------------------------ */
     /** The IP addresses and ports the HTTP server listens on
@@ -35,7 +35,14 @@ public interface HttpConfiguration
     public InetAddrPort[] addresses();
 
     /* ------------------------------------------------------------ */
-    /** The HttpHandlers
+    /** The HttpListener classes.
+     * The classes derived from HttpListener (or HttpListener) used
+     * to listen to the corresponding address from addresses().
+     */
+    public Class[] listenerClasses();
+
+    /* ------------------------------------------------------------ */
+    /** The HttpHandlers.
      * The PathMap returned by this method maps request paths to
      * arrays of HttpHandler instances. When an incoming request is
      * received, its full requestPath is used to select the array of
@@ -48,7 +55,7 @@ public interface HttpConfiguration
     public PathMap httpHandlersMap();
     
     /* ------------------------------------------------------------ */
-    /** The ExceptionHandlers
+    /** The ExceptionHandlers.
      * The PathMap returned by this method maps request paths to
      * arrays of ExceptionHandler instances. When a HttpHandler throws an
      * exception, the requests full requestPath is used to select
@@ -67,10 +74,15 @@ public interface HttpConfiguration
 
     
     /* ------------------------------------------------------------ */
-    /** Returns an attribute of the server given the specified key name.
+    /** Returns an attribute of the server.
+     * @deprecated Use getProperty
      */
     public Object getAttribute(String name);
 
+    /* ------------------------------------------------------------ */
+    /** Returns an attribute of the server given the specified key name.
+     */
+    public String getProperty(String name);
     
     /* ------------------------------------------------------------ */
     /** Writes a message to the servlet log file.

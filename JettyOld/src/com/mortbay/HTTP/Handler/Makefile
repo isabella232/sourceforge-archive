@@ -7,10 +7,9 @@
 
 #JAVAOPTIONS := 
 #JAVACOPTIONS :=
-TESTS := 
+TESTS := TestHarness.java 
 ROOTNAME := com
 BINFILES := 
 CFGFILES := 
-
 
 include $(JETTY_HOME)/etc/Global.mk

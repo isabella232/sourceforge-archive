@@ -146,7 +146,7 @@ public class Cookies
 	if (maxAge>0)
 	{
 	    buf.append("; expires=");
-	    Date date = new Date(System.currentTimeMillis()+1000*maxAge);
+	    Date date = new Date(System.currentTimeMillis()+1000L*maxAge);
 	    buf.append(__dateSend.format(date));
 	}
 	

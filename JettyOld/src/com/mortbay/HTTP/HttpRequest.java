@@ -980,7 +980,7 @@ public class HttpRequest extends HttpHeader
 	{
 	    session=sessions.getSession(id);
 	    if (session == null && !create)
-		session = sessions.invalidSession(id);
+		return null;
 	}
 
 	if (session == null && create)
@@ -1164,9 +1164,9 @@ public class HttpRequest extends HttpHeader
     /** Set the default session timeout.
      *	@param	default	The default timeout in seconds
      */
-    public static void setDefaultSessionMaxIdleTime(int defaultTime)
+    public static void setSessionMaxInactiveInterval(int defaultTime)
     {
-    	sessions.setDefaultSessionMaxIdleTime(defaultTime);
+    	sessions.setMaxInactiveInterval(defaultTime);
     }
 }
 

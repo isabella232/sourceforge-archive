@@ -1,9 +1,9 @@
-EXECUTE.PATHS		            : /servlet/;/SERVLET/;/Servlet/
-RELOAD.PATHS			    : /reload/;/RELOAD/;/Reload/
-CLASSLOADERS			    : 
+PATHS				    : /servlet/;/SERVLET/;/Servlet/
+CLASSPATH			    : ./servlets
 
 SERVLET.Dump.CLASS		    : com.mortbay.Servlets.Dump
 SERVLET.Dump.PATHS		    : /Dump%;*.DUMP
+SERVLET.Dump.CHUNK		    : True
 SERVLET.Dump.PROPERTY.AttrX	    : ValueX
 SERVLET.Dump.PROPERTY.AttrY	    : ValueY
 SERVLET.Dump.PROPERTY.AttrZ	    : ValueZ
@@ -20,9 +20,6 @@ SERVLET.Config.PATHS		    : /Config$
 
 SERVLET.Debug.CLASS		    : com.mortbay.Servlets.DebugServlet
 SERVLET.Debug.PATHS		    : /Debug$
-
-SERVLET.Hello.PATHS		    : /Hello
-SERVLET.Hello.CLASS		    : HelloWorldServlet
 
 SERVLET.Multi.PATHS		    : /Demo/push
 SERVLET.Multi.CLASS		    : com.mortbay.Jetty.MultiPartCount
@@ -44,9 +41,11 @@ SERVLET.Index.CLASS		    : com.mortbay.Jetty.DemoIndex
 
 SERVLET.gnujsp.PATHS		    : /jsp/*.jsp
 SERVLET.gnujsp.CLASS		    : org.gjt.jsp.JSPServlet
+SERVLET.gnujsp.CLASSPATH            : ./lib/gnujsp.jar
 SERVLET.gnujsp.PROPERTY.repository  : ./jsp
 SERVLET.gnujsp.PROPERTY.pagebase    : ./FileBase/jsp/
 SERVLET.gnujsp.PROPERTY.compiler    : javac -classpath %classpath%:%repository% -d %repository% -deprecation %source%
+
 
 
 

@@ -271,7 +271,7 @@ public class PathMap extends Dictionary
     
     /* --------------------------------------------------------------- */
     /** Get the longest matching path specification
-     * @deprecated use match
+     * @deprecated use matchSpec
      */
     public String longestMatch(String path)
     {

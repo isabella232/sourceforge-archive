@@ -12,12 +12,12 @@ ROOTNAME := com
 
 UUFILES := \
 	$(wildcard FileBase/Images/*.gif.uu) \
-	$(wildcard classes/*.uu)
+	$(wildcard servlets/*.uu)
 
 INSTALLPATH := .
 INSTALLFILES := \
 	$(wildcard etc/*.prp) \
-        classes/HelloWorldServlet.class \
+        $(wildcard servlets/*.class) \
 	$(wildcard FileBase/Images/*.gif) \
 	$(wildcard FileBase/*.txt) \
 	$(wildcard FileBase/*/*.txt) \

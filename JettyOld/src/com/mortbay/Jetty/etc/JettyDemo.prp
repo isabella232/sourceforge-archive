@@ -8,9 +8,10 @@ SERVERS                                   : main;proxy
 # ------------------------------------------------------------------------
 main.CLASS				  : com.mortbay.HTTP.HttpServer
 main.STACKS				  : root;javadoc
-main.PROPERTY.DefaultSessionTimeout	  : 3600
-main.PROPERTY.LISTENER.all.CLASS          : com.mortbay.HTTP.HttpListener
-main.PROPERTY.LISTENER.all.ADDRS          : 0.0.0.0:8080;127.0.0.1:8888
+main.PROPERTY.SessionMaxInactiveInterval  : 3600
+main.PROPERTY.MimeMap			  : ./etc/Mime.prp
+main.LISTENER.all.CLASS                   : com.mortbay.HTTP.HttpListener
+main.LISTENER.all.ADDRS                   : 0.0.0.0:8080;127.0.0.1:8888
 
 # ------------------------------------------------------------------------
 
@@ -47,7 +48,7 @@ main.root.File.CLASS			  : com.mortbay.HTTP.Handler.FileHandler
 main.root.File.PROPERTIES		  : ./etc/JettyDemoFiles.prp
 
 main.root.Forward.CLASS			       : com.mortbay.HTTP.Handler.ForwardHandler
-main.root.Forward.PROPERTY.PROXYADDRPORT       :
+main.root.Forward.PROPERTY.ProxyAddrPort       :
 main.root.Forward.PROPERTY.FORWARD.demo.PATHS  : /Forward%
 main.root.Forward.PROPERTY.FORWARD.demo.URL    : http://localhost:8080
 main.root.Forward.PROPERTY.FORWARD.proxy.PATHS : http
@@ -71,8 +72,8 @@ main.javadoc.NotFound.CLASS		  : com.mortbay.HTTP.Handler.NotFoundHandler
 # ------------------------------------------------------------------------
 proxy.CLASS				  : com.mortbay.HTTP.HttpServer
 proxy.STACKS				  : root
-proxy.PROPERTY.LISTENER.all.CLASS         : com.mortbay.HTTP.HttpListener
-proxy.PROPERTY.LISTENER.all.ADDRS         : 0.0.0.0:8081
+proxy.LISTENER.all.CLASS                  : com.mortbay.HTTP.HttpListener
+proxy.LISTENER.all.ADDRS                  : 0.0.0.0:8081
 
 proxy.root.HANDLERS			  : Log;Proxy;NotFound
 proxy.root.PATHS			  : /

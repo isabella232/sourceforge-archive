@@ -1,21 +1,39 @@
- + Update this todo list 
+Things to do before final release of Jetty 2.2.0:
+
+ + Portable make file
+ + Jrun configuratin support
+ + Open log files in append mode.
  + Handle spaces in request paths
  + Virtual Hosts
- + New configuration file
+ + Reload servlet servlet
+ + Comments in config files
+ + Minimal demo config file
+ + Fast,faster & fastest example config files
+ + Better info and feature description pages
+ + Documentation
+
+Other things to do:
+
+ + Update this todo list 
+ + Documentation
+ + Adaption module for SSL
+ + Documentation
  + Graceful exit
- + Reload servlets using own ClassLoader
  + Improve servlet log 
  + Dynamic Realms & Configuration
  + Test Resource URL methods for JSDK2.1
  + RPM packaging
+ + Documentation
  + Use Java 1.2 features. (Mostly replace JDBC connection
    cache with weak references).
  + Standard format server-side includes
+ + Documentation
  + HTTP Meta tags in HTML
  + HTTP/1.1:
      - Timeout connection
      - Handle termination of multipart mime server push.
  + Implement encrypted password realm storage
  + Include a CGI servlet
- + HTTP-DAV????
+ + HTTP-DAV?
+ + Documentation
 

@@ -32,11 +32,14 @@ public class FileServer extends BaseConfiguration
     public FileServer()
 	 throws IOException
     {
-	this(8080, false);
+	this(8080, ".", false,false);
     }
     
     /* -------------------------------------------------------------------- */
-    public FileServer(int port, boolean allowAll)
+    public FileServer(int port,
+		      String directory,
+		      boolean allowPut,
+		      boolean allowDelete)
 	 throws IOException
     {
 	// Listen at a single port on the localhost
@@ -52,9 +55,11 @@ public class FileServer extends BaseConfiguration
 	int h=0;
 
 	// File Handler
-	FileHandler fh = new FileHandler(".");
-	fh.setPutAllowed(true);
-	fh.setDeleteAllowed(true);
+	FileHandler fh = new FileHandler(directory);
+	
+	fh.setPutAllowed(allowPut);
+	fh.setDeleteAllowed(allowDelete);
+	
 	httpHandlers[h++] = fh;
 
 	// NotFound Handler
@@ -70,20 +75,51 @@ public class FileServer extends BaseConfiguration
     {
 	try{
 	    int port = 8080;
-	    if (args.length > 0)
-		port = Integer.parseInt(args[0]);
+	    String directory=".";
+	    boolean allowPut=false;
+	    boolean allowDelete=false;
+
+	    int a=0;
+	    while(args.length>a && args[a].startsWith("-"))
+	    {
+		if ("-allowPut".equals(args[a]))
+		    allowPut=true;
+		else if ("-allowDelete".equals(args[a]))
+		    allowDelete=true;
+		else
+		{
+		    System.err.println("Usage - java com.mortbay.HTTP.Configure.FileServer [options] [ port [ directory ] ]");
+		    System.err.println("Options:");
+		    System.err.println("  -help");
+		    System.err.println("  -allowPut");
+		    System.err.println("  -allowDelete");
+		    System.exit(1);
+		}
+		a++;
+	    }
 	    
-	    FileServer fileServer;
-	    if (args.length > 1)
-		fileServer = new FileServer(port, true);
-	    else
-		fileServer = new FileServer(port, false);
+	    if (args.length>a)
+	    {
+		port = Integer.parseInt(args[a]);
+		a++;
+	    }
+	    
+	    if (args.length>a)
+	    {
+		directory = args[a];
+		a++;
+	    }
+	    
+	    FileServer fileServer =
+		new FileServer(port, directory, allowPut, allowDelete);
 
 	    HttpServer httpServer = new HttpServer(fileServer);
 	    httpServer.join();
 	}
 	catch(Exception e){
-	    Code.warning("FileServer Failed",e);
+	    Code.warning(e);
 	}
     }
 }
+
+

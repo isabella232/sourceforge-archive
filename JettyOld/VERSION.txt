@@ -1,6 +1,21 @@
-  + Improved PropertyTree implementation
-  + Removed historic API from sessions
 
+Release 2.2.Alpha0 - 6 May 1999
+  + Improved PropertyTree implementation
+  + Old Jetty.Server class renamed to Jetty.Server21
+  + New Server class using PropertyTree for configuration
+  + HttpHandlers given setProperties method to configure via Properties.
+  + HttpListener class can be configured
+  + Mime suffic mapping can be configured.
+  + Removed historic API from sessions
+  + Improved SessionDump servlet
+  + Fixed date overflow in Cookies
+  + HttpResponse.sendError avoids IllegalStateException
+  + Added ServletLoader implementation if ClassLoader.
+  + Dynamic loading of servlets.
+  + Added reload method to ServletHolder, but no way to call it yet.
+  + Changed options for FileServer
+  + Implemented ServletServer
+  + Removed SimpleServleServer
 
 Release 2.1.7 - 22 April 1999
   + Fixed showstopper bug with getReader and getWriter in

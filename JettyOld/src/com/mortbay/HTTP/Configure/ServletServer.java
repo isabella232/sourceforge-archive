@@ -20,28 +20,19 @@ import java.util.*;
  * The HTTP configuration allows a single servlet to be configured and
  * served from command line options.
  * <P>Usage<PRE>
- * java com.mortbay.HTTP.Configure.SimpleServletConfig path name class [port]
+ * java com.mortbay.HTTP.Configure.servletServer path name class [port]
  * </PRE>
  * @see com.mortbay.HTTP.HttpConfiguration
  * @version $Id$
  * @author Greg Wilkins
 */
-public class SimpleServletConfig extends BaseConfiguration
+public class ServletServer extends BaseConfiguration
 {
-    /* -------------------------------------------------------------------- */
-    public SimpleServletConfig(String servletPath,
-			       String servletName,
-			       String servletClass)
-	 throws IOException
-    {
-	this(servletPath,servletName,servletClass,8080);
-    }
     
     /* -------------------------------------------------------------------- */
-    public SimpleServletConfig(String servletPath,
-			       String servletName,
-			       String servletClass,
-			       int port)
+    public ServletServer(int port,
+			 String servletPath,
+			 String classPath)
 	 throws IOException
     {
 	// Listen at a single port on the localhost
@@ -50,19 +41,21 @@ public class SimpleServletConfig extends BaseConfiguration
 
 	// Create single stack of HttpHandlers at "/"
 	httpHandlersMap=new PathMap();
-	HttpHandler[] httpHandlers = new HttpHandler[3];
+	HttpHandler[] httpHandlers = new HttpHandler[4];
 	httpHandlersMap.put("/",httpHandlers);
 	int h=0;
 
 	// Parameter handler
+	httpHandlers[h++] = new SessionHandler();
+	
+	// Parameter handler
 	httpHandlers[h++] = new ParamHandler();
 	
 	// Servlet Handler
-	PathMap servletMap= new PathMap();
-	servletMap.put(servletPath,
-		       new ServletHolder(servletName,
-					 servletClass));
-	httpHandlers[h++] = new ServletHandler(servletMap);
+	Properties properties = new Properties();
+	properties.put("PATHS",servletPath);
+	properties.put("CLASSPATH",classPath);
+	httpHandlers[h++] = new ServletHandler(properties);
 
 	// NotFound Handler
 	httpHandlers[h++] = new NotFoundHandler();
@@ -76,31 +69,46 @@ public class SimpleServletConfig extends BaseConfiguration
     public static void main(String args[])
     {
 	try{	    
-	    HttpConfiguration config = null;
+	    int port = 8080;
+	    String servletPath="/";
+	    String classPath=".";
 
-	    switch (args.length)
+	    int a=0;
+	    while(args.length>a && args[a].startsWith("-"))
 	    {
-	      case 3:
-		  config = new SimpleServletConfig(args[0],
-						   args[1],
-						   args[2]);
-		  break;
-	      case 4:
-		  config = new SimpleServletConfig(args[0],
-						   args[1],
-						   args[2],
-						   Integer.parseInt(args[3]));
-		  break;
-	      default:
-		  System.err.println("Usage - java com.mortbay.HTTP.Configure.SimpleServletConfig path name class [port]");
-		  System.exit(1);
+		System.err.println("Usage - java com.mortbay.HTTP.Configure.FileServer [options] [ port  [ urlPath [ classPath ] ] ]");
+		System.err.println("Options:");
+		System.err.println("  -help");
+		System.exit(1);
+		a++;
 	    }
 	    
-	    HttpServer httpServer = new HttpServer(config);
+	    if (args.length>a)
+	    {
+		port = Integer.parseInt(args[a]);
+		a++;
+	    }
+	    
+	    if (args.length>a)
+	    {
+		servletPath = args[a];
+		a++;
+	    }
+	    
+	    if (args.length>a)
+	    {
+		classPath = args[a];
+		a++;
+	    }
+	    
+	    ServletServer servletServer =
+		new ServletServer(port,servletPath,classPath);
+
+	    HttpServer httpServer = new HttpServer(servletServer);
 	    httpServer.join();
 	}
 	catch(Exception e){
-	    Code.warning("Demo Failed",e);
+	    Code.warning(e);
 	}
     }
 }

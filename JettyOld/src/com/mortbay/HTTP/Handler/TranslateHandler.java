@@ -72,7 +72,7 @@ public class TranslateHandler extends NullHandler
     {
 	String address = request.getResourcePath();
 	
-	String path=translations.longestMatch(address);
+	String path=translations.matchSpec(address);
 	if (path != null)
 	{
 	    String translation = (String)translations.get(path);
@@ -89,7 +89,7 @@ public class TranslateHandler extends NullHandler
     /* ----------------------------------------------------------------- */
     public String translate(String address)
     {
-	String path=translations.longestMatch(address);
+	String path=translations.matchSpec(address);
 	if (path != null)
 	{
 	    String translation = (String)translations.get(path);

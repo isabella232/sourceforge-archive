@@ -30,16 +30,52 @@ public class BaseConfiguration implements HttpConfiguration
     /* ------------------------------------------------------------ */
     protected Hashtable mimeMap = null;
     protected InetAddrPort[] addresses = null;
+    protected Class[] listenerClasses = null;
     protected PathMap httpHandlersMap = null;
     protected PathMap exceptionHandlersMap=null;
+    protected Properties properties=null;
+    
+    /**
+     * @deprecated use properties
+     */
     protected Hashtable attributes=new Hashtable();
 
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+	StringBuffer buf = new StringBuffer(1024);
+	buf.append(DataClass.toString(addresses));
+	buf.append("\n");
+	buf.append(httpHandlersMap);
+	buf.append("\n");
+	buf.append(exceptionHandlersMap);
+	buf.append("\n");
+	buf.append(properties);
+	return buf.toString();
+    }
+    
     /* ------------------------------------------------------------ */
     /** The IP addresses and ports the HTTP server listens on
      */
     public InetAddrPort[] addresses()
     {
 	return addresses;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** The HttpListener classes.
+     * The classes derived from HttpListener (or HttpListener) used
+     * to listen to the corresponding address from addresses().
+     */
+    public Class[] listenerClasses()
+    {
+	if (listenerClasses==null)
+	{
+	    listenerClasses = new Class[addresses.length];
+	    for (int i=listenerClasses.length;i-->0;)
+		listenerClasses[i]=com.mortbay.HTTP.HttpListener.class;
+	}
+	return listenerClasses;
     }
 
     /* ------------------------------------------------------------ */
@@ -88,10 +124,27 @@ public class BaseConfiguration implements HttpConfiguration
     /* ------------------------------------------------------------ */
     /**
      * Returns an attribute of the server given the specified key name.
+     * @deprecated Use getProperty
      */
     public Object getAttribute(String name)
     {
-	return attributes.get(name);
+	Object attr=null;
+	if (attributes!=null)
+	    attr=attributes.get(name);
+	if (attr==null)
+	    attr=getProperty(name);
+	return attr;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Returns an attribute of the server given the specified key name.
+     */
+    public String getProperty(String name)
+    {
+	if (properties==null)
+	    return null;
+	return properties.getProperty(name);
     }
     
     /* ------------------------------------------------------------ */
@@ -100,7 +153,7 @@ public class BaseConfiguration implements HttpConfiguration
      */
     public void log(String message)
     {
-	Log.event(message);
+	Log.event(message,4);
     }
     
     /* ------------------------------------------------------------ */
@@ -141,6 +194,7 @@ public class BaseConfiguration implements HttpConfiguration
 
 	return type;
     }
+
 };
 
 

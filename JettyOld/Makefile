@@ -48,7 +48,6 @@ jetty-jar:
 		com/mortbay/FTP \
 		com/mortbay/JDBC \
 		com/mortbay/HTML \
-		HelloWorldServlet.class \
 		com/mortbay/HTTP \
 		com/mortbay/Servlets \
 		com/mortbay/Jetty \

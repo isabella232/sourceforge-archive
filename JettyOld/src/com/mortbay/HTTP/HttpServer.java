@@ -9,6 +9,7 @@ import com.mortbay.Base.*;
 import com.mortbay.Util.*;
 import java.io.*;
 import java.net.*;
+import java.lang.reflect.Constructor;
 import javax.servlet.http.*;
 import javax.servlet.*;
 import java.util.*;
@@ -116,6 +117,7 @@ public class HttpServer implements ServletContext
 
 	Hashtable handlerSet = new Hashtable(20);
 	Enumeration e = httpHandlersMap.keys();
+
 	// for all handler stacks
 	while (e.hasMoreElements())
 	{
@@ -168,11 +170,14 @@ public class HttpServer implements ServletContext
 		    "No mapping for / in exceptionHandlersMap");
 
 	InetAddrPort[] addresses = config.addresses();
+	Class[] classes = config.listenerClasses();
 	listeners = new HttpListener[addresses.length];
 	for (int a=addresses.length; a-->0; )
 	{
 	    try{
-		listeners[a] = new HttpListener(addresses[a],this);
+		Constructor c = classes[a].getConstructor(HttpListener.ConstructArgs);
+		Object[] args = {addresses[a],this};
+		listeners[a] = (HttpListener) c.newInstance(args);
 		listeners[a].start();
 	    }
 	    catch (java.io.IOException ioe){
@@ -181,14 +186,15 @@ public class HttpServer implements ServletContext
 		throw ioe;
 	    }
 	}
-	
-	Integer defaultSessionMaxIdleTime = 
-	    (Integer)config.getAttribute(HttpConfiguration.DefaultSessionMaxIdleTime);
-	if (defaultSessionMaxIdleTime != null)
+		     
+	String sessionMaxInactiveInterval = 
+	    config.getProperty(HttpConfiguration.SessionMaxInactiveInterval);
+	if (sessionMaxInactiveInterval != null &&
+	    sessionMaxInactiveInterval.length()>0)
 	{
-	    int defaultIdle = defaultSessionMaxIdleTime.intValue();
-	    if (defaultIdle > 0)
-		HttpRequest.setDefaultSessionMaxIdleTime(defaultIdle);
+	    int maxIdle = Integer.parseInt(sessionMaxInactiveInterval);
+	    if (maxIdle > 0)
+		HttpRequest.setSessionMaxInactiveInterval(maxIdle);
 	}
     }
 
@@ -262,7 +268,7 @@ public class HttpServer implements ServletContext
 	    try{
 		// Select request handler statck by path
 		HttpHandler[] httpHandlers = (HttpHandler[])
-		    httpHandlersMap.getLongestMatch(resourcePath);
+		    httpHandlersMap.match(resourcePath);
 
 		// Try all handlers in the stack
 		while (httpHandlers!=null &&
@@ -299,7 +305,7 @@ public class HttpServer implements ServletContext
 
 		// Select exception handler stack by path
 		ExceptionHandler[] exceptionHandlers = (ExceptionHandler[])
-		    exceptionHandlersMap.getLongestMatch(resourcePath);
+		    exceptionHandlersMap.match(resourcePath);
 		
 		// try all handlers in the stack
 		int e=0;
@@ -495,7 +501,7 @@ public class HttpServer implements ServletContext
 	String realPath = path;
 	// Select request handler statck by path
 	HttpHandler[] httpHandlers =
-	    (HttpHandler[])httpHandlersMap.getLongestMatch(realPath);
+	    (HttpHandler[])httpHandlersMap.match(realPath);
 	if (httpHandlers != null)
 	{
 	    for (int i = 0; i < httpHandlers.length; i++)
@@ -541,12 +547,14 @@ public class HttpServer implements ServletContext
      * already provided by the other methods in this interface. Attribute
      * names should follow the same convention as package names, and those
      * beginning with 'com.sun.*' are reserved for use by Sun Microsystems.
+     *
+     * These are mapped the the properties of HttpConfiguration.
      * @param name the attribute key name
      * @return the value of the attribute, or null if not defined
      */
     public Object getAttribute(String name)
     {
-	return config.getAttribute(name);
+	return config.getProperty(name);
     }
     
     /* ---------------------------------------------------------------- */

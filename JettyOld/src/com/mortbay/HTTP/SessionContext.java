@@ -50,13 +50,8 @@ public class SessionContext extends Hashtable
 	{
 	    super(10);
 	    this.id=Long.toString(nextSessionId++,36);
-	}
-
-	/* ------------------------------------------------------------- */
-	Session(String sid)
-	{
-	    super(10);
-	    id=sid;
+	    if (defaultMaxIdleTime>=0)
+		maxIdleTime=defaultMaxIdleTime*1000;
 	}
 	
 	/* ------------------------------------------------------------- */
@@ -67,19 +62,19 @@ public class SessionContext extends Hashtable
 	}
 	
 	/* ------------------------------------------------------------- */
-	public long getCreationTime()
-	    throws IllegalStateException
-	{
-	    if (invalid) throw new IllegalStateException();
-	    return created;
-	}
-	
-	/* ------------------------------------------------------------- */
 	public String getId()
 	    throws IllegalStateException
 	{
 	    if (invalid) throw new IllegalStateException();
 	    return id;
+	}
+	
+	/* ------------------------------------------------------------- */
+	public long getCreationTime()
+	    throws IllegalStateException
+	{
+	    if (invalid) throw new IllegalStateException();
+	    return created;
 	}
 	
 	/* ------------------------------------------------------------- */
@@ -235,14 +230,6 @@ public class SessionContext extends Hashtable
 	put(session.getId(),session);
 	return session;
     }
-    
-    /* ------------------------------------------------------------ */
-    public HttpSession invalidSession(String sessionId)
-    {
-	HttpSession session = new Session(sessionId);
-	session.invalidate();
-	return session;
-    }
 
     /* ------------------------------------------------------------ */
     public static void access(HttpSession session)
@@ -260,8 +247,8 @@ public class SessionContext extends Hashtable
     /** Set the default session timeout.
      *	@param	default	The default timeout in seconds
      */
-    public void setDefaultSessionMaxIdleTime(int defaultTime)
-    {
+    public void setMaxInactiveInterval(int defaultTime)
+    {	
     	defaultMaxIdleTime = defaultTime;
     	
     	// Start the session scavenger if we haven't already
@@ -309,8 +296,9 @@ public class SessionContext extends Hashtable
     }
 
     // how often to check - XXX - make this configurable
-    final static int scavangeDelay = 60000;
+    final static int scavangeDelay = 30000;
     
+    /* -------------------------------------------------------------- */
     /** SessionScavenger is a background thread that kills off old sessions */
     class SessionScavenger extends Thread
     {

@@ -21,6 +21,11 @@ import java.util.*;
  * This class will organise the loading of the servlet when needed or
  * requested.
  *
+ * <p><h4>Note</h4>
+ * By default, responses will only use chunking if requested by the
+ * by setting the transfer encoding header.  However, if
+ * the chunkByDefault is set, then chunking is
+ * used if no content length is set.
  *
  * @see com.mortbay.HTTP.Handler.ServletHandler
  * @version $Id$
@@ -30,21 +35,25 @@ public class ServletHolder implements ServletConfig
 {
     /* ---------------------------------------------------------------- */
     private String name;
-    private Class servletClass=null;
     private Hashtable initParams;
     private HttpServer server;
     private boolean singleThreadModel;
-    private boolean chunkByDefault=HttpResponse.chunkByDefaultDefault;
+    private boolean chunkByDefault=false;
+    private String classPath=null;
+    
+    private Class servletClass=null;
     private Stack servlets=new Stack();
     private GenericServlet servlet=null;
+    private ServletLoader loader=null;
 
     /* ---------------------------------------------------------------- */
     /** Construct a Servlet property mostly from the servers config
      * file.
      */
     public ServletHolder(String name,String className)
+	throws ClassNotFoundException
     {
-	this(name,className,null);
+	this(name,className,"",null);
     }
     
     /* ---------------------------------------------------------------- */
@@ -57,17 +66,38 @@ public class ServletHolder implements ServletConfig
     public ServletHolder(String name,
 			 String className,
 			 Hashtable initParams)
+	throws ClassNotFoundException
+    {
+	this(name,className,"",initParams);
+    }
+    
+    /* ---------------------------------------------------------------- */
+    /** Construct a Servlet property mostly from the servers config
+     * file.
+     * @param name Servlet name
+     * @param className Servlet class name (fully qualified)
+     * @param classPath Servlet class path of directories and jars
+     * @param initParams Hashtable of paramters
+     */
+    public ServletHolder(String name,
+			 String className,
+			 String classPath,
+			 Hashtable initParams)
+	throws ClassNotFoundException
     {
 	this.name	= name;
+	this.classPath  = classPath==null?"":classPath;
 	this.initParams=initParams==null?new Hashtable(10):initParams;
 
 	try
 	{
-	    servletClass = Class.forName(className);
+	    loader = new ServletLoader(this.classPath);
+	    servletClass = loader.loadClass(className,true);
 	}
 	catch(Exception e)
 	{
-	    Code.fail("Cannot find servlet class "+className,e);
+	    Code.warning("Cannot find servlet class "+className,e);
+	    throw new ClassNotFoundException(className);
 	}
 
 	if (!javax.servlet.GenericServlet.class.isAssignableFrom(servletClass))
@@ -76,7 +106,6 @@ public class ServletHolder implements ServletConfig
 	singleThreadModel =
 	    javax.servlet.SingleThreadModel.class
 	    .isAssignableFrom(servletClass);
-
     }
     
     /* ---------------------------------------------------------------- */
@@ -92,8 +121,9 @@ public class ServletHolder implements ServletConfig
 			 String className,
 			 Hashtable initParams,
 			 boolean initialize)
+	throws ClassNotFoundException
     {
-	this(name, className,initParams);
+	this(name, className,"",initParams);
     }
 
     /* ---------------------------------------------------------------- */
@@ -108,17 +138,42 @@ public class ServletHolder implements ServletConfig
      */
     public ServletHolder(String name, GenericServlet sl)
     {
-      this.name = name;
-      this.initParams=new Hashtable(10);
-      this.servletClass = sl.getClass();
-      this.servlet = sl;
-      singleThreadModel =
+	this.name = name;
+	this.initParams=new Hashtable(10);
+	this.servletClass = sl.getClass();
+	this.servlet = sl;
+	singleThreadModel =
             javax.servlet.SingleThreadModel.class
             .isAssignableFrom(servletClass);
-      
     }
 
-
+    /* ------------------------------------------------------------ */
+    /** Reload the servlet.
+     * Reload the servlet and all associated classes by disposing of
+     * the class loader instance.
+     */
+    public void reload()
+    {
+	if (servletClass.getClassLoader()!=loader)
+	{
+	    Code.warning("Cannot reload "+this);
+	    return;
+	}
+	
+	try
+	{
+	    String className=servletClass.getName();
+	    loader = new ServletLoader(this.classPath);
+	    servletClass = loader.loadClass(className,true);
+	    servlets=new Stack();
+	    servlet=null;
+	}
+	catch(Exception e)
+	{
+	    Code.warning(e);
+	}
+    }
+    
     /* ---------------------------------------------------------------- */
     /** Set server
      */

@@ -51,6 +51,7 @@ public class SessionDump extends HttpServlet
 	{
 	    page.add("<B>No Session</B>");
 	    tf.addButton("Action","New Session");
+	    tf.method("GET");
 	    page.add(tf);
 	}
 	else
@@ -73,13 +74,6 @@ public class SessionDump extends HttpServlet
 	    
 		Table table = new Table(0).cellPadding(0).cellSpacing(0);
 		page.add(table);
-		table.newRow();
-		table.newHeading()
-		    .cell().nest(new Font(2,true))
-		    .add("<BR>Session "+id+
-			 (session.isNew()?" is NEW</B>":" is valid</B><BR>"))
-		    .attribute("COLSPAN","2")
-		    .left();
 
 		String[] keys= session.getValueNames();
 		for(int k=keys.length;k-->0;)
@@ -93,8 +87,18 @@ public class SessionDump extends HttpServlet
 		}
 	    
 		page.add(tf);
-		tf.addTextField("Name","Name",20,"name");
-		tf.addTextField("Value","Value",20,"value");
+		tf.addText("ID",session.getId());
+		tf.addText("State",session.isNew()?"NEW":"Valid");
+		tf.addText("Creation",
+			   new Date(session.getCreationTime()).toString());
+		tf.addText("Last Access",
+			   new Date(session.getLastAccessedTime()).toString());
+		tf.addText("Max Inactive",
+			   ""+session.getMaxInactiveInterval());
+		
+		tf.addTextField("Property Name","Name",20,"name");
+		tf.addTextField("Property Value","Value",20,"value");
+		tf.addButtonArea();
 		tf.addButton("Action","Add");
 		tf.addButton("Action","Remove");
 		tf.addButton("Action","Invalidate");

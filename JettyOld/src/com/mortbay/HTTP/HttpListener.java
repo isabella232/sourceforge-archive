@@ -26,6 +26,13 @@ import java.net.*;
 public class HttpListener extends ThreadedServer
 {
     /* ------------------------------------------------------------ */
+    public static Class[] ConstructArgs =
+    {
+	com.mortbay.Util.InetAddrPort.class,
+	com.mortbay.HTTP.HttpServer.class
+    };
+    
+    /* ------------------------------------------------------------ */
     InetAddrPort address=null;
     HttpServer server=null;
 

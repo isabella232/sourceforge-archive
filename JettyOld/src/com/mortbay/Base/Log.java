@@ -295,9 +295,25 @@ public class Log
     /* ------------------------------------------------------------ */
     /** Log an event
      */
+    public static void event(String message, int stackDepth)
+    {
+	Log.message(Log.EVENT,message,new Frame(stackDepth));
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Log an event
+     */
     public static void event(String message)
     {
 	Log.message(Log.EVENT,message,new Frame(1));
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Log an warning
+     */
+    public static void warning(String message, int stackDepth)
+    {
+	Log.message(Log.WARN,message,new Frame(1));
     }
     
     /* ------------------------------------------------------------ */

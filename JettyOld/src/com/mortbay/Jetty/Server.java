@@ -23,7 +23,6 @@ import java.lang.reflect.*;
 
 /* ------------------------------------------------------------ */
 /** 
- * 
  * <p><h4>Notes</h4>
  * An IP address of 0.0.0.0 can be used to indicate all local
  * addresses.
@@ -41,7 +40,6 @@ public class Server extends BaseConfiguration
 	
     /* ------------------------------------------------------------ */
     private HttpServer httpServer=null;
-    PropertyTree properties;
     
     /* ------------------------------------------------------------ */
     /** Construct from properties.
@@ -54,36 +52,51 @@ public class Server extends BaseConfiguration
      * 
      * @exception IOException 
      */
-    public Server(Properties properties )
-	throws IOException
+    public Server(PropertyTree listeners, Properties properties)
+	throws Exception
     {
-	PropertyTree tree=null;
-	if (properties instanceof PropertyTree)
-	    tree = (PropertyTree)properties;
-	else
-	    tree = new PropertyTree(properties);
-	Code.debug(tree);
+	Code.debug(listeners,"\n",properties);
 
-	String defaultSessionTimeout=tree.getProperty("DefaultSessionTimeout");
+	// Set properties for HttpConfiguration
+	this.properties=properties;
 
-	Enumeration names = tree.getTree("LISTENER").getNodes();
+	// Empty path map for handlers
+	httpHandlersMap=new PathMap();
+	
+	// Extract listeners
+	Vector listener_classes = new Vector();
+	Vector listener_addresses = new Vector();
+	Enumeration names = listeners.getNodes();
 	while (names.hasMoreElements())
 	{
 	    String listenerName = names.nextElement().toString();
 	    Code.debug("Configuring listener "+listenerName);
-	    PropertyTree listenerTree = tree.getTree("LISTENER."+listenerName);
-	    String className = listenerTree.getProperty("CLASS");
+	    PropertyTree listenerTree = listeners.getTree(listenerName);
 	    
+	    String className = listenerTree.getProperty("CLASS");
+	    Class listenerClass = Class.forName(className);
 	    Vector addrs = listenerTree.getVector("ADDRS",",; ");
-	    addresses = new InetAddrPort[addrs.size()];
 	    for (int a=addrs.size();a-->0;)
 	    {
-		addresses[a]=
+		InetAddrPort addr_port =
 		    new InetAddrPort(addrs.elementAt(a).toString());
+		listener_classes.addElement(listenerClass);
+		listener_addresses.addElement(addr_port);
 	    }
 	}
+	addresses = new InetAddrPort[listener_addresses.size()];
+	listener_addresses.copyInto(addresses);
+	listenerClasses = new Class[listener_classes.size()];
+	listener_classes.copyInto(listenerClasses);
 
-	httpHandlersMap=new PathMap();
+	// Get mime map
+	String mimeFile = properties.getProperty("MimeMap");
+	if (mimeFile!=null && mimeFile.length()>0)
+	{
+	    Properties mimeProps = new Properties();
+	    mimeProps.load(new FileInputStream(mimeFile));
+	    mimeMap=mimeProps;
+	}
     }
 
     /* ------------------------------------------------------------ */
@@ -128,7 +141,8 @@ public class Server extends BaseConfiguration
 		
 		PropertyTree serverTree = props.getTree(serverName);
 		PropertyTree serverProperties=properties(serverTree);
-		Server server = new Server(serverProperties);
+		PropertyTree listeners = serverTree.getTree("LISTENER");
+		Server server = new Server(listeners,serverProperties);
 		serverMap.put(serverName,server);
 		
 		Code.debug("Configure ",serverName,
