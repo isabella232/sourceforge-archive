@@ -4,12 +4,13 @@
  * Created on 07-Apr-2003
  * $Id$
  * ============================================== */
- 
+
 package org.mortbay.io;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.mortbay.util.StringMap;
 
 /* ------------------------------------------------------------------------------- */
 /** 
@@ -19,9 +20,10 @@ import java.util.HashMap;
  */
 public class BufferCache
 {
-	private HashMap _map=new HashMap();
-	private ArrayList _index=new ArrayList();
-	
+    private HashMap _bufferMap=new HashMap();
+    private StringMap _stringMap=new StringMap(StringMap.CASE_INSENSTIVE);
+    private ArrayList _index= new ArrayList();
+
     /* ------------------------------------------------------------------------------- */
     /** add.
      * @param GET
@@ -29,50 +31,71 @@ public class BufferCache
      */
     public void add(String value, int ordinal)
     {
-    	Buffer buffer = new CachedBuffer(value,ordinal);
-      	_map.put(buffer,buffer);
-    	while ((ordinal-_index.size())>0)
-    		_index.add(null);
-    	_index.add(ordinal,buffer); 	
-    } 
-    
-	public CachedBuffer lookup(int ordinal)
-	{
-		if (ordinal<0 || ordinal>=_index.size())
-			return null;
-		return (CachedBuffer)_index.get(ordinal);
-	}
-
-	public CachedBuffer lookup(Buffer buffer)
-	{
-		return (CachedBuffer)_map.get(buffer);
-	}
-	
-    public Buffer normalize(Buffer buffer)
-    {
-    	Buffer b = lookup(buffer);
-    	if (b==null)
-    		return buffer;
-    	return b;
+        Buffer buffer= new CachedBuffer(value, ordinal);
+        _bufferMap.put(buffer, buffer);
+        _stringMap.put(value, buffer);
+        while ((ordinal - _index.size()) > 0)
+            _index.add(null);
+        _index.add(ordinal, buffer);
     }
 
-	public String toString(Buffer buffer)
-	{
-		return normalize(buffer).toString();
-	}
-	
-	public class CachedBuffer extends ByteArrayBuffer
-	{
-		private int _ordinal;
-        public CachedBuffer(String value,int ordinal)
+    public CachedBuffer get(int ordinal)
+    {
+        if (ordinal < 0 || ordinal >= _index.size())
+            return null;
+        return (CachedBuffer)_index.get(ordinal);
+    }
+
+    public CachedBuffer get(Buffer buffer)
+    {
+        return (CachedBuffer)_bufferMap.get(buffer);
+    }
+
+    public CachedBuffer get(String value)
+    {
+        return (CachedBuffer)_stringMap.get(value);
+    }
+
+    public Buffer lookup(Buffer buffer)
+    {
+        Buffer b= get(buffer);
+        if (b == null)
+            return buffer;
+        return b;
+    }
+
+    public Buffer lookup(String value)
+    {
+        Buffer b= get(value);
+        if (b == null)
+            return new CachedBuffer(value,-1);
+        return b;
+    }
+
+    public String toString(Buffer buffer)
+    {
+        return lookup(buffer).toString();
+    }
+
+    public static int getOrdinal(Buffer buffer)
+    {
+        if (buffer instanceof CachedBuffer)
+            return ((CachedBuffer)buffer).getOrdinal();
+        return -1;
+    }
+    
+    public class CachedBuffer extends ByteArrayBuffer
+    {
+        private int _ordinal;
+        public CachedBuffer(String value, int ordinal)
         {
             super(value);
-            _ordinal=ordinal;
+            _ordinal= ordinal;
         }
-        
+
         public int getOrdinal()
         {
-        	return _ordinal;
+            return _ordinal;
         }
-	}
+    }
 }

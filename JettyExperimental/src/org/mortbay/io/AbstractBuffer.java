@@ -20,7 +20,6 @@ public abstract class AbstractBuffer implements Buffer
     {
         _mark= -1;
         _readOnly= readOnly;
-        ;
     }
 
     public int position()
@@ -100,6 +99,14 @@ public abstract class AbstractBuffer implements Buffer
         _position += length;
         return view;
     }
+    
+    public int skip(int n)
+    {
+        if (remaining()<n)
+            n=remaining();
+        _position+=n;
+        return n;
+    }
 
     public void put(byte b)
     {
@@ -133,6 +140,18 @@ public abstract class AbstractBuffer implements Buffer
         _mark= _position + position;
     }
 
+    public void clear()
+    {
+        position(0);
+        limit(capacity());
+    }
+
+    public void empty()
+    {
+        position(0);
+        limit(0);
+    }
+    
     public final void flip()
     {
         _limit= _position;
@@ -144,6 +163,12 @@ public abstract class AbstractBuffer implements Buffer
     {
         _position= 0;
         _mark= -1;
+    }
+
+    public void reset()
+    {
+        if (_mark>=0)
+            _position= _mark;
     }
 
     /**
@@ -194,7 +219,7 @@ public abstract class AbstractBuffer implements Buffer
 
     public String toString()
     {
-        return new String(toArray(), 0, remaining());
+        return new String(asArray(), 0, remaining());
     }
 
     public String toDetailString()
@@ -245,11 +270,24 @@ public abstract class AbstractBuffer implements Buffer
      */
     public boolean equals(Object obj)
     {
+        // reject non buffers;
         if (obj == null || !(obj instanceof Buffer))
             return false;
         Buffer b= (Buffer)obj;
+        
+        // reject different lengths
         if (b.remaining() != remaining())
             return false;
+        
+        // reject AbstractBuffer with different hash value
+        if (_hash!=0 && obj instanceof AbstractBuffer)
+        {
+            AbstractBuffer ab = (AbstractBuffer)obj;
+            if (ab._hash!=0 && _hash!=ab._hash)
+                return false;
+        }
+            
+        // Nothing for it but to do the hard grind.
         for (int i= remaining(); i-- > 0;)
         {
             byte b1= get(position() + i);
@@ -277,30 +315,26 @@ public abstract class AbstractBuffer implements Buffer
     public int hashCode()
     {
         if (!isReadOnly())
-        {
-            int hash= 0;
-            for (int i= limit(); i-- > position();)
-            {
-                byte b= get(i);
-                if ('a' >= b && b <= 'z')
-                    b= (byte) (b - 'a' + 'A');
-                hash= 31 * hash + b;
-            }
-            return hash;
-        }
+            return hash();
+        
         if (_hash == 0)
-        {
-            for (int i= limit(); i-- > position();)
-            {
-                byte b= get(i);
-                if ('a' >= b && b <= 'z')
-                    b= (byte) (b - 'a' + 'A');
-                _hash= 31 * _hash + b;
-            }
-            if (_hash == 0)
-                _hash= 1;
-        }
+            _hash=hash();
+            
         return _hash;
     }
-
+    
+    private int hash()
+    {
+        int hash= 0;
+        for (int i= limit(); i--> position();)
+        {
+            byte b= get(i);
+            if (!isCaseSensitive() && 'a' >= b && b <= 'z')
+                b= (byte) (b - 'a' + 'A');
+            hash= 31 * hash + b;
+        }
+        if (hash == 0)
+            hash= -1;
+        return hash;
+    }
 }

@@ -41,6 +41,11 @@ public class ByteArrayBuffer extends AbstractBuffer
         _string= value;
     }
 
+    public ByteArrayBuffer(int size)
+    {
+        this(new byte[size], 0, size, READWRITE);
+    }
+    
     /**
      * 
      */
@@ -55,6 +60,21 @@ public class ByteArrayBuffer extends AbstractBuffer
     public int capacity()
     {
         return _bytes.length;
+    }
+
+    /**
+     * @see org.mortbay.io.Buffer#get(byte[], int, int)
+     */
+    public int get(byte[] b, int offset, int length)
+    {
+        int l = length;
+        if (l>remaining())
+            l=remaining();
+        if (l<=0)
+            return -1;
+        Portable.arraycopy(_bytes, position(), b, offset, l);
+        position(position()+l);
+        return l;
     }
 
     /**
@@ -129,15 +149,6 @@ public class ByteArrayBuffer extends AbstractBuffer
             super.put(position, src);
     }
 
-    /**
-     * @see org.mortbay.util.Buffer#clear()
-     */
-    public void clear()
-    {
-        position(0);
-        limit(0);
-    }
-
     public void compact()
     {
         int s= markValue() >= 0 ? markValue() : position();
@@ -209,7 +220,7 @@ public class ByteArrayBuffer extends AbstractBuffer
     /* 
      * @see org.mortbay.io.Buffer#toArray()
      */
-    public byte[] toArray()
+    public byte[] asArray()
     {
         byte[] bytes= new byte[limit() - position()];
         Portable.arraycopy(getByteArray(), position(), bytes, 0, bytes.length);
@@ -252,14 +263,14 @@ public class ByteArrayBuffer extends AbstractBuffer
 
     public String toString()
     {
-    	if (_string!=null)
-    		return _string;
-    	if (isReadOnly() && !isVolatile())
-    	{
-    		_string=new String(getByteArray(), position(), remaining());
-        	return _string;
-    	}
-    	
+        if (_string != null)
+            return _string;
+        if (isReadOnly() && !isVolatile())
+        {
+            _string= new String(getByteArray(), position(), remaining());
+            return _string;
+        }
+
         return new String(getByteArray(), position(), remaining());
     }
 

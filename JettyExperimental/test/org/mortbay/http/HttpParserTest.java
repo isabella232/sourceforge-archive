@@ -3,6 +3,7 @@ package org.mortbay.http;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 
 import junit.framework.TestCase;
 
@@ -52,6 +53,7 @@ public class HttpParserTest extends TestCase
     }
 
     public void testLineParse0()
+	throws Exception
     {
         String http= "POST /foo HTTP/1.0\015\012" + "\015\012";
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
@@ -65,6 +67,7 @@ public class HttpParserTest extends TestCase
     }
 
     public void testLineParse1()
+	throws Exception
     {
         String http= "GET /999\015\012";
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
@@ -79,6 +82,7 @@ public class HttpParserTest extends TestCase
     }
 
     public void testLineParse2()
+	throws Exception
     {
         String http= "POST /222  \015\012";
         ByteArrayBuffer buffer= new ByteArrayBuffer(http.getBytes());
@@ -93,6 +97,7 @@ public class HttpParserTest extends TestCase
     }
 
     public void testHeaderParse()
+	throws Exception
     {
         String http=
             "GET / HTTP/1.0\015\012"
@@ -122,6 +127,7 @@ public class HttpParserTest extends TestCase
     }
 
     public void testChunkParse()
+    	throws Exception
     {
         String http=
             "GET /chunk HTTP/1.0\015\012"
@@ -147,6 +153,7 @@ public class HttpParserTest extends TestCase
     }
 
     public void testMultiParse()
+		throws Exception
     {
         String http=
             "GET /mp HTTP/1.0\015\012"

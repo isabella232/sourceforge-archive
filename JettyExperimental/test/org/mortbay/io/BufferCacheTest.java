@@ -57,13 +57,29 @@ public class BufferCacheTest extends TestCase
 		{
 			String s = "S0S1S2S3";
 			ByteArrayBuffer buf=new ByteArrayBuffer(s.getBytes(),i*2,2);
-			BufferCache.CachedBuffer b=cache.lookup(buf);
+			BufferCache.CachedBuffer b=cache.get(buf);
 			int index=b==null?-1:b.getOrdinal();
 			
 			if (i>0)
 				assertEquals(i,index);
 			else
 				assertEquals(-1,index);
+		}
+	}
+	
+
+	public void testGetBuffer()
+	{
+		for (int i=0;i<S.length;i++)
+		{
+			String s = "S0S1S2S3";
+			ByteArrayBuffer buf=new ByteArrayBuffer(s.getBytes(),i*2,2);
+			Buffer b=cache.get(buf);
+			
+			if (i>0)
+				assertEquals(i,b.get(1)-'0');
+			else
+				assertEquals(null,b);
 		}
 	}
 	
@@ -76,27 +92,14 @@ public class BufferCacheTest extends TestCase
 			ByteArrayBuffer buf=new ByteArrayBuffer(s.getBytes(),i*2,2);
 			Buffer b=cache.lookup(buf);
 			
-			if (i>0)
-				assertEquals(i,b.get(1)-'0');
-			else
-				assertEquals(null,b);
-		}
-	}
-	
-
-	public void testNormalizeBuffer()
-	{
-		for (int i=0;i<S.length;i++)
-		{
-			String s = "S0S1S2S3";
-			ByteArrayBuffer buf=new ByteArrayBuffer(s.getBytes(),i*2,2);
-			Buffer b=cache.normalize(buf);
-			
 			assertEquals(S[i],b.toString());
 			if (i>0)
 				assertTrue(S[i]==b.toString());
 			else
-				assertTrue(S[i]!=b.toString());
+			{
+                assertTrue(S[i]!=b.toString());
+                assertEquals(S[i],b.toString());
+            } 
 		}
 	}
 	

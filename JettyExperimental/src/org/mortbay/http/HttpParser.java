@@ -1,11 +1,16 @@
 package org.mortbay.http;
 
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferCache;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.Portable;
+import org.mortbay.io.stream.InputBuffer;
 
 /* ------------------------------------------------------------------------------- */
 /** 
@@ -13,7 +18,7 @@ import org.mortbay.io.Portable;
  * @version $Revision$
  * @author gregw
  */
-public abstract class HttpParser
+public class HttpParser
 {
     private static Log log= LogFactory.getLog(HttpParser.class);
 
@@ -76,18 +81,31 @@ public abstract class HttpParser
     }
 
     /* ------------------------------------------------------------------------------- */
+    public boolean inHeaderState()
+    {
+        return state<0;
+    }
+
+    /* ------------------------------------------------------------------------------- */
+    public boolean inContentState()
+    {
+        return state>0;
+    }
+    
+    /* ------------------------------------------------------------------------------- */
     public String toString(Buffer buf)
     {
         return "state=" + state + " length=" + length + " buf=" + buf.hashCode();
     }
 
     /* ------------------------------------------------------------------------------- */
-    /** parse.
+    /** Parse until END state.
      * @param handler
      * @param source
      * @return parser state
      */
     public void parse(Buffer source)
+	    throws IOException	
     {
         state= STATE_START;
 
@@ -97,13 +115,14 @@ public abstract class HttpParser
     }
 
     /* ------------------------------------------------------------------------------- */
-    /**
-     * Method parseBuffer.
+    /** Parse until next Event.
+     * 
      * @param handler
      * @param buf
      * @param ctx
      */
-    public void parseNext(Buffer source)
+    public void parseNext(Buffer source) 
+    throws IOException
     {
 		if (log.isTraceEnabled()) log.trace("parseNext s="+state+","+source.toDetailString());
 		
@@ -116,12 +135,15 @@ public abstract class HttpParser
             if (source.markValue()==0 && source.limit()==source.capacity())
             	throw new IllegalStateException("Buffer too small");
             int filled= source.fill();
+            if (log.isTraceEnabled()) log.trace("filled="+filled);
             if (filled < 0 && state == STATE_EOF_CONTENT)
             {
                 state= STATE_END;
                 messageComplete(contentPosition);
                 return;
             }
+            if (filled<0)
+            	throw new IOException("EOF");
         }
 
         byte ch;
@@ -264,7 +286,7 @@ public abstract class HttpParser
                     {
                         if (length > 0)
                         {
-                        	header=HttpHeader.CACHE.normalize(source.sliceFromMark(length));
+                        	header=HttpHeaders.CACHE.lookup(source.sliceFromMark(length));
                             foundHttpHeader(header);
                         }
                         eol= ch;
@@ -275,7 +297,7 @@ public abstract class HttpParser
                     {
                         if (length > 0)
                         {
-							header=HttpHeader.CACHE.normalize(source.sliceFromMark(length));
+							header=HttpHeaders.CACHE.lookup(source.sliceFromMark(length));
 							foundHttpHeader(header);
                         } 
                         length= -1;
@@ -293,37 +315,34 @@ public abstract class HttpParser
                 case STATE_HEADER_VALUE :
                     if (ch == CARRIAGE_RETURN || ch == LINE_FEED)
                     {
-                    	Buffer value = source.sliceFromMark(length);
+                        Buffer value= HttpHeaderValues.CACHE.lookup(source.sliceFromMark(length));
                         if (length > 0)
                         {
-                        	if (header instanceof BufferCache.CachedBuffer)
-                        	{
-                        		int ordinal=((BufferCache.CachedBuffer)header).getOrdinal();
+                            int ho= BufferCache.getOrdinal(header);
+                            int vo= BufferCache.getOrdinal(value);
 
-								switch(ordinal)
-								{
-									case HttpHeader.__CONTENT_LENGTH:
-										contentLength = BufferUtil.toInt(value);
-										if (contentLength<=0)
-											contentLength=HttpParser.NO_CONTENT;
-										break;
-									case HttpHeader.__CONNECTION:
-									    // TODO
-										close="close".equalsIgnoreCase(value.toString());
-										break;
-										
-									case HttpHeader.__TRANSFER_ENCODING:
-										// TODO
-										if ("chunked".equalsIgnoreCase(value.toString()))
-											contentLength=CHUNKED_CONTENT;
-										break; 
-										
-									case HttpHeader.__CONTENT_TYPE:
-										content=true;
-										break;
-								}
-                        	}
-                        	
+                            switch (ho)
+                            {
+                                case HttpHeaders.__CONTENT_LENGTH :
+                                    contentLength= BufferUtil.toInt(value);
+                                    if (contentLength <= 0)
+                                        contentLength= HttpParser.NO_CONTENT;
+                                    break;
+                                case HttpHeaders.__CONNECTION :
+                                    close= (HttpHeaderValues.__CLOSE == vo);
+                                    break;
+
+                                case HttpHeaders.__TRANSFER_ENCODING :
+                                    if (HttpHeaderValues.__CHUNKED == vo)
+                                        contentLength= CHUNKED_CONTENT;
+                                    break;
+
+                                case HttpHeaders.__CONTENT_TYPE :
+                                    content= true;
+                                    break;
+
+                            }
+
                             foundHttpValue(value);
                         }
                         
@@ -509,6 +528,27 @@ public abstract class HttpParser
     protected void messageComplete(int contextLength)
     {
         log.trace("messageComplete:" + contextLength);
+    }
+    
+    
+    public static void main(String[] args)
+    	throws Exception
+    {
+    	System.err.println(log.getClass());
+    	
+    	ServerSocket ss = new ServerSocket(8080);
+    	while(true)
+    	{
+    		Socket socket=ss.accept();
+    		InputBuffer in = new InputBuffer(socket.getInputStream(),2048);
+    		HttpParser parser = new HttpParser();
+    		while (true) 
+    		{
+    			parser.parse(in);
+    			socket.getOutputStream().write("HTTP/1.1 200 OK\015\012Transfer-Encoding: chunked\015\012Content-Type: text/html\015\012\015\0120b\015\012<h1>Hi</h1>\015\0120\015\012\015\012".getBytes());
+    			
+    		} 
+    	}
     }
 
 }
