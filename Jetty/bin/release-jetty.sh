@@ -31,17 +31,30 @@ read Y
     cd $HOME
     unset JETTY_HOME
     [ -d Jetty ] && mv Jetty Jetty.cvs
-    cvs $CVS_ARGS rtag $CVS_BRANCH -F Jetty_$TAG Jetty
-    cvs $CVS_ARGS export -r Jetty_$TAG Jetty
+    cvs $CVS_ARGS rtag $CVS_BRANCH -F Jetty_$TAG Jetty JettyExtra
+    cvs $CVS_ARGS rtag $CVS_BRANCH -r Jetty_$TAG -F JBossJetty_$TAG Jetty JettyExtra/jmx
+
+    cvs $CVS_ARGS export -r Jetty_$TAG Jetty JettyExtra
     cd $HOME/Jetty
     rm -fr FileBase servlets doc docroot src/com webappsrc webapps/default webapps/examples webapps/jetty testdocs
     ant all tidy || exit 1
+
     cd ..
     mv Jetty Jetty-$VERSION
-    tar cfz /usr/local/archive/Jetty-${VERSION}.tgz --exclude Jetty-$VERSION/classes Jetty-$VERSION
+    tar cfz /usr/local/archive/Jetty-${VERSION}.tgz Jetty-$VERSION
+
+    export JETTY_HOME=$PWD/Jetty-$VERSION
+    cd JettyExtra
+    ant all tidy
+    cd ..
+    mv JettyExtra JettyExtra-$VERSION
+    tar cfz /usr/local/archive/JettyExtra-${VERSION}.tgz JettyExtra-$VERSION
+
     cd /usr/local/share/java/jetty
     tar xfz /usr/local/archive/Jetty-${VERSION}.tgz
-
+    tar xfz /usr/local/archive/JettyExtra-${VERSION}.tgz
+    cp -f DEFAULT/up.sh Jetty-${VERSION}
+  
 } 2>&1 | tee /tmp/release-jetty.log
 
 

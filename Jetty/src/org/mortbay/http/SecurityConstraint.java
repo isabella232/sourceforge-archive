@@ -107,9 +107,11 @@ public class SecurityConstraint
      * @param role The rolename.  If the rolename is '*' all other
      * roles are removed and anyRole is set true and subsequent
      * addRole calls are ignored.
+     * Authenticate is forced true by this call.
      */
     public synchronized void addRole(String role)
     {
+        _authenticate=true;
         if (ANY_ROLE.equals(role))
         {
             _roles=null;
