@@ -272,30 +272,47 @@ public class TestRequest extends junit.framework.TestCase
         request=getRequest("GET /R1 HTTP/1.0\n"+
                 "Cookie: Client=Winston Churchill\n"+
                 "Cookie: $Version=\"1\"; Customer=\"WILE_E_COYOTE\"; $Path=\"/acme\"\n"+
+                "Cookie: $Version=1; Rodent=Howard; \n"+
                 "\n");
         
         Cookie[] cookies = request.getCookies();
         
-        assertEquals(cookies.length,2);
+        assertEquals(cookies.length,3);
+        boolean seen_winston=false;
+        boolean seen_wiley=false;
+        boolean seen_jonny=false;
         for (int i=0;i<cookies.length;i++)
         {
             Cookie cookie = cookies[i];
             
-            if ("Customer".equals(cookie.getName()))
+            if ("Rodent".equals(cookie.getName()))
+            {
+                assertEquals("Howard",cookie.getValue());
+                assertEquals(1,cookie.getVersion());
+                seen_jonny=true;
+            }
+            else if ("Customer".equals(cookie.getName()))
             {
                 assertEquals("WILE_E_COYOTE",cookie.getValue());
                 assertEquals(1,cookie.getVersion());
                 assertEquals("/acme",cookie.getPath());
+                seen_wiley=true;
             }
             else if ("Client".equals(cookie.getName()))
             {
                 assertEquals("Winston Churchill",cookie.getValue());
                 assertEquals(0,cookie.getVersion());
                 assertEquals(null,cookie.getPath());
+                seen_winston=true;
             }
             else
                 assertTrue(false);
         }
+
+       assertTrue(seen_wiley);
+       assertTrue(seen_winston);
+       assertTrue(seen_jonny);
+
     }
     
 }
