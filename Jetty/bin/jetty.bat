@@ -128,6 +128,8 @@ rem == if no args then set admin.xml and demo.xml
 rem == note: since we will cd to the JETTY_HOME directory
 rem          we do not need to append JETTY_HOME onto the
 rem          file names.
+if [%1]==["run"] (set ARGS=etc\jetty.xml & goto args_done)
+if [%1]==["demo"] (set ARGS=etc\admin.xml etc\demo.xml & goto args_done)
 if [%1]==[] (set ARGS=etc\admin.xml etc\demo.xml & goto args_done)
 rem == append command line arguments on ARGS
 :setargs

@@ -1,86 +1,556 @@
-<BR><H1>Jetty Server Tutorial
-&nbsp;&nbsp;&nbsp;&nbsp;<FONT size=-2>
-<A href="HttpServer.html">Back</A>
-<A href="index.html">Index</A>
-<A href="..">Exit</A>
-<A href="XmlConfiguration.html">Next</A>
-</FONT></H1>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title></title>
+</head>
+  <body>
+            <br>
+                       
+<table cellpadding="0" cellspacing="8" border="0" width="20%">
+              <tbody>
+                <tr>
+                  <td valign="middle" bgcolor="#ccccff"><small><a href="HttpServer.html">
+                BACK</a></small></td>
+                  <td valign="middle" bgcolor="#ccccff"><small><a href="index.html">
+                INDEX</a></small></td>
+                  <td valign="middle" bgcolor="#ccccff"><small><a href="..">
+      EXIT</a></small></td>
+                  <td valign="middle" bgcolor="#ccccff"><small><a href="logging.html">
+                NEXT</a></small></td>
+                </tr>
+                                               
+  </tbody>            
+</table>
+            <br>
+                       
+<h1>Jetty Server</h1>
+        <big><big><b><a name="introduction"></a>Introduction</b></big></big><br>
+        <br>
+        Whilst the <a href="HttpServer.html">Jetty HTTP Server</a> provides 
+ an  embeddable  lightweight web server, the Jetty Server implements  a servlet 
+ container compliant with the <a href="http://java.sun.com/products/servlet/download.html">
+        2.2 Servlet Specification</a> (ie it is capable of serving web applications).<br>
+   <br>
+   The server configuration can be performed by either:<br>
+     
+<ol>
+     <li>using the Jetty API </li>
+     <li>creating a Jetty-specific XML configuration file that specifies
+the  server, listeners, contexts and servlets or web applications and passing 
+it as an argument to the server command line (the <a href="GettingStarted.html#manual">
+   Jetty demonstrations</a> are examples of this)</li>
+     
+</ol>
+   In the examples in this section, usually code examples are given, although 
+ it is always possible to achieve the same result using the Jetty-specific 
+ XML configuration file method. Further explanation of this is available <a href="XmlConfiguration.html">
+  here</a>.<br>
+   <br>
+   The steps in configuring a server are:
 
-The 
-<a href="/javadoc/org/mortbay/jetty/Server.html">org.mortbay.jetty.Server</a> 
-class is an subclass of 
-<a href="/javadoc/org/mortbay/http/HttpServer.html">org.mortbay.http.HttpServer</a> that adds conveniance methods for
-configuring the servlet container provided by the 
-<a href="/javadoc/org/mortbay/jetty/servlet/package-summary.html">org.mortbay.jetty.servlet</a> package.
-<P>
+<ol>
+<li>create the server</li>
+<li> create at least one listener</li>
+<li>either:</li>
+   &nbsp;&nbsp; create at least one context and handler
+   <br>
+   or
+   <br>
+   &nbsp;&nbsp;register a web application
 
-<FONT Size=+1><B>Servlet Mappings</B></FONT><BR>
-The <Code>addContext()</Code> methods return instances of the
-<a href="/javadoc/org/mortbay/jetty/servlet/ServletHttpContext.html">org.mortbay.jetty.servlet.ServletHttpContext</a> class to allow servlet mappings to be simply configured:
-<PRE>
-    ServletHttpContext context = 
-        (ServletHttpContext)server.getContext(null,"/");
-    context.addServlet("Dump",
-                       "/dump/*",
-                       "org.mortbay.servlet.Dump");
-</PRE>
-This configuration gets (or creates) a context at / and maps the Dump servlet to all URLs starting
-with "/dump/*".   This configuration can also be done without using the 
-conveniance methods and is equivalent to the following:
-<PRE>
-    HttpContext context = server.getContext(null,"/"); 
-    ServletHandler handler = new ServletHandler();
-    handler.addServlet("Dump",
-                       "/dump/*",
-                       "org.mortbay.servlet.Dump");
-    context.addHandler(handler);
-</PRE>
-<P>
-<FONT Size=+1><B>Dynamic Servlets</B></FONT><BR>
-The ServletHandler can be configured to dynamically create mappings for servlets that have
-their classnames within the requested URL:
-<PRE>
-    ServletHttpContext context = 
-        (ServletHttpContext)server.getContext(null,"/context/*");
-    context.setClassPath("./servlets/");
-    context.setDynamicServletPathSpec("/servlet/*");
-</PRE>
-If I request is made to the URL <Code>/context/servlet/com.acme.HelloWorldServlet/info</Code> and the 
-classloader for the context can find a class <Code>com.acme.HelloWorldServlet</code>, then that servlet is 
-loaded and a dynamic mapping made to it from <Code>/servlet/com.acme.HelloWorldServlet/*</Code>.
-<P>
-Note that this configuration also sets a class path for the context. This allows the directory 
-<Code>./servlets/com/acme</Code> to be searched for a <Code>HelloWorldServlet.class</Code> file.
-Servlets can also be loaded from the system classpath for the JVM, however this can represent a 
-security risk and thus can be disabled with the following call:
-<PRE>
-    context.getServletHandler().setServeDynamicSystemServlets(false);
-</PRE>
-<P>
-<FONT Size=+1><B>Web Applications</B></FONT><BR>
-The Servlet Specification details a standard layout for web applications.  If your static and dynamic content are
-packages as a web applications, then a 
-<a href="/javadoc/org/mortbay/jetty/servlet/WebApplicationContext.html">org.mortbay.jetty.servlet.WebApplicationContext</a> can be used to simple configure a context for the web application:
-<PRE>
-    server.addWebApplication("/","./webapps/myapp/","./etc/webdefaults.xml");
-</PRE>
-A web application can be configured with upto 5 arguments:<UL>
-<LI>Optional virtual host name for the context.
-<LI>A context path.
-<LI>The location of the web application, which may be a directory structure or a WAR file.
-<LI>The defaults configuration file. This file is in the same format as the webapplication 
-deployment descriptor and provides the default values for one or more webapplications
-<LI>Optional boolean to indicate that WAR files should be extracted to a temporary directory 
-structure.  Some mechanisms such as JSP compilation have difficulty working with un-expanded
-WAR files.
-</UL>
-Jetty also has a web application extension for jetty specific configuration.  If a file called
-"web-jetty.xml" is found in the WEB-INF directory, it is assumes to be a Jetty XmlConfigurarion file as is applied to the WebApplication instance.
+</ol>
+   
+<p><i><b> Developer's Note: </b></i>&nbsp;The  <a href="/javadoc/org/mortbay/jetty/Server.html">
+        org.mortbay.jetty.Server</a>      class is a subclass of  <a href="/javadoc/org/mortbay/http/HttpServer.html">
+            org.mortbay.http.HttpServer</a> that adds convenience methods 
+for   configuring    the servlet container provided by the  <a href="/javadoc/org/mortbay/jetty/servlet/package-summary.html">
+            org.mortbay.jetty.servlet</a> package.</p>
+               
+<p><br>
+        </p>
+<p>
+<big><big><b><a name="nonwebapps"></a>Deploying Servlets without a Web Application</b></big></big></p>
+If you do not wish to use web applications but you want to deploy servlets, then you need to register at least one context and at least the ServletHandler with the server. You are able to statically configure individual servlets at a specific URL pattern, or use dynamic mapping to extract servlet names from the request URL.
+                  
+<p><br>
+        </p>
+               
+<p><big><b><a name="mapping"></a> Using Static Servlet Mappings</b></big></p>
+                                                                        
+                                                                
+<p>To use servlets outside of a web application, you must register the servlets in the context in which they
+will be used. The <code>addContext()</code> methods on <a href="/javadoc/org/mortbay/jetty/Server.html">
+        org.mortbay.jetty.Server</a> return instances of the <a href="/javadoc/org/mortbay/jetty/servlet/ServletHttpContext.html">
+            org.mortbay.jetty.servlet.ServletHttpContext</a> class to allow 
+ servlet     mappings to be eaSily configured:</p>
+                                                                        
+                                                                
+                                        <br>
+                                                                        
+<table align=center cellspacing=2 cellpadding=0 border=0 width="70%">
+<tbody>
+<tr>
+<td>
+<tt>
+<pre>
+ServletHttpContext context = 
+&nbsp; &nbsp; &nbsp; &nbsp; (ServletHttpContext)server.getContext(null,"/");
+context.addServlet("Dump","/dump/*", "org.mortbay.servlet.Dump");
+</pre>
+</tt>
+                     <b>Code Example: &nbsp;Adding a servlet mapping</b>
+</td>
+</tr>
+</tbody>
+</table>
 
-<FONT size=-1>
-<A href="HttpServer.html">Back</A>
-<A href="index.html">Index</A>
-<A href="..">Exit</A>
-<A href="XmlConfiguration.html">Next</A>
-</FONT>
-<P>
+<br>
+                     <br>
+     This code gets (or creates) a context at <tt>/ </tt>and maps the Dump
+   servlet  to all URLs starting with <tt>/dump/*</tt>.   This configuration
+  can also   be done  without using the  convenience methods and is equivalent
+  to:                                <br>
+                                                                        
+                                                
+<table align=center cellspacing=2 cellpadding=0 border=0 width="70%">
+<tbody>
+<tr>
+<td>
+<tt>
+<pre>
+HttpContext context = server.getContext(null,"/");
+ServletHandler handler = new ServletHandler();
+handler.addServlet("Dump",
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp;"/dump/*",
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  &nbsp; &nbsp; &nbsp;"org.mortbay.servlet.Dump");
+context.addHandler(handler);
+</pre>
+</tt>
+                             <b>Code Example: &nbsp;Adding a servlet mapping explicitly</b>
+</td>
+</tr>
+</tbody>
+</table>
+     <br>
+<br>
+<big><b><a name="dynamic"></a> Using Dynamic Servlet Mapping</b></big><br>
+                             <br>
+   Instead of mapping individual servlets, the <a href="/javadoc/org/mortbay/jetty/ServletHandler.html">
+   org.mortbay.jetty.ServletHandler</a>  can be configured to dynamically 
+create  mappings  for   servlets that have their classnames within the requested 
+URL:                                                                     
+
+<table align=center cellspacing=2 cellpadding=0 border=0 width="70%">
+<tbody>
+<tr>
+<td>
+<tt>
+<pre>
+ServletHttpContext context = 
+&nbsp; &nbsp; &nbsp; &nbsp; (ServletHttpContext)server.getContext(null,"/context/*");
+context.setClassPath("./servlets/");
+context.setDynamicServletPathSpec("/servlet/*");
+</pre>
+</tt>
+          <b>Code Example: &nbsp;A dynamic servlet specification</b>
+</td>
+</tr>
+</tbody>
+</table>
+
+<br>
+<br>
+    If one request is made to the URL <code>/context/servlet/com.acme.HelloWorldServlet/info</code>
+             and the  classloader for the context can find a&nbsp; <code>
+com.acme.HelloWorldServlet</code>            &nbsp;class, then that servlet
+is  loaded and a dynamic mapping  made to it from           <code>    /servlet/com.acme.HelloWorldServlet/*</code>
+    .<br>
+                                    <br>
+    Note that this example also sets a classpath for the context (at line 
+2).   This allows the directory  <code>./servlets/com/acme</code>  to be searched
+  for a <code>HelloWorldServlet.class</code> file. Servlets can also be loaded
+  from the system classpath for the JVM, however this can represent a  security
+  risk and can be disabled with the following call:                     
+                                                                  <br>
+                                    <br>
+                                                                        
+                                                                        
+
+<table align=center cellspacing=2 cellpadding=0 border=0 width="70%">
+<tbody>
+<tr>
+<td>
+<tt>
+<pre>
+context.getServletHandler().setServeDynamicSystemServlets(false);
+</pre>
+</tt>
+         <b>Code Example: &nbsp;Disabling class loading from the system classpath</b>
+</td>
+</tr>
+</tbody>
+</table>
+<br>
+<br>
+                                                                        
+                                    
+<big><big><b><a name="webapps"></a>Deploying Web Applications</b></big></big><br>
+<p>
+
+The <a href="http://java.sun.com/products/servlet/download.html">
+        Servlet Specification</a> details a standard layout for web applications.
+       If your content is packaged according to these
+specifications,    then simply call the <tt>addWebApplication </tt>method
+on the&nbsp;<a href="/javadoc/org/mortbay/jetty/Server.html">    
+  org.mortbay.jetty.Server</a> instance, specifying at minimum a context 
+ path, the directory or <tt>war</tt> file of your application, and a default
+   configuration file. Jetty is then able to discover and configure all the required handlers including security, static content and servlets. 
+</p>
+<p>
+The method call will transparently create and return an
+instance of&nbsp;<a href="/javadoc/org/mortbay/jetty/servlet/WebApplicationContext.html"> org.mortbay.jetty.servlet.WebApplicationContext</a>  (NOTE: there
+is no equivalent to <tt>getContext()</tt> provided by the <a href="/jetty/javadoc/org/mortbay/http/HttpServer.html">
+            org.mortbay.http.HttpServer </a>&nbsp;class).</p>
+             
+<p>This example configures a web application located in the directory <tt>
+       ./webapps/myapp/</tt> at the context path <tt>/</tt> for a virtual 
+host   <tt> myhost</tt>:<br>
+        <br>
+        </p>
+               
+<p> </p>
+               
+<table align=center cellspacing=2 cellpadding=0 border=0 width="70%">
+<tbody>
+<tr>
+<td>
+<tt>
+<pre>
+WebApplicationContext webAppCtxt = 
+                     server.addWebApplication("myhost",
+                                              "/",
+                                              "./webapps/myapp/",
+                                              "./etc/webdefaults.xml", 
+                                              false);
+</pre>
+</tt>
+                <b>Code Example: &nbsp;Configuring a web application</b>
+</td>
+</tr>
+</tbody>
+</table>
+<br>
+<br>
+       The arguments to the <tt>addWebApplication</tt> method are:      
+                                                                     
+        <ul>
+                  <li>An (optional) virtual host name for the context </li>
+                  <li>A <a href="/jetty/docs/PathMapping.html">context path</a>
+    </li>
+                  <li>The location of the web application, which may be a 
+directory    structure   or a <tt>war</tt> file </li>
+                  <li>The configuration file for web application defaults.
+ This   file is in the same format  as  the web application  deployment descriptor. 
+   It provides default values for all web application set ups within a server. 
+ The one supplied  in&nbsp;<tt>$JETTY_HOME/etc/webdefaults.xml </tt>suffices 
+ in most cases.           </li>
+                  <li>An (optional) boolean to indicate that <tt>war</tt>
+ files    should be extracted  to  a temporary directory  structure.  Some 
+mechanisms    such as JSP compilation   have difficulty working with un-expanded 
+            <tt>  war               </tt>files </li>
+                                                                        
+      
+        </ul>
+       The <tt>addWebApplication</tt> method is overloaded to accommodate 
+the   parameters  marked as (optional).<br>
+<br>
+<br>
+<big><b>Multiple Web Applications</b></big>
+<br>
+<br>
+To make things even easier, if you have multiple web apps to deploy, you can accomplish this with a single method call:
+<br>
+<table align=center cellspacing=2 cellpadding=0 border=0 width="70%">
+<tbody>
+<tr>
+<td>
+<tt>
+<pre>
+server.addWebApplications ("myhost",
+                           "./webapps/",
+                           "./etc/webdefaults.xml",
+                           false);
+</pre>
+</tt>
+<b>Code Example: Configuring multiple web apps</b>
+</td>
+</tr>
+</tbody>
+</table>
+<br>
+
+           <br>
+Given the code above, Jetty would look in the directory <tt>"./webapps/"</tt> for all <tt>war</tt> files and subdirectories, and configure itself with each web application specified therein. For example, assuming the directory <tt>webapps</tt> contained the <tt>war</tt> files <tt>webapps/root.war, webapps/customer.war and webapps/admin.war</tt>, then Jetty would create the contexts <tt>"/"</tt>, <tt>"/customer/*"</tt> and <tt>"/admin/*"</tt> mapped to the respective war files. NOTE the special mapping of <tt>war</tt> files (or directories) named <tt>root</tt> to the context <tt>"/"</tt>.
+<br>
+<br>
+   In order to actually deploy the web application, it is also necessary
+to  configure a port listener. The full code example to deploy the web application 
+ in the code snippet is:<br>
+           <br>
+                             
+<table align=center cellspacing=2 cellpadding=0 border=0 width="70%">
+<tbody>
+<tr>
+<td>
+<tt>
+<pre>
+Server server = new Server();
+server.addListener(new InetAddrPort(8080));
+WebApplicationContext webAppCtxt = 
+                      server.addWebApplication("myhost",
+                                               "./webapps/myapp/",
+                                               "./etc/webdefaults.xml",
+                                               false);
+server.start();
+</pre>
+</tt>
+                      <b>Code Example: &nbsp;Deploying a web application</b>
+</td>
+</tr>
+</tbody>
+</table>
+<br>
+<br>
+<big><b>Using XML</b></big>
+<br>
+<br>
+  The same web application can be deployed instead via an XML configuration
+ file instead of calls to the API. The name of the file is passed to Jetty
+ as an argument on the command line (see the section on&nbsp;<a href="GettingStarted.html#manual">
+   Jetty demonstrations</a> for instructions). The following excerpt deploys
+ the same web application as given in the code example above:<br>
+                          <br>
+<table align=center cellspacing=2 cellpadding=0 border=0 width="70%">
+<tbody>
+<tr>
+<td>
+<tt>
+<pre>
+                             
+&lt;Configure class="org.mortbay.jetty.Server"&gt;
+  &lt;Call name="addListener"&gt;
+    &lt;Arg&gt;
+      &lt;New class="org.mortbay.http.SocketListener"&gt;
+          &lt;Set name="Port"&gt;
+            &lt;SystemProperty name="jetty.port" default="8080"/&gt;
+          &lt;/Set&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/New&gt;
+    &lt;/Arg&gt;
+  &lt;/Call&gt;
+
+  &lt;Call name="addWebApplication"&gt;
+    &lt;Arg&gt;/&lt;/Arg&gt;
+    &lt;Arg&gt;
+      &lt;SystemProperty name="jetty.home" default="."/&gt; "/webapps/myapp"
+    &lt;/Arg&gt;
+    &lt;Arg&gt;&lt;SystemProperty name="jetty.home" default="."/&gt; "/etc/webdefaults.xml" &lt;/Arg&gt;
+    &lt;Arg type="boolean"&gt;false&lt;/Arg&gt;
+  &lt;/Call&gt;
+ &lt;/Configure&gt;
+</pre>
+</tt>
+
+                                  <b>XML Example: &nbsp;Deploying a web application</b>
+</td>
+</tr>
+</tbody>
+</table>
+
+<br>
+                                <br>
+An explanation of the Jetty XML syntax can be found in the section on   
+                             <a href="XmlConfiguration.html">
+    Jetty XML Configuration</a>.<br>
+                           <br>
+   Once a web application has been identified to Jetty, the server automatically 
+ looks in its <tt>WEB-INF</tt> directory for a file called <tt>web-jetty.xml</tt>
+                           in which additional configuration can be placed.<tt>
+   </tt><tt>This file must use the Jetty XML syntax.</tt>This is an example
+ of one from the Jetty demonstration:<br>
+                                                                        
+
+<table align=center cellspacing=2 cellpadding=0 border=0 width="70%">
+<tbody>
+<tr>
+<td>
+<tt>
+<pre>
+&lt;Configure class="org.mortbay.jetty.servlet.WebApplicationContext"&gt;
+&nbsp;&nbsp;&nbsp; &lt;Set name="statsOn" type="boolean"&gt;false&lt;/Set&gt;
+&nbsp;&nbsp; &lt;Call name="getResourceHandler"&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;Set name="putAllowed"&gt;true&lt;/Set&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;Set name="delAllowed"&gt;false&lt;/Set&gt;
+&nbsp;&nbsp; &lt;/Call&gt;
+&lt;/Configure&gt;
+</pre>
+</tt>
+
+<b>XML Example: &nbsp;A web-jetty.xml file</b>
+</td>
+</tr>
+</tbody>
+</table>
+
+<br>
+<br>
+   The order in which the Jetty server applies the various XML configuration 
+ files is:<br>
+                                                                        
+                                            
+                                        <ol>
+                                     <li><tt>webdefaults.xml</tt> which applies 
+ to all web applications served by that server</li>
+                                     <li><tt>web.xml</tt> which applies to
+ the particular web application</li>
+                                     <li><tt>web-jetty.xml</tt> which applies 
+ to the particular web application <i>and must be expressed in the Jetty XML
+ syntax</i><br>
+                                            </li>
+                                        </ol>
+<br>
+<br>
+<big><b><a name="security"></a>Web Application Security </b></big><br>
+                                            <br>
+             Jetty has made a few interpretations of the security mechanism 
+ "described"     in the servlet specifiction.  The default security model 
+is that all access     is allowed unless a  particular security constraint 
+prevents access. This     is vulnerable to alias attacks where alternate case
+or names can be used    to access a resource.                           
+                                                                        
+                                                                        
+                                                                        
+                                                              
+                                                                        <p>
+   Jetty makes the following interpretations:</p>
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                       
+                                                                        <ul>
+            <li>Methods <tt>PUT</tt>, <tt>DELETE</tt> and <tt>GET</tt> are
+ disabled  unless code (or a <tt>web-jetty.xml</tt> file) explicitly enables
+ them  </li>
+            <li>If multiple security constraints are defined, the most specific 
+   applies   to a     request  </li>
+            <li>A security constraint with no data or auth constraint prevents
+   all    access  </li>
+            <li>A security constraint with only a transport guarantee of
+                                                                            <tt>
+    NONE </tt>grants    access  </li>
+            <li>On platforms without the <tt>/</tt> file separator or when
+ the  system parameter          <tt>org.mortbay.util.FileResource.checkAliases</tt>
+     is <tt>TRUE,</tt> then the <tt>FileResouce</tt>     class      compares
+  the <tt>absolutePath</tt> and <tt>canonicalPath</tt> and treats the resource 
+     as not found     if they do not match </li>
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                       
+                                                                        </ul>
+                                            <br>
+    It is <b>strongly recommended</b> that secure Web Applications take following
+      approach in <tt>web.xml</tt> files:<br>
+                                            <br>
+                                                                        
+                                                                        
+                                                                        
+                                    
+<ul>
+<li>&nbsp;All access should be  denied by default with </li>
+                                                                        
+</ul>
+                                                                        
+<blockquote>
+<blockquote><tt>
+     &lt;security-constraint&gt;    <br>
+    &nbsp; &lt;display-name&gt;Default contraint denies all&lt;/display-name&gt;<br>
+    &nbsp; &lt;web-resource-collection&gt;<br>
+    &nbsp; &nbsp; &lt;url-pattern&gt;/&lt;/url-pattern&gt;<br>
+    &nbsp; &lt;/web-resource-collection&gt;<br>
+      &lt;/security-constraint&gt;</tt><br>
+                                                <br>
+</blockquote>
+</blockquote>
+                                                                        
+                                                                        
+                                                                        
+                                                    
+<ul>
+<li>Specific accesses should be granted with constraints, such as:             </li>
+</ul>
+                                                                        
+                                                    
+<blockquote>
+<blockquote><tt>
+     &lt;security-constraint&gt;</tt><br>
+                                                    <tt>&nbsp; &lt;display-name&gt;Relax
+  contstraint for specific requests&lt;/display-name&gt;</tt><br>
+                                                    <tt>&nbsp; &lt;web-resource-collection&gt;</tt><br>
+                                                    <tt>&nbsp; &nbsp; &lt;url-pattern&gt;/public/*&lt;/url-pattern&gt;</tt><br>
+                                                    <tt>&nbsp; &nbsp; &lt;url-pattern&gt;/images/*&lt;/url-pattern&gt;</tt><br>
+                                                    <tt>&nbsp; &nbsp; &lt;http-method&gt;GET&lt;/http-method&gt;</tt><br>
+                                                    <tt>&nbsp; &nbsp; &lt;http-method&gt;HEAD&lt;/http-method&gt;</tt><br>
+                                                    <tt>&nbsp; &lt;/web-resource-collection&gt;</tt><br>
+                                                    <tt>&nbsp; &lt;web-resource-collection&gt;</tt><br>
+                                                    <tt>&nbsp; &nbsp; &lt;url-pattern&gt;/servlet/*&lt;/url-pattern&gt;</tt><br>
+                                                    <tt>&nbsp; &nbsp; &lt;http-method&gt;GET&lt;/http-method&gt;</tt><br>
+                                                    <tt>&nbsp; &nbsp; &lt;http-method&gt;HEAD&lt;/http-method&gt;</tt><br>
+                                                    <tt>&nbsp; &nbsp; &lt;http-method&gt;POST&lt;/http-method&gt;</tt><br>
+                                                    <tt>&nbsp; &lt;/web-resource-collection&gt;</tt><br>
+                                                    <tt>&nbsp; &lt;user-data-constraint&gt;</tt><br>
+                                                    <tt>&nbsp; &nbsp; &lt;transport-guarantee&gt;NONE&lt;/transport-guarantee&gt;</tt><br>
+                                                    <tt>&nbsp; &lt;/user-data-constraint&gt;</tt><br>
+                                                    <tt>  &lt;/security-constraint&gt;</tt><br>
+                                                    </blockquote>
+                                                    </blockquote>
+          <br>
+           <br>
+           &nbsp;                                                       
+                                                                        
+                                                                        
+                                                                        
+                                                                
+                                                                                <table cellpadding="0" cellspacing="8" border="0" width="20%">
+              <tbody>
+                <tr>
+                  <td valign="middle" bgcolor="#ccccff"><small><a href="HttpServer.html">
+                BACK</a></small></td>
+                  <td valign="middle" bgcolor="#ccccff"><small><a href="index.html">
+                INDEX</a></small></td>
+                  <td valign="middle" bgcolor="#ccccff"><small><a href="..">
+      EXIT</a></small></td>
+                  <td valign="middle" bgcolor="#ccccff"><small><a href="logging.html">
+                NEXT</a></small></td>
+                </tr>
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+          
+                                                                                  </tbody>
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                   
+                                                                                </table>
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                           
+                                                                                </body>
+                                                                                </html>

@@ -1,4 +1,4 @@
-#!/bin/sh 
+#!/bin/sh -x 
 #
 # Startup script for jetty under *nix systems (it works under NT/cygwin too).
 #
@@ -78,7 +78,7 @@
 
 usage()
 {
-    echo "Usage: $0 {start|stop|run|restart|check|supervise} [ CONFIGS ... ] "
+    echo "Usage: $0 {start|stop|run|restart|check|supervise|demo} [ CONFIGS ... ] "
     exit 1
 }
 
@@ -436,7 +436,11 @@ JAVA_OPTIONS="-Djetty.home=$JETTY_HOME -Djetty.log=$JETTY_LOG -Djetty.port=$JETT
 #####################################################
 
 case "$ACTION" in
-  start|supervise)
+  start|supervise|demo)
+     RUN_CMD="$JAVA -DLOG_FILE=$JETTY_LOG/yyyy_mm_dd.jetty.log -cp $CLASSPATH $JAVA_OPTIONS org.mortbay.jetty.Server $CONFIGS"
+  ;;
+  run)
+     CONFIGS="${JETTY_HOME}/etc/jetty.xml"
      RUN_CMD="$JAVA -DLOG_FILE=$JETTY_LOG/yyyy_mm_dd.jetty.log -cp $CLASSPATH $JAVA_OPTIONS org.mortbay.jetty.Server $CONFIGS"
   ;;
   *)
@@ -505,7 +509,7 @@ case "$ACTION" in
          exec $RUN_CMD
          ;;
 
-  run)
+  run|demo)
         echo "Running Jetty: "
 
         if [ -f $JETTY_PID ]

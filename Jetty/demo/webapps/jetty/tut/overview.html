@@ -1,97 +1,251 @@
-<BR><H1>Jetty Tutorial Overview
-&nbsp;&nbsp;&nbsp;&nbsp;<FONT size=-2>
-<A href="index.html">Back</A>
-<A href="index.html">Index</A>
-<A href="..">Exit</A>
-<A href="HttpServer.html">Next</A>
-</FONT></H1>
-
-
-<P>
-Jetty is both a HTTP Server (like <A href="http://httpd.apache.org">apache</A>) and a Servlet Container (like <A href="http://jakarta.apache.org/tomcat/">tomcat</A>) running as a single Java component.
-Jetty can be used as a stand-alone servlet/container with which you can deploy and server your static content, servlets, JSPs or web applications.  Jetty can also be used as a software component so that
-you may add HTTP and/or Servlet capabilities to your java product or application.
-
-<P>
-<FONT Size=+1><B>HTTP Server</B></FONT><BR>
-The <a href="/javadoc/org/mortbay/http/HttpServer.html">org.mortbay.http.HttpServer</a> class provides core HTTP server, which is responsible for listening on ports and accepting and handling requests.  The base package does not know about Servlets but provides and extensible HttpHandler architecture and handlers for serving static resources.
-<P>
-HTTP Server instances are configured via the <A href="/javadoc/org/mortbay/http/package-summary.html">Java API</A>. A simple file serving server can be configured as follows:
-<PRE>
-    HttpServer server = new HttpServer();
-    server.addListener(new InetAddrPort(8080));
-    HttpContext context = server.addContext("/");
-    context.setResourceBase("./docroot/");
-    context.setServingResources(true);
-    server.start();
-</PRE>
-This configuration listens on port 8080 and serves static content from the ./docroot directory.
-<P>
-
-
-<FONT Size=+1><B>Jetty Server</B></FONT><BR>
-The <a href="/javadoc/org/mortbay/jetty/Server.html">org.mortbay.jetty.Server</A> class extends HttpServer with XML configuration capabilities and a J2EE compliant Servlet container.
-The Server can be configured via its <A href="/javadoc/org/mortbay/jetty/package-summary.html">Java API</A>:
-<PRE>
-    Server server = new Server();
-    server.addListener(new InetAddrPort(8080));
-    server.addWebApplication("/","./webapps/myapp/","./etc/webdefaults.xml");
-    server.start();
-</PRE>
-This configuration listens on port 8080 for requests and servers content from the
-web application in ./webapps/myapp.
-<P>
-The Server class may also be configured via XML and the code above is equivalent to:<FONT size=-1><PRE>
-myserver.xml:
-    &lt;?xml version="1.0"  encoding="ISO-8859-1"?&gt; 
-    &lt;!DOCTYPE Configure PUBLIC 
-     "-//Mort Bay Consulting//DTD Configure 1.0//EN" 
-     "http://jetty.mortbay.org/configure_1_0.dtd"&gt;
-
-    &lt;Configure class="org.mortbay.jetty.Server"&gt;
-
-      &lt;Call name="addListener"&gt;
-        &lt;Arg&gt;&lt;New class="org.mortbay.util.InetAddrPort&gt;
-          &lt;Arg&gt;8080&lt;/Arg&gt;
-        &lt;/New&gt;&lt;/Arg&gt;
-      &lt;/Call&gt;
-
-      &lt;Call name="addWebApplication"&gt;
-        &lt;Arg&gt;/&lt;/Arg&gt;
-        &lt;Arg&gt;./webapps/myapp/&lt;/Arg&gt;
-        &lt;Arg&gt;./etc/webdefault.xml/&lt;/Arg&gt;
-      &lt;/Call&gt;
-
-    &lt;/Configure&gt;
-</font></PRE>
-This XML file can be run with the following command:<PRE>
-    java org.mortbay.jetty.Server myserver.xml
-</PRE>
-<P>
-
-<FONT Size=+1><B>Servlet Container</B></FONT><BR>
-The Servlet container implements the 2.2 Servlet Specification. This allows servlets to be added to the container in
-several ways:<UL>
-<LI>Web Applications are a standardized layout of static and dynamic content for a servlet container. Once a web application directory 
-(or war file) is identified to Jetty, it is able to discover and configure all the required handlers, including security, static content,
-servlets and JSPs.
-<LI>Servlet Mappings can be used to configure individual servlets at a specific URL pattern.
-<LI>Dynamic servlet mappings can be configured to extract servlet class names from the requested URL (eg. http://host/servlet/HelloWorldServlet )
-</UL>
-
-<P>
-
-<FONT Size=+1><B>XML Configuration</B></FONT><BR>
-As can be seen above, the XML configuration mechanism of Jetty is equivalent to making calls on the <A href="/javadoc/overview-summary.html">Java API</A>.
-For clarity, the remainder of this document will mostly give examples as API calls rather than the more verbose XML.  The XML format will also be discussed 
-in detail and examples given in the <A href="XmlConfiguration.html">XML Configuration</A> tutorial.
-<P>
-
-<P>
-<FONT size=-1>
-<A href="index.html">Back</A>
-<A href="index.html">Index</A>
-<A href="..">Exit</A>
-<A href="HttpServer.html">Next</A>
-</FONT>
-<P>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title></title>
+</head>
+  <body>
+               
+<table cellpadding="0" cellspacing="8" border="0" width="20%">
+          <tbody>
+            <tr>
+              <td valign="middle" bgcolor="#ccccff"><small><a href="index.html">
+        BACK</a></small></td>
+              <td valign="middle" bgcolor="#ccccff"><small><a href="index.html">
+        INDEX</a></small></td>
+              <td valign="middle" bgcolor="#ccccff"><small><a href="..">
+  EXIT</a></small></td>
+              <td valign="middle" bgcolor="#ccccff"><small><a href="HttpServer.html">
+        NEXT</a></small></td>
+            </tr>
+                               
+  </tbody>        
+</table>
+        <br>
+       
+<h1><font color="#000000">The Basics</font></h1>
+  <big><big><b><a name="Introduction"></a>Introduction</b></big></big><br>
+  <br>
+   <big><b>What is Jetty</b></big><br>
+               
+<h1></h1>
+                   
+<div align="left"> Jetty is both an HTTP Server (like <a href="http://httpd.apache.org">
+    apache</a>    ) and a Servlet Container (like <a href="http://jakarta.apache.org/tomcat/">
+        tomcat</a>) running as a single Java component. It can be used  stand-alone 
+ to deploy your static content,  servlets, JSPs and web applications. Alternatively, 
+ it can be embedded into your Java application to add HTTP and Servlet capabilities.<br>
+   <br>
+   <br>
+   <big><b>Lightweight or Standards Based</b></big><br>
+   <br>
+      Jetty can be used at two different levels:&nbsp; as the core HttpServer
+  and the complete Jetty Server. The former provides an HTTP server  with
+the ability  to serve static content and servlets, whilst the latter supports
+richer configuration  capabilities and the deployment of standard web applications. 
+<br>
+    <br>
+The advantages of the&nbsp;<a href="#http">  HttpServer</a> is that it is
+lightweight and embeddable and is highly customizable.<br>
+    <br>
+      If you need standard Servlet Container support for the development
+and   deployment of web applications, then use the enhanced Server (referred
+to  usually as the <a href="#webapp">Jetty Server</a>). This has the added
+benefit  of better support for configuration via XML. Skip down to an example
+of a  web app deployment <a href="#webapp">here</a>.<br>
+    <br>
+    </div>
+    <br>
+              <big><font size="+1"><big><b><a name="http"></a>Introduction
+ to the HttpServer</b></big></font></big>    
+<p align="left">     The <a href="/javadoc/org/mortbay/http/HttpServer.html">
+    org.mortbay.http.HttpServer</a>     class provides a core HTTP server 
+that  listens on  specified ports and accepts and handles requests.  </p>
+       
+<p align="left">The server is configured by method calls on the&nbsp;<a href="/javadoc/org/mortbay/http/package-summary.html">
+        Java API</a> . This code example creates a simple server listening
+ on port 8080 and serving static files from the location .<font face="Courier New, Courier, monospace">
+   /docroot</font>:</p>
+       
+<p align="left"> </p>
+       
+<div align="left">       </div>
+       
+<p align="left">  </p>
+               
+<blockquote>         
+  <blockquote>               
+    <blockquote>                     </blockquote>
+      </blockquote>
+      </blockquote>
+      <table cellpadding="2" cellspacing="2" border="0" width="50%" align="center">
+        <tbody>
+          <tr>
+            <td valign="top"><tt>HttpServer server = new HttpServer();</tt><br>
+            <tt>       server.addListener(new InetAddrPort(8080));</tt><br>
+            <tt>       HttpContext context = server.addContext("/");</tt><br>
+            <tt>       context.setResourceBase("./docroot/");</tt><br>
+            <tt>       context.setServingResources(true);</tt><br>
+            <tt>       server.start();</tt><br>
+            <br>
+            <b>Code Example: Creating a trivial HTTP server</b><br>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <tt><br>
+      </tt><br>
+      <br>
+                           The server is made stand-alone by placing the
+above code in the body of  a <tt>main</tt> method (the HttpServer class itself
+has a <tt>main</tt>  that  can be used as an example). To use the server
+as a component within an application,  include the above lines at an appropriate
+location within the application  code.<br>
+    <br>
+    The HttpServer provides a flexible mechanism for extending the capabilities
+  of the server called "HttpHandlers". &nbsp;The server selects an appropriate
+  HttpHandler to generate a response to an incoming request. The release
+includes   handlers for static content, authentication and a Servlet Container.
+&nbsp;Serlvets   are the standard method for generating dynamic content,
+however the server   can also be extended by writing custom HttpHandlers
+if servlets are insufficient   or too heavyweight for your application.<br>
+         <br>
+ In the example above, convenience methods on the <tt>HttpContext</tt> object 
+are used to quickly and easily set up static content serving. The <tt>setServingResources()</tt>
+  method hides the instantiation of an <tt>HttpHandler</tt> instance (actually 
+a subclass of <tt>HttpHandler</tt> called <tt>ResourceHandler</tt>) to perform 
+the file serving.<br>
+         <br>
+    More detailed information on the HttpServer class, including setting
+up  port listeners, contexts and handlers is to be found in the section <a href="HttpServer.html">
+    HTTP Server</a>.<br>
+    <br>
+           <br>
+           <br>
+                                     
+      <p>   <font size="+1"><b><a name="webapp"></a><big>Introduction to 
+the Web Application Server</big></b></font></p>
+                               
+      <p>     The <a href="/javadoc/org/mortbay/jetty/Server.html">org.mortbay.jetty.Server</a>
+         class extends <a href="/javadoc/org/mortbay/http/HttpServer.html">
+  org.mortbay.http.HttpServer</a>  with XML configuration capabilities and
+ a J2EE   compliant Servlet Container.         </p>
+                             
+      <p>The following code example demonstrates the creation of a server, 
+ listening on port 8080 to deploy a web application located in the directory 
+ .<tt>/webapps/myapp:</tt><br>
+      </p>
+                                                                        
+                                                                        
+                                       <tt><br>
+      </tt>
+      <table cellpadding="2" cellspacing="2" border="0" width="50%" align="center">
+        <tbody>
+          <tr>
+            <td valign="top"><tt>Server server = new Server();<br>
+       server.addListener(new InetAddrPort(8080));<br>
+       server.addWebApplication("/","./webapps/myapp/","./etc/webdefaults.xml");<br>
+       server.start();<br>
+            </tt><br>
+            <b>Code Example: Creating a Web Application Server</b><br>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+                                                                        
+                                              
+      <p>As mentioned previously, the Jetty Server is able to be  configured
+via XML as an alternative to cutting code. The same web application  as coded
+above can be deployed by this XML configuration file:<br>
+                   </p>
+      <table cellpadding="2" cellspacing="2" border="0" width="50%" align="center">
+        <tbody>
+          <tr>
+            <td valign="top"><font size="-1"><big>&lt;?xml version="1.0"
+ encoding="ISO-8859-1"?&gt; </big></font><br>
+            <tt><font size="-1"><big>    &lt;!DOCTYPE  Configure PUBLIC </big></font><font size="-1"><big>
+"-//Mort Bay Consulting//DTD  Configure 1.0//EN" </big></font><font size="-1"><big>
+"http://jetty.mortbay.org/configure_1_0.dtd"&gt;</big></font></tt><br>
+            <tt><br>
+            <font size="-1"><big>    &lt;Configure class="org.mortbay.jetty.Server"&gt;</big></font><br>
+            <br>
+            <font size="-1"><big>      &lt;Call name="addListener"&gt;</big></font><br>
+            <font size="-1"><big>&nbsp; &lt;Arg&gt;&lt;New  class="org.mortbay.util.InetAddrPort&gt;</big></font><br>
+            <font size="-1"><big>&nbsp; &nbsp; &nbsp;  &nbsp;&lt;Arg&gt;8080&lt;/Arg&gt;</big></font><br>
+            <font size="-1"><big>&nbsp; &nbsp; &nbsp;  &nbsp;&lt;/New&gt;<br>
+   &nbsp; &lt;/Arg&gt;</big></font><br>
+            <font size="-1"><big>      &lt;/Call&gt;</big></font><br>
+            <br>
+            <font size="-1"><big>      &lt;Call name="addWebApplication"&gt;</big></font><br>
+            <font size="-1"><big>&nbsp; &lt;Arg&gt;/&lt;/Arg&gt;</big></font><br>
+            <font size="-1"><big>&nbsp; &lt;Arg&gt;./webapps/myapp/&lt;/Arg&gt;</big></font><br>
+            <font size="-1"><big>&nbsp; &lt;Arg&gt;./etc/webdefault.xml/&lt;/Arg&gt;</big></font><br>
+            <font size="-1"><big>      &lt;/Call&gt;</big></font><br>
+            <br>
+            <font size="-1"><big>    &lt;/Configure&gt;</big></font><br>
+            <br>
+            </tt><b>Example: Web App Configuration via  XML</b><br>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <br>
+                                                                        
+         <br>
+                                                                        
+                                   To run Jetty with this XML file, execute
+this command:                                                           
+                                            
+      <blockquote>                                                      
+                                                  
+        <blockquote>                                                    
+                                                          
+          <blockquote>                                                  
+                                                                  
+            <blockquote><tt>java org.mortbay.jetty.Server  myserver.xml<br>
+                                           <br>
+                                           </tt></blockquote>
+                                           </blockquote>
+                                           </blockquote>
+                                           </blockquote>
+   To read more about Jetty as a web application server, click <a href="Server.html">
+   here</a>.<br>
+                                           <br>
+   To skip to more information on the XML file format click <a href="XmlConfiguration.html">
+   here</a>.<br>
+                                                                        
+                                                                
+              <p>  </p>
+                                                                        
+                                                    
+              <p><br>
+        <br>
+        </p>
+                                                                        
+                                                              
+              <table cellpadding="0" cellspacing="8" border="0" width="20%">
+          <tbody>
+            <tr>
+              <td valign="middle" bgcolor="#ccccff"><small><a href="index.html">
+        BACK</a></small></td>
+              <td valign="middle" bgcolor="#ccccff"><small><a href="index.html">
+        INDEX</a></small></td>
+              <td valign="middle" bgcolor="#ccccff"><small><a href="..">
+  EXIT</a></small></td>
+              <td valign="middle" bgcolor="#ccccff"><small><a href="HttpServer.html">
+        NEXT</a></small></td>
+            </tr>
+                                                                        
+                                                                        
+     
+                </tbody>                                                
+                                                                        
+      
+              </table>
+                                                                        
+                                                              
+              <p> </p>
+                                                                        
+                                                               
+              </body>
+              </html>

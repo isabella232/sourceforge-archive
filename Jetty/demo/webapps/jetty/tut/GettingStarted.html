@@ -1,0 +1,469 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>Getting Started with Jetty</title>
+                                                                        
+                 
+  <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+</head>
+  <body>
+                         
+<table cellpadding="0" cellspacing="8" border="0" width="20%">
+                 <tbody>
+                   <tr>
+                     <td valign="middle" bgcolor="#ccccff"><small><a href="index.html">
+            BACK</a></small></td>
+                     <td valign="middle" bgcolor="#ccccff"><small><a href="index.html">
+               INDEX</a></small><br>
+                     </td>
+                     <td valign="middle" bgcolor="#ccccff"><small><a href="..">
+           EXIT</a></small><br>
+                     </td>
+                     <td valign="middle" bgcolor="#ccccff"><small><a href="overview.html">
+               NEXT</a></small><br>
+                     </td>
+                   </tr>
+                                                           
+  </tbody>               
+</table>
+                  
+<h1>Getting Started</h1>
+               <a name="Introduction"></a><big><big><b>Introduction</b></big></big><br>
+          <br>
+             So you want to skip all the preliminary reading and just get 
+Jetty      up and going? No problem, but we do recommend that once you've 
+satisfied      the urge to play around with it in your environment that you 
+go back and    visit the <a href="index.html">tutorial</a>, particularly if
+you're so enthused     that you want to <a href="/jetty/contributing.html">
+ contribute</a>    to Jetty!<br>
+             <br>
+             <br>
+             Firstly, if you haven't already done it, you need to <a href="/jetty/download.html">
+            download</a>  Jetty using one of the methods provided on the
+<a href="/jetty/download.html">            download page</a>. Once successfully
+downloaded, follow the links   for&nbsp;   <a href="#Running_Jetty">  running
+the demonstrations</a> provided   with  Jetty.<br>
+          <br>
+         <br>
+            <br>
+           <big><a name="Running_Jetty"></a> <big><b>Running the Jetty demonstrations</b></big></big><br>
+          <br>
+         The installation includes the ability to serve the Jetty web site
+ pages    locally as a demonstration of Jetty's capabilities.&nbsp; The demonstrations
+    include various servlets, JSP integration, SSL integration and a web
+application.     <br>
+         <br>
+         There are 3 ways to run it:<br>
+                   
+<ul>
+            <li>using prepared scripts</li>
+            <li>using the Ant build environment</li>
+            <li>manually<br>
+            </li>
+                   
+</ul>
+          The scripts handle all the housekeeping tasks associated with getting 
+   a server started, and are provided as <a href="#Unix">Unix shell scripts</a>
+          and as <a href="#Windows">Window bat files</a> (you should treat
+them as examples, and feel free to brew your own). Alternatively, if  you
+  have Ant installed, you can <a href="#Ant">use it</a> to run the demonstration
+    content. Finally, you can <a href="#manual">manually configure</a> your
+  environment  and run the server by hand.<br>
+          <br>
+          <br>
+          &nbsp;<big><a name="Unix"></a><b>Quick start on Unix</b></big><br>
+          <br>
+         You must already have a Java environment installed and configured
+ (ie   you  must have the <font face="Courier New, Courier, monospace">$JAVA_HOME</font>
+          environment variable set).<br>
+         <br>
+         Then, &nbsp;set up the fundamental Jetty evironment variable <font face="Courier New, Courier, monospace">
+         $JETTY_HOME</font>. This must point to the directory into which
+you   installed   Jetty:<br>
+                 
+<blockquote> &nbsp; <font face="Courier New, Courier, monospace">export JETTY_HOME=&lt;jetty 
+    install directory&gt;</font><br>
+           </blockquote>
+           <i><b>Running a simple server</b><br>
+           </i><br>
+         To verify Jetty on your system, type the following command to start
+  a  very  simple one-page server:<br>
+                                   
+  <blockquote> &nbsp; <font face="Courier New, Courier, monospace">$JETTY_HOME/bin/jetty.sh 
+    run</font><br>
+             </blockquote>
+             <br>
+         Use your browser to go to the following location to see the sample 
+ page:        <br>
+                                                     
+    <blockquote> &nbsp; <font face="Courier New, Courier, monospace">http://localhost:8080</font>
+               <br>
+               </blockquote>
+         If the script doesn't work for you, either try the <a href="GettingStarted.html#Ant">
+         Ant</a> version, or follow the <a href="#manual">manual instructions</a>
+        .<br>
+               <br>
+               <i><b>Running the Jetty demonstrations</b></i><br>
+               <br>
+         To run the more sophisticated demonstrations, execute the following
+  command   (if you are still running the previous example, don't forget
+to   kill it first):<br>
+                                                                       
+      <blockquote> &nbsp;<font face="Courier New, Courier, monospace">$JETTY_HOME/bin/jetty.sh 
+  demo</font><br>
+                 </blockquote>
+         Use your browser to go to the following location: <br>
+                                                                        
+                
+        <blockquote><font face="Courier New, Courier, monospace">http://localhost:8080<br>
+                   </font><br>
+                   </blockquote>
+         Select the <font face="Courier New, Courier, monospace">Demonstrations</font>
+          link to explore the servlets provided. <a href="/jetty/demos.html">
+    Here</a>      is page you should see.<br>
+                   <br>
+          <br>
+          <big><br>
+                   <b><a name="Windows"></a>Quick start on Windows</b></big>
+              <br>
+          <br>
+                   <b>NOTE</b>: &nbsp;Due to problems with the servlet security 
+   model,  it is vital that Windows users use the exact case for drive letters, 
+   URLs  and filenames.<br>
+          <br>
+         To run the demonstrations under Windows, ensure that your Java environment 
+    is set up, then set the fundamental Jetty evironment variable <font face="Courier New, Courier, monospace">
+         %JETTY_HOME%</font>. This must point to the directory into which 
+you   installed   Jetty:<br>
+                                                                        
+                                  
+          <blockquote> &nbsp; <font face="Courier New, Courier, monospace">
+         set JETTY_HOME=&lt;jetty install directory&gt;</font><br>
+                     </blockquote>
+                     <i><b>Running a simple server</b><br>
+                     </i><br>
+         To verify Jetty on your system, type the following command to start
+  a  very  simple one-page server:<br>
+                                                                        
+                                                    
+            <blockquote> &nbsp; <font face="Courier New, Courier, monospace">
+         %JETTY_HOME%\bin\jetty.bat</font><br>
+                       </blockquote>
+          Use your browser to go to the following location: <br>
+                                                                        
+                                                                      
+              <blockquote> &nbsp; <font face="Courier New, Courier, monospace">
+         http://localhost:8080</font><br>
+                         <br>
+                         </blockquote>
+         If you have problems:<br>
+                                                                        
+                                                                        
+               
+                <ul>
+                           <li>&nbsp;try installing Jetty in a path with
+no  spaces    in the directory name.</li>
+                           <li> &nbsp;check that the case of JETTY_HOME is
+ exactly    the same as reported by your system </li>
+                                                                        
+                                                                        
+               
+                </ul>
+         &nbsp;If you still cannot get the bat file to work, then try the 
+                <a href="GettingStarted.html#Ant">
+         Ant </a>option, or set it up <a href="#manual">manually</a>.<br>
+                         <br>
+                         <i><b>Running the Jetty demonstrations</b></i><br>
+                         <br>
+          To run the more sophisticated servlet demonstrations, execute the 
+ following    command (if you are still running the previous example, don't 
+ forget to  kill  it first):<br>
+                                                                        
+                                                                        
+               
+                <blockquote> &nbsp;<font face="Courier New, Courier, monospace">
+         %JETTY_HOME%\bin\jetty.bat demo</font><br>
+                           </blockquote>
+          Use your browser to go to the following location: <br>
+                                                                        
+                                                                        
+                                 
+                  <blockquote><font face="Courier New, Courier, monospace">
+         http://localhost:8080</font><br>
+                             </blockquote>
+         Select the <font face="Courier New, Courier, monospace">Demonstrations</font>
+          link to explore the servlets provided. <a href="/jetty/demos.html">
+         Here</a> is page you should see.<br>
+                             <br>
+                             <br>
+          <br>
+          <br>
+          <big><b><a name="Ant"></a>Ant Quick Start</b></big><br>
+          <br>
+          &nbsp;You must have Ant already installed to use this method. <br>
+                             <b><br>
+         Unix</b><br>
+                             <br>
+         Set the fundamental Jetty evironment variable <font face="Courier New, Courier, monospace">
+         $JETTY_HOME</font>:                                            
+                                                                        
+                                                                       
+                    <blockquote><font face="Courier New, Courier, monospace">
+         export JETTY_HOME=&lt;jetty install directory&gt;</font><br>
+                               <br>
+                               </blockquote>
+                                                                        
+                                                                        
+                                                                     
+                      <blockquote><i><b>Running a simple server</b></i><br>
+                                 <br>
+          To verify Jetty on your system, type the following command to start 
+  a  very  simple one-page server:                                       
+                                                                        
+                                                                        
+                                       
+                        <blockquote><font face="Courier New, Courier, monospace">
+         ant -buildfile $JETTY_HOME/build.xml run</font><br>
+                                   <br>
+                                   </blockquote>
+                                   </blockquote>
+                                                                        
+                                                                        
+                                                                        
+                                
+                          <blockquote><i><b>Running the Jetty demonstrations</b></i><br>
+                                     <br>
+           To run the more sophisticated servlet demonstrations, execute
+the   following   command (if you are still running the previous example,
+don't   forget to kill  it first):<br>
+                                                                        
+                                                                        
+                                                                        
+                                                  
+                            <blockquote><font face="Courier New, Courier, monospace">
+         ant -buildfile $JETTY_HOME/build.xml demo</font><br>
+                                       </blockquote>
+           Use your browser to go to the following location: <br>
+                                                                        
+                                                                        
+                                                                        
+                                                                    
+                              <blockquote><font face="Courier New, Courier, monospace">
+         http://localhost:8080</font><br>
+                                         </blockquote>
+          Select the <font face="Courier New, Courier, monospace">Demonstrations</font>
+          link to explore the servlets provided. <a href="/jetty/demos.html">
+         Here</a> is page you should see.<br>
+                                         </blockquote>
+                                         <br>
+                                         <b>  Windows</b><br>
+                                         <br>
+         Set the fundamental Jetty evironment variable <font face="Courier New, Courier, monospace">
+         %JETTY_HOME%:</font><br>
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+             
+                                <blockquote><font face="Courier New, Courier, monospace">
+         set JETTY_HOME=&lt;jetty install directory&gt;</font><br>
+                                           <br>
+                                           </blockquote>
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                               
+                                  <blockquote><i><b>Running a simple server</b></i><br>
+                                             <br>
+           To verify Jetty on your system, type the following command to
+start    a  very simple one-page server:<br>
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                 
+                                    <blockquote>&nbsp;<font face="Courier New, Courier, monospace">
+         ant.bat -buildfile %JETTY_HOME%\build.xml run</font><br>
+                                               </blockquote>
+                                               </blockquote>
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                     
+                                      <blockquote><i><b>Running the Jetty 
+    demonstrations</b></i><br>
+                                                 <br>
+            To run the more sophisticated servlet demonstrations, execute 
+the   following   command (if you are still running the previous example, 
+don't   forget to kill  it first):<br>
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+            
+                                        <blockquote><font face="Courier New, Courier, monospace">
+         ant.bat -buildfile&nbsp;</font><font face="Courier New, Courier, monospace">
+         %JETTY_HOME%\build.xml</font><font face="Courier New, Courier, monospace">
+          demo</font><br>
+                                                   </blockquote>
+            Use your browser to go to the following location: <br>
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                             
+                                          <blockquote><font face="Courier New, Courier, monospace">
+         http://localhost:8080</font><br>
+                                                     </blockquote>
+           Select the <font face="Courier New, Courier, monospace">Demonstrations</font>
+          link to explore the servlets provided. <a href="/jetty/demos.html">
+         Here</a> is page you should see.<br>
+                                                     <br>
+                                                     </blockquote>
+                                                     <br>
+          <br>
+          <a name="manual"></a><big><b><br>
+         Manual configuration and execution<br>
+                                                     <small><br>
+         Configuration</small><br>
+                                                     </b></big><br>
+         Jetty requires a Java 1.2 environment to be installed. <br>
+                                                     <br>
+         The <font face="Courier New, Courier, monospace">$CLASSPATH</font>
+   variable    (or its non-Unix equivalent) must have the following set as
+ a minimum:<br>
+          <br>
+          &nbsp;<font face="Courier New, Courier, monospace"> CLASSPATH=\<br>
+          &nbsp;&nbsp;&nbsp; $JETTY_HOME/lib/org.mortbay.jetty.jar:\<br>
+          &nbsp;&nbsp;&nbsp; $JETTY_HOME/lib/javax.servlet.jar:\<br>
+          &nbsp;&nbsp;&nbsp; $JETTY_HOME/lib/javax.xml.jaxp.jar:\<br>
+          &nbsp;&nbsp;&nbsp; $JETTY_HOME/lib/org.apache.jasper.jar:\<br>
+          &nbsp;&nbsp;&nbsp; $JETTY_HOME/lib/org.apache.crimson.jar</font><br>
+          <br>
+          To use SSL you will also need to add the the jar below, which is
+ a  merge   of the jsse, jnet and jcert jars from the JSSE package<br>
+          (see $JETTY_HOME/doc/JsseSSL.html for more details):<br>
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                
+                                            <blockquote><font face="Courier New, Courier, monospace">
+         $JETTY_HOME/lib/com.sun.net.ssl.jar</font><br>
+                                                       </blockquote>
+          <br>
+         To run JSP with the JDK compiler, you will also need to add the
+jar   containing   the JDK compiler (if you wish to use another compiler<br>
+          you will have to configure jasper):<font face="Courier New, Courier, monospace"><br>
+                                                       </font>          
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                               
+                                              <blockquote><font face="Courier New, Courier, monospace">
+         $JDK_HOME/lib/tools.jar</font><br>
+                                                         </blockquote>
+          <b>Execution</b><br>
+          <br>
+         The execution examples are illustrated using Unix-style commands 
+and   environment   variable specifications - adapt these as necessary to 
+your  environment.<br>
+                                                         <br>
+         To run a Jetty server, the steps are as following:<br>
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+           
+                                                <blockquote><font face="Courier New, Courier, monospace">
+         cd $JETTY_HOME<br>
+         java org.mortbay.jetty.Server &lt;xml configuration file&gt;<br>
+                                                           <br>
+                                                           </font></blockquote>
+         The <font face="Courier New, Courier, monospace">&lt;xml configuration 
+   file&gt;</font>   specifies the operation of the Jetty server. &nbsp;Some 
+   examples of these  can be found in the <font face="Courier New, Courier, monospace">
+   $JETTY_HOME/etc </font> directory.<br>
+                                                           <br>
+         For example, the simple one-page server mentioned in the Quick Start 
+  sections   can be started by the following command:<font face="Courier New, Courier, monospace"><br>
+                                                           </font>      
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+              
+                                                  <blockquote><font face="Courier New, Courier, monospace">
+         cd $JETTY_HOME</font><font face="Courier New, Courier, monospace"><br>
+         java org.mortbay.jetty.Server etc/jetty.xml</font><br>
+                                                             </blockquote>
+         The servlet demonstration server is run by the following:<br>
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                               
+                                                    <blockquote><font face="Courier New, Courier, monospace">
+         cd $JETTY_HOME<br>
+          java org.mortbay.jetty.Server etc/admin.xml etc/demo.xml</font><br>
+                                                               </blockquote>
+                                                               <br>
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+           
+                                                      <table cellpadding="0" cellspacing="8" border="0" width="20%">
+                 <tbody>
+                   <tr>
+                     <td valign="middle" bgcolor="#ccccff"><small><a href="index.html">
+            BACK</a></small></td>
+                     <td valign="middle" bgcolor="#ccccff"><small><a href="index.html">
+               INDEX</a></small><br>
+                     </td>
+                     <td valign="middle" bgcolor="#ccccff"><small><a href="..">
+           EXIT</a></small><br>
+                     </td>
+                     <td valign="middle" bgcolor="#ccccff"><small><a href="overview.html">
+               NEXT</a></small><br>
+                     </td>
+                   </tr>
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                     
+                                                        </tbody>         
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                      </table>
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+                                                                        
+            
+                                                      </body>
+                                                      </html>

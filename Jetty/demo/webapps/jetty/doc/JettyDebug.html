@@ -1,45 +1,11 @@
 <html>
-<head><title>Hints for Debugging Jetty Problems</title>
+<head><title>Hints for Debugging Jetty With SSL</title>
 </head>
-<h1>Hints for Debugging Jetty Problems</h1>
+<h1>Hints for Debugging Jetty With SSL</h1>
 
 <p> While Jetty is normally well behaved, there are times when it is necessary to
-debug problems. This is a simple guide describing the debugging options
-available and how to control them.
+debug problems. For information on how to set up general debugging options go to the <a href="/jetty/tut/logging.html#debugging"> tutorial page </a>. The following are some hints for debugging when using SSL.
 
-<p> The target audience is Java developers.
-
-<h1>Jetty</h1>
-<p> Debugging of Jetty is controlled by the <code>org.mortbay.util.Code</code>
-class - what follows is basically ripped out of the javadoc for that class.
-
-<h4>System Properties</h4>
-
-The debug output can be controlled with java System properties:
-<ul>
-  <li>DEBUG - If set, debug output is enabled
-  </li>
-  <li>DEBUG_PATTERNS - If set to a comma separated list of strings,
-      Then debug output is only produced from those classes whose fully
-      qualified class name contains one of the strings as a substring.
-  </li>
-  <li>DEBUG_VERBOSE - Set to an integer verbosity level for
-  use in controlling debug verbosity (see verbose(int))
-  </li>
-</ul>
-
-<h4>Using this with the java program:</h4>
-<pre>
-java [-DDEBUG [-DDEBUG_PATTERNS="MyClass,my.package"] \
-              [-DDEBUG_VERBOSE=n] ]  my.package.main
-</pre>
-
-<h4>example</h4>
-<pre>
-JAVA_OPTIONS='-DDEBUG' ./bin/jetty.sh run
-</pre>
-
-<hr>
 
 <h1>JSSE</h1>
 <p> As described in the JSSE FAQ, there is a debug facility built into JSSE controlled by the javax.net.debug property.
@@ -143,9 +109,13 @@ SSL-Session:
     Verify return code: 0 (ok)
 ---
 </pre>
-
+<BR><BR>
+<font size=-1>Author: Brett Sealey.<br>
+Last updated: 2002 January 22nd
+</font>
+<BR><BR>
 <hr>
-Author: Brett Sealey.<br>
-Last updated: 2001 May 20th
+Return to <A HREF="JettyFaq.html">Jetty FAQ</A>.
+<hr>
 </body>
 </html>
