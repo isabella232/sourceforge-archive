@@ -211,7 +211,7 @@ public abstract class AbstractSessionManager implements SessionManager
     {
         _dftMaxIdleSecs = seconds;
         if (_dftMaxIdleSecs>0 && _scavengePeriodMs>_dftMaxIdleSecs*100)
-            setScavangePeriod((_dftMaxIdleSecs+9)/10);
+            setScavengePeriod((_dftMaxIdleSecs+9)/10);
     }
     
     
@@ -219,7 +219,7 @@ public abstract class AbstractSessionManager implements SessionManager
     /** 
      * @return seconds 
      */
-    public int getScavangePeriod()
+    public int getScavengePeriod()
     {
         return _scavengePeriodMs/1000;
     }
@@ -228,7 +228,7 @@ public abstract class AbstractSessionManager implements SessionManager
     /** 
      * @param seconds 
      */
-    public void setScavangePeriod(int seconds)
+    public void setScavengePeriod(int seconds)
     {
         if (seconds==0)
             seconds=60;
@@ -429,7 +429,7 @@ public abstract class AbstractSessionManager implements SessionManager
             finally
             {
                 AbstractSessionManager.this._scavenger=null;
-                Code.debug("Session scavanger exited");
+                Code.debug("Session scavenger exited");
             }
         }
 
@@ -532,7 +532,7 @@ public abstract class AbstractSessionManager implements SessionManager
         {
             _maxIdleMs = (long)secs * 1000;
             if (_maxIdleMs>0 && (_maxIdleMs/10)<_scavengePeriodMs)
-                AbstractSessionManager.this.setScavangePeriod((secs+9)/10);
+                AbstractSessionManager.this.setScavengePeriod((secs+9)/10);
         }
 
         /* ------------------------------------------------------------- */

@@ -36,7 +36,7 @@ public class AbstractSessionManagerMBean extends SessionManagerMBean
     {
         super.defineManagedResource();
         defineAttribute("maxInactiveInterval"); 
-        defineAttribute("scavangePeriod"); 
+        defineAttribute("scavengePeriod"); 
         defineAttribute("useRequestedId"); 
         defineAttribute("workerName");  
         defineAttribute("sessions"); 
