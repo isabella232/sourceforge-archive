@@ -534,10 +534,13 @@ abstract public class HttpMessage
             /* implementation of educated defaults */
             String type = _header.get(HttpFields.__ContentType);
             
-            /* get only MIME type/subtype from complete Content-Type */
-            int split = type.indexOf(';');
-            if (split != -1)
-                type = type.substring(0,split);
+            // get only MIME type/subtype from complete Content-Type
+            if (type!=null)
+            {
+                int split = type.indexOf(';');
+                if (split != -1)
+                    type = type.substring(0,split);
+            }
             
             /* look up correct default encoding for given MIME type */
             encoding = (String)__defaultEncodingMap.get(type);  
