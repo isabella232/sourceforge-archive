@@ -61,9 +61,9 @@ public class CMPStore
 	boolean isDaemon=true;
 	_scavenger=new Timer(isDaemon);
 	long delay=Math.round(Math.random()*_scavengerPeriod);
-	_log.info("scavenge delay is: "+delay+" seconds");
+	_log.debug("local scavenge delay is: "+delay+" seconds");
 	_scavenger.scheduleAtFixedRate(new Scavenger(), delay*1000, _scavengerPeriod*1000);
-	_log.info("started scavenger");
+	_log.debug("started local scavenger");
       }
     }
   }
@@ -77,7 +77,7 @@ public class CMPStore
       {
 	_scavenger.cancel();
 	_scavenger=null;
-	_log.info("stopped scavenger");
+	_log.debug("stopped local scavenger");
       }
     }
   }

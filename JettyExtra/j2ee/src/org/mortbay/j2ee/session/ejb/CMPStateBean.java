@@ -70,7 +70,7 @@ public abstract class CMPStateBean
       // instance - but it is the only one that I have found so far...
       CMPStateHome home = (CMPStateHome)_entityContext.getEJBObject().getEJBHome();
       Collection c=(Collection)home.findTimedOut(System.currentTimeMillis(), extraTime, actualMaxInactiveInterval);
-      _log.info("distributed scavenging: "+c);
+      _log.debug("distributed scavenging: "+c);
 
       // this is not working - what is the class of the Objects returned in the Collection ?
       for (Iterator i=c.iterator(); i.hasNext();)
@@ -99,7 +99,7 @@ public abstract class CMPStateBean
   public CMPStatePK ejbCreate(String context, String id, int maxInactiveInterval)
     throws CreateException
   {
-    _log.info("ejbCreate("+context+":"+id+")");
+    _log.debug("ejbCreate("+context+":"+id+")");
 
     setContext(context);
     setId(id);
@@ -132,43 +132,13 @@ public abstract class CMPStateBean
     _entityContext=entityContext;
   }
 
-  //   public void
-  //     ejbLoad()
-  //   {
-  //     //    _log.info("ejbLoad()");
-  //   }
-  //
-  //   public void
-  //     ejbActivate()
-  //   {
-  //     //    _log.info("ejbActivate()");
-  //   }
-  //
-  //   public void
-  //     ejbPassivate()
-  //   {
-  //     //    _log.info("ejbPassivate()");
-  //   }
-  //
-  //   public void
-  //     ejbStore()
-  //   {
-  //     //    _log.info("ejbStore()");
-  //   }
-  //
-  //   public void
-  //     unsetEntityContext()
-  //   {
-  //     //    _log.info("unsetEntityContext()");
-  //   }
-
   /**
    */
   public void
     ejbRemove()
     throws RemoveException
   {
-    _log.info("ejbRemove("+getContext()+":"+getId()+")");
+    _log.debug("ejbRemove("+getContext()+":"+getId()+")");
   }
 
   //----------------------------------------
@@ -229,7 +199,7 @@ public abstract class CMPStateBean
   public Object
     getAttribute(String name)
   {
-    _log.info(getId()+": get attribute - "+name);
+    //    _log.info(getId()+": get attribute - "+name);
     return getAttributes().get(name);
   }
 
@@ -244,7 +214,7 @@ public abstract class CMPStateBean
     setAttributes(null);
     setAttributes(attrs);
 
-    _log.info(getContext()+":"+getId()+": set attribute - "+name+":"+value);
+    //    _log.info(getContext()+":"+getId()+": set attribute - "+name+":"+value);
 
     return tmp;
   }
@@ -264,7 +234,7 @@ public abstract class CMPStateBean
       setAttributes(attrs);
     }
 
-    _log.info(getContext()+":"+getId()+": remove attribute - "+name);
+    //    _log.info(getContext()+":"+getId()+": remove attribute - "+name);
 
     return tmp;
   }

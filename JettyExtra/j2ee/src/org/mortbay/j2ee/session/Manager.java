@@ -550,7 +550,7 @@ public class Manager
 	  {
 	    s=newContainer(id, tmp);
 	    _sessions.put(id, s);
-	    _log.info("found distributed session: "+id);
+	    //	    _log.debug("found distributed session: "+id);
 	  }
 	}
 	catch (Exception ignore)
@@ -671,7 +671,7 @@ public class Manager
   protected void
     scavenge()
   {
-    _log.info("local scavenging...");
+    _log.debug("local scavenging...");
 
     // take a quick copy...
     Collection copy;
@@ -691,6 +691,6 @@ public class Manager
       ((StateAdaptor)i.next()).isValid();
     }
 
-    _log.info("...local scavenging");
+    _log.debug("...local scavenging");
   }
 }

@@ -69,7 +69,7 @@ public class StateAdaptor
       return false;
 
     long currentSecond=_manager.currentSecond();
-    _log.debug("isValid - checking local cache");
+    //    _log.debug("isValid() - checking local cache");
     if ((_lastAccessedTime+(getRealMaxInactiveValue()*1000))<currentSecond)
     {
       // our local cache reckons we have timed out - confirm with our
@@ -84,11 +84,11 @@ public class StateAdaptor
 	_lastAccessedTime   =_state.getLastAccessedTime();
 	_maxInactiveInterval=_state.getMaxInactiveInterval();
 	// check again...
-	_log.info("isValid - checking distributed state");
+	//	_log.debug("isValid() - checking distributed state");
 	if ((_lastAccessedTime+(getRealMaxInactiveValue()*1000))<currentSecond)
 	{
 	  //	  invalidate(); - watch out for this - you'll recurse to the bottom of the stack !
-	  _log.info("isValid - calling _manager.destroySession...");
+	  _log.debug("isValid() - calling _manager.destroySession("+_id+")...");
 	  _manager.destroySession(_id);
 	  return false;
 	}
@@ -357,7 +357,7 @@ public class StateAdaptor
     if (!isValid())
       throw new IllegalStateException("invalid session");
 
-    //    _log.info("user invalidated session: "+getId());
+    _log.debug("user invalidated session: "+getId());
     _manager.destroySession(_id);
   }
 
