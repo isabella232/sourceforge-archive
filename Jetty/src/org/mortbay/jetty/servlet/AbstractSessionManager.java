@@ -563,7 +563,7 @@ public abstract class AbstractSessionManager implements SessionManager
 
 
         /* ------------------------------------------------------------ */
-        public Object getAttribute(String name)
+        public synchronized Object getAttribute(String name)
         {
             if (_invalid) throw new IllegalStateException();
             if (_values==null)
@@ -572,7 +572,7 @@ public abstract class AbstractSessionManager implements SessionManager
         }
 
         /* ------------------------------------------------------------ */
-        public Enumeration getAttributeNames()
+        public synchronized Enumeration getAttributeNames()
         {
             if (_invalid) throw new IllegalStateException();
             List names = _values==null?Collections.EMPTY_LIST:new ArrayList(_values.keySet());
