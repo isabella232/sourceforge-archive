@@ -33,8 +33,8 @@ import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.http.SecurityConstraint;
 import org.mortbay.http.SecurityConstraint.Authenticator;
+import org.mortbay.http.SecurityConstraint;
 import org.mortbay.http.UserRealm;
 import org.mortbay.util.Code;
 import org.mortbay.util.JarResource;
@@ -1163,26 +1163,7 @@ public class WebApplicationContext
     {
         return _tagLibMap;
     }
-
-
-    /* ------------------------------------------------------------ */
-    public boolean checkSecurityContstraints(String pathInContext,
-                                             HttpRequest request,
-                                             HttpResponse response)
-            throws HttpException, IOException
-    {
-        if (!super.checkSecurityContstraints(pathInContext,request,response))
-            return false;
-        
-        if (getAuthenticator() instanceof FormAuthenticator &&
-            pathInContext.endsWith(FormAuthenticator.__J_SECURITY_CHECK) &&
-            getAuthenticator().authenticated(getRealm(),
-                                             pathInContext,
-                                             request,
-                                             response)==null)
-            return false;
-        return true;
-    }
+    
     
     /* ------------------------------------------------------------ */
     /** Set Resource Alias.

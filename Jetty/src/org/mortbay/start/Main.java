@@ -411,8 +411,9 @@ public class Main
 
         if (_debug) System.err.println("jetty.home="+System.getProperty("jetty.home"));
         if (_debug) System.err.println("java.io.tmpdir="+System.getProperty("java.io.tmpdir"));
-        if (_debug) System.err.println("java.class.path="+_classpath.toString());
-        
+        if (_debug) System.err.println("java.class.path="+_classpath);
+        if (_debug) System.err.println("classloader="+cl);
+        if (_debug) System.err.println("classloader.parent="+cl.getParent());
 
         // Invoke main(args) using new classloader.
         Thread.currentThread().setContextClassLoader(cl);

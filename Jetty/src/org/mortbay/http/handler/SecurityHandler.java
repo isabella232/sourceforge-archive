@@ -66,7 +66,7 @@ public class SecurityHandler extends AbstractHttpHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
-        getHttpContext().checkSecurityContstraints(pathInContext,request,response);
+        getHttpContext().checkSecurityConstraints(pathInContext,request,response);
     }
 
 }

@@ -1429,9 +1429,9 @@ public class HttpContext implements LifeCycle,
 
 
     /* ------------------------------------------------------------ */
-    public boolean checkSecurityContstraints(String pathInContext,
-                                             HttpRequest request,
-                                             HttpResponse response)
+    public boolean checkSecurityConstraints(String pathInContext,
+                                            HttpRequest request,
+                                            HttpResponse response)
         throws HttpException, IOException
     {
         UserRealm realm = getRealm();

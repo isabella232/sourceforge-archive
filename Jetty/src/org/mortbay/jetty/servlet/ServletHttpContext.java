@@ -5,8 +5,12 @@
 
 package org.mortbay.jetty.servlet;
 
+import java.io.IOException;
 import javax.servlet.ServletContext;
 import org.mortbay.http.HttpContext;
+import org.mortbay.http.HttpRequest;
+import org.mortbay.http.HttpResponse;
+import org.mortbay.http.HttpException;
 import org.mortbay.util.Code;
 
 /* ------------------------------------------------------------ */
@@ -108,6 +112,35 @@ public class ServletHttpContext extends HttpContext
         Code.warning("setDynamicServletPathSpec is deprecated.");
     }
 
+    /* ------------------------------------------------------------ */
+    protected boolean jSecurityCheck(String pathInContext,
+                                     HttpRequest request,
+                                     HttpResponse response)
+            throws IOException
+    {
+        if (getAuthenticator() instanceof FormAuthenticator &&
+            pathInContext.endsWith(FormAuthenticator.__J_SECURITY_CHECK) &&
+            getAuthenticator().authenticated(getRealm(),
+                                             pathInContext,
+                                             request,
+                                             response)==null)
+            return false;
+        return true;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public boolean checkSecurityConstraints(String pathInContext,
+                                            HttpRequest request,
+                                            HttpResponse response)
+            throws HttpException, IOException
+    {
+        if (!super.checkSecurityConstraints(pathInContext,request,response) ||
+            ! jSecurityCheck(pathInContext,request,response))
+            return false;
+        
+        return true;
+    }
+    
     /* ------------------------------------------------------------ */
     public void stop()
         throws InterruptedException

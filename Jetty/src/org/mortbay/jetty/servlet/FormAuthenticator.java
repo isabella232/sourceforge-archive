@@ -106,7 +106,10 @@ public class FormAuthenticator implements Authenticator
             UserPrincipal user = realm.authenticate(username,password,httpRequest);
             String nuri=(String)session.getAttribute(__J_URI);
             session.removeAttribute(__J_URI); // Remove popped return URI.
-            if (user!=null && nuri!=null)
+            if (nuri==null || nuri.length()==0)
+                nuri="/";
+            
+            if (user!=null)
             {
                 Code.debug("Form authentication OK for ",username);
                 httpRequest.setAuthType(SecurityConstraint.__FORM_AUTH);

@@ -20,6 +20,7 @@ import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.mortbay.http.HttpResponse;
+import org.mortbay.http.HttpContext;
 import org.mortbay.util.Code;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiException;
@@ -188,6 +189,21 @@ public class WebApplicationHandler extends ServletHandler
 
         if (request instanceof Dispatcher.DispatcherRequest)
         {
+            // Handle dispatch to j_security_check
+            HttpContext context= getHttpContext();
+            if (context instanceof ServletHttpContext &&
+                pathInContext.endsWith(FormAuthenticator.__J_SECURITY_CHECK))
+            {
+                ServletHttpRequest servletHttpRequest=(ServletHttpRequest)request;
+                ServletHttpResponse servletHttpResponse=(ServletHttpResponse)response;
+                ServletHttpContext servletContext = (ServletHttpContext)context;
+                
+                if (!servletContext.jSecurityCheck(pathInContext,
+                                                   servletHttpRequest.getHttpRequest(),
+                                                   servletHttpResponse.getHttpResponse()))
+                    return;
+            }
+        
             // Forward or include
             requestType=((Dispatcher.DispatcherRequest)request).getFilterType();
         }
@@ -216,10 +232,10 @@ public class WebApplicationHandler extends ServletHandler
                 }
                 
                 // Security Check
-                if (!getHttpContext().checkSecurityContstraints
+                if (!getHttpContext().checkSecurityConstraints
                     (pathInContext,
                      servletHttpRequest.getHttpRequest(),
-                     servletHttpResponse.getHttpResponse()))
+                     httpResponse))
                     return;
             }
         }
