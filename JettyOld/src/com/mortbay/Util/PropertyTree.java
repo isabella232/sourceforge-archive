@@ -270,7 +270,12 @@ public class PropertyTree extends Properties
 	String elem = key.elementAt(index).toString();
 	PropertyTree subnode = getSubNode(elem, false);
 	if (subnode == null) return null;
-	return subnode.removeSubTree(index + 1, key);
+	if (index + 1 == key.size() && subnode.value == null){
+	    children.remove(elem);
+	    return subnode;
+	} else {
+	    return subnode.removeSubTree(index + 1, key);
+	}
     }
     /* ------------------------------------------------------------ */
     private PropertyTree getSubNode(String name){
