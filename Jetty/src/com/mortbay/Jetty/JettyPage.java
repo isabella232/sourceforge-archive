@@ -124,12 +124,12 @@ public class JettyPage extends Page
 		return;
 	}
 	
-	title("Mort Bay: "+_section._key);
+	title("Jetty: "+_section._key);
 	_home=false;
 	if (__section[0][0].equals(_section))
 	{
 	    _home=true;
-	    title("Mort Bay Consulting");
+	    title("Jetty Java HTTP Servlet Server");
 	    addHeader("<META NAME=\"description\" CONTENT=\"Jetty Java HTTP Servlet Server\"><META NAME=\"keywords\" CONTENT=\"Jetty Java HTTP Servlet Server\">");
 	}
 	
@@ -186,7 +186,7 @@ public class JettyPage extends Page
 	_table.add("<A HREF=\"http://www.mortbay.com\"><IMG SRC=\""+root+"images/mbLogoBar.png\" BORDER=0></A><P>\n");
 	_table.add("<A HREF=\"http://www.inetu.com\"><IMG SRC=\""+root+"images/inetu.png\" BORDER=0></A><P>\n");
 	_table.add("<A HREF=\"http://sourceforge.net/projects/jetty\"><IMG SRC=\""+root+"images/sourceforge.png\" BORDER=0></A><P>\n");
-	
+	//_table.add("<A HREF=\"http://sourceforge.net/projects/jetty\"><IMG SRC=\"http://sourceforge.net/sflogo.php?group_id=7322&type=1\" width=\"88\" height=\"31\" border=\"0\" alt=\"SourceForge Logo\" ></A><P>\n");
 	
 	_table.newCell();
 	_table.add("<IMG SRC=\""+root+"images/blank.png\">");
