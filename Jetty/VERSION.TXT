@@ -1,7 +1,8 @@
 Jetty Versions
 --------------
 
-Jetty-4.1.D1 - 6 June 2002
+Jetty-4.1.D1 - 
+ + Reworked output buffering to keep constant sized buffers.
  + Don't chunk 30x empty responses.
  + Fixed "" contextPaths in Dispatcher.
  + Removed race for the starting of session scavaging
