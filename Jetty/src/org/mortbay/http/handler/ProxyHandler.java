@@ -39,6 +39,15 @@ public class ProxyHandler extends NullHandler
                        HttpResponse response)
         throws HttpException, IOException
     {
+
+        // XXX we should proxy IF
+        //  1) we have a configured path that we send to a configured
+        //     destination (URL rewritting forbidden by rfc???)
+        //  2) We have a http and the host is not what is configured
+        //     as us
+        //  3) We have a ftp scheme and the FTP client classes are in
+        //     our classpath (should delegate to another class to
+        //     avoid linking hassles).
         URI uri = request.getURI();
         if (!"http".equals(uri.getScheme()))
             return;
@@ -61,14 +70,12 @@ public class ProxyHandler extends NullHandler
             System.err.println("host="+host);
             System.err.println("port="+port);
             System.err.println("path="+path);
-
-
-            // XXX need to do loop detection here - is the host me???
             
             // XXX associate this socket with the connection so
             // that it may be persistent.
+            
             socket = new Socket(host,port);
-            socket.setSoTimeout(5000);
+            socket.setSoTimeout(5000); // XXX configure this
             System.err.println("socket="+socket);
             
             OutputStream sout=socket.getOutputStream();
