@@ -46,22 +46,30 @@ public class BasicAuthenticator implements Authenticator
         
         if (credentials!=null )
         {
-            Code.debug("Credentials: "+credentials);
-            credentials = credentials.substring(credentials.indexOf(' ')+1);
-            credentials = B64Code.decode(credentials,StringUtil.__ISO_8859_1);
-            int i = credentials.indexOf(':');
-            String username = credentials.substring(0,i);
-            String password = credentials.substring(i+1);
-
-            user = realm.authenticate(username,password,request);
-            if (user!=null)
+            try
             {
-                request.setAuthType(SecurityConstraint.__BASIC_AUTH);
-                request.setAuthUser(username);
-                request.setUserPrincipal(user);                
+                Code.debug("Credentials: "+credentials);
+                credentials = credentials.substring(credentials.indexOf(' ')+1);
+                credentials = B64Code.decode(credentials,StringUtil.__ISO_8859_1);
+                int i = credentials.indexOf(':');
+                String username = credentials.substring(0,i);
+                String password = credentials.substring(i+1);
+            
+                user = realm.authenticate(username,password,request);
+                if (user!=null)
+                {
+                    request.setAuthType(SecurityConstraint.__BASIC_AUTH);
+                    request.setAuthUser(username);
+                    request.setUserPrincipal(user);                
+                }
+                else
+                    Code.warning("AUTH FAILURE: user "+username);
             }
-            else
-                Code.warning("AUTH FAILURE: user "+username);
+            catch (Exception e)
+            {
+                Code.warning("AUTH FAILURE: "+e.toString());
+                Code.ignore(e);
+            }
         }
 
         // Challenge if we have no user

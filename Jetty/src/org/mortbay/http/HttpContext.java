@@ -1043,6 +1043,12 @@ public class HttpContext implements LifeCycle,
         if (isStarted())
             throw new IllegalStateException("Started");
 
+        if (dir!=null)
+        {
+            try{dir=new File(dir.getCanonicalPath());}
+            catch (IOException e){Code.warning(e);}
+        }        
+        
         if (dir!=null && !dir.exists())
         {
             dir.mkdir();

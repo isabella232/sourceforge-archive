@@ -38,7 +38,9 @@ public class SecurityConstraint
     {
         /* ------------------------------------------------------------ */
         /** Authenticate.
-         * @return UserPrincipal if authenticated else null 
+         * @return UserPrincipal if authenticated. Null if Authentication
+         * failed. If the SecurityConstraint.__NOBODY instance is returned,
+         * the request is considered as part of the authentication process.
          * @exception IOException 
          */
         public UserPrincipal authenticated(UserRealm realm,
@@ -49,6 +51,26 @@ public class SecurityConstraint
 
         public String getAuthMethod();
     };
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /** Nobody user.
+     * The Nobody UserPrincipal is used to indicate a partial state of
+     * authentication. A request with a Nobody UserPrincipal will be allowed
+     * past all authentication constraints - but will not be considered an
+     * authenticated request.  It can be used by Authenticators such as
+     * FormAuthenticator to allow access to logon and error pages within an
+     * authenticated URI tree.
+     */
+    public static class Nobody implements UserPrincipal
+    {
+        public String getName() { return "Nobody";}
+        public boolean isAuthenticated() {return false;}
+        public boolean isUserInRole(String role) {return false;}
+    };
+    public final static Nobody __NOBODY=new Nobody();
+
     
     /* ------------------------------------------------------------ */
     public final static int
@@ -325,6 +347,9 @@ public class SecurityConstraint
                 // If we still did not get a user
                 if (user==null)
                     return -1; // Auth challenge or redirection already sent
+                else if (user==__NOBODY)
+                    return 0; // The Nobody user indicates authentication in transit.
+                    
                 
                 if (!sc.isAnyRole())
                 {

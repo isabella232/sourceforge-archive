@@ -138,7 +138,7 @@ public class FormAuthenticator implements Authenticator
         // Don't authenticate authform or errorpage
         if (pathInContext!=null &&
             pathInContext.equals(_formErrorPage) || pathInContext.equals(_formLoginPage))
-            return null;
+            return SecurityConstraint.__NOBODY;
         
         // redirect to login page
         if (httpRequest.getQuery()!=null)
@@ -148,4 +148,5 @@ public class FormAuthenticator implements Authenticator
                                            _formLoginPage));
         return null;
     }
+
 }

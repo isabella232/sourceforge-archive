@@ -3,6 +3,7 @@ Jetty Versions
 
  + Allow WebApplicationHandler to be used with other handlers.
  + Added defaults descriptor to addWebApplications.
+ + Allow FORM auth pages to be within security constraint.
 
 Jetty-4.1.0RC2 - 20 August 2002
  + Conveninace setClassLoaderJava2Compliant method.
