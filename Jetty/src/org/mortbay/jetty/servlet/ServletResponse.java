@@ -320,19 +320,21 @@ public class ServletResponse implements HttpServletResponse
             int suffix=url.indexOf("?",prefix);
             if (suffix<0)
                 suffix=url.indexOf("#",prefix);
-            
-            return url.substring(0,prefix+Context.__SessionUrlPrefix.length())+
-                (suffix<=prefix?"":url.substring(suffix));
+
+            if (suffix<=prefix)
+                return url.substring(0,prefix+Context.__SessionUrlPrefix.length())+id;
+            return url.substring(0,prefix+Context.__SessionUrlPrefix.length())+id+
+                url.substring(suffix);
         }        
         
         // edit the session
-        int end=url.indexOf('?');
-        if (end<0)
-            end=url.indexOf('#');
-        if (end<0)
+        int suffix=url.indexOf('?');
+        if (suffix<0)
+            suffix=url.indexOf('#');
+        if (suffix<0)
             return url+Context.__SessionUrlPrefix+id;
-        return url.substring(0,end)+
-            Context.__SessionUrlPrefix+id+url.substring(end);
+        return url.substring(0,suffix)+
+            Context.__SessionUrlPrefix+id+url.substring(suffix);
     }
 
     /* ------------------------------------------------------------ */

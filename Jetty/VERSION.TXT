@@ -5,6 +5,7 @@ Jetty3 Versions
 
  + Fixed double entry on PathMap.getMatches
  + Fixed FORM Authentication username.
+ + Fix servlet handling of non session url params.
  + Change JSESSIONID to jsessionid
  + Fix attr handling in XmlPArser.toString
 

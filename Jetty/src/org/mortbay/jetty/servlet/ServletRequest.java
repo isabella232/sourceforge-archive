@@ -398,9 +398,8 @@ public class ServletRequest
         }
             
         // check if there is a url encoded session param.
-        if (pathParams!=null)
+        if (pathParams!=null && pathParams.startsWith(Context.__SessionId))
         {
-            // XXX - Assumes JSESSIONID
             String id =
                 pathParams.substring(Context.__SessionId.length()+1);
             Code.debug("Got Session ",id," from URL");
