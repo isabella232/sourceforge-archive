@@ -11,7 +11,7 @@ import org.mortbay.util.Resource;
 import org.mortbay.util.StringUtil;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.OutputStream;
 import java.net.URL;
 import javax.servlet.GenericServlet;
 import javax.servlet.ServletContext;
@@ -55,8 +55,8 @@ public class JettyServlet extends HttpServlet
         {
             response.setContentType("text/html");
             page.add(new Include(resource.getInputStream()));
-            PrintWriter pout = response.getWriter();
-            page.write(pout);
+            OutputStream out = response.getOutputStream();
+            page.write(out);
         }
         else
         {

@@ -152,7 +152,7 @@ public class JettyPage extends Page
             ("<link REL=\"STYLESHEET\" TYPE=\"text/css\" HREF=\""+
              context+"/jetty.css\">");
 
-        addHeader("<link REL=\"icon\" HREF=\""+context+"/images/jicon.png\" TYPE=\"image/png\">");
+        addHeader("<link REL=\"icon\" HREF=\""+context+"/images/jicon.gif\" TYPE=\"image/gif\">");
         
         addLinkHeader("Author",context,"http://www.mortbay.com");
         addLinkHeader("Copyright",context,"LICENSE.html");
@@ -209,7 +209,6 @@ public class JettyPage extends Page
         attribute("link","#606CC0");
         attribute("vlink","#606CC0");
         attribute("alink","#606CC0");
-        //        attribute("background",context+"/images/jettybg.png");
         attribute("MARGINWIDTH","0");
         attribute("MARGINHEIGHT","0");
         attribute("LEFTMARGIN","0");
@@ -314,7 +313,7 @@ public class JettyPage extends Page
             _table.add("<IMG SRC=\""+context+"/images/sourceforge.gif\" WIDTH=88 HEIGHT=31 BORDER=\"0\" alt=\"SourceForge\"></A><P>\n");
         _table.add("</A><P>\n");
 
-        _table.add("<A HREF=\""+context+"/freesoftware.html\"><IMG SRC=\""+context+"/images/effbr.png\" WIDTH=88 HEIGHT=32 BORDER=0 ALT=\"EFF\"></A><P>\n");
+        _table.add("<A HREF=\""+context+"/freesoftware.html\"><IMG SRC=\""+context+"/images/effbr.gif\" WIDTH=88 HEIGHT=32 BORDER=0 ALT=\"EFF\"></A><P>\n");
         
         _table.add("&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P>&nbsp;<P><font size=-4 color=\"#606CC0\">Copyright 2002<BR>Mort Bay Consulting.</FONT>");
         
@@ -328,6 +327,9 @@ public class JettyPage extends Page
         _table.newCell();
         _table.cell().top();
         _table.cell().left();
+        
+        _table.add("<IMG SRC=\""+context+"/images/trans.gif\" WIDTH=4 HEIGHT=4 BORDER=0><br>");
+        
         if (path.endsWith(".txt"))
             _table.nest(new Block(Block.Pre));
         
