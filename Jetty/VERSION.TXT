@@ -10,6 +10,7 @@ Jetty-4.2.14
  + cookie timestamps are in GMT
  + Priority on ThreadedServer
  + replaced win32 service with http://wrapper.tanukisoftware.org
+ + Build fileclasspath from a walk of the classloaders
 
 Jetty-4.2.12 - 12 August 2003
  + Restore max inactive interval for session manager

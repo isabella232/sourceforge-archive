@@ -11,6 +11,8 @@ import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.InetAddress;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.net.UnknownHostException;
 import java.security.Permission;
 import java.security.PermissionCollection;
@@ -22,9 +24,11 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.StringTokenizer;
 import org.mortbay.http.SecurityConstraint.Authenticator;
 import org.mortbay.util.CachedResource;
 import org.mortbay.util.Code;
@@ -941,39 +945,88 @@ public class HttpContext implements LifeCycle,
     /* ------------------------------------------------------------ */
     /** Get the file classpath of the context.
      * This method makes a best effort to return a complete file
-     * classpath for the context.  The default implementation returns
-     * <PRE>
-     *  ((ContextLoader)getClassLoader()).getFileClassPath()+
-     *       System.getProperty("path.separator")+
-     *       System.getProperty("java.class.path");
-     * </PRE>
-     * The default implementation requires the classloader to be
-     * initialized before it is called. It will not include any
-     * classpaths used by a non-system parent classloader.
-     * <P>
-     * The main user of this method is the start() method.  If a JSP
-     * servlet is detected, the string returned from this method is
-     * used as the default value for the "classpath" init parameter.
-     * <P>
-     * Derivations may replace this method with a more accurate or
-     * specialized version.
+     * classpath for the context. 
+     * It is obtained by walking the classloader hierarchy and looking for
+     * URLClassLoaders.  The system property java.class.path is also checked for
+     * file elements not already found in the loader hierarchy.
      * @return Path of files and directories for loading classes.
      * @exception IllegalStateException HttpContext.initClassLoader
      * has not been called.
      */
     public String getFileClassPath()
         throws IllegalStateException
-    {
+    {	
         ClassLoader loader = getClassLoader();
         if (loader==null)
             throw new IllegalStateException("Context classloader not initialized");
-        String fileClassPath =
-            ((loader instanceof ContextLoader)
-             ? ((ContextLoader)loader).getFileClassPath()
-             : getClassPath())+
-            System.getProperty("path.separator")+
-            System.getProperty("java.class.path");
-        return fileClassPath;
+            
+        LinkedList paths =new LinkedList();
+        LinkedList loaders=new LinkedList();
+        
+        // Walk the loader hierarchy
+       	while (loader !=null)
+       	{
+            loaders.add(0,loader);
+            loader = loader.getParent();
+       	}
+       	
+       	// Try to handle java2compliant modes
+       	loader=getClassLoader();
+       	if (loader instanceof ContextLoader && !((ContextLoader)loader).isJava2Compliant())
+       	{
+            loaders.remove(loader);
+            loaders.add(0,loader);
+       	}
+        
+        for (int i=0;i<loaders.size();i++)
+        {
+            loader=(ClassLoader)loaders.get(i);
+            
+            Code.debug("extract paths from ",loader);
+            if (loader instanceof URLClassLoader)
+            {
+                URL[] urls = ((URLClassLoader)loader).getURLs();
+                for (int j=0;j<urls.length;j++)
+                {
+                    try
+                    {
+                        Resource path = Resource.newResource(urls[j]);
+                        File file = path.getFile();
+                        if (file!=null)
+                            paths.add(file.getAbsolutePath());
+                    }
+                    catch(Exception e)
+                    {
+                        Code.ignore(e);
+                    }
+                }	
+            }	
+       	}
+       	
+        // Add the system classpath elements from property.
+        String jcp=System.getProperty("java.class.path");
+        if (jcp!=null)
+        {
+            StringTokenizer tok=new StringTokenizer(jcp,File.pathSeparator);
+            while (tok.hasMoreTokens())
+            {
+                String path=tok.nextToken();
+                if (!paths.contains(path))
+                    paths.add(path);			
+            }
+        }
+        
+        StringBuffer buf = new StringBuffer();
+        Iterator iter = paths.iterator();
+        while(iter.hasNext())
+        {
+            if (buf.length()>0)
+                buf.append(File.pathSeparator);
+            buf.append(iter.next().toString());
+        }
+        
+        Code.debug("fileClassPath=",buf);
+        return buf.toString();
     }
 
     /* ------------------------------------------------------------ */
