@@ -294,7 +294,8 @@ public class HttpFields
         if (o instanceof List)
             return (List)o;
         
-        List list=Collections.singletonList(o);
+        List list=new ArrayList(1);
+        list.add(o);
         
         return list;
     }
