@@ -54,14 +54,6 @@ public class Resource
             if (perm instanceof java.io.FilePermission)
             {
                 File file =new File(perm.getName());
-                if (urls.indexOf("..")>=0)
-                {
-                    file=new File(file.getCanonicalPath());
-                    url=file.toURL();
-                }
-                if (file.isDirectory() && !url.getFile().endsWith("/"))
-                    url=new URL(url.toString()+"/");
-
                 FileResource fileResource= new FileResource(url,connection,file);
                 if (fileResource.getAlias()!=null)
                     return fileResource.getAlias();
@@ -99,19 +91,23 @@ public class Resource
         }
         catch(MalformedURLException e)
         {
-            if(resource.startsWith("."))
+            if(!resource.startsWith("ftp:") &&
+               !resource.startsWith("file:") &&
+               !resource.startsWith("jar:"))
             {
-                // It's a local file.
+                // It's a file.
+                if (resource.startsWith("./"))
+                    resource=resource.substring(2);
+                
                 File file=new File(resource);
-                file =new File(file.getCanonicalPath());
+                if (resource.indexOf("..")>=0)
+                    file=new File(file.getCanonicalPath());
                 url=file.toURL();
-            }
-            else if (!resource.startsWith("ftp:") &&
-                     !resource.startsWith("file:") &&
-                     !resource.startsWith("jar:"))
-            {
-                // Nope - try it as a file
-                url = new File(resource).toURL();
+                URLConnection connection=url.openConnection();
+                FileResource fileResource= new FileResource(url,connection,file);
+                if (fileResource.getAlias()!=null)
+                    return fileResource.getAlias();
+                return fileResource;
             }
             else
                 Code.warning(e);
@@ -122,12 +118,13 @@ public class Resource
             nurl.charAt(nurl.length()-1)!=
             resource.charAt(resource.length()-1))
         {
-            if (nurl.charAt(nurl.length()-1)!='/' ||
-                nurl.charAt(nurl.length()-2)!=resource.charAt(resource.length()-1))
+            if ((nurl.charAt(nurl.length()-1)!='/' ||
+                 nurl.charAt(nurl.length()-2)!=resource.charAt(resource.length()-1))
+                &&
+                (resource.charAt(resource.length()-1)!='/' ||
+                 resource.charAt(resource.length()-2)!=nurl.charAt(nurl.length()-1)
+                 ))
             {
-                System.err.println("resource="+resource);
-                System.err.println("nurl="+nurl);
-
                 return new BadResource(url,"Trailing special characters stripped by URL in "+resource);
             }
         }
