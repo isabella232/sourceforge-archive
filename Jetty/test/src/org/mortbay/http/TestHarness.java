@@ -340,8 +340,8 @@ public class TestHarness
             "D1: Fri, 31 Dec 1999 23:59:59 GMT" + CRLF +
             "D2: Friday, 31-Dec-99 23:59:59 GMT" + CRLF +
             "D3: Fri Dec 31 23:59:59 1999" + CRLF +
-            "D4: Mon Jan 1 2000 00:00:01" + CRLF +
-            "D5: Tue Feb 29 2000 12:00:00" + CRLF +
+            "D4: Mon Jan 1 00:00:01 2000" + CRLF +
+            "D5: Tue Feb 29 12:00:00 2000" + CRLF +
             "C1: Continuation  " + CRLF +
             "    Value  " + CRLF +
             "L1: V1  " + CRLF +
@@ -357,8 +357,8 @@ public class TestHarness
             "D1: Fri, 31 Dec 1999 23:59:59 GMT" + CRLF +
             "D2: Fri, 31 Dec 1999 23:59:59 GMT" + CRLF +
             "D3: Fri Dec 31 23:59:59 1999" + CRLF +
-            "D4: Mon Jan 1 2000 00:00:01" + CRLF +
-            "D5: Tue Feb 29 2000 12:00:00" + CRLF +
+            "D4: Mon Jan 1 00:00:01 2000" + CRLF +
+            "D5: Tue Feb 29 12:00:00 2000" + CRLF +
             "C1: VC1" + CRLF +
             "L1: V1" + CRLF +
             "L1: V2" + CRLF +

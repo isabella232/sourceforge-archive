@@ -426,27 +426,12 @@ public class HttpFields
     private final static String __dateReceiveFmt[] =
     {
         "EEE, dd MMM yyyy HH:mm:ss zzz",
-        "EEE, dd MMM yyyy HH:mm:ss",
-        "EEE dd MMM yyyy HH:mm:ss zzz",
-        "EEE dd MMM yyyy HH:mm:ss",
-        "EEE MMM dd yyyy HH:mm:ss zzz",
-        "EEE MMM dd yyyy HH:mm:ss",
-        "EEE MMM-dd-yyyy HH:mm:ss zzz",
-        "EEE MMM-dd-yyyy HH:mm:ss",
-        "dd MMM yyyy HH:mm:ss zzz",
-        "dd MMM yyyy HH:mm:ss",
-        "dd-MMM-yy HH:mm:ss zzz",
-        "dd-MMM-yy HH:mm:ss",
-        "MMM dd HH:mm:ss yyyy zzz",
-        "MMM dd HH:mm:ss yyyy",
-        "EEE MMM dd HH:mm:ss yyyy zzz",
-        "EEE MMM dd HH:mm:ss yyyy",
-        "EEE, MMM dd HH:mm:ss yyyy zzz",
-        "EEE, MMM dd HH:mm:ss yyyy",
         "EEE, dd-MMM-yy HH:mm:ss zzz",
-        "EEE, dd-MMM-yy HH:mm:ss",
-        "EEE dd-MMM-yy HH:mm:ss zzz",
-        "EEE dd-MMM-yy HH:mm:ss",
+        "EEE MMM dd HH:mm:ss yyyy",
+        "EEE, dd MMM yyyy HH:mm:ss zzz",
+        "EEE, dd-MMM-yy HH:mm:ss zzz",
+        "dd MMM yyyy HH:mm:ss",
+        "dd-MMM-yy HH:mm:ss",
     };
     public static SimpleDateFormat __dateReceiveSource[];
     public static ThreadLocal __dateReceiveCache=new ThreadLocal();
@@ -1042,7 +1027,7 @@ public class HttpFields
             }
         }
 
-	return -1;
+        throw new IllegalArgumentException(val);
     }
     
     /* -------------------------------------------------------------- */
