@@ -42,7 +42,6 @@ public class SecurityHandler extends NullHandler
     Map _authRealmMap;
     String _realmName ;
     UserRealm _realm ;
-
     
     /* ------------------------------------------------------------ */
     /** 
@@ -81,7 +80,7 @@ public class SecurityHandler extends NullHandler
             throw new IllegalArgumentException("Not supported: "+method);
         _authMethod = method;
     }
-
+    
     /* ------------------------------------------------------------ */
     public void addSecurityConstraint(String pathSpec,
                                       SecurityConstraint sc)
@@ -140,8 +139,7 @@ public class SecurityHandler extends NullHandler
         // Get all path matches
         List scss =_constraintMap.getMatches(pathInContext);
         if (scss!=null)
-        {
-            
+        {            
             // for each path match 
             for (int m=0;m<scss.size();m++)
             {

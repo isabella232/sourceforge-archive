@@ -34,12 +34,19 @@ public class Dump extends HttpServlet
 {
     /* ------------------------------------------------------------ */
     String pageType;
+    String initParams="";
 
     /* ------------------------------------------------------------ */
     public void init(ServletConfig config)
          throws ServletException
     {
-        super.init(config);      
+        super.init(config);
+        Enumeration e=getInitParameterNames();
+        while(e.hasMoreElements())
+        {
+            String name=(String)e.nextElement();
+            initParams+=name+"="+getInitParameter(name)+" ";
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -154,6 +161,10 @@ public class Dump extends HttpServlet
             table.newRow();
             table.addHeading("getRequestedSessionId:&nbsp;").cell().right();
             table.addCell(""+sreq.getRequestedSessionId());            
+                                  
+            table.newRow();
+            table.addHeading("getInitParams:&nbsp;").cell().right();
+            table.addCell(initParams);            
                         
             table.newRow();
             table.addHeading("getLocales:&nbsp;").cell().right();

@@ -232,6 +232,7 @@ public class ResourceHandler extends NullHandler
         if (resourceBase==null)
             return;
         
+        boolean endsWithSlash= pathInContext.endsWith("/");
         Resource resource = resourceBase.addPath(pathInContext);
         
         try
@@ -240,7 +241,6 @@ public class ResourceHandler extends NullHandler
                        "\nRESOURCE=",resource);
             
             // check filename
-            boolean endsWithSlash= resource.toString().endsWith("/");
             
             String method=request.getMethod();
             if (method.equals(HttpRequest.__GET) ||

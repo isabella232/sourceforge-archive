@@ -65,7 +65,7 @@ $Id$
     </Arg>
   </Call>
 
-<!--  Uncomment this to add an SSL listener. 
+<!--  Uncomment this to add an SSL listener. -->
   <Call name="addListener">
     <Arg>
       <New class="com.mortbay.HTTP.SunJsseListener">
@@ -79,7 +79,7 @@ $Id$
       </New>
     </Arg>
   </Call>
--->
+
 
   <Call name="addWebApplication">
     <Arg>/jetty/*</Arg>
@@ -95,6 +95,7 @@ $Id$
       <Arg>Dump</Arg>
       <Arg>/dump/*,*.DUMP</Arg>
       <Arg>com.mortbay.Servlet.Dump</Arg>
+      <Put name="InitParam">Value</Put>
     </Call>
     <Call name="addServlet">
       <Arg>Session</Arg>

@@ -1,5 +1,7 @@
 Jetty Versions
 --------------
+ 
+ + Fixed handling of directories without trailing /
 
 Jetty-3.0.2 - 13 Jan 2001
  + Replaced ResourceHandler FIFO cache with LRU cache.
