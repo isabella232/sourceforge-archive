@@ -29,6 +29,9 @@ public class ContextLoader extends URLClassLoader
     private static HashMap __infoMap = new HashMap(3);
     private PathInfo _info;
     private String _path;
+    private int _loadedServletsCount;
+    private int _loadedClassesCount;
+    private static Class __servletClass = javax.servlet.http.HttpServlet.class;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -143,7 +146,15 @@ public class ContextLoader extends URLClassLoader
     {
         if (Code.verbose())
             Code.debug("loadClass(",name,","+resolve,") from ",_path);
-        return super.loadClass(name,resolve);
+         
+         Class retClass = super.loadClass(name,resolve);
+         
+         // Don't account for javax.servlet.http.HttpServlet itself -- only subclasses.
+         if(retClass != __servletClass && __servletClass.isAssignableFrom(retClass))
+             _loadedServletsCount++;
+         _loadedClassesCount++;
+         
+         return retClass;        
     }
 
     /* ------------------------------------------------------------ */
@@ -157,12 +168,30 @@ public class ContextLoader extends URLClassLoader
     }
     
     /* ------------------------------------------------------------ */
+    /** Return number of servlets this classloader has loaded.
+     * Any class which is a subclass of javax.servlet.http.HttpServlet
+     * will count. Does not include javax.servlet.http.HttpServlet itself.
+     */
+    public int getLoadedServletsCount()
+    {
+        return _loadedServletsCount;
+    }
+    
+     /* ------------------------------------------------------------ */
+    /** Return total number of classes this classloader has loaded.
+     */
+    public int getLoadedClassesCount()
+    {
+        return _loadedClassesCount;
+    }
+    
+    /* ------------------------------------------------------------ */
     public String toString()
     {
         return "com.mortbay.HTTP.ContextLoader("+
             _path+") / "+getParent();
     }
-
+    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
