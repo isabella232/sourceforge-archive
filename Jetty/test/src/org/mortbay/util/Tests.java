@@ -37,11 +37,11 @@ import junit.framework.*;
 
 
 /* ------------------------------------------------------------ */
-/** Util meta JUnitTestHarness.
+/** Util meta Tests.
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class JUnitTestHarness extends junit.framework.TestCase
+public class Tests extends junit.framework.TestCase
 {
     public final static String __CRLF = "\015\012";
     public static String __userDir =
@@ -49,19 +49,19 @@ public class JUnitTestHarness extends junit.framework.TestCase
     public static URL __userURL=null;
     private static String __relDir="";
 
-    public JUnitTestHarness(String name) 
+    public Tests(String name) 
     {
       super(name);
     }
     
     public static junit.framework.Test suite() {
-      return new TestSuite(JUnitTestHarness.class);
+      return new TestSuite(Tests.class);
     }
 
     /* ------------------------------------------------------------ */
     /** main.
      */
-    public void main(String[] args)
+    public static void main(String[] args)
     {
       junit.textui.TestRunner.run(suite());
     }    
