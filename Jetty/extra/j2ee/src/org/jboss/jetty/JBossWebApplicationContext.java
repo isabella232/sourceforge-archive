@@ -25,6 +25,7 @@ import org.jboss.deployment.DeploymentInfo;
 import org.jboss.jetty.jmx.JBossWebApplicationContextMBean;
 import org.jboss.jetty.security.JBossUserRealm;
 import org.jboss.logging.Logger;
+import org.jboss.metadata.WebMetaData;
 import org.jboss.web.WebApplication;
 import org.jboss.web.AbstractWebContainer.WebDescriptorParser;
 import org.mortbay.j2ee.J2EEWebApplicationContext;
@@ -315,13 +316,27 @@ public class JBossWebApplicationContext extends J2EEWebApplicationContext
             }
             else if("login-config".equals(element))
             {
-                // we need to get hold of the real-name...
-                super.initWebXmlElement(element,node); // Greg
-                                                                                               // has
-                                                                                               // now
-                                                                                               // consumed
-                                                                                               // it
+                // get Jetty to parse the realm-name element
+                super.initWebXmlElement(element,node); 
+                
+                // if the realm-name element is set in web.xml use it as the realm name 
+                // otherwise, use the security domain name from jboss-web.xml
+                
                 String realmName=getJBossWebApplicationContext().getRealmName();
+                if (null==realmName)
+                {
+                    WebMetaData metaData = getJBossWebApplicationContext()._webApp.getMetaData();
+                    realmName = metaData.getSecurityDomain();
+                    if (null!=realmName)
+                    {
+                        if (realmName.endsWith("/"))
+                            realmName = realmName.substring (0, realmName.length());
+                        int idx = realmName.lastIndexOf('/');
+                        if (idx >= 0)
+                            realmName = realmName.substring(idx+1);
+                    }
+                }
+                
                 if(__log.isDebugEnabled())
                     __log.debug("setting Realm: "+realmName);
                 getJBossWebApplicationContext()._realm=new JBossUserRealm(realmName,getJBossWebApplicationContext()._subjAttrName); // we
