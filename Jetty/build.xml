@@ -41,7 +41,7 @@ Other targets:
   <property name="webappsrc"      value="${basedir}/webappsrc"/>
   <property name="build.compiler" value="jikes"/>
   <!-- property name="build.compiler" value="classic"/ -->
-  <!-- property name="build.compiler" value="modern" -->
+  <!-- property name="build.compiler" value="modern" / -->
 
   <property name="javac.debug"             value="on" />
   <property name="javac.optimize"          value="off" />
@@ -61,8 +61,14 @@ Other targets:
   <property name="xml.jar"        value="${lib}/org.apache.crimson.jar"/>
   <property name="jsse.jar"       value="${lib}/com.sun.net.ssl.jar"/>
 
-  <property name="classpath"      value="${jetty.jar};${jasper.jar};${servlet.jar};${jsse.jar};${jaxp.jar};${xml.jar}"/>
-
+  <path id="classpath">
+    <pathelement path="${jetty.jar}" />
+    <pathelement path="${jasper.jar}" />
+    <pathelement path="${servlet.jar}" />
+    <pathelement path="${jsse.jar}" />
+    <pathelement path="${jaxp.jar}" />
+    <pathelement path="${xml.jar}" />
+  </path>
 
   <!-- ==================================================================== -->
   <target name="prepare">
@@ -114,11 +120,11 @@ Other targets:
     </copy>
     <javac srcdir="${src}"
            destdir="${classes}"
-           classpath="${classpath}"
            debug="${javac.debug}"
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}"
            >
+       <classpath refid="classpath" />
        <include name="**/*.java"/>
        <exclude name="**/nbio/*.java"/>
        <exclude name="com/**/*.java"/>
@@ -129,11 +135,11 @@ Other targets:
   <target name="nbio" depends="classes">
     <javac srcdir="${src}"
            destdir="${classes}"
-           classpath="${classpath}"
            debug="${javac.debug}"
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}"
            >
+       <classpath refid="classpath" />
        <include name="**/NBIO/*.java"/>
     </javac>
   </target>
@@ -205,17 +211,20 @@ Other targets:
         <include name="org/mortbay/webapps/jetty/*.properties" />
       </fileset>
     </copy>
-    <copy file="${jetty.webapp.classes}/org/mortbay/webapps/jetty/JettyIndex.properties" 
+    <copy file="${jetty.webapp.classes}/org/mortbay/webapps/jetty/JettyIndex.properties"
         tofile="${jetty.webapp.classes}/org/mortbay/webapps/jetty/JettyIndex_en.properties" />
     <javac srcdir="${webappsrc}"
            destdir="${jetty.webapp.classes}"
-           classpath="${jetty.jar};${servlet.jar}"
            debug="${javac.debug}"
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}"
            >
+      <classpath>
+        <pathelement path="${servlet.jar}" />
+        <pathelement path="${jetty.jar}"   />
+      </classpath>
       <include name="org/mortbay/webapps/jetty/*.java" />
-    </javac>   
+    </javac>
 
     <copy file="LICENSE.html" tofile="${jetty.webapp}/LICENSE.html" />
     <copy file="VERSION.TXT" tofile="${jetty.webapp}/versions.txt" />
@@ -226,20 +235,26 @@ Other targets:
   <target name="webapp.examples" depends="jars">
     <javac srcdir="${webapps}/examples/WEB-INF/classes"
            destdir="${webapps}/examples/WEB-INF/classes"
-           classpath="${jetty.jar};${servlet.jar}"
            debug="${javac.debug}"
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}"
            >
+      <classpath>
+        <pathelement path="${servlet.jar}" />
+        <pathelement path="${jetty.jar}"   />
+      </classpath>
       <include name="**/*.java" />
     </javac>
     <javac srcdir="${webapps}/examples/jsp/plugin/applet"
            destdir="${webapps}/examples/jsp/plugin/applet"
-           classpath="${jetty.jar};${servlet.jar}"
            debug="${javac.debug}"
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}"
            >
+      <classpath>
+        <pathelement path="${servlet.jar}" />
+        <pathelement path="${jetty.jar}"   />
+      </classpath>
       <include name="**/*.java" />
     </javac>
   </target>
@@ -250,7 +265,6 @@ Other targets:
     <mkdir dir="${javadoc}"/>
     <javadoc packagenames="org.mortbay.*,javax.servlet.*,org.apache.jasper.*"
              sourcepath="${src}"
-	     classpath="${classpath}"
              destdir="${javadoc}"
              author="true"
              version="true"
@@ -258,6 +272,7 @@ Other targets:
              windowtitle="${ant.project.name} API"
              doctitle="${ant.project.name}"
              bottom="Copyright &#169; 2000 Mortbay Consulting Pty. Ltd. All Rights Reserved.">
+       <classpath refid="classpath" />
     </javadoc>
   </target>
 
@@ -275,20 +290,28 @@ Other targets:
   <target name="testXML" depends="jars">
     <property name="classpath" value="${jetty.jar};${servlet.jar}" />
     <java classname="org.mortbay.xml.TestHarness"
-          classpath="${classes};${xml.jar};${jaxp.jar}"
           fork="yes"
-          failonerror="yes"
-          />
+          failonerror="yes">
+      <classpath>
+        <pathelement location="${classes}" />
+        <pathelement path="${xml.jar}" />
+        <pathelement path="${jaxp.jar}"   />
+      </classpath>
+    </java>
   </target>
 
   <!-- ==================================================================== -->
   <target name="testHTTP" depends="jars">
     <property name="classpath" value="${jetty.jar};${servlet.jar}" />
     <java classname="org.mortbay.http.TestHarness"
-          classpath="${classes};${xml.jar};${jaxp.jar}"
           fork="yes"
-          failonerror="yes"
-          />
+          failonerror="yes">
+      <classpath>
+        <pathelement location="${classes}" />
+        <pathelement path="${xml.jar}" />
+        <pathelement path="${jaxp.jar}" />
+      </classpath>
+    </java>
   </target>
 
   <!-- ==================================================================== -->
