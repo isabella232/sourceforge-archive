@@ -7,6 +7,7 @@ Jetty Versions
  + WEB-INF/classes before WEB-INF/lib
  + Sorted directory listings.
  + Stop servlets in opposite order to start.
+ + Handle unremovable tempdir.
 
 Jetty-4.1.0RC6 - 14 September 2002
  + Don't URL encode FileURLS.
