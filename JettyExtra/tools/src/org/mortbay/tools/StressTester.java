@@ -20,6 +20,7 @@ import java.io.*;
  */
 public class  StressTester
 {
+    Random random = new Random(this.hashCode());
     int totalRequests=0;
     long totalBytes=0;
     
@@ -122,7 +123,6 @@ public class  StressTester
         /* ------------------------------------------------------------ */
         public void run()
         {  
-            Random random = new Random(this.hashCode());
             int bytes = 0;
             int requests = 0;
             for (int iurl = _urls.length;iurl-->0;)
@@ -163,21 +163,24 @@ public class  StressTester
             int totalBytes = 0;
             URL u = new URL(inURL);
             URLConnection conn = u.openConnection();
-                conn.setRequestProperty("Accept", "*/*");
-                InputStream in = conn.getInputStream(); // Open the URL
-                try
-                {
-                    totalBytes = flush(in);// Read and throw away the contents
-                }
-                finally
-                {
-                    in.close();
-                }
-                
-                // Check for a successful connection
-                HttpURLConnection httpConn = (HttpURLConnection)conn;
-                if (httpConn.getResponseCode() >= 400)
-                    throw new Exception(Integer.toString(httpConn.getResponseCode()));
+	    conn.setRequestProperty("Accept", "*/*");
+	    if (random.nextDouble()<0.05)
+		conn.setRequestProperty("Connection","close");
+		
+	    InputStream in = conn.getInputStream(); // Open the URL
+	    try
+	    {
+		totalBytes = flush(in);// Read and throw away the contents
+	    }
+	    finally
+	    {
+		in.close();
+	    }
+	    
+	    // Check for a successful connection
+	    HttpURLConnection httpConn = (HttpURLConnection)conn;
+	    if (httpConn.getResponseCode() >= 400)
+		throw new Exception(Integer.toString(httpConn.getResponseCode()));
            
             
             return totalBytes;
