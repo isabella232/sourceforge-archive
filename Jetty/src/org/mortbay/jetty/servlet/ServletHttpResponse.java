@@ -206,6 +206,9 @@ public class ServletHttpResponse implements HttpServletResponse
     /* ------------------------------------------------------------ */
     public void resetBuffer()
     {
+        if (isCommitted())
+            throw new IllegalStateException("Committed");
+        
         ((HttpOutputStream)_httpResponse.getOutputStream()).resetBuffer();
         if (_writer!=null) _writer.reset();
     }
@@ -460,8 +463,7 @@ public class ServletHttpResponse implements HttpServletResponse
             url=buf.toString();
         }
         
-        if (isCommitted())
-            throw new IllegalStateException("Commited");
+        resetBuffer();
         
         _httpResponse.setField(HttpFields.__Location,url);
         _httpResponse.setStatus(HttpResponse.__302_Moved_Temporarily);

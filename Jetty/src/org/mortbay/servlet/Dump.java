@@ -88,7 +88,7 @@ public class Dump extends HttpServlet
         String redirect= request.getParameter("redirect");
         if (redirect != null && redirect.length() > 0)
         {
-            response.getOutputStream().println("THIS SHOULD BE SEEN!");
+            response.getOutputStream().println("THIS SHOULD NOT BE SEEN!");
             response.sendRedirect(redirect);
             response.getOutputStream().println("THIS SHOULD NOT BE SEEN!");
             return;
