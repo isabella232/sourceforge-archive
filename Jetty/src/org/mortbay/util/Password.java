@@ -103,7 +103,8 @@ public class Password
                 System.out.flush();
                 byte[] buf = new byte[512];
                 int len=System.in.read(buf);
-                passwd=new String(buf,0,len).trim();
+                if (len>0)
+                    passwd=new String(buf,0,len).trim();
             }
             catch(IOException e)
             {

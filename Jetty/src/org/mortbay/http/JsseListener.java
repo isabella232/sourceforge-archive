@@ -166,6 +166,10 @@ public abstract class JsseListener extends SocketListener
 	    socket.setNeedClientAuth(_needClientAuth);
 	    Log.event("JsseListener.needClientAuth=" + _needClientAuth);
 	}
+        catch (IOException e)
+        {
+            throw e;
+        }
         catch( Exception e )
         {
             Code.warning(e);
