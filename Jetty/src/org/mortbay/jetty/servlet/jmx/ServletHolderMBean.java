@@ -21,10 +21,8 @@ import java.util.Map;
 
 import javax.management.MBeanException;
 
-import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
-import org.mortbay.jetty.servlet.WebApplicationContext;
 
 
 /* ------------------------------------------------------------ */

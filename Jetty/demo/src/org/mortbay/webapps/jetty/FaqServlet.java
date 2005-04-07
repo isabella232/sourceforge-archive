@@ -24,7 +24,6 @@ import org.apache.commons.logging.LogFactory;
 import org.mortbay.html.Heading;
 import org.mortbay.html.Link;
 import org.mortbay.html.Page;
-import org.mortbay.html.Text;
 
 /* ------------------------------------------------------------ */
 /** Faq Servlet 
@@ -380,7 +379,7 @@ public class FaqServlet extends HttpServlet
         page.add("&nbsp;<br/>");
         page.add(new Heading (1, "Jetty FAQ &nbsp; <IMG SRC=\"/jetty/images/info.gif\" ALIGN=\"MIDDLE\" BORDER=\"0\">"));
 
-        page.add(new Text ("These frequently asked questions have been contributed by Jetty users.  If you have a question and/or answer that is not here, email <A HREF=\"http:///lists.sourceforge.net/lists/listinfo/jetty-discuss/\">Jetty Discuss</A>."));
+        page.add("These frequently asked questions have been contributed by Jetty users.  If you have a question and/or answer that is not here, email <A HREF=\"http:///lists.sourceforge.net/lists/listinfo/jetty-discuss/\">Jetty Discuss</A>.");
 
 
         Iterator itor = sectionMap.keySet().iterator();
@@ -424,10 +423,10 @@ public class FaqServlet extends HttpServlet
         page.add("&nbsp;<br/>");
         page.add (new Heading (1, entry.getQuestion()));
 
-        page.add (new Text (entry.getBody()));
-        page.add (new Text ("<P>"));
+        page.add (entry.getBody());
+        page.add ("<P>");
         page.add (new Link (contextPath+servletPath+"/","<IMG SRC=\"/jetty/images/info_sm.gif\" BORDER=\"0\"><BR CLEAR=\"bottom\"> JettyFaq"));
-        page.add (new Text ("<BR><BR>"));
+        page.add ("<BR><BR>");
         
         return page;
 

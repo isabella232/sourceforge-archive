@@ -27,7 +27,6 @@ import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.tools.ant.filters.StringInputStream;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.TestCase;

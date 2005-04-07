@@ -23,7 +23,7 @@
 
 package javax.servlet.jsp.tagext;
 
-import javax.servlet.jsp.*;
+import javax.servlet.jsp.JspException;
 
 /**
  * The IterationTag interface extends Tag by defining one additional

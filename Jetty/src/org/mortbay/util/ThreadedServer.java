@@ -396,24 +396,39 @@ abstract public class ThreadedServer extends ThreadPool
      * Accept socket connection. May be overriden by derived class to create specialist
      * serversockets (eg SSL).
      * 
+     * @deprecated use acceptSocket(int timeout)
+     * @param ignored
+     * @param timeout The time to wait for a connection. Normally passed the ThreadPool maxIdleTime.
+     * @return Accepted Socket
+     */
+    protected Socket acceptSocket(ServerSocket ignored, int timeout)
+    {
+        return acceptSocket(timeout);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Accept socket connection. May be overriden by derived class to create specialist
+     * serversockets (eg SSL).
+     * 
      * @param serverSocket
      * @param timeout The time to wait for a connection. Normally passed the ThreadPool maxIdleTime.
      * @return Accepted Socket
      */
-    protected Socket acceptSocket(ServerSocket serverSocket, int timeout)
+    protected Socket acceptSocket(int timeout)
     {
         try
         {
             Socket s = null;
 
-            if (_soTimeOut != timeout)
-            {
-                _soTimeOut = timeout;
-                _listen.setSoTimeout(_soTimeOut);
-            }
-
             if (_listen != null)
             {
+                if (_soTimeOut != timeout)
+                {
+                    _soTimeOut = timeout;
+                    _listen.setSoTimeout(_soTimeOut);
+                }
+
                 s = _listen.accept();
 
                 try
@@ -613,7 +628,7 @@ abstract public class ThreadedServer extends ThreadPool
                     try
                     {
                         // Accept a socket
-                        Socket socket = acceptSocket(_listen, _soTimeOut);
+                        Socket socket = acceptSocket(_soTimeOut);
                         
                         // Handle the socket
                         if (socket != null)

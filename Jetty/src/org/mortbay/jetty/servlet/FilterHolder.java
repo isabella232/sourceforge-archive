@@ -16,18 +16,12 @@
 package org.mortbay.jetty.servlet;
 
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 
 import org.mortbay.http.HttpHandler;
-import org.mortbay.http.PathMap;
-import org.mortbay.util.LazyList;
-import org.mortbay.util.TypeUtil;
 
 /* --------------------------------------------------------------------- */
 /** 

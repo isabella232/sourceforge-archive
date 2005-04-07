@@ -16,7 +16,6 @@
 package org.mortbay.jetty.servlet.jmx;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -26,7 +25,6 @@ import javax.management.ObjectName;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.jetty.servlet.WebApplicationHandler;
-import org.mortbay.util.LogSupport;
 
 
 /* ------------------------------------------------------------ */

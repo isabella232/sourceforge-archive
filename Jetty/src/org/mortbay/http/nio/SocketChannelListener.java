@@ -585,7 +585,7 @@ public class SocketChannelListener extends ThreadPool implements HttpListener
                         }
                         finally
                         {
-                            break;
+                            i=buf.limit();
                         }
                     }
                 }

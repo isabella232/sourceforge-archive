@@ -15,7 +15,6 @@
 
 package org.mortbay.http;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -31,7 +30,6 @@ import org.mortbay.util.DateCache;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.RolloverFileOutputStream;
 import org.mortbay.util.StringUtil;
-import org.mortbay.util.UrlEncoded;
 
 
 /* ------------------------------------------------------------ */

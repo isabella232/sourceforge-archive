@@ -25,8 +25,6 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.servlet.ServletContextAttributeEvent;
-import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 

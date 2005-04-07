@@ -32,7 +32,6 @@ import org.mortbay.http.DigestAuthenticator;
 import org.mortbay.http.SecurityConstraint;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.Resource;
-import org.mortbay.xml.XmlConfiguration;
 import org.mortbay.xml.XmlParser;
 /* ------------------------------------------------------------------------------- */
 /**

@@ -28,8 +28,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.StringTokenizer;
 
-import org.mortbay.xml.XmlParser;
-
 /*-------------------------------------------*/
 /**
  * Main start class. This class is intended to be the main class listed in the MANIFEST.MF of the

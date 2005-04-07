@@ -41,7 +41,6 @@ import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpInputStream;
-import org.mortbay.http.HttpOnlyCookie;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.SecurityConstraint;
 import org.mortbay.util.LazyList;

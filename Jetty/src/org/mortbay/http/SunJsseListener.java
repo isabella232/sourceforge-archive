@@ -45,6 +45,7 @@ import com.sun.net.ssl.TrustManagerFactory;
  * turn is based on the work from Forge Research.
  *
  * @version $Id$
+ * @deprecated Use org.mortbay.http.SslListener
  * @author Greg Wilkins (gregw@mortbay.com)
  * @author Court Demas (court@kiwiconsulting.com)
  * @author Forge Research Pty Ltd  ACN 003 491 576

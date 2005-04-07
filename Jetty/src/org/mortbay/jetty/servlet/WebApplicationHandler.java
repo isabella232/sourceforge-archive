@@ -46,7 +46,6 @@ import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.PathMap;
 import org.mortbay.util.LazyList;
-import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringUtil;

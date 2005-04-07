@@ -23,7 +23,6 @@ import java.io.UnsupportedEncodingException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.util.LineInput;
-import org.mortbay.util.LogSupport;
 import org.mortbay.util.StringUtil;
 
 

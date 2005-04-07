@@ -17,7 +17,6 @@ package org.mortbay.jetty.servlet;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.ConcurrentModificationException;
 import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.HashMap;

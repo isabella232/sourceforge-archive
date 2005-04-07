@@ -16,7 +16,6 @@
 package org.mortbay.http.jmx;
 
 import java.util.HashMap;
-import java.util.Iterator;
 
 import javax.management.MBeanException;
 import javax.management.MBeanServer;

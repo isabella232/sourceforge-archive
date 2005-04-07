@@ -23,14 +23,13 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;
-import org.mortbay.http.ResourceCache;
 import org.mortbay.http.InclusiveByteRange;
 import org.mortbay.http.MultiPartResponse;
+import org.mortbay.http.ResourceCache;
 import org.mortbay.util.CachedResource;
 import org.mortbay.util.IO;
 import org.mortbay.util.LogSupport;

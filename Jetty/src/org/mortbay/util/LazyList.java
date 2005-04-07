@@ -14,7 +14,6 @@
 // ========================================================================
 
 package org.mortbay.util;
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
