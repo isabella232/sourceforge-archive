@@ -121,8 +121,6 @@ public class HttpServer extends Container
     
     private transient int _gcRequests;
     private transient HttpContext _notFoundContext=null;
-    private transient Object _eventListeners;
-    private transient List _components;
     private transient boolean _gracefulStop;
     
     /* ------------------------------------------------------------ */
@@ -1308,62 +1306,7 @@ public class HttpServer extends Container
             _connectionsRequestsAve=_connectionsRequestsAve-_connectionsRequestsAve/16+requests;
         }
     }
-    
-    
-    /* ------------------------------------------------------------ */
-    protected void addComponent(Object o)
-    {
-        if(log.isDebugEnabled())log.debug("add component: "+o);
-        if (_components==null)
-            _components=new ArrayList();
-        _components.add(o);
-        
-        ComponentEvent event = new ComponentEvent(this,o);
-        for(int i=0;i<LazyList.size(_eventListeners);i++)
-        {
-            EventListener listener=(EventListener)LazyList.get(_eventListeners,i);
-            if (listener instanceof ComponentListener)
-                ((ComponentListener)listener).addComponent(event);
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    protected void removeComponent(Object o)
-    {
-        if(log.isDebugEnabled())log.debug("remove component: "+o);
-        ComponentEvent event = new ComponentEvent(this,o);
-        for(int i=0;i<LazyList.size(_eventListeners);i++)
-        {
-            EventListener listener=(EventListener)LazyList.get(_eventListeners,i);
-            if (listener instanceof ComponentListener)
-                ((ComponentListener)listener).removeComponent(event);
-        }
-    }
 
-    /* ------------------------------------------------------------ */
-    /** Add a server event listener.
-     * @param listener ComponentEventListener or LifeCycleEventListener 
-     */
-    public void addEventListener(EventListener listener)
-    	throws IllegalArgumentException
-    {
-        if(log.isDebugEnabled())log.debug("addEventListener: "+listener);
-        if (_eventListeners==null)
-            _eventListeners=new ArrayList();
-        
-        if (listener instanceof ComponentListener ||
-            listener instanceof LifeCycleListener )
-            _eventListeners=LazyList.add(_eventListeners,listener);
-        else
-            throw new IllegalArgumentException("Not handled "+listener);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void removeEventListener(EventListener listener)
-    {
-        if(log.isDebugEnabled())log.debug("removeEventListener: "+listener);
-        _eventListeners=LazyList.remove(_eventListeners,listener);
-    }
 
     /* ------------------------------------------------------------ */
     /** Save the HttpServer
@@ -1403,28 +1346,7 @@ public class HttpServer extends Container
         _virtualHostMap=null;
         _notFoundContext=null;
 
-        if (_components!=null && _eventListeners!=null)
-        {
-            for (int c=0;c<_components.size();c++)
-            {
-                Object o=_components.get(c);
-                if (o instanceof HttpContext )
-                    ((HttpContext)o).destroy();
-                
-                ComponentEvent event = new ComponentEvent(this,o);
-                for(int i=0;i<LazyList.size(_eventListeners);i++)
-                {
-                    EventListener listener=(EventListener)LazyList.get(_eventListeners,i);
-                    if (listener instanceof ComponentListener)
-                        ((ComponentListener)listener).removeComponent(event);
-                }
-            }
-        }
-        
-        if (_components!=null)
-            _components.clear();
-        _components=null;
-        _eventListeners=null;
+        super.destroy();
     }
     
     /* ------------------------------------------------------------ */
