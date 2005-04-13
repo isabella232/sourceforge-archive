@@ -106,7 +106,9 @@ public class JBossUserRealm
             if (_logRef.isDebugEnabled())
                 _logRef.debug("authenticating: Name:"+_principal+" Password:****"/*+password*/);
 
-            if(_subjSecMgrRef!=null &&_subjSecMgrRef.isValid(this._principal, passwordChars))
+            Subject subjectCopy = new Subject();
+            
+            if(_subjSecMgrRef!=null &&_subjSecMgrRef.isValid(this._principal, passwordChars, subjectCopy))
                 {
                     if (_logRef.isDebugEnabled())
                         _logRef.debug("authenticated: "+_principal);
@@ -116,6 +118,7 @@ public class JBossUserRealm
                     SecurityAssociation.setPrincipal(_principal);
 
                     SecurityAssociation.setCredential(passwordChars);
+                    SecurityAssociation.setSubject(subjectCopy);
                     authenticated=true;
                 }
             else
@@ -253,13 +256,15 @@ public class JBossUserRealm
                 _logRef.debug("authenticating: Name:"+_principal);
 
             // Authenticate using the cert as the credential
-            if(_subjSecMgrRef!=null &&_subjSecMgrRef.isValid(_principal,_certs))
+            Subject subjectCopy = new Subject();
+            if(_subjSecMgrRef!=null &&_subjSecMgrRef.isValid(_principal,_certs,subjectCopy))
                 {
                     if (_logRef.isDebugEnabled())
                         _logRef.debug("authenticated: "+_principal);
 
                     SecurityAssociation.setPrincipal(_principal);
                     SecurityAssociation.setCredential(_certs);
+                    SecurityAssociation.setSubject(subjectCopy);
                     authenticated=true;
                 }
             else
