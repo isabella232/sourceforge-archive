@@ -228,6 +228,7 @@ public class ServletHttpContext extends HttpContext
      */
     protected void doStop() throws Exception
     {
+        super.doStop();
         _servletHandler=null;
     }
 }
