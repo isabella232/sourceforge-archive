@@ -119,8 +119,8 @@
     <delete dir="${classes}" quiet="true"/>
     <delete dir="${test.classes}" quiet="true"/>
     <delete file="${mini.http.jar}" quiet="true"/>
-    <ant antfile="${test}/build.xml" inheritAll="false" target="tidy"/>
-    <ant antfile="${extra}/build.xml" inheritAll="false" target="tidy"/>
+    <ant dir="${test}" antfile="${test}/build.xml" inheritAll="false" target="tidy"/>
+    <ant dir="${extra}" antfile="${extra}/build.xml" inheritAll="false" target="tidy"/>
   </target>
   
 
@@ -156,7 +156,7 @@
     </delete>
     -->
     <ant antfile="${test}/build.xml" inheritAll="false" target="clean"/>
-    <ant antfile="${extra}/build.xml" inheritAll="false" target="clean"/>
+    <ant dir="${extra}" antfile="${extra}/build.xml" inheritAll="false" target="clean"/>
   </target>
 
 
@@ -208,7 +208,7 @@
 
   <!-- ==================================================================== -->
   <target name="extra" depends="jars">
-    <ant antfile="${extra}/build.xml" inheritAll="false"/>
+    <ant dir="${extra}" antfile="${extra}/build.xml" inheritAll="false"/>
   </target>
 
 
@@ -431,7 +431,7 @@
   <target name="test" 
           depends="webapps"
           description="Build and run the test harnesses">
-    <ant antfile="${test}/build.xml" inheritAll="true" target="test"/>
+    <ant dir="." antfile="${test}/build.xml" inheritAll="true" target="test"/>
   </target>
 
   <!-- ==================================================================== -->
