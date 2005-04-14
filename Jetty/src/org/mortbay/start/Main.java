@@ -292,7 +292,7 @@ public class Main
                 
                 String file=subject.replace('/',File.separatorChar);
                 if(_debug)
-                    System.err.println((expression?"T ":"F ")+line);
+                    System.err.println((expression?"T ":"F ")+line+" subject="+subject);
                 if(!expression)
                 {
                     done.put(file,file);
@@ -365,7 +365,7 @@ public class Main
                         _classname=cn;
                     }
                 }
-                else
+                else if (subject!=null && subject.length()>0)
                 {
                     // single JAR file
                     File f=new File(file);

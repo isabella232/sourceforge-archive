@@ -458,7 +458,8 @@ public class Dump extends HttpServlet
 
                 table.newRow();
                 table.addHeading("getServletContext():&nbsp;").cell().right();
-                table.addCell("" + getServletContext().getResource(res));
+                try{table.addCell("" + getServletContext().getResource(res));}
+                catch(Exception e) {table.addCell("" +e);}
             }
             
 

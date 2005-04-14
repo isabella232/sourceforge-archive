@@ -1,7 +1,9 @@
 Jetty Versions
 --------------
 
+ + ServletHttpContext correctly calls super.doStop.
  + HttpServer delegates component handling to Container.
+ + Allow ServletHandler in normal HttpContext again.
 
 Jetty-5.1.3 - 7 April 2005
  + Some minor code janitorial services
