@@ -157,6 +157,7 @@
     -->
     <ant antfile="${test}/build.xml" inheritAll="false" target="clean"/>
     <ant dir="${extra}" antfile="${extra}/build.xml" inheritAll="false" target="clean"/>
+    <ant dir="${webapps}/template" antfile="${webapps}/template/build.xml" inheritAll="false" target="clean"/>
   </target>
 
 
@@ -331,6 +332,7 @@
   <target name="webapps" depends="webapp.jetty,webapp.examples"
    description="Build the demonstration webapplications"
    >
+     <ant dir="${webapps}/template" antfile="${webapps}/template/build.xml" inheritAll="false"/>
   </target>
 
   <!-- ==================================================================== -->
