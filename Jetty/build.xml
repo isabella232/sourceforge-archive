@@ -332,7 +332,6 @@
   <target name="webapps" depends="webapp.jetty,webapp.examples"
    description="Build the demonstration webapplications"
    >
-     <ant dir="${webapps}/template" antfile="${webapps}/template/build.xml" inheritAll="false"/>
   </target>
 
   <!-- ==================================================================== -->
