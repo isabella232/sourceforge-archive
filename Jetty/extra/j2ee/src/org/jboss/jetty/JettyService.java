@@ -13,6 +13,7 @@ package org.jboss.jetty;
 
 //------------------------------------------------------------------------------
 
+import java.lang.reflect.Method;
 import java.util.Iterator;
 import javax.management.MBeanRegistration;
 import javax.management.MBeanServer;
@@ -425,6 +426,22 @@ public class JettyService
       //TODO - do better job of passing in config from AbstractWebContainer
       setLenientEjbLink(JettyService.this.getLenientEjbLink ());
       setServer(JettyService.this._server);
+      
+      //Avoiding a code branch for the sake of a single method, 
+      //use reflection to set the defaultSecurityDomain if the
+      //version of JBoss we have bee compiled against supports it.
+      try
+      {
+          Method method = AbstractWebContainer.class.getDeclaredMethod("getDefaultSecurityDomain", new Class[0]);
+          String defaultSecurityDomain = (String)method.invoke (JettyService.this, new Object[0]);
+          method = AbstractWebDeployer.class.getDeclaredMethod("setDefaultSecurityDomain", new Class[]{String.class});
+          method.invoke(this, new Object[]{defaultSecurityDomain});
+      }
+      catch (Exception e)
+      {
+          //ignore - it means the currently executing version of jboss does not support this method
+          log.info("Getter/setter for DefaultSecurityDomain not available in this version of JBoss");
+      }
     }
 
     public void
