@@ -227,7 +227,7 @@ public class FormAuthenticator implements Authenticator
             
             if (request.getUserPrincipal()!=null)
             {
-                form_cred=new FormCredential(request.getUserPrincipal().toString(),
+                form_cred=new FormCredential(request.getUserPrincipal().getName(),
                                              cred!=null?cred.toString():null);
                 form_cred._userPrincipal=(UserPrincipal)request.getUserPrincipal();
                 form_cred._realm=realm;

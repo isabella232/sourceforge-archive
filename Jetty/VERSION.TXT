@@ -1,6 +1,36 @@
 Jetty Versions
 --------------
 
+Jetty-5.1.3 - 7 April 2005
+ + Some minor code janitorial services
+
+Jetty-4.2.24 - 7 April 2005 
+
+Jetty-5.1.3rc4 - 31 March 2005
+ + Moved servlet request wrapping to enterContextScope for geronimo security
+ + refixed / mapping for filters
+ + Allow XmlConfiguration to start with no object.
+ + updated to mx4j 3.0.1
+ + rework InitialContextFactory to use static 'default' namespace
+ + make java:comp/env immutable for webapps as per J2EE spec
+
+Jetty-5.1.3rc3 - 20 March 2005
+ + removed accidental enablement of DEBUG for JettyPlus jndi in log4j.properties
+ + fixed "No getter or setter found" mbean errors
+
+Jetty-5.1.3rc2 - 16 March 2005
+ + Updated JSR154Filter for ERROR dispatch
+ + Fixed context to _context refactory error
+
+Jetty-5.1.3rc1 - 13 March 2005
+ + Fixed typo in context-param handling.
+ + update to demo site look and feel.
+ + Fixed principal naming in FormAuthenticator
+ + JettyPlus updated to JOTM 2.0.5, XAPool 1.4.2
+
+Jetty-4.2.24rc1 
+ + Fixed principal naming in FormAuthenticator
+
 Jetty-5.1.3rc0 - 8 March 2005
  + Flush filter chain caches on servlet/filter change
  + Fixed rollover filename format bug
