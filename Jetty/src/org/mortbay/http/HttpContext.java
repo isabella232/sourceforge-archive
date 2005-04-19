@@ -1257,6 +1257,8 @@ public class HttpContext extends Container
         if (className==null)
             return null;
 
+        if (_loader == null) 
+            return Class.forName(className); 
         return _loader.loadClass(className);
     }
 
