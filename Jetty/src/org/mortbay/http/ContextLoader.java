@@ -201,7 +201,7 @@ public class ContextLoader extends URLClassLoader
         Class c= findLoadedClass(name);
         ClassNotFoundException ex= null;
         boolean tried_parent= false;
-        if (c == null && (_java2compliant || isSystemPath(name)) && !isServerPath(name))
+        if (c == null && (_java2compliant || isSystemPath(name)) && !isServerPath(name) && _parent!=null)
         {
             if (log.isTraceEnabled())
                 log.trace("try loadClass " + name + " from " + _parent);
@@ -234,7 +234,7 @@ public class ContextLoader extends URLClassLoader
             }
         }
 
-        if (c == null && !tried_parent && !isServerPath(name))
+        if (c == null && !tried_parent && !isServerPath(name) && _parent!=null)
         {
             if (log.isTraceEnabled())
                 log.trace("try loadClass " + name + " from " + _parent);
