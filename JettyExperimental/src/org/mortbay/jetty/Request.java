@@ -44,6 +44,7 @@ import org.mortbay.io.BufferUtil;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.IO;
 import org.mortbay.io.Portable;
+import org.mortbay.resource.MimeTypes;
 import org.mortbay.util.ByteArrayOutputStream2;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
@@ -880,7 +881,7 @@ public class Request implements HttpServletRequest
         {
             content_type = HttpFields.valueParameters(content_type, null);
             
-            if (HttpHeaderValues.FORM_ENCODED.equalsIgnoreCase(content_type) && HttpMethods.POST.equals(getMethod()))
+            if (MimeTypes.FORM_ENCODED.equalsIgnoreCase(content_type) && HttpMethods.POST.equals(getMethod()))
             {
                 int content_length = getContentLength();
                 if (content_length <= 0)

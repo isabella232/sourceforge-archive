@@ -50,6 +50,7 @@ import org.mortbay.jetty.HttpMethods;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.WrappedHandler;
+import org.mortbay.resource.MimeTypes;
 import org.mortbay.util.Container;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiException;
@@ -75,7 +76,7 @@ import org.omg.CORBA._PolicyStub;
  */
 public class ServletHandler extends WrappedHandler
 {
-    private static ULogger log = LoggerFactory.getLogger(Holder.class);
+    private static ULogger log = LoggerFactory.getLogger(ServletHolder.class);
 
     /* ------------------------------------------------------------ */
     public static final String __DEFAULT_SERVLET="default";
@@ -274,14 +275,6 @@ public class ServletHandler extends WrappedHandler
     {
         if (!isStarted())
             return false;
-        
-        // Handle TRACE
-        // TODO - move this elsewhere!!
-        if (HttpMethods.TRACE.equals(request.getMethod()))
-        {
-            handleTrace(request,response);
-            return true;
-        }        
 
         // Get the base requests
         Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
@@ -409,72 +402,22 @@ public class ServletHandler extends WrappedHandler
      * @param pathInContext Path within _context.
      * @return PathMap Entries pathspec to ServletHolder
      */
-    public Map.Entry getHolderEntry(String pathInContext)
+    private Map.Entry getHolderEntry(String pathInContext)
     {
         return _servletPathMap.getMatch(pathInContext);
     }
     
+    
 
     /* ------------------------------------------------------------ */
-    protected void notFound(HttpServletRequest request,
-                  HttpServletResponse response)
-        throws IOException
+    /**
+     * @param ipath
+     * @return
+     */
+    public RequestDispatcher getRequestDispatcher(String ipath)
     {
-        if(log.isDebugEnabled())log.debug("Not Found "+request.getRequestURI());
-        String method=request.getMethod();
-            
-        // Not found special requests.
-        if (method.equals(HttpMethods.GET)    ||
-            method.equals(HttpMethods.HEAD)   ||
-            method.equals(HttpMethods.POST))
-        {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
-        }
-        else if (method.equals(HttpMethods.TRACE))
-            handleTrace(request,response);
-        else if (method.equals(HttpMethods.OPTIONS))
-            handleOptions(request,response);
-        else
-        {
-            // Unknown METHOD
-            response.setHeader(HttpHeaders.ALLOW,__AllowString);
-            response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    protected void handleTrace(HttpServletRequest request,
-                            HttpServletResponse response)
-        throws IOException
-    {
-        response.setHeader(HttpHeaders.CONTENT_TYPE,
-                           HttpHeaderValues.MESSAGE_HTTP);
-        /* TODO
-        OutputStream out = response.getOutputStream();
-        ByteArrayISO8859Writer writer = new ByteArrayISO8859Writer();
-        writer.write(request.toString());
-        writer.flush();
-        response.setIntHeader(HttpFields.__ContentLength,writer.size());
-        writer.writeTo(out);
-        out.flush();
-        */
-    }
-    
-    /* ------------------------------------------------------------ */
-    protected void handleOptions(HttpServletRequest request,
-                              HttpServletResponse response)
-        throws IOException
-    {
-        // Handle OPTIONS request for entire server
-        if ("*".equals(request.getRequestURI()))
-        {
-            // 9.2
-            response.setIntHeader(HttpHeaders.CONTENT_LENGTH,0);
-            response.setHeader(HttpHeaders.ALLOW,__AllowString);                
-            response.flushBuffer();
-        }
-        else
-            response.sendError(HttpServletResponse.SC_NOT_FOUND);
+        // TODO Auto-generated method stub
+        return null;
     }
 
 

@@ -28,13 +28,9 @@ public class HttpHeaderValues extends BufferCache
     public final static String
         CLOSE="close",
         CHUNKED="chunked",
-        FORM_ENCODED="application/x-www-form-urlencoded",
         GZIP="gzip",
         IDENTITY="identity",
         KEEP_ALIVE="keep-alive",
-        MESSAGE_HTTP="message/http",
-        MULTIPART_BYTERANGES="multipart/byteranges",
-        TEXT_HTML="text/html",
         CONTINUE="100-continue",
         
         CLIENT0="ISO-8859-1,utf-8;q=0.7, *;q=0.7",
@@ -45,28 +41,22 @@ public class HttpHeaderValues extends BufferCache
     public final static int
         CLOSE_ORDINAL=index++,
         CHUNKED_ORDINAL=index++,
-        FORM_ENCODED_ORDINAL=index++,
         GZIP_ORDINAL=index++,
         IDENTITY_ORDINAL=index++,
         KEEP_ALIVE_ORDINAL=index++,
-        MESSAGE_HTTP_ORDINAL=index++,
-        MULTIPART_BYTERANGES_ORDINAL=index++,
-        TEXT_HTML_ORDINAL=index++,
         CONTINUE_ORDINAL=index++;
 
+
+    
     public final static HttpHeaderValues CACHE= new HttpHeaderValues();
 
     public final static Buffer 
         CLOSE_BUFFER=CACHE.add(CLOSE,CLOSE_ORDINAL),
         CHUNKED_BUFFER=CACHE.add(CHUNKED,CHUNKED_ORDINAL),
-        FORM_ENCODED_BUFFER=CACHE.add(FORM_ENCODED,FORM_ENCODED_ORDINAL),
         GZIP_BUFFER=CACHE.add(GZIP,GZIP_ORDINAL),
         IDENTITY_BUFFER=CACHE.add(IDENTITY,IDENTITY_ORDINAL),
         KEEP_ALIVE_BUFFER=CACHE.add(KEEP_ALIVE,KEEP_ALIVE_ORDINAL),
-        TEXT_HTML_BUFFER=CACHE.add(TEXT_HTML,TEXT_HTML_ORDINAL),
-        CONTINUE_BUFFER=CACHE.add(CONTINUE, CONTINUE_ORDINAL),
-        MESSAGE_HTTP_BUFFER=CACHE.add(MESSAGE_HTTP, MESSAGE_HTTP_ORDINAL),
-        MULTIPART_BYTERANGES_BUFFER=CACHE.add(MULTIPART_BYTERANGES,MULTIPART_BYTERANGES_ORDINAL);
+        CONTINUE_BUFFER=CACHE.add(CONTINUE, CONTINUE_ORDINAL);
         
     static
     {  

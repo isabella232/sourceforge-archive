@@ -24,6 +24,7 @@ import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
+import org.mortbay.resource.MimeTypes;
 
 /* ------------------------------------------------------------ */
 /** HttpGenerator.
@@ -372,7 +373,7 @@ public class HttpGenerator implements HttpTokens
                             
                             case HttpHeaders.CONTENT_TYPE_ORDINAL:
                                 content_type=field;
-                            if (BufferUtil.isPrefix(HttpHeaderValues.MULTIPART_BYTERANGES_BUFFER, field.getValueBuffer()))
+                            if (BufferUtil.isPrefix(MimeTypes.MULTIPART_BYTERANGES_BUFFER, field.getValueBuffer()))
                                 _contentLength=SELF_DEFINING_CONTENT;
                             
                             // write the field to the header buffer

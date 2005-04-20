@@ -310,7 +310,6 @@ public abstract class Resource implements Serializable
     {
         return URIUtil.encodePath(uri);
     }
-    
         
     /* ------------------------------------------------------------ */
     public Object getAssociate()
@@ -332,7 +331,6 @@ public abstract class Resource implements Serializable
     {
         return null;
     }
-    
     
     /* ------------------------------------------------------------ */
     /** Get the resource list as a HTML directory listing.

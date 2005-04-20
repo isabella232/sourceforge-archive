@@ -24,7 +24,7 @@ import org.mortbay.io.BufferCache;
  * @version $Revision$
  * @author gregw
  */
-public class HttpVersions extends BufferCache
+public class HttpVersions
 {
 	public final static String
 		HTTP_0_9 = "",
@@ -36,7 +36,7 @@ public class HttpVersions extends BufferCache
 		HTTP_1_0_ORDINAL=10,
 		HTTP_1_1_ORDINAL=11;
 	
-	public final static HttpVersions CACHE = new HttpVersions();
+	public final static BufferCache CACHE = new BufferCache();
 	
     public final static Buffer 
         HTTP_0_9_BUFFER=CACHE.add(HTTP_0_9,HTTP_0_9_ORDINAL),

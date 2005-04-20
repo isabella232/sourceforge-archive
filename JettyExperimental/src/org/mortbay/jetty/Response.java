@@ -27,6 +27,7 @@ import org.apache.ugli.LoggerFactory;
 import org.apache.ugli.ULogger;
 import org.mortbay.io.IO;
 import org.mortbay.io.Portable;
+import org.mortbay.resource.MimeTypes;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
@@ -376,6 +377,19 @@ public class Response implements HttpServletResponse
      * @see javax.servlet.ServletResponse#setContentLength(int)
      */
     public void setContentLength(int len)
+    {
+        // Protect from setting after committed as default handling
+        // of a servlet HEAD request ALWAYS sets _content length, even
+        // if the getHandling committed the response!
+        if (!isCommitted())
+            _connection.getResponseFields().putLongField(HttpHeaders.CONTENT_LENGTH, len);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see javax.servlet.ServletResponse#setContentLength(int)
+     */
+    public void setLongContentLength(long len)
     {
         // Protect from setting after committed as default handling
         // of a servlet HEAD request ALWAYS sets _content length, even

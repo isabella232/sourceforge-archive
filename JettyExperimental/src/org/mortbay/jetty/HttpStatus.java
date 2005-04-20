@@ -23,7 +23,7 @@ import org.mortbay.io.ByteArrayBuffer;
 /**
  * 
  */
-public class HttpStatus extends BufferCache
+public class HttpStatus
 {
     public final static String Continue= "Continue",
         Switching_Protocols= "Switching Protocols",
@@ -122,7 +122,7 @@ public class HttpStatus extends BufferCache
         ORDINAL_507_Insufficient_Storage= 507,
         ORDINAL_999_Unknown = 999;
 
-    public static final HttpStatus CACHE = new HttpStatus();
+    public static final BufferCache CACHE = new BufferCache();
 
     public static final Buffer
         Continue_BUFFER=CACHE.add(Continue,ORDINAL_100_Continue),

@@ -24,7 +24,7 @@ import org.mortbay.io.BufferCache;
  * @version $Revision$
  * @author gregw
  */
-public class HttpMethods extends BufferCache
+public class HttpMethods
 {
     public final static String GET= "GET",
         POST= "POST",
@@ -46,7 +46,7 @@ public class HttpMethods extends BufferCache
         CONNECT_ORDINAL= 8,
         MOVE_ORDINAL= 9;
 
-    public final static HttpMethods CACHE= new HttpMethods();
+    public final static BufferCache CACHE= new BufferCache();
 
     public final static Buffer 
         GET_BUFFER= CACHE.add(GET, GET_ORDINAL),
