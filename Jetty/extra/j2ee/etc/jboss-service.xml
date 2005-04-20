@@ -71,6 +71,10 @@
        <!-- Configure the Request Listeners                                 -->
        <!-- =============================================================== -->
 
+       <Call class="java.lang.System" name="setProperty">
+         <Arg>org.mortbay.xml.XmlParser.NotValidating</Arg>
+	 <Arg>true</Arg>
+       </Call>
 
        <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
        <!-- Add and configure a HTTP listener to port 8080                       -->
