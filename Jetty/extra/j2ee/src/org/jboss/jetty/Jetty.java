@@ -337,11 +337,13 @@ public class Jetty extends org.mortbay.jetty.Server
         }
         catch (DeploymentException e)
         {
+            _log.error("Undeploying on start due to error", e);
             undeploy(warUrl);
             throw e;
         }
         catch (Exception e)
         {
+            _log.error("Undeploying on start due to error", e);
             undeploy(warUrl);
             throw new DeploymentException(e);
         }
