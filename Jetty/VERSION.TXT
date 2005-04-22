@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + set classloader during webapp doStop
+
 Jetty-5.1.4rc0 - 19 April 2005
  + ServletHttpContext correctly calls super.doStop.
  + HttpServer delegates component handling to Container.

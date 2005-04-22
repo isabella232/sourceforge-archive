@@ -539,54 +539,66 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
     protected void doStop() throws Exception
     {
         MultiException mex=new MultiException();
-        // Context listeners
-        if (_contextListeners != null)
+        
+        
+        Thread thread= Thread.currentThread();
+        ClassLoader lastContextLoader= thread.getContextClassLoader();
+        
+        try
         {
-            if (_webAppHandler != null)
+            // Context listeners
+            if (_contextListeners != null)
             {
-                ServletContextEvent event= new ServletContextEvent(getServletContext());
-                
-                for (int i= LazyList.size(_contextListeners); i-- > 0;)
+                if (_webAppHandler != null)
                 {
-                    try 
+                    ServletContextEvent event= new ServletContextEvent(getServletContext());
+                    
+                    for (int i= LazyList.size(_contextListeners); i-- > 0;)
                     {
-                        ((ServletContextListener)LazyList.get(_contextListeners, i)).contextDestroyed(event);
-                    }
-                    catch (Exception e)
-                    {
-                        mex.add(e);
+                        try 
+                        {
+                            ((ServletContextListener)LazyList.get(_contextListeners, i)).contextDestroyed(event);
+                        }
+                        catch (Exception e)
+                        {
+                            mex.add(e);
+                        }
                     }
                 }
             }
+            _contextListeners= null;
+            
+            // Stop the context
+            try
+            {
+                super.doStop();
+            }
+            catch (Exception e)
+            {
+                mex.add(e);
+            }
+            
+            // clean up
+            clearSecurityConstraints();
+            
+            if (_webAppHandler != null)
+                removeHandler(_webAppHandler);
+            _webAppHandler= null;
+            
+            if (_errorPages != null)
+                _errorPages.clear();
+            _errorPages= null;
+            
+            _webApp=null;
+            _webInf=null;
+            
+            _configurations=null;
+            
         }
-
-        _contextListeners= null;
-
-        // Stop the context
-        try
+        finally
         {
-            super.doStop();
+            thread.setContextClassLoader(lastContextLoader);
         }
-        catch (Exception e)
-        {
-            mex.add(e);
-        }
-
-        // clean up
-        clearSecurityConstraints();
-
-        if (_webAppHandler != null)
-            removeHandler(_webAppHandler);
-        _webAppHandler= null;
-
-        if (_errorPages != null)
-            _errorPages.clear();
-        _errorPages= null;
-
-        _webApp=null;
-        _webInf=null;
-        
-        _configurations=null;
         
         if (mex!=null)
             mex.ifExceptionThrow();
