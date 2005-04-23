@@ -19,8 +19,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.ugli.LoggerFactory;
-import org.apache.ugli.ULogger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.ULogger;
 
 /* ------------------------------------------------------------ */
 /** Handles coding of MIME  "x-www-form-urlencoded".

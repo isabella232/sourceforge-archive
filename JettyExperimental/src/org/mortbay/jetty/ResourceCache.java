@@ -20,9 +20,10 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.ugli.LoggerFactory;
-import org.apache.ugli.ULogger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.ULogger;
 import org.mortbay.resource.Resource;
+import org.mortbay.resource.ResourceFactory;
 import org.mortbay.thread.AbstractLifeCycle;
 
 
@@ -96,8 +97,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
      * @param value associated value
      * @exception IOException
      */
-    public Entry lookup(String pathInContext, Resource resource)
-        throws IOException
+    public Entry lookup(String pathInContext, ResourceFactory factory)
     {
         if(log.isDebugEnabled())log.debug("lookup "+pathInContext);
         
@@ -111,13 +111,15 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
             entry = (Entry)_cache.get(pathInContext);
             if (entry!=null)
             {
-                if(log.isDebugEnabled())log.debug("CACHE HIT: "+entry);
                 if (entry!=null && !entry.isValid())
                     entry=null;
+                else
+                    if(log.isDebugEnabled())log.debug("CACHE HIT: "+entry);
             }
-            
+
             if (entry!=null)
             {
+                Resource resource=factory.getResource(pathInContext);
                 long len = resource.length();
                 if (resource.exists())
                 {
@@ -236,7 +238,6 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
 
         /* ------------------------------------------------------------ */
         boolean isValid()
-            throws IOException
         {
             if (_lastModified==_resource.lastModified())
             {

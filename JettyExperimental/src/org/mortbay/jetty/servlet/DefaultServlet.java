@@ -18,6 +18,7 @@ package org.mortbay.jetty.servlet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -29,8 +30,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.ugli.LoggerFactory;
-import org.apache.ugli.ULogger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.ULogger;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.IO;
@@ -46,6 +47,7 @@ import org.mortbay.jetty.Response;
 import org.mortbay.jetty.ResourceCache.Entry;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.resource.Resource;
+import org.mortbay.resource.ResourceFactory;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.URIUtil;
 
@@ -83,7 +85,7 @@ import org.mortbay.util.URIUtil;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class DefaultServlet extends HttpServlet
+public class DefaultServlet extends HttpServlet implements ResourceFactory
 {
     private static ULogger log = LoggerFactory.getLogger(DefaultServlet.class);
     
@@ -91,12 +93,16 @@ public class DefaultServlet extends HttpServlet
     private ServletHandler _servletHandler;
     private String _AllowString="GET, POST, HEAD, OPTIONS, TRACE";
     
+    private long _maxSizeBytes=1024;
+    private long _maxSizeBuffer=256*1024;
+        
     private boolean _acceptRanges=true;
     private boolean _dirAllowed;
     private boolean _redirectWelcomeFiles;
     private int _minGzipLength=-1;
     private Resource _resourceBase;
     private ResourceCache _cache;
+    
     
     /* ------------------------------------------------------------ */
     public void init()
@@ -180,11 +186,18 @@ public class DefaultServlet extends HttpServlet
      * @param pathInContext The path to find a resource for.
      * @return The resource to serve.
      */
-    protected Resource getResource(String pathInContext)
-    throws IOException
+    public Resource getResource(String pathInContext)
     {
-        Resource r = _resourceBase.addPath(pathInContext);
-        if (log.isDebugEnabled()) log.debug("RESOURCE="+r);
+        Resource r=null;
+        try
+        {
+            r = _resourceBase.addPath(pathInContext);
+            if (log.isDebugEnabled()) log.debug("RESOURCE="+r);
+        }
+        catch (IOException e)
+        {
+            LogSupport.ignore(log, e);
+        }
         return r;
     }
     
@@ -220,7 +233,7 @@ public class DefaultServlet extends HttpServlet
                 resource=getResource(pathInContext);
             else
             {
-                cache=_cache.lookup(pathInContext,resource);
+                cache=_cache.lookup(pathInContext,this);
               
                 if (metaData!=null)
                 {
@@ -268,13 +281,13 @@ public class DefaultServlet extends HttpServlet
                             dispatcher.forward(request,response);
                     }
                 }
-                else if (passConditionalHeaders(request,response,resource,metaData=checkMetaData(metaData,resource)))
+                else if (passConditionalHeaders(request,response,resource,metaData=checkMetaData(metaData,pathInContext,resource)))
                     // If we got here, no forward to index took place
                     sendDirectory(request,response,resource,pathInContext.length()>1);
             }
             else if (passConditionalHeaders(request,response,resource,metaData))    
                 // just send it
-                sendData(request,response,pathInContext,include,resource,metaData=checkMetaData(metaData,resource));
+                sendData(request,response,pathInContext,include,resource,metaData=checkMetaData(metaData,pathInContext,resource));
             
         }
         catch(IllegalArgumentException e)
@@ -300,10 +313,19 @@ public class DefaultServlet extends HttpServlet
     }
 
     /* ------------------------------------------------------------ */
-    private MetaData checkMetaData(MetaData metaData,Resource resource)
+    private MetaData checkMetaData(MetaData metaData,String pathInContext, Resource resource)
     {
         if (metaData==null)
+        {
             metaData=new MetaData(resource);
+            String mime_type=_context.getMimeType(pathInContext);
+            if (mime_type!=null) metaData.setMimeType(new ByteArrayBuffer(mime_type));
+            
+
+          
+            ResourceCache.Entry gzcached=_cache.lookup(pathInContext+".gz",null);
+     
+        }
         return metaData;
     }
     
@@ -407,169 +429,162 @@ public class DefaultServlet extends HttpServlet
             				MetaData metaData)
     throws IOException
     {
-        long resLength=resource.length();
-        
+        Resource content=resource;
+        long content_length=resource.length();
+        Buffer cached;
         
         // Get the output stream (or writer)
         OutputStream out =null;
-        try
-        {
-            out = response.getOutputStream();
-        }
-        catch(IllegalStateException e)
-        {
-            out = new WriterOutputStream(response.getWriter());
-        }
+        try{out = response.getOutputStream();}
+        catch(IllegalStateException e) {out = new WriterOutputStream(response.getWriter());}
         
-        
-        //  see if there are any range headers
+  
+        // see if there are any range headers
         Enumeration reqRanges = include?null:request.getHeaders(HttpHeaders.RANGE);
         
         if ( reqRanges == null || !reqRanges.hasMoreElements())
         {
             //  if there were no ranges, send entire entity
             Resource data=resource;
-            if (!include)
+            if (include)
+            {
+                data.writeTo(out,0,content_length);
+            }
+            else
             {
                 // look for a gziped content.
                 if (_minGzipLength>0)
                 {
                     String accept=request.getHeader(HttpHeaders.ACCEPT_ENCODING);
-                    if (accept!=null && resLength>_minGzipLength &&
-                            !pathInContext.endsWith(".gz"))
+                    if (accept!=null && accept.indexOf("gzip")>=0 &&
+                        !include && content_length>_minGzipLength )
                     {
-                        ResourceCache.Entry gzcached=_cache.lookup(pathInContext+".gz",null);
-                        Resource gz = getResource();
-                        if (gz.exists() && accept.indexOf("gzip")>=0 &&
-                                request.getAttribute(Dispatcher.__INCLUDE_REQUEST_URI)==null)
-                        {
+                        /* 
                             response.setHeader(HttpHeaders.CONTENT_ENCODING,"gzip");
-                            data=gz;
-                            resLength=data.length();
-                        }
+                         */
                     }
                 }
-                writeHeaders(response,resource,cached,resLength);
+                
+                
+                // See if a short direct method can be used?
+                if (!(out instanceof HttpConnection.Output))
+                {
+                    ((HttpConnection.Output)out).sendContent(metaData);
+                }
+                else if (cached !=null)
+                {
+                    writeHeaders(response,metaData,content_length);
+                    cached.writeTo(out);
+                }
+                else
+                {
+                    // Write content normally
+                    writeHeaders(response,metaData,content_length);
+                    data.writeTo(out,0,content_length);
+                }
             }
-            
-            // See if a short direct method can be used?
-            if (out instanceof HttpConnection.Output)
-            {
-            
-            }
-            
-            data.writeTo(out,0,resLength);
-            return;
         }
-        
-        
-        
-        
-        // Parse the satisfiable ranges
-        List ranges =InclusiveByteRange.satisfiableRanges(reqRanges,resLength);
-        
-        //  if there are no satisfiable ranges, send 416 response
-        if (ranges==null || ranges.size()==0)
-        {
-            writeHeaders(response, resource,cached, resLength);
-            response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
-            response.setHeader(HttpHeaders.CONTENT_RANGE, 
-                    InclusiveByteRange.to416HeaderRangeString(resLength));
-            resource.writeTo(out,0,resLength);
-            return;
-        }
-        
-        
-        //  if there is only a single valid range (must be satisfiable 
-        //  since were here now), send that range with a 216 response
-        if ( ranges.size()== 1)
-        {
-            InclusiveByteRange singleSatisfiableRange =
-                (InclusiveByteRange)ranges.get(0);
-            long singleLength = singleSatisfiableRange.getSize(resLength);
-            writeHeaders(response,resource,cached,singleLength);
-            response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-            response.setHeader(HttpHeaders.CONTENT_RANGE, 
-                    singleSatisfiableRange.toHeaderRangeString(resLength));
-            resource.writeTo(out,singleSatisfiableRange.getFirst(resLength),singleLength);
-            return;
-        }
-        
-        
-        //  multiple non-overlapping valid ranges cause a multipart
-        //  216 response which does not require an overall 
-        //  content-length header
-        //
-        writeHeaders(response,resource,cached,-1);
-        String mimetype = cached!=null?cached.getMimeType().toString():_context.getMimeType(pathInContext);
-        MultiPartResponse multi = new MultiPartResponse(response.getOutputStream());
-        response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
-        
-        // If the request has a "Request-Range" header then we need to
-        // send an old style multipart/x-byteranges Content-Type. This
-        // keeps Netscape and acrobat happy. This is what Apache does.
-        String ctp;
-        if (request.getHeader(HttpHeaders.REQUEST_RANGE)!=null)
-            ctp = "multipart/x-byteranges; boundary=";
         else
-            ctp = "multipart/byteranges; boundary=";
-        response.setContentType(ctp+multi.getBoundary());
-        
-        InputStream in=resource.getInputStream();
-        long pos=0;
-        
-        for (int i=0;i<ranges.size();i++)
         {
-            InclusiveByteRange ibr = (InclusiveByteRange) ranges.get(i);
-            String header=HttpHeaders.CONTENT_RANGE+": "+
-            ibr.toHeaderRangeString(resLength);
-            multi.startPart(mimetype,new String[]{header});
             
-            long start=ibr.getFirst(resLength);
-            long size=ibr.getSize(resLength);
-            if (in!=null)
+            // Parse the satisfiable ranges
+            List ranges =InclusiveByteRange.satisfiableRanges(reqRanges,content_length);
+            
+            //  if there are no satisfiable ranges, send 416 response
+            if (ranges==null || ranges.size()==0)
             {
-                // Handle non cached resource
-                if (start<pos)
-                {
-                    in.close();
-                    in=resource.getInputStream();
-                    pos=0;
-                }
-                if (pos<start)
-                {
-                    in.skip(start-pos);
-                    pos=start;
-                }
-                IO.copy(in,out,size);
-                pos+=size;
+                writeHeaders(response, resource,cached, content_length);
+                response.setStatus(HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE);
+                response.setHeader(HttpHeaders.CONTENT_RANGE, 
+                        InclusiveByteRange.to416HeaderRangeString(content_length));
+                resource.writeTo(out,0,content_length);
+                return;
             }
-            else
-                // Handle cached resource
-                (resource).writeTo(out,start,size);
             
+            
+            //  if there is only a single valid range (must be satisfiable 
+            //  since were here now), send that range with a 216 response
+            if ( ranges.size()== 1)
+            {
+                InclusiveByteRange singleSatisfiableRange =
+                    (InclusiveByteRange)ranges.get(0);
+                long singleLength = singleSatisfiableRange.getSize(content_length);
+                writeHeaders(response,resource,cached,singleLength);
+                response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+                response.setHeader(HttpHeaders.CONTENT_RANGE, 
+                        singleSatisfiableRange.toHeaderRangeString(content_length));
+                resource.writeTo(out,singleSatisfiableRange.getFirst(content_length),singleLength);
+                return;
+            }
+            
+            
+            //  multiple non-overlapping valid ranges cause a multipart
+            //  216 response which does not require an overall 
+            //  content-length header
+            //
+            writeHeaders(response,resource,cached,-1);
+            String mimetype = cached!=null?cached.getMimeType().toString():_context.getMimeType(pathInContext);
+            MultiPartResponse multi = new MultiPartResponse(response.getOutputStream());
+            response.setStatus(HttpServletResponse.SC_PARTIAL_CONTENT);
+            
+            // If the request has a "Request-Range" header then we need to
+            // send an old style multipart/x-byteranges Content-Type. This
+            // keeps Netscape and acrobat happy. This is what Apache does.
+            String ctp;
+            if (request.getHeader(HttpHeaders.REQUEST_RANGE)!=null)
+                ctp = "multipart/x-byteranges; boundary=";
+            else
+                ctp = "multipart/byteranges; boundary=";
+            response.setContentType(ctp+multi.getBoundary());
+            
+            InputStream in=resource.getInputStream();
+            long pos=0;
+            
+            for (int i=0;i<ranges.size();i++)
+            {
+                InclusiveByteRange ibr = (InclusiveByteRange) ranges.get(i);
+                String header=HttpHeaders.CONTENT_RANGE+": "+
+                ibr.toHeaderRangeString(content_length);
+                multi.startPart(mimetype,new String[]{header});
+                
+                long start=ibr.getFirst(content_length);
+                long size=ibr.getSize(content_length);
+                if (in!=null)
+                {
+                    // Handle non cached resource
+                    if (start<pos)
+                    {
+                        in.close();
+                        in=resource.getInputStream();
+                        pos=0;
+                    }
+                    if (pos<start)
+                    {
+                        in.skip(start-pos);
+                        pos=start;
+                    }
+                    IO.copy(in,out,size);
+                    pos+=size;
+                }
+                else
+                    // Handle cached resource
+                    (resource).writeTo(out,start,size);
+                
+            }
+            if (in!=null)
+                in.close();
+            multi.close();
         }
-        if (in!=null)
-            in.close();
-        multi.close();
-        
         return;
     }
     
     /* ------------------------------------------------------------ */
-    protected void writeHeaders(HttpServletResponse response,Resource resource,ResourceCache.Entry cached,long count)
+    protected void writeHeaders(HttpServletResponse response,MetaData metaData,long count)
     throws IOException
     {
-        if (cached!=null)
-        {
-            response.setContentType(cached.getMimeType().toString());
-            response.setHeader(HttpHeaders.LAST_MODIFIED,cached.getLastModified().toString());
-        }
-        else
-        {
-            response.setContentType(_context.getMimeType(resource.getName()));
-            response.setHeader(HttpHeaders.LAST_MODIFIED,cached.getLastModified().toString());
-        }
+        response.setContentType(metaData.getMimeType().toString());
+        response.setHeader(HttpHeaders.LAST_MODIFIED,metaData.getLastModified().toString());
+       
 
         if (count != -1)
         {

@@ -32,8 +32,8 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.ugli.LoggerFactory;
-import org.apache.ugli.ULogger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.ULogger;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.Loader;
 import org.mortbay.util.LogSupport;

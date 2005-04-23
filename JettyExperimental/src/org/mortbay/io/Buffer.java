@@ -15,6 +15,8 @@
 
 package org.mortbay.io;
 
+import java.io.OutputStream;
+
 
 /**
  * Byte Buffer interface.
@@ -341,6 +343,12 @@ public interface Buffer extends Cloneable
      * @return a <code>String</code> value describing the state and contents of the buffer.
      */
     String toDetailString();
+
+    /* ------------------------------------------------------------ */
+    /** Write the buffer's contents to the output stream
+     * @param out
+     */
+    void writeTo(OutputStream out);
     
     /* 
      * Buffers implementing this interface should be compared with case insensitive equals
@@ -348,5 +356,6 @@ public interface Buffer extends Cloneable
      */
     public interface CaseInsensitve
     {}
+
     
 }

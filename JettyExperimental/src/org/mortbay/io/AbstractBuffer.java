@@ -15,6 +15,9 @@
 
 package org.mortbay.io;
 
+import java.io.IOException;
+import java.io.OutputStream;
+
 /**
  * @author gregw
  *  
@@ -560,5 +563,18 @@ public abstract class AbstractBuffer implements Buffer
             return _string;
         }
         return new String(asArray(), 0, length());
+    }
+    
+    public void writeTo(OutputStream out)
+    	throws IOException
+    {
+        byte array[] = array();
+        if (array!=null)
+            out.write(array,_get,_put-_get);
+        else
+        {
+            for (int i=_get;i<_put;i++)
+                out.write(peek(i));
+        } 
     }
 }

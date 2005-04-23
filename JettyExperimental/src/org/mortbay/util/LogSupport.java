@@ -16,8 +16,8 @@
 package org.mortbay.util;
 import java.lang.reflect.Method;
 
-import org.apache.ugli.LoggerFactory;
-import org.apache.ugli.ULogger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.ULogger;
 
 /*-----------------------------------------------------------------------*/
 /** Log Support class.
