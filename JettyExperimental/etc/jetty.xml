@@ -46,11 +46,24 @@
 	                      <Item>/dump/*</Item>
 	                      <Item>/exact</Item>
 	                      <Item>*.DUMP</Item>
+	                     </Array>
+	                    </Set>
+	                  </New>
+	                </Item>
+	                
+	                <Item>
+	                  <New class="org.mortbay.jetty.servlet.ServletHolder">
+	                    <Set name="name">Default</Set>
+	                    <Set name="className">org.mortbay.jetty.servlet.DefaultServlet</Set>
+	                    <Set name="paths">
+	                     <Array type="java.lang.String">
 	                      <Item>/</Item>
 	                     </Array>
 	                    </Set>
 	                  </New>
 	                </Item>
+	                
+	                
 	              </Array>
 	            </Set>
 	          </New>

@@ -27,7 +27,6 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.ULogger;
 import org.mortbay.io.IO;
 import org.mortbay.io.Portable;
-import org.mortbay.resource.MimeTypes;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;

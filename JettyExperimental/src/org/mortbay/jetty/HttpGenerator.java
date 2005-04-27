@@ -24,7 +24,6 @@ import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
-import org.mortbay.resource.MimeTypes;
 
 /* ------------------------------------------------------------ */
 /** HttpGenerator.
@@ -542,9 +541,9 @@ public class HttpGenerator implements HttpTokens
         
         if (_endp==null)
         {
-            if (_needCRLF)
+            if (_needCRLF && _buffer!=null)
                 _buffer.put(CRLF);
-            if (_needEOC)
+            if (_needEOC && _buffer!=null)
                 _buffer.put(LAST_CHUNK);
             return;
         }
@@ -655,7 +654,7 @@ public class HttpGenerator implements HttpTokens
             // Chunk buffer if need be
             if (_contentLength==CHUNKED_CONTENT)
             {
-                int size = _buffer.length();
+                int size = _buffer==null?0:_buffer.length();
                 if (size>0)
                 {
                     // Prepare a chunk!
@@ -700,16 +699,32 @@ public class HttpGenerator implements HttpTokens
                 // If we need EOC and everything written 
                 if (_needEOC && (_content==null || _content.length()==0))
                 {
-                    if (_needCRLF && _buffer.space()>=2)
+                    if (_needCRLF)
                     {
-                        _buffer.put(CRLF);
-                        _needCRLF=false;
+                        if (_buffer==null && _header.space()>=2)
+                        {
+                            _header.put(CRLF);
+                            _needCRLF=false;
+                        }
+                        else if (_buffer.space()>=2)
+                        {
+                       	 	_buffer.put(CRLF);
+                       	 	_needCRLF=false;
+                        }
                     }
                  
-                    if (!_needCRLF && _needEOC && _buffer.space()>= LAST_CHUNK.length)
+                    if (!_needCRLF && _needEOC)
                     {
-                        _buffer.put(LAST_CHUNK);
-                        _needEOC=false;
+                        if (_buffer==null && _header.space()>= LAST_CHUNK.length)
+                        {
+                            _header.put(LAST_CHUNK);
+                            _needEOC=false;
+                        }
+                        else if (_buffer.space()>= LAST_CHUNK.length)
+                        {
+                            _buffer.put(LAST_CHUNK);
+                            _needEOC=false;
+                        }
                     }
                 }
             }

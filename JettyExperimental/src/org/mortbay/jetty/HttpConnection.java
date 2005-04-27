@@ -528,7 +528,8 @@ public class HttpConnection
             _buf1.put((byte)b);
             write(_buf1);
         }
-        
+
+        /* ------------------------------------------------------------ */
         private void write(Buffer buffer)
         	throws IOException
         {
@@ -564,11 +565,25 @@ public class HttpConnection
             if (_generator.getContentAdded()>0)
                 Portable.throwIllegalState("!empty");
             
-            if (content instanceof Buffer)
+            if (content instanceof HttpContent)
+            {
+                HttpContent c = (HttpContent)content;
+                if (c.getContentType()!=null && !_responseFields.containsKey(HttpHeaders.CONTENT_TYPE_BUFFER))
+                    _responseFields.add(HttpHeaders.CONTENT_TYPE_BUFFER, c.getContentType());
+                if (c.getContentLength()>0)
+                    _responseFields.addLongField(HttpHeaders.CONTENT_LENGTH_BUFFER, c.getContentLength());
+                if (c.getLastModified()!=null)
+                    _responseFields.add(HttpHeaders.LAST_MODIFIED_BUFFER, c.getLastModified());
+                if (c.getBuffer()!=null)
+                    _generator.addContent(c.getBuffer(),HttpGenerator.LAST);
+                commitResponse(HttpGenerator.LAST);
+            }
+            else if (content instanceof Buffer)
             {
                 _generator.addContent((Buffer)content,HttpGenerator.LAST);
                 commitResponse(HttpGenerator.LAST);
             }
+            
             else
                 Portable.throwIllegalArgument("type?");
         }

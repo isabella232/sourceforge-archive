@@ -15,6 +15,7 @@
 
 package org.mortbay.io;
 
+import java.io.IOException;
 import java.io.OutputStream;
 
 
@@ -348,7 +349,7 @@ public interface Buffer extends Cloneable
     /** Write the buffer's contents to the output stream
      * @param out
      */
-    void writeTo(OutputStream out);
+    void writeTo(OutputStream out) throws IOException;
     
     /* 
      * Buffers implementing this interface should be compared with case insensitive equals

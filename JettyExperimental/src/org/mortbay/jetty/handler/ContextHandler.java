@@ -36,7 +36,9 @@ import javax.servlet.ServletException;
 
 import org.slf4j.LoggerFactory;
 import org.slf4j.ULogger;
+import org.mortbay.io.Buffer;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.Request;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.LogSupport;
@@ -80,6 +82,7 @@ public class ContextHandler extends WrappedHandler
     private String _servletContextName;
     private Resource _resourceBase;  
     private String _docRoot;
+    private MimeTypes _mimeTypes;
     
     /* ------------------------------------------------------------ */
     /**
@@ -193,6 +196,10 @@ public class ContextHandler extends WrappedHandler
                 old_classloader=current_thread.getContextClassLoader();
                 current_thread.setContextClassLoader(_classLoader);
             }
+            
+
+            if (_mimeTypes==null)
+                _mimeTypes=new MimeTypes();
             
             old_context=__context.get();
             __context.set(_context);
@@ -393,6 +400,24 @@ public class ContextHandler extends WrappedHandler
             throw new IllegalArgumentException(resourceBase);
         }
     }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the mimeTypes.
+     */
+    public MimeTypes getMimeTypes()
+    {
+        return _mimeTypes;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param mimeTypes The mimeTypes to set.
+     */
+    public void setMimeTypes(MimeTypes mimeTypes)
+    {
+        _mimeTypes = mimeTypes;
+    }
     
     /* ------------------------------------------------------------ */
     /** Context.
@@ -405,6 +430,13 @@ public class ContextHandler extends WrappedHandler
         /* ------------------------------------------------------------ */
         private Context()
         {}
+
+        /* ------------------------------------------------------------ */
+        public ContextHandler getContextHandler()
+        {
+            // TODO reduce visibility of this method
+            return ContextHandler.this;
+        }
 
         /* ------------------------------------------------------------ */
         /* 
@@ -431,7 +463,11 @@ public class ContextHandler extends WrappedHandler
          */
         public String getMimeType(String file)
         {
-            // TODO Auto-generated method stub
+            if (_mimeTypes==null)
+                return null;
+            Buffer mime = _mimeTypes.getMimeByExtension(file);
+            if (mime!=null)
+                return mime.toString();
             return null;
         }
 

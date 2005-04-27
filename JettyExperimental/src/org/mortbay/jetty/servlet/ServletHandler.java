@@ -47,10 +47,10 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpHeaderValues;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.HttpMethods;
+import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.WrappedHandler;
-import org.mortbay.resource.MimeTypes;
 import org.mortbay.util.Container;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiException;
@@ -207,8 +207,11 @@ public class ServletHandler extends WrappedHandler
         _servletPathMap=pm;
         _servletNameMap=nm;
         
-        System.err.println("servletNameMap="+nm);
-        System.err.println("servletPathMap="+pm);
+        if (log.isDebugEnabled())
+        {
+            log.debug("servletNameMap="+nm);
+            log.debug("servletPathMap="+pm);
+        }
         
         if (isStarted())
             initializeServlets();
@@ -391,7 +394,8 @@ public class ServletHandler extends WrappedHandler
         {
             if (servletHolder!=null && response!=null)
             {
-                // TODO ??? response.complete();
+                if (!response.isCommitted())
+                    response.flushBuffer(); // TODO signal last flush
             }
         }
         return true;

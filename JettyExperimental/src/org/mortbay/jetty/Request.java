@@ -44,7 +44,6 @@ import org.mortbay.io.BufferUtil;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.IO;
 import org.mortbay.io.Portable;
-import org.mortbay.resource.MimeTypes;
 import org.mortbay.util.ByteArrayOutputStream2;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;

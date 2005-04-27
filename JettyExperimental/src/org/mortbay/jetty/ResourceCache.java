@@ -117,7 +117,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                     if(log.isDebugEnabled())log.debug("CACHE HIT: "+entry);
             }
 
-            if (entry!=null)
+            if (entry==null)
             {
                 Resource resource=factory.getResource(pathInContext);
                 long len = resource.length();
@@ -136,12 +136,13 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                         
                         if(log.isDebugEnabled())log.debug("CACHED: "+resource);
                         entry= new Entry(pathInContext,resource);
+                        newEntry=true;
                     }
                 }
             }
         }
         
-        if (!newEntry)
+        if (!newEntry && entry!=null)
         {
             synchronized(entry)
             {

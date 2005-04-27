@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.resource;
+package org.mortbay.jetty;
 
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -73,7 +73,7 @@ public class MimeTypes
     private final static Map __encodings = new HashMap();
     static
     {
-        ResourceBundle mime = ResourceBundle.getBundle("org/mortbay/resource/mime");
+        ResourceBundle mime = ResourceBundle.getBundle("org/mortbay/jetty/mime");
         Enumeration i = mime.getKeys();
         while(i.hasMoreElements())
         {
@@ -82,12 +82,12 @@ public class MimeTypes
             __dftMimeMap.put(StringUtil.asciiToLowerCase(ext),normalizeMimeType(m));
         }
         
-        ResourceBundle encoding = ResourceBundle.getBundle("org/mortbay/resource/encoding");
+        ResourceBundle encoding = ResourceBundle.getBundle("org/mortbay/jetty/encoding");
         i = encoding.getKeys();
         while(i.hasMoreElements())
         {
-            String type = normalizeMimeType((String)i.nextElement());
-            __encodings.put(type,encoding.getString(type));
+            Buffer type = normalizeMimeType((String)i.nextElement());
+            __encodings.put(type,encoding.getString(type.toString()));
         }
         
         // TODO add common mime type and encoding combinations.
@@ -139,9 +139,9 @@ public class MimeTypes
      * @return MIME type matching the longest dot extension of the
      * file name.
      */
-    public String getMimeByExtension(String filename)
+    public Buffer getMimeByExtension(String filename)
     {
-        String type=null;
+        Buffer type=null;
 
         if (filename!=null)
         {
@@ -155,18 +155,18 @@ public class MimeTypes
 
                 String ext=StringUtil.asciiToLowerCase(filename.substring(i+1));
                 if (_mimeMap!=null)
-                    type = (String)_mimeMap.get(ext);
+                    type = (Buffer)_mimeMap.get(ext);
                 if (type==null)
-                    type=(String)__dftMimeMap.get(ext);
+                    type=(Buffer)__dftMimeMap.get(ext);
             }
         }
 
         if (type==null)
         {
             if (_mimeMap!=null)
-                type=(String)_mimeMap.get("*");
+                type=(Buffer)_mimeMap.get("*");
              if (type==null)
-                 type=(String)__dftMimeMap.get("*");
+                 type=(Buffer)__dftMimeMap.get("*");
         }
 
         return type;
@@ -245,12 +245,12 @@ public class MimeTypes
 
 
     /* ------------------------------------------------------------ */
-    private static synchronized String normalizeMimeType(String type)
+    private static synchronized Buffer normalizeMimeType(String type)
     {
         Buffer b =CACHE.get(type);
         if (b==null)
             b=CACHE.add(type,index++);
-        return b.toString();
+        return b;
     }
 
 

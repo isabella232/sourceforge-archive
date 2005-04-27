@@ -16,6 +16,7 @@
 package org.mortbay.jetty;
 
 import java.io.IOException;
+import java.net.SocketTimeoutException;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
@@ -229,8 +230,15 @@ public class HttpParser implements HttpTokens
                 if (_buffer == _content) _buffer.compact();
 
                 if (_buffer.space() == 0) Portable.throwIO("FULL");
-
-                filled = _endp.fill(_buffer);
+                
+                try
+                {
+                    filled = _endp.fill(_buffer);
+                }
+                catch(SocketTimeoutException toe)
+                {
+                    Portable.throwIO("EOF");
+                }
             }
             
             if (filled < 0 && _state == STATE_EOF_CONTENT)

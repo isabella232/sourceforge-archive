@@ -41,6 +41,7 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferCache;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.ByteArrayBuffer;
+import org.mortbay.io.View;
 import org.mortbay.util.DateCache;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.QuotedStringTokenizer;
@@ -324,6 +325,12 @@ public class HttpFields
         return (Field)_bufferMap.get(name);
     }
     
+    
+    /* ------------------------------------------------------------ */
+    public boolean containsKey(Buffer name)
+    {
+        return _bufferMap.containsKey(name);
+    }
     
     /* ------------------------------------------------------------ */
     public boolean containsKey(String name)
@@ -803,6 +810,18 @@ public class HttpFields
     
     /* -------------------------------------------------------------- */
     /**
+     * Sets the value of an long field.
+     * @param name the field name
+     * @param value the field long value
+     */
+    public void addLongField(Buffer name, long value)
+    {
+        Buffer v=BufferUtil.toBuffer(value);
+        add(name,v,value);
+    }
+    
+    /* -------------------------------------------------------------- */
+    /**
      * Sets the value of a date field.
      * @param name the field name
      * @param date the field date value
@@ -1202,7 +1221,7 @@ public class HttpFields
     public static final class Field
     {
         private Buffer _name;
-        private Buffer _value;
+        private View _value;
         private long _numValue;
         private Field _next;
         private Field _prev;
@@ -1212,7 +1231,7 @@ public class HttpFields
         private Field(Buffer name, Buffer value, long numValue, int revision)
         {
             _name=name;
-            _value=value;
+            _value=new View(value);
             _numValue=numValue;
             _next=null;
             _prev=null;
@@ -1240,9 +1259,15 @@ public class HttpFields
          */
         private void reset(Buffer value, long numValue, int revision)
         {  
-            if (_value==null || !_value.equals(value))
+            if (_value==null)
             {
-                _value=value.asReadOnlyBuffer();
+                _value=new View(value);
+                _numValue=numValue;
+            }
+            else if (!_value.equals(value))
+            {
+                // TODO - the chances of this being right are small, as no copy is made!
+                _value.update(value);
                 _numValue=numValue;
             }
             _revision=revision;
