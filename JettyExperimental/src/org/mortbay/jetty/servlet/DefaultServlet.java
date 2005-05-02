@@ -19,7 +19,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -31,8 +30,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.IO;
@@ -49,12 +46,13 @@ import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.MultiPartResponse;
 import org.mortbay.jetty.ResourceCache;
 import org.mortbay.jetty.Response;
-import org.mortbay.jetty.ResourceCache.Entry;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.resource.Resource;
 import org.mortbay.resource.ResourceFactory;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.URIUtil;
+import org.slf4j.LoggerFactory;
+import org.slf4j.ULogger;
 
 
 
@@ -88,6 +86,9 @@ import org.mortbay.util.URIUtil;
  *  maxDirectBuffer   The maximum size of NIO direct buffer content
  *  maxFileBuffer     The maximum size of NIO file mapped buffer content
  * 
+ *  maxCacheSize      The maximum total size of the cache or 0 for no cache.
+ *  maxCachedFileSize The maximum size of a file to cache
+ *  maxCachedFiles    The maximum number of files to cache
  * </PRE>
  *                                                               
  * The MOVE method is allowed if PUT and DELETE are allowed             
@@ -108,7 +109,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     private int _maxFileBuffer=256*1024;
         
     private boolean _acceptRanges=true;
-    private boolean _dirAllowed;
+    private boolean _dirAllowed=true;
     private boolean _redirectWelcome;
     private boolean _gzip=true;
     
@@ -166,8 +167,28 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 _resourceBase=Resource.newResource(_context.getResource("/"));
             
 
+            int max_cache_size=getInitInt("maxCacheSize", -2);
+            if (max_cache_size>0)
+            {
+                if (_cache==null)
+                    _cache=new ResourceCache();
+                _cache.setMaxCacheSize(max_cache_size);    
+            }
+            else if (max_cache_size!=-2)
+                _cache=null;
+            
             if (_cache!=null)
+            {
+                int max_cached_file_size=getInitInt("maxCachedFileSize", -2);
+                if (max_cached_file_size>=-1)
+                    _cache.setMaxCachedFileSize(max_cached_file_size);    
+                
+                int max_cached_files=getInitInt("maxCachedFiles", -2);
+                if (max_cached_files>=-1)
+                    _cache.setMaxCachedFiles(max_cached_files);
+                
                 _cache.start();
+            }
         }
         catch (Exception e) 
         {
@@ -410,52 +431,55 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         Buffer mime_type=_mimeTypes.getMimeByExtension(pathInContext);
         if (mime_type!=null) content.setContentType(mime_type);
         
-        Buffer buffer=null;
-        long length=resource.length();
-        if (length<_maxByteBuffer)
+        if (!resource.isDirectory())   
         {
-            buffer=new ByteArrayBuffer((int)length);
-            byte[] array = buffer.array();
-            InputStream in=resource.getInputStream();
-            
-            int l=0;
-            while(l<length)
+            Buffer buffer=null;
+            long length=resource.length();
+            if (length<_maxByteBuffer)
             {
-                int r=in.read(array,l,array.length-l);
-                if (r<0)
-                    throw new IOException("unexpect EOF");
-                l+=r;
+                buffer=new ByteArrayBuffer((int)length);
+                byte[] array = buffer.array();
+                InputStream in=resource.getInputStream();
+                
+                int l=0;
+                while(l<length)
+                {
+                    int r=in.read(array,l,array.length-l);
+                    if (r<0)
+                        throw new IOException("unexpect EOF");
+                    l+=r;
+                }
+                buffer.setPutIndex(l);
             }
-            buffer.setPutIndex(l);
-        }
-        else if (length<_maxDirectBuffer)
-        {
-            buffer=new NIOBuffer((int)length,NIOBuffer.DIRECT);
-            byte[] buf = new byte[8192];
-            InputStream in=resource.getInputStream();
-            
-            int l=0;
-            while(l<length)
+            else if (length<_maxDirectBuffer)
             {
-                int r=in.read(buf,0,buf.length);
-                if (r<0)
-                    throw new IOException("unexpect EOF");
-                buffer.put(buf,0,r);
-                l+=r;
+                buffer=new NIOBuffer((int)length,NIOBuffer.DIRECT);
+                byte[] buf = new byte[8192];
+                InputStream in=resource.getInputStream();
+                
+                int l=0;
+                while(l<length)
+                {
+                    int r=in.read(buf,0,buf.length);
+                    if (r<0)
+                        throw new IOException("unexpect EOF");
+                    buffer.put(buf,0,r);
+                    l+=r;
+                }
             }
-        }
-        else if (length<_maxFileBuffer)
-        {
-            File file = resource.getFile();
-            if (file!=null)
-                buffer=new NIOBuffer(file);
-        }
-        
-        if (buffer!=null)
-        {
-            content.setBuffer(buffer);
-            if (log.isDebugEnabled())
-                log.debug("content buffer is "+buffer.getClass());
+            else if (length<_maxFileBuffer)
+            {
+                File file = resource.getFile();
+                if (file!=null)
+                    buffer=new NIOBuffer(file);
+            }
+            
+            if (buffer!=null)
+            {
+                content.setBuffer(buffer);
+                if (log.isDebugEnabled())
+                    log.debug("content buffer is "+buffer.getClass());
+            }
         }
         return content;
     }
@@ -541,13 +565,12 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             "No directory");
             return;
         }
+        
+        // TODO cache this?
         data=dir.getBytes("UTF-8");
         response.setContentType("text/html; charset=UTF-8");
         response.setContentLength(data.length);
-        
-        if (!request.getMethod().equals(HttpMethods.HEAD))
-            // TODO - maybe a better way?
-            response.getOutputStream().write(data);
+        response.getOutputStream().write(data);
     }
     
     

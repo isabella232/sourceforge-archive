@@ -313,10 +313,12 @@ public abstract class AbstractBuffer implements Buffer
         }
         else
         {
+            _view.update(this.buffer());
             _view.setMarkIndex(-1);
             _view.setGetIndex(0);
             _view.setPutIndex(index + length);
             _view.setGetIndex(index);
+            
         }
         return _view;
     }

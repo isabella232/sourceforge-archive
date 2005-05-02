@@ -17,19 +17,23 @@ package org.mortbay.jetty;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Locale;
 
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
 import org.mortbay.io.IO;
 import org.mortbay.io.Portable;
+import org.mortbay.jetty.handler.ErrorPageHandler;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
+import org.mortbay.util.URIUtil;
+import org.slf4j.LoggerFactory;
+import org.slf4j.ULogger;
 
 /* ------------------------------------------------------------ */
 /** Response.
@@ -48,11 +52,25 @@ public class Response implements HttpServletResponse
     
     private static ServletWriter __nullServletWriter;
     private static ServletOutputStream __nullServletOut;
+    private static String[] __reasons = new String[600];
     static
     {
         try{
             __nullServletWriter = new ServletWriter(IO.getNullStream());
             __nullServletOut = new NullOutput();
+            
+            Field[] fields = HttpServletResponse.class.getDeclaredFields();
+            for (int i=0;i<fields.length;i++)
+            {
+                if ((fields[i].getModifiers()&Modifier.STATIC)!=0 &&
+                    fields[i].getName().startsWith("SC_"))
+                {
+                    int code = fields[i].getInt(null);
+                    if (code<__reasons.length)
+                        __reasons[code]=fields[i].getName().substring(3);
+                }    
+            }
+            
         }
         catch (Exception e)
         {
@@ -160,12 +178,30 @@ public class Response implements HttpServletResponse
     /* 
      * @see javax.servlet.http.HttpServletResponse#sendError(int, java.lang.String)
      */
-    public void sendError(int sc, String msg) throws IOException
+    public void sendError(int code, String message) throws IOException
     {
-        _status=sc;
-        _reason=msg;
+        setStatus(code,message);
         
-        // TODO Auto-generated method stub
+        // Generate normal error page.
+        Request request=_connection.getRequest();
+        
+        // If we are allowed to have a body 
+        if (code!=SC_NO_CONTENT &&
+            code!=SC_NOT_MODIFIED &&
+            code!=SC_PARTIAL_CONTENT &&
+            code>=SC_OK)
+        {
+            new ErrorPageHandler().handle(_connection.getRequest(),this,Handler.ERROR);
+        }
+        else if (code!=SC_PARTIAL_CONTENT) 
+        {
+            _connection.getRequestFields().remove(HttpHeaders.CONTENT_TYPE_BUFFER);
+            _connection.getRequestFields().remove(HttpHeaders.CONTENT_LENGTH_BUFFER);
+            _characterEncoding=null;
+            _mimeType=null;
+        }
+        
+        complete();
 
     }
 
@@ -175,11 +211,7 @@ public class Response implements HttpServletResponse
      */
     public void sendError(int sc) throws IOException
     {
-        _status=sc;
-        _reason=null;
-        
-        // TODO Auto-generated method stub
-
+        sendError(sc,null);
     }
 
     /* ------------------------------------------------------------ */
@@ -188,7 +220,30 @@ public class Response implements HttpServletResponse
      */
     public void sendRedirect(String location) throws IOException
     {
-        // TODO Auto-generated method stub
+        if (location==null)
+            throw new IllegalArgumentException();
+        
+        if (!URIUtil.hasScheme(location))
+        {
+            StringBuffer buf = _connection.getRequest().getRootURL();
+            if (location.startsWith("/"))
+                buf.append(URIUtil.canonicalPath(location));
+            else
+            {
+                String path=_connection.getRequest().getRequestURI();
+                String parent=(path.endsWith("/"))?path:URIUtil.parentPath(path);
+                location=URIUtil.canonicalPath(URIUtil.addPaths(parent,location));
+                if (!location.startsWith("/"))
+                    buf.append('/');
+                buf.append(location);
+            }
+            
+            location=buf.toString();
+        }
+        resetBuffer();
+        
+        setHeader(HttpHeaders.LOCATION,location);
+        setStatus(HttpServletResponse.SC_MOVED_TEMPORARILY);
 
     }
 
@@ -252,8 +307,7 @@ public class Response implements HttpServletResponse
      */
     public void setStatus(int sc)
     {
-        _status=sc;
-        _reason=null;
+        setStatus(sc,null);
     }
 
     /* ------------------------------------------------------------ */
@@ -263,6 +317,8 @@ public class Response implements HttpServletResponse
     public void setStatus(int sc, String sm)
     {
         _status=sc;
+        if (sm==null && sc<__reasons.length)
+            sm=__reasons[sc];
         _reason=sm;
     }
 
@@ -434,6 +490,7 @@ public class Response implements HttpServletResponse
                         ? typeAndMime.substring(i1,i2)
                         : typeAndMime.substring(i1);
                     _characterEncoding = QuotedStringTokenizer.unquote(_characterEncoding);
+                    _contentType=typeAndMime;
                 }
                 else // No encoding in the params.
                 {
@@ -463,8 +520,7 @@ public class Response implements HttpServletResponse
      */
     public void setBufferSize(int size)
     {
-        // TODO Auto-generated method stub
-        // maybe just insert extra buffer for these wallies ????
+        _connection.getGenerator().increaseContentBufferSize(size);
     }
 
     /* ------------------------------------------------------------ */
@@ -473,8 +529,7 @@ public class Response implements HttpServletResponse
      */
     public int getBufferSize()
     {
-        // TODO Auto-generated method stub
-        return 0;
+        return _connection.getGenerator().getContentBufferSize();
     }
 
     /* ------------------------------------------------------------ */
@@ -601,6 +656,20 @@ public class Response implements HttpServletResponse
         public void write(int b) throws IOException
         {
         }
+    }
+
+
+
+    /* ------------------------------------------------------------ */
+    /**
+     * 
+     */
+    public void complete()
+    	throws IOException
+    {	
+        if (_outputState==WRITER && _writer!=null && _writer.isWritten())
+            _writer.close();
+        _connection.completeResponse();
     }
 
 

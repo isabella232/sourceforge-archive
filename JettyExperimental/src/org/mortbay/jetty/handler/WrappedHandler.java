@@ -17,14 +17,13 @@ package org.mortbay.jetty.handler;
 
 import java.io.IOException;
 
+import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletException;
 
+import org.mortbay.jetty.Handler;
 import org.slf4j.LoggerFactory;
 import org.slf4j.ULogger;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.HttpConnection;
 
 /* ------------------------------------------------------------ */
 /** HandlerCollection.

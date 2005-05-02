@@ -13,15 +13,17 @@
 // limitations under the License.
 // ========================================================================
  
-package org.mortbay.jetty.bio;
+package org.mortbay.jetty.nio;
 
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.channels.ByteChannel;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 
 import org.mortbay.io.Buffer;
-import org.mortbay.io.ByteArrayBuffer;
-import org.mortbay.io.bio.SocketEndPoint;
+import org.mortbay.io.nio.ChannelEndPoint;
+import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.util.LogSupport;
@@ -35,17 +37,17 @@ import org.slf4j.ULogger;
  * @version $Revision$
  * @author gregw
  */
-public class SocketConnector extends AbstractConnector
+public class BlockingChannelConnector extends AbstractConnector
 {
-    private static ULogger log= LoggerFactory.getLogger(SocketConnector.class);
+    private static ULogger log= LoggerFactory.getLogger(BlockingChannelConnector.class);
     
-    ServerSocket _acceptSocket;
+    private transient ServerSocketChannel _acceptChannel;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
      * 
      */
-    public SocketConnector()
+    public BlockingChannelConnector()
     {
     }
 
@@ -53,52 +55,53 @@ public class SocketConnector extends AbstractConnector
     public void open() throws IOException
     {
         // Create a new server socket and set to non blocking mode
-        _acceptSocket= new ServerSocket();
+        _acceptChannel= ServerSocketChannel.open();
+        _acceptChannel.configureBlocking(true);
 
         // Bind the server socket to the local host and port
-        _acceptSocket.bind(getAddress());
-        
-        log.info("Opened "+_acceptSocket);
+        _acceptChannel.socket().bind(getAddress());
         
     }
 
     /* ------------------------------------------------------------ */
     public void close() throws IOException
     {
-        if (_acceptSocket!=null)
-            _acceptSocket.close();
-        _acceptSocket=null;
+        if (_acceptChannel != null)
+            _acceptChannel.close();
+        _acceptChannel=null;
     }
     
     /* ------------------------------------------------------------ */
     public void accept()
     	throws IOException, InterruptedException
     {   
-        Socket socket = _acceptSocket.accept();
+        SocketChannel channel = _acceptChannel.accept();
+        channel.configureBlocking(true);
+        Socket socket=channel.socket();
         configure(socket);
 
-        Connection connection=new Connection(socket);
+        Connection connection=new Connection(channel);
         connection.dispatch();
     }
 
     /* ------------------------------------------------------------------------------- */
     protected Buffer newBuffer(int size)
     {
-        return new ByteArrayBuffer(size);
+        return new NIOBuffer(size,NIOBuffer.DIRECT);
     }
 
     /* ------------------------------------------------------------------------------- */
     /* ------------------------------------------------------------------------------- */
     /* ------------------------------------------------------------------------------- */
-    private class Connection extends SocketEndPoint implements Runnable
+    private class Connection extends ChannelEndPoint implements Runnable
     {
         boolean _dispatched=false;
         HttpConnection _connection;
         
-        Connection(Socket socket) throws IOException
+        Connection(ByteChannel channel) throws IOException
         {
-            super(socket);
-            _connection = new HttpConnection(SocketConnector.this,this,getHandler());
+            super(channel);
+            _connection = new HttpConnection(BlockingChannelConnector.this,this,getHandler());
         }
         
         void dispatch() throws InterruptedException
@@ -110,7 +113,7 @@ public class SocketConnector extends AbstractConnector
         {
             int l = super.fill(buffer);
             if (l<0)
-                close();
+                getChannel().close();
             return l;
         }
         

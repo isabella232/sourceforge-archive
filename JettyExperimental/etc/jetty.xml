@@ -18,8 +18,20 @@
 	    </Item>
 	    
         <Item>
-	      <New class="org.mortbay.jetty.nio.SocketChannelConnector">
+	      <New class="org.mortbay.jetty.nio.BlockingChannelConnector">
 	        <Set name="port">8081</Set>
+	      </New>
+	    </Item>
+	    
+        <Item>
+	      <New class="org.mortbay.jetty.nio.SelectChannelConnector">
+	        <Set name="port">8082</Set>
+	      </New>
+	    </Item>
+	    
+        <Item>
+	      <New class="org.mortbay.jetty.nio.SelectBlockingChannelConnector">
+	        <Set name="port">8083</Set>
 	      </New>
 	    </Item>
 	    
@@ -40,7 +52,7 @@
 	                <Item>
 	                  <New class="org.mortbay.jetty.servlet.ServletHolder">
 	                    <Set name="name">Dump</Set>
-	                    <Set name="className">org.mortbay.servlet.DumpServlet</Set>
+	                    <Set name="className">org.mortbay.servlet.Dump</Set>
 	                    <Set name="paths">
 	                     <Array type="java.lang.String">
 	                      <Item>/dump/*</Item>

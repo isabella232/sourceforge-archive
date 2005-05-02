@@ -21,12 +21,12 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.util.ArrayList;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
 import org.mortbay.io.Buffer;
 import org.mortbay.thread.AbstractLifeCycle;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.LogSupport;
+import org.slf4j.LoggerFactory;
+import org.slf4j.ULogger;
 
 /**
  * @author gregw
@@ -368,17 +368,20 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
         {   
             _acceptorThread=Thread.currentThread();
             String name =_acceptorThread.getName();
+            _acceptorThread.setName(name+" - Acceptor "+AbstractConnector.this);
             try
             {
-                _acceptorThread.setName(name+" - Acceptor "+AbstractConnector.this);
                 while (isRunning())
-                {   
-                    accept();
+                {
+                    try
+                    {
+                        accept(); 
+                    }
+                    catch(Exception e)
+                    {
+                        log.error("select ",e);
+                    }
                 }
-            }
-            catch(Exception e)
-            {
-                log.error("select ",e);
             }
             finally
             {

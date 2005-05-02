@@ -758,4 +758,31 @@ public class HttpGenerator implements HttpTokens
             complete();
         }        
     }
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the contentBufferSize.
+     */
+    public int getContentBufferSize()
+    {
+        return _contentBufferSize;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param contentBufferSize The contentBufferSize to set.
+     */
+    public void increaseContentBufferSize(int contentBufferSize)
+    {
+        if (contentBufferSize>_contentBufferSize)
+        {
+            _contentBufferSize = contentBufferSize;
+            if (_buffer!=null)
+            {
+                Buffer nb=_buffers.getBuffer(_contentBufferSize);
+                nb.put(_buffer);
+                _buffers.returnBuffer(_buffer);
+                _buffer=nb;
+            }
+        }
+    }
 }

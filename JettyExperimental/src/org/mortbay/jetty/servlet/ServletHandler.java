@@ -18,43 +18,26 @@ package org.mortbay.jetty.servlet;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
 import org.mortbay.io.Portable;
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.HttpHeaderValues;
-import org.mortbay.jetty.HttpHeaders;
-import org.mortbay.jetty.HttpMethods;
-import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.WrappedHandler;
-import org.mortbay.util.Container;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiException;
-import org.omg.CORBA._PolicyStub;
+import org.slf4j.LoggerFactory;
+import org.slf4j.ULogger;
 
 
 /* --------------------------------------------------------------------- */
@@ -392,11 +375,6 @@ public class ServletHandler extends WrappedHandler
         }
         finally
         {
-            if (servletHolder!=null && response!=null)
-            {
-                if (!response.isCommitted())
-                    response.flushBuffer(); // TODO signal last flush
-            }
         }
         return true;
     }

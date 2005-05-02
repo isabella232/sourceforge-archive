@@ -20,11 +20,11 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
 import org.mortbay.resource.Resource;
 import org.mortbay.resource.ResourceFactory;
 import org.mortbay.thread.AbstractLifeCycle;
+import org.slf4j.LoggerFactory;
+import org.slf4j.ULogger;
 
 
 /* ------------------------------------------------------------ */
@@ -37,10 +37,12 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
     private static ULogger log = LoggerFactory.getLogger(ResourceCache.class);
     
     private int _maxCachedFileSize =254*1024;
+    private int _maxCachedFiles=1024;
     private int _maxCacheSize =4096*1024;
     
     protected transient Map _cache;
     protected transient int _cacheSize;
+    protected transient int _cachedFiles;
     protected transient Entry _mostRecentlyUsed;
     protected transient Entry _leastRecentlyUsed;
 
@@ -78,6 +80,24 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         _cache.clear();
     }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the maxCachedFiles.
+     */
+    public int getMaxCachedFiles()
+    {
+        return _maxCachedFiles;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param maxCachedFiles The maxCachedFiles to set.
+     */
+    public void setMaxCachedFiles(int maxCachedFiles)
+    {
+        _maxCachedFiles = maxCachedFiles;
+    }
+    
     /* ------------------------------------------------------------ */
     public void flushCache()
     {
@@ -131,7 +151,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                     if (len>0 && len<_maxCachedFileSize && len<_maxCacheSize)
                     {
                         int needed=_maxCacheSize-(int)len;
-                        while(_cacheSize>needed)
+                        while(_cacheSize>needed || (_maxCachedFiles>0 && _cachedFiles>_maxCachedFiles))
                             _leastRecentlyUsed.invalidate();
                         
                         if(log.isDebugEnabled())log.debug("CACHED: "+resource);
@@ -163,6 +183,8 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
         throws Exception
     {
         _cache=new HashMap();
+        _cacheSize=0;
+        _cachedFiles=0;
     }
 
     /* ------------------------------------------------------------ */
@@ -205,6 +227,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
 
             _cache.put(_key,this);
             _cacheSize+=_resource.length();
+            _cachedFiles++;
         }
 
         public String getKey()
@@ -276,6 +299,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                 _cache.remove(_key);
                 _key=null;
                 _cacheSize=_cacheSize-(int)_resource.length();
+                _cachedFiles--;
                 
                 if (_mostRecentlyUsed==this)
                     _mostRecentlyUsed=_next;

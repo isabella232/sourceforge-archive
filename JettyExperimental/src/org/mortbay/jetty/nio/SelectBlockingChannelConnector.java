@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.nio.channels.CancelledKeyException;
 import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -26,18 +27,14 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.handler.FileHandler;
 import org.mortbay.util.LogSupport;
+import org.slf4j.LoggerFactory;
+import org.slf4j.ULogger;
 
 /* ------------------------------------------------------------------------------- */
 /**  EXPERIMENTAL NIO listener!
@@ -45,24 +42,26 @@ import org.mortbay.util.LogSupport;
  * @version $Revision$
  * @author gregw
  */
-public class SocketChannelConnector extends AbstractConnector
+public class SelectBlockingChannelConnector extends AbstractConnector
 {
-    private static ULogger log= LoggerFactory.getLogger(SocketChannelConnector.class);
-
+    private static ULogger log= LoggerFactory.getLogger(SelectBlockingChannelConnector.class);
+    
     private transient ServerSocketChannel _acceptChannel;
     private transient SelectionKey _acceptKey;
     private transient Selector _selector;
-    private transient ArrayList _keyChanges=new ArrayList();
-    private transient boolean _idle;    
+    private transient ArrayList _unDispatched=new ArrayList();
+
     
     /* ------------------------------------------------------------------------------- */
     /** Constructor.
      * 
      */
-    public SocketChannelConnector()
+    public SelectBlockingChannelConnector()
     {
     }
 
+
+    /* ------------------------------------------------------------ */
     public void open() throws IOException
     {
         if (_acceptChannel==null)
@@ -105,35 +104,39 @@ public class SocketChannelConnector extends AbstractConnector
     public void accept()
     	throws IOException
     {      
-        // Give other threads a chance to process last loop.
-        // TODO ? Thread.yield();
-        
         // Make any key changes required
-        synchronized(_keyChanges)
+        synchronized(_unDispatched)
         {
-            for (int i=0;i<_keyChanges.size();i++)
+            if (_unDispatched.size()>0)
+                _selector.selectNow();
+            
+            for (int i=0;i<_unDispatched.size();i++)
             {
                 try
                 {
-                    HttpEndPoint c = (HttpEndPoint)_keyChanges.get(i);
-                    if (c._interestOps>=0)
-                        c._key.interestOps(c._interestOps);
-                    else
-                        c._key.cancel();
+                    HttpEndPoint c = (HttpEndPoint)_unDispatched.get(i);
+                    {
+                        SocketChannel channel = (SocketChannel)c.getChannel();
+                        if (channel.isOpen())
+                        {
+                            channel.configureBlocking(false);
+                            c.setKey(channel.register(_selector, SelectionKey.OP_READ));
+                        }
+                    }
                 }
                 catch(CancelledKeyException e)
                 {
                     log.warn("???",e);
                 }
             }
-            _keyChanges.clear();
+            _unDispatched.clear();
         }
  
         // SELECT for things to do!
-        _selector.select(_maxIdleTime);
+        if (_selector.selectedKeys().size()==0)
+            _selector.select(_maxIdleTime);
         
         // Look for things to do
-        boolean dispatched=false;
         Iterator iter= _selector.selectedKeys().iterator();
         while (iter.hasNext())
         {
@@ -145,6 +148,9 @@ public class SocketChannelConnector extends AbstractConnector
                 if (!key.isValid())
                 {
                     key.cancel();
+                    HttpEndPoint connection = (HttpEndPoint)key.attachment();
+                    if (connection!=null)
+                        connection._key=null;
                     continue;
                 }
                 
@@ -153,30 +159,23 @@ public class SocketChannelConnector extends AbstractConnector
                     if (key.isAcceptable())
                     {
                         SocketChannel channel = _acceptChannel.accept();
-                        channel.configureBlocking(false);
+                        channel.configureBlocking(true);
                         Socket socket=channel.socket();
                         configure(socket);
-                        SelectionKey newKey = channel.register(_selector, SelectionKey.OP_READ);
-                        HttpEndPoint connection=new HttpEndPoint(channel,newKey);
+                        HttpEndPoint connection=new HttpEndPoint(channel);
                         
                         // assume something to do
-                        dispatched=connection.dispatch()||dispatched;
+                        connection.dispatch();
                     }
                 }
                 else
                 {
                     HttpEndPoint connection = (HttpEndPoint)key.attachment();
                     if (connection!=null)
-                        dispatched=connection.dispatch()||dispatched;    
+                        connection.dispatch();    
                 }
                 
                 key= null;
-            }
-            catch (CancelledKeyException e)
-            {
-                LogSupport.ignore(log,e);
-                key.cancel();
-                continue;   
             }
             catch (Exception e)
             {
@@ -186,7 +185,6 @@ public class SocketChannelConnector extends AbstractConnector
                     key.interestOps(0);
             }
         }   
-        _idle=!dispatched;
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -201,64 +199,55 @@ public class SocketChannelConnector extends AbstractConnector
     private class HttpEndPoint extends ChannelEndPoint implements Runnable
     {
         boolean _dispatched=false;
-        boolean _writable=true;  // TODO - get rid of this bad side effect
         SelectionKey _key;
         HttpConnection _connection;
-        int _interestOps;
-        int _readBlocked;
-        int _writeBlocked;
     
         /* ------------------------------------------------------------ */
-        HttpEndPoint(SocketChannel channel,SelectionKey key) 
+        HttpEndPoint(SocketChannel channel) 
         {
             super(channel);
-            _connection = new HttpConnection(SocketChannelConnector.this,this, getHandler());
-            key.attach(this);
+            _connection = new HttpConnection(SelectBlockingChannelConnector.this,this, getHandler());
+        }
+
+        /* ------------------------------------------------------------ */
+        void setKey(SelectionKey key)
+        {
             _key=key;
+            _key.attach(this);
         }
 
         /* ------------------------------------------------------------ */
         /** Dispatch the endpoint by arranging for a thread to service it.
          * Either a blocked thread is woken up or the endpoint is passed to the server job queue.
-         * If the thread is already dispatched and the server is otherwise idle, then the selection key 
+         * If the thread is dispatched and then the selection key 
          * is modified  so that it is no longer selected.
          */
         boolean dispatch() 
+            throws IOException
         {
-            synchronized(this)
-            {
-                // If threads are blocked on this
-                if (_readBlocked>0 || _writeBlocked>0)
-                {
-                    // wake them up is as good as a dispatched.
-                    this.notifyAll();
-
-                    // then we are not interested in further selecting if we are idle
-                    if (_idle)
-                        _key.interestOps(0);
-                    return true;
-                }
-                
-                // Otherwise if we are still dispatched
-                if (_dispatched)
-                {
-                    // then we are not interested in further selecting if we are idle
-                    if (_idle)
-                        _key.interestOps(0);
-                    return false;
-                }
-                
-                // Remove writeable op
-                if ((_key.readyOps()|SelectionKey.OP_WRITE)!=0 &&
-                    (_key.interestOps()|SelectionKey.OP_WRITE)!=0)
-                    _key.interestOps(_interestOps=_key.interestOps()&(-1^SelectionKey.OP_WRITE));
-                
-                _dispatched=true;
-            }
             
             boolean dispatch_done=false;
             try
             {
+                synchronized(this)
+                {
+                    // Otherwise if we are still dispatched
+                    if (_dispatched)
+                    {
+                        // we are not interested in further selecting 
+                        return false;
+                    }
+                    
+                    if (_key!=null)
+                    {
+                        _key.cancel();
+                        _key.attach(null);
+                        _key=null;
+                    }
+                       
+                    ((SelectableChannel)getChannel()).configureBlocking(true);
+                    _dispatched=true;
+                }
                 dispatch_done=getThreadPool().dispatch(this);
             }
             finally
@@ -277,23 +266,18 @@ public class SocketChannelConnector extends AbstractConnector
          * The selection key operations are updated.
          */
         private void undispatch()
+            throws IOException	
         {
-            try
+            synchronized(this)
             {
                 _dispatched=false;
                 
-                if (getChannel().isOpen() && _key.isValid())
-                    updateKey();
-            }
-            catch(Exception e)
-            {
-                log.error("???",e);
-                _interestOps=-1;
-                synchronized(_keyChanges)
+                synchronized(_unDispatched)
                 {
-                    _keyChanges.add(this);
+                    _unDispatched.add(this);
                 }
             }
+            _selector.wakeup();
         }
 
         /* ------------------------------------------------------------ */
@@ -307,106 +291,6 @@ public class SocketChannelConnector extends AbstractConnector
             return l;
         }
 
-        /* ------------------------------------------------------------ */
-        /*
-         */
-        public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
-        {
-            int l = super.flush(header, buffer, trailer);
-            _writable=l>0;
-            return l;
-        }
-
-        /* ------------------------------------------------------------ */
-        /*
-         */
-        public int flush(Buffer buffer) throws IOException
-        {
-            int l = super.flush(buffer);
-            _writable=l>0;
-            return l;
-        }
-        
-        /* ------------------------------------------------------------ */
-        /* Allows thread to block waiting for further events.
-         */
-        public void blockReadable(long timeoutMs)
-        {
-            synchronized(this)
-            {
-                if (getChannel().isOpen() && _key.isValid())
-                {
-                    try
-                    {
-                        _readBlocked++;
-                        updateKey();
-                        this.wait(timeoutMs);
-                    }
-                    catch (InterruptedException e)
-                    {
-                        e.printStackTrace();
-                    }
-                    finally
-                    {
-                        _readBlocked--;
-                    }
-                }
-            }
-        }
-
-        /* ------------------------------------------------------------ */
-        /* Allows thread to block waiting for further events.
-         */
-        public void blockWritable(long timeoutMs)
-        {
-            synchronized(this)
-            {
-                if (getChannel().isOpen() && _key.isValid())
-                {
-                    try
-                    {
-                        _writeBlocked++;
-                        updateKey();
-                        this.wait(timeoutMs);
-                    }
-                    catch (InterruptedException e)
-                    {
-                        e.printStackTrace();
-                    }
-                    finally
-                    {
-                        _writeBlocked--;
-                    }
-                }
-            }
-        }
-
-        /* ------------------------------------------------------------ */
-        /** Updates selection key.
-         * Adds operations types to the selection key as needed.
-         * No operations are removed as this is only done during dispatch
-         */
-        private void updateKey()
-        {
-            synchronized(this)
-            {
-                int ops = _key.interestOps();
-                _interestOps=ops | 
-                ((!_dispatched||_readBlocked>0)?SelectionKey.OP_READ:0) | 
-                ((!_writable||_writeBlocked>0)?SelectionKey.OP_WRITE:0);
-                _writable=true; // Once writable is in ops, only removed with dispatch.
-                                
-                if (_interestOps!=ops)
-                {
-                    synchronized(_keyChanges)
-                    {
-                        _keyChanges.add(this);
-                    }
-                    _selector.wakeup();
-                }
-            }
-        }
-        
         /* ------------------------------------------------------------ */
         /* 
          */
@@ -432,14 +316,18 @@ public class SocketChannelConnector extends AbstractConnector
                     log.debug("EOF",e);
                 else
                     log.warn("IO",e);
-                _key.cancel();
+                if (_key!=null)
+                    _key.cancel();
+                _key=null;
                 try{close();}
                 catch(IOException e2){LogSupport.ignore(log, e2);}
             }
             catch(Throwable e)
             {
                 log.warn("handle failed",e);
-                _key.cancel();
+                if (_key!=null)
+                    _key.cancel();
+                _key=null;
                 try{close();}
                 catch(IOException e2){LogSupport.ignore(log, e2);}
             }
@@ -447,15 +335,11 @@ public class SocketChannelConnector extends AbstractConnector
             {
                 synchronized(this)
                 {
-                    undispatch();
+                    try{undispatch();}catch(Exception e){ log.warn(e); }
                 }
             }
         }
         
-        public String toString()
-        {
-            return "HTTPep[d="+_dispatched+",io="+_interestOps+",w="+_writable+",b="+_readBlocked+"|"+_writeBlocked+"]";
-        }
     }
     
 }

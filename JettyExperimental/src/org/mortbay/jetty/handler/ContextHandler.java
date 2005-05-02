@@ -20,22 +20,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
 import org.mortbay.io.Buffer;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.MimeTypes;
@@ -43,6 +40,8 @@ import org.mortbay.jetty.Request;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.URIUtil;
+import org.slf4j.LoggerFactory;
+import org.slf4j.ULogger;
 
 
 /* ------------------------------------------------------------ */

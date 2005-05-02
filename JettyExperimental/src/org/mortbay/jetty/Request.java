@@ -37,22 +37,20 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.EndPoint;
-import org.mortbay.io.IO;
 import org.mortbay.io.Portable;
-import org.mortbay.util.ByteArrayOutputStream2;
+import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.handler.ContextHandler.Context;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 import org.mortbay.util.UrlEncoded;
-import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.jetty.handler.ContextHandler.Context;
+import org.slf4j.LoggerFactory;
+import org.slf4j.ULogger;
 
 /* ------------------------------------------------------------ */
 /** Request.
@@ -258,7 +256,10 @@ public class Request implements HttpServletRequest
      */
     public Enumeration getHeaders(String name)
     {
-        return _connection.getRequestFields().getValues(name);
+        Enumeration e = _connection.getRequestFields().getValues(name);
+        if (e==null)
+            return Collections.enumeration(Collections.EMPTY_LIST);
+        return e;
     }
 
     /* ------------------------------------------------------------ */
@@ -549,6 +550,8 @@ public class Request implements HttpServletRequest
      */
     public String getRemoteUser()
     {
+        if (_userPrincipal==null)
+            return null;
         return _userPrincipal.toString();
     }
 
@@ -655,7 +658,7 @@ public class Request implements HttpServletRequest
                 if (hostPort.peek(hostPort.getIndex()+i)==':')
                 {
                     _serverName=hostPort.peek(hostPort.getIndex(), i).toString();
-                    _port=BufferUtil.toInt(hostPort.peek(i+1, hostPort.length()-i-1));
+                    _port=BufferUtil.toInt(hostPort.peek(hostPort.getIndex()+i+1, hostPort.length()-i-1));
                 }
             }
             if (_serverName==null || _port<0)
@@ -890,28 +893,16 @@ public class Request implements HttpServletRequest
                     try
                     {
                         // TODO limit size
-                        // TODO use getContentAs API.
-                        
-                        // Read the _content
-                        ByteArrayOutputStream2 bout = new ByteArrayOutputStream2(content_length);
                         InputStream in = getInputStream();
-                        
-                        // Copy to a byte array.
-                        // TODO - this is very inefficient and we could
-                        // save lots of memory by streaming this!!!!
-                        IO.copy(in, bout, content_length);
-                        
-                        
                         // Add form params to query params
-                        UrlEncoded.decodeTo(bout.getBuf(), 0, bout.getCount(), _parameters,
-                                encoding);
+                        UrlEncoded.decodeTo(in, _parameters, encoding);
                     }
                     catch (IOException e)
                     {
                         if (log.isDebugEnabled())
                             log.warn(LogSupport.EXCEPTION, e);
                         else
-                            log.warn(e.toString());
+                            log.warn(e);
                     }
                 }
             }
@@ -1077,6 +1068,39 @@ public class Request implements HttpServletRequest
     public Context getContext()
     {
         return _context;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Reconstructs the URL the client used to make the request. The returned URL contains a
+     * protocol, server name, port number, and, but it does not include a path.
+     * <p>
+     * Because this method returns a <code>StringBuffer</code>, not a string, you can modify the
+     * URL easily, for example, to append path and query parameters.
+     * 
+     * This method is useful for creating redirect messages and for reporting errors.
+     * 
+     * @return "scheme://host:port"
+     */
+    public StringBuffer getRootURL()
+    {
+        StringBuffer url = new StringBuffer(48);
+        synchronized (url)
+        {
+            String scheme = getScheme();
+            int port = getServerPort();
+
+            url.append(scheme);
+            url.append("://");
+            url.append(getServerName());
+            
+            if (port > 0 && ((scheme.equalsIgnoreCase("http") && port != 80) || (scheme.equalsIgnoreCase("https") && port != 443)))
+            {
+                url.append(':');
+                url.append(port);
+            }
+            return url;
+        }
     }
 }
 

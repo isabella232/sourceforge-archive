@@ -21,6 +21,7 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.GatheringByteChannel;
+import java.nio.channels.SelectableChannel;
 import java.nio.channels.SocketChannel;
 
 import org.mortbay.io.Buffer;
@@ -56,6 +57,8 @@ public class ChannelEndPoint implements EndPoint
     
     public boolean isBlocking()
     {
+        if (_channel instanceof SelectableChannel)
+            return ((SelectableChannel)_channel).isBlocking();
         return false;
     }
     
@@ -196,7 +199,6 @@ public class ChannelEndPoint implements EndPoint
             {
                 synchronized(nbuf1)
                 {
-                    
                     try
                     {
                         bbuf0.position(header.getIndex());

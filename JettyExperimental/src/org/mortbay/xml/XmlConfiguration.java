@@ -15,7 +15,6 @@
 
 package org.mortbay.xml;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
@@ -32,12 +31,12 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.Loader;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.TypeUtil;
+import org.slf4j.LoggerFactory;
+import org.slf4j.ULogger;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 

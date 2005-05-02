@@ -15,7 +15,6 @@
 
 package org.mortbay.resource;
 
-import java.io.IOException;
 
 /* ------------------------------------------------------------ */
 /** ResourceFactory.

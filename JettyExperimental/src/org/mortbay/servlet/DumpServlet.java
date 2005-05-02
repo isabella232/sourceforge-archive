@@ -1,7 +1,10 @@
 package org.mortbay.servlet;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.Enumeration;
+
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestWrapper;

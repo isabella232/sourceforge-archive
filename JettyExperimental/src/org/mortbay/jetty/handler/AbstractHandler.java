@@ -15,11 +15,11 @@
 
 package org.mortbay.jetty.handler;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.thread.AbstractLifeCycle;
+import org.slf4j.LoggerFactory;
+import org.slf4j.ULogger;
 
 
 /* ------------------------------------------------------------ */

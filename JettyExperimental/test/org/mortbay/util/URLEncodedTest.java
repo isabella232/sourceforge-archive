@@ -15,6 +15,8 @@
 
 package org.mortbay.util;
 
+import java.io.ByteArrayInputStream;
+
 import junit.framework.TestSuite;
 
 
@@ -126,6 +128,25 @@ public class URLEncodedTest extends junit.framework.TestCase
         String sjis=(String)m.get("s");
         assertEquals("SJIS len",3, sjis.length());
         assertEquals("SJIS param","\u30b2\u30fc\u30e0",sjis );
+        
+        
+    }
+    
+
+    /* -------------------------------------------------------------- */
+    public void testUrlEncodedStream()
+    	throws Exception
+    {
+        ByteArrayInputStream in = new ByteArrayInputStream (
+                "name0=value+%30&name1=&name2&name3=value+3".getBytes());
+        MultiMap m = new MultiMap();
+        UrlEncoded.decodeTo(in, m, null);
+        System.err.println(m);
+        assertEquals("stream length",4,m.size());
+        assertEquals("stream name0","value 0",m.getString("name0"));
+        assertEquals("stream name1",null,m.getString("name1"));
+        assertEquals("stream name2",null,m.getString("name2"));
+        assertEquals("stream name3","value 3",m.getString("name3"));
         
         
     }

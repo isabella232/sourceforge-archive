@@ -16,10 +16,6 @@
 package org.mortbay.util;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.slf4j.LoggerFactory;
 import org.slf4j.ULogger;

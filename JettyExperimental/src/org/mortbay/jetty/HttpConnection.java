@@ -17,7 +17,6 @@ package org.mortbay.jetty;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -25,12 +24,12 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
 
-import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
+import org.slf4j.LoggerFactory;
+import org.slf4j.ULogger;
 
 /**
  * @author gregw
@@ -286,6 +285,69 @@ public class HttpConnection
     {
 
         /*
+         * 
+         * @see org.mortbay.jetty.HttpParser.EventHandler#startRequest(org.mortbay.io.Buffer,
+         *      org.mortbay.io.Buffer, org.mortbay.io.Buffer)
+         */
+        public void startRequest(Buffer method, Buffer uri, Buffer version)
+           throws IOException
+        {
+            _host = false;
+            _expect = UNKNOWN;
+            _connection = UNKNOWN;
+            _request.setMethod(method.toString());
+            
+            try	
+            {
+                _uri=new URI(uri.toString()); 
+                _uri=_uri.normalize();
+                _request.setUri(_uri); 
+            
+                _version = version == null ? HttpVersions.HTTP_0_9_ORDINAL : HttpVersions.CACHE
+                        .getOrdinal(version);
+                if (_version <= 0) _version = HttpVersions.HTTP_1_0_ORDINAL;
+                _request.setProtocol(HttpVersions.CACHE.get(_version).toString());
+            
+                _head = HttpMethods.CACHE.getOrdinal(method) == HttpMethods.HEAD_ORDINAL;  
+            }
+            catch (URISyntaxException e)
+            {
+                _parser.reset();
+                // TODO prebuilt response
+                _generator.setResponse(400, null);
+                _responseFields.put(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CLOSE_BUFFER);
+                _generator.complete();
+                return;
+            }
+        }
+        
+        /*
+         * @see org.mortbay.jetty.HttpParser.EventHandler#parsedHeaderValue(org.mortbay.io.Buffer)
+         */
+        public void parsedHeader(Buffer name, Buffer value)
+        {
+            int ho = HttpHeaders.CACHE.getOrdinal(name);
+            switch (ho)
+            {
+                case HttpHeaders.HOST_ORDINAL:
+                    // TODO check if host matched a host in the URI.
+                    _host = true;
+                    break;
+
+                case HttpHeaders.EXPECT_ORDINAL:
+                    _expect = HttpHeaderValues.CACHE.getOrdinal(value);
+
+                case HttpHeaders.CONNECTION_ORDINAL:
+                    // TODO comma list of connections ???
+                    _connection = HttpHeaderValues.CACHE.getOrdinal(value);
+                    _responseFields.put(HttpHeaders.CONNECTION_BUFFER,value);
+                	// TODO something with this???
+            }
+            
+            _requestFields.add(name, value);
+        }
+
+        /*
          * @see org.mortbay.jetty.HttpParser.EventHandler#headerComplete()
          */
         public void headerComplete() throws IOException
@@ -341,7 +403,29 @@ public class HttpConnection
                     log.warn("handling",e);
                     _generator.sendError(500,null,null,true);
                 }
+                finally
+                {
+                    if (_response!=null)
+                        _response.complete();
+                    
+                    if (!_generator.isComplete())
+                    {
+                        _generator.completeHeader(_responseFields, HttpGenerator.LAST);
+                        _generator.complete();
+                    }
+                }
             }
+        }        
+
+        /* ------------------------------------------------------------ */
+        /* 
+         * @see org.mortbay.jetty.HttpParser.EventHandler#content(int, org.mortbay.io.Buffer)
+         */
+        public void content(int index, Buffer ref) throws IOException
+        {
+            if (_content!=null)
+                Portable.throwIllegalState("content not read");
+            _content=ref;
         }
 
         /*
@@ -351,76 +435,9 @@ public class HttpConnection
          */
         public void messageComplete(int contextLength) throws IOException
         {
-            if (!_generator.isComplete())
-            {
-                _generator.completeHeader(_responseFields, HttpGenerator.LAST);
-                _generator.complete();
-            }
         }
 
-        /*
-         * @see org.mortbay.jetty.HttpParser.EventHandler#parsedHeaderValue(org.mortbay.io.Buffer)
-         */
-        public void parsedHeader(Buffer name, Buffer value)
-        {
-            int ho = HttpHeaders.CACHE.getOrdinal(name);
-            switch (ho)
-            {
-                case HttpHeaders.HOST_ORDINAL:
-                    // TODO check if host matched a host in the URI.
-                    _host = true;
-                    break;
-
-                case HttpHeaders.EXPECT_ORDINAL:
-                    _expect = HttpHeaderValues.CACHE.getOrdinal(value);
-
-                case HttpHeaders.CONNECTION_ORDINAL:
-                    // TODO comma list of connections ???
-                    _connection = HttpHeaderValues.CACHE.getOrdinal(value);
-                    _responseFields.put(HttpHeaders.CONNECTION_BUFFER,value);
-                	// TODO something with this???
-            }
-            
-            _requestFields.add(name, value);
-        }
         
-        
-        /*
-         * 
-         * @see org.mortbay.jetty.HttpParser.EventHandler#startRequest(org.mortbay.io.Buffer,
-         *      org.mortbay.io.Buffer, org.mortbay.io.Buffer)
-         */
-        public void startRequest(Buffer method, Buffer uri, Buffer version)
-           throws IOException
-        {
-            _host = false;
-            _expect = UNKNOWN;
-            _connection = UNKNOWN;
-            _request.setMethod(method.toString());
-            
-            try	
-            {
-                _uri=new URI(uri.toString()); 
-                _uri=_uri.normalize();
-                _request.setUri(_uri); 
-            
-                _version = version == null ? HttpVersions.HTTP_0_9_ORDINAL : HttpVersions.CACHE
-                        .getOrdinal(version);
-                if (_version <= 0) _version = HttpVersions.HTTP_1_0_ORDINAL;
-                _request.setProtocol(HttpVersions.CACHE.get(_version).toString());
-            
-                _head = HttpMethods.CACHE.getOrdinal(method) == HttpMethods.HEAD_ORDINAL;  
-            }
-            catch (URISyntaxException e)
-            {
-                _parser.reset();
-                // TODO prebuilt response
-                _generator.setResponse(400, null);
-                _responseFields.put(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CLOSE_BUFFER);
-                _generator.complete();
-                return;
-            }
-        }
         
         /*
          * (non-Javadoc)
@@ -434,9 +451,12 @@ public class HttpConnection
         }
         
     }
-    
+
+    /* ------------------------------------------------------------ */
     private class Input extends ServletInputStream
     {
+        // TODO - more effecient methods!
+        
         /* ------------------------------------------------------------ */
         /* 
          * @see java.io.InputStream#read()
@@ -449,6 +469,7 @@ public class HttpConnection
                     return -1;
                 
                 // Try to get more _content
+                _content=null;
                 _parser.parseNext();
                 
                 // If unsuccessful and if we are we are not blocking then block
@@ -494,7 +515,7 @@ public class HttpConnection
          * @see java.io.OutputStream#write(byte[], int, int)
          */
         public void write(byte[] b, int off, int len) throws IOException
-        {
+        {   
             if(_bufn==null)
                 _bufn=new ByteArrayBuffer(b,off,len);
             else
@@ -588,6 +609,15 @@ public class HttpConnection
                 Portable.throwIllegalArgument("type?");
         }
     
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    HttpGenerator getGenerator()
+    {
+        return _generator;
     }
 
 }

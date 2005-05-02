@@ -30,9 +30,9 @@ import java.util.Stack;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import org.mortbay.util.LogSupport;
 import org.slf4j.LoggerFactory;
 import org.slf4j.ULogger;
-import org.mortbay.util.LogSupport;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
