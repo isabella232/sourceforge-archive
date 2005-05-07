@@ -121,8 +121,6 @@ public class LazyList
         l.add(index,item);
         return l;    
     }
-
-    
     
     /* ------------------------------------------------------------ */
     /** Add the contents of a Collection to a LazyList
@@ -152,7 +150,7 @@ public class LazyList
             if (ol.size()>initialSize)
                 return ol;
             ArrayList nl = new ArrayList(initialSize);
-            nl.addAll((ArrayList)list);
+            nl.addAll(ol);
             return nl;
         }
         List l= new ArrayList(initialSize);

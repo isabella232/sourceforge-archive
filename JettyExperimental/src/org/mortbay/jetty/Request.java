@@ -37,6 +37,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.mortbay.jetty.HttpFields;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.EndPoint;
@@ -46,6 +47,7 @@ import org.mortbay.jetty.handler.ContextHandler.Context;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiMap;
+import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 import org.mortbay.util.UrlEncoded;
@@ -62,6 +64,7 @@ public class Request implements HttpServletRequest
     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
     private static ULogger log = LoggerFactory.getLogger(HttpConnection.class);
     private static final int NONE=0, STREAM=1, READER=2;
+    private static Cookie[] __noCookies = new Cookie[0];
     
     private HttpConnection _connection;
     private EndPoint _endp;
@@ -69,7 +72,6 @@ public class Request implements HttpServletRequest
     private Map _attributes;
     private String _authType;
     private String _characterEncoding;
-    private Cookie[] _cookies;
     private String _serverName;
     private String _method;
     private String _pathInfo;
@@ -77,6 +79,7 @@ public class Request implements HttpServletRequest
     private String _protocol=HttpVersions.HTTP_1_1;
     private String _queryString;
     private String _requestedSessionId;
+    private boolean _requestedSessionIdFromCookie=false;
     private String _requestURI;
     private String _scheme=URIUtil.HTTP;
     private String _servletPath;
@@ -88,6 +91,11 @@ public class Request implements HttpServletRequest
     private BufferedReader _reader;
     private boolean _dns=false;
     private ContextHandler.Context _context;
+    private HttpSession _session;
+    private SessionManager _sessionManager;
+    private boolean _cookiesExtracted=false;
+    private Cookie[] _cookies;
+    private String[] _lastCookies;
     
     /* ------------------------------------------------------------ */
     /**
@@ -107,7 +115,6 @@ public class Request implements HttpServletRequest
         _authType=null;
         _characterEncoding=null;
         _context=null;
-        _cookies=null;
         _serverName=null;
         _method=null;
         _pathInfo=null;
@@ -115,6 +122,7 @@ public class Request implements HttpServletRequest
         _protocol=HttpVersions.HTTP_1_1;
         _queryString=null;
         _requestedSessionId=null;
+        _requestedSessionIdFromCookie=false;
         _requestURI=null;
         _scheme=URIUtil.HTTP;
         _servletPath=null;
@@ -125,6 +133,7 @@ public class Request implements HttpServletRequest
         _paramsExtracted=false;;
         _inputState=NONE;
         _reader=null; 
+        _cookiesExtracted=false;
     }
     
     
@@ -220,6 +229,124 @@ public class Request implements HttpServletRequest
      */
     public Cookie[] getCookies()
     {
+        if (_cookiesExtracted) return _cookies;
+
+        try
+        {
+            // Handle no cookies
+            if (!_connection.getRequestFields().containsKey(HttpHeaders.COOKIE_BUFFER))
+            {
+                _cookies = __noCookies;
+                _cookiesExtracted = true;
+                _lastCookies = null;
+                return _cookies;
+            }
+
+            // Check if cookie headers match last cookies
+            if (_lastCookies != null)
+            {
+                int last = 0;
+                Enumeration enm = _connection.getRequestFields().getValues(HttpHeaders.COOKIE_BUFFER);
+                while (enm.hasMoreElements())
+                {
+                    String c = enm.nextElement().toString();
+                    if (last >= _lastCookies.length || !c.equals(_lastCookies[last]))
+                    {
+                        _lastCookies = null;
+                        break;
+                    }
+                    last++;
+                }
+                if (_lastCookies != null)
+                {
+                    _cookiesExtracted = true;
+                    return _cookies;
+                }
+            }
+
+            // Get ready to parse cookies (Expensive!!!)
+            Object cookies = null;
+            Object lastCookies = null;
+
+            int version = 0;
+            Cookie cookie = null;
+
+            // For each cookie header
+            Enumeration enm = _connection.getRequestFields().getValues(HttpHeaders.COOKIE_BUFFER);
+            while (enm.hasMoreElements())
+            {
+                // Save a copy of the unparsed header as cache.
+                String hdr = enm.nextElement().toString();
+                lastCookies = LazyList.add(lastCookies, hdr);
+
+                // Parse the header
+                QuotedStringTokenizer tok = new QuotedStringTokenizer(hdr, ",;", false, false);
+                while (tok.hasMoreElements())
+                {
+                    String c = (String) tok.nextElement();
+                    if (c == null) continue;
+                    c = c.trim();
+
+                    try
+                    {
+                        String n;
+                        String v;
+                        int e = c.indexOf('=');
+                        if (e > 0)
+                        {
+                            n = c.substring(0, e);
+                            v = c.substring(e + 1);
+                        }
+                        else
+                        {
+                            n = c;
+                            v = "";
+                        }
+
+                        // Handle quoted values
+                        if (version > 0) v = StringUtil.unquote(v);
+
+                        // Ignore $ names
+                        if (n.startsWith("$"))
+                        {
+                            if ("$version".equalsIgnoreCase(n))
+                                version = Integer.parseInt(StringUtil.unquote(v));
+                            else if ("$path".equalsIgnoreCase(n) && cookie != null)
+                                cookie.setPath(v);
+                            else if ("$domain".equalsIgnoreCase(n) && cookie != null)
+                                    cookie.setDomain(v);
+                            continue;
+                        }
+
+                        v = URIUtil.decodePath(v);
+                        cookie = new Cookie(n, v);
+                        if (version > 0) cookie.setVersion(version);
+                        cookies = LazyList.add(cookies, cookie);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogSupport.ignore(log, ex);
+                    }
+                }
+            }
+
+            int l = LazyList.size(cookies);
+            if (_cookies == null || _cookies.length != l) _cookies = new Cookie[l];
+            for (int i = 0; i < l; i++)
+                _cookies[i] = (Cookie) LazyList.get(cookies, i);
+            _cookiesExtracted = true;
+
+            l = LazyList.size(lastCookies);
+            _lastCookies = new String[l];
+            for (int i = 0; i < l; i++)
+                _lastCookies[i] = (String) LazyList.get(lastCookies, i);
+
+        }
+        catch (Exception e)
+        {
+            log.warn(LogSupport.EXCEPTION, e);
+        }
+
         return _cookies;
     }
 
@@ -734,8 +861,7 @@ public class Request implements HttpServletRequest
      */
     public HttpSession getSession()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return getSession(true);
     }
 
     /* ------------------------------------------------------------ */
@@ -744,8 +870,29 @@ public class Request implements HttpServletRequest
      */
     public HttpSession getSession(boolean create)
     {
-        // TODO Auto-generated method stub
-        return null;
+        if (_session != null && _session.getId()!=null)
+            return _session;
+        
+        _session=null;
+        
+        String id = getRequestedSessionId();
+        
+        if (id != null && _sessionManager!=null)
+        {
+            _session=_sessionManager.getHttpSession(id);
+            if (_session == null && !create)
+                return null;
+        }
+        
+        if (_session == null && create)
+        {
+            HttpSession session=_sessionManager.newHttpSession(this);
+            Cookie cookie=_sessionManager.getSessionCookie(session,isSecure());
+            if (cookie!=null)
+                _connection.getResponse().addCookie(cookie);
+        }
+        
+        return _session;
     }
 
     /* ------------------------------------------------------------ */
@@ -763,8 +910,7 @@ public class Request implements HttpServletRequest
      */
     public boolean isRequestedSessionIdFromCookie()
     {
-        // TODO Auto-generated method stub
-        return false;
+        return _requestedSessionId!=null && _requestedSessionIdFromCookie;
     }
 
     /* ------------------------------------------------------------ */
@@ -773,8 +919,7 @@ public class Request implements HttpServletRequest
      */
     public boolean isRequestedSessionIdFromUrl()
     {
-        // TODO Auto-generated method stub
-        return false;
+        return _requestedSessionId!=null && !_requestedSessionIdFromCookie;
     }
 
     /* ------------------------------------------------------------ */
@@ -783,8 +928,7 @@ public class Request implements HttpServletRequest
      */
     public boolean isRequestedSessionIdFromURL()
     {
-        // TODO Auto-generated method stub
-        return false;
+        return _requestedSessionId!=null && !_requestedSessionIdFromCookie;
     }
 
     /* ------------------------------------------------------------ */
@@ -792,9 +936,9 @@ public class Request implements HttpServletRequest
      * @see javax.servlet.http.HttpServletRequest#isRequestedSessionIdValid()
      */
     public boolean isRequestedSessionIdValid()
-    {
-        // TODO Auto-generated method stub
-        return false;
+    {	
+        HttpSession session=null;
+        return _requestedSessionId!=null && (session=getSession(false))!=null && _requestedSessionId.equals(session.getId());
     }
 
     /* ------------------------------------------------------------ */
@@ -803,7 +947,7 @@ public class Request implements HttpServletRequest
      */
     public boolean isSecure()
     {
-        return _connection.isConfidential();
+        return _connection.isConfidential(this);
     }
 
     /* ------------------------------------------------------------ */
@@ -1010,6 +1154,38 @@ public class Request implements HttpServletRequest
         _requestedSessionId = requestedSessionId;
     }
     
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the sessionManager.
+     */
+    public SessionManager getSessionManager()
+    {
+        return _sessionManager;
+    }
+    /* ------------------------------------------------------------ */
+    /**
+     * @param sessionManager The sessionManager to set.
+     */
+    public void setSessionManager(SessionManager sessionManager)
+    {
+        _sessionManager = sessionManager;
+    }
+    /* ------------------------------------------------------------ */
+    /**
+     * @param requestedSessionIdCookie The requestedSessionIdCookie to set.
+     */
+    public void setRequestedSessionIdFromCookie(boolean requestedSessionIdCookie)
+    {
+        _requestedSessionIdFromCookie = requestedSessionIdCookie;
+    }
+    /* ------------------------------------------------------------ */
+    /**
+     * @param session The session to set.
+     */
+    public void setSession(HttpSession session)
+    {
+        _session = session;
+    }
     /* ------------------------------------------------------------ */
     /**
      * @param scheme The scheme to set.

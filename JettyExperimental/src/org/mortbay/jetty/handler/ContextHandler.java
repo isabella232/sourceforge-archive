@@ -55,7 +55,7 @@ import org.slf4j.ULogger;
  */
 public class ContextHandler extends WrappedHandler
 {
-    private static ULogger log = LoggerFactory.getLogger(HttpConnection.class);
+    private static ULogger log = LoggerFactory.getLogger(ContextHandler.class);
     private static ThreadLocal __context=new ThreadLocal();
     
     /* ------------------------------------------------------------ */

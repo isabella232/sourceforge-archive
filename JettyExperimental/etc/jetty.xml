@@ -42,48 +42,70 @@
     <Set name="handlers">
       <Array type="org.mortbay.jetty.Handler"> 
         <Item>
-	      <New class="org.mortbay.jetty.handler.ContextHandler">
+	      <New id="testContextHandler"  class="org.mortbay.jetty.handler.ContextHandler">
 	        <Set name="contextPath">/test</Set>
 	        <Set name="resourceBase">./webapps/test</Set>
-	        <Set name="handler">
-	          <New class="org.mortbay.jetty.servlet.ServletHandler">
-	            <Set name="servlets">
-	              <Array type="org.mortbay.jetty.servlet.ServletHolder">
-	                <Item>
-	                  <New class="org.mortbay.jetty.servlet.ServletHolder">
-	                    <Set name="name">Dump</Set>
-	                    <Set name="className">org.mortbay.servlet.Dump</Set>
-	                    <Set name="paths">
-	                     <Array type="java.lang.String">
-	                      <Item>/dump/*</Item>
-	                      <Item>/exact</Item>
-	                      <Item>*.DUMP</Item>
-	                     </Array>
-	                    </Set>
-	                  </New>
-	                </Item>
-	                
-	                <Item>
-	                  <New class="org.mortbay.jetty.servlet.ServletHolder">
-	                    <Set name="name">Default</Set>
-	                    <Set name="className">org.mortbay.jetty.servlet.DefaultServlet</Set>
-	                    <Set name="paths">
-	                     <Array type="java.lang.String">
-	                      <Item>/</Item>
-	                     </Array>
-	                    </Set>
-	                  </New>
-	                </Item>
-	                
-	                
-	              </Array>
-	            </Set>
-	          </New>
+            <Set name="handler">
+              <New id="testSessionHandler" class="org.mortbay.jetty.servlet.SessionHandler">
+                 <Set name="handler">
+                   <New id="testServletHandler" class="org.mortbay.jetty.servlet.ServletHandler"/>
+                 </Set>
+              </New>
             </Set>
           </New>
         </Item>
       </Array>
     </Set>
+
+	<Ref id="testSessionHandler">
+		<Set name="SessionManager"><New class="org.mortbay.jetty.servlet.HashSessionManager"/></Set>
+	</Ref>
+	
+	<Ref id="testServletHandler">
+	   <Set name="servlets">
+	       <Array type="org.mortbay.jetty.servlet.ServletHolder">
+	           <Item>
+	              <New class="org.mortbay.jetty.servlet.ServletHolder">
+	                 <Set name="name">Dump</Set>
+	                 <Set name="className">org.mortbay.servlet.Dump</Set>
+	                 <Set name="paths">
+	                   <Array type="java.lang.String">
+	                      <Item>/dump/*</Item>
+	                      <Item>/exact</Item>
+	                      <Item>*.DUMP</Item>
+	                   </Array>
+	                 </Set>
+	              </New>
+	           </Item>
+	                
+	           <Item>
+	              <New class="org.mortbay.jetty.servlet.ServletHolder">
+	                 <Set name="name">Session</Set>
+	                 <Set name="className">org.mortbay.servlet.SessionDump</Set>
+	                 <Set name="paths">
+	                   <Array type="java.lang.String">
+	                      <Item>/session/*</Item>
+	                   </Array>
+	                 </Set>
+	              </New>
+	           </Item>
+	           
+	           <Item>
+	              <New class="org.mortbay.jetty.servlet.ServletHolder">
+	                  <Set name="name">Default</Set>
+	                  <Set name="className">org.mortbay.jetty.servlet.DefaultServlet</Set>
+	                  <Set name="paths">
+	                    <Array type="java.lang.String">
+	                      <Item>/</Item>
+	                     </Array>
+	                  </Set>
+	              </New>
+	           </Item>                
+	        </Array>
+	    </Set>
+	</Ref>
+
+
 
     <Call name="start"/>
 

@@ -235,7 +235,13 @@ public class MultiMap extends HashMap
         Object ln=lo;
         int s=LazyList.size(lo);
         if (s>0)
+        {
             ln=LazyList.remove(lo,value);
+            if (ln==null)
+                super.remove(name);
+            else
+                super.put(name, ln);
+        }
         return LazyList.size(ln)!=s;
     }
     
@@ -279,6 +285,15 @@ public class MultiMap extends HashMap
     /* ------------------------------------------------------------ */
     public Object clone()
     {
-        return new MultiMap(this);
+        MultiMap mm = (MultiMap) super.clone();
+        
+        Iterator iter = mm.entrySet().iterator();
+        while (iter.hasNext())
+        {
+            Map.Entry entry = (Map.Entry)iter.next();
+            entry.setValue(LazyList.clone(entry.getValue()));
+        }
+        
+        return mm;
     }
 }

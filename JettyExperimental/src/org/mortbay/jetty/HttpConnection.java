@@ -138,9 +138,8 @@ public class HttpConnection
     /**
      * @return
      */
-    public boolean isConfidential()
+    public boolean isConfidential(Request request)
     {
-        // TODO Auto-generated method stub
         return false;
     }
 
