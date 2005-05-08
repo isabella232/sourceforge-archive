@@ -30,7 +30,12 @@ import org.slf4j.ULogger;
 
 
 /* ------------------------------------------------------------------------------- */
-/**  EXPERIMENTAL NIO listener!
+/**  Socket Connector.
+ * This connector implements a traditional blocking IO and threading model.
+ * Normal JRE sockets are used and a thread is allocated per connection.
+ * Buffers are managed so that large buffers are only allocated to active connections.
+ * 
+ * This Connector should only be used if NIO is not available.
  * 
  * @version $Revision$
  * @author gregw

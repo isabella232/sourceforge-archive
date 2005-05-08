@@ -28,29 +28,34 @@ import org.mortbay.util.LogSupport;
 import org.slf4j.LoggerFactory;
 import org.slf4j.ULogger;
 
-/**
+/** Abstract Connector implementation.
+ * This abstract implemenation of the Connector interface provides:<ul>
+ * <li>AbstractLifeCycle implementation</li>
+ * <li>Implementations for connector getters and setters</li>
+ * <li>Buffer management</li>
+ * <li>Socket configuration</li>
+ * <li>Base acceptor thread</li>
+ * </ul>
+ * 
  * @author gregw
  *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- * 
  * TODO - allow multiple Acceptor threads
  */
 public abstract class AbstractConnector extends AbstractLifeCycle implements Connector
 {
     private static ULogger log= LoggerFactory.getLogger(AbstractConnector.class);
 
-    private int _headerBufferSize=1500;
-    private int _requestBufferSize=8096;
-    private int _responseBufferSize=32768;
+    private int _headerBufferSize=2*1024;
+    private int _requestBufferSize=16*1024;
+    private int _responseBufferSize=48*1024;
 
     private ThreadPool _threadPool;
     private Handler _handler;
     private String _host;
     private int _port=8080;
     
-    protected long _maxIdleTime=30000;  // TODO Configure
-    protected long _soLingerTime=1000;  // TODO Configure
+    protected long _maxIdleTime=30000; 
+    protected long _soLingerTime=1000; 
     
     private transient SocketAddress _address;
     
@@ -61,8 +66,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     
     
     /* ------------------------------------------------------------------------------- */
-    /** Constructor.
-     * 
+    /** 
      */
     public AbstractConnector()
     {
@@ -214,6 +218,24 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     public void setResponseBufferSize(int responseBufferSize)
     {
         _responseBufferSize = responseBufferSize;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the soLingerTime.
+     */
+    public long getSoLingerTime()
+    {
+        return _soLingerTime;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param soLingerTime The soLingerTime to set.
+     */
+    public void setSoLingerTime(long soLingerTime)
+    {
+        _soLingerTime = soLingerTime;
     }
     
     /* ------------------------------------------------------------ */

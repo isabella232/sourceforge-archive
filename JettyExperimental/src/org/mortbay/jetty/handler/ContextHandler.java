@@ -421,6 +421,12 @@ public class ContextHandler extends WrappedHandler
     {
         _mimeTypes = mimeTypes;
     }
+
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        return "ContextHandler@"+Integer.toHexString(hashCode())+"{"+getContextPath()+","+getResourceBase()+"}";
+    }
     
     /* ------------------------------------------------------------ */
     /** Context.
@@ -733,6 +739,13 @@ public class ContextHandler extends WrappedHandler
         public String getContextPath()
         {
             return _contextPath;
+        }
+
+
+        /* ------------------------------------------------------------ */
+        public String toString()
+        {
+            return "ServletContext@"+Integer.toHexString(hashCode())+"{"+getContextPath()+","+getResourceBase()+"}";
         }
 
     }

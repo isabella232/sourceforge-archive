@@ -27,6 +27,7 @@
   <property name="webapps"        value="${basedir}/webapps"/>
   <property name="test.src"       value="${basedir}/test"/>
   <property name="test.classes"   value="${basedir}/target/test-classes" />
+  <property name="test.results"   value="${basedir}/target/results" />
 
   <property name="jetty.home"             value="${basedir}" />
 
@@ -218,20 +219,63 @@
        </sourcepath>
     </javadoc>
 
+    <!--
     <jar jarfile="${webapps}/javadoc.war">
       <fileset dir="${javadoc}">
         <exclude name="**/CVS"/>
       </fileset>
     </jar>
+    -->
 
   </target>
 
 
   <!-- ==================================================================== -->
   <target name="tests" depends="test"/>
-  <target name="test" depends="jars,javadoc"
+  <target name="test" depends="jars"
           description="Build and run the test harnesses">
-    <ant  dir="." antfile="${test}/build.xml" inheritAll="false" target="test"/>
+    <echo>
+Test results in ${test.results}
+Test basedir=${basedir}
+    </echo>
+    <mkdir dir="${test.classes}"/>
+    <javac srcdir="${test.src}"
+           destdir="${test.classes}"
+           debug="${javac.debug}"
+           optimize="${javac.optimize}"
+           deprecation="${javac.deprecation}"
+	   encoding="${javac.encoding}"
+           >
+       <classpath>
+         <path refid="extpath"/>
+         <pathelement path="${classes}"/>
+       </classpath>
+       <include name="**/*.java"/>
+       <exclude name="**/jmx/**" unless="jmx.available"/>
+    </javac>
+    <mkdir dir="${test.results}"/>
+    <delete file="${test.results}/*" quiet="true" />
+    <junit dir="${basedir}" fork="yes" printsummary="yes" haltonerror="yes" haltonfailure="yes" >
+      <formatter type="plain" usefile="true" />                  
+      <classpath> 
+         <pathelement location="${classes}" />     
+         <pathelement location="${junit.jar}" />     
+         <pathelement location="${test.classes}" />     
+	 <path id="extpath">
+	  <fileset dir="${ext}">
+	    <include name="*.jar"/>
+	    <include name="*.JAR"/>
+	    <include name="*.zip"/>
+	    <include name="*.ZIP"/>
+	   </fileset>
+	 </path>
+      </classpath>        
+      <batchtest  todir="${test.results}">
+        <fileset dir="${test.src}">
+          <include name="**/*Test.java" />
+        </fileset>
+      </batchtest>   
+    </junit>
   </target>
 
   <!-- ==================================================================== -->

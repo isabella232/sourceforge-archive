@@ -37,7 +37,13 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.ULogger;
 
 /* ------------------------------------------------------------------------------- */
-/**  EXPERIMENTAL NIO listener!
+/**  Selecting Blocking NIO connector.
+ * This connector uses efficient NIO buffers with a non blocking threading model for
+ * idle connections. When a connection receives a request, it is switched to a traditional
+ * blocking IO model.
+ * 
+ * This connector is best used when there are a very many low activity connections. Even then
+ * the SelectChannelConnector may give better performance.
  * 
  * @version $Revision$
  * @author gregw

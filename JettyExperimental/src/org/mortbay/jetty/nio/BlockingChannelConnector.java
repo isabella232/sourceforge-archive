@@ -32,7 +32,11 @@ import org.slf4j.ULogger;
 
 
 /* ------------------------------------------------------------------------------- */
-/**  EXPERIMENTAL NIO listener!
+/**  Blocking NIO connector.
+ * This connector uses efficient NIO buffers with a traditional blocking thread model.
+ * Direct NIO buffers are used and a thread is allocated per connections.
+ * 
+ * This connector is best used when there are a few very active connections.
  * 
  * @version $Revision$
  * @author gregw

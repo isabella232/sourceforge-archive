@@ -95,10 +95,7 @@ public class HttpHeaderTest extends TestCase
     {
         HttpFields header = new HttpFields();
         
-        header.put("Content-Type", "gzip");
         header.put("HttpConnection", "keep-alive");
-        
-        assertTrue(HttpHeaderValues.GZIP==header.getStringField(HttpHeaders.CONTENT_TYPE));
         assertTrue(HttpHeaderValues.KEEP_ALIVE==header.getStringField(HttpHeaders.CONNECTION));
 
         int matches=0;
@@ -111,7 +108,7 @@ public class HttpHeaderTest extends TestCase
             if (o==HttpHeaders.CONNECTION)
                 matches++;
         }
-        assertEquals(2, matches);
+        assertEquals(1, matches);
         
         
     }

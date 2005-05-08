@@ -1221,7 +1221,7 @@ public class HttpFields
     public static final class Field
     {
         private Buffer _name;
-        private View _value;
+        private Buffer _value;
         private long _numValue;
         private Field _next;
         private Field _prev;
@@ -1231,7 +1231,7 @@ public class HttpFields
         private Field(Buffer name, Buffer value, long numValue, int revision)
         {
             _name=name;
-            _value=new View(value);
+            _value=value.isImmutable()?value:new View(value);
             _numValue=numValue;
             _next=null;
             _prev=null;
@@ -1267,7 +1267,12 @@ public class HttpFields
             else if (!_value.equals(value))
             {
                 // TODO - the chances of this being right are small, as no copy is made!
-                _value.update(value);
+                if (value.isImmutable())
+                    _value=value;
+                else if (_value instanceof View)
+                    ((View)_value).update(value);
+                else
+                    _value=new View(value);
                 _numValue=numValue;
             }
             _revision=revision;

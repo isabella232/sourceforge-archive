@@ -36,7 +36,13 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.ULogger;
 
 /* ------------------------------------------------------------------------------- */
-/**  EXPERIMENTAL NIO listener!
+/** Selecting NIO connector.
+ * This connector uses efficient NIO buffers with a non blocking threading model.
+ * Direct NIO buffers are used and threads are only allocated to connections with
+ * requests. Synchronization is used to simulate blocking for the servlet API, and
+ * any unflushed content at the end of request handling is written asynchronously.
+ * 
+ * This connector is best used when there are a many moderately active connections.
  * 
  * @version $Revision$
  * @author gregw

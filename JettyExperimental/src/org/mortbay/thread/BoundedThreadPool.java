@@ -246,7 +246,6 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
             _jobs.add(job);
             queued=true;
             _jobLock.notify();
-            // TODO ?? Thread.yield(); 
         }
         
         return queued;

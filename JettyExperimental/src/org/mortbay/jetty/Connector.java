@@ -21,11 +21,18 @@ import org.mortbay.io.Buffers;
 import org.mortbay.thread.LifeCycle;
 import org.mortbay.thread.ThreadPool;
 
-/**
+/** HTTP Connector.
+ * Implementations of this interface provide connectors for the HTTP protocol.
+ * A connector receives requests (normally from a socket) and calls the 
+ * handle method of the Handler object.  These operations are performed using
+ * threads from the ThreadPool set on the connector.
+ * 
+ * When a connector is registered with an instance of Server, then the server
+ * will set itself as both the ThreadPool and the Handler.  Note that a connector
+ * can be used without a Server if a thread pool and handler are directly provided.
+ * 
  * @author gregw
  *
- * To change the template for this generated type comment go to
- * Window - Preferences - Java - Code Generation - Code and Comments
  */
 public interface Connector extends LifeCycle, Buffers
 { 
@@ -47,6 +54,8 @@ public interface Connector extends LifeCycle, Buffers
     
     /* ------------------------------------------------------------ */
     /**
+     * Set the size of the buffer to be used for request and response headers.
+     * An idle connection will at most have one buffer of this size allocated.
      * @param headerBufferSize The headerBufferSize to set.
      */
     void setHeaderBufferSize(int headerBufferSize);
@@ -60,6 +69,9 @@ public interface Connector extends LifeCycle, Buffers
     
     /* ------------------------------------------------------------ */
     /**
+     * Set the size of the content buffer for receiving requests. 
+     * These buffers are only used for active connections that have
+     * requests with bodies that will not fit within the header buffer.
      * @param requestBufferSize The requestBufferSize to set.
      */
     void setRequestBufferSize(int requestBufferSize);
@@ -72,6 +84,9 @@ public interface Connector extends LifeCycle, Buffers
     
     /* ------------------------------------------------------------ */
     /**
+     * Set the size of the content buffer for sending responses. 
+     * These buffers are only used for active connections that are sending 
+     * responses with bodies that will not fit within the header buffer.
      * @param responseBufferSize The responseBufferSize to set.
      */
     void setResponseBufferSize(int responseBufferSize);

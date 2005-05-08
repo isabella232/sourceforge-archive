@@ -30,6 +30,16 @@ import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.MultiException;
 
+/* ------------------------------------------------------------ */
+/** Jetty HTTP Servlet Server.
+ * This class is the main class for the Jetty HTTP Servlet server.
+ * It aggregates Connectors (HTTP request receivers) and request Handlers.
+ * The server is itself a handler and a ThreadPool.  Connectors use the ThreadPool methods
+ * to run jobs that will eventually call the handle method.
+ * 
+ * @author gregw
+ *
+ */
 public class Server extends AbstractLifeCycle implements Handler, ThreadPool
 {
     private static ThreadLocal __server = new ThreadLocal();
@@ -54,7 +64,8 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
     }
     
     /* ------------------------------------------------------------ */
-    /**
+    /** Set the connectors for this server.
+     * Each connector has this server set as it's ThreadPool and its Handler.
      * @param connectors The connectors to set.
      */
     public void setConnectors(Connector[] connectors)
