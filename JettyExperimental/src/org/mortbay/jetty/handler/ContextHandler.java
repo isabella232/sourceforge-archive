@@ -264,6 +264,10 @@ public class ContextHandler extends WrappedHandler
         ClassLoader old_classloader=null;
         Thread current_thread=null;
         
+        String path_info=request.getPathInfo();
+        if (!path_info.startsWith(_contextPath))
+        	return false;
+        
         try
         {
             http_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();

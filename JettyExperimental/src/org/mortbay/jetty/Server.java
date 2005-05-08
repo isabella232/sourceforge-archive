@@ -16,11 +16,15 @@
 package org.mortbay.jetty;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.jetty.handler.WrappedHandler;
 import org.mortbay.thread.AbstractLifeCycle;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.ThreadPool;
@@ -28,6 +32,7 @@ import org.mortbay.util.MultiException;
 
 public class Server extends AbstractLifeCycle implements Handler, ThreadPool
 {
+    private static ThreadLocal __server = new ThreadLocal();
     private ThreadPool _threadPool;
     private Connector[] _connectors;
     private Handler[] _handlers;
@@ -168,11 +173,6 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
             return _threadPool.dispatch(job);
         return false;
     }
-    
-    public String toString()
-    {
-        return "Server";
-    }
 
     /* ------------------------------------------------------------ */
     /* 
@@ -180,6 +180,8 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
      */
     public boolean handle(HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
+        __server.set(this);
+        
         if (_handlers==null || _handlers.length==0)
         {
             response.sendError(500);
@@ -195,6 +197,34 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
         }    
         return false;
     }
-    
 
+    /* ------------------------------------------------------------ */
+    public Handler[] getAllHandlers()
+    {
+        List list = new ArrayList();
+        for (int i=0;i<_handlers.length;i++)
+            expandHandler(_handlers[i],list);
+        return (Handler[])list.toArray(new Handler[list.size()]);
+    }
+
+    /* ------------------------------------------------------------ */
+    private void expandHandler(Handler handler, List list)
+    {
+        if (handler==null)
+            return;
+        list.add(handler);
+        if (handler instanceof WrappedHandler)
+            expandHandler(((WrappedHandler)handler).getHandler(),list);
+        if (handler instanceof HandlerCollection)
+        {
+            Handler[] ha = ((HandlerCollection)handler).getHandlers();
+            for (int i=0;ha!=null && i<ha.length; i++)
+                expandHandler(ha[i], list);
+        }
+    }
+    
+    public static Server getCurrentServer()
+    {
+        return (Server)__server.get();
+    }
 }

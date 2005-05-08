@@ -19,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.MalformedURLException;
 import java.util.Enumeration;
 import java.util.List;
 
@@ -110,13 +111,14 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         
     private boolean _acceptRanges=true;
     private boolean _dirAllowed=true;
-    private boolean _redirectWelcome;
+    private boolean _redirectWelcome=true;
     private boolean _gzip=true;
     
     private Resource _resourceBase;
     private ResourceCache _cache=new ResourceCache();
     
     private MimeTypes _mimeTypes;
+    private String[] _welcomes={"index.jsp","index.html"};
     
     
     /* ------------------------------------------------------------ */
@@ -488,10 +490,21 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     /**
      * @param resource
      * @return
+     * @throws IOException
+     * @throws MalformedURLException
      */
-    private String getWelcomeFile(Resource resource)
+    private String getWelcomeFile(Resource resource) throws MalformedURLException, IOException
     {
-        // TODO Auto-generated method stub
+        if (!resource.isDirectory() || _welcomes==null)
+            return null;
+
+        for (int i=0;i<_welcomes.length;i++)
+        {
+            Resource welcome=resource.addPath(_welcomes[i]);
+            if (welcome.exists())
+                return _welcomes[i];
+        }
+
         return null;
     }
 
