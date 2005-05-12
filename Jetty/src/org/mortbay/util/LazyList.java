@@ -159,7 +159,7 @@ public class LazyList
             return list;
         List l= new ArrayList(initialSize);
         l.add(list);
-        return list;    
+        return l;    
     }
 
     /* ------------------------------------------------------------ */

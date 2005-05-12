@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
  + set classloader during webapp doStop
+ + NPE protection in ThreadedServer
 
 Jetty-5.1.4rc0 - 19 April 2005
  + ServletHttpContext correctly calls super.doStop.

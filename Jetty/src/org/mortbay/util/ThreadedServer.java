@@ -541,14 +541,14 @@ abstract public class ThreadedServer extends ThreadPool
 
             // Do we have an acceptor thread (running or not)
             Thread.yield();
-            for (int a = 0; a < _acceptor.length; a++)
+            for (int a = 0; _acceptor!=null && a<_acceptor.length; a++)
             {
                 Acceptor acc = _acceptor[a];
                 if (acc != null) acc.interrupt();
             }
             Thread.yield();
 
-            for (int a = 0; a < _acceptor.length; a++)
+            for (int a = 0; _acceptor!=null && a<_acceptor.length; a++)
             {
                 Acceptor acc = _acceptor[a];
 
