@@ -764,8 +764,9 @@ public class ModelMBeanImpl
         if(log.isDebugEnabled())log.debug("invoke "+name);
 
         String methodKey=name+"(";
-        for (int i=0;i<signature.length;i++)
-            methodKey+=(i>0?",":"")+signature[i];
+        if (signature!=null)
+            for (int i=0;i<signature.length;i++)
+                methodKey+=(i>0?",":"")+signature[i];
         methodKey+=")";
 
         try
