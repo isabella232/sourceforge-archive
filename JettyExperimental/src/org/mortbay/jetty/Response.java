@@ -180,6 +180,7 @@ public class Response implements HttpServletResponse
      */
     public void sendError(int code, String message) throws IOException
     {
+        reset();
         setStatus(code,message);
         
         // Generate normal error page.
@@ -191,6 +192,7 @@ public class Response implements HttpServletResponse
             code!=SC_PARTIAL_CONTENT &&
             code>=SC_OK)
         {
+            // TODO avoid new
             new ErrorPageHandler().handle(_connection.getRequest(),this,Handler.ERROR);
         }
         else if (code!=SC_PARTIAL_CONTENT) 

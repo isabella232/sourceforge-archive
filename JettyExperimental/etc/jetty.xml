@@ -82,13 +82,6 @@
 	              <New class="org.mortbay.jetty.servlet.ServletHolder">
 	                 <Set name="name">Dump</Set>
 	                 <Set name="className">org.mortbay.servlet.Dump</Set>
-	                 <Set name="paths">
-	                   <Array type="java.lang.String">
-	                      <Item>/dump/*</Item>
-	                      <Item>/exact</Item>
-	                      <Item>*.DUMP</Item>
-	                   </Array>
-	                 </Set>
 	              </New>
 	           </Item>
 	                
@@ -96,11 +89,6 @@
 	              <New class="org.mortbay.jetty.servlet.ServletHolder">
 	                 <Set name="name">Session</Set>
 	                 <Set name="className">org.mortbay.servlet.SessionDump</Set>
-	                 <Set name="paths">
-	                   <Array type="java.lang.String">
-	                      <Item>/session/*</Item>
-	                   </Array>
-	                 </Set>
 	              </New>
 	           </Item>
 	           
@@ -108,15 +96,46 @@
 	              <New class="org.mortbay.jetty.servlet.ServletHolder">
 	                  <Set name="name">Default</Set>
 	                  <Set name="className">org.mortbay.jetty.servlet.DefaultServlet</Set>
-	                  <Set name="paths">
-	                    <Array type="java.lang.String">
-	                      <Item>/</Item>
-	                     </Array>
-	                  </Set>
 	              </New>
 	           </Item>                
 	        </Array>
 	    </Set>
+	    
+	    
+	   <Set name="servletMappings">
+	       <Array type="org.mortbay.jetty.servlet.ServletMapping">
+	           <Item>
+	              <New class="org.mortbay.jetty.servlet.ServletMapping">
+	                <Set name="pathSpec">/dump/*</Set>
+	                <Set name="servletName">Dump</Set>
+	              </New>
+	           </Item>
+	           <Item>
+	              <New class="org.mortbay.jetty.servlet.ServletMapping">
+	                <Set name="pathSpec">/exact</Set>
+	                <Set name="servletName">Dump</Set>
+	              </New>
+	           </Item>
+	           <Item>
+	              <New class="org.mortbay.jetty.servlet.ServletMapping">
+	                <Set name="pathSpec">*.DUMP</Set>
+	                <Set name="servletName">Dump</Set>
+	              </New>
+	           </Item>
+	           <Item>
+	              <New class="org.mortbay.jetty.servlet.ServletMapping">
+	                <Set name="pathSpec">/session/*</Set>
+	                <Set name="servletName">Session</Set>
+	              </New>
+	           </Item>
+	           <Item>
+	              <New class="org.mortbay.jetty.servlet.ServletMapping">
+	                <Set name="pathSpec">/</Set>
+	                <Set name="servletName">Default</Set>
+	              </New>
+	           </Item>
+	       </Array>
+	   </Set>
 	</Ref>
 
 	<Ref id="javadocServletHandler">
@@ -126,15 +145,21 @@
 	              <New class="org.mortbay.jetty.servlet.ServletHolder">
 	                  <Set name="name">Default</Set>
 	                  <Set name="className">org.mortbay.jetty.servlet.DefaultServlet</Set>
-	                  <Set name="paths">
-	                    <Array type="java.lang.String">
-	                      <Item>/</Item>
-	                     </Array>
-	                  </Set>
 	              </New>
 	           </Item>                
 	        </Array>
 	    </Set>
+	    
+	   <Set name="servletMappings">
+	       <Array type="org.mortbay.jetty.servlet.ServletMapping">
+	           <Item>
+	              <New class="org.mortbay.jetty.servlet.ServletMapping">
+	                <Set name="pathSpec">/</Set>
+	                <Set name="servletName">Default</Set>
+	              </New>
+	           </Item>
+	       </Array>
+	   </Set>
 	</Ref>
 
 

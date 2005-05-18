@@ -16,13 +16,14 @@
 package org.mortbay.jetty.servlet;
 
 import java.util.Enumeration;
-import java.util.Map;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 
 import org.mortbay.jetty.Handler;
+import org.slf4j.LoggerFactory;
+import org.slf4j.ULogger;
 
 /* --------------------------------------------------------------------- */
 /** 
@@ -32,6 +33,7 @@ import org.mortbay.jetty.Handler;
 public class FilterHolder
     extends Holder
 {
+    private static ULogger log = LoggerFactory.getLogger(FilterHolder.class);
 
     /* ------------------------------------------------------------ */
     /** Dispatch type from name
@@ -50,9 +52,6 @@ public class FilterHolder
     }
     
     /* ------------------------------------------------------------ */
-    private PathMap _pathSpecs;
-    private Map _servlets;
-
     private transient Filter _filter;
     private transient Config _config;
         
@@ -60,8 +59,9 @@ public class FilterHolder
     /** Constructor for Serialization.
      */
     public FilterHolder()
-    {}
-
+    {
+    }
+    
     /* ------------------------------------------------------------ */
     public void doStart()
         throws Exception
@@ -132,6 +132,8 @@ public class FilterHolder
         }
     }
     
+
+
 }
 
 

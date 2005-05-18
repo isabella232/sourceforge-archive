@@ -18,24 +18,33 @@ package org.mortbay.jetty.servlet;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Portable;
+import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.WrappedHandler;
+import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiException;
+import org.mortbay.util.MultiMap;
 import org.slf4j.LoggerFactory;
 import org.slf4j.ULogger;
 
@@ -59,7 +68,7 @@ import org.slf4j.ULogger;
  */
 public class ServletHandler extends WrappedHandler
 {
-    private static ULogger log = LoggerFactory.getLogger(ServletHolder.class);
+    private static String __AllowString="GET, HEAD, POST, OPTIONS, TRACE";
 
     /* ------------------------------------------------------------ */
     public static final String __DEFAULT_SERVLET="default";
@@ -73,17 +82,30 @@ public class ServletHandler extends WrappedHandler
     
     /* ------------------------------------------------------------ */
     private static final boolean __Slosh2Slash=File.separatorChar=='\\';
-    private static String __AllowString="GET, HEAD, POST, OPTIONS, TRACE";
+    private static ULogger log = LoggerFactory.getLogger(ServletHolder.class);
 
     
     
     /* ------------------------------------------------------------ */
-    protected ServletContext _context;
-    protected ServletHolder[] _servlets;
-    protected PathMap _servletPathMap=new PathMap();
-    protected Map _servletNameMap=new HashMap();
-
-    protected transient ULogger _contextLog;
+    private ServletContext _context;
+    private FilterHolder[] _filters;
+    private FilterMapping[] _filterMappings;
+    private boolean _filterChainsCached=true;
+    
+    private ServletHolder[] _servlets;
+    private ServletMapping[] _servletMappings;
+    
+    private ULogger _contextLog;
+    
+    private transient Map _filterNameMap;
+    private transient List _filterPathMappings;
+    private transient MultiMap _filterNameMappings;
+    
+    private transient Map _servletNameMap;
+    private transient PathMap _servletPathMap;
+    
+    protected transient HashMap _chainCache[];
+    protected transient HashMap _namedChainCache[];
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -91,26 +113,116 @@ public class ServletHandler extends WrappedHandler
     public ServletHandler()
     {
     }
-    
-    /* ------------------------------------------------------------ */
-    public ServletHolder getServletHolder(String name)
+
+    /* ----------------------------------------------------------------- */
+    protected synchronized void doStart()
+        throws Exception
     {
-        return (ServletHolder)_servletNameMap.get(name);
-    }    
+        _context=ContextHandler.getCurrentContext();
+        _contextLog = LoggerFactory.getLogger(_context.getServletContextName());
+        if (_contextLog==null)
+            _contextLog=log;
+
+        // Start filters
+        if (_filters!=null)
+        {
+            for (int i=_filters.length; i-->0;)
+            {
+                _filters[i].start();
+            }
+        }
+        
+        
+        updateMappings();
+        initializeServlets();
+
+        if(_filterChainsCached && _filters!=null && _filters.length>0)
+        {
+            _chainCache=     new HashMap[]{null,new HashMap(),new HashMap(),null,new HashMap(),null,null,null,new HashMap()};
+            _namedChainCache=new HashMap[]{null,null,new HashMap(),null,new HashMap(),null,null,null,new HashMap()};
+        }
+        super.doStart();
+    }   
+    
+    /* ----------------------------------------------------------------- */
+    protected synchronized void doStop()
+        throws Exception
+    {
+        super.doStop();
+        
+        // Stop filters
+        if (_filters!=null)
+        {
+            for (int i=_filters.length; i-->0;)
+            {
+                try { _filters[i].stop(); }catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
+            }
+        }
+        
+        // Stop servlets
+        if (_servlets!=null)
+        {
+            for (int i=_servlets.length; i-->0;)
+            {
+                try { _servlets[i].stop(); }catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
+            }
+        }
+
+        _filterNameMap=null;
+        _filterPathMappings=null;
+        _filterNameMappings=null;
+        _servletNameMap=null;
+        _servletPathMap=null;
+        _chainCache=null;
+        _namedChainCache=null;
+    }
+
     
     /* ------------------------------------------------------------ */
     /**
-     * Register an existing ServletHolder with this handler.
-     * @param holder the ServletHolder to register.
+     * @return Returns the contextLog.
      */
-    public void addServletHolder(ServletHolder holder)
+    public ULogger getContextLog()
     {
-        ServletHolder existing = (ServletHolder)
-        _servletNameMap.get(holder.getName());
-        if (existing==null)
-            _servletNameMap.put(holder.getName(),holder);
-        else if (existing!=holder)
-            throw new IllegalArgumentException("Holder already exists for name: "+holder.getName());
+        return _contextLog;
+    }
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the filterMappings.
+     */
+    public FilterMapping[] getFilterMappings()
+    {
+        return _filterMappings;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get Filters.
+     * @return Array of defined servlets
+     */
+    public FilterHolder[] getFilters()
+    {
+        return _filters;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** ServletHolder matching path.
+     * @param pathInContext Path within _context.
+     * @return PathMap Entries pathspec to ServletHolder
+     */
+    private Map.Entry getHolderEntry(String pathInContext)
+    {
+        return _servletPathMap.getMatch(pathInContext);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param ipath
+     * @return
+     */
+    public RequestDispatcher getRequestDispatcher(String ipath)
+    {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     /* ------------------------------------------------------------ */
@@ -118,21 +230,15 @@ public class ServletHandler extends WrappedHandler
     {
         return _context;
     }
-    
-    /* ----------------------------------------------------------------- */
-    protected synchronized void doStart()
-        throws Exception
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the servletMappings.
+     */
+    public ServletMapping[] getServletMappings()
     {
-        if (isStarted())
-            return;
-        _context=ContextHandler.getCurrentContext();
-        _contextLog = LoggerFactory.getLogger(_context.getServletContextName());
-        if (_contextLog==null)
-            _contextLog=log;
-
-        initializeServlets();
-    }   
-    
+        return _servletMappings;
+    }
+        
     /* ------------------------------------------------------------ */
     /** Get Servlets.
      * @return Array of defined servlets
@@ -141,116 +247,6 @@ public class ServletHandler extends WrappedHandler
     {
         return _servlets;
     }
-    
-    /* ------------------------------------------------------------ */
-    /** Get Servlets.
-     * @return Array of defined servlets
-     */
-    public synchronized void setServlets(ServletHolder[] holders)
-    {
-        _servlets=(ServletHolder[])holders.clone();
-        try
-        {
-            mapServlets();
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException(e);
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    synchronized void mapServlets()
-    	throws Exception
-    {
-        // handle null holders
-        if (_servlets==null)
-        {
-            _servletNameMap=null;
-            _servletPathMap=null;
-            return;
-        }
-        
-        // create new maps
-        PathMap pm = new PathMap();
-        HashMap nm = new HashMap();
-        
-        // update the maps
-        for (int i=0;i<_servlets.length;i++)
-        {
-            nm.put(_servlets[i].getName(),_servlets[i]);
-            String[] paths = _servlets[i].getPaths();
-            if (paths!=null)
-            {
-                for (int j=0;j<paths.length;j++)
-                    pm.put(paths[j],_servlets[i]);
-            }
-        }
-        
-        _servletPathMap=pm;
-        _servletNameMap=nm;
-        
-        if (log.isDebugEnabled())
-        {
-            log.debug("servletNameMap="+nm);
-            log.debug("servletPathMap="+pm);
-        }
-        
-        if (isStarted())
-            initializeServlets();
-    }
-    
-    
-    /* ------------------------------------------------------------ */
-    /** Initialize load-on-startup servlets.
-     * Called automatically from start if autoInitializeServlet is true.
-     */
-    public void initializeServlets()
-        throws Exception
-    {
-        MultiException mx = new MultiException();
-        
-        if (_servlets!=null)
-        {
-            // Sort and Initialize servlets
-            ServletHolder[] servlets = (ServletHolder[])_servlets.clone();
-            Arrays.sort(servlets);
-            for (int i=0; i<servlets.length; i++)
-            {
-                try
-                {
-                    servlets[i].setServletHandler(this);
-                    servlets[i].start();
-                }
-                catch(Exception e)
-                {
-                    log.debug(LogSupport.EXCEPTION,e);
-                    mx.add(e);
-                }
-            } 
-            mx.ifExceptionThrow();  
-        }
-    }
-    
-    /* ----------------------------------------------------------------- */
-    protected synchronized void doStop()
-        throws Exception
-    {
-        // Sort and Initialize servlets
-        ServletHolder[] holders = getServlets();
-        
-        // Stop servlets
-        for (int i=holders.length; i-->0;)
-        {
-            try
-            {
-                holders[i].stop();
-            }
-            catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
-        }
-        
-    }
-
 
     /* ------------------------------------------------------------ */
     /* 
@@ -264,14 +260,15 @@ public class ServletHandler extends WrappedHandler
 
         // Get the base requests
         Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
+
+        String pathInContext=request.getPathInfo(); 
         
         // find the servlet
         ServletHolder servletHolder=null;
+        boolean named_dispatch=false;
         if (type == REQUEST)
         {
             // Look for the servlet
-            String pathInContext=request.getPathInfo(); // TODO WRONG???
-
             Map.Entry map=getHolderEntry(pathInContext);
             if (map!=null)
             {
@@ -291,25 +288,24 @@ public class ServletHandler extends WrappedHandler
         {
             // servlet must already be determined
             Portable.throwNotSupported();
+            named_dispatch=true; // TODO maybe or maybe not?
         }
         
         try
         {
-            
-            
             // Do that funky filter thang 
-            // TODO
-            
-            // servlet thang!
-            if (servletHolder!=null)
-            {
+            // Build and/or cache filter chain
+            FilterChain chain=(!named_dispatch) ? getChainForPath(type, pathInContext, servletHolder): getChainForName(type, servletHolder);
 
+            if (log.isDebugEnabled()) log.debug("chain="+chain);
+            
+            // Do the handling thang
+            if (chain!=null)
+                chain.doFilter(request, response);
+            else if (servletHolder != null)
                 servletHolder.handle(request,response);
-                
-                /* TODO
-                dispatch(pathInContext,request,response,servletHolder, Dispatcher.__REQUEST);
-                */
-            }
+            else
+                notFound(request, response);
         }
         catch(Exception e)
         {
@@ -378,30 +374,424 @@ public class ServletHandler extends WrappedHandler
         }
         return true;
     }
-    
-    /* ------------------------------------------------------------ */
-    /** ServletHolder matching path.
-     * @param pathInContext Path within _context.
-     * @return PathMap Entries pathspec to ServletHolder
-     */
-    private Map.Entry getHolderEntry(String pathInContext)
-    {
-        return _servletPathMap.getMatch(pathInContext);
-    }
-    
-    
 
+    /* ------------------------------------------------------------ */
+    private FilterChain getChainForName(int requestType, ServletHolder servletHolder) {
+        if (servletHolder == null) {
+            throw new IllegalStateException("Named dispatch must be to an explicitly named servlet");
+        }
+        
+        if (_filterChainsCached)
+        {
+            synchronized(this)
+            {
+                if (_namedChainCache[requestType].containsKey(servletHolder.getName()))
+                    return (FilterChain)_namedChainCache[requestType].get(servletHolder.getName());
+            }
+        }
+        
+        // Build list of filters
+        Object filters= null;
+        
+        // Servlet filters
+        if (_filterNameMappings.size() > 0)
+        {
+            Object o= _filterNameMappings.get(servletHolder.getName());
+            for (int i=0; i<LazyList.size(o);i++)
+            {
+                FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
+                if (mapping.appliesTo(null,requestType))
+                    filters=LazyList.add(filters,mapping.getFilterHolder());
+            }
+        }
+
+        FilterChain chain = null;
+        if (_filterChainsCached)
+        {
+            synchronized(this)
+            {
+                if (LazyList.size(filters) > 0)
+                    chain= new CachedChain(filters, servletHolder);
+                _namedChainCache[requestType].put(servletHolder.getName(),chain);
+            }
+        }
+        else if (LazyList.size(filters) > 0)
+            chain = new Chain(filters, servletHolder);
+        
+        return chain;   
+    }
+
+    /* ------------------------------------------------------------ */
+    private FilterChain getChainForPath(int requestType, String pathInContext, ServletHolder servletHolder) 
+    {
+        if (_filterChainsCached && _chainCache!=null)
+        {
+            synchronized(this)
+            {
+                if(_chainCache[requestType].containsKey(pathInContext))
+                    return (FilterChain)_chainCache[requestType].get(pathInContext);
+            }
+        }
+        
+        
+        // Build list of filters
+        Object filters= null;
+    
+        
+        // Path filters
+        if (_filterPathMappings!=null)
+        {
+            for (int i= 0; i < _filterPathMappings.size(); i++)
+            {
+                FilterMapping mapping = (FilterMapping)_filterPathMappings.get(i);
+                if (mapping.appliesTo(pathInContext, requestType))
+                    filters= LazyList.add(filters, mapping.getFilterHolder());
+            }
+        }
+        
+        // Servlet filters
+        if (servletHolder != null && _filterNameMappings!=null && _filterNameMappings.size() > 0)
+        {
+            Object o= _filterNameMappings.get(servletHolder.getName());
+            for (int i=0; i<LazyList.size(o);i++)
+            {
+                FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
+                if (mapping.appliesTo(null,requestType))
+                    filters=LazyList.add(filters,mapping.getFilterHolder());
+            }
+        }
+        if (filters==null)
+            return null;
+        
+        FilterChain chain = null;
+        if (_filterChainsCached)
+        {
+            synchronized(this)
+            {
+                if (LazyList.size(filters) > 0)
+                    chain= new CachedChain(filters, servletHolder);
+                _chainCache[requestType].put(pathInContext,chain);
+            }
+        }
+        else if (LazyList.size(filters) > 0)
+            chain = new Chain(filters, servletHolder);
+    
+        return chain;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Initialize load-on-startup servlets.
+     * Called automatically from start if autoInitializeServlet is true.
+     */
+    public void initializeServlets()
+        throws Exception
+    {
+        MultiException mx = new MultiException();
+        
+        if (_servlets!=null)
+        {
+            // Sort and Initialize servlets
+            ServletHolder[] servlets = (ServletHolder[])_servlets.clone();
+            Arrays.sort(servlets);
+            for (int i=0; i<servlets.length; i++)
+            {
+                try
+                {
+                    servlets[i].setServletHandler(this);
+                    servlets[i].start();
+                }
+                catch(Exception e)
+                {
+                    log.debug(LogSupport.EXCEPTION,e);
+                    mx.add(e);
+                }
+            } 
+            mx.ifExceptionThrow();  
+        }
+    }
     /* ------------------------------------------------------------ */
     /**
-     * @param ipath
-     * @return
+     * @return Returns the filterChainsCached.
      */
-    public RequestDispatcher getRequestDispatcher(String ipath)
+    public boolean isFilterChainsCached()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return _filterChainsCached;
+    }
+    
+    /* ------------------------------------------------------------ */
+    protected synchronized void updateMappings()
+    {
+        // Map servlet names to holders
+        if (_servlets==null)
+        {
+            _servletNameMap=null;
+        }
+        else
+        {   
+            HashMap nm = new HashMap();
+            
+            // update the maps
+            for (int i=0;i<_servlets.length;i++)
+                nm.put(_servlets[i].getName(),_servlets[i]);
+            _servletNameMap=nm;
+        }
+
+        // Map servlet paths to holders
+        if (_servletMappings==null || _servletNameMap==null)
+        {
+            _servletPathMap=null;
+        }
+        else
+        {
+            PathMap pm = new PathMap();
+            
+            // update the maps
+            for (int i=0;i<_servletMappings.length;i++)
+            {
+                ServletHolder servlet_holder = (ServletHolder)_servletNameMap.get(_servletMappings[i].getServletName());
+                if (servlet_holder==null)
+                    throw new IllegalStateException("No such servlet: "+_servletMappings[i].getServletName());
+                else if (_servletMappings[i].getPathSpec()!=null)
+                    pm.put(_servletMappings[i].getPathSpec(),servlet_holder);
+            }
+            
+            _servletPathMap=pm;
+        }
+        
+        
+        
+        // update filter name map
+        if (_filters==null)
+        {
+            _filterNameMap=null;
+        }
+        else
+        {   
+            HashMap nm = new HashMap();
+            for (int i=0;i<_filters.length;i++)
+                nm.put(_servlets[i].getName(),_filters[i]);
+            _filterNameMap=nm;
+        }
+
+        // update filter mappings
+        if (_filterMappings==null)
+        {
+            _filterPathMappings=null;
+            _filterNameMappings=null;
+        }
+        else 
+        {
+            _filterPathMappings=new ArrayList();
+            _filterNameMappings=new MultiMap();
+            for (int i=0;i<_filterMappings.length;i++)
+            {
+                FilterHolder holder = (FilterHolder)_filterNameMap.get(_filterMappings[i].getFilterName());
+                if (holder==null)
+                    throw new IllegalStateException("No filter named "+_filterMappings[i].getFilterName());
+                _filterMappings[i].setFilterHolder(holder);    
+                if (_filterMappings[i].getPathSpec()!=null)
+                    _filterPathMappings.add(_filterMappings[i]);
+                else if (_filterMappings[i].getServletName()!=null)
+                    _filterNameMappings.add(_filterMappings[i].getServletName(), holder);         
+            }
+        }
+
+        if (log.isDebugEnabled()) 
+        {
+            log.debug("filterNameMap="+_filterNameMap);
+            log.debug("pathFilters="+_filterPathMappings);
+            log.debug("servletFilterMap="+_filterNameMappings);
+            log.debug("servletPathMap="+_servletPathMap);
+            log.debug("servletNameMap="+_servletNameMap);
+        }
+        
+        
+        try
+        {
+            if (isStarted())
+                initializeServlets();
+        }
+        catch (Exception e)
+        {
+            throw new RuntimeException(e);
+        }
     }
 
 
+    /* ------------------------------------------------------------ */
+    protected void notFound(HttpServletRequest request,
+                  HttpServletResponse response)
+        throws IOException
+    {
+        if(log.isDebugEnabled())log.debug("Not Found "+request.getRequestURI());
+        response.sendError(HttpServletResponse.SC_NOT_FOUND);
         
+    }
+    /* ------------------------------------------------------------ */
+    /**
+     * @param contextLog The contextLog to set.
+     */
+    public void setContextLog(ULogger contextLog)
+    {
+        _contextLog = contextLog;
+    }
+    /* ------------------------------------------------------------ */
+    /**
+     * @param filterChainsCached The filterChainsCached to set.
+     */
+    public void setFilterChainsCached(boolean filterChainsCached)
+    {
+        _filterChainsCached = filterChainsCached;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param filterMappings The filterMappings to set.
+     */
+    public void setFilterMappings(FilterMapping[] filterMappings)
+    {
+        _filterMappings = filterMappings;
+        if (isStarted())
+            updateMappings();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get Filters.
+     * @return Array of defined servlets
+     */
+    public synchronized void setFilters(FilterHolder[] holders)
+    {
+        _filters=(FilterHolder[])holders.clone();
+    }
+    /* ------------------------------------------------------------ */
+    /**
+     * @param servletMappings The servletMappings to set.
+     */
+    public void setServletMappings(ServletMapping[] servletMappings)
+    {
+        _servletMappings = servletMappings;
+        if (isStarted())
+            updateMappings();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Get Servlets.
+     * @return Array of defined servlets
+     */
+    public synchronized void setServlets(ServletHolder[] holders)
+    {
+        _servlets=(ServletHolder[])holders.clone();
+        updateMappings();
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class CachedChain implements FilterChain
+    {
+        FilterHolder _filterHolder;
+        CachedChain _next;
+        ServletHolder _servletHolder;
+
+        /* ------------------------------------------------------------ */
+        CachedChain(Object filters, ServletHolder servletHolder)
+        {
+            if (LazyList.size(filters)>0)
+            {
+                _filterHolder=(FilterHolder)LazyList.get(filters, 0);
+                filters=LazyList.remove(filters,0);
+                _next=new CachedChain(filters,servletHolder);
+            }
+            else
+                _servletHolder=servletHolder;
+        }
+
+        /* ------------------------------------------------------------ */
+        public void doFilter(ServletRequest request, ServletResponse response) 
+            throws IOException, ServletException
+        {
+            // pass to next filter
+            if (_filterHolder!=null)
+            {
+                if (log.isDebugEnabled())
+                    log.debug("call filter " + _filterHolder);
+                Filter filter= _filterHolder.getFilter();
+                filter.doFilter(request, response, _next);
+                return;
+            }
+
+            // Call servlet
+            if (_servletHolder != null)
+            {
+                if (log.isDebugEnabled())
+                    log.debug("call servlet " + _servletHolder);
+                _servletHolder.handle(request, response);
+            }
+            else // Not found
+                notFound((HttpServletRequest)request, (HttpServletResponse)response);
+        }
+        
+        public String toString()
+        {
+            if (_filterHolder!=null)
+                return _filterHolder+"->"+_next.toString();
+            if (_servletHolder!=null)
+                return _servletHolder.toString();
+            return "null";
+        }
+    }  
+    
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class Chain implements FilterChain
+    {
+        int _filter= 0;
+        Object _filters;
+        ServletHolder _servletHolder;
+
+        /* ------------------------------------------------------------ */
+        Chain(Object filters, ServletHolder servletHolder)
+        {
+            _filters= filters;
+            _servletHolder= servletHolder;
+        }
+
+        /* ------------------------------------------------------------ */
+        public void doFilter(ServletRequest request, ServletResponse response)
+            throws IOException, ServletException
+        {
+            if (log.isDebugEnabled()) log.debug("doFilter " + _filter);
+
+            // pass to next filter
+            if (_filter < LazyList.size(_filters))
+            {
+                FilterHolder holder= (FilterHolder)LazyList.get(_filters, _filter++);
+                if (log.isDebugEnabled()) log.debug("call filter " + holder);
+                Filter filter= holder.getFilter();
+                filter.doFilter(request, response, this);
+                return;
+            }
+
+            // Call servlet
+            if (_servletHolder != null)
+            {
+                if (log.isDebugEnabled()) log.debug("call servlet " + _servletHolder);
+                _servletHolder.handle(request, response);
+            }
+            else // Not found
+                notFound((HttpServletRequest)request, (HttpServletResponse)response);
+        }
+        
+        public String toString()
+        {
+            StringBuffer b = new StringBuffer();
+            for (int i=0; i<LazyList.size(_filters);i++)
+            {
+                b.append(LazyList.get(_filters, i).toString());
+                b.append("->");
+            }
+            b.append(_servletHolder);
+            return b.toString();
+        }
+    }
 }

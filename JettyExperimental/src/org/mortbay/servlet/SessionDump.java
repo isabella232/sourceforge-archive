@@ -71,7 +71,7 @@ public class SessionDump extends HttpServlet
         {
             if (action.equals("Invalidate"))
                 session.invalidate();
-            else if (action.equals("Set"))
+            else if (action.equals("Set") && name!=null && name.length()>0)
             {   
                 session.setAttribute(name,value);
                 try
@@ -128,7 +128,7 @@ public class SessionDump extends HttpServlet
                 while(keys.hasMoreElements())
                 {
                     String name=(String)keys.nextElement();
-                    String value=session.getAttribute(name).toString();
+                    String value=(String)session.getAttribute(name);
 
                     out.println("<b>"+name+":</b> "+value+"<br/>");
                 }

@@ -49,7 +49,6 @@ public class ServletHolder extends Holder
 {
     /* ---------------------------------------------------------------- */
     
-    private String[] _paths;
     private int _initOrder;
     private boolean _initOnStartup=false;
     private Map _roleMap; 
@@ -69,35 +68,6 @@ public class ServletHolder extends Holder
      */
     public ServletHolder()
     {}
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the paths.
-     */
-    public String[] getPaths()
-    {
-        return _paths;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param paths The paths to set.
-     */
-    public void setPaths(String[] paths)
-    {
-        _paths=(String[])paths.clone();
-        if (isStarted())
-        {
-            try
-            {
-                getServletHandler().mapServlets();
-            }
-            catch (Exception e)
-            {
-                throw new RuntimeException(e);
-            }
-        }
-    }
     
     /* ------------------------------------------------------------ */
     public int getInitOrder()
