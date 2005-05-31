@@ -21,8 +21,13 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.Request;
+import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.util.StringMap;
 import org.slf4j.LoggerFactory;
 import org.slf4j.ULogger;
@@ -67,7 +72,7 @@ public class Dispatcher implements RequestDispatcher
         __managedAttributes.put(__FORWARD_PATH_INFO,__FORWARD_PATH_INFO);
         __managedAttributes.put(__FORWARD_QUERY_STRING,__FORWARD_QUERY_STRING);
     }
-    
+
     /* ------------------------------------------------------------ */
     /** Dispatch type from name
      */
@@ -84,14 +89,47 @@ public class Dispatcher implements RequestDispatcher
         throw new IllegalArgumentException(type);
     }
 
+
+    /* ------------------------------------------------------------ */
+    private ContextHandler _contextHandler;
+    private String _uri;
+    private String _path;
+    private String _query;
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param contextHandler
+     * @param uriInContext
+     * @param pathInContext
+     * @param query
+     */
+    public Dispatcher(ContextHandler contextHandler, String uri, String pathInContext, String query)
+    {
+        _contextHandler=contextHandler;
+        _uri=uri;
+        _path=pathInContext;
+        _query=query;
+    }
+
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.RequestDispatcher#forward(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
      */
     public void forward(ServletRequest request, ServletResponse response) throws ServletException, IOException
     {
-        // TODO Auto-generated method stub
+        Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
         
+        String old_uri=base_request.getRequestURI();
+        try
+        {
+            base_request.setRequestURI(_uri);
+            
+            _contextHandler.handle(_path, (HttpServletRequest)request, (HttpServletResponse)response, Handler.FORWARD);
+        }
+        finally
+        {
+            base_request.setRequestURI(old_uri);
+        }
     }
 
     /* ------------------------------------------------------------ */

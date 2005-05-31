@@ -254,55 +254,73 @@ public class ContextHandler extends WrappedHandler
     /* 
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public boolean handle(HttpServletRequest request, HttpServletResponse response, int dispatch)
+    public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
             throws IOException, ServletException
     {
         boolean handled=false;
         Request http_request=null;
         Context old_context=null;
+        String old_servlet_path=null;
         String old_path_info=null;
         ClassLoader old_classloader=null;
         Thread current_thread=null;
         
-        String path_info=request.getPathInfo();
-        if (!path_info.startsWith(_contextPath))
-        	return false;
         
         try
         {
             http_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
             old_context=http_request.getContext();
+            old_servlet_path=http_request.getServletPath();
             old_path_info=http_request.getPathInfo();
-            
-            http_request.setContext(_context);
-            
-            // TODO - maybe only for REQUEST type ?
-            if (old_path_info.startsWith(_contextPath))
-                http_request.setPathInfo(old_path_info.substring(_contextPath.length()));
-            
-            // Set the classloader
-            if (_classLoader!=null)
+
+            // Are we already in this context?
+            if (old_context!=_context)
             {
-                current_thread=Thread.currentThread();
-                old_classloader=current_thread.getContextClassLoader();
-                current_thread.setContextClassLoader(_classLoader);
+                // Nope - so check the target.
+                
+                if (target.startsWith(_contextPath))
+                    target=target.substring(_contextPath.length());
+                else
+                {
+                    // Not for this context!
+                    old_context=_context;
+                	return false;
+                }
+                
+                // Update the paths
+                http_request.setContext(_context);
+                http_request.setServletPath(null);
+                http_request.setPathInfo(target);
+                
+                // Set the classloader
+                if (_classLoader!=null)
+                {
+                    current_thread=Thread.currentThread();
+                    old_classloader=current_thread.getContextClassLoader();
+                    current_thread.setContextClassLoader(_classLoader);
+                }
             }
             
-            handled = super.handle(request, response, dispatch);
+            handled = super.handle(target, request, response, dispatch);
             
         }
         finally
         {
-            // reset the classloader
-            if (_classLoader!=null)
+            if (old_context!=_context)
             {
-                current_thread.setContextClassLoader(old_classloader);
+                // reset the classloader
+                if (_classLoader!=null)
+                {
+                    current_thread.setContextClassLoader(old_classloader);
+                }
+                
+                // reset the context and servlet path.
+                http_request.setContext(old_context);
+                http_request.setServletPath(old_servlet_path);
+                http_request.setPathInfo(old_path_info); 
             }
-            
-            // reset the context and servlet path.
-            http_request.setContext(old_context);
-            http_request.setPathInfo(old_path_info); 
         }
+        
         return handled;
     }
 

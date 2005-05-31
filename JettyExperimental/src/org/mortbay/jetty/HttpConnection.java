@@ -28,6 +28,7 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
+import org.mortbay.util.URIUtil;
 import org.slf4j.LoggerFactory;
 import org.slf4j.ULogger;
 
@@ -392,9 +393,9 @@ public class HttpConnection
             {
                 try
                 {
-                    _request.setPathInfo(_uri.getPath());
                     _request.setRequestURI(_uri.getRawPath());
-                    _handler.handle(_request, _response, Handler.REQUEST);
+                    String target = URIUtil.canonicalPath(_uri.getPath());
+                    _handler.handle(target, _request, _response, Handler.REQUEST);
                 }
                 catch (ServletException e)
                 {

@@ -35,7 +35,7 @@ public interface Handler extends LifeCycle
     public static final int ALL=15;
     
     
-    public boolean handle(HttpServletRequest request, HttpServletResponse response, int dispatch)
+    public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
         throws IOException, ServletException;
     
 }

@@ -44,7 +44,7 @@ public class ErrorPageHandler extends AbstractHandler
     /* 
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
-    public boolean handle(HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException
+    public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException
     {
         response.setContentType(MimeTypes.TEXT_HTML);
         ByteArrayISO8859Writer writer= new ByteArrayISO8859Writer(2048);

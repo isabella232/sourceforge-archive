@@ -90,10 +90,10 @@ public class WrappedHandler extends AbstractHandler
     /* 
      * @see org.mortbay.jetty.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public boolean handle(HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+    public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
         if (_handler==null || !isStarted())
             return false;
-        return _handler.handle(request,response, dispatch);
+        return _handler.handle(target,request, response, dispatch);
     }
 }

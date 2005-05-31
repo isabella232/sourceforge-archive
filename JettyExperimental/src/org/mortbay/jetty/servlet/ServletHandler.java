@@ -35,8 +35,6 @@ import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.io.Portable;
-import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.ContextHandler;
@@ -45,6 +43,7 @@ import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.MultiMap;
+import org.mortbay.util.URIUtil;
 import org.slf4j.LoggerFactory;
 import org.slf4j.ULogger;
 
@@ -87,7 +86,8 @@ public class ServletHandler extends WrappedHandler
     
     
     /* ------------------------------------------------------------ */
-    private ServletContext _context;
+    private ContextHandler _contextHandler;
+    private ContextHandler.Context _servletContext;
     private FilterHolder[] _filters;
     private FilterMapping[] _filterMappings;
     private boolean _filterChainsCached=true;
@@ -118,8 +118,10 @@ public class ServletHandler extends WrappedHandler
     protected synchronized void doStart()
         throws Exception
     {
-        _context=ContextHandler.getCurrentContext();
-        _contextLog = LoggerFactory.getLogger(_context.getServletContextName());
+        _servletContext=ContextHandler.getCurrentContext();
+        _contextHandler=_servletContext.getContextHandler();
+        
+        _contextLog = LoggerFactory.getLogger(_servletContext.getServletContextName());
         if (_contextLog==null)
             _contextLog=log;
 
@@ -131,7 +133,6 @@ public class ServletHandler extends WrappedHandler
                 _filters[i].start();
             }
         }
-        
         
         updateMappings();
         initializeServlets();
@@ -219,16 +220,41 @@ public class ServletHandler extends WrappedHandler
      * @param ipath
      * @return
      */
-    public RequestDispatcher getRequestDispatcher(String ipath)
+    public RequestDispatcher getRequestDispatcher(String uriInContext)
     {
-        // TODO Auto-generated method stub
+        if (uriInContext == null)
+            return null;
+
+        if (!uriInContext.startsWith("/"))
+            return null;
+        
+        try
+        {
+            String query=null;
+            int q=0;
+            if ((q=uriInContext.indexOf('?'))>0)
+            {
+                query=uriInContext.substring(q+1);
+                uriInContext=uriInContext.substring(0,q);
+            }
+            if ((q=uriInContext.indexOf(';'))>0)
+                uriInContext=uriInContext.substring(0,q);
+
+            String pathInContext=URIUtil.canonicalPath(URIUtil.decodePath(uriInContext));
+            String uri=URIUtil.addPaths(_contextHandler.getContextPath(), uriInContext);
+            return new Dispatcher(_contextHandler, uri, pathInContext, query);
+        }
+        catch(Exception e)
+        {
+            LogSupport.ignore(log,e);
+        }
         return null;
     }
 
     /* ------------------------------------------------------------ */
     public ServletContext getServletContext()
     {
-        return _context;
+        return _servletContext;
     }
     /* ------------------------------------------------------------ */
     /**
@@ -252,7 +278,7 @@ public class ServletHandler extends WrappedHandler
     /* 
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
-    public boolean handle(HttpServletRequest request, HttpServletResponse response,int type)
+    public boolean handle(String target, HttpServletRequest request,HttpServletResponse response, int type)
          throws IOException
     {
         if (!isStarted())
@@ -260,50 +286,58 @@ public class ServletHandler extends WrappedHandler
 
         // Get the base requests
         Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
+        String old_servlet_path=null;
+        String old_path_info=null;
 
-        String pathInContext=request.getPathInfo(); 
-        
-        // find the servlet
-        ServletHolder servletHolder=null;
-        boolean named_dispatch=false;
-        if (type == REQUEST)
-        {
-            // Look for the servlet
-            Map.Entry map=getHolderEntry(pathInContext);
-            if (map!=null)
-            {
-                servletHolder=(ServletHolder)map.getValue();
-                if(log.isDebugEnabled())log.debug("servlet="+servletHolder);
-          
-                String servletPathSpec=(String)map.getKey(); 
-                String servletPath=PathMap.pathMatch(servletPathSpec,pathInContext);
-                String pathInfo=PathMap.pathInfo(servletPathSpec,pathInContext);
-                
-                base_request.setServletPath(servletPath);
-                base_request.setPathInfo(pathInfo);
-                // TODO - should these be reset afterwards?
-            }      
-        }
-        else
-        {
-            // servlet must already be determined
-            Portable.throwNotSupported();
-            named_dispatch=true; // TODO maybe or maybe not?
-        }
         
         try
         {
-            // Do that funky filter thang 
-            // Build and/or cache filter chain
-            FilterChain chain=(!named_dispatch) ? getChainForPath(type, pathInContext, servletHolder): getChainForName(type, servletHolder);
+            old_servlet_path=base_request.getServletPath();
+            old_path_info=base_request.getPathInfo();
 
-            if (log.isDebugEnabled()) log.debug("chain="+chain);
+            ServletHolder servlet_holder=null;
+            FilterChain chain=null;
             
-            // Do the handling thang
+            // find the servlet
+            if (target.startsWith("/"))
+            {
+                // Look for the servlet by path
+                Map.Entry map=getHolderEntry(target);
+                if (map!=null)
+                {
+                    servlet_holder=(ServletHolder)map.getValue();
+                    if(log.isDebugEnabled())log.debug("servlet="+servlet_holder);
+                    
+                    String servlet_path_spec=(String)map.getKey(); 
+                    String servlet_path=PathMap.pathMatch(servlet_path_spec,target);
+                    String path_info=PathMap.pathInfo(servlet_path_spec,target);
+                    
+                    base_request.setServletPath(servlet_path);
+                    base_request.setPathInfo(path_info);
+
+                    if (servlet_holder!=null && _filterMappings!=null && _filterMappings.length>0)
+                        chain=getChainForPath(type, target, servlet_holder);
+                }      
+            }
+            else
+            {
+                // look for a servlet by name!
+                servlet_holder=(ServletHolder)_servletNameMap.get(target);
+                if (servlet_holder!=null && _filterMappings!=null && _filterMappings.length>0)
+                    chain=getChainForName(type, servlet_holder);
+            }
+
+            if (log.isDebugEnabled()) 
+            {
+                log.debug("chain="+chain);
+                log.debug("servelet holder="+servlet_holder);
+            }
+            
+            // Do the filter/handling thang
             if (chain!=null)
                 chain.doFilter(request, response);
-            else if (servletHolder != null)
-                servletHolder.handle(request,response);
+            else if (servlet_holder != null)
+                servlet_holder.handle(request,response);
             else
                 notFound(request, response);
         }
@@ -371,6 +405,8 @@ public class ServletHandler extends WrappedHandler
         }
         finally
         {
+            base_request.setServletPath(old_servlet_path);
+            base_request.setPathInfo(old_path_info); 
         }
         return true;
     }

@@ -32,6 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
+import javax.servlet.Servlet;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -44,6 +45,7 @@ import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandler.Context;
+import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiMap;
@@ -604,15 +606,6 @@ public class Request implements HttpServletRequest
 
     /* ------------------------------------------------------------ */
     /* 
-     * @see javax.servlet.http.HttpServletRequest#getQueryString()
-     */
-    public String getQueryString()
-    {
-        return _queryString;
-    }
-
-    /* ------------------------------------------------------------ */
-    /* 
      * @see javax.servlet.ServletRequest#getReader()
      */
     public BufferedReader getReader() throws IOException
@@ -904,6 +897,15 @@ public class Request implements HttpServletRequest
         return _userPrincipal;
     }
 
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see javax.servlet.http.HttpServletRequest#getQueryString()
+     */
+    public String getQueryString()
+    {
+        return _queryString;
+    }
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.http.HttpServletRequest#isRequestedSessionIdFromCookie()
@@ -1278,5 +1280,7 @@ public class Request implements HttpServletRequest
             return url;
         }
     }
+
+
 }
 

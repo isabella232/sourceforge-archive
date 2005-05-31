@@ -87,7 +87,7 @@ public class SessionHandler extends WrappedHandler
     /* 
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
      */
-    public boolean handle(HttpServletRequest request, HttpServletResponse response, int dispatch)
+    public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch)
             throws IOException, ServletException
     {
         boolean result=false;
@@ -159,7 +159,7 @@ public class SessionHandler extends WrappedHandler
                 ((SessionManager.Session)session).access();
             if(log.isDebugEnabled())log.debug("session="+session);
             
-            result=super.handle(request,response,dispatch);
+            result=super.handle(target,request,response, dispatch);
         }
         finally
         {

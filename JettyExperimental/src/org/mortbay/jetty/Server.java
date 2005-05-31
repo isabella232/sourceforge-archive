@@ -189,7 +189,7 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
     /* 
      * @see org.mortbay.jetty.EventHandler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
      */
-    public boolean handle(HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
+    public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
         __server.set(this);
         
@@ -202,7 +202,7 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
         {
             for (int i=0;i<_handlers.length;i++)
             {
-                if (_handlers[i].handle(request,response, dispatch))
+                if (_handlers[i].handle(target,request, response, dispatch))
                     return true;
             }
         }    

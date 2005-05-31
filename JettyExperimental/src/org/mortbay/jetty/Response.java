@@ -193,7 +193,7 @@ public class Response implements HttpServletResponse
             code>=SC_OK)
         {
             // TODO avoid new
-            new ErrorPageHandler().handle(_connection.getRequest(),this,Handler.ERROR);
+            new ErrorPageHandler().handle(null,_connection.getRequest(),this, Handler.ERROR);
         }
         else if (code!=SC_PARTIAL_CONTENT) 
         {
