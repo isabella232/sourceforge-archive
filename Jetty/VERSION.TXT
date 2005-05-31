@@ -1,9 +1,11 @@
 Jetty Versions
 --------------
 
+ + setup MX4J with JDK1.5 in start.config
  + set classloader during webapp doStop
  + NPE protection in ThreadedServer
  + ModelMBean handles null signatures
+ + Change JAAS impl to be more flexible on finding roles
 
 Jetty-5.1.4rc0 - 19 April 2005
  + ServletHttpContext correctly calls super.doStop.

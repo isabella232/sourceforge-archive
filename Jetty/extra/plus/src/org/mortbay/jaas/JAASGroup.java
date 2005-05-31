@@ -24,7 +24,7 @@ import java.util.Iterator;
 
 public class JAASGroup implements Group 
 {
-    public static final String ROLES = "roles";
+    public static final String ROLES = "__roles__";
     
     private String name = null;
     private HashSet members = null;
