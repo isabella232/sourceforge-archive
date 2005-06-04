@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at 
+// You may obtain a copy of the License at
 // http://www.apache.org/licenses/LICENSE-2.0
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,7 +35,7 @@ public class DataPort extends Thread
     /* ------------------------------------------------------------------- */
     public static void main(String[] args)
     {
-        DataPort dp = new DataPort(null,System.out);
+        DataPort dp = new DataPort(null, System.out);
 
         System.err.println(dp.getFtpPortCommand());
     }
@@ -44,202 +44,256 @@ public class DataPort extends Thread
     private static final int SOCKET_LISTEN_TIMEOUT = 120000;
 
     /* ------------------------------------------------------------------- */
-    private int port=0;
-    private InetAddress addr=null;
+    private int port = 0;
+    private InetAddress addr = null;
     private ServerSocket listen = null;
-    private Socket connection=null;
+    private Socket connection = null;
     private InputStream in = null;
-    private OutputStream out =null;
-    private Ftp ftp=null;
+    private OutputStream out = null;
+    private Ftp ftp = null;
     private boolean terminated = false;
-    
+
     /* ------------------------------------------------------------------- */
-    /** Passive Constructor. 
-     * @param ftp 
-     * @param in 
+    /**
+     * Passive Constructor.
+     * 
+     * @param ftp
+     * @param in
      */
-    DataPort(Ftp ftp,InputStream in)
+    DataPort(Ftp ftp, InputStream in)
     {
         super("FtpDataIn");
-        synchronized(this){
+        synchronized (this)
+        {
             this.in = in;
-            this.ftp= ftp;
+            this.ftp = ftp;
             start();
-            try{
+            try
+            {
                 wait();
-                if(log.isDebugEnabled())log.debug("Listening on "+addr+" "+port);
+                if (log.isDebugEnabled()) log.debug("Listening on " + addr + " " + port);
             }
-            catch(InterruptedException e){
-                log.fatal("Interrupted"); System.exit(1);
-            }
-        }
-    }
-    
-    /* ------------------------------------------------------------------- */
-    /** Passive Constructor. 
-     * @param ftp 
-     * @param out 
-     */
-    DataPort(Ftp ftp, OutputStream out)
-    {
-        super("FtpDataOut");
-        synchronized(this){
-            this.out = out;
-            this.ftp= ftp;
-            start();
-            try{
-                wait();
-                if(log.isDebugEnabled())log.debug("Listening on "+addr+" "+port);
-            }
-            catch(InterruptedException e){
-                log.fatal("Interrupted"); System.exit(1);
+            catch (InterruptedException e)
+            {
+                log.fatal("Interrupted");
+                System.exit(1);
             }
         }
     }
 
-    
-    /*--------------------------------------------------------------*/
-    /** Active Constructor. 
-     * @param ftp 
-     * @param in 
+    /* ------------------------------------------------------------------- */
+    /**
+     * Passive Constructor.
+     * 
+     * @param ftp
+     * @param out
      */
-    DataPort(Ftp ftp,InputStream in, InetAddress addr, int port)
+    DataPort(Ftp ftp, OutputStream out)
     {
-        super("ActiveFtpDataIn");
-        synchronized(this){
-            this.in  = in;
+        super("FtpDataOut");
+        synchronized (this)
+        {
+            this.out = out;
             this.ftp = ftp;
-	    this.addr=addr;
-	    this.port=port;
             start();
-            try{
+            try
+            {
                 wait();
-                if(log.isDebugEnabled())log.debug("Connected to "+addr+" "+port);
+                if (log.isDebugEnabled()) log.debug("Listening on " + addr + " " + port);
             }
-            catch(InterruptedException e){
-                log.fatal("Interrupted"); System.exit(1);
+            catch (InterruptedException e)
+            {
+                log.fatal("Interrupted");
+                System.exit(1);
             }
         }
     }
-    
+
+    /*--------------------------------------------------------------*/
+    /**
+     * Active Constructor.
+     * 
+     * @param ftp
+     * @param in
+     */
+    DataPort(Ftp ftp, InputStream in, InetAddress addr, int port)
+    {
+        super("ActiveFtpDataIn");
+        synchronized (this)
+        {
+            this.in = in;
+            this.ftp = ftp;
+            this.addr = addr;
+            this.port = port;
+            start();
+            try
+            {
+                wait();
+                if (log.isDebugEnabled()) log.debug("Connected to " + addr + " " + port);
+            }
+            catch (InterruptedException e)
+            {
+                log.fatal("Interrupted");
+                System.exit(1);
+            }
+        }
+    }
+
     /* ------------------------------------------------------------------- */
-    /** Active Constructor. 
-     * @param ftp 
-     * @param out 
+    /**
+     * Active Constructor.
+     * 
+     * @param ftp
+     * @param out
      */
     DataPort(Ftp ftp, OutputStream out, InetAddress addr, int port)
     {
         super("ActiveFtpDataOut");
-        synchronized(this){
+        synchronized (this)
+        {
             this.out = out;
             this.ftp = ftp;
-	    this.addr=addr;
-	    this.port=port;
+            this.addr = addr;
+            this.port = port;
             start();
-            try{
+            try
+            {
                 wait();
-                if(log.isDebugEnabled())log.debug("Connected to "+addr+" "+port);
+                if (log.isDebugEnabled()) log.debug("Connected to " + addr + " " + port);
             }
-            catch(InterruptedException e){
-                log.fatal("Interrupted"); System.exit(1);
+            catch (InterruptedException e)
+            {
+                log.fatal("Interrupted");
+                System.exit(1);
             }
         }
     }
-    
+
     /* ------------------------------------------------------------------- */
-    final public void run() 
+    final public void run()
     {
         terminated = false;
         try
         {
             while (connection == null)
             {
-		if (addr==null)
-		    listen();
-		else
-		    connect();
+                if (addr == null)
+                    listen();
+                else
+                    connect();
 
-                // TODO Lets not loop here on failure 
-		terminated=(connection==null);
-		
-                if (terminated) 
-                    return;
-            }        
+                // TODO Lets not loop here on failure
+                terminated = terminated || (connection == null);
+
+                if (terminated) return;
+            }
             handle();
         }
-        catch(Exception e){
-            if (ftp!=null)
+        catch (Exception e)
+        {
+            if (ftp != null)
             {
-                if(log.isDebugEnabled())log.debug("DataPort failed",e);
+                if (log.isDebugEnabled()) log.debug("DataPort failed", e);
                 ftp.transferCompleteNotification(e);
-                ftp=null;
+                ftp = null;
             }
         }
-        finally{
-            if (connection!=null)
+        finally
+        {
+            if (connection != null)
             {
-                try{connection.close();
-                }catch(Exception e){if(log.isDebugEnabled())log.debug("Close Exception",e);}
-                        
+                try
+                {
+                    connection.close();
+                }
+                catch (Exception e)
+                {
+                    if (log.isDebugEnabled()) log.debug("Close Exception", e);
+                }
+
                 connection = null;
             }
-            if (ftp!=null)
-                ftp.transferCompleteNotification(null);
-        }       
+            if (ftp != null) ftp.transferCompleteNotification(null);
+        }
     }
-    
+
     /* ------------------------------------------------------------------- */
-    /** Close this DataPort and cancel any transfer notification
-     *
+    /**
+     * Close this DataPort and cancel any transfer notification
+     *  
      */
-    final public void close() 
+    final public void close()
     {
         log.debug("Close DataPort");
         terminated = true;
         if (connection != null)
         {
-            try {connection.close();}
-            catch (IOException ioe) { LogSupport.ignore(log,ioe);}
+            try
+            {
+                connection.close();
+            }
+            catch (IOException ioe)
+            {
+                LogSupport.ignore(log, ioe);
+            }
             connection = null;
         }
         if (listen != null)
         {
-            try {listen.close();}
-            catch (IOException ioe) { LogSupport.ignore(log,ioe);}
+            try
+            {
+                listen.close();
+            }
+            catch (IOException ioe)
+            {
+                LogSupport.ignore(log, ioe);
+            }
             listen = null;
         }
         if (in != null)
         {
-            try {in.close();}
-            catch (IOException ioe) { LogSupport.ignore(log,ioe);}
+            try
+            {
+                in.close();
+            }
+            catch (IOException ioe)
+            {
+                LogSupport.ignore(log, ioe);
+            }
             in = null;
         }
         if (out != null)
         {
-            try {out.close();}
-            catch (IOException ioe) { LogSupport.ignore(log,ioe);}
+            try
+            {
+                out.close();
+            }
+            catch (IOException ioe)
+            {
+                LogSupport.ignore(log, ioe);
+            }
             out = null;
         }
-        ftp=null;
+        ftp = null;
     }
-    
+
     /* ------------------------------------------------------------------- */
-    private void listen()
-         throws IOException
+    private void listen() throws IOException
     {
-        listen=null;
+        listen = null;
 
         // open the listen port
-        synchronized(this)
-	{
-            try{
+        synchronized (this)
+        {
+            try
+            {
                 listen = new ServerSocket(0);
                 port = listen.getLocalPort();
                 addr = listen.getInetAddress();
-                if (addr==null || addr.getAddress()[0]==0)
-                    addr = ftp.getLocalAddress();
+                if (addr == null || addr.getAddress()[0] == 0) addr = ftp.getLocalAddress();
             }
-            finally{
+            finally
+            {
                 notify();
             }
         }
@@ -247,83 +301,79 @@ public class DataPort extends Thread
         if (!terminated)
         {
             // wait for connection
-            if(log.isDebugEnabled())log.debug("Waiting for connection... "+listen);
-            listen.setSoTimeout( SOCKET_LISTEN_TIMEOUT );
+            if (log.isDebugEnabled()) log.debug("Waiting for connection... " + listen);
+            listen.setSoTimeout(SOCKET_LISTEN_TIMEOUT);
             connection = listen.accept();
-            if(log.isDebugEnabled())log.debug("Accepted "+connection);
+            if (log.isDebugEnabled()) log.debug("Accepted " + connection);
         }
     }
 
     /* ------------------------------------------------------------------- */
-    private void connect()
-         throws IOException
+    private void connect() throws IOException
     {
         // open the listen port
-        synchronized(this)
-	{
+        synchronized (this)
+        {
             try
-	    {
-		if(log.isDebugEnabled())log.debug("Making connection: "+addr+":"+port+"...");
-		connection = new Socket(addr,port);
-		if(log.isDebugEnabled())log.debug("Connected "+connection);
+            {
+                if (log.isDebugEnabled())
+                        log.debug("Making connection: " + addr + ":" + port + "...");
+                connection = new Socket(addr, port);
+                if (log.isDebugEnabled()) log.debug("Connected " + connection);
             }
-            finally{
+            finally
+            {
                 notify();
             }
         }
     }
-    
 
     /* ------------------------------------------------------------------- */
-    public void handle()
-         throws IOException
+    public void handle() throws IOException
     {
         // Setup streams
-        if (out!=null)
-            in=connection.getInputStream();
-        else 
-            out=connection.getOutputStream();
-        
-        try{
+        if (out != null)
+            in = connection.getInputStream();
+        else
+            out = connection.getOutputStream();
+
+        try
+        {
             // Copy in to out
-            IO.copy(in,out);
+            IO.copy(in, out);
         }
-        finally{
-            if (out!=null)
+        finally
+        {
+            if (out != null)
             {
                 try
                 {
                     out.flush();
                     out.close();
                 }
-                catch(IOException e)
-                {if(log.isDebugEnabled())log.debug("Exception ignored",e);}       
+                catch (IOException e)
+                {
+                    if (log.isDebugEnabled()) log.debug("Exception ignored", e);
+                }
             }
-            if (connection!=null)
-                connection.close();
+            if (connection != null) connection.close();
         }
     }
-    
+
     /* ------------------------------------------------------------------- */
     public int getListenPort()
     {
         return port;
     }
-    
+
     /* ------------------------------------------------------------------- */
     public String getFtpPortCommand()
     {
         byte[] ip = addr.getAddress();
 
-        String portCommand = 
-            "PORT "+
-            (0xff&ip[0])+','+(0xff&ip[1])+','+(0xff&ip[2])+','+(0xff&ip[3])+','+
-            port/256+","+port%256;
+        String portCommand = "PORT " + (0xff & ip[0]) + ',' + (0xff & ip[1]) + ',' + (0xff & ip[2])
+                + ',' + (0xff & ip[3]) + ',' + port / 256 + "," + port % 256;
 
         return portCommand;
     }
 }
-
-
-
- 
