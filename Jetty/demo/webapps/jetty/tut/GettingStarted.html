@@ -395,10 +395,13 @@ To use SSL you will also need to add the the jars below: (see <a href="/jetty/Js
 To use JMX the classpath must also include:
 <code>
 <pre>
-    $JETTY_HOME/ext/jmxri.jar
-    $JETTY_HOME/ext/jmxtools.jar 
+    $JETTY_HOME/ext/mx4j.jar
+    $JETTY_HOME/ext/mx4j-tools.jar 
 </pre>
 </code>
+For java &gt;=1.5 you will also need to add <code>
+-Djavax.management.builder.initial=mx4j.server.MX4JMBeanServerBuilder
+</code> to the command line to avoid a clash with the internal jmx implementation.
 
   <p>
 To run JSP with the JDK compiler, you will also need to add the JDK <code>tools.jar</code>

@@ -970,7 +970,7 @@ public class HttpConnection
             else if (_dotVersion!=-1)
                 throw new HttpException(HttpResponse.__505_HTTP_Version_Not_Supported);
 
-            if(log.isDebugEnabled())log.debug("REQUEST:\n"+_request);
+            if(log.isDebugEnabled())log.debug("REQUEST from "+_listener+":\n"+_request);
 
             // handle HttpListener handlers
             if (!_request.isHandled() && _listener.getHttpHandler()!=null)

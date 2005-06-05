@@ -62,6 +62,8 @@ or
 
    java -Dmain.class=org.mortbay.xml.XmlConfiguration -jar start.jar etc/demo-jmx.xml
 
+[ NB. When using java >= 1.5 you will need to add -Djavax.management.builder.initial=mx4j.server.MX4JMBeanServerBuilder
+to the command line to avoid a clash with the builting JMX implementation ]
 
 
 Jetty start.jar 

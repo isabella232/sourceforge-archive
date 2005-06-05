@@ -1,0 +1,77 @@
+SECTION: 250-Configuration
+TITLE: 200classloading
+QUESTION: I'm having class loading problems?
+
+<p>
+Class loading in a web container is slightly more complex than a normal java application.
+</p><p>
+The normal configuration is for each web context (webapplication or war file) is given it's 
+own classloader, which has the system classloader as it's parent.   Such a classloader hierarchy
+is normal in Java, however the servlet specification complicates the hierarchy by
+requiring that:</p>
+<ul>
+  <li>Classes contained within <code>WEB-INF/lib</code> or <code>WEB-INF/classes</code> have
+  priority over classes on the parent class loader.  This is the opposite of the normal behaviour
+  of a java 2 class loader.</li>
+
+  <li>System classes such as java.lang.String may not be replaced by classes in 
+  <code>WEB-INF/lib</code> or <code>WEB-INF/classes</code>.  Unfortunately the specification does
+  not clearly state what classes are "System" classes and it is unclear if all javax classes
+  should be treated as System classes.</li>
+
+  <li>Server implementation classes should be hidden from the web application and 
+  should not be available in any class loader. Unfortunately the specification does not
+  state what is a Server class and it is unclear if common libraries like the
+  xerces parser should be treated as Implementation classes.
+</ul>
+<p>
+Jetty provides configuration options to control all three of these options. The method
+<code>org.mortbay.http.HttpContext.setClassLoaderJava2Compliant(boolean)</code> allows
+the normal java 2 behaviour to be used and all classes will be loaded from the system
+classpath if possible.   This is very useful if the libraries that a web application uses
+are having problems loading classes that are both in a web application and on the
+system classpath.
+</p>
+<p>The methods <code>setSystemClasses(String[])</code> and <code>setServerClasses(String[])</code>
+may be called on either the <code>org.mortbay.http.HttpServer</code> or <code>org.mortbay.http.HttpContext</code>
+class to configure the whole server or just a particular context.  This allows fine control
+over what classes can be seen or overridden by a web application.  Absolute classname can be passed, names 
+ending with . are treated as packages names and names starting with - are treated as negative matches.
+</p>
+<p>
+These configuration may be setup either in code, in <code>jetty.xml</code> or in a <code>jetty-web.xml</code>
+file.  An example for <code>jetty.xml</code> is below:
+<pre>
+
+  &lt;Call name="addWebApplication"&gt;
+    &lt;Arg&gt;/mywebapp&lt;/Arg&gt;
+    &lt;Arg&gt;./webapps/mywebapp.war&lt;/Arg&gt;
+
+    &lt;Set name="classLoaderJava2Compliant"&gt;true&lt;/Set&gt;
+
+    &lt;!-- System classes cannot be overriden by a HttpContext or webapp --&gt;
+    &lt;Set name="systemClasses"&gt;
+      &lt;Array type="java.lang.String"&gt;
+	&lt;Item&gt;java.&lt;/Item&gt;
+	&lt;Item&gt;javax.servlet.&lt;/Item&gt;
+	&lt;Item&gt;javax.xml.&lt;/Item&gt;
+	&lt;Item&gt;org.mortbay.&lt;/Item&gt;
+	&lt;Item&gt;org.xml.&lt;/Item&gt;
+	&lt;Item&gt;org.w3c.&lt;/Item&gt;
+      &lt;/Array&gt;
+    &lt;/Set&gt;
+
+    &lt;!-- Server classes are hidden from a HttpContext or webapp --&gt;
+    &lt;Set name="serverClasses"&gt;
+      &lt;Array type="java.lang.String"&gt;
+	&lt;Item&gt;-org.mortbay.http.PathMap&lt;/Item&gt;
+	&lt;Item&gt;-org.mortbay.&lt;/Item&gt;
+	&lt;Item&gt;org.mortbay.start.&lt;/Item&gt;
+	&lt;Item&gt;org.mortbay.stop.&lt;/Item&gt;
+	&lt;Item&gt;org.mortbay.jetty.Server&lt;/Item&gt;
+      &lt;/Array&gt;
+    &lt;/Set&gt;
+  &lt;/Call&gt;
+</pre>
+
+

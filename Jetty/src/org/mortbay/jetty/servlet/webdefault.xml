@@ -80,6 +80,11 @@
   <!--                                                                      -->
   <!--   resoureBase      Can be set to replace the context resource base   -->
   <!--                                                                      -->
+  <!--   relativeResourceBase                                               -->
+  <!--                    Set with a pathname relative to the base of the   -->
+  <!--                    servlet context root. Useful for only serving     -->
+  <!--                    static content from only specific subdirectories. -->
+  <!--                                                                      -->
   <!-- The MOVE method is allowed if PUT and DELETE are allowed             -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -  -->
   <servlet>

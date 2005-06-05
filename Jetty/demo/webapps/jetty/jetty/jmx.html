@@ -39,6 +39,9 @@ The Jetty demo can be run as JMX enabled with:
   java -Dmain.class=org.mortbay.xml.XmlConfiguration -jar start.jar etc/demo-jmx.xml
 </pre>
 
+[ NB. When using java &gt;= 1.5 you will need to add -Djavax.management.builder.initial=mx4j.server.MX4JMBeanServerBuilder
+to the command line to avoid a clash with the builting JMX implementation ]
+<p>
 By default, the mx4j MBean agent is run at <A href="http://localhost:8082">http://localhost:8082</A>.
 
 

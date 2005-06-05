@@ -30,7 +30,10 @@ If this server was started via JMX, then a
 To start Jetty with JMX use:  <PRE>
   java -Dmain.class=org.mortbay.xml.XmlConfiguration -jar start.jar etc/jetty-jmx.xml
 </PRE>
-
+For java &gt;=1.5 you will also need to add <code>
+-Djavax.management.builder.initial=mx4j.server.MX4JMBeanServerBuilder
+</code> to the command line to avoid a clash with the internal jmx implementation.
+<p>
 To start a server using the jars and resource in the extra packages, use:
 <PRE>
 java -DSTART=extra/etc/start.config -jar start.jar
