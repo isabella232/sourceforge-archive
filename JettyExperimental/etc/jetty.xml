@@ -112,6 +112,13 @@
 	                 <Set name="className">org.mortbay.webapps.test.SessionDump</Set>
 	              </New>
 	           </Item>
+	                
+	           <Item>
+	              <New class="org.mortbay.jetty.servlet.ServletHolder">
+	                 <Set name="name">Dispatch</Set>
+	                 <Set name="className">org.mortbay.webapps.test.DispatchServlet</Set>
+	              </New>
+	           </Item>
 	           
 	           <Item>
 	              <New class="org.mortbay.jetty.servlet.ServletHolder">
@@ -147,6 +154,12 @@
 	              <New class="org.mortbay.jetty.servlet.ServletMapping">
 	                <Set name="pathSpec">/session/*</Set>
 	                <Set name="servletName">Session</Set>
+	              </New>
+	           </Item>
+	           <Item>
+	              <New class="org.mortbay.jetty.servlet.ServletMapping">
+	                <Set name="pathSpec">/dispatch/*</Set>
+	                <Set name="servletName">Dispatch</Set>
 	              </New>
 	           </Item>
 	           <Item>

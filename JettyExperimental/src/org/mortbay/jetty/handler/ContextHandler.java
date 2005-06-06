@@ -37,6 +37,7 @@ import org.mortbay.io.Buffer;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.Request;
+import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.URIUtil;
@@ -551,9 +552,34 @@ public class ContextHandler extends WrappedHandler
         /* 
          * @see javax.servlet.ServletContext#getRequestDispatcher(java.lang.String)
          */
-        public RequestDispatcher getRequestDispatcher(String path)
+        public RequestDispatcher getRequestDispatcher(String uriInContext)
         {
-            // TODO Auto-generated method stub
+            if (uriInContext == null)
+                return null;
+
+            if (!uriInContext.startsWith("/"))
+                return null;
+            
+            try
+            {
+                String query=null;
+                int q=0;
+                if ((q=uriInContext.indexOf('?'))>0)
+                {
+                    query=uriInContext.substring(q+1);
+                    uriInContext=uriInContext.substring(0,q);
+                }
+                if ((q=uriInContext.indexOf(';'))>0)
+                    uriInContext=uriInContext.substring(0,q);
+
+                String pathInContext=URIUtil.canonicalPath(URIUtil.decodePath(uriInContext));
+                String uri=URIUtil.addPaths(getContextPath(), uriInContext);
+                return new Dispatcher(ContextHandler.this, uri, pathInContext, query);
+            }
+            catch(Exception e)
+            {
+                LogSupport.ignore(log,e);
+            }
             return null;
         }
 

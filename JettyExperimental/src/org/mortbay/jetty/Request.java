@@ -1296,6 +1296,8 @@ public class Request implements HttpServletRequest
      */
     public Attributes getAttributes()
     {
+        if (_attributes==null)
+            _attributes=new AttributesMap();
         return _attributes;
     }
     

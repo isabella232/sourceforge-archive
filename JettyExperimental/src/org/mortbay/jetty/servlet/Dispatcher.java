@@ -111,24 +111,40 @@ public class Dispatcher implements RequestDispatcher
      */
     public void forward(ServletRequest request, ServletResponse response) throws ServletException, IOException
     {
+        response.reset(); // TODO or just buffer?
+        
         Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
         
         String old_uri=base_request.getRequestURI();
         String old_context_path=base_request.getContextPath();
+        String old_query=base_request.getQueryString();
         Attributes old_attr=base_request.getAttributes();
         try
         {
+            // TODO parameters and query
+            String query=_query;
+            
+            ForwardAttributes attr = new ForwardAttributes(old_attr); 
+            
+            attr._requestURI=base_request.getRequestURI();
+            attr._contextPath=base_request.getContextPath();
+            attr._servletPath=base_request.getServletPath();
+            attr._pathInfo=base_request.getPathInfo();
+            attr._query=base_request.getQueryString();
+
             base_request.setRequestURI(_uri);
             base_request.setContextPath(_contextHandler.getContextPath());
-            DispatchedAttributes attr = new DispatchedAttributes(Handler.FORWARD,old_attr); 
+            base_request.setAttributes(attr);
+            base_request.setQueryString(query);
             
             _contextHandler.handle(_path, (HttpServletRequest)request, (HttpServletResponse)response, Handler.FORWARD);
         }
         finally
         {
             base_request.setRequestURI(old_uri);
-            base_request.setAttributes(old_attr);
             base_request.setContextPath(old_context_path);
+            base_request.setAttributes(old_attr);
+            base_request.setQueryString(old_query);
         }
     }
 
@@ -138,14 +154,33 @@ public class Dispatcher implements RequestDispatcher
      */
     public void include(ServletRequest request, ServletResponse response) throws ServletException, IOException
     {
-        // TODO Auto-generated method stub
+        Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
         
+        Attributes old_attr=base_request.getAttributes();
+        try
+        {
+            // TODO parameters and query
+            String query=_query;
+            
+            IncludeAttributes attr = new IncludeAttributes(old_attr); 
+            
+            attr._requestURI=_uri;
+            attr._contextPath=_contextHandler.getContextPath();
+            attr._query=query;
+            
+            base_request.setAttributes(attr);
+            
+            _contextHandler.handle(_path, (HttpServletRequest)request, (HttpServletResponse)response, Handler.INCLUDE);
+        }
+        finally
+        {
+            base_request.setAttributes(old_attr);
+        }
     }
 
 
-    private class DispatchedAttributes implements Attributes
+    private class ForwardAttributes implements Attributes
     {
-        int _type;
         Attributes _attr;
         
         String _requestURI;
@@ -154,33 +189,15 @@ public class Dispatcher implements RequestDispatcher
         String _pathInfo;
         String _query;
         
-        DispatchedAttributes(int type,Attributes attributes)
+        ForwardAttributes(Attributes attributes)
         {
-            _type=type;
             _attr=attributes;
         }
         
         /* ------------------------------------------------------------ */
         public Object getAttribute(String key)
         {
-            if (_type==Handler.INCLUDE && Dispatcher.this._named==null)
-            {
-                if (key.equals(__INCLUDE_PATH_INFO))    return _pathInfo;
-                if (key.equals(__INCLUDE_SERVLET_PATH)) return _servletPath;
-                if (key.equals(__INCLUDE_CONTEXT_PATH)) return _contextPath;
-                if (key.equals(__INCLUDE_QUERY_STRING)) return _query;
-                if (key.equals(__INCLUDE_REQUEST_URI))  return _requestURI;
-            }
-            else
-            {
-                if (key.equals(__INCLUDE_PATH_INFO))    return null;
-                if (key.equals(__INCLUDE_REQUEST_URI))  return null;
-                if (key.equals(__INCLUDE_SERVLET_PATH)) return null;
-                if (key.equals(__INCLUDE_CONTEXT_PATH)) return null;
-                if (key.equals(__INCLUDE_QUERY_STRING)) return null;
-            }
-
-            if (_type!=Handler.INCLUDE && Dispatcher.this._named==null)
+            if (Dispatcher.this._named==null)
             {
                 if (key.equals(__FORWARD_PATH_INFO))    return _pathInfo;
                 if (key.equals(__FORWARD_REQUEST_URI))  return _requestURI;
@@ -200,24 +217,7 @@ public class Dispatcher implements RequestDispatcher
             while(e.hasMoreElements())
                 set.add(e.nextElement());
             
-            if (_type==Handler.INCLUDE && _named==null)
-            {
-                set.add(__INCLUDE_PATH_INFO);
-                set.add(__INCLUDE_REQUEST_URI);
-                set.add(__INCLUDE_SERVLET_PATH);
-                set.add(__INCLUDE_CONTEXT_PATH);
-                set.add(__INCLUDE_QUERY_STRING);
-            }
-            else
-            {
-                set.remove(__INCLUDE_PATH_INFO);
-                set.remove(__INCLUDE_REQUEST_URI);
-                set.remove(__INCLUDE_SERVLET_PATH);
-                set.remove(__INCLUDE_CONTEXT_PATH);
-                set.remove(__INCLUDE_QUERY_STRING);
-            }
-
-            if (_type!=Handler.INCLUDE && _named==null)
+            if (_named==null)
             {
                 set.add(__FORWARD_PATH_INFO);
                 set.add(__FORWARD_REQUEST_URI);
@@ -235,30 +235,15 @@ public class Dispatcher implements RequestDispatcher
 
             if (_named==null && ((String)key).startsWith("javax.servlet."))
             {
-                if (_type==Handler.INCLUDE)
-                {
-                    if (key.equals(__INCLUDE_PATH_INFO))         _pathInfo=(String)value;
-                    else if (key.equals(__INCLUDE_REQUEST_URI))  _requestURI=(String)value;
-                    else if (key.equals(__INCLUDE_SERVLET_PATH)) _servletPath=(String)value;
-                    else if (key.equals(__INCLUDE_CONTEXT_PATH)) _contextPath=(String)value;
-                    else if (key.equals(__INCLUDE_QUERY_STRING)) _query=(String)value;
-                    else if (value==null)
-                        _attr.removeAttribute(key);
-                    else
-                        _attr.setAttribute(key,value); // TODO ???
-                }
+                if (key.equals(__FORWARD_PATH_INFO))         _pathInfo=(String)value;
+                else if (key.equals(__FORWARD_REQUEST_URI))  _requestURI=(String)value;
+                else if (key.equals(__FORWARD_SERVLET_PATH)) _servletPath=(String)value;
+                else if (key.equals(__FORWARD_CONTEXT_PATH)) _contextPath=(String)value;
+                else if (key.equals(__FORWARD_QUERY_STRING)) _query=(String)value;
+                else if (value==null)
+                    _attr.removeAttribute(key);
                 else
-                {
-                    if (key.equals(__FORWARD_PATH_INFO))         _pathInfo=(String)value;
-                    else if (key.equals(__FORWARD_REQUEST_URI))  _requestURI=(String)value;
-                    else if (key.equals(__FORWARD_SERVLET_PATH)) _servletPath=(String)value;
-                    else if (key.equals(__FORWARD_CONTEXT_PATH)) _contextPath=(String)value;
-                    else if (key.equals(__FORWARD_QUERY_STRING)) _query=(String)value;
-                    else if (value==null)
-                        _attr.removeAttribute(key);
-                    else
-                        _attr.setAttribute(key,value); // TODO ???
-                }
+                    _attr.setAttribute(key,value); // TODO ???
             }
             else if (value==null)
                 _attr.removeAttribute(key);
@@ -269,7 +254,114 @@ public class Dispatcher implements RequestDispatcher
         /* ------------------------------------------------------------ */
         public String toString() 
         {
-            return "DISPATCHER+"+_attr.toString();
+            return "FORWARD+"+_attr.toString();
+        }
+
+        /* ------------------------------------------------------------ */
+        public void clear()
+        {
+            throw new IllegalStateException();
+        }
+
+        /* ------------------------------------------------------------ */
+        public void removeAttribute(String name)
+        {
+            setAttribute(name,null);
+        }
+    }
+    
+    private class IncludeAttributes implements Attributes
+    {
+        Attributes _attr;
+        
+        String _requestURI;
+        String _contextPath;
+        String _servletPath;
+        String _pathInfo;
+        String _query;
+        
+        IncludeAttributes(Attributes attributes)
+        {
+            _attr=attributes;
+        }
+        
+        /* ------------------------------------------------------------ */
+        public Object getAttribute(String key)
+        {
+            if (Dispatcher.this._named==null)
+            {
+                if (key.equals(__INCLUDE_PATH_INFO))    return _pathInfo;
+                if (key.equals(__INCLUDE_SERVLET_PATH)) return _servletPath;
+                if (key.equals(__INCLUDE_CONTEXT_PATH)) return _contextPath;
+                if (key.equals(__INCLUDE_QUERY_STRING)) return _query;
+                if (key.equals(__INCLUDE_REQUEST_URI))  return _requestURI;
+            }
+            else
+            {
+                if (key.equals(__INCLUDE_PATH_INFO))    return null;
+                if (key.equals(__INCLUDE_REQUEST_URI))  return null;
+                if (key.equals(__INCLUDE_SERVLET_PATH)) return null;
+                if (key.equals(__INCLUDE_CONTEXT_PATH)) return null;
+                if (key.equals(__INCLUDE_QUERY_STRING)) return null;
+            }
+
+            return _attr.getAttribute(key);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public Enumeration getAttributeNames()
+        {
+            HashSet set=new HashSet();
+            Enumeration e=_attr.getAttributeNames();
+            while(e.hasMoreElements())
+                set.add(e.nextElement());
+            
+            if (_named==null)
+            {
+                set.add(__INCLUDE_PATH_INFO);
+                set.add(__INCLUDE_REQUEST_URI);
+                set.add(__INCLUDE_SERVLET_PATH);
+                set.add(__INCLUDE_CONTEXT_PATH);
+                set.add(__INCLUDE_QUERY_STRING);
+            }
+            else
+            {
+                set.remove(__INCLUDE_PATH_INFO);
+                set.remove(__INCLUDE_REQUEST_URI);
+                set.remove(__INCLUDE_SERVLET_PATH);
+                set.remove(__INCLUDE_CONTEXT_PATH);
+                set.remove(__INCLUDE_QUERY_STRING);
+            }
+            
+            return Collections.enumeration(set);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void setAttribute(String key, Object value)
+        {
+
+            if (_named==null && ((String)key).startsWith("javax.servlet."))
+            {
+                if (key.equals(__INCLUDE_PATH_INFO))         _pathInfo=(String)value;
+                else if (key.equals(__INCLUDE_REQUEST_URI))  _requestURI=(String)value;
+                else if (key.equals(__INCLUDE_SERVLET_PATH)) _servletPath=(String)value;
+                else if (key.equals(__INCLUDE_CONTEXT_PATH)) _contextPath=(String)value;
+                else if (key.equals(__INCLUDE_QUERY_STRING)) _query=(String)value;
+                else if (value==null)
+                    _attr.removeAttribute(key);
+                else
+                    _attr.setAttribute(key,value); // TODO ???
+            }
+            else if (value==null)
+                _attr.removeAttribute(key);
+            else
+                _attr.setAttribute(key,value);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public String toString() 
+        {
+            return "INCLUDE+"+_attr.toString();
         }
 
         /* ------------------------------------------------------------ */
