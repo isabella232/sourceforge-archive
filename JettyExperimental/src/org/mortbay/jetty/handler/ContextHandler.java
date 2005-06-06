@@ -258,8 +258,9 @@ public class ContextHandler extends WrappedHandler
             throws IOException, ServletException
     {
         boolean handled=false;
-        Request http_request=null;
+        Request base_request=null;
         Context old_context=null;
+        String old_context_path=null;
         String old_servlet_path=null;
         String old_path_info=null;
         ClassLoader old_classloader=null;
@@ -268,29 +269,37 @@ public class ContextHandler extends WrappedHandler
         
         try
         {
-            http_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
-            old_context=http_request.getContext();
-            old_servlet_path=http_request.getServletPath();
-            old_path_info=http_request.getPathInfo();
+            base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
+            old_context=base_request.getContext();
+            old_context_path=base_request.getContextPath();
+            old_servlet_path=base_request.getServletPath();
+            old_path_info=base_request.getPathInfo();
 
             // Are we already in this context?
             if (old_context!=_context)
             {
-                // Nope - so check the target.
                 
-                if (target.startsWith(_contextPath))
-                    target=target.substring(_contextPath.length());
-                else
+                // Nope - so check the target.
+                if (dispatch==REQUEST)
                 {
-                    // Not for this context!
-                    old_context=_context;
-                	return false;
+                    if (target.startsWith(_contextPath))
+                        target=target.substring(_contextPath.length());
+                    else 
+                    {
+                        // Not for this context!
+                        old_context=_context;
+                        return false;
+                    }
                 }
                 
                 // Update the paths
-                http_request.setContext(_context);
-                http_request.setServletPath(null);
-                http_request.setPathInfo(target);
+                base_request.setContext(_context);
+                if (dispatch!=INCLUDE && target.startsWith("/"))
+                {
+                    base_request.setContextPath(_context.getContextPath());
+                    base_request.setServletPath(null);
+                    base_request.setPathInfo(target);
+                }
                 
                 // Set the classloader
                 if (_classLoader!=null)
@@ -315,9 +324,10 @@ public class ContextHandler extends WrappedHandler
                 }
                 
                 // reset the context and servlet path.
-                http_request.setContext(old_context);
-                http_request.setServletPath(old_servlet_path);
-                http_request.setPathInfo(old_path_info); 
+                base_request.setContext(old_context);
+                base_request.setContextPath(old_context_path);
+                base_request.setServletPath(old_servlet_path);
+                base_request.setPathInfo(old_path_info); 
             }
         }
         

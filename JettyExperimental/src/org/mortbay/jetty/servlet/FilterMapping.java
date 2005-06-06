@@ -20,7 +20,7 @@ import org.mortbay.jetty.Handler;
 
 public class FilterMapping
 {
-    private int _dispatches;
+    private int _dispatches=Handler.REQUEST;
     private String _filterName;
     private transient FilterHolder _holder;
     private String _pathSpec;

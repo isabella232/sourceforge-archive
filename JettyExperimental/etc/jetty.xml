@@ -76,19 +76,40 @@
 	</Ref>
 	
 	<Ref id="testServletHandler">
+	   <Set name="filters">
+	       <Array type="org.mortbay.jetty.servlet.FilterHolder">
+	         <Item>
+	           <New class="org.mortbay.jetty.servlet.FilterHolder">
+	             <Set name="name">TestFilter</Set>
+	             <Set name="className">org.mortbay.webapps.test.TestFilter</Set>
+	           </New>
+	         </Item>
+	       </Array>
+	   </Set>
+	  
+	   <Set name="filterMappings">
+	       <Array type="org.mortbay.jetty.servlet.FilterMapping">
+	           <Item>
+	              <New class="org.mortbay.jetty.servlet.FilterMapping">
+	                <Set name="pathSpec">/*</Set>
+	                <Set name="filterName">TestFilter</Set>
+	              </New>
+	           </Item>
+	       </Array>
+	   </Set>
 	   <Set name="servlets">
 	       <Array type="org.mortbay.jetty.servlet.ServletHolder">
 	           <Item>
 	              <New class="org.mortbay.jetty.servlet.ServletHolder">
 	                 <Set name="name">Dump</Set>
-	                 <Set name="className">org.mortbay.servlet.Dump</Set>
+	                 <Set name="className">org.mortbay.webapps.test.Dump</Set>
 	              </New>
 	           </Item>
 	                
 	           <Item>
 	              <New class="org.mortbay.jetty.servlet.ServletHolder">
 	                 <Set name="name">Session</Set>
-	                 <Set name="className">org.mortbay.servlet.SessionDump</Set>
+	                 <Set name="className">org.mortbay.webapps.test.SessionDump</Set>
 	              </New>
 	           </Item>
 	           

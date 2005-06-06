@@ -46,6 +46,8 @@ import org.mortbay.io.Portable;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandler.Context;
 import org.mortbay.jetty.servlet.ServletHolder;
+import org.mortbay.util.Attributes;
+import org.mortbay.util.AttributesMap;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiMap;
@@ -71,7 +73,7 @@ public class Request implements HttpServletRequest
     private HttpConnection _connection;
     private EndPoint _endp;
     
-    private Map _attributes;
+    private Attributes _attributes;
     private String _authType;
     private String _characterEncoding;
     private String _serverName;
@@ -84,6 +86,7 @@ public class Request implements HttpServletRequest
     private boolean _requestedSessionIdFromCookie=false;
     private String _requestURI;
     private String _scheme=URIUtil.HTTP;
+    private String _contextPath;
     private String _servletPath;
     private URI _uri;
     private Principal _userPrincipal;
@@ -147,7 +150,7 @@ public class Request implements HttpServletRequest
     {
         if (_attributes==null)
             return null;
-        return _attributes.get(name);
+        return _attributes.getAttribute(name);
     }
 
     /* ------------------------------------------------------------ */
@@ -158,7 +161,7 @@ public class Request implements HttpServletRequest
     {
         if (_attributes==null)
             return Collections.enumeration(Collections.EMPTY_LIST);
-        return Collections.enumeration(_attributes.keySet());
+        return _attributes.getAttributeNames();
     }
 
     /* ------------------------------------------------------------ */
@@ -220,9 +223,7 @@ public class Request implements HttpServletRequest
      */
     public String getContextPath()
     {
-        if (_context==null)
-            return "";
-        return _context.getContextPath();
+        return _contextPath;
     }
 
     /* ------------------------------------------------------------ */
@@ -971,7 +972,7 @@ public class Request implements HttpServletRequest
     public void removeAttribute(String name)
     {
         if (_attributes!=null)
-            _attributes.remove(name);
+            _attributes.removeAttribute(name);
     }
 
     /* ------------------------------------------------------------ */
@@ -981,8 +982,8 @@ public class Request implements HttpServletRequest
     public void setAttribute(String name, Object attribute)
     {
         if (_attributes==null)
-            _attributes=new HashMap(11);
-        _attributes.put(name,attribute);
+            _attributes=new AttributesMap();
+        _attributes.setAttribute(name, attribute);
     }
 
     /* ------------------------------------------------------------ */
@@ -1217,6 +1218,14 @@ public class Request implements HttpServletRequest
     /**
      * @param servletPath The servletPath to set.
      */
+    public void setContextPath(String contextPath)
+    {
+        _contextPath = contextPath;
+    }
+    /* ------------------------------------------------------------ */
+    /**
+     * @param servletPath The servletPath to set.
+     */
     public void setServletPath(String servletPath)
     {
         _servletPath = servletPath;
@@ -1281,6 +1290,23 @@ public class Request implements HttpServletRequest
         }
     }
 
+
+    /* ------------------------------------------------------------ */
+    /* 
+     */
+    public Attributes getAttributes()
+    {
+        return _attributes;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     */
+    public void setAttributes(Attributes attributes)
+    {
+        _attributes=attributes;
+    }
+    
 
 }
 

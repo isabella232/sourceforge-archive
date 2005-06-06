@@ -16,6 +16,14 @@
 package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
+import java.util.AbstractMap;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -28,6 +36,7 @@ import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.util.Attributes;
 import org.mortbay.util.StringMap;
 import org.slf4j.LoggerFactory;
 import org.slf4j.ULogger;
@@ -56,22 +65,6 @@ public class Dispatcher implements RequestDispatcher
     public final static String __FORWARD_PATH_INFO= "javax.servlet.forward.path_info";
     public final static String __FORWARD_QUERY_STRING= "javax.servlet.forward.query_string";
 
-    
-    public final static StringMap __managedAttributes = new StringMap();
-    static
-    {
-        __managedAttributes.put(__INCLUDE_REQUEST_URI,__INCLUDE_REQUEST_URI);
-        __managedAttributes.put(__INCLUDE_CONTEXT_PATH,__INCLUDE_CONTEXT_PATH);
-        __managedAttributes.put(__INCLUDE_SERVLET_PATH,__INCLUDE_SERVLET_PATH);
-        __managedAttributes.put(__INCLUDE_PATH_INFO,__INCLUDE_PATH_INFO);
-        __managedAttributes.put(__INCLUDE_QUERY_STRING,__INCLUDE_QUERY_STRING);
-        
-        __managedAttributes.put(__FORWARD_REQUEST_URI,__FORWARD_REQUEST_URI);
-        __managedAttributes.put(__FORWARD_CONTEXT_PATH,__FORWARD_CONTEXT_PATH);
-        __managedAttributes.put(__FORWARD_SERVLET_PATH,__FORWARD_SERVLET_PATH);
-        __managedAttributes.put(__FORWARD_PATH_INFO,__FORWARD_PATH_INFO);
-        __managedAttributes.put(__FORWARD_QUERY_STRING,__FORWARD_QUERY_STRING);
-    }
 
     /* ------------------------------------------------------------ */
     /** Dispatch type from name
@@ -95,6 +88,7 @@ public class Dispatcher implements RequestDispatcher
     private String _uri;
     private String _path;
     private String _query;
+    private String _named;
     
     /* ------------------------------------------------------------ */
     /**
@@ -120,15 +114,21 @@ public class Dispatcher implements RequestDispatcher
         Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
         
         String old_uri=base_request.getRequestURI();
+        String old_context_path=base_request.getContextPath();
+        Attributes old_attr=base_request.getAttributes();
         try
         {
             base_request.setRequestURI(_uri);
+            base_request.setContextPath(_contextHandler.getContextPath());
+            DispatchedAttributes attr = new DispatchedAttributes(Handler.FORWARD,old_attr); 
             
             _contextHandler.handle(_path, (HttpServletRequest)request, (HttpServletResponse)response, Handler.FORWARD);
         }
         finally
         {
             base_request.setRequestURI(old_uri);
+            base_request.setAttributes(old_attr);
+            base_request.setContextPath(old_context_path);
         }
     }
 
@@ -143,4 +143,145 @@ public class Dispatcher implements RequestDispatcher
     }
 
 
+    private class DispatchedAttributes implements Attributes
+    {
+        int _type;
+        Attributes _attr;
+        
+        String _requestURI;
+        String _contextPath;
+        String _servletPath;
+        String _pathInfo;
+        String _query;
+        
+        DispatchedAttributes(int type,Attributes attributes)
+        {
+            _type=type;
+            _attr=attributes;
+        }
+        
+        /* ------------------------------------------------------------ */
+        public Object getAttribute(String key)
+        {
+            if (_type==Handler.INCLUDE && Dispatcher.this._named==null)
+            {
+                if (key.equals(__INCLUDE_PATH_INFO))    return _pathInfo;
+                if (key.equals(__INCLUDE_SERVLET_PATH)) return _servletPath;
+                if (key.equals(__INCLUDE_CONTEXT_PATH)) return _contextPath;
+                if (key.equals(__INCLUDE_QUERY_STRING)) return _query;
+                if (key.equals(__INCLUDE_REQUEST_URI))  return _requestURI;
+            }
+            else
+            {
+                if (key.equals(__INCLUDE_PATH_INFO))    return null;
+                if (key.equals(__INCLUDE_REQUEST_URI))  return null;
+                if (key.equals(__INCLUDE_SERVLET_PATH)) return null;
+                if (key.equals(__INCLUDE_CONTEXT_PATH)) return null;
+                if (key.equals(__INCLUDE_QUERY_STRING)) return null;
+            }
+
+            if (_type!=Handler.INCLUDE && Dispatcher.this._named==null)
+            {
+                if (key.equals(__FORWARD_PATH_INFO))    return _pathInfo;
+                if (key.equals(__FORWARD_REQUEST_URI))  return _requestURI;
+                if (key.equals(__FORWARD_SERVLET_PATH)) return _servletPath;
+                if (key.equals(__FORWARD_CONTEXT_PATH)) return _contextPath;
+                if (key.equals(__FORWARD_QUERY_STRING)) return _query;
+            }
+            
+            return _attr.getAttribute(key);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public Enumeration getAttributeNames()
+        {
+            HashSet set=new HashSet();
+            Enumeration e=_attr.getAttributeNames();
+            while(e.hasMoreElements())
+                set.add(e.nextElement());
+            
+            if (_type==Handler.INCLUDE && _named==null)
+            {
+                set.add(__INCLUDE_PATH_INFO);
+                set.add(__INCLUDE_REQUEST_URI);
+                set.add(__INCLUDE_SERVLET_PATH);
+                set.add(__INCLUDE_CONTEXT_PATH);
+                set.add(__INCLUDE_QUERY_STRING);
+            }
+            else
+            {
+                set.remove(__INCLUDE_PATH_INFO);
+                set.remove(__INCLUDE_REQUEST_URI);
+                set.remove(__INCLUDE_SERVLET_PATH);
+                set.remove(__INCLUDE_CONTEXT_PATH);
+                set.remove(__INCLUDE_QUERY_STRING);
+            }
+
+            if (_type!=Handler.INCLUDE && _named==null)
+            {
+                set.add(__FORWARD_PATH_INFO);
+                set.add(__FORWARD_REQUEST_URI);
+                set.add(__FORWARD_SERVLET_PATH);
+                set.add(__FORWARD_CONTEXT_PATH);
+                set.add(__FORWARD_QUERY_STRING);
+            }
+            
+            return Collections.enumeration(set);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public void setAttribute(String key, Object value)
+        {
+
+            if (_named==null && ((String)key).startsWith("javax.servlet."))
+            {
+                if (_type==Handler.INCLUDE)
+                {
+                    if (key.equals(__INCLUDE_PATH_INFO))         _pathInfo=(String)value;
+                    else if (key.equals(__INCLUDE_REQUEST_URI))  _requestURI=(String)value;
+                    else if (key.equals(__INCLUDE_SERVLET_PATH)) _servletPath=(String)value;
+                    else if (key.equals(__INCLUDE_CONTEXT_PATH)) _contextPath=(String)value;
+                    else if (key.equals(__INCLUDE_QUERY_STRING)) _query=(String)value;
+                    else if (value==null)
+                        _attr.removeAttribute(key);
+                    else
+                        _attr.setAttribute(key,value); // TODO ???
+                }
+                else
+                {
+                    if (key.equals(__FORWARD_PATH_INFO))         _pathInfo=(String)value;
+                    else if (key.equals(__FORWARD_REQUEST_URI))  _requestURI=(String)value;
+                    else if (key.equals(__FORWARD_SERVLET_PATH)) _servletPath=(String)value;
+                    else if (key.equals(__FORWARD_CONTEXT_PATH)) _contextPath=(String)value;
+                    else if (key.equals(__FORWARD_QUERY_STRING)) _query=(String)value;
+                    else if (value==null)
+                        _attr.removeAttribute(key);
+                    else
+                        _attr.setAttribute(key,value); // TODO ???
+                }
+            }
+            else if (value==null)
+                _attr.removeAttribute(key);
+            else
+                _attr.setAttribute(key,value);
+        }
+        
+        /* ------------------------------------------------------------ */
+        public String toString() 
+        {
+            return "DISPATCHER+"+_attr.toString();
+        }
+
+        /* ------------------------------------------------------------ */
+        public void clear()
+        {
+            throw new IllegalStateException();
+        }
+
+        /* ------------------------------------------------------------ */
+        public void removeAttribute(String name)
+        {
+            setAttribute(name,null);
+        }
+    }
 };

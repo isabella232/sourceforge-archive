@@ -35,6 +35,7 @@ import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.ContextHandler;
@@ -312,9 +313,17 @@ public class ServletHandler extends WrappedHandler
                     String servlet_path=PathMap.pathMatch(servlet_path_spec,target);
                     String path_info=PathMap.pathInfo(servlet_path_spec,target);
                     
-                    base_request.setServletPath(servlet_path);
-                    base_request.setPathInfo(path_info);
-
+                    if (type==INCLUDE)
+                    {
+                        base_request.setAttribute(Dispatcher.__FORWARD_SERVLET_PATH,servlet_path);
+                        base_request.setAttribute(Dispatcher.__INCLUDE_PATH_INFO, path_info);
+                    }
+                    else
+                    {
+                        base_request.setServletPath(servlet_path);
+                        base_request.setPathInfo(path_info);
+                    }
+                    
                     if (servlet_holder!=null && _filterMappings!=null && _filterMappings.length>0)
                         chain=getChainForPath(type, target, servlet_holder);
                 }      
@@ -405,6 +414,7 @@ public class ServletHandler extends WrappedHandler
         }
         finally
         {
+            if (type!=INCLUDE)
             base_request.setServletPath(old_servlet_path);
             base_request.setPathInfo(old_path_info); 
         }
@@ -533,7 +543,6 @@ public class ServletHandler extends WrappedHandler
             {
                 try
                 {
-                    servlets[i].setServletHandler(this);
                     servlets[i].start();
                 }
                 catch(Exception e)
@@ -568,7 +577,10 @@ public class ServletHandler extends WrappedHandler
             
             // update the maps
             for (int i=0;i<_servlets.length;i++)
+            {
                 nm.put(_servlets[i].getName(),_servlets[i]);
+                _servlets[i].setServletHandler(this);
+            }
             _servletNameMap=nm;
         }
 
@@ -605,7 +617,10 @@ public class ServletHandler extends WrappedHandler
         {   
             HashMap nm = new HashMap();
             for (int i=0;i<_filters.length;i++)
-                nm.put(_servlets[i].getName(),_filters[i]);
+            {
+                nm.put(_filters[i].getName(),_filters[i]);
+                _filters[i].setServletHandler(this);
+            }
             _filterNameMap=nm;
         }
 
