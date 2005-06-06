@@ -1845,7 +1845,12 @@ public class HttpContext extends Container
         
         removeComponent(_resources);
         if (_resources!=null)
+	{
+	    _resources.flushCache();
+	    if (_resources.isStarted())
+	        try{_resources.stop();}catch(Exception e){LogSupport.ignore(log,e);}
             _resources.destroy();
+	}
         _resources=null;
         
         super.destroy();
