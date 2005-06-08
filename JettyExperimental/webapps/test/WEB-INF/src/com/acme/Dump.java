@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.webapps.test;
+package com.acme;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -35,7 +35,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.util.Loader;
 import org.mortbay.util.LogSupport;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /* ------------------------------------------------------------ */
 /** Dump Servlet Request.
@@ -44,7 +44,7 @@ import org.slf4j.ULogger;
 public class Dump extends HttpServlet
 {
 
-    private static ULogger log = LoggerFactory.getLogger(Dump.class);
+    private static Logger log = LoggerFactory.getLogger(Dump.class);
 
     /* ------------------------------------------------------------ */
     String pageType;

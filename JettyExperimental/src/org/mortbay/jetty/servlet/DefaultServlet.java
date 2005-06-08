@@ -53,7 +53,7 @@ import org.mortbay.resource.ResourceFactory;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.URIUtil;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 
 
@@ -99,10 +99,9 @@ import org.slf4j.ULogger;
  */
 public class DefaultServlet extends HttpServlet implements ResourceFactory
 {
-    private static ULogger log = LoggerFactory.getLogger(DefaultServlet.class);
+    private static Logger log = LoggerFactory.getLogger(DefaultServlet.class);
     
     private ContextHandler.Context _context;
-    private ServletHandler _servletHandler;
     private String _AllowString="GET, POST, HEAD, OPTIONS, TRACE";
     
     private int _maxByteBuffer=1024;
@@ -396,7 +395,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                     else
                     {
                         // Forward to the index
-                        RequestDispatcher dispatcher=_servletHandler.getRequestDispatcher(ipath);
+                        RequestDispatcher dispatcher=request.getRequestDispatcher(ipath);
                         if (dispatcher!=null)
                             dispatcher.forward(request,response);
                     }

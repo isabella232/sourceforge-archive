@@ -29,7 +29,7 @@ import java.security.Permission;
 
 import org.mortbay.util.LogSupport;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 
 /* ------------------------------------------------------------ */
@@ -49,7 +49,7 @@ import org.slf4j.ULogger;
  */
 public class FileResource extends URLResource
 {
-    private static ULogger log = LoggerFactory.getLogger(Resource.class);
+    private static Logger log = LoggerFactory.getLogger(Resource.class);
     private static boolean __checkAliases;
     static
     {

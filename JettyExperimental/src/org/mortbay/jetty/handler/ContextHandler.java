@@ -39,10 +39,11 @@ import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.resource.Resource;
+import org.mortbay.util.Loader;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.URIUtil;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 
 /* ------------------------------------------------------------ */
@@ -56,7 +57,7 @@ import org.slf4j.ULogger;
  */
 public class ContextHandler extends WrappedHandler
 {
-    private static ULogger log = LoggerFactory.getLogger(ContextHandler.class);
+    private static Logger log = LoggerFactory.getLogger(ContextHandler.class);
     private static ThreadLocal __context=new ThreadLocal();
     
     /* ------------------------------------------------------------ */
@@ -80,8 +81,8 @@ public class ContextHandler extends WrappedHandler
     private String _contextPath;
     private HashMap _initParams;
     private String _servletContextName;
-    private Resource _resourceBase;  
     private String _docRoot;
+    private Resource _baseResource;  
     private MimeTypes _mimeTypes;
     
     /* ------------------------------------------------------------ */
@@ -204,7 +205,7 @@ public class ContextHandler extends WrappedHandler
             old_context=__context.get();
             __context.set(_context);
             
-            super.doStart();
+            startContext();
             
         }
         finally
@@ -217,6 +218,13 @@ public class ContextHandler extends WrappedHandler
                 current_thread.setContextClassLoader(old_classloader);
             }
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    protected void startContext()
+    	throws Exception
+    {
+        super.doStart();
     }
     
     /* ------------------------------------------------------------ */
@@ -397,34 +405,64 @@ public class ContextHandler extends WrappedHandler
     {
         _servletContextName = servletContextName;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the resourceBase.
      */
+    public Resource getBaseResource()
+    {
+        if (_baseResource==null)
+            return null;
+        return _baseResource;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the base resource as a string.
+     */
     public String getResourceBase()
     {
-        if (_resourceBase==null)
+        if (_baseResource==null)
             return null;
-        return _resourceBase.toString();
+        return _baseResource.toString();
     }
     
     /* ------------------------------------------------------------ */
     /**
      * @param resourceBase The resourceBase to set.
      */
-    public void setResourceBase(String resourceBase) 
+    public void setBaseResource(Resource base) 
     {
+        _baseResource=base;
+        _docRoot=null;
+        
         try
         {
-            _docRoot=null;
-            _resourceBase = Resource.newResource(resourceBase);
-            File file=_resourceBase.getFile();
+            File file=_baseResource.getFile();
             if (file!=null)
             {
                 _docRoot=file.getCanonicalPath();
                 if (_docRoot.endsWith(File.pathSeparator))
                     _docRoot=_docRoot.substring(0,_docRoot.length()-1);
             }
+        }
+        catch (Exception e)
+        {
+            log.warn(e);
+            throw new IllegalArgumentException(base.toString());
+        }
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param resourceBase The base resource as a string.
+     */
+    public void setResourceBase(String resourceBase) 
+    {
+        try
+        {
+            setBaseResource(Resource.newResource(resourceBase));
         }
         catch (Exception e)
         {
@@ -454,7 +492,20 @@ public class ContextHandler extends WrappedHandler
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "ContextHandler@"+Integer.toHexString(hashCode())+"{"+getContextPath()+","+getResourceBase()+"}";
+        return "ContextHandler@"+Integer.toHexString(hashCode())+"{"+getContextPath()+","+getBaseResource()+"}";
+    }
+
+    /* ------------------------------------------------------------ */
+    public synchronized Class loadClass(String className)
+        throws ClassNotFoundException
+    {
+        if (className==null)
+            return null;
+        
+        if (_classLoader==null)
+            return Loader.loadClass(this.getClass(), className);
+
+        return _classLoader.loadClass(className);
     }
     
     /* ------------------------------------------------------------ */
@@ -464,7 +515,6 @@ public class ContextHandler extends WrappedHandler
      */
     public class Context implements ServletContext
     {
-
         /* ------------------------------------------------------------ */
         private Context()
         {}
@@ -592,12 +642,12 @@ public class ContextHandler extends WrappedHandler
             if (path==null || !path.startsWith("/"))
                 throw new MalformedURLException(path);
             
-            if (_resourceBase==null)
+            if (_baseResource==null)
                 return null;
             
             try
             {
-                Resource resource=_resourceBase.addPath(URIUtil.canonicalPath(path));
+                Resource resource=_baseResource.addPath(URIUtil.canonicalPath(path));
                 return resource.getURL();
             }
             catch(Exception e)
@@ -636,12 +686,12 @@ public class ContextHandler extends WrappedHandler
             if (path==null || !path.startsWith("/"))
                 return Collections.EMPTY_SET;
             
-            if (_resourceBase==null)
+            if (_baseResource==null)
                 return null;
             
             try
             {
-                Resource resource=_resourceBase.addPath(URIUtil.canonicalPath(path));
+                Resource resource=_baseResource.addPath(URIUtil.canonicalPath(path));
                 String[] l=resource.list();
                 if (l==null)
                 {
@@ -799,7 +849,7 @@ public class ContextHandler extends WrappedHandler
         /* ------------------------------------------------------------ */
         public String toString()
         {
-            return "ServletContext@"+Integer.toHexString(hashCode())+"{"+getContextPath()+","+getResourceBase()+"}";
+            return "ServletContext@"+Integer.toHexString(hashCode())+"{"+getContextPath()+","+getBaseResource()+"}";
         }
 
     }

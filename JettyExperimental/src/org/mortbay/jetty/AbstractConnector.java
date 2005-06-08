@@ -26,7 +26,7 @@ import org.mortbay.thread.AbstractLifeCycle;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.LogSupport;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /** Abstract Connector implementation.
  * This abstract implemenation of the Connector interface provides:<ul>
@@ -43,7 +43,7 @@ import org.slf4j.ULogger;
  */
 public abstract class AbstractConnector extends AbstractLifeCycle implements Connector
 {
-    private static ULogger log= LoggerFactory.getLogger(AbstractConnector.class);
+    private static Logger log= LoggerFactory.getLogger(AbstractConnector.class);
 
     private int _headerBufferSize=2*1024;
     private int _requestBufferSize=16*1024;

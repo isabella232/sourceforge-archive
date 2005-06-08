@@ -26,7 +26,7 @@ import org.mortbay.jetty.AbstractConnector;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.util.LogSupport;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 
 /* ------------------------------------------------------------------------------- */
@@ -42,7 +42,7 @@ import org.slf4j.ULogger;
  */
 public class SocketConnector extends AbstractConnector
 {
-    private static ULogger log= LoggerFactory.getLogger(SocketConnector.class);
+    private static Logger log= LoggerFactory.getLogger(SocketConnector.class);
     
     ServerSocket _acceptSocket;
     

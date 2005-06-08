@@ -33,7 +33,7 @@ import org.mortbay.jetty.AbstractConnector;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.util.LogSupport;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /* ------------------------------------------------------------------------------- */
 /** Selecting NIO connector.
@@ -49,7 +49,7 @@ import org.slf4j.ULogger;
  */
 public class SelectChannelConnector extends AbstractConnector
 {
-    private static ULogger log= LoggerFactory.getLogger(SelectChannelConnector.class);
+    private static Logger log= LoggerFactory.getLogger(SelectChannelConnector.class);
     
     
     private transient ServerSocketChannel _acceptChannel;

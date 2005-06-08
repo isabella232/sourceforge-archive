@@ -21,7 +21,7 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /* ------------------------------------------------------------ */
 /** TYPE Utilities.
@@ -34,7 +34,7 @@ import org.slf4j.ULogger;
  */
 public class TypeUtil
 {
-    private static ULogger log = LoggerFactory.getLogger(TypeUtil.class);
+    private static Logger log = LoggerFactory.getLogger(TypeUtil.class);
 
     /* ------------------------------------------------------------ */
     private static final HashMap name2Class=new HashMap();

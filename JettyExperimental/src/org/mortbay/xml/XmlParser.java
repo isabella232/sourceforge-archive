@@ -32,7 +32,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import org.mortbay.util.LogSupport;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -56,7 +56,7 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class XmlParser 
 {
-    private static ULogger log = LoggerFactory.getLogger(XmlParser.class);
+    private static Logger log = LoggerFactory.getLogger(XmlParser.class);
 
     private Map _redirectMap = new HashMap();
     private SAXParser _parser;
@@ -186,7 +186,7 @@ public class XmlParser
     
     
     /* ------------------------------------------------------------ */
-    /** Parse URL.
+    /** Parse String URL.
      */
     public synchronized Node parse(String url)
         throws IOException,SAXException

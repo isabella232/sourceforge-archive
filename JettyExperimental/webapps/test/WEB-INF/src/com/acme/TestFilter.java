@@ -13,7 +13,7 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.webapps.test;
+package com.acme;
 
 import java.io.IOException;
 

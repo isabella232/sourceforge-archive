@@ -44,7 +44,7 @@ import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiMap;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 
 /* ------------------------------------------------------------ */
@@ -73,7 +73,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     /* ------------------------------------------------------------ */
     public final static int __distantFuture = 60*60*24*7*52*20;
     private final static String __NEW_SESSION_ID="org.mortbay.jetty.newSessionId";
-    private static ULogger log = LoggerFactory.getLogger(AbstractSessionManager.class);
+    private static Logger log = LoggerFactory.getLogger(AbstractSessionManager.class);
     protected boolean _crossContextSessionIDs=false;
     
     /* ------------------------------------------------------------ */

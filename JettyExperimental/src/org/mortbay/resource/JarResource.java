@@ -26,13 +26,13 @@ import java.util.jar.JarInputStream;
 import org.mortbay.io.IO;
 import org.mortbay.util.LogSupport;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 
 /* ------------------------------------------------------------ */
 public class JarResource extends URLResource
 {
-    private static ULogger log = LoggerFactory.getLogger(Resource.class);
+    private static Logger log = LoggerFactory.getLogger(Resource.class);
 
     protected transient JarURLConnection _jarConnection;
     

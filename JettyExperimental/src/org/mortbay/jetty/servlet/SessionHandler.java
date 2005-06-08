@@ -16,6 +16,7 @@
 package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
+import java.util.EventListener;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
@@ -30,7 +31,7 @@ import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.WrappedHandler;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /* ------------------------------------------------------------ */
 /** SessionHandler.
@@ -39,7 +40,7 @@ import org.slf4j.ULogger;
  */
 public class SessionHandler extends WrappedHandler
 {
-    private static ULogger log = LoggerFactory.getLogger(SessionHandler.class);
+    private static Logger log = LoggerFactory.getLogger(SessionHandler.class);
 
     /* -------------------------------------------------------------- */
     SessionManager _sessionManager;
@@ -167,5 +168,15 @@ public class SessionHandler extends WrappedHandler
             jetty_request.setSession(old_session);
         }
         return result;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param listener
+     */
+    public void addEventListener(EventListener listener)
+    {
+        // TODO Auto-generated method stub
+        
     }
 }

@@ -18,7 +18,7 @@ package org.mortbay.util;
 import java.io.UnsupportedEncodingException;
 
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /* ------------------------------------------------------------ */
 /** URI Holder.
@@ -35,7 +35,7 @@ import org.slf4j.ULogger;
 public class URIUtil
     implements Cloneable
 {
-    private static ULogger log = LoggerFactory.getLogger(URIUtil.class);
+    private static Logger log = LoggerFactory.getLogger(URIUtil.class);
 
     public static final String HTTP="http";
     public static final String HTTP_COLON="http:";

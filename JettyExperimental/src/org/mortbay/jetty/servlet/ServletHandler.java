@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,8 +29,11 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestAttributeListener;
+import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
@@ -46,7 +50,7 @@ import org.mortbay.util.MultiException;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.URIUtil;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 
 /* --------------------------------------------------------------------- */
@@ -62,7 +66,7 @@ import org.slf4j.ULogger;
  * initialized, then a HashSessionManager with a standard
  * java.util.Random generator is created.
  * <P>
- * @see org.mortbay.jetty.servlet.WebApplicationHandler
+ * @see org.mortbay.jetty.servlet.WebAppHandler
  * @version $Id$
  * @author Greg Wilkins
  */
@@ -82,7 +86,7 @@ public class ServletHandler extends WrappedHandler
     
     /* ------------------------------------------------------------ */
     private static final boolean __Slosh2Slash=File.separatorChar=='\\';
-    private static ULogger log = LoggerFactory.getLogger(ServletHolder.class);
+    private static Logger log = LoggerFactory.getLogger(ServletHolder.class);
 
     
     
@@ -96,7 +100,8 @@ public class ServletHandler extends WrappedHandler
     private ServletHolder[] _servlets;
     private ServletMapping[] _servletMappings;
     
-    private ULogger _contextLog;
+    private Logger _contextLog;
+    private boolean _initializeAtStart=true;
     
     private transient Map _filterNameMap;
     private transient List _filterPathMappings;
@@ -107,6 +112,10 @@ public class ServletHandler extends WrappedHandler
     
     protected transient HashMap _chainCache[];
     protected transient HashMap _namedChainCache[];
+
+    private Object _requestAttributeListeners;
+    private Object _contextAttributeListeners;
+    private Object _requestListeners;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -126,17 +135,10 @@ public class ServletHandler extends WrappedHandler
         if (_contextLog==null)
             _contextLog=log;
 
-        // Start filters
-        if (_filters!=null)
-        {
-            for (int i=_filters.length; i-->0;)
-            {
-                _filters[i].start();
-            }
-        }
-        
         updateMappings();
-        initializeServlets();
+        
+        if (isInitializeAtStart())
+            initialize();
 
         if(_filterChainsCached && _filters!=null && _filters.length>0)
         {
@@ -184,7 +186,7 @@ public class ServletHandler extends WrappedHandler
     /**
      * @return Returns the contextLog.
      */
-    public ULogger getContextLog()
+    public Logger getContextLog()
     {
         return _contextLog;
     }
@@ -526,13 +528,38 @@ public class ServletHandler extends WrappedHandler
     }
 
     /* ------------------------------------------------------------ */
-    /** Initialize load-on-startup servlets.
+    /**
+     * @return Returns the initializeAtStart.
+     */
+    public boolean isInitializeAtStart()
+    {
+        return _initializeAtStart;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param initializeAtStart The initializeAtStart to set.
+     */
+    public void setInitializeAtStart(boolean initializeAtStart)
+    {
+        _initializeAtStart = initializeAtStart;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Initialize filters and load-on-startup servlets.
      * Called automatically from start if autoInitializeServlet is true.
      */
-    public void initializeServlets()
+    public void initialize()
         throws Exception
     {
         MultiException mx = new MultiException();
+
+        // Start filters
+        if (_filters!=null)
+        {
+            for (int i=_filters.length; i-->0;)
+                _filters[i].start();
+        }
         
         if (_servlets!=null)
         {
@@ -660,7 +687,7 @@ public class ServletHandler extends WrappedHandler
         try
         {
             if (isStarted())
-                initializeServlets();
+                initialize();
         }
         catch (Exception e)
         {
@@ -682,7 +709,7 @@ public class ServletHandler extends WrappedHandler
     /**
      * @param contextLog The contextLog to set.
      */
-    public void setContextLog(ULogger contextLog)
+    public void setContextLog(Logger contextLog)
     {
         _contextLog = contextLog;
     }
@@ -734,7 +761,38 @@ public class ServletHandler extends WrappedHandler
         _servlets=(ServletHolder[])holders.clone();
         updateMappings();
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param listener
+     */
+    public void addEventListener(EventListener listener)
+    {
+        if (listener instanceof ServletRequestAttributeListener)
+        {
+             _requestAttributeListeners= LazyList.add(_requestAttributeListeners, listener);
+        }
+
+        if (listener instanceof ServletContextAttributeListener)
+        {            
+            _contextAttributeListeners= LazyList.add(_contextAttributeListeners, listener);
+        }
+        
+        if (listener instanceof ServletRequestListener)
+        {
+            _requestListeners= LazyList.add(_requestListeners, listener);
+        }
+
+        if (listener instanceof ServletRequestAttributeListener)
+        {
+             _requestAttributeListeners= LazyList.add(_requestAttributeListeners, listener);
+        }
+
+        if (listener instanceof ServletContextAttributeListener)
+        {            
+            _contextAttributeListeners= LazyList.add(_contextAttributeListeners, listener);
+        }
+    }
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -845,4 +903,5 @@ public class ServletHandler extends WrappedHandler
             return b.toString();
         }
     }
+
 }

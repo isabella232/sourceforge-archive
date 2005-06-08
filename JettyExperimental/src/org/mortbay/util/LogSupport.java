@@ -17,14 +17,14 @@ package org.mortbay.util;
 import java.lang.reflect.Method;
 
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /*-----------------------------------------------------------------------*/
 /** Log Support class.
  */
 public class LogSupport 
 {    
-    private static ULogger log = LoggerFactory.getLogger(LogSupport.class);
+    private static Logger log = LoggerFactory.getLogger(LogSupport.class);
     
     public final static String FATAL= "FATAL ";
     public final static String IGNORED= "IGNORED ";
@@ -38,7 +38,7 @@ public class LogSupport
      * Ignore an exception unless trace is enabled.
      * This works around the problem that log4j does not support the trace level.
      */
-    public static void ignore(ULogger log,Throwable th)
+    public static void ignore(Logger log,Throwable th)
     {
         if (trace && log.isDebugEnabled()) log.debug(IGNORED,th);
     }
@@ -59,7 +59,7 @@ public class LogSupport
      * Fatal exception
      * This works around the problem that log4j does not support the trace level.
      */
-    public static void fatal(ULogger log,Throwable th)
+    public static void fatal(Logger log,Throwable th)
     {
         log.debug(FATAL,th);
         System.exit(1);
@@ -72,7 +72,7 @@ public class LogSupport
 
     /** Log nested exceptions 
      */
-    public static void warn(ULogger log,String msg, Throwable th)
+    public static void warn(Logger log,String msg, Throwable th)
     {
         log.warn(msg,th);
 

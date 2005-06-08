@@ -34,7 +34,7 @@ import org.mortbay.jetty.AbstractConnector;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.util.LogSupport;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /* ------------------------------------------------------------------------------- */
 /**  Selecting Blocking NIO connector.
@@ -50,7 +50,7 @@ import org.slf4j.ULogger;
  */
 public class SelectBlockingChannelConnector extends AbstractConnector
 {
-    private static ULogger log= LoggerFactory.getLogger(SelectBlockingChannelConnector.class);
+    private static Logger log= LoggerFactory.getLogger(SelectBlockingChannelConnector.class);
     
     private transient ServerSocketChannel _acceptChannel;
     private transient SelectionKey _acceptKey;

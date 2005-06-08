@@ -56,7 +56,7 @@ import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 import org.mortbay.util.UrlEncoded;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /* ------------------------------------------------------------ */
 /** Request.
@@ -66,7 +66,7 @@ import org.slf4j.ULogger;
 public class Request implements HttpServletRequest
 {
     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
-    private static ULogger log = LoggerFactory.getLogger(HttpConnection.class);
+    private static Logger log = LoggerFactory.getLogger(HttpConnection.class);
     private static final int NONE=0, STREAM=1, READER=2;
     private static Cookie[] __noCookies = new Cookie[0];
     

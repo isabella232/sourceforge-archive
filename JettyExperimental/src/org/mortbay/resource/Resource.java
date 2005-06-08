@@ -31,7 +31,7 @@ import org.mortbay.util.LogSupport;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 
 /* ------------------------------------------------------------ */
@@ -43,7 +43,7 @@ import org.slf4j.ULogger;
  */
 public abstract class Resource implements Serializable
 {
-    private static ULogger log = LoggerFactory.getLogger(Resource.class);
+    private static Logger log = LoggerFactory.getLogger(Resource.class);
 
     Object _associate;
     

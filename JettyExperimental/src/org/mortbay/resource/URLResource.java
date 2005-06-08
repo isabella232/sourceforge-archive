@@ -26,7 +26,7 @@ import java.security.Permission;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.URIUtil;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /* ------------------------------------------------------------ */
 /** Abstract resource class.
@@ -37,7 +37,7 @@ import org.slf4j.ULogger;
  */
 public class URLResource extends Resource
 {
-    private static ULogger log = LoggerFactory.getLogger(Resource.class);
+    private static Logger log = LoggerFactory.getLogger(Resource.class);
 
     protected URL _url;
     protected String _urlString;

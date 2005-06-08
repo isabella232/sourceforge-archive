@@ -22,7 +22,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /* ------------------------------------------------------------ */
 /** Handles coding of MIME  "x-www-form-urlencoded".
@@ -42,7 +42,7 @@ import org.slf4j.ULogger;
  */
 public class UrlEncoded extends MultiMap
 {
-    private static ULogger log = LoggerFactory.getLogger(UrlEncoded.class);
+    private static Logger log = LoggerFactory.getLogger(UrlEncoded.class);
 
     /* ----------------------------------------------------------------- */
     public UrlEncoded(UrlEncoded url)

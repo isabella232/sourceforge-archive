@@ -24,7 +24,7 @@ import java.util.Map;
 import org.mortbay.thread.AbstractLifeCycle;
 import org.mortbay.util.Loader;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 
 /* --------------------------------------------------------------------- */
@@ -34,7 +34,7 @@ import org.slf4j.ULogger;
  */
 public class Holder extends AbstractLifeCycle implements Serializable
 {
-    private static ULogger log = LoggerFactory.getLogger(Holder.class);
+    private static Logger log = LoggerFactory.getLogger(Holder.class);
     protected transient Class _class;
     protected String _className;
     protected String _displayName;

@@ -23,7 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /* ------------------------------------------------------------ */
 /** HandlerCollection.
@@ -33,7 +33,7 @@ import org.slf4j.ULogger;
 public class WrappedHandler extends AbstractHandler
 {
     
-    private static ULogger log = LoggerFactory.getLogger(WrappedHandler.class);
+    private static Logger log = LoggerFactory.getLogger(WrappedHandler.class);
 
     private Handler _handler;
 

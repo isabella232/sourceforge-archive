@@ -168,6 +168,24 @@ public class ServletHolder extends Holder
     }
     
     /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the forcedPath.
+     */
+    public String getForcedPath()
+    {
+        return _forcedPath;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param forcedPath The forcedPath to set.
+     */
+    public void setForcedPath(String forcedPath)
+    {
+        _forcedPath = forcedPath;
+    }
+    
+    /* ------------------------------------------------------------ */
     public void doStart()
         throws Exception
     {

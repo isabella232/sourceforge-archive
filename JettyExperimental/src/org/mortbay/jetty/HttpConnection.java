@@ -30,7 +30,7 @@ import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
 import org.mortbay.util.URIUtil;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /**
  * @author gregw
@@ -40,7 +40,7 @@ import org.slf4j.ULogger;
  */
 public class HttpConnection 
 {
-    private static ULogger log = LoggerFactory.getLogger(HttpConnection.class);
+    private static Logger log = LoggerFactory.getLogger(HttpConnection.class);
     private static int UNKNOWN = -2;
     private static ThreadLocal __currentConnection=new ThreadLocal();
 

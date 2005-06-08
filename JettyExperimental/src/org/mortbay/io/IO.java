@@ -25,7 +25,7 @@ import java.io.Writer;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.util.LogSupport;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /* ======================================================================== */
 /** IO Utilities.
@@ -34,7 +34,7 @@ import org.slf4j.ULogger;
  */
 public class IO extends BoundedThreadPool
 {
-    private static ULogger log = LoggerFactory.getLogger(IO.class);
+    private static Logger log = LoggerFactory.getLogger(IO.class);
 
     /* ------------------------------------------------------------------- */
     public final static String

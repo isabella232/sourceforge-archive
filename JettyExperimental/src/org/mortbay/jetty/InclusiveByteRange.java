@@ -22,7 +22,7 @@ import java.util.StringTokenizer;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /* ------------------------------------------------------------ */
 /** Byte range inclusive of end points.
@@ -47,7 +47,7 @@ import org.slf4j.ULogger;
  */
 public class InclusiveByteRange 
 {
-    private static ULogger log = LoggerFactory.getLogger(InclusiveByteRange.class);
+    private static Logger log = LoggerFactory.getLogger(InclusiveByteRange.class);
     
     long first = 0;
     long last  = 0;    

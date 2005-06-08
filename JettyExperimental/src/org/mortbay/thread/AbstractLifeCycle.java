@@ -15,14 +15,14 @@
 
 package org.mortbay.thread;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /**
  * @author gregw
  */
 public abstract class AbstractLifeCycle implements LifeCycle
 {
-    private final static ULogger log = LoggerFactory.getLogger(AbstractLifeCycle.class);
+    private final static Logger log = LoggerFactory.getLogger(AbstractLifeCycle.class);
     private final int FAILED=-1,STOPPED=0,STARTING=1,STARTED=2,STOPPING=3;
     private transient int _state=0;
     protected void doStart() throws Exception {};

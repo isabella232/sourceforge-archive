@@ -16,14 +16,9 @@
 package org.mortbay.jetty.servlet;
 
 import java.io.IOException;
-import java.util.AbstractMap;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -37,9 +32,8 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.util.Attributes;
-import org.mortbay.util.StringMap;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /* ------------------------------------------------------------ */
 /** Servlet RequestDispatcher.
@@ -49,7 +43,7 @@ import org.slf4j.ULogger;
  */
 public class Dispatcher implements RequestDispatcher
 {
-    private static ULogger log = LoggerFactory.getLogger(DefaultServlet.class);
+    private static Logger log = LoggerFactory.getLogger(DefaultServlet.class);
     
     /** Dispatch include attribute names */
     public final static String __INCLUDE_REQUEST_URI= "javax.servlet.include.request_uri";

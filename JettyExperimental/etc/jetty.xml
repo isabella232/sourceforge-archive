@@ -41,21 +41,14 @@
     <Set name="handlers">
       <Array type="org.mortbay.jetty.Handler"> 
         <Item>
-	      <New id="testContextHandler"  class="org.mortbay.jetty.handler.ContextHandler">
+	      <New id="testWebAppContext"  class="org.mortbay.jetty.webapp.WebAppHandler">
 	        <Set name="contextPath">/test</Set>
-	        <Set name="resourceBase">./webapps/test</Set>
-            <Set name="handler">
-              <New id="testSessionHandler" class="org.mortbay.jetty.servlet.SessionHandler">
-                 <Set name="handler">
-                   <New id="testServletHandler" class="org.mortbay.jetty.servlet.ServletHandler"/>
-                 </Set>
-              </New>
-            </Set>
+	        <Set name="war">./webapps/test</Set>
           </New>
         </Item>
         
         <Item>
-	      <New id="testContextHandler"  class="org.mortbay.jetty.handler.ContextHandler">
+	      <New id="javadocContext"  class="org.mortbay.jetty.handler.ContextHandler">
 	        <Set name="contextPath">/javadoc</Set>
 	        <Set name="resourceBase">./javadoc</Set>
             <Set name="handler">
@@ -71,105 +64,10 @@
       </Array>
     </Set>
 
-	<Ref id="testSessionHandler">
+	<Ref id="testWebAppContext">
+      <Get name="SessionHandler">
 		<Set name="SessionManager"><New class="org.mortbay.jetty.servlet.HashSessionManager"/></Set>
-	</Ref>
-	
-	<Ref id="testServletHandler">
-	   <Set name="filters">
-	       <Array type="org.mortbay.jetty.servlet.FilterHolder">
-	         <Item>
-	           <New class="org.mortbay.jetty.servlet.FilterHolder">
-	             <Set name="name">TestFilter</Set>
-	             <Set name="className">org.mortbay.webapps.test.TestFilter</Set>
-	           </New>
-	         </Item>
-	       </Array>
-	   </Set>
-	  
-	   <Set name="filterMappings">
-	       <Array type="org.mortbay.jetty.servlet.FilterMapping">
-	           <Item>
-	              <New class="org.mortbay.jetty.servlet.FilterMapping">
-	                <Set name="pathSpec">/*</Set>
-	                <Set name="filterName">TestFilter</Set>
-	              </New>
-	           </Item>
-	       </Array>
-	   </Set>
-	   <Set name="servlets">
-	       <Array type="org.mortbay.jetty.servlet.ServletHolder">
-	           <Item>
-	              <New class="org.mortbay.jetty.servlet.ServletHolder">
-	                 <Set name="name">Dump</Set>
-	                 <Set name="className">org.mortbay.webapps.test.Dump</Set>
-	              </New>
-	           </Item>
-	                
-	           <Item>
-	              <New class="org.mortbay.jetty.servlet.ServletHolder">
-	                 <Set name="name">Session</Set>
-	                 <Set name="className">org.mortbay.webapps.test.SessionDump</Set>
-	              </New>
-	           </Item>
-	                
-	           <Item>
-	              <New class="org.mortbay.jetty.servlet.ServletHolder">
-	                 <Set name="name">Dispatch</Set>
-	                 <Set name="className">org.mortbay.webapps.test.DispatchServlet</Set>
-	              </New>
-	           </Item>
-	           
-	           <Item>
-	              <New class="org.mortbay.jetty.servlet.ServletHolder">
-	                  <Set name="name">Default</Set>
-	                  <Set name="className">org.mortbay.jetty.servlet.DefaultServlet</Set>
-	              </New>
-	           </Item>                
-	        </Array>
-	    </Set>
-	    
-	    
-	   <Set name="servletMappings">
-	       <Array type="org.mortbay.jetty.servlet.ServletMapping">
-	           <Item>
-	              <New class="org.mortbay.jetty.servlet.ServletMapping">
-	                <Set name="pathSpec">/dump/*</Set>
-	                <Set name="servletName">Dump</Set>
-	              </New>
-	           </Item>
-	           <Item>
-	              <New class="org.mortbay.jetty.servlet.ServletMapping">
-	                <Set name="pathSpec">/exact</Set>
-	                <Set name="servletName">Dump</Set>
-	              </New>
-	           </Item>
-	           <Item>
-	              <New class="org.mortbay.jetty.servlet.ServletMapping">
-	                <Set name="pathSpec">*.DUMP</Set>
-	                <Set name="servletName">Dump</Set>
-	              </New>
-	           </Item>
-	           <Item>
-	              <New class="org.mortbay.jetty.servlet.ServletMapping">
-	                <Set name="pathSpec">/session/*</Set>
-	                <Set name="servletName">Session</Set>
-	              </New>
-	           </Item>
-	           <Item>
-	              <New class="org.mortbay.jetty.servlet.ServletMapping">
-	                <Set name="pathSpec">/dispatch/*</Set>
-	                <Set name="servletName">Dispatch</Set>
-	              </New>
-	           </Item>
-	           <Item>
-	              <New class="org.mortbay.jetty.servlet.ServletMapping">
-	                <Set name="pathSpec">/</Set>
-	                <Set name="servletName">Default</Set>
-	              </New>
-	           </Item>
-	       </Array>
-	   </Set>
+	  </Get>
 	</Ref>
 
 	<Ref id="javadocServletHandler">

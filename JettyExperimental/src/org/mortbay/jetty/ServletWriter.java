@@ -24,7 +24,7 @@ import java.io.UnsupportedEncodingException;
 import org.mortbay.io.IO;
 import org.mortbay.util.LogSupport;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 
 /* ------------------------------------------------------------ */
@@ -37,7 +37,7 @@ import org.slf4j.ULogger;
  */
 class ServletWriter extends PrintWriter
 {
-    private static ULogger log = LoggerFactory.getLogger(ServletWriter.class);
+    private static Logger log = LoggerFactory.getLogger(ServletWriter.class);
     
     String encoding=null;
     OutputStream os=null;

@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /* ------------------------------------------------------------ */
 /** HandlerCollection.
@@ -33,7 +33,7 @@ import org.slf4j.ULogger;
  */
 public class HandlerCollection extends AbstractHandler implements Handler
 {
-    private static ULogger log = LoggerFactory.getLogger(HttpConnection.class);
+    private static Logger log = LoggerFactory.getLogger(HttpConnection.class);
 
     private Handler[] _handlers;
 

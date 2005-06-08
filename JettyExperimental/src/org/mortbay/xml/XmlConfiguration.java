@@ -36,7 +36,7 @@ import org.mortbay.util.Loader;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.TypeUtil;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -50,7 +50,7 @@ import org.xml.sax.SAXException;
  */
 public class XmlConfiguration
 {
-    private static ULogger log = LoggerFactory.getLogger(XmlConfiguration.class);
+    private static Logger log = LoggerFactory.getLogger(XmlConfiguration.class);
 
     private static Class[] __primitives = { Boolean.TYPE, Character.TYPE, Byte.TYPE, Short.TYPE,
             Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE, Void.TYPE};

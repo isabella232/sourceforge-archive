@@ -33,7 +33,7 @@ import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /* ------------------------------------------------------------ */
 /** Response.
@@ -42,7 +42,7 @@ import org.slf4j.ULogger;
  */
 public class Response implements HttpServletResponse
 {
-    private static ULogger log = LoggerFactory.getLogger(Response.class);
+    private static Logger log = LoggerFactory.getLogger(Response.class);
     
     public static final int
         DISABLED=-1,

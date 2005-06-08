@@ -23,7 +23,7 @@ import javax.servlet.ServletContext;
 
 import org.mortbay.jetty.Handler;
 import org.slf4j.LoggerFactory;
-import org.slf4j.ULogger;
+import org.slf4j.Logger;
 
 /* --------------------------------------------------------------------- */
 /** 
@@ -33,7 +33,7 @@ import org.slf4j.ULogger;
 public class FilterHolder
     extends Holder
 {
-    private static ULogger log = LoggerFactory.getLogger(FilterHolder.class);
+    private static Logger log = LoggerFactory.getLogger(FilterHolder.class);
 
     /* ------------------------------------------------------------ */
     /** Dispatch type from name
