@@ -605,7 +605,7 @@ public class Response implements HttpServletResponse
             type="application/octet-stream";
         }
         
-        String charset = null; // TODO getLocaleEncoding(locale);
+        String charset = _connection.getRequest().getContext().getContextHandler().getLocaleEncoding(locale);
         if (charset != null && charset.length()>0)
         {
             int semi=type.indexOf(';');

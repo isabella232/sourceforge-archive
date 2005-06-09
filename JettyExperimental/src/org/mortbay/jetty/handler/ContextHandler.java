@@ -24,6 +24,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import javax.servlet.RequestDispatcher;
@@ -84,6 +86,8 @@ public class ContextHandler extends WrappedHandler
     private String _docRoot;
     private Resource _baseResource;  
     private MimeTypes _mimeTypes;
+    private Map _localeEncodingMap;
+    private String[] _welcomeFiles;
     
     /* ------------------------------------------------------------ */
     /**
@@ -490,6 +494,23 @@ public class ContextHandler extends WrappedHandler
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     */
+    public void setWelcomeFiles(String[] files) 
+    {
+        _welcomeFiles=files;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    public String[] getWelcomeFiles() 
+    {
+        return _welcomeFiles;
+    }
+    
+    /* ------------------------------------------------------------ */
     public String toString()
     {
         return "ContextHandler@"+Integer.toHexString(hashCode())+"{"+getContextPath()+","+getBaseResource()+"}";
@@ -507,6 +528,36 @@ public class ContextHandler extends WrappedHandler
 
         return _classLoader.loadClass(className);
     }
+    
+
+    /* ------------------------------------------------------------ */
+    public void addLocaleEncoding(String locale,String encoding)
+    {
+        if (_localeEncodingMap==null)
+            _localeEncodingMap=new HashMap();
+        _localeEncodingMap.put(locale, encoding);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Get the character encoding for a locale. The full locale name is first
+     * looked up in the map of encodings. If no encoding is found, then the
+     * locale language is looked up. 
+     *
+     * @param locale a <code>Locale</code> value
+     * @return a <code>String</code> representing the character encoding for
+     * the locale or null if none found.
+     */
+    public String getLocaleEncoding(Locale locale)
+    {
+        if (_localeEncodingMap==null)
+            return null;
+        String encoding = (String)_localeEncodingMap.get(locale.toString());
+        if (encoding==null)
+            encoding = (String)_localeEncodingMap.get(locale.getLanguage());
+        return encoding;
+    }
+    
     
     /* ------------------------------------------------------------ */
     /** Context.
@@ -853,5 +904,8 @@ public class ContextHandler extends WrappedHandler
         }
 
     }
+
+
+
 
 }

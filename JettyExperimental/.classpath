@@ -6,8 +6,5 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="ext/slf4j-simple.jar"/>
 	<classpathentry output="webapps/test/WEB-INF/classes" kind="src" path="webapps/test/WEB-INF/src"/>
-	<classpathentry kind="lib" path="ext/xercesImpl.jar"/>
-	<classpathentry kind="lib" path="ext/xml-apis.jar"/>
-	<classpathentry kind="lib" path="ext/xmlParserAPIs-2.5.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

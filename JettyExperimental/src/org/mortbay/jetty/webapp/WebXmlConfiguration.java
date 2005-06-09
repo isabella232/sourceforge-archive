@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EventListener;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.servlet.UnavailableException;
 
@@ -32,6 +33,7 @@ import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.resource.Resource;
+import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
 import org.mortbay.xml.XmlParser;
 import org.slf4j.Logger;
@@ -47,10 +49,11 @@ public class WebXmlConfiguration implements Configuration
     
     protected WebAppHandler _context;
     protected XmlParser xmlParser;
-    protected ArrayList filters = new ArrayList();
-    protected ArrayList filterMappings = new ArrayList();
-    protected ArrayList servlets = new ArrayList();
-    protected ArrayList servletMappings = new ArrayList();
+    protected List filters;
+    protected List filterMappings;
+    protected List servlets;
+    protected List servletMappings;
+    protected List welcomeFiles;
 
     
     public WebXmlConfiguration()
@@ -207,23 +210,11 @@ public class WebXmlConfiguration implements Configuration
         ServletHandler servlet_handler = getWebAppHandler().getServletHandler();
         
         // Get any existing servlets and mappings.
-        if (servlet_handler.getFilters()!=null)
-            filters = new ArrayList(Arrays.asList(servlet_handler.getFilters()));
-        else
-            filters.clear();
-        if (servlet_handler.getFilterMappings()!=null)
-            filterMappings = new ArrayList(Arrays.asList(servlet_handler.getFilterMappings()));
-        else
-            filterMappings.clear();
-        if (servlet_handler.getServlets()!=null)
-            servlets = new ArrayList(Arrays.asList(servlet_handler.getServlets()));
-        else
-            servlets.clear();
-        if (servlet_handler.getServletMappings()!=null)
-            servletMappings = new ArrayList(Arrays.asList(servlet_handler.getServletMappings()));
-        else
-            servletMappings.clear();
-        
+        filters=LazyList.array2List(servlet_handler.getFilters());
+        filterMappings=LazyList.array2List(servlet_handler.getFilterMappings());
+        servlets=LazyList.array2List(servlet_handler.getServlets());
+        servletMappings=LazyList.array2List(servlet_handler.getServletMappings());
+        welcomeFiles = LazyList.array2List(getWebAppHandler().getWelcomeFiles());
         
         Iterator iter=config.iterator();
         XmlParser.Node node=null;
@@ -253,6 +244,8 @@ public class WebXmlConfiguration implements Configuration
         servlet_handler.setFilterMappings((FilterMapping[])filterMappings.toArray(new FilterMapping[filterMappings.size()]));
         servlet_handler.setServlets((ServletHolder[])servlets.toArray(new ServletHolder[servlets.size()]));
         servlet_handler.setServletMappings((ServletMapping[])servletMappings.toArray(new ServletMapping[servletMappings.size()]));
+        getWebAppHandler().setWelcomeFiles((String[])welcomeFiles.toArray(new String[welcomeFiles.size()]));
+        
     }
 
     /* ------------------------------------------------------------ */
@@ -513,10 +506,8 @@ public class WebXmlConfiguration implements Configuration
         while(iter.hasNext())
         {
             XmlParser.Node indexNode=(XmlParser.Node)iter.next();
-            String index=indexNode.toString(false,true);
-            if(log.isDebugEnabled())
-                log.debug("Index: "+index);
-            // TODO getWebAppHandler().addWelcomeFile(index);
+            String welcome=indexNode.toString(false,true);
+            welcomeFiles.add(welcome);
         }
     }
 
@@ -529,7 +520,7 @@ public class WebXmlConfiguration implements Configuration
             XmlParser.Node mapping=(XmlParser.Node)iter.next();
             String locale=mapping.getString("locale",false,true);
             String encoding=mapping.getString("encoding",false,true);
-            // TODO getWebAppHandler().addLocaleEncoding(locale,encoding);
+            getWebAppHandler().addLocaleEncoding(locale,encoding);
         }
     }
 

@@ -117,7 +117,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
     private ResourceCache _cache=new ResourceCache();
     
     private MimeTypes _mimeTypes;
-    private String[] _welcomes={"index.jsp","index.html"};
+    private String[] _welcomes;
     
     
     /* ------------------------------------------------------------ */
@@ -127,6 +127,9 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         ServletContext config=getServletContext();
         _context = (ContextHandler.Context)config;
         _mimeTypes = _context.getContextHandler().getMimeTypes();
+        _welcomes = _context.getContextHandler().getWelcomeFiles();
+        if (_welcomes==null)
+            _welcomes=new String[] {"index.jsp","index.html"};
         
         _acceptRanges=getInitBoolean("acceptRanges",_acceptRanges);
         _dirAllowed=getInitBoolean("dirAllowed",_dirAllowed);

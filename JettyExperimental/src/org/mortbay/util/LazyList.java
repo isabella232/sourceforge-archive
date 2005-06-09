@@ -16,6 +16,7 @@
 package org.mortbay.util;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -345,6 +346,19 @@ public class LazyList
             return ((List)list).listIterator();
         return getList(list).listIterator();
     }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param welcomeFiles
+     * @return
+     */
+    public static List array2List(Object[] array)
+    {	
+        if (array==null || array.length==0)
+            return new ArrayList();
+        return new ArrayList(Arrays.asList(array));
+    }
+    
     
 }
 
