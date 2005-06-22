@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + Applied ciphersuite patch from tonyj
+
 Jetty-5.1.4 - 5 June 2005
  + Fixed FTP close issue.
  + setup MX4J with JDK1.5 in start.config
