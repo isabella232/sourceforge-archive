@@ -2,6 +2,7 @@ Jetty Versions
 --------------
 
  + Applied ciphersuite patch from tonyj
+ + Authenticators use servlet sendError
 
 Jetty-5.1.4 - 5 June 2005
  + Fixed FTP close issue.

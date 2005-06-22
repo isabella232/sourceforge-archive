@@ -38,9 +38,9 @@ public class DigestAuthenticator implements Authenticator
 {
     static Log log = LogFactory.getLog(DigestAuthenticator.class);
 
-    private long maxNonceAge=0;
-    private long nonceSecret=this.hashCode() ^ System.currentTimeMillis();
-    private boolean useStale=false;
+    protected long maxNonceAge=0;
+    protected long nonceSecret=this.hashCode() ^ System.currentTimeMillis();
+    protected boolean useStale=false;
     
     
     /* ------------------------------------------------------------ */

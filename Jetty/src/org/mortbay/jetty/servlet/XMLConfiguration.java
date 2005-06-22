@@ -26,9 +26,7 @@ import javax.servlet.UnavailableException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.mortbay.http.Authenticator;
-import org.mortbay.http.BasicAuthenticator;
 import org.mortbay.http.ClientCertAuthenticator;
-import org.mortbay.http.DigestAuthenticator;
 import org.mortbay.http.SecurityConstraint;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.Resource;
@@ -61,8 +59,8 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
         URL webapp24xsd=WebApplicationContext.class.getResource("/javax/servlet/resources/web-app_2_4.xsd");
         URL schemadtd=WebApplicationContext.class.getResource("/javax/servlet/resources/XMLSchema.dtd");
         URL xmlxsd=WebApplicationContext.class.getResource("/javax/servlet/resources/xml.xsd");
-        URL webservice11xsd=WebApplicationContext.class
-                .getResource("/javax/servlet/resources/j2ee_web_services_client_1_1.xsd");
+        URL webserviceclient11xsd=WebApplicationContext.class.getResource("/javax/servlet/resources/j2ee_web_services_client_1_1.xsd");
+        URL webservice11xsd=WebApplicationContext.class.getResource("/javax/servlet/resources/j2ee_web_services_1_1.xsd");
         URL datatypesdtd=WebApplicationContext.class.getResource("/javax/servlet/resources/datatypes.dtd");
         xmlParser.redirectEntity("web-app_2_2.dtd",dtd22);
         xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN",dtd22);
@@ -83,7 +81,8 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
         xmlParser.redirectEntity("datatypes.dtd",datatypesdtd);
         xmlParser.redirectEntity("http://www.w3.org/2001/datatypes.dtd",datatypesdtd);
         xmlParser.redirectEntity("j2ee_web_services_client_1_1.xsd",webservice11xsd);
-        xmlParser.redirectEntity("http://www.ibm.com/webservices/xsd/j2ee_web_services_client_1_1.xsd",webservice11xsd);
+        xmlParser.redirectEntity("http://www.ibm.com/webservices/xsd/j2ee_web_services_1_1.xsd",webservice11xsd);
+        xmlParser.redirectEntity("http://www.ibm.com/webservices/xsd/j2ee_web_services_client_1_1.xsd",webserviceclient11xsd);
         return xmlParser;
     }
     
