@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 // ========================================================================
+//
 
 package org.mortbay.http;
 
@@ -56,6 +57,9 @@ import org.mortbay.util.Resource;
 public class SslListener extends SocketListener
 {
     private static Log log = LogFactory.getLog(SslListener.class);
+    
+    /** Default value for the cipher Suites. */
+    private String cipherSuites[] = null;
 
     /** Default value for the keystore location path. */
     public static final String DEFAULT_KEYSTORE = System.getProperty("user.home") + File.separator
@@ -110,6 +114,18 @@ public class SslListener extends SocketListener
         setDefaultScheme(HttpMessage.__SSL_SCHEME);
     }
 
+    /* ------------------------------------------------------------ */    
+    public String[] getCipherSuites() {
+        return cipherSuites;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** 
+     * @author Tony Jiang
+     */
+    public void setCipherSuites(String[] cipherSuites) {
+        this.cipherSuites = cipherSuites;
+    }
 
     /* ------------------------------------------------------------ */
     public void setPassword(String password)
@@ -260,6 +276,12 @@ public class SslListener extends SocketListener
 
             socket.setNeedClientAuth(_needClientAuth);
             log.info("SslListener.needClientAuth=" + _needClientAuth);
+            if(cipherSuites != null && cipherSuites.length >0) {
+            	socket.setEnabledCipherSuites(cipherSuites);
+            	for ( int i=0; i<cipherSuites.length; i++ ) {
+                    log.debug("SslListener enabled ciphersuite: " + cipherSuites[i]);
+                }            
+            }
         }
         catch (IOException e)
         {
