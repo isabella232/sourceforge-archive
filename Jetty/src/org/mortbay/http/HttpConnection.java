@@ -503,16 +503,9 @@ public class HttpConnection
         String expect=_request.getField(HttpFields.__Expect);
         if (expect!=null && expect.length()>0)
         {
-            if (StringUtil.asciiToLowerCase(expect)
-                .equals(HttpFields.__ExpectContinue))
+            if (StringUtil.asciiToLowerCase(expect).equals(HttpFields.__ExpectContinue))
             {
-                // Send continue if no body available yet.
-                if (_inputStream.available()<=0)
-                {
-                    OutputStream real_out=_outputStream.getOutputStream();
-                    real_out.write(HttpResponse.__Continue);
-                    real_out.flush();
-                }
+                _inputStream.setExpectContinues(_outputStream.getOutputStream());
             }
             else
                 throw new HttpException(HttpResponse.__417_Expectation_Failed);
@@ -761,6 +754,8 @@ public class HttpConnection
                 else
                     log.warn(_request.getRequestLine()+" "+e.toString());
                 log.debug(LogSupport.EXCEPTION,e);
+                
+                e.printStackTrace();
             }
             else if (e instanceof EOFException)
             {
@@ -1006,10 +1001,17 @@ public class HttpConnection
                 
             // Complete the request
             if (_persistent)
-            {                    
+            {         
+                boolean no_continue_sent=false;
                 try{
-                    // Read remaining input
-                    while(_inputStream.skip(4096)>0 || _inputStream.read()>=0);
+                    if (_inputStream.getExpectContinues()!=null)
+                    {
+                        _inputStream.setExpectContinues(null);
+                        no_continue_sent=true;
+                    }
+                    else
+                        // Read remaining input
+                        while(_inputStream.skip(4096)>0 || _inputStream.read()>=0);
                 }
                 catch(IOException e)
                 {
@@ -1022,12 +1024,11 @@ public class HttpConnection
                 }
                     
                 // Check for no more content
-                if (_inputStream.getContentLength()>0)
+                if (!no_continue_sent && _inputStream.getContentLength()>0)
                 {
                     _inputStream.setContentLength(0);
                     _persistent=false;
-                    exception (new HttpException(HttpResponse.__400_Bad_Request,
-                                                 "Missing Content"));
+                    exception (new HttpException(HttpResponse.__400_Bad_Request,"Missing Content"));
                 }
                 
                 // Commit the response

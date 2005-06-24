@@ -18,6 +18,7 @@ package org.mortbay.http;
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.logging.Log;
@@ -53,6 +54,7 @@ public class HttpInputStream extends FilterInputStream
     private ChunkingInputStream _deChunker;
     private LineInput _realIn;
     private boolean _chunking;
+    private OutputStream _expectContinues;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -76,6 +78,87 @@ public class HttpInputStream extends FilterInputStream
             log.fatal(e); System.exit(1);
         }
         this.in=_realIn;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param expectContinues The expectContinues to set.
+     */
+    public OutputStream getExpectContinues()
+    {
+        return _expectContinues;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param expectContinues The expectContinues to set.
+     */
+    public void setExpectContinues(OutputStream expectContinues)
+    {
+        _expectContinues = expectContinues;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see java.io.InputStream#read()
+     */
+    public int read() throws IOException
+    {
+        if (_expectContinues!=null)
+            expectContinues();
+        return super.read();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see java.io.InputStream#read(byte[], int, int)
+     */
+    public int read(byte[] b, int off, int len) throws IOException
+    {
+        if (_expectContinues!=null)
+            expectContinues();
+        return super.read(b, off, len);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see java.io.InputStream#read(byte[])
+     */
+    public int read(byte[] b) throws IOException
+    {
+        if (_expectContinues!=null)
+            expectContinues();
+        return super.read(b);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see java.io.InputStream#skip(long)
+     */
+    public long skip(long n) throws IOException
+    {
+        if (_expectContinues!=null)
+            expectContinues();
+        return super.skip(n);
+    }
+    
+    /* ------------------------------------------------------------ */
+    private void expectContinues()
+    	throws IOException	
+    	{
+        try
+        {
+            if (available()<=0)
+            {
+                _expectContinues.write(HttpResponse.__Continue);
+                _expectContinues.flush();
+            }
+        }
+        finally
+        {
+            _expectContinues=null;
+        }
+            
     }
     
     /* ------------------------------------------------------------ */
@@ -199,6 +282,7 @@ public class HttpInputStream extends FilterInputStream
             _realIn.destroy();
         _realIn=null;
         _deChunker=null;
+        _expectContinues=null;
     }
     
     

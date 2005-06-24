@@ -1,8 +1,10 @@
 package com.acme;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.util.Enumeration;
 
 import javax.servlet.ServletException;
@@ -97,7 +99,16 @@ public class DumpServlet extends HttpServlet
         }
 
         if (referer != null) out.write("<p><a href=\"" + referer + "\">BACK</a></p>");
-        out.write("</body></html>");
+        
+
+        out.write("<h3>Content:</h3><pre>");
+        Reader in = request.getReader();
+        int len=0;
+        char[] buf=new char[8096];
+        while ((len=in.read(buf))>=0)
+            out.write(buf, 0, len);
+        
+        out.write("</pre></body></html>");
         out.flush();
     }
 }
