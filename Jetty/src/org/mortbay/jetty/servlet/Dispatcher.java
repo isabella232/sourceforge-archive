@@ -636,28 +636,37 @@ public class Dispatcher implements RequestDispatcher
         }
         
         /* ------------------------------------------------------------ */
+        /**
+         *  If the request attribute "org.mortbay.jetty.servlet.Dispatcher.shared_session" is set, then 
+         * sessions are shared in cross context dispatch.  Watch out for class loading issues!
+         */
         public HttpSession getSession(boolean create)
         {
             if (_xContext)
             {
                 if (_xSession==null)
-                {
-                    log.debug("Ctx dispatch session");
-
-                    String rsid=getRequestedSessionId();
-                    if (rsid==null)
+                {	    
+                    if (getAttribute("org.mortbay.jetty.servlet.Dispatcher.shared_session") != null)
+                        _xSession= super.getSession(create);
+                    else
                     {
-                        HttpSession session=super.getSession(false);
-                        if (session!=null)
-                            rsid=session.getId();
-                    }
-                    _xSession=_servletHandler.getHttpSession(rsid);
-                    if (create && _xSession==null)
-                    {
-                        _xSession=_servletHandler.newHttpSession(this);
-                        Cookie cookie = _servletHandler.getSessionManager().getSessionCookie(_xSession, isSecure());
-                        if (cookie!=null)
-                            _servletHttpRequest.getHttpRequest().getHttpResponse().addSetCookie(cookie);
+                        log.debug("Ctx dispatch session");
+                        
+                        String rsid=getRequestedSessionId();
+                        if (rsid==null)
+                        {
+                            HttpSession session=super.getSession(false);
+                            if (session!=null)
+                                rsid=session.getId();
+                        }
+                        _xSession=_servletHandler.getHttpSession(rsid);
+                        if (create && _xSession==null)
+                        {
+                            _xSession=_servletHandler.newHttpSession(this);
+                            Cookie cookie = _servletHandler.getSessionManager().getSessionCookie(_xSession, isSecure());
+                            if (cookie!=null)
+                                _servletHttpRequest.getHttpRequest().getHttpResponse().addSetCookie(cookie);
+                        }
                     }
                     
                 }
