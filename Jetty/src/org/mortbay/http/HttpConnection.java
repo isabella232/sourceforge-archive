@@ -754,8 +754,6 @@ public class HttpConnection
                 else
                     log.warn(_request.getRequestLine()+" "+e.toString());
                 log.debug(LogSupport.EXCEPTION,e);
-                
-                e.printStackTrace();
             }
             else if (e instanceof EOFException)
             {
