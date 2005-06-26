@@ -589,6 +589,7 @@ public class HttpConnection
         // Nobble the OutputStream for HEAD requests
         if (HttpRequest.__HEAD.equals(_request.getMethod()))
             _outputStream.nullOutput();    
+            
         int length=_response.getIntField(HttpFields.__ContentLength);
         if (length>=0)
             _outputStream.setContentLength(length);
@@ -617,6 +618,14 @@ public class HttpConnection
 
         int status=_response.getStatus();
         int length=-1;
+        
+        // Check if there is missing content expectations
+        if (_inputStream.getExpectContinues()!=null)
+        {
+            // No input read yet - so assume it never will be
+            _inputStream.setExpectContinues(null);
+            _inputStream.setContentLength(0);
+        }
         
         // Handler forced close, listener stopped or no idle threads left.
         boolean has_close=HttpFields.__Close.equals(_response.getField(HttpFields.__Connection));
