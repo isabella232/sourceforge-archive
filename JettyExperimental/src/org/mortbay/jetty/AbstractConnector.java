@@ -25,8 +25,8 @@ import org.mortbay.io.Buffer;
 import org.mortbay.thread.AbstractLifeCycle;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.LogSupport;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /** Abstract Connector implementation.
  * This abstract implemenation of the Connector interface provides:<ul>
@@ -371,13 +371,41 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
         }
     }
 
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.jetty.Connector#getConfidentialPort()
+     */
+    public int getConfidentialPort()
+    {
+        return 443;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.jetty.Connector#getConfidentialScheme()
+     */
+    public String getConfidentialScheme()
+    {
+        return "https";
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.jetty.Connector#isConfidential(org.mortbay.jetty.Request)
+     */
+    public boolean isConfidential(Request request)
+    {
+        return false;
+    }
+    
     /* ------------------------------------------------------------ */
     protected abstract void accept() throws IOException, InterruptedException;
 
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "Listener "+getHost()+":"+getPort();
+        return "Connector "+getHost()+":"+getPort();
     }
     
     /* ------------------------------------------------------------ */

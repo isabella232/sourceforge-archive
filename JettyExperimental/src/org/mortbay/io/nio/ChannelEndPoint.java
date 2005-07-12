@@ -384,4 +384,13 @@ public class ChannelEndPoint implements EndPoint
         return _remote.getPort();
     }
 
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getConnection()
+     */
+    public Object getConnection()
+    {
+        return _channel;
+    }
+
 }

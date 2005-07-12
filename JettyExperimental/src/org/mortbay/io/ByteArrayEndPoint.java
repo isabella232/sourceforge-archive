@@ -125,7 +125,7 @@ public class ByteArrayEndPoint implements EndPoint
     public int fill(Buffer buffer) throws IOException
     {
         if (_closed)
-            Portable.throwIO("CLOSED");
+            throw new IOException("CLOSED");
         if (_in.length()<=0)
             return -1;
         return buffer.put(_in);
@@ -138,7 +138,7 @@ public class ByteArrayEndPoint implements EndPoint
     public int flush(Buffer buffer) throws IOException
     {
         if (_closed)
-            Portable.throwIO("CLOSED");
+            throw new IOException("CLOSED");
         return _out.put(buffer);
     }
 
@@ -149,7 +149,7 @@ public class ByteArrayEndPoint implements EndPoint
     public int flush(Buffer header, Buffer buffer, Buffer trailer) throws IOException
     {
         if (_closed)
-            Portable.throwIO("CLOSED");
+            throw new IOException("CLOSED");
         int flushed=0;
         if (header!=null && header.length()>0)
             flushed+=_out.put(header);
@@ -234,6 +234,15 @@ public class ByteArrayEndPoint implements EndPoint
     public int getRemotePort()
     {
         return 0;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getConnection()
+     */
+    public Object getConnection()
+    {
+        return _inBytes;
     }
 
 

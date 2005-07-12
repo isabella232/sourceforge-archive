@@ -118,6 +118,7 @@ public interface EndPoint
     /* ------------------------------------------------------------ */
     public boolean isClosed();
 
-    
+    /* ------------------------------------------------------------ */
+    public Object getConnection();
     
 }

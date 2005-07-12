@@ -19,8 +19,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import org.mortbay.io.Portable;
-
 /**
  * @author gregw
  *
@@ -61,7 +59,7 @@ public class StringEndPoint extends StreamEndPoint
         }
         catch(Exception e)
         {
-            Portable.throwIllegalState(e.toString());
+            throw new IllegalStateException(e.toString());
         }
     }
     
@@ -76,8 +74,7 @@ public class StringEndPoint extends StreamEndPoint
         catch(Exception e)
         {
             e.printStackTrace();
-            Portable.throwIllegalState(_encoding+": "+e.toString());
-            return null;
+            throw new IllegalStateException(_encoding+": "+e.toString());
         }
     }
 

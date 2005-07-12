@@ -7,7 +7,11 @@
 <!-- =============================================================== -->
 <Configure class="org.mortbay.jetty.Server">
 
-
+    <!-- =========================================================== -->
+    <!-- Set connectors                                              -->
+    <!-- =========================================================== -->
+    <!-- One of each type!                                           -->
+    <!-- =========================================================== -->
     <Set name="connectors">
       <Array type="org.mortbay.jetty.Connector"> 
       
@@ -38,8 +42,16 @@
       </Array>
     </Set>
 
+    <!-- =========================================================== -->
+    <!-- Set handlers                                                -->
+    <!-- =========================================================== -->
     <Set name="handlers">
       <Array type="org.mortbay.jetty.Handler"> 
+      
+        
+        <!-- ======================================================= -->
+        <!-- Configure a test web application with web.xml           -->
+        <!-- ======================================================= -->
         <Item>
 	      <New id="testWebAppContext"  class="org.mortbay.jetty.webapp.WebAppHandler">
 	        <Set name="contextPath">/test</Set>
@@ -47,6 +59,9 @@
           </New>
         </Item>
         
+        <!-- ======================================================= -->
+        <!-- Configure a context directly                            -->
+        <!-- ======================================================= -->
         <Item>
 	      <New id="javadocContext"  class="org.mortbay.jetty.handler.ContextHandler">
 	        <Set name="contextPath">/javadoc</Set>
@@ -57,12 +72,20 @@
           </New>
         </Item>
         
+        <!-- ======================================================= -->
+        <!-- Handle anything not already handled                     -->
+        <!-- ======================================================= -->
         <Item>
 	      <New  class="org.mortbay.jetty.handler.NotFoundHandler"/>
         </Item>
         
       </Array>
     </Set>
+
+
+    <!-- =========================================================== -->
+    <!-- Additional configuration for the components defined above   -->
+    <!-- =========================================================== -->
 
 	<Ref id="testWebAppContext">
       <Get name="SessionHandler">

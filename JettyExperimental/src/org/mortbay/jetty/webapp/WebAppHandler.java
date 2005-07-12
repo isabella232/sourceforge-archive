@@ -31,6 +31,7 @@ import javax.servlet.http.HttpSessionListener;
 
 import org.mortbay.io.IO;
 import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.resource.JarResource;
@@ -52,6 +53,7 @@ public class WebAppHandler extends ContextHandler
     /* ------------------------------------------------------------ */
     private static Logger log= LoggerFactory.getLogger(WebAppHandler.class);
     
+    private SecurityHandler _securityHandler;
     private SessionHandler _sessionHandler;
     private ServletHandler _servletHandler;
     private String[] _configurationClasses;
@@ -74,7 +76,10 @@ public class WebAppHandler extends ContextHandler
         _sessionHandler = new SessionHandler();
         _sessionHandler.setHandler(_servletHandler);
         
-        setHandler(_sessionHandler);
+        _securityHandler = new SecurityHandler();
+        _securityHandler.setHandler(_sessionHandler);
+        
+        setHandler(_securityHandler);
     }
 
     /* ------------------------------------------------------------ */
@@ -166,6 +171,24 @@ public class WebAppHandler extends ContextHandler
     public void setSessionHandler(SessionHandler sessionHandler)
     {
         _sessionHandler = sessionHandler;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the securityHandler.
+     */
+    public SecurityHandler getSecurityHandler()
+    {
+        return _securityHandler;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param sessionHandler The sessionHandler to set.
+     */
+    public void setSecurityHandler(SecurityHandler securityHandler)
+    {
+        _securityHandler = securityHandler;
     }
 
     /* ------------------------------------------------------------ */

@@ -90,4 +90,10 @@ public interface Connector extends LifeCycle, Buffers
      * @param responseBufferSize The responseBufferSize to set.
      */
     void setResponseBufferSize(int responseBufferSize);
+    
+
+    /* ------------------------------------------------------------ */
+    int getConfidentialPort();
+    String getConfidentialScheme();
+    boolean isConfidential(Request request);
 }

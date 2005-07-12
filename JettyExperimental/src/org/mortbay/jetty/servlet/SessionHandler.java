@@ -24,14 +24,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.SessionManager;
-import org.mortbay.jetty.handler.AbstractHandler;
 import org.mortbay.jetty.handler.WrappedHandler;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** SessionHandler.

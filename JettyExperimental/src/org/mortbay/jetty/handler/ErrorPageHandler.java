@@ -17,13 +17,11 @@ import java.io.IOException;
 import java.io.Writer;
 import java.net.URLDecoder;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.MimeTypes;
-import org.mortbay.jetty.Request;
 import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.StringUtil;
 

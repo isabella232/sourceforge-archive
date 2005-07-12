@@ -21,8 +21,8 @@ import java.util.StringTokenizer;
 
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** Byte range inclusive of end points.

@@ -19,17 +19,14 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.CodeSource;
 import java.security.PermissionCollection;
-import java.util.Arrays;
 import java.util.StringTokenizer;
 
 import org.mortbay.io.IO;
 import org.mortbay.resource.Resource;
-import org.mortbay.thread.LifeCycle;
 import org.mortbay.util.LogSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

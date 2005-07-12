@@ -23,7 +23,6 @@ import java.nio.channels.FileChannel;
 
 import org.mortbay.io.AbstractBuffer;
 import org.mortbay.io.Buffer;
-import org.mortbay.io.Portable;
 
 /* ------------------------------------------------------------------------------- */
 /** 
@@ -105,13 +104,13 @@ public class NIOBuffer extends AbstractBuffer
 
     public void poke(int position, byte b)
     {
-        if (isReadOnly()) Portable.throwIllegalState(__READONLY);
+        if (isReadOnly()) throw new IllegalStateException(__READONLY);
         _buf.put(position,b);
     }
 
     public int poke(int index, Buffer src)
     {
-        if (isReadOnly()) Portable.throwIllegalState(__READONLY);
+        if (isReadOnly()) throw new IllegalStateException(__READONLY);
         
         byte[] array=src.array();
         if (array!=null)
@@ -159,7 +158,7 @@ public class NIOBuffer extends AbstractBuffer
 
     public int poke(int index, byte[] b, int offset, int length)
     {
-        if (isReadOnly()) Portable.throwIllegalState(__READONLY);
+        if (isReadOnly()) throw new IllegalStateException(__READONLY);
         try
         {
             if (index+length>capacity())

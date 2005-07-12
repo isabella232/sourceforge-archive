@@ -44,8 +44,8 @@ import org.mortbay.resource.Resource;
 import org.mortbay.util.Loader;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.URIUtil;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /* ------------------------------------------------------------ */
@@ -453,7 +453,7 @@ public class ContextHandler extends WrappedHandler
         }
         catch (Exception e)
         {
-            log.warn(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw new IllegalArgumentException(base.toString());
         }
     }
@@ -470,7 +470,7 @@ public class ContextHandler extends WrappedHandler
         }
         catch (Exception e)
         {
-            log.warn(e);
+            log.warn(LogSupport.EXCEPTION,e);
             throw new IllegalArgumentException(resourceBase);
         }
     }

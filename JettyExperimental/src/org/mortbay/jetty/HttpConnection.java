@@ -27,10 +27,9 @@ import javax.servlet.ServletOutputStream;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
-import org.mortbay.io.Portable;
 import org.mortbay.util.URIUtil;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author gregw
@@ -47,6 +46,7 @@ public class HttpConnection
     private Connector _connector;
     private EndPoint _endp;
     private Handler _handler;
+    private boolean _expectingContinues;
     
     private URI _uri;
     
@@ -230,6 +230,7 @@ public class HttpConnection
             // TODO - maybe do this at start of handle aswell or instead?
             if (_parser.isState(HttpParser.STATE_END) && _generator.isState(HttpGenerator.STATE_END))
             {
+                _expectingContinues=false; // TODO do something with this!
                 _parser.reset();  // TODO return header buffer???
                 _requestFields.clear();
                 _request.recycle();
@@ -295,7 +296,10 @@ public class HttpConnection
             _host = false;
             _expect = UNKNOWN;
             _connection = UNKNOWN;
+
+            _request.setTimeStamp(System.currentTimeMillis());
             _request.setMethod(method.toString());
+            
             
             try	
             {
@@ -375,6 +379,8 @@ public class HttpConnection
                     {
                         if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
                         {
+                            _expectingContinues=true;
+                            // TODO delay sending 100 response until a read is attempted.
                             _generator.setResponse(100, null);
                             _generator.complete();
                             _generator.reset(false);
@@ -424,7 +430,7 @@ public class HttpConnection
         public void content(int index, Buffer ref) throws IOException
         {
             if (_content!=null)
-                Portable.throwIllegalState("content not read");
+                throw new IllegalStateException("content not read");
             _content=ref;
         }
 
@@ -447,7 +453,7 @@ public class HttpConnection
          */
         public void startResponse(Buffer version, int status, Buffer reason)
         {
-            Portable.throwIllegalState("response");
+            throw new IllegalStateException("response");
         }
         
     }
@@ -584,7 +590,7 @@ public class HttpConnection
         	throws IOException
         {
             if (_generator.getContentAdded()>0)
-                Portable.throwIllegalState("!empty");
+                throw new IllegalStateException("!empty");
             
             if (content instanceof HttpContent)
             {
@@ -606,7 +612,7 @@ public class HttpConnection
             }
             
             else
-                Portable.throwIllegalArgument("type?");
+                throw new IllegalArgumentException("unknown content type?");
         }
     
     }

@@ -85,7 +85,7 @@ public class ByteArrayBuffer extends AbstractBuffer
 
     public int peek(int index, byte[] b, int offset, int length)
     {
-        if (index < 0) Portable.throwIllegalArgument("index<0: " + index + "<0");
+        if (index < 0) throw new IllegalArgumentException("index<0: " + index + "<0");
         int l = length;
         if (index + l > capacity()) l = capacity() - index;
         if (l <= 0) return -1;
@@ -95,10 +95,10 @@ public class ByteArrayBuffer extends AbstractBuffer
 
     public void poke(int index, byte b)
     {
-        if (isReadOnly()) Portable.throwIllegalState(__READONLY);
-        if (index < 0) Portable.throwIllegalArgument("index<0: " + index + "<0");
+        if (isReadOnly()) throw new IllegalStateException(__READONLY);
+        if (index < 0) throw new IllegalArgumentException("index<0: " + index + "<0");
         if (index > capacity())
-                Portable.throwIllegalArgument("index>capacity(): " + index + ">" + capacity());
+                throw new IllegalArgumentException("index>capacity(): " + index + ">" + capacity());
         _bytes[index] = b;
     }
     
@@ -125,8 +125,8 @@ public class ByteArrayBuffer extends AbstractBuffer
      */
     public void wrap(byte[] b, int off, int len)
     {
-        if (isReadOnly()) Portable.throwIllegalState(__READONLY);
-        if (isImmutable()) Portable.throwIllegalState(__IMMUTABLE);
+        if (isReadOnly()) throw new IllegalStateException(__READONLY);
+        if (isImmutable()) throw new IllegalStateException(__IMMUTABLE);
         _bytes=b;
         clear();
         setGetIndex(off);
@@ -139,8 +139,8 @@ public class ByteArrayBuffer extends AbstractBuffer
      */
     public void wrap(byte[] b)
     {
-        if (isReadOnly()) Portable.throwIllegalState(__READONLY);
-        if (isImmutable()) Portable.throwIllegalState(__IMMUTABLE);
+        if (isReadOnly()) throw new IllegalStateException(__READONLY);
+        if (isImmutable()) throw new IllegalStateException(__IMMUTABLE);
         _bytes=b;
         setGetIndex(0);
         setPutIndex(b.length);

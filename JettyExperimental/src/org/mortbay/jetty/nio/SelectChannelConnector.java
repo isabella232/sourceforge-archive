@@ -32,8 +32,8 @@ import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.util.LogSupport;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------------------------- */
 /** Selecting NIO connector.

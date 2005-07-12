@@ -26,14 +26,13 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.IO;
-import org.mortbay.io.Portable;
 import org.mortbay.jetty.handler.ErrorPageHandler;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** Response.
@@ -74,7 +73,7 @@ public class Response implements HttpServletResponse
         }
         catch (Exception e)
         {
-            LogSupport.fatal(log,e);
+            log.error(LogSupport.EXCEPTION,e);
         }
     }
     
@@ -354,7 +353,7 @@ public class Response implements HttpServletResponse
             return __nullServletOut;
         
         if (_outputState!=NONE && _outputState!=STREAM)
-            Portable.throwIllegalState("WRITER");
+            throw new IllegalStateException("WRITER");
        
         _outputState=STREAM;
         return _connection.getOutputStream();
@@ -370,7 +369,7 @@ public class Response implements HttpServletResponse
             return __nullServletWriter;
                                    
         if (_outputState!=NONE && _outputState!=WRITER)
-            Portable.throwIllegalState("STREAM");
+            throw new IllegalStateException("STREAM");
         
         /* if there is no writer yet */
         if (_writer==null)

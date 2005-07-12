@@ -35,8 +35,8 @@ import org.mortbay.resource.Resource;
 import org.mortbay.util.Loader;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.TypeUtil;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 

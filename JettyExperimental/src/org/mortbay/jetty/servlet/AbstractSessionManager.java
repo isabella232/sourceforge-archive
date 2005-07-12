@@ -43,8 +43,8 @@ import org.mortbay.thread.AbstractLifeCycle;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiMap;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /* ------------------------------------------------------------ */
@@ -65,27 +65,24 @@ import org.slf4j.Logger;
  */
 public abstract class AbstractSessionManager extends AbstractLifeCycle implements SessionManager
 {
-
-    /* ------------------------------------------------------------ */
-    /* global Map of ID to session */
-    protected static MultiMap __allSessions=new MultiMap();  
+    private static final HttpSessionContext __nullSessionContext = new NullSessionContext();
+    
     
     /* ------------------------------------------------------------ */
     public final static int __distantFuture = 60*60*24*7*52*20;
     private final static String __NEW_SESSION_ID="org.mortbay.jetty.newSessionId";
     private static Logger log = LoggerFactory.getLogger(AbstractSessionManager.class);
-    protected boolean _crossContextSessionIDs=false;
     
     /* ------------------------------------------------------------ */
     // Setting of max inactive interval for new sessions
     // -1 means no timeout
     private int _dftMaxIdleSecs = -1;
     protected boolean _httpOnly=false;
-    protected boolean _invalidateGlobal=true;
     protected int _maxSessions = 0;
     protected int _minSessions = 0;
     protected transient Random _random;
     private int _scavengePeriodMs = 30000;
+    private MetaManager _metaManager;
     
     private transient SessionScavenger _scavenger = null;
     protected boolean _secureCookies=false;
@@ -119,16 +116,22 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         if (listener instanceof HttpSessionListener)
             _sessionListeners.add(listener);
     }
+    
     /* ------------------------------------------------------------ */
-    /** 
-     * @return True if cross context session IDs are first considered for new
-     * session IDs
+    /**
+     * @return Returns the metaManager used for cross context session management
      */
-    public boolean getCrossContextSessionIDs()
-    {
-        return _crossContextSessionIDs;
+    public MetaManager getMetaManager() {
+        return _metaManager;
     }
     
+    /* ------------------------------------------------------------ */
+    /**
+     * @param metaManager The metaManager used for cross context session management.
+     */
+    public void setMetaManager(MetaManager metaManager) {
+        _metaManager = metaManager;
+    }
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the httpOnly.
@@ -231,19 +234,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         return _sessions.size ();
     }
     
-    
-    
-    /* ------------------------------------------------------------ */
-    /** 
-     * @return True if requested session ID are first considered for new
-     * @deprecated use getCrossContextSessionIDs
-     * session IDs
-     */
-    public boolean getUseRequestedId()
-    {
-        return _crossContextSessionIDs;
-    }
-    
     /* ------------------------------------------------------------ */
     /** Get the workname.
      * If set, the workername is dot appended to the session ID
@@ -253,12 +243,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     public String getWorkerName()
     {
         return _workerName;
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isInvalidateGlobal()
-    {
-        return _invalidateGlobal;
     }
     
     /* ------------------------------------------------------------ */
@@ -275,14 +259,15 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     {
         Session session = newSession(request);
         session.setMaxInactiveInterval(_dftMaxIdleSecs);
-        synchronized(__allSessions)
+        
+        synchronized(_metaManager)
         {
             synchronized(this)
             {
-              _sessions.put(session.getId(),session);
-              __allSessions.add(session.getId(), session);
-              if (_sessions.size() > this._maxSessions)
-                  this._maxSessions = _sessions.size ();
+                _sessions.put(session.getId(),session);
+                _metaManager.addSession(session);
+                if (_sessions.size() > this._maxSessions)
+                    this._maxSessions = _sessions.size ();
             }
         }
         
@@ -292,7 +277,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             ((HttpSessionListener)_sessionListeners.get(i))
             .sessionCreated(event);
         
-        if (getCrossContextSessionIDs())
+        if (!(_metaManager instanceof NullMetaManager))
             request.setAttribute(__NEW_SESSION_ID, session.getId());
         return session;
     }
@@ -313,24 +298,24 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
      */
     private String newSessionId(HttpServletRequest request,long created)
     {
-        synchronized(__allSessions)
+        synchronized(_metaManager)
         {
             // A requested session ID can only be used if it is in the global map of
             // ID but not in this contexts map.  Ie it is an ID in use by another context
             // in this server and thus we are doing a cross context dispatch.
-            if (_crossContextSessionIDs)
+            if (!(_metaManager instanceof NullMetaManager))
             {
                 String requested_id=(String)request.getAttribute(__NEW_SESSION_ID);
                 if (requested_id==null)
                     requested_id=request.getRequestedSessionId();
                 if (requested_id !=null && 
-                    requested_id!=null && __allSessions.containsKey(requested_id) && !_sessions.containsKey(requested_id))
+                    requested_id!=null && _metaManager.idInUse(requested_id) && !_sessions.containsKey(requested_id))
                 return requested_id;
             }
             
             // pick a new unique ID!
             String id=null;
-            while (id==null || id.length()==0 || __allSessions.containsKey(id))
+            while (id==null || id.length()==0 || _metaManager.idInUse(id))
             {
                 long r = _random.nextLong();
                 if (r<0)r=-r;
@@ -417,37 +402,12 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     }
     
     /* ------------------------------------------------------------ */
-    /** Set Cross Context sessions IDs
-     * This option activates a mode where a requested session ID can be used to create a 
-     * new session. This facilitates the sharing of session cookies when cross context
-     * dispatches use sessions.   
-     * 
-     * @param useRequestedId True if cross context session ID are first considered for new
-     * session IDs
-     */
-    public void setCrossContextSessionIDs(boolean useRequestedId)
-    {   
-        _crossContextSessionIDs = useRequestedId;
-    }
-    
-    /* ------------------------------------------------------------ */
     /**
      * @param httpOnly The httpOnly to set.
      */
     public void setHttpOnly(boolean httpOnly)
     {
         _httpOnly = httpOnly;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param global True if session invalidation should be global.
-     * ie Sessions in other contexts with the same ID (linked by cross context dispatch
-     * or shared session cookie) are invalidated as a group.
-     */
-    public void setInvalidateGlobal(boolean global)
-    {
-        _invalidateGlobal=global;
     }
     
     /* ------------------------------------------------------------ */
@@ -498,16 +458,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     }
     
     /* ------------------------------------------------------------ */
-    /** Set Use Requested ID.
-     * @deprectated use setCrossContextSessionIDs
-     * @param useRequestedId True if requested session ID are first considered for new
-     * session IDs
-     */
-    public void setUseRequestedId(boolean useRequestedId)
-    {   
-        _crossContextSessionIDs = useRequestedId;
-    }
-    /* ------------------------------------------------------------ */
     /**
      * @param usingCookies The usingCookies to set.
      */
@@ -551,6 +501,11 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             _scavenger = new SessionScavenger();
             _scavenger.start();
         }
+        
+        if (_metaManager==null)
+            _metaManager=new NullMetaManager();
+        _metaManager.start();
+        
         super.doStart();
     }
     
@@ -575,6 +530,8 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         _scavenger=null;
         if (scavenger!=null)
             scavenger.interrupt();
+        
+        // TODO when do we stop the meta manager?
         
         _loader=null;
     }
@@ -758,24 +715,15 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             finally
             {
                 // Remove session from context and global maps
-                synchronized (__allSessions)
+                synchronized(_metaManager)
                 {
+                    String id = getId();
                     synchronized (_sessions)
                     {
                         _invalid=true;
-                        _sessions.remove(getId());
-                        __allSessions.removeValue(getId(), this);
-                        
-                        if (isInvalidateGlobal())
-                        {
-                            // Don't iterate as other sessions may also be globally invalidating
-                            while(__allSessions.containsKey(getId()))
-                            {
-                                Session session=(Session)__allSessions.getValue(getId(),0);
-                                session.invalidate();
-                            }
-                        }
-                    }
+                        _sessions.remove(id);
+                    }                        
+                    _metaManager.invalidateAll(id);
                 }
             }
         }
@@ -974,5 +922,79 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     }
     
     /* ------------------------------------------------------------ */
-    private static final HttpSessionContext __nullSessionContext = new NullSessionContext();
+    
+    public static class SimpleMetaManager extends AbstractLifeCycle implements MetaManager
+    {
+        MultiMap _sessions;
+        
+        protected void doStart()
+        {
+            _sessions=new MultiMap();
+        }
+
+        /* ------------------------------------------------------------ */
+        protected void doStop()
+        {
+            if (_sessions!=null)
+                _sessions.clear(); // Maybe invalidate?
+            _sessions=null;
+        }
+        
+        /* ------------------------------------------------------------ */
+        /* 
+         * @see org.mortbay.jetty.SessionManager.MetaManager#idInUse(java.lang.String)
+         */
+        public boolean idInUse(String id) {
+            return _sessions.containsKey(id);
+        }
+
+        /* ------------------------------------------------------------ */
+        /* 
+         * @see org.mortbay.jetty.SessionManager.MetaManager#addSession(javax.servlet.http.HttpSession)
+         */
+        public void addSession(HttpSession session) {
+            _sessions.add(session.getId(), session);
+        }
+
+        /* ------------------------------------------------------------ */
+        /* 
+         * @see org.mortbay.jetty.SessionManager.MetaManager#invalidateAll(java.lang.String)
+         */
+        public void invalidateAll(String id) {
+            
+            synchronized(this)
+            {
+                while(_sessions.containsKey(id))
+                {
+                    Session session=(Session)_sessions.getValue(id,0);
+                    if (session.isValid())
+                        session.invalidate();
+                    else
+                        _sessions.removeValue(id, session);
+                }
+            }
+            
+        }
+
+        /* ------------------------------------------------------------ */
+        /* 
+         * @see org.mortbay.jetty.SessionManager.MetaManager#crossContext()
+         */
+        public boolean crossContext() {
+            return true;
+        }
+        
+    }
+
+    /* ------------------------------------------------------------ */
+    public static class NullMetaManager extends AbstractLifeCycle implements MetaManager
+    {
+        public boolean idInUse(String id) {return false;}
+        public void addSession(HttpSession session) {}
+        public void invalidateAll(String id) {}
+        public boolean crossContext() {
+            return true;
+        }
+    }
+    
 }

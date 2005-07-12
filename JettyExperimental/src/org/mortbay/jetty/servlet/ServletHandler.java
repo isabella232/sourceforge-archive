@@ -39,7 +39,6 @@ import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.ContextHandler;
@@ -49,8 +48,8 @@ import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.URIUtil;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /* --------------------------------------------------------------------- */
@@ -376,7 +375,7 @@ public class ServletHandler extends WrappedHandler
                 if(log.isDebugEnabled())
                 {
                     log.warn(request.getRequestURI()+": ",th);
-                    log.debug(request);
+                    log.debug(request.toString());
                 }
             }
             
@@ -402,7 +401,7 @@ public class ServletHandler extends WrappedHandler
         catch(Error e)
         {   
             log.warn("Error for "+request.getRequestURI(),e);
-            if(log.isDebugEnabled())log.debug(request);
+            if(log.isDebugEnabled())log.debug(request.toString());
             
             // TODO httpResponse.getHttpConnection().forceClose();
             if (!response.isCommitted())
@@ -728,7 +727,7 @@ public class ServletHandler extends WrappedHandler
      */
     public void setFilterMappings(FilterMapping[] filterMappings)
     {
-        _filterMappings = filterMappings;
+        _filterMappings = (FilterMapping[])filterMappings.clone();
         if (isStarted())
             updateMappings();
     }

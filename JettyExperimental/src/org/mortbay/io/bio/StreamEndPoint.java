@@ -22,7 +22,6 @@ import java.io.OutputStream;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
-import org.mortbay.io.Portable;
 
 /**
  * @author gregw
@@ -93,7 +92,7 @@ public class StreamEndPoint implements EndPoint
     	{
     	    if (buffer.hasContent())
     	        return 0;
-    	    Portable.throwIO("FULL");
+    	    throw new IOException("FULL");
     	}
         
 	    byte[] bytes = buffer.array();
@@ -235,6 +234,15 @@ public class StreamEndPoint implements EndPoint
     public int getRemotePort()
     {
         return 0;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getConnection()
+     */
+    public Object getConnection()
+    {
+        return null;
     }
 
 }

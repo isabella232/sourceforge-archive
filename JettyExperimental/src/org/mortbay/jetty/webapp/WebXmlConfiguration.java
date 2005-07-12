@@ -17,8 +17,6 @@ package org.mortbay.jetty.webapp;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EventListener;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +24,9 @@ import java.util.List;
 import javax.servlet.UnavailableException;
 
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.security.Constraint;
+import org.mortbay.jetty.security.ConstraintMapping;
+import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.FilterMapping;
@@ -54,6 +55,7 @@ public class WebXmlConfiguration implements Configuration
     protected List servlets;
     protected List servletMappings;
     protected List welcomeFiles;
+    protected List constraintMappings;
 
     
     public WebXmlConfiguration()
@@ -215,6 +217,7 @@ public class WebXmlConfiguration implements Configuration
         servlets=LazyList.array2List(servlet_handler.getServlets());
         servletMappings=LazyList.array2List(servlet_handler.getServletMappings());
         welcomeFiles = LazyList.array2List(getWebAppHandler().getWelcomeFiles());
+        constraintMappings = LazyList.array2List(getWebAppHandler().getSecurityHandler().getConstraintMappings());
         
         Iterator iter=config.iterator();
         XmlParser.Node node=null;
@@ -306,8 +309,8 @@ public class WebXmlConfiguration implements Configuration
         {
             if(log.isDebugEnabled())
             {
-                log.debug("Element "+element+" not handled in "+this);
-                log.debug(node);
+                log.debug("Element {} not handled in {}",element,this);
+                log.debug(node.toString());
             }
         }
     }
@@ -531,6 +534,7 @@ public class WebXmlConfiguration implements Configuration
         if(error==null||error.length()==0)
             error=node.getString("exception-type",false,true);
         String location=node.getString("location",false,true);
+        
         // TODO getWebAppHandler().setErrorPage(error,location);
     }
 
@@ -539,6 +543,7 @@ public class WebXmlConfiguration implements Configuration
     {
         String uri=node.getString("taglib-uri",false,true);
         String location=node.getString("taglib-location",false,true);
+        
         // TODO getWebAppHandler().setResourceAlias(uri,location);
     }
     
@@ -556,7 +561,7 @@ public class WebXmlConfiguration implements Configuration
     /* ------------------------------------------------------------ */
     protected void initSecurityConstraint(XmlParser.Node node)
     {
-        /* TODO SecurityConstraint scBase = new SecurityConstraint();
+        Constraint scBase = new Constraint();
          
         try
         {
@@ -578,15 +583,15 @@ public class WebXmlConfiguration implements Configuration
                 data = data.get("transport-guarantee");
                 String guarantee = data.toString(false, true).toUpperCase();
                 if (guarantee == null || guarantee.length() == 0 || "NONE".equals(guarantee))
-                    scBase.setDataConstraint(SecurityConstraint.DC_NONE);
+                    scBase.setDataConstraint(Constraint.DC_NONE);
                 else if ("INTEGRAL".equals(guarantee))
-                    scBase.setDataConstraint(SecurityConstraint.DC_INTEGRAL);
+                    scBase.setDataConstraint(Constraint.DC_INTEGRAL);
                 else if ("CONFIDENTIAL".equals(guarantee))
-                    scBase.setDataConstraint(SecurityConstraint.DC_CONFIDENTIAL);
+                    scBase.setDataConstraint(Constraint.DC_CONFIDENTIAL);
                 else
                 {
                     log.warn("Unknown user-data-constraint:" + guarantee);
-                    scBase.setDataConstraint(SecurityConstraint.DC_CONFIDENTIAL);
+                    scBase.setDataConstraint(Constraint.DC_CONFIDENTIAL);
                 }
             }
             Iterator iter = node.iterator("web-resource-collection");
@@ -594,24 +599,43 @@ public class WebXmlConfiguration implements Configuration
             {
                 XmlParser.Node collection = (XmlParser.Node) iter.next();
                 String name = collection.getString("web-resource-name", false, true);
-                SecurityConstraint sc = (SecurityConstraint) scBase.clone();
+                Constraint sc = (Constraint) scBase.clone();
                 sc.setName(name);
-                Iterator iter2 = collection.iterator("http-method");
-                while (iter2.hasNext())
-                    sc.addMethod(((XmlParser.Node) iter2.next()).toString(false, true));
-                iter2 = collection.iterator("url-pattern");
+                
+                
+                Iterator iter2 = collection.iterator("url-pattern");
                 while (iter2.hasNext())
                 {
                     String url = ((XmlParser.Node) iter2.next()).toString(false, true);
-                    getWebAppHandler().addSecurityConstraint(url, sc);
+                    
+                    Iterator iter3 = collection.iterator("http-method");
+                    if (iter3.hasNext())
+                    {
+                        while (iter3.hasNext())    
+                        {
+                            String method=((XmlParser.Node) iter3.next()).toString(false, true);
+                            ConstraintMapping mapping = new ConstraintMapping(); 
+                            mapping.setMethod(method);
+                            mapping.setPathSpec(url);
+                            mapping.setConstraint(sc);
+                            constraintMappings.add(mapping);
+                        }
+                    }
+                    else
+                    {
+                        ConstraintMapping mapping = new ConstraintMapping(); 
+                        mapping.setPathSpec(url);
+                        mapping.setConstraint(sc);
+                        constraintMappings.add(mapping);
+                    }
                 }
             }
         }
         catch (CloneNotSupportedException e)
         {
-            log.error(e);
+            log.error(LogSupport.EXCEPTION,e);
         }
-            */
+            
     }
 
     /* ------------------------------------------------------------ */

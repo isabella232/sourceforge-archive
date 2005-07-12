@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import org.mortbay.io.Portable;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.SingletonList;
 import org.mortbay.util.StringMap;
@@ -157,7 +156,7 @@ public class PathMap extends HashMap implements Externalizable
             String spec=tok.nextToken();
             
             if (!spec.startsWith("/") && !spec.startsWith("*."))
-                Portable.throwIllegalArgument("PathSpec "+spec+". must start with '/' or '*.'");
+                throw new IllegalArgumentException("PathSpec "+spec+". must start with '/' or '*.'");
             
             old = super.put(spec,object);
             

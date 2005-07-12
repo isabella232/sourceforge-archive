@@ -22,7 +22,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.thread.LifeCycle;
 
 
@@ -129,6 +128,17 @@ public interface SessionManager extends LifeCycle, Serializable
      */
     public Cookie getSessionCookie(HttpSession session,boolean requestIsSecure);
     
+    /* ------------------------------------------------------------ */
+    /**
+     * @return the cross context session meta manager.
+     */
+    public MetaManager getMetaManager();
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param meta the cross context session meta manager.
+     */
+    public void setMetaManager(MetaManager meta);
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -141,5 +151,19 @@ public interface SessionManager extends LifeCycle, Serializable
         public void access();
     }
 
-
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /** MetaManager.
+     * Manage cross context sessions.
+     * @author gregw
+     *
+     */
+    public interface MetaManager extends LifeCycle
+    {
+        public boolean crossContext();
+        public boolean idInUse(String id);
+        public void addSession(HttpSession session);
+        public void invalidateAll(String id);
+    }
 }

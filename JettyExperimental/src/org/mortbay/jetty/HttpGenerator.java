@@ -200,7 +200,7 @@ public class HttpGenerator implements HttpTokens
     public void setVersion(int version)
     {   
         if (_state!=STATE_HEADER)
-            Portable.throwIllegalState("STATE!=START");
+            throw new IllegalStateException("STATE!=START");
         _version=version;
     }
     
@@ -220,7 +220,7 @@ public class HttpGenerator implements HttpTokens
     public void setResponse(int status,String reason)
     {    
         if (_state!=STATE_HEADER)
-            Portable.throwIllegalState("STATE!=START");
+            throw new IllegalStateException("STATE!=START");
         
         _status=status;
         _reason=reason;
@@ -235,10 +235,10 @@ public class HttpGenerator implements HttpTokens
     public void addContent(Buffer content,boolean last) throws IOException
     {
         if (content.isImmutable())
-            Portable.throwIllegalArgument("immutable");
+            throw new IllegalArgumentException("immutable");
 
         if (_last)
-            Portable.throwIllegalState("last");
+            throw new IllegalStateException("last");
         _last=last;
         
         // Handle any unfinished business?
@@ -246,7 +246,7 @@ public class HttpGenerator implements HttpTokens
         {
             flushBuffers();
             if (_content!=null || _bufferChunked)
-                Portable.throwIllegalState("FULL");
+                throw new IllegalStateException("FULL");
         }
         
         _content=content;
@@ -291,7 +291,7 @@ public class HttpGenerator implements HttpTokens
             return;
         
         if (_last&&!allContentAdded)
-            Portable.throwIllegalState("last?");
+            throw new IllegalStateException("last?");
         _last=_last|allContentAdded;
         
         switch(_version)
@@ -473,7 +473,7 @@ public class HttpGenerator implements HttpTokens
                         if (c.endsWith(HttpHeaderValues.CHUNKED))
                             transfer_encoding.put(_header);   
                         else
-                            Portable.throwIllegalArgument("BAD TE");
+                            throw new IllegalArgumentException("BAD TE");
                     }
                     else 
                         _header.put(TRANSFER_ENCODING_CHUNKED);
@@ -512,7 +512,7 @@ public class HttpGenerator implements HttpTokens
             return;
         
         if (_state==STATE_HEADER)
-            Portable.throwIllegalState("State==HEADER");
+            throw new IllegalStateException("State==HEADER");
         
         else if (_contentLength>=0 && _contentLength!=_contentAdded)
         {
@@ -535,7 +535,7 @@ public class HttpGenerator implements HttpTokens
     	throws IOException
     {
         if (_state==STATE_HEADER)
-            Portable.throwIllegalState("State==HEADER");
+            throw new IllegalStateException("State==HEADER");
         
         prepareBuffers();
         
@@ -681,7 +681,7 @@ public class HttpGenerator implements HttpTokens
                         if (_needCRLF)
                         {
                             if (_header.length()>0)
-                                Portable.throwIllegalState("EOC");
+                                throw new IllegalStateException("EOC");
                             _header.put(CRLF);
                             _needCRLF=false;
                         }

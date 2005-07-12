@@ -26,26 +26,22 @@ import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.mortbay.jetty.HttpFields;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandler.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
 import org.mortbay.util.LazyList;
@@ -55,8 +51,8 @@ import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 import org.mortbay.util.UrlEncoded;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** Request.
@@ -101,6 +97,8 @@ public class Request implements HttpServletRequest
     private boolean _cookiesExtracted=false;
     private Cookie[] _cookies;
     private String[] _lastCookies;
+    private long _timeStamp;
+    private String _timeStampStr;
     
     /* ------------------------------------------------------------ */
     /**
@@ -140,7 +138,36 @@ public class Request implements HttpServletRequest
         _reader=null; 
         _cookiesExtracted=false;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Get Request TimeStamp
+     * 
+     * @return The time that the request was received.
+     */
+    public String getTimeStampStr()
+    {
+        if (_timeStampStr == null && _timeStamp > 0)
+                _timeStampStr = HttpFields.__dateCache.format(_timeStamp);
+        return _timeStampStr;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Get Request TimeStamp
+     * 
+     * @return The time that the request was received.
+     */
+    public long getTimeStamp()
+    {
+        return _timeStamp;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setTimeStamp(long ts)
+    {
+        _timeStamp = ts;
+    }
     
     /* ------------------------------------------------------------ */
     /* 
@@ -1049,7 +1076,7 @@ public class Request implements HttpServletRequest
                         if (log.isDebugEnabled())
                             log.warn(LogSupport.EXCEPTION, e);
                         else
-                            log.warn(e);
+                            log.warn(e.toString());
                     }
                 }
             }
@@ -1222,6 +1249,7 @@ public class Request implements HttpServletRequest
     {
         _contextPath = contextPath;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param servletPath The servletPath to set.
@@ -1230,6 +1258,7 @@ public class Request implements HttpServletRequest
     {
         _servletPath = servletPath;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param userPrincipal The userPrincipal to set.

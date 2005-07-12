@@ -23,8 +23,8 @@ import java.util.Map;
 import org.mortbay.resource.Resource;
 import org.mortbay.resource.ResourceFactory;
 import org.mortbay.thread.AbstractLifeCycle;
-import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /* ------------------------------------------------------------ */

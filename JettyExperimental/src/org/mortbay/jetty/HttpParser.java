@@ -23,7 +23,6 @@ import org.mortbay.io.BufferUtil;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
-import org.mortbay.io.Portable;
 import org.mortbay.io.View;
 
 /* ------------------------------------------------------------------------------- */
@@ -174,7 +173,7 @@ public class HttpParser implements HttpTokens
         if (_state==STATE_END)
             reset();
         if (_state!=STATE_START)
-            Portable.throwIllegalState("!START");
+            throw new IllegalStateException("!START");
 
         // continue parsing
         while (_state != STATE_END)
@@ -206,7 +205,7 @@ public class HttpParser implements HttpTokens
      */
     public void parseNext() throws IOException
     {
-        if (_state == STATE_END) Portable.throwIllegalState("STATE_END");
+        if (_state == STATE_END) throw new IllegalStateException("STATE_END");
         if (_state == STATE_CONTENT && _contentPosition == _contentLength)
         {
             _state = STATE_END;
@@ -220,7 +219,7 @@ public class HttpParser implements HttpTokens
         if (length == 0)
         {
             if (_buffer.markIndex() == 0 && _buffer.putIndex() == _buffer.capacity())
-                    Portable.throwIO("FULL");
+                    throw new IOException("FULL");
             int filled = -1;
             if (_endp != null)
             {
@@ -229,7 +228,7 @@ public class HttpParser implements HttpTokens
                 // TODO check this is not moving data too much
                 if (_buffer == _content) _buffer.compact();
 
-                if (_buffer.space() == 0) Portable.throwIO("FULL");
+                if (_buffer.space() == 0) throw new IOException("FULL");
                 
                 try
                 {
@@ -237,7 +236,7 @@ public class HttpParser implements HttpTokens
                 }
                 catch(SocketTimeoutException toe)
                 {
-                    Portable.throwIO("EOF");
+                    throw new IOException("EOF");
                 }
             }
             
@@ -247,7 +246,7 @@ public class HttpParser implements HttpTokens
                 _handler.messageComplete(_contentPosition);
                 return;
             }
-            if (filled < 0) Portable.throwIO("EOF");
+            if (filled < 0) throw new IOException("EOF");
             length=_buffer.length();
         }
 
@@ -283,7 +282,7 @@ public class HttpParser implements HttpTokens
                     }
                     else if (ch < SPACE)
                     {
-                        Portable.throwIO("BAD");
+                        throw new IOException("BAD");
                     }
                     break;
 
@@ -296,7 +295,7 @@ public class HttpParser implements HttpTokens
                     }
                     else if (ch < SPACE)
                     {
-                        Portable.throwIO("BAD");
+                        throw new IOException("BAD");
                     }
                     break;
 
@@ -406,7 +405,7 @@ public class HttpParser implements HttpTokens
                                             if (c.endsWith(HttpHeaderValues.CHUNKED))
                                                 _contentLength = CHUNKED_CONTENT;
                                             else if (c.indexOf(HttpHeaderValues.CHUNKED) >= 0)
-                                                    Portable.throwIO("BAD");
+                                                    throw new IOException("BAD");
                                         }
                                         break;
 
@@ -619,7 +618,7 @@ public class HttpParser implements HttpTokens
                     else if (ch >= 'A' && ch <= 'F')
                         _chunkLength = _chunkLength * 16 + (10 + ch - 'A');
                     else
-                        Portable.throwRuntime("bad chunk char: " + ch);
+                        throw new IOException("bad chunk char: " + ch);
                     break;
                 }
 

@@ -16,7 +16,6 @@
 package com.acme;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.util.Date;
 import java.util.Enumeration;
 

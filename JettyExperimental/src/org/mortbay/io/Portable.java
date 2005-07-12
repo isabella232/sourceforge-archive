@@ -15,7 +15,7 @@
 
 package org.mortbay.io;
 
-import java.io.IOException;
+import org.mortbay.util.StringUtil;
 
 /**
  * Portability class containing methods not available on all JVMs (specifically SuperWaba).
@@ -36,36 +36,11 @@ public class Portable
         throw new RuntimeException("Not Supported");
     }
 
-    public static void throwIllegalArgument(String msg)
-    {
-        throw new IllegalArgumentException(msg);
-    }
-
-    public static void throwIllegalState(String msg)
-    {
-        throw new IllegalStateException(msg);
-    }
-
-    public static void throwRuntime(String msg)
-    {
-        throw new RuntimeException(msg);
-    }
-
-    public static void throwNumberFormat(String string)
-    {
-        throw new NumberFormatException(string);
-    }
-
-    public static void throwIO(String string) throws IOException
-    {
-        throw new IOException(string);
-    }
-
     public static byte[] getBytes(String s)
     {
         try
         {
-            return s.getBytes("ISO8859_1");
+            return s.getBytes(StringUtil.__ISO_8859_1);
         }
         catch (Exception e)
         {

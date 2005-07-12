@@ -138,4 +138,13 @@ public class SocketEndPoint extends StreamEndPoint
         return _remote.getPort();
     }
 
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.io.EndPoint#getConnection()
+     */
+    public Object getConnection()
+    {
+        return _socket;
+    }
 }

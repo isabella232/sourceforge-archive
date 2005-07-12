@@ -63,8 +63,7 @@ public class BufferUtil
 
         if (started)
             return minus ? (-val) : val;
-        Portable.throwNumberFormat(buffer.toString());
-        return -1;
+        throw new NumberFormatException(buffer.toString());
     }
     
     /**
@@ -102,8 +101,7 @@ public class BufferUtil
 
         if (started)
             return minus ? (-val) : val;
-        Portable.throwNumberFormat(buffer.toString());
-        return -1L;
+        throw new NumberFormatException(buffer.toString());
     }
 
     public static void putHexInt(Buffer buffer, int n)

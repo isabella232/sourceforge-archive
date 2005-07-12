@@ -50,7 +50,7 @@ public abstract class AbstractBuffer implements Buffer
     public AbstractBuffer(int access, boolean isVolatile)
     {
         if (access == IMMUTABLE && isVolatile)
-                Portable.throwIllegalArgument("IMMUTABLE && VOLATILE");
+                throw new IllegalArgumentException("IMMUTABLE && VOLATILE");
         setMarkIndex(-1);
         _access = access;
         _volatile = isVolatile;
@@ -128,7 +128,7 @@ public abstract class AbstractBuffer implements Buffer
 
     public void compact()
     {
-        if (isReadOnly()) Portable.throwIllegalState(__READONLY);
+        if (isReadOnly()) throw new IllegalStateException(__READONLY);
         int s = markIndex() >= 0 ? markIndex() : getIndex();
         if (s > 0)
         {
@@ -326,15 +326,15 @@ public abstract class AbstractBuffer implements Buffer
     public int poke(int index, Buffer src)
     {
         _hash=0;
-        if (isReadOnly()) Portable.throwIllegalState(__READONLY);
-        if (index < 0) Portable.throwIllegalArgument("index<0: " + index + "<0");
+        if (isReadOnly()) throw new IllegalStateException(__READONLY);
+        if (index < 0) throw new IllegalArgumentException("index<0: " + index + "<0");
         
         int length=src.length();
         if (index + length > capacity())
         {
             length=capacity()-index;
             if (length<0)
-                Portable.throwIllegalArgument("index>capacity(): " + index + ">" + capacity());
+                throw new IllegalArgumentException("index>capacity(): " + index + ">" + capacity());
         }
         
         byte[] src_array = src.array();
@@ -370,14 +370,14 @@ public abstract class AbstractBuffer implements Buffer
     public int poke(int index, byte[] b, int offset, int length)
     {
         _hash=0;
-        if (isReadOnly()) Portable.throwIllegalState(__READONLY);
-        if (index < 0) Portable.throwIllegalArgument("index<0: " + index + "<0");
+        if (isReadOnly()) throw new IllegalStateException(__READONLY);
+        if (index < 0) throw new IllegalArgumentException("index<0: " + index + "<0");
 
         if (index + length > capacity())
         {
             length=capacity()-index;
             if (length<0)
-                Portable.throwIllegalArgument("index>capacity(): " + index + ">" + capacity());
+                throw new IllegalArgumentException("index>capacity(): " + index + ">" + capacity());
         }
         
         byte[] dst_array = array();
@@ -443,9 +443,9 @@ public abstract class AbstractBuffer implements Buffer
     public void setGetIndex(int getIndex)
     {
         /* TODO
-        if (isImmutable()) Portable.throwIllegalState(__IMMUTABLE);
-        if (getIndex < 0) Portable.throwIllegalArgument("getIndex<0: " + getIndex + "<0");
-        if (getIndex > putIndex()) Portable.throwIllegalArgument("getIndex>putIndex: " + getIndex + ">" + putIndex());
+        if (isImmutable()) new throw IllegalStateException(__IMMUTABLE);
+        if (getIndex < 0) throw new IllegalArgumentException("getIndex<0: " + getIndex + "<0");
+        if (getIndex > putIndex()) throw new IllegalArgumentException("getIndex>putIndex: " + getIndex + ">" + putIndex());
          */
         _get = getIndex;
         _hash=0;
@@ -454,18 +454,18 @@ public abstract class AbstractBuffer implements Buffer
 
     public void setMarkIndex(int index)
     {
-        if (index>=0 && isImmutable()) Portable.throwIllegalState(__IMMUTABLE);
+        if (index>=0 && isImmutable()) throw new IllegalStateException(__IMMUTABLE);
         _mark = index;
     }
 
     public void setPutIndex(int putIndex)
     {
         /* TODO
-        if (isImmutable()) Portable.throwIllegalState(__IMMUTABLE);
+        if (isImmutable()) new throw IllegalStateException(__IMMUTABLE);
         if (putIndex > capacity())
-                Portable.throwIllegalArgument("putIndex>capacity: " + putIndex + ">" + capacity());
+                throw new IllegalArgumentException("putIndex>capacity: " + putIndex + ">" + capacity());
         if (getIndex() > putIndex)
-                Portable.throwIllegalArgument("getIndex>putIndex: " + getIndex() + ">" + putIndex);
+                throw new IllegalArgumentException("getIndex>putIndex: " + getIndex() + ">" + putIndex);
          */
         _put = putIndex;
         _hash=0;
