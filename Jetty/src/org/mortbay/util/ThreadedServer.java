@@ -569,12 +569,10 @@ abstract public class ThreadedServer extends ThreadPool
         {
             log.warn(LogSupport.EXCEPTION, e);
         }
-
-        // Clean up
-        _listen = null;
-        for (int a = 0; a < _acceptor.length; a++)
-            _acceptor[a] = null;
-        _acceptor = null;
+        finally
+        {
+            _acceptor = null;
+        }
     }
 
     /* ------------------------------------------------------------ */
