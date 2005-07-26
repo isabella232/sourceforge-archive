@@ -215,9 +215,10 @@ public class CGI extends HttpServlet
 	// "REMOTE_IDENT" => "NYI"
 	env.set("REMOTE_USER", req.getRemoteUser());
 	env.set("REQUEST_METHOD", req.getMethod());
-        env.set("SCRIPT_NAME",
-                req.getRequestURI().substring(0, req.getRequestURI().length() - pathInfo.length()));
-	env.set("SERVER_NAME", req.getServerName());
+    String scriptName = req.getRequestURI().substring(0,req.getRequestURI().length() - pathInfo.length());
+	env.set("SCRIPT_NAME",scriptName);
+    env.set("SCRIPT_FILENAME",getServletContext().getRealPath(scriptName));
+    env.set("SERVER_NAME", req.getServerName());
 	env.set("SERVER_PORT", Integer.toString(req.getServerPort()));
 	env.set("SERVER_PROTOCOL", req.getProtocol());
         env.set("SERVER_SOFTWARE", getServletContext().getServerInfo());
