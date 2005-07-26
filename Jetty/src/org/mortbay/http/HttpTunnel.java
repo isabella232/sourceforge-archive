@@ -15,6 +15,7 @@
 
 package org.mortbay.http;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
@@ -110,13 +111,16 @@ public class HttpTunnel
     private void copydata(InputStream in, OutputStream out) throws java.io.IOException
     {
         long timestamp= 0;
+        long byteCount = 0;
         while (true)
         {
             try
             {
-                IO.copy(in, out);
+                byteCount = copyBytes(in, out,-1);
                 timestamp= 0;
-                return;
+                if (byteCount == -1) {
+                    return;
+                }
             }
             catch (InterruptedIOException e)
             {
@@ -128,6 +132,71 @@ public class HttpTunnel
             }
         }
     }
+    
+
+    /* ------------------------------------------------------------------- */
+    /** Copy Stream in to Stream for byteCount bytes or until EOF or exception.
+      * @return Copied bytes count or -1 if no bytes were read *and* EOF was reached
+    */
+    public static int copyBytes(InputStream in,
+                            OutputStream out,
+                            long byteCount)
+         throws IOException
+    {     
+        byte buffer[] = new byte[IO.bufferSize];
+        int len=IO.bufferSize;
+        int totalCount=0;
+        
+        if (byteCount>=0)
+        {
+            totalCount=(int)byteCount;
+            while (byteCount>0)
+            {
+                try {
+                    if (byteCount<IO.bufferSize)
+                        len=in.read(buffer,0,(int)byteCount);
+                    else
+                        len=in.read(buffer,0,IO.bufferSize);
+                    if (len==-1 && totalCount==byteCount)
+                        totalCount=(int)byteCount - 1;
+                } catch (InterruptedIOException e) {
+                    if (totalCount==byteCount)
+                        throw e;
+                    LogSupport.ignore(log, e);
+                    len=0;
+                }                   
+                
+                if (len<=0)
+                    break;
+                
+                byteCount -= len;
+                out.write(buffer,0,len);
+            }
+            totalCount -= byteCount;
+        }
+        else
+        {
+            while (len>0)
+            {
+                try {
+                    len=in.read(buffer,0,IO.bufferSize);
+                    if (len==-1 && totalCount==0)
+                        totalCount=-1;
+                } catch (InterruptedIOException e) {
+                    if (totalCount==0)
+                        throw e;
+                    LogSupport.ignore(log, e);
+                    len=0;
+                }
+                if (len>0) {
+                    out.write(buffer,0,len);
+                    totalCount += len;
+                }
+            }
+        }
+        return totalCount;
+    }
+    
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */

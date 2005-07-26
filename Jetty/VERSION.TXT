@@ -4,6 +4,7 @@ Jetty Versions
  + Applied ciphersuite patch from tonyj
  + Authenticators use servlet sendError
  + CGI sets SCRIPT_FILENAME
+ + HttpTunnel timeout
 
 Jetty-5.1.4 - 5 June 2005
  + Fixed FTP close issue.

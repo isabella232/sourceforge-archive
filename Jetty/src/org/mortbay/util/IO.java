@@ -18,6 +18,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
@@ -43,7 +44,7 @@ public class IO extends ThreadPool
         CRLF_BYTES    = {(byte)'\015',(byte)'\012'};
 
     /* ------------------------------------------------------------------- */
-    public static int bufferSize = 8192;
+    public static int bufferSize = Integer.getInteger("org.mortbay.util.IO.bufferSize", 8192).intValue();
     
     /* ------------------------------------------------------------------- */
     private static class Singleton {
@@ -126,6 +127,7 @@ public class IO extends ThreadPool
     
     /* ------------------------------------------------------------------- */
     /** Copy Reader to Writer out until EOF or exception.
+     * @return TODO
      */
     public static void copy(Reader in, Writer out)
          throws IOException
@@ -135,6 +137,7 @@ public class IO extends ThreadPool
     
     /* ------------------------------------------------------------------- */
     /** Copy Stream in to Stream for byteCount bytes or until EOF or exception.
+     * @return Copied bytes count or -1 if no bytes were read *and* EOF was reached
      */
     public static void copy(InputStream in,
                             OutputStream out,
@@ -171,7 +174,7 @@ public class IO extends ThreadPool
             }
         }
     }  
-    
+
     /* ------------------------------------------------------------------- */
     /** Copy Reader to Writer for byteCount bytes or until EOF or exception.
      */
