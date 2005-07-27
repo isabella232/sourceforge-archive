@@ -23,6 +23,7 @@ import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.jboss.mq.selectors.ISelectorParser;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.StringUtil;
 
@@ -255,7 +256,7 @@ public class HttpInputStream extends FilterInputStream
      */
     public void setContentLength(int len)
     {
-        if (_chunking && len>=0)
+        if (_chunking && len>=0 && getExpectContinues()==null)
             throw new IllegalStateException("Chunking");
         _realIn.setByteLimit(len);
     }
