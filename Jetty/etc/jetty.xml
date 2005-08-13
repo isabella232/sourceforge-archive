@@ -17,7 +17,7 @@
   <!-- Configure Jetty Logging.                                        -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!-- Uncomment if using jetty logging.
-  <Call class="org.apache.commons.logging.LogFactory" name="getFactory">
+  <Call class="org.mortbay.log.LogFactory" name="getFactory">
     <Call name="getInstance">
       <Arg/>
       <Call name="reset"/>
@@ -130,8 +130,9 @@
     <Array type="java.lang.String">
       <Item>org.mortbay.jetty.servlet.XMLConfiguration</Item>
       <Item>org.mortbay.jetty.servlet.JettyWebConfiguration</Item>
-      <Item>org.mortbay.jetty.servlet.TagLibConfiguration</Item>
+
       <!--
+      <Item>org.mortbay.jetty.servlet.TagLibConfiguration</Item>
       <Item>org.mortbay.jetty.servlet.jsr77.Configuration</Item>
       -->
     </Array>

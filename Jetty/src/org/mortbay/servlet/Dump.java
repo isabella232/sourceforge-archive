@@ -33,7 +33,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.html.Break;
 import org.mortbay.html.Font;
 import org.mortbay.html.Heading;

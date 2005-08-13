@@ -18,7 +18,7 @@ package org.mortbay.util;
 import java.security.MessageDigest;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 
 
 /* ------------------------------------------------------------ */

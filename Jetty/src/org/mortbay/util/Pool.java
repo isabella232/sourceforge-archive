@@ -19,7 +19,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 
 /* ------------------------------------------------------------ */
 /** A pool of Objects.

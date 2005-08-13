@@ -31,7 +31,7 @@ import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.UserRealm;
 

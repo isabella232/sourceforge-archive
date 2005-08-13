@@ -30,7 +30,7 @@ import java.util.ListIterator;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 
 /* ------------------------------------------------------------ */
 /** A File OutputStream that rolls overs.

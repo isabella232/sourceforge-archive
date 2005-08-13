@@ -21,7 +21,7 @@ import java.security.Principal;
 import javax.net.ssl.SSLSocket;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 
 /* ------------------------------------------------------------ */
 /** Client Certificate Authenticator.

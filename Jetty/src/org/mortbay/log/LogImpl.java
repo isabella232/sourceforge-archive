@@ -23,7 +23,7 @@ import org.mortbay.util.Loader;
  * </pre> 
  * This logger can be configured with the org.mortbay.log.Factory
  * 
- * @see org.mortbay.log.Factory
+ * @see org.mortbay.log.LogFactory
  */
 public class LogImpl implements org.apache.commons.logging.Log
 {

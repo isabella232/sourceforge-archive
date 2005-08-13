@@ -23,7 +23,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.util.LogSupport;
 
 /* ------------------------------------------------------------------------------- */

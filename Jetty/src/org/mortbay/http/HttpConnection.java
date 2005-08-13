@@ -24,7 +24,7 @@ import java.util.Enumeration;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.LogSupport;

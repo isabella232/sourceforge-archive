@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.ResourceBundle;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.util.CachedResource;
 import org.mortbay.util.LifeCycle;
 import org.mortbay.util.LogSupport;

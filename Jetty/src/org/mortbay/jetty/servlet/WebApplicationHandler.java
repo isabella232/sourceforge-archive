@@ -41,7 +41,7 @@ import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.http.HttpContext;
 import org.mortbay.http.HttpResponse;
 import org.mortbay.http.PathMap;

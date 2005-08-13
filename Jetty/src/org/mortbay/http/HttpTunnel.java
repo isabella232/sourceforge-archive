@@ -22,7 +22,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.util.IO;
 import org.mortbay.util.LogSupport;
 

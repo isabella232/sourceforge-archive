@@ -20,7 +20,7 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.jetty.servlet.Holder;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.jmx.LifeCycleMBean;

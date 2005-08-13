@@ -24,7 +24,7 @@ import javax.management.modelmbean.InvalidTargetObjectTypeException;
 import javax.management.modelmbean.ModelMBean;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.http.HttpServer;
 import org.mortbay.http.Version;
 import org.mortbay.util.ComponentEvent;

@@ -27,7 +27,7 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpHandler;
 import org.mortbay.http.HttpListener;

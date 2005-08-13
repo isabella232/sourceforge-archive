@@ -28,7 +28,7 @@ import java.util.Arrays;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.util.IO;
 import org.mortbay.util.Resource;
 

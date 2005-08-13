@@ -28,7 +28,7 @@ import java.io.Writer;
 import java.net.URL;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.util.IO;
 
 /* -------------------------------------------------------------------- */

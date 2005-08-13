@@ -24,7 +24,7 @@ import java.io.Reader;
 import java.io.Writer;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 
 /* ======================================================================== */
 /** IO Utilities.

@@ -20,7 +20,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 
 /*-------------------------------------------------------------------*/
 /** Test Harness and report.

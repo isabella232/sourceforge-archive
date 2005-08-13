@@ -34,7 +34,7 @@ import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocket;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.jetty.servlet.ServletSSL;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LogSupport;

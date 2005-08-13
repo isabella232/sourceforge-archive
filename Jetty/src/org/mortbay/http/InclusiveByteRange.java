@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
 

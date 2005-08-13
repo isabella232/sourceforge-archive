@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.http.ResourceCache.ResourceMetaData;
 import org.mortbay.http.handler.ErrorPageHandler;
 import org.mortbay.util.Container;

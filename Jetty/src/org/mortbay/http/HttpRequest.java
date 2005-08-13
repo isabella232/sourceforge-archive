@@ -30,7 +30,7 @@ import java.util.Set;
 import javax.servlet.http.Cookie;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.util.ByteArrayOutputStream2;
 import org.mortbay.util.IO;
 import org.mortbay.util.InetAddrPort;

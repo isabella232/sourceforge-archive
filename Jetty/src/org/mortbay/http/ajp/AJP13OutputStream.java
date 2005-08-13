@@ -21,7 +21,7 @@ import java.io.OutputStream;
 import java.util.Enumeration;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.http.BufferedOutputStream;
 import org.mortbay.http.HttpMessage;
 import org.mortbay.http.HttpResponse;

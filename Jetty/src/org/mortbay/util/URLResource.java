@@ -24,7 +24,7 @@ import java.net.URLConnection;
 import java.security.Permission;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 
 /* ------------------------------------------------------------ */
 /** Abstract resource class.

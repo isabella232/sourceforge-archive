@@ -22,7 +22,7 @@ import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.util.LazyList;
 
 /* ------------------------------------------------------------------------------- */

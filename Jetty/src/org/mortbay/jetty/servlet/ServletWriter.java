@@ -22,7 +22,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.http.HttpOutputStream;
 import org.mortbay.util.IO;
 import org.mortbay.util.LogSupport;

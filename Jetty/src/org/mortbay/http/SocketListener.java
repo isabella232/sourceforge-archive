@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.util.InetAddrPort;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.ThreadedServer;

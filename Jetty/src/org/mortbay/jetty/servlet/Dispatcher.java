@@ -38,7 +38,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.http.HttpSession;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.PathMap;
 import org.mortbay.util.LogSupport;

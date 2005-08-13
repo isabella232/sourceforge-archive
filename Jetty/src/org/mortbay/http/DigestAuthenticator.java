@@ -20,7 +20,7 @@ import java.security.MessageDigest;
 import java.security.Principal;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.util.B64Code;
 import org.mortbay.util.Credential;
 import org.mortbay.util.LogSupport;

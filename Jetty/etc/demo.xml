@@ -39,7 +39,7 @@
      </Arg>
    </Call>
   </New>
-  <Call class="org.apache.commons.logging.LogFactory" name="getFactory">
+  <Call class="org.mortbay.log.LogFactory" name="getFactory">
     <Call name="setAttribute">
       <Arg>org.mortbay.webapps.*</Arg>
       <Arg ref="demologger"/>
@@ -53,7 +53,8 @@
   
   <!-- reconfigure the default logger to log to a file -->  
   <!--
-  <Call class="org.apache.commons.logging.LogFactory" name="getFactory">
+  -->
+  <Call class="org.mortbay.log.LogFactory" name="getFactory">
     <Call name="getInstance">
       <Arg/>
       <Call name="reset"/>
@@ -74,7 +75,6 @@
       </Call>
     </Call>
   </Call>
-  -->
   
   <!-- Uncomment to capture stderr and stdout to commons logging
   <Set class="org.mortbay.log.LogStream" name="logStdErr">true</Set>

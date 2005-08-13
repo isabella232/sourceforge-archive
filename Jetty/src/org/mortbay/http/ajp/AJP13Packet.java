@@ -23,7 +23,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.ByteArrayPool;
 import org.mortbay.util.LogSupport;

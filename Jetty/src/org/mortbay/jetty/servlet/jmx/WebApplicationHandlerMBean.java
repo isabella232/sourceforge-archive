@@ -23,7 +23,7 @@ import javax.management.MBeanException;
 import javax.management.ObjectName;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.jetty.servlet.WebApplicationHandler;
 
 

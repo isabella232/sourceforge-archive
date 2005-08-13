@@ -1,6 +1,7 @@
 Jetty Versions
 --------------
 
+ + Facade over commons LogFactory so that discovery may be avoided.
  + Applied ciphersuite patch from tonyj
  + Authenticators use servlet sendError
  + CGI sets SCRIPT_FILENAME

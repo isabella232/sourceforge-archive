@@ -104,7 +104,7 @@ specifies org.apache.commons.logging.LogFactory=org.mortbay.log.Factory.    The 
 default log instance as well as optional named (by package or otherwise) log instance.  Each log instance
 may contain multiple log sinks (appenders in log4j language).   The following jetty.xml configures the
 default log instance by reseting it's default sinks (stderr) and adding a roll over file LogSink:<pre>
-  &lt;Call class="org.apache.commons.logging.LogFactory" name="getFactory">
+  &lt;Call class="org.mortbay.log.LogFactory" name="getFactory">
     &lt;Call name="getInstance">
       &lt;Arg/>
       &lt;Call name="reset"/>
@@ -129,7 +129,7 @@ default log instance by reseting it's default sinks (stderr) and adding a roll o
 </p>
 <p>
 To add a logImpl for a specific package name:<pre>
-  &lt;Call class="org.apache.commons.logging.LogFactory" name="getFactory">
+  &lt;Call class="org.mortbay.log.LogFactory" name="getFactory">
     &lt;Call name="setAttribute">
       &lt;Arg>org.mortbay.myapp.*&lt;/Arg>
       &lt;Arg>
@@ -151,7 +151,7 @@ To add a logImpl for a specific package name:<pre>
 <p>
 To alias another package (or other) name to an existing log impl:
 <pre>
-  &lt;Call class="org.apache.commons.logging.LogFactory" name="getFactory">
+  &lt;Call class="org.mortbay.log.LogFactory" name="getFactory">
     &lt;Call name="setAttribute">
       &lt;Arg>org.mortbay.otherpackage&lt;/Arg>
       &lt;Arg>org.mortbay.mypackage.*&lt;/Arg>
@@ -186,10 +186,12 @@ discovery mechanism finds the log4j.jar in extra/ext which is configured from ex
 
 <h3>Alternate Log Implementations</h3>
 <p>
-To use an alternative log mechanism, system properties need to be set to set the log factory. For example,
+To use an alternative log mechanism, the commons logging discovery mechanism needs to be used.
+By default, this is turned off in Jetty with the org.mortbay.log.LogFactory.noDiscovery system property
+that is set in start.config. For example,
 to use log4j you need to put the log4j.jar on the classpath (place it in the ext directory) and to run jetty 
 with a command like:<pre>
-  java -Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger -jar start.jar
+  java -Dorg.mortbay.log.LogFactory.noDiscovery=false -jar start.jar
 </pre>
 You need to consult the documentation for those specific log mechanism to learn their configuration.
 </p>

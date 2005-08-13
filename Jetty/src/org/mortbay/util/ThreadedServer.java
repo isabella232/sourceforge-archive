@@ -25,7 +25,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 
 /* ======================================================================= */
 /**

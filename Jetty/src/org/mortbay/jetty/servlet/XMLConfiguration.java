@@ -24,7 +24,7 @@ import java.util.Map;
 import javax.servlet.UnavailableException;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.http.Authenticator;
 import org.mortbay.http.ClientCertAuthenticator;
 import org.mortbay.http.SecurityConstraint;

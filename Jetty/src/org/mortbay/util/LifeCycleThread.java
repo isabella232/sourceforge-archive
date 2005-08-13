@@ -18,7 +18,7 @@ package org.mortbay.util;
 import java.io.InterruptedIOException;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 
 /* ------------------------------------------------------------ */
 /** Base Thread class implementing LifeCycle.

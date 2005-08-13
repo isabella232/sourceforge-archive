@@ -22,7 +22,7 @@ import java.util.Collection;
 import java.util.EventListener;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.http.HttpContext;
 
 

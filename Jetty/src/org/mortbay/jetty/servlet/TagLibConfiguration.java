@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.jetty.servlet.WebApplicationContext.Configuration;
 import org.mortbay.util.Resource;
 import org.mortbay.xml.XmlParser;

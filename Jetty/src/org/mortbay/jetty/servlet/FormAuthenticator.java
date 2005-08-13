@@ -26,7 +26,7 @@ import javax.servlet.http.HttpSessionBindingEvent;
 import javax.servlet.http.HttpSessionBindingListener;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.http.Authenticator;
 import org.mortbay.http.HttpRequest;
 import org.mortbay.http.HttpResponse;

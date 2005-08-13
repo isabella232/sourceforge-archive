@@ -23,7 +23,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.util.ByteArrayPool;
 import org.mortbay.util.IO;
 import org.mortbay.util.LogSupport;

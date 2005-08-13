@@ -25,7 +25,7 @@ import java.util.TimeZone;
 import javax.servlet.http.Cookie;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 import org.mortbay.util.DateCache;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.RolloverFileOutputStream;

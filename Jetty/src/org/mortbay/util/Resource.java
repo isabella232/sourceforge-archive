@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.mortbay.log.LogFactory;
 
 
 /* ------------------------------------------------------------ */
