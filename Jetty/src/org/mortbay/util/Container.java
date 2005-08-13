@@ -214,9 +214,9 @@ public abstract class Container implements LifeCycle,EventProvider,Serializable
     {
         if (LazyList.contains(_components,o))
         {
-            ComponentEvent event = new ComponentEvent(this,o);
+            _components=LazyList.remove(_components, o);
             if(log.isDebugEnabled())log.debug("remove component: "+o);
-        
+            ComponentEvent event = new ComponentEvent(this,o);
             for(int i=0;i<LazyList.size(_eventListeners);i++)
             {
                 EventListener listener=(EventListener)LazyList.get(_eventListeners,i);
