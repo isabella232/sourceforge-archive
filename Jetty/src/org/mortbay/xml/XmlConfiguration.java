@@ -243,6 +243,11 @@ public class XmlConfiguration
                     throw new IllegalStateException("Unknown tag: " + tag);
             }
         }
+        catch(InvocationTargetException e)
+        {
+            log.warn("Exception at "+node.toString(),e.getTargetException());
+            throw e;
+        }
         catch (Error e)
         {
             log.debug(node);

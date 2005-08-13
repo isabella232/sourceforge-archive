@@ -21,8 +21,8 @@ import org.apache.commons.logging.Log;
  */
 public class LogFactory {
     static boolean noDiscovery = Boolean.getBoolean("org.mortbay.log.LogFactory.noDiscovery");
-    static org.apache.commons.logging.LogFactory factory=noDiscovery?new Factory():org.apache.commons.logging.LogFactory.getFactory();;
-
+    static org.apache.commons.logging.LogFactory factory=noDiscovery?new Factory():org.apache.commons.logging.LogFactory.getFactory();
+    
     public static Log getLog(Class logClass)
     {
         return factory.getInstance(logClass);
@@ -35,6 +35,7 @@ public class LogFactory {
     
     public static org.apache.commons.logging.LogFactory getFactory()
     {
+        System.err.println("factory="+factory);
         return factory;
     }
     

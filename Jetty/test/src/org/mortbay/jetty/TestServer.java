@@ -43,8 +43,11 @@ public class TestServer extends junit.framework.TestCase
 
     /* ------------------------------------------------------------ */
     public static void main(String[] args)
+        throws Exception
     {
-        junit.textui.TestRunner.run(suite());
+        new TestServer("foo").other();
+        
+        // junit.textui.TestRunner.run(suite());
     }
     
     /* ------------------------------------------------------------ */
@@ -69,10 +72,17 @@ public class TestServer extends junit.framework.TestCase
     public void testServer()
         throws Exception
     {
+        System.err.println("Build a server");
+        
         Server server = new Server(new File(home,"etc/demo.xml").toString());
-        server.start();
-        assertTrue("started",server.isStarted());
 
+        System.err.println("start server");
+        
+        server.start();
+        
+        
+        assertTrue("started",server.isStarted());
+        
         File tmp = File.createTempFile("JettyServer",".serialized");
         ObjectOutputStream oo = new ObjectOutputStream(new FileOutputStream(tmp));
         oo.writeObject(server);
@@ -84,13 +94,56 @@ public class TestServer extends junit.framework.TestCase
         assertTrue("stopped",!server.isStarted());
         server.destroy();
 
+        
+        
+        System.err.println("Serialize and deserialize server");
+        
         ObjectInputStream oi = new ObjectInputStream(new FileInputStream(tmp));
         server = (Server)oi.readObject();
         oi.close();
+        
+
+        System.err.println("start recovered server");
         server.start();
         assertTrue("restarted",server.isStarted());
         server.stop();
         assertTrue("restopped",!server.isStarted());
+        server.destroy();
+    }
+
+    /* ------------------------------------------------------------ */
+    public void other()
+        throws Exception
+    {
+        System.err.println("Build a server");
+        
+        Server server = new Server(new File(home,"etc/demo.xml").toString());
+
+        System.err.println("start server");
+        
+        server.start();
+        
+        
+        
+        File tmp = File.createTempFile("JettyServer",".serialized");
+        ObjectOutputStream oo = new ObjectOutputStream(new FileOutputStream(tmp));
+        oo.writeObject(server);
+        oo.flush();
+        oo.close();
+
+        server.stop();
+        server.destroy();
+
+        
+        
+        ObjectInputStream oi = new ObjectInputStream(new FileInputStream(tmp));
+        server = (Server)oi.readObject();
+        oi.close();
+        
+
+        System.err.println("start recovered server");
+        server.start();
+        server.stop();
         server.destroy();
     }
     

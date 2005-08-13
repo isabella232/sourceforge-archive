@@ -16,6 +16,7 @@
 package org.mortbay.jetty;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
@@ -106,6 +107,11 @@ public class Server extends HttpServer
         catch(IOException e)
         {
             throw e;
+        }
+        catch(InvocationTargetException e)
+        {
+            log.warn(LogSupport.EXCEPTION,e.getTargetException());
+            throw new IOException("Jetty configuration problem: "+e.getTargetException());
         }
         catch(Exception e)
         {
