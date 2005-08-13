@@ -322,8 +322,7 @@ public class ContextHandler extends WrappedHandler
                     current_thread.setContextClassLoader(_classLoader);
                 }
             }
-            
-            handled = super.handle(target, request, response, dispatch);
+            handled = getHandler().handle(target, base_request, response, dispatch);
             
         }
         finally

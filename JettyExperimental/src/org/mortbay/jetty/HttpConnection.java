@@ -59,6 +59,7 @@ public class HttpConnection
     private HttpFields _responseFields;
     private Response _response;
     private Output _out;
+    private RetryRequest _retry;
     
     private transient Buffer _content;
     private transient int _connection = UNKNOWN;
@@ -215,13 +216,24 @@ public class HttpConnection
         try
         {
             __currentConnection.set(this);
-            // If we are not ended then parse available
-            if (!_parser.isState(HttpParser.STATE_END) && (_content==null || _content.length()==0)) 
-                _parser.parseAvailable();
 
-            // Do we have more writting to do?
-            if (_generator.isState(HttpGenerator.STATE_FLUSHING) || _generator.isState(HttpGenerator.STATE_CONTENT))
-                _generator.flushBuffers();
+            RetryRequest retry=getRetryRequest();
+            if (retry!=null)
+            {
+                setRetryRequest(null);
+		_request.setAttribute(RetryRequest.RETRIED_REQUEST,retry.getObject()!=null?retry.getObject():retry);
+		doHandler();
+            }
+            else
+            {
+                // If we are not ended then parse available
+                if (!_parser.isState(HttpParser.STATE_END) && (_content==null || _content.length()==0)) 
+                    _parser.parseAvailable();
+
+                // Do we have more writting to do?
+                if (_generator.isState(HttpGenerator.STATE_FLUSHING) || _generator.isState(HttpGenerator.STATE_CONTENT))
+                    _generator.flushBuffers();
+            }
         }
         finally
         {
@@ -241,6 +253,45 @@ public class HttpConnection
             }
         }
     }
+
+    /* ------------------------------------------------------------ */
+    private void doHandler() throws IOException
+    {
+	if (_handler!=null)
+	{
+	    try
+	    {
+		_request.setRequestURI(_uri.getRawPath());
+		String target = URIUtil.canonicalPath(_uri.getPath());
+		_handler.handle(target, _request, _response, Handler.REQUEST);
+	    }
+	    catch (RetryRequest retry)
+	    {
+		setRetryRequest(retry);
+		retry.printStackTrace();
+	    }
+	    catch (ServletException e)
+	    {
+		// TODO Auto-generated catch block
+		log.warn("handling",e);
+		_generator.sendError(500,null,null,true);
+	    }
+	    finally
+	    {
+		if (_retry==null)
+		{
+		    if (_response!=null)
+			_response.complete();
+		
+		    if (!_generator.isComplete())
+		    {
+			_generator.completeHeader(_responseFields, HttpGenerator.LAST);
+			_generator.complete();
+		    }
+		}
+	    }
+	}
+    }        
     
     /* ------------------------------------------------------------ */
     public void commitResponse(boolean last)
@@ -394,34 +445,10 @@ public class HttpConnection
                     break;
                 default:
             }
+
+	    doHandler();
+	}
             
-            if (_handler!=null)
-            {
-                try
-                {
-                    _request.setRequestURI(_uri.getRawPath());
-                    String target = URIUtil.canonicalPath(_uri.getPath());
-                    _handler.handle(target, _request, _response, Handler.REQUEST);
-                }
-                catch (ServletException e)
-                {
-                    // TODO Auto-generated catch block
-                    log.warn("handling",e);
-                    _generator.sendError(500,null,null,true);
-                }
-                finally
-                {
-                    if (_response!=null)
-                        _response.complete();
-                    
-                    if (!_generator.isComplete())
-                    {
-                        _generator.completeHeader(_responseFields, HttpGenerator.LAST);
-                        _generator.complete();
-                    }
-                }
-            }
-        }        
 
         /* ------------------------------------------------------------ */
         /* 
@@ -624,6 +651,18 @@ public class HttpConnection
     HttpGenerator getGenerator()
     {
         return _generator;
+    }
+
+
+    /* ------------------------------------------------------------ */
+    public RetryRequest getRetryRequest()
+    {
+        return _retry;
+    }
+
+    public void setRetryRequest(RetryRequest retry)
+    {
+        _retry=retry;
     }
 
 }

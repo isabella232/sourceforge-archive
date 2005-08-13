@@ -41,6 +41,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
+import org.mortbay.jetty.RetryRequest;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.WrappedHandler;
 import org.mortbay.util.LazyList;
@@ -350,6 +351,10 @@ public class ServletHandler extends WrappedHandler
                 servlet_holder.handle(request,response);
             else
                 notFound(request, response);
+        }
+        catch(RetryRequest e)
+        {
+            throw e;
         }
         catch(Exception e)
         {

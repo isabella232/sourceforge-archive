@@ -24,6 +24,7 @@ import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.bio.SocketEndPoint;
 import org.mortbay.jetty.AbstractConnector;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.RetryRequest;
 import org.mortbay.util.LogSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,6 +126,10 @@ public class SocketConnector extends AbstractConnector
             {
                 while (!isClosed())
                     _connection.handle();
+            }
+            catch(RetryRequest e)
+            {
+                throw e;
             }
             catch(IOException e)
             {

@@ -23,6 +23,12 @@
     <load-on-startup>1</load-on-startup>
   </servlet>
 
+  <servlet>
+    <servlet-name>Retry</servlet-name>
+    <servlet-class>com.acme.TestRetry</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
   <servlet-mapping>
     <servlet-name>Dump</servlet-name>
     <url-pattern>/dump/*</url-pattern>
@@ -31,6 +37,11 @@
   <servlet-mapping>
     <servlet-name>Dump</servlet-name>
     <url-pattern>*.dump</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>Retry</servlet-name>
+    <url-pattern>/retry/*</url-pattern>
   </servlet-mapping>
 
   <servlet>

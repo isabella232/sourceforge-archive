@@ -158,7 +158,7 @@ public class SessionHandler extends WrappedHandler
                 ((SessionManager.Session)session).access();
             if(log.isDebugEnabled())log.debug("session="+session);
             
-            result=super.handle(target,request,response, dispatch);
+            result=getHandler().handle(target, jetty_request, response, dispatch);
         }
         finally
         {

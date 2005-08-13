@@ -31,6 +31,7 @@ import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.RetryRequest;
 import org.mortbay.util.LogSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,6 +88,7 @@ public class SelectChannelConnector extends AbstractConnector
         }
     }
 
+    /* ------------------------------------------------------------ */
     public void close() throws IOException
     {
         if (_acceptChannel != null)
@@ -138,7 +140,7 @@ public class SelectChannelConnector extends AbstractConnector
         }
  
         // SELECT for things to do!
-        _selector.select(_maxIdleTime);
+        _selector.select(_maxIdleTime); // TODO this timeout is not the best one
         
         // Look for things to do
         Iterator iter= _selector.selectedKeys().iterator();
@@ -146,6 +148,8 @@ public class SelectChannelConnector extends AbstractConnector
         {
             SelectionKey key= (SelectionKey)iter.next();
             iter.remove();
+            
+            System.err.println("key="+key);
             
             try
             {
@@ -177,8 +181,10 @@ public class SelectChannelConnector extends AbstractConnector
                 else
                 {
                     HttpEndPoint connection = (HttpEndPoint)key.attachment();
+                    System.err.println("ready="+key.readyOps());
+                    System.err.println("channel="+key.channel().isOpen());
                     if (connection!=null)
-                        connection.dispatch();    
+                        connection.dispatch(); 
                 }
                 
                 key= null;
@@ -211,6 +217,7 @@ public class SelectChannelConnector extends AbstractConnector
         int _interestOps;
         int _readBlocked;
         int _writeBlocked;
+	long _lastDispatch;
     
         /* ------------------------------------------------------------ */
         HttpEndPoint(SocketChannel channel) 
@@ -237,6 +244,8 @@ public class SelectChannelConnector extends AbstractConnector
         {
             synchronized(this)
             {
+		_lastDispatch=System.currentTimeMillis();
+
                 // If threads are blocked on this
                 if (_readBlocked>0 || _writeBlocked>0)
                 {
@@ -255,7 +264,6 @@ public class SelectChannelConnector extends AbstractConnector
                     _key.interestOps(0);
                     return;
                 }
-                
 
                 // Remove writeable op
                 if ((_key.readyOps()|SelectionKey.OP_WRITE)!=0 &&
@@ -460,7 +468,10 @@ public class SelectChannelConnector extends AbstractConnector
             {
                 synchronized(this)
                 {
-                    undispatch();
+                    if (_connection.getRetryRequest()!=null)
+                        undispatch();
+                    else
+                        System.err.println("RETRY");
                 }
             }
         }

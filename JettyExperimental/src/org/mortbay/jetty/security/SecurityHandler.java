@@ -141,17 +141,17 @@ public class SecurityHandler extends WrappedHandler
             // Find out the Authenticator.
             if (Constraint.__BASIC_AUTH.equalsIgnoreCase(_authMethod))
                 _authenticator=new BasicAuthenticator();
-            if (Constraint.__DIGEST_AUTH.equalsIgnoreCase(_authMethod))
+            else if (Constraint.__DIGEST_AUTH.equalsIgnoreCase(_authMethod))
                 _authenticator=new DigestAuthenticator();
             else if (Constraint.__CERT_AUTH.equalsIgnoreCase(_authMethod))
                _authenticator=new ClientCertAuthenticator();
             else if (Constraint.__FORM_AUTH.equalsIgnoreCase(_authMethod))
                 _authenticator=new FormAuthenticator();
             else
-                log.warn("Unknown Authentication method:"+_authMethod);
+                log.error("Unknown Authentication method:"+_authMethod);
         }
         
-        super.start();
+        super.doStart();
     }
     
 
