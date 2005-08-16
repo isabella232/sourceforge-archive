@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-5.1.5rc0 - 15 August 2005
+Jetty-5.1.5rc0 - 16 August 2005
  + Fixed component remove memory leak for stop/start cycles
  + Facade over commons LogFactory so that discovery may be avoided.
  + Applied ciphersuite patch from tonyj
