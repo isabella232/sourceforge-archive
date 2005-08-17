@@ -15,6 +15,10 @@
 
 package org.mortbay.thread;
 
+import org.mortbay.util.LogSupport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 /* ------------------------------------------------------------ */
 /** Timer.
@@ -25,26 +29,71 @@ package org.mortbay.thread;
  */
 public class Timer
 {
+    private final static Logger log = LoggerFactory.getLogger(TimerTest.class);
+    
     private long _duration;
     private Queue _queue=new Queue();
     private long _now;
-    
+    private long _lastTick;
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the duration.
+     */
+    public long getDuration()
+    {
+        return _duration;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param duration The duration to set.
+     */
+    public void setDuration(long duration)
+    {
+        _duration = duration;
+    }
+
+    /* ------------------------------------------------------------ */
     public void setNow()
     {
         _now=System.currentTimeMillis();
     }
-    
-    public void setNow(long time)
+
+    /* ------------------------------------------------------------ */
+    public void setNow(long now)
     {
-        _now=time;
+        _now=now;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public void tick()
     {
+        if (_now==0 || _lastTick==_now)
+            throw new IllegalStateException();
+        _lastTick=_now;
         
+        long _expiry = _now-_duration;
+        
+        while (_queue.size()>0 && _queue.head()._timestamp<_expiry)
+        {
+            Timeout entry = _queue.head();
+            if (entry._timestamp>_expiry)
+                break;
+            entry.unlink();
+            try
+            {
+                entry.doExpire();
+            }
+            catch(Throwable th)
+            {
+                log.warn(LogSupport.EXCEPTION,th);
+            }
+        }
     }
-    
-    public void add(Entry entry)
+
+    /* ------------------------------------------------------------ */
+    public void add(Timeout entry)
     {
         if (entry._timestamp!=0)
         {
@@ -55,7 +104,10 @@ public class Timer
         entry._timestamp = _now;
         _queue.add(entry);
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     private static class Link
     {
         Link _next;
@@ -73,7 +125,7 @@ public class Timer
             _next=_prev=this;
         }
 
-        public void setNext(Entry entry)
+        public void setNext(Timeout entry)
         {
             if (entry._next!=entry)
                 throw new IllegalStateException();
@@ -81,15 +133,18 @@ public class Timer
             _next._prev=entry;
             _next=entry;
             _next._next=next_next;
-            _next._prev=this;
-            
+            _next._prev=this;   
         }
     }
     
-    
-    public abstract static class Entry extends Link 
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public static class Timeout extends Link 
     {
         long _timestamp=0;
+        boolean _expired=false;
 
         
         public void cancel()
@@ -98,9 +153,20 @@ public class Timer
             unlink();
         }
         
-        public abstract void expire();
+        public boolean isExpired() { return _expired; }
+        
+        public void expire(){}
+        
+        private void doExpire()
+        {
+            _expired=true;
+            expire();
+        }
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     private static class Queue
     {
         Link _head=new Link();
@@ -127,10 +193,17 @@ public class Timer
             return _head._next==_head;
         }
 
-        public boolean add(Entry entry)
+        public boolean add(Timeout entry)
         {
             _head._prev.setNext(entry);
             return true;
+        }
+        
+        public Timeout head()
+        {
+            if (_head._next==_head)
+                return null;
+            return (Timeout)_head._next;
         }
 
         

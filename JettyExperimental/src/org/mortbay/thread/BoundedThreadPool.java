@@ -42,6 +42,7 @@ import java.util.Set;
  */
 public class BoundedThreadPool extends AbstractLifeCycle implements Serializable, ThreadPool
 {
+    private static final long serialVersionUID = 2806675379803919606L;
     
     private static int __id;
     private transient List _blocked;
