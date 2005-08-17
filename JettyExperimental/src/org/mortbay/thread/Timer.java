@@ -33,6 +33,10 @@ public class Timer
     
     private long _duration;
     private Queue _queue=new Queue();
+    {
+        // yuck!
+        _queue._head._timer=this;
+    }
     private long _now;
     private long _lastTick;
 
@@ -112,6 +116,7 @@ public class Timer
     {
         Link _next;
         Link _prev;
+        Timer _timer;
         
         Link()
         {
@@ -123,17 +128,21 @@ public class Timer
             _next._prev=_prev;
             _prev._next=_next;
             _next=_prev=this;
+            _timer=null;
         }
 
         public void setNext(Timeout entry)
         {
-            if (entry._next!=entry)
+            if (_timer==null || 
+                entry._timer!=null && entry._timer!=_timer ||    
+                entry._next!=entry)
                 throw new IllegalStateException();
             Link next_next = _next;
             _next._prev=entry;
             _next=entry;
             _next._next=next_next;
             _next._prev=this;   
+            _next._timer=_timer;
         }
     }
     
