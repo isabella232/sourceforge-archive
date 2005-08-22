@@ -216,20 +216,18 @@ public class HttpConnection
         try
         {
             __currentConnection.set(this);
-
-            RetryRequest retry=getRetryRequest();
-            if (retry!=null)
+            
+            Continuation continuation=_request.getContinuation();
+            if (continuation!=null)
             {
-                setRetryRequest(null);
-		_request.setAttribute(RetryRequest.RETRIED_REQUEST,retry.getObject()!=null?retry.getObject():retry);
-		doHandler();
+                doHandler();
             }
             else
             {
                 // If we are not ended then parse available
                 if (!_parser.isState(HttpParser.STATE_END) && (_content==null || _content.length()==0)) 
                     _parser.parseAvailable();
-
+                
                 // Do we have more writting to do?
                 if (_generator.isState(HttpGenerator.STATE_FLUSHING) || _generator.isState(HttpGenerator.STATE_CONTENT))
                     _generator.flushBuffers();
@@ -257,40 +255,41 @@ public class HttpConnection
     /* ------------------------------------------------------------ */
     private void doHandler() throws IOException
     {
-	if (_handler!=null)
-	{
-	    try
-	    {
-		_request.setRequestURI(_uri.getRawPath());
-		String target = URIUtil.canonicalPath(_uri.getPath());
-		_handler.handle(target, _request, _response, Handler.REQUEST);
-	    }
-	    catch (RetryRequest retry)
-	    {
-		setRetryRequest(retry);
-		retry.printStackTrace();
-	    }
-	    catch (ServletException e)
-	    {
-		// TODO Auto-generated catch block
-		log.warn("handling",e);
-		_generator.sendError(500,null,null,true);
-	    }
-	    finally
-	    {
-		if (_retry==null)
-		{
-		    if (_response!=null)
-			_response.complete();
-		
-		    if (!_generator.isComplete())
-		    {
-			_generator.completeHeader(_responseFields, HttpGenerator.LAST);
-			_generator.complete();
-		    }
-		}
-	    }
-	}
+        if (_handler!=null)
+        {
+            boolean retry=false;
+            try
+            {
+                _request.setRequestURI(_uri.getRawPath());
+                String target = URIUtil.canonicalPath(_uri.getPath());
+                _handler.handle(target, _request, _response, Handler.REQUEST);
+            }
+            catch (RetryRequest r)
+            {
+                log.debug("retry ",r);
+                retry=true;
+            }
+            catch (ServletException e)
+            {
+                log.warn("handling",e);
+                _generator.sendError(500,null,null,true);
+            }
+            finally
+            {
+                if (!retry)
+                {
+                    _request.setContinuation(null);
+                    if (_response!=null)
+                        _response.complete();
+                    
+                    if (!_generator.isComplete())
+                    {
+                        _generator.completeHeader(_responseFields, HttpGenerator.LAST);
+                        _generator.complete();
+                    }
+                }
+            }
+        }
     }        
     
     /* ------------------------------------------------------------ */

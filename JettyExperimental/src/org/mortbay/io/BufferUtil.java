@@ -293,12 +293,5 @@ public class BufferUtil
                 return false;
         return true;
     }
-    
-
-    public static void main(String[] args)
-    {
-        System.err.println(Long.MIN_VALUE);
-    }
-
 
 }

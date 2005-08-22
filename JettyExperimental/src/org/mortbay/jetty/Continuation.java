@@ -16,8 +16,8 @@
 package org.mortbay.jetty;
 
 
-public class RetryRequest extends RuntimeException
+public interface Continuation
 {
-    private static final long serialVersionUID = 1939935091196907199L;
-    
+    public void resume(Object object);
+    public Object getObject(long timeout);
 }

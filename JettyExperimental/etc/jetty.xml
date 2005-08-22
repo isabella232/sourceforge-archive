@@ -15,31 +15,38 @@
     <Set name="connectors">
       <Array type="org.mortbay.jetty.Connector"> 
       
+        <!-- Use this connector if NIO is not available.
         <Item>
-	      <New class="org.mortbay.jetty.bio.SocketConnector">
-	        <Set name="port">8080</Set>
-	      </New>
-	    </Item>
-	    
+          <New class="org.mortbay.jetty.bio.SocketConnector">
+            <Set name="port">8080</Set>
+          </New>
+        </Item>
+        -->
+        
+        <!-- Use this connector for few very active connections.
         <Item>
-	      <New class="org.mortbay.jetty.nio.BlockingChannelConnector">
-	        <Set name="port">8081</Set>
-	      </New>
-	    </Item>
-	    
+          <New class="org.mortbay.jetty.nio.BlockingChannelConnector">
+            <Set name="port">8080</Set>
+          </New>
+        </Item>
+        -->
+        
+	<!-- Use this connector for many frequently idle connections -->
         <Item>
-	      <New class="org.mortbay.jetty.nio.SelectChannelConnector">
-	        <Set name="port">8082</Set>
-	        <Set name="maxIdleTime">10</Set>
-	      </New>
-	    </Item>
-	    
+          <New class="org.mortbay.jetty.nio.SelectChannelConnector">
+            <Set name="port">8080</Set>
+            <Set name="maxIdleTime">15000</Set>
+          </New>
+        </Item>
+        
+        <!-- 
         <Item>
-	      <New class="org.mortbay.jetty.nio.SelectBlockingChannelConnector">
-	        <Set name="port">8083</Set>
-	      </New>
-	    </Item>
-	    
+          <New class="org.mortbay.jetty.nio.SelectBlockingChannelConnector">
+            <Set name="port">8080</Set>
+          </New>
+        </Item>
+        -->
+        
       </Array>
     </Set>
 
@@ -54,9 +61,9 @@
         <!-- Configure a test web application with web.xml           -->
         <!-- ======================================================= -->
         <Item>
-	      <New id="testWebAppContext"  class="org.mortbay.jetty.webapp.WebAppHandler">
-	        <Set name="contextPath">/test</Set>
-	        <Set name="war">./webapps/test</Set>
+          <New id="testWebAppContext"  class="org.mortbay.jetty.webapp.WebAppHandler">
+            <Set name="contextPath">/test</Set>
+            <Set name="war">./webapps/test</Set>
           </New>
         </Item>
         
@@ -64,9 +71,9 @@
         <!-- Configure a context directly                            -->
         <!-- ======================================================= -->
         <Item>
-	      <New id="javadocContext"  class="org.mortbay.jetty.handler.ContextHandler">
-	        <Set name="contextPath">/javadoc</Set>
-	        <Set name="resourceBase">./javadoc</Set>
+          <New id="javadocContext"  class="org.mortbay.jetty.handler.ContextHandler">
+            <Set name="contextPath">/javadoc</Set>
+            <Set name="resourceBase">./javadoc</Set>
             <Set name="handler">
                <New id="javadocServletHandler" class="org.mortbay.jetty.servlet.ServletHandler"/>
             </Set>
@@ -77,7 +84,7 @@
         <!-- Handle anything not already handled                     -->
         <!-- ======================================================= -->
         <Item>
-	      <New  class="org.mortbay.jetty.handler.NotFoundHandler"/>
+          <New  class="org.mortbay.jetty.handler.NotFoundHandler"/>
         </Item>
         
       </Array>
@@ -88,35 +95,35 @@
     <!-- Additional configuration for the components defined above   -->
     <!-- =========================================================== -->
 
-	<Ref id="testWebAppContext">
+    <Ref id="testWebAppContext">
       <Get name="SessionHandler">
-		<Set name="SessionManager"><New class="org.mortbay.jetty.servlet.HashSessionManager"/></Set>
-	  </Get>
-	</Ref>
+        <Set name="SessionManager"><New class="org.mortbay.jetty.servlet.HashSessionManager"/></Set>
+      </Get>
+    </Ref>
 
-	<Ref id="javadocServletHandler">
-	   <Set name="servlets">
-	       <Array type="org.mortbay.jetty.servlet.ServletHolder">
-	           <Item>
-	              <New class="org.mortbay.jetty.servlet.ServletHolder">
-	                  <Set name="name">Default</Set>
-	                  <Set name="className">org.mortbay.jetty.servlet.DefaultServlet</Set>
-	              </New>
-	           </Item>                
-	        </Array>
-	    </Set>
-	    
-	   <Set name="servletMappings">
-	       <Array type="org.mortbay.jetty.servlet.ServletMapping">
-	           <Item>
-	              <New class="org.mortbay.jetty.servlet.ServletMapping">
-	                <Set name="pathSpec">/</Set>
-	                <Set name="servletName">Default</Set>
-	              </New>
-	           </Item>
-	       </Array>
-	   </Set>
-	</Ref>
+    <Ref id="javadocServletHandler">
+       <Set name="servlets">
+           <Array type="org.mortbay.jetty.servlet.ServletHolder">
+               <Item>
+                  <New class="org.mortbay.jetty.servlet.ServletHolder">
+                      <Set name="name">Default</Set>
+                      <Set name="className">org.mortbay.jetty.servlet.DefaultServlet</Set>
+                  </New>
+               </Item>                
+            </Array>
+        </Set>
+        
+       <Set name="servletMappings">
+           <Array type="org.mortbay.jetty.servlet.ServletMapping">
+               <Item>
+                  <New class="org.mortbay.jetty.servlet.ServletMapping">
+                    <Set name="pathSpec">/</Set>
+                    <Set name="servletName">Default</Set>
+                  </New>
+               </Item>
+           </Array>
+       </Set>
+    </Ref>
 
 
 

@@ -26,12 +26,16 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import javax.servlet.http.HttpServletRequest;
+
 import org.mortbay.io.Buffer;
 import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
+import org.mortbay.jetty.Continuation;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.RetryRequest;
+import org.mortbay.thread.Timeout;
 import org.mortbay.util.LogSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +56,8 @@ public class SelectChannelConnector extends AbstractConnector
 {
     private static Logger log= LoggerFactory.getLogger(SelectChannelConnector.class);
     
-    
+    private transient Timeout _idleTimeout;
+    private transient Timeout _retryTimeout;
     private transient ServerSocketChannel _acceptChannel;
     private transient SelectionKey _acceptKey;
     private transient Selector _selector;
@@ -65,6 +70,45 @@ public class SelectChannelConnector extends AbstractConnector
      */
     public SelectChannelConnector()
     {
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.jetty.AbstractConnector#doStart()
+     */
+    protected void doStart() throws Exception
+    {
+        _idleTimeout=new Timeout();
+        _idleTimeout.setDuration(getMaxIdleTime());
+        _retryTimeout=new Timeout();
+        _retryTimeout.setDuration(0L);
+        super.doStart();
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.jetty.AbstractConnector#doStop()
+     */
+    protected void doStop() throws Exception
+    {
+        // TODO Auto-generated method stub
+        super.doStop();
+        _idleTimeout.cancelAll();
+        _idleTimeout=null;
+        _retryTimeout.cancelAll();
+        _retryTimeout=null;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.jetty.AbstractConnector#setMaxIdleTime(long)
+     */
+    public void setMaxIdleTime(long maxIdleTime)
+    {
+        super.setMaxIdleTime(maxIdleTime);
+        if (_idleTimeout!=null)
+            _idleTimeout.setDuration(maxIdleTime);
     }
 
 
@@ -139,8 +183,28 @@ public class SelectChannelConnector extends AbstractConnector
             _keyChanges.clear();
         }
  
-        // SELECT for things to do!
-        _selector.select(_maxIdleTime); // TODO this timeout is not the best one
+        // workout how low to wait in select
+        long wait = getMaxIdleTime();
+        long to_next = _idleTimeout.getTimeToNext();
+        if (wait<0 || to_next >=0 && wait>to_next)
+            wait=to_next;
+        to_next = _retryTimeout.getTimeToNext();
+        if (wait<0 || to_next >=0 && wait>to_next)
+            wait=to_next;
+             
+        // Do the select.
+        if (wait>0)
+            _selector.select(wait); 
+        else if (wait==0)
+            _selector.selectNow();
+        else
+            _selector.select();
+        
+        
+        // update the timers for task schedule in this loop
+        long now = System.currentTimeMillis();
+        _idleTimeout.setNow(now);
+        _retryTimeout.setNow(now);
         
         // Look for things to do
         Iterator iter= _selector.selectedKeys().iterator();
@@ -148,9 +212,7 @@ public class SelectChannelConnector extends AbstractConnector
         {
             SelectionKey key= (SelectionKey)iter.next();
             iter.remove();
-            
-            System.err.println("key="+key);
-            
+                        
             try
             {
                 if (!key.isValid())
@@ -181,8 +243,6 @@ public class SelectChannelConnector extends AbstractConnector
                 else
                 {
                     HttpEndPoint connection = (HttpEndPoint)key.attachment();
-                    System.err.println("ready="+key.readyOps());
-                    System.err.println("channel="+key.channel().isOpen());
                     if (connection!=null)
                         connection.dispatch(); 
                 }
@@ -196,7 +256,15 @@ public class SelectChannelConnector extends AbstractConnector
                 if (key != null && key!=_acceptKey)
                     key.interestOps(0);
             }
-        }   
+        }
+        
+        // tick over the timer
+        now=System.currentTimeMillis();
+        _retryTimeout.setNow(now);
+        _retryTimeout.tick();
+        _idleTimeout.setNow(now);
+        _idleTimeout.tick();
+        
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -217,13 +285,15 @@ public class SelectChannelConnector extends AbstractConnector
         int _interestOps;
         int _readBlocked;
         int _writeBlocked;
-	long _lastDispatch;
+        
+        IdleTask _timeoutTask = new IdleTask();
     
         /* ------------------------------------------------------------ */
         HttpEndPoint(SocketChannel channel) 
         {
             super(channel);
             _connection = new HttpConnection(SelectChannelConnector.this,this, getHandler());
+            _timeoutTask.schedule(_idleTimeout);
         }
 
         /* ------------------------------------------------------------ */
@@ -244,8 +314,8 @@ public class SelectChannelConnector extends AbstractConnector
         {
             synchronized(this)
             {
-		_lastDispatch=System.currentTimeMillis();
-
+                _timeoutTask.reschedule();
+                
                 // If threads are blocked on this
                 if (_readBlocked>0 || _writeBlocked>0)
                 {
@@ -468,18 +538,133 @@ public class SelectChannelConnector extends AbstractConnector
             {
                 synchronized(this)
                 {
-                    if (_connection.getRetryRequest()!=null)
-                        undispatch();
+                    RetryContinuation continuation = (RetryContinuation)_connection.getRequest().getContinuation();
+                    if (continuation!=null && continuation.getObject(0)==null)
+                    {
+                        log.debug("continuation {}",continuation);
+                        long timeout=continuation.getTimeout();
+                        continuation.setEndPoint(this);
+                        _retryTimeout.schedule(continuation,timeout);
+                        _selector.wakeup();
+                    }
                     else
-                        System.err.println("RETRY");
+                        undispatch();
                 }
             }
         }
         
         public String toString()
         {
-            return "HTTPep[d="+_dispatched+",io="+_interestOps+",w="+_writable+",b="+_readBlocked+"|"+_writeBlocked+"]";
+            return "HEP[d="+_dispatched+",io="+_interestOps+",w="+_writable+",b="+_readBlocked+"|"+_writeBlocked+"]";
+        }
+        
+
+
+        /* ------------------------------------------------------------ */
+        /* ------------------------------------------------------------ */
+        /* ------------------------------------------------------------ */
+        private class IdleTask extends Timeout.Task
+        {
+            /* ------------------------------------------------------------ */
+            /* @see org.mortbay.thread.Timeout.Task#expire()
+             */
+            public void expire()
+            {
+                try{close();}
+                catch(IOException e) { LogSupport.ignore(log, e); }
+            }
+            
+            public String toString()
+            {
+                return "TimeoutTask:"+HttpEndPoint.this.toString();
+            }
+            
+        }
+        
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.jetty.Connector#newContinuation()
+     */
+    public Continuation newContinuation()
+    {
+        return new RetryContinuation();
+    }
+
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    private class RetryContinuation extends Timeout.Task implements Continuation
+    {
+        Object _object;
+        HttpEndPoint _endPoint;
+        long _timeout;
+        
+        
+        void setEndPoint(HttpEndPoint ep)
+        {
+            synchronized (this)
+            {
+                _endPoint=ep;
+            
+                if (_object!=null)
+                    redispatch();
+            }
+        }
+
+        long getTimeout()
+        {
+            return _timeout;
+        }
+        
+        public void expire()
+        {
+            redispatch();
+        }
+        
+        public Object getObject(long timeout)
+        {
+            synchronized (this)
+            {
+                if (!isExpired() && _object==null && timeout>0)
+                {
+                    if (_endPoint!=null)
+                        throw new IllegalStateException();
+                    _timeout=timeout;
+                    throw new RetryRequest();
+                }
+            }   
+            
+            return _object;
+        }
+        
+        public void resume(Object object)
+        {
+            synchronized (this)
+            {
+                _object=object==null?this:object;
+            
+                if (_endPoint!=null)
+                    redispatch();
+            }
+        }
+
+        private void redispatch()
+        {
+            boolean dispatch_done=false;
+            try
+            {
+                dispatch_done=getThreadPool().dispatch(_endPoint);
+            }
+            finally
+            {
+                if (!dispatch_done)
+                {
+                    log.warn("dispatch failed");
+                    _endPoint.undispatch();
+                }
+            }
         }
     }
-    
 }

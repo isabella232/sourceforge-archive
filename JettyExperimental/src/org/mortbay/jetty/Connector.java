@@ -96,4 +96,7 @@ public interface Connector extends LifeCycle, Buffers
     int getConfidentialPort();
     String getConfidentialScheme();
     boolean isConfidential(Request request);
+    
+    Continuation newContinuation();
+    
 }

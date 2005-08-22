@@ -99,6 +99,7 @@ public class Request implements HttpServletRequest
     private String[] _lastCookies;
     private long _timeStamp;
     private String _timeStampStr;
+    private Continuation _continuation;
     
     /* ------------------------------------------------------------ */
     /**
@@ -137,6 +138,7 @@ public class Request implements HttpServletRequest
         _inputState=NONE;
         _reader=null; 
         _cookiesExtracted=false;
+        _continuation=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -1337,6 +1339,29 @@ public class Request implements HttpServletRequest
     {
         _attributes=attributes;
     }
+
+    /* ------------------------------------------------------------ */
+    public Continuation getContinuation()
+    {
+        return _continuation;
+    }
+    
+    /* ------------------------------------------------------------ */
+    void setContinuation(Continuation cont)
+    {
+        _continuation=cont;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public Continuation newContinuation()
+    {
+        if (_continuation!=null)
+            throw new IllegalStateException();
+        
+        _continuation=getConnection().getConnector().newContinuation();
+        return _continuation;
+    }
+    
     
 
 }

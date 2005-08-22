@@ -28,6 +28,7 @@ import org.mortbay.util.LogSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 /** Abstract Connector implementation.
  * This abstract implemenation of the Connector interface provides:<ul>
  * <li>AbstractLifeCycle implementation</li>
@@ -408,6 +409,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
         return "Connector "+getHost()+":"+getPort();
     }
     
+    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -450,4 +452,47 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
 
     }
 
+    
+    public Continuation newContinuation()
+    {
+        return new WaitingContinuation();
+    }
+    
+    private static class WaitingContinuation implements org.mortbay.jetty.Continuation
+    {
+        Object _object;
+        boolean _waited;
+        
+        public void resume(Object object)
+        {
+            synchronized (this)
+            {
+                _object=object==null?this:object;
+                notify();
+            }
+        }
+
+        public Object getObject(long timeout)
+        {
+            if (timeout < 0)
+                throw new IllegalArgumentException();
+            
+            synchronized (this)
+            {
+                try
+                {
+                    if (!_waited && _object==null && timeout>0)
+                        wait(timeout);
+                    _waited=true;
+                }
+                catch (InterruptedException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+            return _object;
+        }
+        
+    
+    }
 }

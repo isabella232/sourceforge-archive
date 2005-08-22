@@ -217,7 +217,6 @@ abstract public class TagLibraryInfo {
     public FunctionInfo getFunction(String name) {
 
         if (functions == null || functions.length == 0) {
-            System.err.println("No functions");
             return null;
         }
 
