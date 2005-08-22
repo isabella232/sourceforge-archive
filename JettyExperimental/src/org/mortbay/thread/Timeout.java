@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Timeout
 {
-    private final static Logger log = LoggerFactory.getLogger(TimeoutTest.class);
+    private final static Logger log = LoggerFactory.getLogger(Timeout.class);
     
     private long _duration;
     private long _now;
