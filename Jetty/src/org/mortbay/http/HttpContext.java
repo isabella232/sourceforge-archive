@@ -1799,8 +1799,14 @@ public class HttpContext extends Container
             {
                 thread.setContextClassLoader(lastContextLoader);
             }
+            
+            // TODO this is a poor test
             if (_loader instanceof ContextLoader)
+            {
                 ((ContextLoader)_loader).destroy();
+                LogFactory.release(_loader);
+            }
+            
             _loader=null;
         }
         _resources.flushCache();
@@ -1845,12 +1851,12 @@ public class HttpContext extends Container
         
         removeComponent(_resources);
         if (_resources!=null)
-	{
-	    _resources.flushCache();
-	    if (_resources.isStarted())
-	        try{_resources.stop();}catch(Exception e){LogSupport.ignore(log,e);}
-            _resources.destroy();
-	}
+        {
+            _resources.flushCache();
+            if (_resources.isStarted())
+                try{_resources.stop();}catch(Exception e){LogSupport.ignore(log,e);}
+                _resources.destroy();
+        }
         _resources=null;
         
         super.destroy();

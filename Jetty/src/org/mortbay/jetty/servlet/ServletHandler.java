@@ -401,6 +401,7 @@ public class ServletHandler extends Container implements HttpHandler
             return;
         
         _contextLog = LogFactory.getLog(getHttpContext().getHttpContextName());
+        
         if (_contextLog==null)
             _contextLog=log;
         

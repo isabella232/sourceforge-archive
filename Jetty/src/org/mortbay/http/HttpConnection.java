@@ -624,7 +624,7 @@ public class HttpConnection
         {
             // No input read yet - so assume it never will be
             _inputStream.setExpectContinues(null);
-            _inputStream.setContentLength(0);
+            _inputStream.unsafeSetContentLength(0);
         }
         
         // Handler forced close, listener stopped or no idle threads left.

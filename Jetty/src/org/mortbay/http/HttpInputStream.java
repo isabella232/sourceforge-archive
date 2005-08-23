@@ -259,6 +259,12 @@ public class HttpInputStream extends FilterInputStream
             throw new IllegalStateException("Chunking");
         _realIn.setByteLimit(len);
     }
+
+    /* ------------------------------------------------------------ */
+    void unsafeSetContentLength(int len) 
+    {
+        _realIn.setByteLimit(len);
+    } 
     
     /* ------------------------------------------------------------ */
     /** Get the content length.

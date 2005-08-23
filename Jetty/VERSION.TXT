@@ -1,6 +1,11 @@
 Jetty Versions
 --------------
 
+Jetty-5.1.5rc1 - 23 August 2005
+ + upgraded to commons logging 1.0.4
+ + Release commons logging factories when stopping context.
+ + Fixed illegal state with chunks and 100 continue - Tony Seebregts
+
 Jetty-5.1.5rc0 - 16 August 2005
  + Fixed component remove memory leak for stop/start cycles
  + Facade over commons LogFactory so that discovery may be avoided.

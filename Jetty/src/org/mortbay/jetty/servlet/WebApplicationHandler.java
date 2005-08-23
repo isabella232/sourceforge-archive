@@ -185,7 +185,6 @@ public class WebApplicationHandler extends ServletHandler
     public synchronized void addEventListener(EventListener listener)
         throws IllegalArgumentException
     {
-
         if ((listener instanceof HttpSessionActivationListener)
             || (listener instanceof HttpSessionAttributeListener)
             || (listener instanceof HttpSessionBindingListener)
@@ -210,7 +209,6 @@ public class WebApplicationHandler extends ServletHandler
         {            
             _contextAttributeListeners= LazyList.add(_contextAttributeListeners, listener);
         }
-
         
         super.addEventListener(listener);
     }

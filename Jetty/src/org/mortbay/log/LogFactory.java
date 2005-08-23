@@ -39,4 +39,9 @@ public class LogFactory {
         return factory;
     }
     
+    public static void release(ClassLoader loader)
+    {
+        org.apache.commons.logging.LogFactory.release(loader);
+    }
+    
 }
