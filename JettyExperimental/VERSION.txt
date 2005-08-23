@@ -1,5 +1,8 @@
+
 Jetty-6.0.ALPHA1
+    + Continuations - way cool way to suspend a request and retry later.
     + Dispatchers
+    + Security
     + Filters
     + web.xml handling
 
