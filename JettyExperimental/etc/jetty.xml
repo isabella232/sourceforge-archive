@@ -31,7 +31,7 @@
         </Item>
         -->
         
-	<!-- Use this connector for many frequently idle connections -->
+        <!-- Use this connector for many frequently idle connections -->
         <Item>
           <New class="org.mortbay.jetty.nio.SelectChannelConnector">
             <Set name="port">8080</Set>
@@ -60,19 +60,12 @@
         <!-- Configure a test web application with web.xml           -->
         <!-- ======================================================= -->
         <Item>
-          <New id="AMQ"  class="org.mortbay.jetty.webapp.WebAppHandler">
-            <Set name="contextPath">/amq</Set>
-            <Set name="war">./webapps/amq</Set>
-          </New>
-        </Item>
-        
-        <!-- ======================================================= -->
-        <!-- Configure a test web application with web.xml           -->
-        <!-- ======================================================= -->
-        <Item>
           <New id="testWebAppContext"  class="org.mortbay.jetty.webapp.WebAppHandler">
             <Set name="contextPath">/test</Set>
             <Set name="war">./webapps/test</Set>
+            <Get name="SessionHandler">
+              <Set name="SessionManager"><New class="org.mortbay.jetty.servlet.HashSessionManager"/></Set>
+            </Get>
           </New>
         </Item>
         
@@ -84,7 +77,29 @@
             <Set name="contextPath">/javadoc</Set>
             <Set name="resourceBase">./javadoc</Set>
             <Set name="handler">
-               <New id="javadocServletHandler" class="org.mortbay.jetty.servlet.ServletHandler"/>
+              <New id="javadocServletHandler" class="org.mortbay.jetty.servlet.ServletHandler">
+		<Set name="servlets">
+		    <Array type="org.mortbay.jetty.servlet.ServletHolder">
+			<Item>
+			   <New class="org.mortbay.jetty.servlet.ServletHolder">
+			       <Set name="name">Default</Set>
+			       <Set name="className">org.mortbay.jetty.servlet.DefaultServlet</Set>
+			   </New>
+			</Item>                
+		     </Array>
+		 </Set>
+		 
+		<Set name="servletMappings">
+		    <Array type="org.mortbay.jetty.servlet.ServletMapping">
+			<Item>
+			   <New class="org.mortbay.jetty.servlet.ServletMapping">
+			     <Set name="pathSpec">/</Set>
+			     <Set name="servletName">Default</Set>
+			   </New>
+			</Item>
+		    </Array>
+		</Set>
+	      </New>
             </Set>
           </New>
         </Item>
@@ -100,40 +115,10 @@
     </Set>
 
 
+
     <!-- =========================================================== -->
     <!-- Additional configuration for the components defined above   -->
     <!-- =========================================================== -->
-
-    <Ref id="testWebAppContext">
-      <Get name="SessionHandler">
-        <Set name="SessionManager"><New class="org.mortbay.jetty.servlet.HashSessionManager"/></Set>
-      </Get>
-    </Ref>
-
-    <Ref id="javadocServletHandler">
-       <Set name="servlets">
-           <Array type="org.mortbay.jetty.servlet.ServletHolder">
-               <Item>
-                  <New class="org.mortbay.jetty.servlet.ServletHolder">
-                      <Set name="name">Default</Set>
-                      <Set name="className">org.mortbay.jetty.servlet.DefaultServlet</Set>
-                  </New>
-               </Item>                
-            </Array>
-        </Set>
-        
-       <Set name="servletMappings">
-           <Array type="org.mortbay.jetty.servlet.ServletMapping">
-               <Item>
-                  <New class="org.mortbay.jetty.servlet.ServletMapping">
-                    <Set name="pathSpec">/</Set>
-                    <Set name="servletName">Default</Set>
-                  </New>
-               </Item>
-           </Array>
-       </Set>
-    </Ref>
-
     <Call class="org.mortbay.jetty.webapp.WebAppHandler" name="addWebApplications">
       <Arg><Ref id="Server"/></Arg>
       <Arg>./webapps</Arg>
