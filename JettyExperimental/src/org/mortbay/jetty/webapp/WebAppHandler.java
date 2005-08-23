@@ -17,6 +17,8 @@ package org.mortbay.jetty.webapp;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EventListener;
 
 import javax.servlet.ServletContextAttributeListener;
@@ -30,6 +32,8 @@ import javax.servlet.http.HttpSessionBindingListener;
 import javax.servlet.http.HttpSessionListener;
 
 import org.mortbay.io.IO;
+import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.servlet.ServletHandler;
@@ -634,4 +638,94 @@ public class WebAppHandler extends ContextHandler
     }
 
     
+
+    /* ------------------------------------------------------------ */
+    /**  Add Web Applications.
+     * Add auto webapplications to the server.  The name of the
+     * webapp directory or war is used as the context name. If the
+     * webapp matches the rootWebApp it is added as the "/" context.
+     * @param host Virtual host name or null
+     * @param webapps Directory file name or URL to look for auto
+     * webapplication.
+     * @param defaults The defaults xml filename or URL which is
+     * loaded before any in the web app. Must respect the web.dtd.
+     * If null the default defaults file is used. If the empty string, then
+     * no defaults file is used.
+     * @param extract If true, extract war files
+     * @param java2CompliantClassLoader True if java2 compliance is applied to all webapplications
+     * @exception IOException 
+     */
+    public static void addWebApplications(Server server,
+                                          String webapps,
+                                          String defaults,
+                                          boolean extract,
+                                          boolean java2CompliantClassLoader)
+        throws IOException
+    {
+        ArrayList wacs = new ArrayList(Arrays.asList(server.getHandlers()));
+        Resource r=Resource.newResource(webapps);
+        if (!r.exists())
+            throw new IllegalArgumentException("No such webapps resource "+r);
+        
+        if (!r.isDirectory())
+            throw new IllegalArgumentException("Not directory webapps resource "+r);
+        
+        String[] files=r.list();
+        
+        files: for (int f=0;files!=null && f<files.length;f++)
+        {
+            String context=files[f];
+            
+            if (context.equalsIgnoreCase("CVS/") ||
+                    context.equalsIgnoreCase("CVS") ||
+                    context.startsWith("."))
+                continue;
+            
+            Resource app = r.addPath(r.encode(files[f]));
+            
+            if (context.toLowerCase().endsWith(".war") ||
+                    context.toLowerCase().endsWith(".jar"))
+            {
+                context=context.substring(0,context.length()-4);
+                Resource unpacked=r.addPath(context);
+                if (unpacked!=null && unpacked.exists() && unpacked.isDirectory())
+                    continue;
+            }
+            
+            if (context.equalsIgnoreCase("root")||context.equalsIgnoreCase("root/"))
+                context="/";
+            else
+                context="/"+context;
+            if (context.endsWith("/") && context.length()>0)
+                context=context.substring(0,context.length()-1);
+            
+            // Check the webapp has not already been added.
+            for (int i=0;i<wacs.size();i++)
+            {
+                Object o =wacs.get(i);
+                if (o instanceof WebAppHandler)
+                {
+                    WebAppHandler w = (WebAppHandler)o;
+                    System.err.println("w="+w);
+                    System.err.println(app+"=="+Resource.newResource(w.getWar()));
+                    System.err.println(context+"=="+w.getContextPath());
+                    if (app.equals(Resource.newResource(w.getWar())) && context.equals(w.getContextPath()))
+                            continue files;
+                }
+            }
+            
+            // add it
+            WebAppHandler wah = new WebAppHandler();
+            wah.setContextPath(context);
+            if (defaults!=null)
+                wah.setDefaultsDescriptor(defaults);
+            wah.setExtractWAR(extract);
+            wah.setWar(app.toString());
+            // TODO java2 classloader
+            
+            wacs.add(wah);
+        }
+
+        server.setHandlers((Handler[])wacs.toArray(new Handler[wacs.size()]));
+    }
 }

@@ -5,7 +5,7 @@
 <!-- =============================================================== -->
 <!-- Configure the Jetty Server                                      -->
 <!-- =============================================================== -->
-<Configure class="org.mortbay.jetty.Server">
+<Configure id="Server" class="org.mortbay.jetty.Server">
 
     <!-- =========================================================== -->
     <!-- Set connectors                                              -->
@@ -56,6 +56,15 @@
     <Set name="handlers">
       <Array type="org.mortbay.jetty.Handler"> 
       
+        <!-- ======================================================= -->
+        <!-- Configure a test web application with web.xml           -->
+        <!-- ======================================================= -->
+        <Item>
+          <New id="AMQ"  class="org.mortbay.jetty.webapp.WebAppHandler">
+            <Set name="contextPath">/amq</Set>
+            <Set name="war">./webapps/amq</Set>
+          </New>
+        </Item>
         
         <!-- ======================================================= -->
         <!-- Configure a test web application with web.xml           -->
@@ -125,7 +134,13 @@
        </Set>
     </Ref>
 
-
+    <Call class="org.mortbay.jetty.webapp.WebAppHandler" name="addWebApplications">
+      <Arg><Ref id="Server"/></Arg>
+      <Arg>./webapps</Arg>
+      <Arg>org/mortbay/jetty/webapp/webdefault.xml</Arg>
+      <Arg type="boolean">True</Arg>
+      <Arg type="boolean">True</Arg>
+    </Call>
 
     <Call name="start"/>
 

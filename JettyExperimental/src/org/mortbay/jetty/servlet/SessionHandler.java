@@ -41,7 +41,7 @@ public class SessionHandler extends WrappedHandler
     private static Logger log = LoggerFactory.getLogger(SessionHandler.class);
 
     /* -------------------------------------------------------------- */
-    SessionManager _sessionManager;
+    SessionManager _sessionManager=new HashSessionManager();
     
 
     /* ------------------------------------------------------------ */
@@ -52,12 +52,15 @@ public class SessionHandler extends WrappedHandler
     {
         return _sessionManager;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param sessionManager The sessionManager to set.
      */
     public void setSessionManager(SessionManager sessionManager)
     {
+        if (isStarted())
+            throw new IllegalStateException();
         _sessionManager = sessionManager;
     }
 
@@ -67,8 +70,6 @@ public class SessionHandler extends WrappedHandler
      */
     protected void doStart() throws Exception
     {
-        if (_sessionManager==null)
-            _sessionManager=new HashSessionManager();
         _sessionManager.start();
         super.doStart();
     }

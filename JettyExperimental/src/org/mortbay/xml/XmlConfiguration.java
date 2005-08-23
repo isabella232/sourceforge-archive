@@ -200,6 +200,10 @@ public class XmlConfiguration
      */
     private void configure(Object obj, XmlParser.Node cfg, int i) throws Exception
     {
+        String id = cfg.getAttribute("id");
+        if (id!=null)
+            _idMap.put(id,obj);
+            
         for (; i < cfg.size(); i++)
         {
             Object o = cfg.get(i);

@@ -909,8 +909,8 @@ public class Request implements HttpServletRequest
         
         if (_session == null && create)
         {
-            HttpSession session=_sessionManager.newHttpSession(this);
-            Cookie cookie=_sessionManager.getSessionCookie(session,isSecure());
+            _session=_sessionManager.newHttpSession(this);
+            Cookie cookie=_sessionManager.getSessionCookie(_session,isSecure());
             if (cookie!=null)
                 _connection.getResponse().addCookie(cookie);
         }
