@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -191,8 +192,6 @@ public class Dispatcher implements RequestDispatcher
         ServletHttpRequest servletHttpRequest=
             (ServletHttpRequest)httpConnection.getRequest().getWrapper();
         
-        
-        
         // wrap the request and response
         DispatcherRequest request = new DispatcherRequest(httpServletRequest,
                                                           servletHttpRequest,
@@ -243,23 +242,11 @@ public class Dispatcher implements RequestDispatcher
                 	_servletHandler.dispatch(null,request,response,_holder, type);
             }
             else
-            {
-                // merge query string
-                String oldQ=httpServletRequest.getQueryString();
-                if (oldQ!=null && oldQ.length()>0)
-                {
-                    if (query==null)
-                        query=oldQ;
-                    else
-                        query=query+"&"+oldQ;
-                }
-                
-                
+            {   
                 // Adjust servlet paths
                 request.setPaths(_servletHandler.getHttpContext().getContextPath(),
                                  PathMap.pathMatch(_pathSpec,_pathInContext),
-                                 PathMap.pathInfo(_pathSpec,_pathInContext),
-                                 query);
+                                 PathMap.pathInfo(_pathSpec,_pathInContext));
         
 
                 // are we wrap over or wrap under
@@ -329,7 +316,6 @@ public class Dispatcher implements RequestDispatcher
         String _contextPath;
         String _servletPath;
         String _pathInfo;
-        String _query;
         MultiMap _parameters;
         HashMap _attributes;
         boolean _xContext;
@@ -373,12 +359,11 @@ public class Dispatcher implements RequestDispatcher
         }
         
         /* ------------------------------------------------------------ */
-        void setPaths(String cp,String sp, String pi, String qs)
+        void setPaths(String cp,String sp, String pi)
         {
             _contextPath = (cp.length()==1 && cp.charAt(0)=='/')?"":cp;
             _servletPath=sp;
             _pathInfo=pi;
-            _query=qs;
         }
         
         /* ------------------------------------------------------------ */
@@ -463,7 +448,18 @@ public class Dispatcher implements RequestDispatcher
         /* ------------------------------------------------------------ */
         public String getQueryString()
         {
-            return(_filterType==Dispatcher.__INCLUDE||isNamed())?super.getQueryString():_query;
+            if (_filterType==Dispatcher.__INCLUDE||isNamed()||_parameters==null)
+                return super.getQueryString();
+            
+            Map m=getParameterMap();
+            UrlEncoded encode = new UrlEncoded();
+            Iterator iter=m.entrySet().iterator();
+            while (iter.hasNext())
+            {
+                Map.Entry entry = (Map.Entry)iter.next();
+                encode.addValues(entry.getKey(), (String[])entry.getValue());
+            }
+            return encode.encode();
         }
         
 
@@ -490,34 +486,19 @@ public class Dispatcher implements RequestDispatcher
         /* -------------------------------------------------------------- */
         public String getParameter(String name)
         {
-            if (_parameters==null)
+            if (_parameters==null || !_parameters.containsKey(name))
                 return super.getParameter(name);
-            String value=_parameters.getString(name);
-            if (value!=null)
-                return value;
-            return super.getParameter(name);
+            
+            return _parameters.get(name).toString();
         }
         
         /* -------------------------------------------------------------- */
         public String[] getParameterValues(String name)
         {
-            List v0=_parameters==null?null:_parameters.getValues(name);
-            String[] v1=super.getParameterValues(name);
-
-            if (v0==null && v1==null)
-                return null;
-            
-            String[] a=new String[(v0==null?0:v0.size())+(v1==null?0:v1.length)];
-            if (v0==null || v0.size()==0)
-                return v1;
-            if (v1==null || v1.length==0)
-                return (String[])v0.toArray(a);
-            
-            for (int i=0;i<v0.size();i++)
-                a[i]=(String)v0.get(i);
-            for (int i=0;i<v1.length;i++)
-                a[v0.size()+i]=v1[i];
-            return a;
+            if (_parameters==null || !_parameters.containsKey(name))
+                return super.getParameterValues(name);
+            List l =_parameters.getValues(name);
+            return (String[])l.toArray(new String[l.size()]);
         }
         
         /* -------------------------------------------------------------- */

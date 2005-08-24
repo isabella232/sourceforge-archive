@@ -6,6 +6,7 @@ Jetty-5.1.5rc1 - 23 August 2005
  + Release commons logging factories when stopping context.
  + Fixed illegal state with chunks and 100 continue - Tony Seebregts
  + Fixed PKCS12Import input string method
+ + Fixed merge of Dispatcher parameters
 
 Jetty-5.1.5rc0 - 16 August 2005
  + Fixed component remove memory leak for stop/start cycles
