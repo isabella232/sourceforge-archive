@@ -313,8 +313,8 @@
             <manifest>
                 <attribute name="Built-By" value="${user.name}"/>
                 <attribute name="Main-Class" value="org.mortbay.http.HttpServer"/>
-				<attribute name="Class-Path" value="ext\commons-logging.jar"/>
-<!-- doc update: only runs as command line: java -cp ext\commons-logging.jar;lib\org.mortbay.http.jar org.mortbay.http.HttpServer %1 %2 -->
+				<attribute name="Class-Path" value="ext\commons-logging-api.jar"/>
+<!-- doc update: only runs as command line: java -cp ext\commons-logging-api.jar;lib\org.mortbay.http.jar org.mortbay.http.HttpServer %1 %2 -->
               </manifest>
     </jar>
   </target>
@@ -465,8 +465,6 @@
         <include name="etc/jetty-jmx.xml"/>  
         <include name="etc/webdefault.xml"/>   
 	<include name="extra/lib/*-jdk1.2.jar"/>
-        <include name="etc/commons-logging.properties"/> 
-        <include name="etc/simplelog.properties"/>         
         <exclude name="**/CVS/**"/>
       </zipfileset>
     </zip>
