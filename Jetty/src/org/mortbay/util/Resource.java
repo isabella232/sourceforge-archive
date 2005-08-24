@@ -375,9 +375,7 @@ public abstract class Resource implements Serializable
         DateFormat dfmt=DateFormat.getDateTimeInstance(DateFormat.MEDIUM,
                                                        DateFormat.MEDIUM);
         for (int i=0 ; i< ls.length ; i++)
-        {
-            System.err.println("base="+base+" item="+ls[i]);
-            
+        {   
             String encoded=URI.encodePath(ls[i]);
             Resource item = addPath(encoded);
             

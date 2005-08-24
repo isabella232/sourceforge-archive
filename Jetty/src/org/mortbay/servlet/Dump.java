@@ -185,6 +185,9 @@ public class Dump extends HttpServlet
             table.addHeading("getContentType:&nbsp;").cell().right();
             table.addCell("" + request.getContentType());
             table.newRow();
+            table.addHeading("getCharacterEncoding:&nbsp;").cell().right();
+            table.addCell("" + request.getCharacterEncoding());
+            table.newRow();
             table.addHeading("getRequestURI:&nbsp;").cell().right();
             table.addCell("" + request.getRequestURI());
             table.newRow();
