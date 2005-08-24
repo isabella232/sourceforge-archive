@@ -533,6 +533,7 @@ abstract public class ThreadedServer extends ThreadPool
             try
             {
                 if (_listen != null) _listen.close();
+                _listen=null;
             }
             catch (IOException e)
             {
@@ -544,9 +545,10 @@ abstract public class ThreadedServer extends ThreadPool
             for (int a = 0; _acceptor!=null && a<_acceptor.length; a++)
             {
                 Acceptor acc = _acceptor[a];
-                if (acc != null) acc.interrupt();
+                if (acc != null) 
+                    acc.interrupt();
             }
-            Thread.yield();
+            Thread.sleep(100);
 
             for (int a = 0; _acceptor!=null && a<_acceptor.length; a++)
             {
@@ -657,7 +659,8 @@ abstract public class ThreadedServer extends ThreadPool
                     if (_acceptor != null)
                     {
                         for (int a = 0; a < _acceptor.length; a++)
-                            if (_acceptor[a] == this) _acceptor[a] = null;
+                            if (_acceptor[a] == this) 
+                                _acceptor[a] = null;
                     }
                     threadedServer.notifyAll();
                 }
