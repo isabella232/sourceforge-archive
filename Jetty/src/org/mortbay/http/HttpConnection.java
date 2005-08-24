@@ -1016,9 +1016,13 @@ public class HttpConnection
                         _inputStream.setExpectContinues(null);
                         no_continue_sent=true;
                     }
-                    else
-                        // Read remaining input
-                        while(_inputStream.skip(4096)>0 || _inputStream.read()>=0);
+                    else 
+                    {
+                        int remaining = _inputStream.getContentLength();
+                        if (remaining!=0)
+                            // Read remaining input
+                            while(_inputStream.skip(4096)>0 || _inputStream.read()>=0);
+                    }
                 }
                 catch(IOException e)
                 {

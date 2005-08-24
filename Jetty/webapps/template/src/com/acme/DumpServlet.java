@@ -19,6 +19,12 @@ public class DumpServlet extends HttpServlet
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException,
             ServletException
     {
+        if (request.getParameter("redirect")!=null)
+        {
+            response.sendRedirect(request.getParameter("redirect"));
+            return;
+        }
+        
         String furi = (String) request.getAttribute("javax.servlet.forward.request_uri");
         if (furi == null) furi = request.getRequestURI();
         String url = request.getScheme() + "://" + request.getServerName() + ":"
@@ -33,6 +39,7 @@ public class DumpServlet extends HttpServlet
         String info = (String) request.getAttribute("javax.servlet.include.path_info");
         if (info == null) info = request.getPathInfo();
 
+        
         PrintWriter out = null;
         try
         {

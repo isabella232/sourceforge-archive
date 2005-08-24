@@ -9,6 +9,7 @@ Jetty-5.1.5rc1 - 23 August 2005
  + Fixed merge of Dispatcher parameters
  + Encoded full path in ResourceHandler directory listing
  + handle extra params after charset in header
+ + Fixed 100-continues with chunking and early commit
 
 Jetty-5.1.5rc0 - 16 August 2005
  + Fixed component remove memory leak for stop/start cycles
