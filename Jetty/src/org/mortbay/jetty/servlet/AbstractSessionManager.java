@@ -119,8 +119,8 @@ public abstract class AbstractSessionManager implements SessionManager
     
     /* ------------------------------------------------------------ */
     /** Set Use Requested ID.
-     * @deprectated use setCrossContextSessionIDs
      * @param useRequestedId True if requested session ID are first considered for new
+     * @deprecated use setCrossContextSessionIDs
      * session IDs
      */
     public void setUseRequestedId(boolean useRequestedId)
