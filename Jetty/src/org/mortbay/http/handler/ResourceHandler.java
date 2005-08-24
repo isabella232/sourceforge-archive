@@ -773,7 +773,7 @@ public class ResourceHandler extends AbstractHttpHandler
         if (data==null)
         {
             String base = URI.addPaths(request.getPath(),"/");
-            String dir = resource.getListHTML(base,parent);
+            String dir = resource.getListHTML(URI.encodePath(base),parent);
             if (dir==null)
             {
                 response.sendError(HttpResponse.__403_Forbidden,

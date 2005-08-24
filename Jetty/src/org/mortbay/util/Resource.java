@@ -350,13 +350,14 @@ public abstract class Resource implements Serializable
         if (!isDirectory())
             return null;
         
+      
         String[] ls = list();
         if (ls==null)
             return null;
         Arrays.sort(ls);
         
-        String title = "Directory: "+base;
-
+        String title = "Directory: "+URI.decodePath(base);
+        title=StringUtil.replace(StringUtil.replace(title,"<","&lt;"),">","&gt;");
         StringBuffer buf=new StringBuffer(4096);
         buf.append("<HTML><HEAD><TITLE>");
         buf.append(title);
@@ -375,10 +376,13 @@ public abstract class Resource implements Serializable
                                                        DateFormat.MEDIUM);
         for (int i=0 ; i< ls.length ; i++)
         {
+            System.err.println("base="+base+" item="+ls[i]);
+            
             String encoded=URI.encodePath(ls[i]);
             Resource item = addPath(encoded);
             
             buf.append("<TR><TD><A HREF=\"");
+            
             String path=URI.addPaths(base,encoded);
             
             if (item.isDirectory() && !path.endsWith("/"))

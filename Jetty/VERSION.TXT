@@ -7,6 +7,7 @@ Jetty-5.1.5rc1 - 23 August 2005
  + Fixed illegal state with chunks and 100 continue - Tony Seebregts
  + Fixed PKCS12Import input string method
  + Fixed merge of Dispatcher parameters
+ + Encoded full path in ResourceHandler directory listing
 
 Jetty-5.1.5rc0 - 16 August 2005
  + Fixed component remove memory leak for stop/start cycles
