@@ -14,6 +14,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 public class DumpServlet extends HttpServlet
 {
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException,
@@ -55,6 +58,30 @@ public class DumpServlet extends HttpServlet
 
         out.write("<html><body>");
         out.write("<h1>Dump from " + getServletContext().getServerInfo() + "</h1>");
+
+        /* Some helpful debug
+        out.write("<pre>");
+        out.write("*** Thread.currentThread().getContextClassLoader()="+Thread.currentThread().getContextClassLoader());
+        out.write("\n");
+        out.write("*** this.getClass().getClassLoader()="+this.getClass().getClassLoader());
+        out.write("\n");
+        out.write("*** LogFactory.class.getClassLoader()="+LogFactory.class.getClassLoader());
+        out.write("\n");
+        try
+        {
+            Log log = LogFactory.getLog(DumpServlet.class);
+            out.write("*** log.getclass().getClassLoader() "+log.getClass().getClassLoader());
+            out.write("\n");
+	    log.info("some information");
+        }
+        catch(Throwable th)
+        {
+            th.printStackTrace(out);
+        }
+        out.write("\n");
+        out.write("</pre>");
+	    */
+        
         out.write("<h3>Logical Values</h3>");
         out.write("<table border=\"1\"><tr><th>Name</th><th>Value</th><th>Expected Value</th></tr>");
         out.write("<tr><td>Client URL</td><td>" + url

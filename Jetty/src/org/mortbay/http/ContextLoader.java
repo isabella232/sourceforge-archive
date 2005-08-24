@@ -175,9 +175,7 @@ public class ContextLoader extends URLClassLoader
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        if (log.isDebugEnabled())
-            return "ContextLoader@" + hashCode() + "(" + _urlClassPath + ") / " + _parent.toString();
-        return "ContextLoader@" + hashCode();
+        return "ContextLoader@" + hashCode() + "(" + _urlClassPath + ")\n  --parent--> " + _parent.toString();
     }
 
     /* ------------------------------------------------------------ */
@@ -210,7 +208,7 @@ public class ContextLoader extends URLClassLoader
             {
                 c= _parent.loadClass(name);
                 if (log.isTraceEnabled())
-                    log.trace("loaded " + c);
+                    log.trace("p0 loaded " + c);
             }
             catch (ClassNotFoundException e)
             {
@@ -226,7 +224,7 @@ public class ContextLoader extends URLClassLoader
             {
                 c= this.findClass(name);
                 if (log.isTraceEnabled())
-                    log.trace("loaded " + c);
+                    log.trace("cx loaded " + c);
             }
             catch (ClassNotFoundException e)
             {
@@ -240,9 +238,9 @@ public class ContextLoader extends URLClassLoader
                 log.trace("try loadClass " + name + " from " + _parent);
             c= _parent.loadClass(name);
             if (log.isTraceEnabled())
-                log.trace("loaded " + c);
+                log.trace("p1 loaded " + c);
         }
-
+        
         if (c == null)
             throw ex;
 
