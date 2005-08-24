@@ -158,6 +158,7 @@
     <Arg><SystemProperty name="jetty.home" default="."/>/webapps/</Arg>
     <Arg><SystemProperty name="jetty.home" default="."/>/etc/webdefault.xml</Arg>
     <Arg type="boolean">true</Arg><!--extract WARs-->
+    <Arg type="boolean">false</Arg><!-- java 2 compliante class loader s-->
   </Call>
 
 
@@ -217,15 +218,15 @@
       <Item>org.mortbay.</Item>
       <Item>org.xml.</Item>
       <Item>org.w3c.</Item>
+      <Item>org.apache.commons.logging.</Item>
     </Array>
   </Set>
 
   <!-- Server classes are hidden from a HttpContext or webapp -->
   <Set name="serverClasses">
     <Array type="java.lang.String">
-<!--      <Item>-org.mortbay.http.PathMap</Item>
+      <Item>-org.mortbay.http.PathMap</Item>
       <Item>org.mortbay.http.</Item>
--->
       <Item>-org.mortbay.jetty.servlet.Default</Item>
       <Item>-org.mortbay.jetty.servlet.Invoker</Item>
       <Item>-org.mortbay.jetty.servlet.JSR154Filter</Item>

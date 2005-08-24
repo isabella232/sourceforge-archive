@@ -11,6 +11,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.LineNumberReader;
 import java.io.OutputStream;
 import java.security.Key;
 import java.security.KeyStore;
@@ -79,10 +80,11 @@ public class PKCS12Import
       KeyStore kspkcs12 = KeyStore.getInstance("pkcs12");
       KeyStore ksjks = KeyStore.getInstance("jks");
 
+      LineNumberReader in = new LineNumberReader(new InputStreamReader(System.in));
       System.out.print("Enter input keystore passphrase: ");
-      char[] inphrase = readPassphrase();
+      char[] inphrase = in.readLine().toCharArray();
       System.out.print("Enter output keystore passphrase: ");
-      char[] outphrase = readPassphrase();
+      char[] outphrase = in.readLine().toCharArray();
 
       kspkcs12.load(new FileInputStream(fileIn), inphrase);
 
@@ -123,29 +125,5 @@ public class PKCS12Import
       }
    }
 
-   static char[] readPassphrase() throws IOException
-   {
-      InputStreamReader in = new InputStreamReader(System.in);
-
-      char[] cbuf = new char[256];
-      int i = 0;
-
-readchars:
-      while (i < cbuf.length) {
-         char c = (char)in.read();
-         switch (c) {
-            case '\r':
-               break readchars;
-            case '\n':
-               break readchars;
-            default:
-               cbuf[i++] = c;
-         }
-      }
-
-      char[] phrase = new char[i];
-      System.arraycopy(cbuf, 0, phrase, 0, i);
-      return phrase;
-   }
 }
 
