@@ -35,7 +35,6 @@ public class LogFactory {
     
     public static org.apache.commons.logging.LogFactory getFactory()
     {
-        System.err.println("factory="+factory);
         return factory;
     }
     
