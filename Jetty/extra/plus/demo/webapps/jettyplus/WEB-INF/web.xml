@@ -14,6 +14,12 @@
      org.mortbay.webapps.jettyplus.MailTest
    </servlet-class>
  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>MailTest</servlet-name>
+    <url-pattern>/mail/*</url-pattern>
+  </servlet-mapping>
+
  
   <resource-ref>
     <description>
