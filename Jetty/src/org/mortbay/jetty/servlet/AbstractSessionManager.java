@@ -274,13 +274,18 @@ public abstract class AbstractSessionManager implements SessionManager
         if (period<1000)
             period=1000;
         
-        if (period!=old_period)
+        if (period!=old_period) 
         {
-            synchronized(_sessions)
-            {
+            if (_sessions==null)
                 _scavengePeriodMs=period;
-                if (_scavenger!=null)
-                    _scavenger.interrupt();
+            else
+            {
+                synchronized(_sessions)
+                {
+                    _scavengePeriodMs=period;
+                    if (_scavenger!=null)
+                        _scavenger.interrupt();
+                }
             }
         }
     }
