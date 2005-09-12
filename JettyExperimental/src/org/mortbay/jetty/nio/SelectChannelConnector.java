@@ -539,8 +539,9 @@ public class SelectChannelConnector extends AbstractConnector
                 synchronized(this)
                 {
                     RetryContinuation continuation = (RetryContinuation)_connection.getRequest().getContinuation();
-                    if (continuation!=null && continuation.getObject(0)==null)
+                    if (continuation!=null && continuation.isPending())
                     {
+                        // We have a continuation
                         log.debug("continuation {}",continuation);
                         long timeout=continuation.getTimeout();
                         continuation.setEndPoint(this);
@@ -601,6 +602,7 @@ public class SelectChannelConnector extends AbstractConnector
         HttpEndPoint _endPoint;
         long _timeout;
         boolean _new=true;
+        boolean _pending=true;
         
         
         void setEndPoint(HttpEndPoint ep)
@@ -623,10 +625,20 @@ public class SelectChannelConnector extends AbstractConnector
         {
             return _new;
         }
+
+        public boolean isPending()
+        {
+            return _pending;
+        }
         
         public void expire()
         {
-            redispatch();
+            synchronized (this)
+            {
+                if (_pending)
+                    redispatch();
+                _pending=false;
+            }
         }
         
         public Object getObject(long timeout)
@@ -637,7 +649,9 @@ public class SelectChannelConnector extends AbstractConnector
                 if (!isExpired() && _object==null && timeout>0)
                 {
                     if (_endPoint!=null)
+                    {
                         throw new IllegalStateException();
+                    }
                     _timeout=timeout;
                     throw new RetryRequest();
                 }
@@ -650,6 +664,11 @@ public class SelectChannelConnector extends AbstractConnector
         {
             synchronized (this)
             {
+                if (isExpired())
+                    return;
+
+                _pending=false;
+                this.cancel();
                 _object=object==null?this:object;
             
                 if (_endPoint!=null)
@@ -673,5 +692,6 @@ public class SelectChannelConnector extends AbstractConnector
                 }
             }
         }
+        
     }
 }

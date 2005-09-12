@@ -56,8 +56,6 @@ public class AjaxFilter implements Filter
         
         if (method!=null && method.length>0)
         {
-            System.err.println("ajax="+Arrays.asList(method));
-            
             HttpServletRequest srequest = (HttpServletRequest)request;
             HttpServletResponse sresponse = (HttpServletResponse) response;
             
@@ -75,7 +73,6 @@ public class AjaxFilter implements Filter
             sresponse.setContentType("text/xml; charset=UTF-8");
             sresponse.setContentLength(ajax.length);
             sresponse.getOutputStream().write(ajax);
-            System.err.println(sout.toString());
             sresponse.flushBuffer();
             
         }
@@ -85,7 +82,7 @@ public class AjaxFilter implements Filter
 
     public void handle(String method,HttpServletRequest request,AjaxResponse response)
     {    
-        response.elementResponse(null, "<span class=\"error\">No implementation for "+method+" "+request.getParameter("member")+"</span>\n");
+        response.elementResponse(null, "<span class=\"error\">No implementation for "+method+" "+request.getParameter("member")+"</span>");
     }
     
     public void destroy()
@@ -97,7 +94,7 @@ public class AjaxFilter implements Filter
     {
         // TODO - much better implementation of this needed
         s=StringUtil.replace(s, "<", "&lt;");
-        s=StringUtil.replace(s, ">", "&t;");
+        s=StringUtil.replace(s, ">", "&gt;");
         return s;
     }
     
@@ -114,9 +111,7 @@ public class AjaxFilter implements Filter
                 id = request.getParameter("id");
             if (id==null)
                 id="unknown";
-            out.println("  <response type=\"element\" id=\""+id+"\">\n    "+
-                            element+"\n"+
-                        "  </response>");
+            out.println("<response type=\"element\" id=\""+id+"\">"+element+"</response>");
         }
         
         public void objectResponse(String id,String element)
@@ -125,9 +120,8 @@ public class AjaxFilter implements Filter
                 id = request.getParameter("id");
             if (id==null)
                 id="unknown";
-            out.println("  <response type=\"object\" id=\""+id+"\">\n    "+
-                            element+"\n"+
-                        "  </response>");
+            
+            out.println("<response type=\"object\" id=\""+id+"\">"+element+"</response>");
         }
     }
 }

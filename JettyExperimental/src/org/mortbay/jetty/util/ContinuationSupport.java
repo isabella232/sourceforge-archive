@@ -18,11 +18,17 @@ package org.mortbay.jetty.util;
 import javax.servlet.http.HttpServletRequest;
 import org.mortbay.jetty.Request;
 
+/* ------------------------------------------------------------ */
+/** ContinuationSupport.
+ * Conveniance class to avoid classloading visibility issues.
+ * @author gregw
+ *
+ */
 public class ContinuationSupport
 {
     public static Continuation getContinutaion(HttpServletRequest request, boolean create)
     {
         // TODO use reflection to make this portable
-        return Request.getRequest(request).getContinuation(true);
+        return Request.getRequest(request).getContinuation(create);
     }
 }

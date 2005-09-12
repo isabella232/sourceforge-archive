@@ -31,13 +31,7 @@ import org.mortbay.jetty.util.Continuation;
 import org.mortbay.jetty.util.ContinuationSupport;
 
 public class ChatFilter extends AjaxFilter
-{
-    public static final String 
-    JOIN_CHAT="join",    
-    GET_EVENTS="getEvents",
-    CHAT="chat",
-    LEAVE_CHAT="leave";
-        
+{       
     private final String mutex="mutex";
     private Map chatroom;
     
@@ -68,11 +62,13 @@ public class ChatFilter extends AjaxFilter
      */
     public void handle(String method, HttpServletRequest request, AjaxResponse response)
     {
-        if (JOIN_CHAT.equals(method))
+        if ("join".equals(method))
             doJoinChat(request,response);
-        else if (GET_EVENTS.equals(method))
+        else if ("chat".equals(method))
+            doChat(request,response);
+        else if ("getEvents".equals(method))
             doGetEvents(request,response);
-        else if (JOIN_CHAT.equals(method))
+        else if ("leave".equals(method))
             doLeaveChat(request,response);
         else
             super.handle(method, request, response);                
@@ -94,7 +90,8 @@ public class ChatFilter extends AjaxFilter
             {
                 // exists already, so just update name
                 member=(Member)chatroom.get(id);
-                member.rename(name);
+                if (!name.equals(member.getName()))
+                    member.rename(name);
             }
             else
             {
@@ -109,12 +106,40 @@ public class ChatFilter extends AjaxFilter
     }
     
 
-
     /* ------------------------------------------------------------ */
     private void doLeaveChat(HttpServletRequest request, AjaxResponse response)
     {
-        // TODO Auto-generated method stub
+        HttpSession session = request.getSession(true);
+        String id = session.getId();
+
+        Member member=null;
+        synchronized (mutex)
+        {
+            member = (Member)chatroom.get(id);
+            if (member==null || !member.isValid())
+                return;
+            member.leaveChat();
+            chatroom.remove(id);
+        }
+        sendMembers(response);
+        response.objectResponse("left", "<ok/>");
+    }
+
+
+    /* ------------------------------------------------------------ */
+    private void doChat(HttpServletRequest request, AjaxResponse response)
+    {
+        HttpSession session = request.getSession(true);
+        String id = session.getId();
+        String text = request.getParameter("text");
         
+        synchronized (mutex)
+        {
+            Member member = (Member)chatroom.get(id);
+            if (member==null || !member.isValid())
+                return;
+            sendEvent(member, text, false);
+        }
     }
 
 
@@ -123,35 +148,41 @@ public class ChatFilter extends AjaxFilter
     {
         HttpSession session = request.getSession(true);
         String id = session.getId();
+        boolean alerts=false;
         
         synchronized (mutex)
         {
             Member member = (Member)chatroom.get(id);
-            if (member==null || !member.isValid())
-                return;
-            
-            synchronized (member)
-            {
-                // Do we have a continuation (ie has this request been tried before)?
-                Continuation continuation = ContinuationSupport.getContinutaion(request, false);
-        
-                // If we don't have a continuation, do we need one (because we have no events to return)?
-                if (continuation==null && !member.hasEvents())
-                    continuation = ContinuationSupport.getContinutaion(request, true);
+            if (member!=null && member.isValid())
+            {          
+                synchronized (member)
+                {
+                    // Do we have a continuation (ie has this request been tried before)?
+                    Continuation continuation = ContinuationSupport.getContinutaion(request, false);
+                    
+                    // If we don't have a continuation, do we need one (because we have no events to return)?
+                    if (continuation==null && !member.hasEvents())
+                        continuation = ContinuationSupport.getContinutaion(request, true);
+                    
+                    // If we have a new continuation, put it in the member object so it can be resumed.
+                    if (continuation!=null && continuation.isNew())
+                        member.setContinuation(continuation);
+                    
+                    // Get the continuation object (may wait and/or retry request here).  For this demo we don't need return value. 
+                    if (continuation!=null) continuation.getObject(10000L);
+                    
+                    member.setContinuation(null);
+                    alerts=member.sendEvents(response);
+                }
                 
-                System.err.println("continuation="+continuation+" isNew="+continuation.isNew());
+                if (alerts)
+                    sendMembers(response);
                 
-                // If we have a new continuation, put it in the member object so it can be resumed.
-                if (continuation.isNew())
-                    member.setContinuation(continuation);
-                
-                // Get the continuation object (may wait and/or retry request here).  For this demo we don't need return value. 
-                if (continuation!=null) continuation.getObject(10000L);
-                
-                member.setContinuation(null);
-                member.sendEvents(response);
+                // Signal for a new poll
+                response.objectResponse("poll", "<ok/>");
             }
-        } 
+        }
+        
     }
 
     /* ------------------------------------------------------------ */
@@ -218,10 +249,17 @@ public class ChatFilter extends AjaxFilter
             _alert=alert;
         }
         
+        boolean isAlert()
+        {
+            return _alert;
+        }
+        
         public String toString()
         {
-            return "<event from=\""+_from+"\" text=\""+_text+"\" alert=\""+_alert+"\"/>";
+            return "<event from=\""+_from+"\" alert=\""+_alert+"\">"+encodeText(_text)+"</event>";
         }
+        
+        
         
     }
 
@@ -295,7 +333,6 @@ public class ChatFilter extends AjaxFilter
             synchronized (this)
             {
                 _events.add(event);
-                System.err.print("addEvent "+_continuation);
                 if (_continuation!=null)
                 {
                     _continuation.resume(event);
@@ -306,20 +343,22 @@ public class ChatFilter extends AjaxFilter
         /* ------------------------------------------------------------ */
         public boolean hasEvents()
         {
-            System.err.println("hasEvents "+_events);
             return _events!=null && _events.size()>0;
         }
         
         /* ------------------------------------------------------------ */
         public void joinChat()
         {
-            ChatFilter.this.sendEvent(this,getName()+" has joined the chat",true);
+            ChatFilter.this.sendEvent(this,"has joined the chat",true);
         }
         
         /* ------------------------------------------------------------ */
         public void leaveChat()
         {
-            ChatFilter.this.sendEvent(this,getName()+" has left the chat",true);
+            if ("Elvis".equals(getName()))
+                ChatFilter.this.sendEvent(this,"has left the building",true);
+            else
+                ChatFilter.this.sendEvent(this,"has left the chat",true);
             _session=null;
             _events=null;
             _continuation=null;
@@ -330,20 +369,23 @@ public class ChatFilter extends AjaxFilter
         {
             String oldName = getName();
             setName(name);
-            ChatFilter.this.sendEvent(this,name+" has changed their name from "+oldName,true);
+            ChatFilter.this.sendEvent(this,oldName+" has been renamed to "+name,true);
         }
 
         /* ------------------------------------------------------------ */
-        public void sendEvents(AjaxResponse response)
+        public boolean sendEvents(AjaxResponse response)
         {
             synchronized (this)
             {
+                boolean alerts=false;
                 for (int i=0;i<_events.size();i++)
                 {
                     Event event = (Event)_events.get(i);
                     response.objectResponse("event", event.toString());
+                    alerts |= event.isAlert();
                 }
                 _events.clear();
+                return alerts;
             }
         }
 

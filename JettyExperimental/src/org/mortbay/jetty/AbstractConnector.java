@@ -464,12 +464,14 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
         Object _object;
         boolean _waited;
         boolean _new=true;
+        boolean _pending=true;
         
         public void resume(Object object)
         {
             synchronized (this)
             {
                 _object=object==null?this:object;
+                _pending=false;
                 notify();
             }
         }
@@ -497,10 +499,15 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
                 {
                     e.printStackTrace();
                 }
+                _pending=false;
             }
             return _object;
         }
         
+        public boolean isPending()
+        {
+            return _pending;
+        }
     
     }
 }
