@@ -35,7 +35,7 @@ import org.mortbay.util.StringUtil;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class ErrorPageHandler extends AbstractHandler
+public class ErrorHandler extends AbstractHandler
 {
 
     /* ------------------------------------------------------------ */

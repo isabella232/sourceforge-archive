@@ -358,8 +358,6 @@ public class ServletHandler extends WrappedHandler
         }
         catch(Exception e)
         {
-            log.debug(LogSupport.EXCEPTION,e);
-            
             Throwable th=e;
             while (th instanceof ServletException)
             {

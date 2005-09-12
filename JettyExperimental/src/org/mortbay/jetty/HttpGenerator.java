@@ -16,14 +16,23 @@
 package org.mortbay.jetty;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Iterator;
+
+import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferUtil;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
+import org.mortbay.io.IO;
 import org.mortbay.io.Portable;
+import org.mortbay.util.LogSupport;
+import org.mortbay.util.UrlEncoded;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /**
@@ -34,7 +43,7 @@ import org.mortbay.io.Portable;
  */
 public class HttpGenerator implements HttpTokens
 {
-
+    
     // states
     public final static int STATE_HEADER = 0;
     public final static int STATE_CONTENT = 2;
@@ -56,6 +65,28 @@ public class HttpGenerator implements HttpTokens
 
     // other statics
     private static int CHUNK_SPACE = 12;
+    
+
+    private static String[] __reasons = new String[505];
+    static
+    {
+        Field[] fields = HttpServletResponse.class.getDeclaredFields();
+        for (int i=0;i<fields.length;i++)
+        {
+            if ((fields[i].getModifiers()&Modifier.STATIC)!=0 &&
+                            fields[i].getName().startsWith("SC_"))
+            {
+                try
+                {
+                    int code = fields[i].getInt(null);
+                    if (code<__reasons.length)
+                        __reasons[code]=fields[i].getName().substring(3);
+                }
+                catch(IllegalAccessException e)
+                {}
+            }    
+        }
+    }
 
     // data
     private int _state = STATE_HEADER;
@@ -218,7 +249,7 @@ public class HttpGenerator implements HttpTokens
         if (_state != STATE_HEADER) throw new IllegalStateException("STATE!=START");
 
         _status = status;
-        _reason = reason;
+        _reason = reason==null?reason:UrlEncoded.encodeString(reason); // encode user supplied reasons!
     }
 
     /* ------------------------------------------------------------ */
@@ -299,6 +330,15 @@ public class HttpGenerator implements HttpTokens
             // add response line
             Buffer line = HttpStatus.getResponseLine(_status);
 
+            // check reason
+            if (_reason!=null)
+            {
+                if (_reason.length()>_header.capacity()/2)
+                    _reason=_reason.substring(0,_header.capacity()/2);
+            }
+            if (_reason==null && _status<__reasons.length)
+                _reason=__reasons[_status];
+            
             if (line == null)
             {
                 _header.put(HttpVersions.HTTP_1_1_BUFFER);

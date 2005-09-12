@@ -32,9 +32,9 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
-import org.mortbay.jetty.Continuation;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.RetryRequest;
+import org.mortbay.jetty.util.Continuation;
 import org.mortbay.thread.Timeout;
 import org.mortbay.util.LogSupport;
 import org.slf4j.Logger;
@@ -600,6 +600,7 @@ public class SelectChannelConnector extends AbstractConnector
         Object _object;
         HttpEndPoint _endPoint;
         long _timeout;
+        boolean _new=true;
         
         
         void setEndPoint(HttpEndPoint ep)
@@ -617,6 +618,11 @@ public class SelectChannelConnector extends AbstractConnector
         {
             return _timeout;
         }
+
+        public boolean isNew()
+        {
+            return _new;
+        }
         
         public void expire()
         {
@@ -627,6 +633,7 @@ public class SelectChannelConnector extends AbstractConnector
         {
             synchronized (this)
             {
+                _new=false;
                 if (!isExpired() && _object==null && timeout>0)
                 {
                     if (_endPoint!=null)

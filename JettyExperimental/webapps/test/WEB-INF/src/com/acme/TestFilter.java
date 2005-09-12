@@ -58,7 +58,8 @@ public class TestFilter implements Filter
         }
         finally
         {
-            _context.log((System.currentTimeMillis()-start)+"ms handling "+((HttpServletRequest)request).getRequestURI());
+            HttpServletRequest srequest = (HttpServletRequest)request;
+            _context.log((System.currentTimeMillis()-start)+"ms handling "+srequest.getRequestURI()+(srequest.getQueryString()==null?"":("?"+srequest.getQueryString())));
         }
     }
 

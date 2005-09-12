@@ -32,9 +32,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.jetty.Continuation;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
+import org.mortbay.jetty.util.Continuation;
 import org.mortbay.util.Loader;
 import org.mortbay.util.LogSupport;
 import org.slf4j.Logger;
@@ -68,11 +68,10 @@ public class TestRetry extends HttpServlet
     /* ------------------------------------------------------------ */
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
+        
         System.err.println("\ndoGet");
-        Continuation continuation = ((Request)request).getContinuation();
-        System.err.println("continuation="+continuation);
-        if (continuation==null)
-            continuation=((Request)request).newContinuation(); 
+        Continuation continuation = Request.getRequest(request).getContinuation(true);
+        System.err.println("continuation="+continuation+" isNew"+continuation.isNew());
         
         Object o = continuation.getObject(5000L);
         if (o==null)

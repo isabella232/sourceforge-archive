@@ -13,11 +13,12 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.jetty;
+package org.mortbay.jetty.util;
 
 
 public interface Continuation
 {
     public void resume(Object object);
     public Object getObject(long timeout);
+    public boolean isNew();
 }

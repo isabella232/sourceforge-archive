@@ -32,6 +32,7 @@ import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequestWrapper;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -42,6 +43,7 @@ import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandler.Context;
+import org.mortbay.jetty.util.Continuation;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
 import org.mortbay.util.LazyList;
@@ -1043,9 +1045,10 @@ public class Request implements HttpServletRequest
         if (encoding == null)
         {
             // No encoding, so use the existing characters.
-            encoding = StringUtil.__ISO_8859_1;
+            // TODO - UTF-8 is correct ????
+            encoding = StringUtil.__UTF8;
             if (_uri!=null && _uri.getQuery()!=null)
-                UrlEncoded.decodeTo(_uri.getQuery(), _parameters);
+                UrlEncoded.decodeTo(_uri.getQuery(), _parameters,encoding);
         }
         else if (_uri!=null && _uri.getRawQuery()!=null)
         {
@@ -1347,19 +1350,34 @@ public class Request implements HttpServletRequest
     }
     
     /* ------------------------------------------------------------ */
+    public Continuation getContinuation(boolean create)
+    {
+        if (_continuation==null)
+            _continuation=getConnection().getConnector().newContinuation();
+        return _continuation;
+        
+    }
+    
+    /* ------------------------------------------------------------ */
     void setContinuation(Continuation cont)
     {
         _continuation=cont;
     }
     
+
     /* ------------------------------------------------------------ */
-    public Continuation newContinuation()
+    public static Request getRequest(HttpServletRequest request)
     {
-        if (_continuation!=null)
-            throw new IllegalStateException();
+        if (request instanceof Request)
+            return (Request) request;
         
-        _continuation=getConnection().getConnector().newContinuation();
-        return _continuation;
+        while (request instanceof ServletRequestWrapper)
+            request = (HttpServletRequest)((ServletRequestWrapper)request).getRequest();
+        
+        if (request instanceof Request)
+            return (Request) request;
+        
+        return HttpConnection.getCurrentConnection().getRequest();
     }
     
     

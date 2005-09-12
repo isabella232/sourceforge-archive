@@ -400,13 +400,14 @@ public class WebAppClassLoader extends URLClassLoader
             }
             return false;
         }
+
+        if (name.equals("org.mortbay.jetty.servlet.DefaultServlet") ||
+            name.startsWith("org.mortbay.jetty.util."))
+            return false;
         
         // Arbitrary list that covers the worst security problems.
         // If you are worried by this, then use a permissions file!
-        return name.equals("org.mortbay.jetty.Server")
-            || name.startsWith("org.mortbay.http.")
-            || name.startsWith("org.mortbay.start.")
-            || name.startsWith("org.mortbay.stop.");
+        return name.startsWith("org.mortbay.jetty.");
     }
 
     /* ------------------------------------------------------------ */

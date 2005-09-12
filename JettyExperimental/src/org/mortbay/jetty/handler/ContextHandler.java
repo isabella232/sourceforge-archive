@@ -88,6 +88,7 @@ public class ContextHandler extends WrappedHandler
     private MimeTypes _mimeTypes;
     private Map _localeEncodingMap;
     private String[] _welcomeFiles;
+    private ErrorHandler _errorHandler;
     
     /* ------------------------------------------------------------ */
     /**
@@ -208,6 +209,9 @@ public class ContextHandler extends WrappedHandler
             
             old_context=__context.get();
             __context.set(_context);
+            
+            if (_errorHandler==null)
+                _errorHandler=new ErrorHandler();
             
             startContext();
             
@@ -508,7 +512,25 @@ public class ContextHandler extends WrappedHandler
     {
         return _welcomeFiles;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the errorHandler.
+     */
+    public ErrorHandler getErrorHandler()
+    {
+        return _errorHandler;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param errorHandler The errorHandler to set.
+     */
+    public void setErrorHandler(ErrorHandler errorHandler)
+    {
+        _errorHandler = errorHandler;
+    }
+
     /* ------------------------------------------------------------ */
     public String toString()
     {
@@ -903,8 +925,6 @@ public class ContextHandler extends WrappedHandler
         }
 
     }
-
-
 
 
 }

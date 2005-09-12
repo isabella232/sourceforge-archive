@@ -32,19 +32,19 @@ import org.mortbay.io.View;
  * To change the template for this generated type comment go to
  * Window - Preferences - Java - Code Generation - Code and Comments
  */
-public class HttpBuilderTest extends TestCase
+public class HttpGeneratorTest extends TestCase
 {
     public final static String CONTENT="The quick brown fox jumped over the lazy dog.\nNow is the time for all good men to come to the aid of the party\nThe moon is blue to a fish in love.\n";
     public final static String[] connect={null,"keep-alive","close"};
 
-    public HttpBuilderTest(String arg0)
+    public HttpGeneratorTest(String arg0)
     {
         super(arg0);
     }
 
     public static void main(String[] args)
     {
-        junit.textui.TestRunner.run(HttpBuilderTest.class);
+        junit.textui.TestRunner.run(HttpGeneratorTest.class);
     }
 
     

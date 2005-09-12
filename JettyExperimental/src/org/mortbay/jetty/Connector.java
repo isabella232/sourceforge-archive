@@ -18,6 +18,7 @@ package org.mortbay.jetty;
 import java.io.IOException;
 
 import org.mortbay.io.Buffers;
+import org.mortbay.jetty.util.Continuation;
 import org.mortbay.thread.LifeCycle;
 import org.mortbay.thread.ThreadPool;
 

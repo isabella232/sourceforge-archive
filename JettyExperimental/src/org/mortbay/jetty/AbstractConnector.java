@@ -22,6 +22,7 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 
 import org.mortbay.io.Buffer;
+import org.mortbay.jetty.util.Continuation;
 import org.mortbay.thread.AbstractLifeCycle;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.LogSupport;
@@ -458,10 +459,11 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
         return new WaitingContinuation();
     }
     
-    private static class WaitingContinuation implements org.mortbay.jetty.Continuation
+    private static class WaitingContinuation implements org.mortbay.jetty.util.Continuation
     {
         Object _object;
         boolean _waited;
+        boolean _new=true;
         
         public void resume(Object object)
         {
@@ -472,6 +474,11 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
             }
         }
 
+        public boolean isNew()
+        {
+            return _new;
+        }
+
         public Object getObject(long timeout)
         {
             if (timeout < 0)
@@ -479,6 +486,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
             
             synchronized (this)
             {
+                _new=false;
                 try
                 {
                     if (!_waited && _object==null && timeout>0)

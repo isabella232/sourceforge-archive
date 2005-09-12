@@ -1,0 +1,47 @@
+
+div 
+{ 
+  border: 1px solid black; 
+}
+
+div#chatroom
+{
+  width: 41em;
+}
+
+div#chat
+{
+  float: left;
+  width: 30em;
+  height: 20ex;
+}
+
+
+div#member
+{
+  float: left;
+  width: 10em;
+}
+
+div#members
+{
+  float: left;
+  clear: right;
+  width: 10em;
+}
+
+div#input
+{
+  clear: both;
+}
+
+div#input input.input 
+{
+  width:28em;
+  background-color: #e0f0f0;
+}
+
+div.hidden
+{
+  display: none;
+}

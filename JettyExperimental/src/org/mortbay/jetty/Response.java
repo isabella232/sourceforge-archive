@@ -17,20 +17,22 @@ package org.mortbay.jetty;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.Locale;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.IO;
-import org.mortbay.jetty.handler.ErrorPageHandler;
+import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.handler.ErrorHandler;
+import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
+import org.mortbay.util.UrlEncoded;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,25 +53,12 @@ public class Response implements HttpServletResponse
     
     private static ServletWriter __nullServletWriter;
     private static ServletOutputStream __nullServletOut;
-    private static String[] __reasons = new String[600];
+
     static
     {
         try{
             __nullServletWriter = new ServletWriter(IO.getNullStream());
             __nullServletOut = new NullOutput();
-            
-            Field[] fields = HttpServletResponse.class.getDeclaredFields();
-            for (int i=0;i<fields.length;i++)
-            {
-                if ((fields[i].getModifiers()&Modifier.STATIC)!=0 &&
-                    fields[i].getName().startsWith("SC_"))
-                {
-                    int code = fields[i].getInt(null);
-                    if (code<__reasons.length)
-                        __reasons[code]=fields[i].getName().substring(3);
-                }    
-            }
-            
         }
         catch (Exception e)
         {
@@ -182,17 +171,25 @@ public class Response implements HttpServletResponse
         reset();
         setStatus(code,message);
         
-        // Generate normal error page.
-        Request request=_connection.getRequest();
-        
         // If we are allowed to have a body 
         if (code!=SC_NO_CONTENT &&
             code!=SC_NOT_MODIFIED &&
             code!=SC_PARTIAL_CONTENT &&
             code>=SC_OK)
         {
-            // TODO avoid new
-            new ErrorPageHandler().handle(null,_connection.getRequest(),this, Handler.ERROR);
+            Request request = _connection.getRequest();
+            // TODO - probably should reset these after the request?
+            request.setAttribute(ServletHandler.__J_S_ERROR_STATUS_CODE,new Integer(code));
+            request.setAttribute(ServletHandler.__J_S_ERROR_MESSAGE, message);
+            request.setAttribute(ServletHandler.__J_S_ERROR_REQUEST_URI, request.getRequestURI());
+            request.setAttribute(ServletHandler.__J_S_ERROR_SERVLET_NAME,"UNKNOWN"); // TODO!!!
+            
+            ErrorHandler error_handler = null;
+            ContextHandler.Context context = request.getContext();
+            if (context!=null)
+                error_handler=context.getContextHandler().getErrorHandler();
+            if (error_handler!=null)
+                error_handler.handle(null,_connection.getRequest(),this, Handler.ERROR);
         }
         else if (code!=SC_PARTIAL_CONTENT) 
         {
@@ -204,6 +201,7 @@ public class Response implements HttpServletResponse
         
         complete();
 
+        
     }
 
     /* ------------------------------------------------------------ */
@@ -318,9 +316,7 @@ public class Response implements HttpServletResponse
     public void setStatus(int sc, String sm)
     {
         _status=sc;
-        if (sm==null && sc<__reasons.length)
-            sm=__reasons[sc];
-        _reason=sm;
+        _reason=sm; 
     }
 
     /* ------------------------------------------------------------ */
