@@ -27,6 +27,7 @@ import javax.servlet.ServletOutputStream;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
+import org.mortbay.jetty.util.Continuation;
 import org.mortbay.util.URIUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,58 +38,57 @@ import org.slf4j.LoggerFactory;
  * To change the template for this generated type comment go to Window - Preferences - Java - Code
  * Generation - Code and Comments
  */
-public class HttpConnection 
+public class HttpConnection
 {
     private static Logger log = LoggerFactory.getLogger(HttpConnection.class);
     private static int UNKNOWN = -2;
-    private static ThreadLocal __currentConnection=new ThreadLocal();
+    private static ThreadLocal __currentConnection = new ThreadLocal();
 
     private Connector _connector;
     private EndPoint _endp;
     private Handler _handler;
     private boolean _expectingContinues;
-    
+
     private URI _uri;
-    
+
     private HttpParser _parser;
     private HttpFields _requestFields;
     private Request _request;
     private Input _in;
-    
+
     private HttpGenerator _generator;
     private HttpFields _responseFields;
     private Response _response;
     private Output _out;
     private RetryRequest _retry;
-    
+
     private transient Buffer _content;
     private transient int _connection = UNKNOWN;
     private transient int _expect = UNKNOWN;
     private transient int _version = UNKNOWN;
     private transient boolean _head = false;
     private transient boolean _host = false;
-    
 
     public static HttpConnection getCurrentConnection()
     {
-        return (HttpConnection)__currentConnection.get();
+        return (HttpConnection) __currentConnection.get();
     }
-    
+
     /**
      * @param handler TODO
-     *  
+     * 
      */
     public HttpConnection(Connector connector, EndPoint endpoint, Handler handler)
     {
         _connector = connector;
         _endp = endpoint;
         _parser = new HttpParser(_connector, endpoint, new RequestHandler(), _connector.getHeaderBufferSize(), _connector.getRequestBufferSize());
-        _requestFields=new HttpFields();
-        _responseFields=new HttpFields();
-        _request=new Request(this);
-        _response=new Response(this);
-        _generator = new HttpGenerator(_connector,_endp, _connector.getHeaderBufferSize(), _connector.getResponseBufferSize());
-        _handler=handler;
+        _requestFields = new HttpFields();
+        _responseFields = new HttpFields();
+        _request = new Request(this);
+        _response = new Response(this);
+        _generator = new HttpGenerator(_connector, _endp, _connector.getHeaderBufferSize(), _connector.getResponseBufferSize());
+        _handler = handler;
     }
 
     /*
@@ -96,7 +96,7 @@ public class HttpConnection
      */
     public void content(int index, Buffer ref)
     {
-        _content=ref;
+        _content = ref;
     }
 
     /* ------------------------------------------------------------ */
@@ -107,7 +107,7 @@ public class HttpConnection
     {
         return _connector;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the handler.
@@ -116,7 +116,7 @@ public class HttpConnection
     {
         return _handler;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the requestFields.
@@ -125,7 +125,7 @@ public class HttpConnection
     {
         return _requestFields;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the responseFields.
@@ -135,13 +135,14 @@ public class HttpConnection
         return _responseFields;
     }
 
-
     /* ------------------------------------------------------------ */
     /**
      * @return
      */
     public boolean isConfidential(Request request)
     {
+        if (_connector!=null)
+            return _connector.isConfidential(request);
         return false;
     }
 
@@ -163,7 +164,7 @@ public class HttpConnection
         // TODO Auto-generated method stub
         return false;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the request.
@@ -172,7 +173,7 @@ public class HttpConnection
     {
         return _request;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the response.
@@ -181,15 +182,14 @@ public class HttpConnection
     {
         return _response;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @return
      */
     public ServletInputStream getInputStream()
     {
-        if (_in==null)
-            _in=new Input();
+        if (_in == null) _in = new Input();
         return _in;
     }
 
@@ -199,8 +199,7 @@ public class HttpConnection
      */
     public ServletOutputStream getOutputStream()
     {
-        if (_out==null)
-            _out=new Output();
+        if (_out == null) _out = new Output();
         return _out;
     }
 
@@ -216,36 +215,34 @@ public class HttpConnection
         try
         {
             __currentConnection.set(this);
-            
-            Continuation continuation=_request.getContinuation();
-            if (continuation!=null)
+
+            Continuation continuation = _request.getContinuation();
+            if (continuation != null)
             {
                 doHandler();
             }
             else
             {
                 // If we are not ended then parse available
-                if (!_parser.isState(HttpParser.STATE_END) && (_content==null || _content.length()==0)) 
-                    _parser.parseAvailable();
-                
+                if (!_parser.isState(HttpParser.STATE_END) && (_content == null || _content.length() == 0)) _parser.parseAvailable();
+
                 // Do we have more writting to do?
-                if (_generator.isState(HttpGenerator.STATE_FLUSHING) || _generator.isState(HttpGenerator.STATE_CONTENT))
-                    _generator.flushBuffers();
+                if (_generator.isState(HttpGenerator.STATE_FLUSHING) || _generator.isState(HttpGenerator.STATE_CONTENT)) _generator.flushBuffers();
             }
         }
         finally
         {
             __currentConnection.set(null);
-            
+
             // TODO - maybe do this at start of handle aswell or instead?
             if (_parser.isState(HttpParser.STATE_END) && _generator.isState(HttpGenerator.STATE_END))
             {
-                _expectingContinues=false; // TODO do something with this!
-                _parser.reset();  // TODO return header buffer???
+                _expectingContinues = false; // TODO do something with this!
+                _parser.reset(); // TODO return header buffer???
                 _requestFields.clear();
                 _request.recycle();
-                
-                _generator.reset(!_generator.isPersistent());  // TODO true or false?
+
+                _generator.reset(!_generator.isPersistent()); // TODO true or false?
                 _responseFields.clear();
                 _response.recycle();
             }
@@ -255,33 +252,33 @@ public class HttpConnection
     /* ------------------------------------------------------------ */
     private void doHandler() throws IOException
     {
-        if (_handler!=null)
+        if (_handler != null)
         {
-            boolean retry=false;
+            boolean retry = false;
             try
             {
                 _request.setRequestURI(_uri.getRawPath());
+                _request.setQueryString(_uri.getQuery());
                 String target = URIUtil.canonicalPath(_uri.getPath());
                 _handler.handle(target, _request, _response, Handler.REQUEST);
             }
             catch (RetryRequest r)
             {
-                log.debug("retry ",r);
-                retry=true;
+                log.debug("retry ", r);
+                retry = true;
             }
             catch (ServletException e)
             {
-                log.warn("handling",e);
-                _generator.sendError(500,null,null,true);
+                log.warn("handling", e);
+                _generator.sendError(500, null, null, true);
             }
             finally
             {
                 if (!retry)
                 {
                     _request.setContinuation(null);
-                    if (_response!=null)
-                        _response.complete();
-                    
+                    if (_response != null) _response.complete();
+
                     if (!_generator.isComplete())
                     {
                         _generator.completeHeader(_responseFields, HttpGenerator.LAST);
@@ -290,31 +287,28 @@ public class HttpConnection
                 }
             }
         }
-    }        
-    
+    }
+
     /* ------------------------------------------------------------ */
-    public void commitResponse(boolean last)
-     throws IOException	
+    public void commitResponse(boolean last) throws IOException
     {
         if (!_generator.isCommitted())
         {
             _generator.setResponse(_response.getStatus(), _response.getReason());
             _generator.completeHeader(_responseFields, last);
         }
-        if (last)
-            _generator.complete();
+        if (last) _generator.complete();
     }
-    
+
     /* ------------------------------------------------------------ */
-    public void completeResponse()
-    	throws IOException	
+    public void completeResponse() throws IOException
     {
         if (!_generator.isCommitted())
         {
             _generator.setResponse(_response.getStatus(), _response.getReason());
             _generator.completeHeader(_responseFields, HttpGenerator.LAST);
         }
-        
+
         if (!_generator.isComplete())
         {
             _generator.complete();
@@ -322,8 +316,7 @@ public class HttpConnection
     }
 
     /* ------------------------------------------------------------ */
-    public void flushResponse()
-     throws IOException	
+    public void flushResponse() throws IOException
     {
         commitResponse(HttpGenerator.MORE);
         _generator.flushBuffers();
@@ -340,8 +333,7 @@ public class HttpConnection
          * @see org.mortbay.jetty.HttpParser.EventHandler#startRequest(org.mortbay.io.Buffer,
          *      org.mortbay.io.Buffer, org.mortbay.io.Buffer)
          */
-        public void startRequest(Buffer method, Buffer uri, Buffer version)
-           throws IOException
+        public void startRequest(Buffer method, Buffer uri, Buffer version) throws IOException
         {
             _host = false;
             _expect = UNKNOWN;
@@ -349,20 +341,18 @@ public class HttpConnection
 
             _request.setTimeStamp(System.currentTimeMillis());
             _request.setMethod(method.toString());
-            
-            
-            try	
+
+            try
             {
-                _uri=new URI(uri.toString()); 
-                _uri=_uri.normalize();
-                _request.setUri(_uri); 
-            
-                _version = version == null ? HttpVersions.HTTP_0_9_ORDINAL : HttpVersions.CACHE
-                        .getOrdinal(version);
+                _uri = new URI(uri.toString());
+                _uri = _uri.normalize();
+                _request.setUri(_uri);
+
+                _version = version == null ? HttpVersions.HTTP_0_9_ORDINAL : HttpVersions.CACHE.getOrdinal(version);
                 if (_version <= 0) _version = HttpVersions.HTTP_1_0_ORDINAL;
                 _request.setProtocol(HttpVersions.CACHE.get(_version).toString());
-            
-                _head = HttpMethods.CACHE.getOrdinal(method) == HttpMethods.HEAD_ORDINAL;  
+
+                _head = HttpMethods.CACHE.getOrdinal(method) == HttpMethods.HEAD_ORDINAL;
             }
             catch (URISyntaxException e)
             {
@@ -374,7 +364,7 @@ public class HttpConnection
                 return;
             }
         }
-        
+
         /*
          * @see org.mortbay.jetty.HttpParser.EventHandler#parsedHeaderValue(org.mortbay.io.Buffer)
          */
@@ -394,10 +384,10 @@ public class HttpConnection
                 case HttpHeaders.CONNECTION_ORDINAL:
                     // TODO comma list of connections ???
                     _connection = HttpHeaderValues.CACHE.getOrdinal(value);
-                    _responseFields.put(HttpHeaders.CONNECTION_BUFFER,value);
-                	// TODO something with this???
+                    _responseFields.put(HttpHeaders.CONNECTION_BUFFER, value);
+            // TODO something with this???
             }
-            
+
             _requestFields.add(name, value);
         }
 
@@ -429,7 +419,7 @@ public class HttpConnection
                     {
                         if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
                         {
-                            _expectingContinues=true;
+                            _expectingContinues = true;
                             // TODO delay sending 100 response until a read is attempted.
                             _generator.setResponse(100, null);
                             _generator.complete();
@@ -437,7 +427,7 @@ public class HttpConnection
                         }
                         else
                         {
-                            _generator.sendError(417,null,null,true);
+                            _generator.sendError(417, null, null, true);
                             return;
                         }
                     }
@@ -445,19 +435,17 @@ public class HttpConnection
                 default:
             }
 
-	    doHandler();
-	}
-            
+            doHandler();
+        }
 
         /* ------------------------------------------------------------ */
-        /* 
+        /*
          * @see org.mortbay.jetty.HttpParser.EventHandler#content(int, org.mortbay.io.Buffer)
          */
         public void content(int index, Buffer ref) throws IOException
         {
-            if (_content!=null)
-                throw new IllegalStateException("content not read");
-            _content=ref;
+            if (_content != null) throw new IllegalStateException("content not read");
+            _content = ref;
         }
 
         /*
@@ -469,8 +457,6 @@ public class HttpConnection
         {
         }
 
-        
-        
         /*
          * (non-Javadoc)
          * 
@@ -481,166 +467,158 @@ public class HttpConnection
         {
             throw new IllegalStateException("response");
         }
-        
+
     }
 
     /* ------------------------------------------------------------ */
     private class Input extends ServletInputStream
     {
         // TODO - more effecient methods!
-        
+
         /* ------------------------------------------------------------ */
-        /* 
+        /*
          * @see java.io.InputStream#read()
          */
         public int read() throws IOException
         {
-            while (_content==null || _content.length()==0)
+            while (_content == null || _content.length() == 0)
             {
-                if (_parser.isState(HttpParser.STATE_END))
-                    return -1;
-                
+                if (_parser.isState(HttpParser.STATE_END)) return -1;
+
                 // Try to get more _content
-                _content=null;
+                _content = null;
                 _parser.parseNext();
-                
+
                 // If unsuccessful and if we are we are not blocking then block
-                if (!_parser.isState(HttpParser.STATE_END) && (_content==null || _content.length()==0) && (_endp!=null && !_endp.isBlocking()))
+                if (!_parser.isState(HttpParser.STATE_END) && (_content == null || _content.length() == 0) && (_endp != null && !_endp.isBlocking()))
                 {
                     _endp.blockWritable(60000); // TODO Configure from connector
                     _parser.parseNext();
                 }
-                
+
                 // if still no _content - this is a timeout
-                if (!_parser.isState(HttpParser.STATE_END) && (_content==null || _content.length()==0))
-                    throw new InterruptedIOException("timeout");
+                if (!_parser.isState(HttpParser.STATE_END) && (_content == null || _content.length() == 0)) throw new InterruptedIOException("timeout");
             }
-            
+
             return _content.get();
         }
     }
-    
+
     public class Output extends ServletOutputStream
     {
-        ByteArrayBuffer _buf1=null;
-        ByteArrayBuffer _bufn=null;
-        
+        ByteArrayBuffer _buf1 = null;
+        ByteArrayBuffer _bufn = null;
+
         /* ------------------------------------------------------------ */
-        /* 
+        /*
          * @see java.io.OutputStream#close()
          */
         public void close() throws IOException
         {
             commitResponse(HttpGenerator.LAST);
         }
+
         /* ------------------------------------------------------------ */
-        /* 
+        /*
          * @see java.io.OutputStream#flush()
          */
         public void flush() throws IOException
         {
             flushResponse();
         }
-        
+
         /* ------------------------------------------------------------ */
-        /* 
+        /*
          * @see java.io.OutputStream#write(byte[], int, int)
          */
         public void write(byte[] b, int off, int len) throws IOException
-        {   
-            if(_bufn==null)
-                _bufn=new ByteArrayBuffer(b,off,len);
+        {
+            if (_bufn == null)
+                _bufn = new ByteArrayBuffer(b, off, len);
             else
-                _bufn.wrap(b,off,len);
+                _bufn.wrap(b, off, len);
             write(_bufn);
         }
-        
+
         /* ------------------------------------------------------------ */
-        /* 
+        /*
          * @see java.io.OutputStream#write(byte[])
          */
         public void write(byte[] b) throws IOException
         {
-            if(_bufn==null)
-                _bufn=new ByteArrayBuffer(b);
+            if (_bufn == null)
+                _bufn = new ByteArrayBuffer(b);
             else
                 _bufn.wrap(b);
             write(_bufn);
         }
-        
+
         /* ------------------------------------------------------------ */
-        /* 
+        /*
          * @see java.io.OutputStream#write(int)
          */
         public void write(int b) throws IOException
         {
-            if (_buf1==null)
-                _buf1=new ByteArrayBuffer(1);
+            if (_buf1 == null)
+                _buf1 = new ByteArrayBuffer(1);
             else
                 _buf1.compact();
-            _buf1.put((byte)b);
+            _buf1.put((byte) b);
             write(_buf1);
         }
 
         /* ------------------------------------------------------------ */
-        private void write(Buffer buffer)
-        	throws IOException
+        private void write(Buffer buffer) throws IOException
         {
             // Block until we can add _content.
             while (_generator.isBufferFull() && !_endp.isClosed() && !_endp.isBlocking())
             {
-                _endp.blockWritable(60000);  // TODO Configure timeout
+                _endp.blockWritable(60000); // TODO Configure timeout
                 _generator.flushBuffers();
             }
-            
+
             // Add the _content
-            _generator.addContent(buffer,HttpGenerator.MORE);
-            
-            //  Have to flush and complete headers?
+            _generator.addContent(buffer, HttpGenerator.MORE);
+
+            // Have to flush and complete headers?
             if (_generator.isBufferFull())
             {
                 // Buffers are full so flush.
                 commitResponse(HttpGenerator.MORE);
                 _generator.flushBuffers();
             }
-            
+
             // Block until our buffer is free
-            while (buffer.length()>0 && !_endp.isClosed() && !_endp.isBlocking())
+            while (buffer.length() > 0 && !_endp.isClosed() && !_endp.isBlocking())
             {
-                _endp.blockWritable(60000);  // TODO Configure timeout
+                _endp.blockWritable(60000); // TODO Configure timeout
                 _generator.flushBuffers();
             }
         }
-        
-        public void sendContent(Object content)
-        	throws IOException
+
+        public void sendContent(Object content) throws IOException
         {
-            if (_generator.getContentAdded()>0)
-                throw new IllegalStateException("!empty");
-            
+            if (_generator.getContentAdded() > 0) throw new IllegalStateException("!empty");
+
             if (content instanceof HttpContent)
             {
-                HttpContent c = (HttpContent)content;
-                if (c.getContentType()!=null && !_responseFields.containsKey(HttpHeaders.CONTENT_TYPE_BUFFER))
-                    _responseFields.add(HttpHeaders.CONTENT_TYPE_BUFFER, c.getContentType());
-                if (c.getContentLength()>0)
-                    _responseFields.addLongField(HttpHeaders.CONTENT_LENGTH_BUFFER, c.getContentLength());
-                if (c.getLastModified()!=null)
-                    _responseFields.add(HttpHeaders.LAST_MODIFIED_BUFFER, c.getLastModified());
-                if (c.getBuffer()!=null)
-                    _generator.addContent(c.getBuffer(),HttpGenerator.LAST);
+                HttpContent c = (HttpContent) content;
+                if (c.getContentType() != null && !_responseFields.containsKey(HttpHeaders.CONTENT_TYPE_BUFFER)) _responseFields.add(HttpHeaders.CONTENT_TYPE_BUFFER, c.getContentType());
+                if (c.getContentLength() > 0) _responseFields.addLongField(HttpHeaders.CONTENT_LENGTH_BUFFER, c.getContentLength());
+                if (c.getLastModified() != null) _responseFields.add(HttpHeaders.LAST_MODIFIED_BUFFER, c.getLastModified());
+                if (c.getBuffer() != null) _generator.addContent(c.getBuffer(), HttpGenerator.LAST);
                 commitResponse(HttpGenerator.LAST);
             }
             else if (content instanceof Buffer)
             {
-                _generator.addContent((Buffer)content,HttpGenerator.LAST);
+                _generator.addContent((Buffer) content, HttpGenerator.LAST);
                 commitResponse(HttpGenerator.LAST);
             }
-            
+
             else
                 throw new IllegalArgumentException("unknown content type?");
         }
-    
+
     }
 
     /* ------------------------------------------------------------ */
@@ -652,7 +630,6 @@ public class HttpConnection
         return _generator;
     }
 
-
     /* ------------------------------------------------------------ */
     public RetryRequest getRetryRequest()
     {
@@ -661,7 +638,7 @@ public class HttpConnection
 
     public void setRetryRequest(RetryRequest retry)
     {
-        _retry=retry;
+        _retry = retry;
     }
 
 }
