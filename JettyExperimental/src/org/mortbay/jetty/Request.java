@@ -811,6 +811,7 @@ public class Request implements HttpServletRequest
                 {
                     _serverName=hostPort.peek(hostPort.getIndex(), i).toString();
                     _port=BufferUtil.toInt(hostPort.peek(hostPort.getIndex()+i+1, hostPort.length()-i-1));
+                    return _serverName;
                 }
             }
             if (_serverName==null || _port<0)
@@ -854,10 +855,13 @@ public class Request implements HttpServletRequest
             if (_serverName==null)
                 getServerName();
         
-            if (_port<=0 && _serverName!=null && _uri!=null && _uri.isAbsolute())
-                _port = _uri.getPort();
-            else 
-                _port = _endp==null?0:_endp.getLocalPort();
+            if (_port<=0)
+            {
+                if (_serverName!=null && _uri!=null && _uri.isAbsolute())
+                    _port = _uri.getPort();
+                else 
+                    _port = _endp==null?0:_endp.getLocalPort();
+            }
         }
         
         if (_port<=0)
