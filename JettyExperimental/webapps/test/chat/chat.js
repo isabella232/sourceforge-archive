@@ -1,12 +1,6 @@
 
 
 
-function getMember(listItem) 
-{
-  var member = listItem.innerHTML;
-  ajaxEngine.sendRequest('getMember',"member=" + member);
-}
-
 
 var JoinHandler = 
 { 
