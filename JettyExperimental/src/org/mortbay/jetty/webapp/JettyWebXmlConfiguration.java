@@ -23,7 +23,9 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 
- * JettyWebConfiguration
+ * JettyWebConfiguration.
+ * 
+ * Looks for Xmlconfiguration files in WEB-INF.  Searches in order for the first of jetty6-web.xml, jetty-web.xml or web-jetty.xml
  *
  * @author janb
  * @version $Revision$ $Date$
@@ -85,9 +87,11 @@ public class JettyWebXmlConfiguration implements Configuration
         if(webInf!=null&&webInf.isDirectory())
         {
             // do jetty.xml file
-            Resource jetty=webInf.addPath("web-jetty.xml");
+            Resource jetty=webInf.addPath("jetty6.xml");
             if(!jetty.exists())
                 jetty=webInf.addPath("jetty-web.xml");
+            if(!jetty.exists())
+                jetty=webInf.addPath("web-jetty.xml");
             
             if(jetty.exists())
             {
