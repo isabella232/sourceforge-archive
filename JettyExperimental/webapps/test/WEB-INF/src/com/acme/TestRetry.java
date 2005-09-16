@@ -73,7 +73,7 @@ public class TestRetry extends HttpServlet
         Continuation continuation = Request.getRequest(request).getContinuation(true);
         System.err.println("continuation="+continuation+" isNew"+continuation.isNew());
         
-        Object o = continuation.getObject(5000L);
+        Object o = continuation.getEvent(5000L);
         if (o==null)
         {
             // timeout

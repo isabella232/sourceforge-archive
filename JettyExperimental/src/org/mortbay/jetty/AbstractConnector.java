@@ -462,6 +462,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     private static class WaitingContinuation implements org.mortbay.jetty.util.Continuation
     {
         Object _object;
+        Object _event;
         boolean _waited;
         boolean _new=true;
         boolean _pending=true;
@@ -470,7 +471,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
         {
             synchronized (this)
             {
-                _object=object==null?this:object;
+                _event=object==null?this:object;
                 _pending=false;
                 notify();
             }
@@ -481,7 +482,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
             return _new;
         }
 
-        public Object getObject(long timeout)
+        public Object getEvent(long timeout)
         {
             if (timeout < 0)
                 throw new IllegalArgumentException();
@@ -491,9 +492,11 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
                 _new=false;
                 try
                 {
-                    if (!_waited && _object==null && timeout>0)
+                    if (!_waited && _event==null && timeout>0)
+                    {
+                        _waited=true;
                         wait(timeout);
-                    _waited=true;
+                    }
                 }
                 catch (InterruptedException e)
                 {
@@ -501,12 +504,22 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
                 }
                 _pending=false;
             }
-            return _object;
+            return _event;
         }
         
         public boolean isPending()
         {
             return _pending;
+        }
+
+        public Object getObject()
+        {
+            return _object;
+        }
+
+        public void setObject(Object object)
+        {
+            _object = object;
         }
     
     }

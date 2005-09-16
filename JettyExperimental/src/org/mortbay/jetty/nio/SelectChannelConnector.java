@@ -42,12 +42,23 @@ import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------------------------- */
 /** Selecting NIO connector.
- * This connector uses efficient NIO buffers with a non blocking threading model.
+ * <p>This connector uses efficient NIO buffers with a non blocking threading model.
  * Direct NIO buffers are used and threads are only allocated to connections with
  * requests. Synchronization is used to simulate blocking for the servlet API, and
  * any unflushed content at the end of request handling is written asynchronously.
- * 
- * This connector is best used when there are a many moderately active connections.
+ * </p>
+ * <p>
+ * This connector is best used when there are a many connections that have idle periods.
+ * </p>
+ * <p>
+ * When used with {@link org.mortbay.jetty.util.Continuation}, threadless waits are
+ * supported.  When a filter or servlet calls getEvent on a Continuation, a
+ * {@link org.mortbay.jetty.RetryRequest} runtime exception is thrown to allow the
+ * thread to exit the current request handling.  Jetty will catch this exception and will not
+ * send a response to the client.  Instead the thread is released and the Continuation is 
+ * placed on the timer queue.  If the Continuation timeout expires, or it's resume method
+ * is called, then the request is again allocated a thread and the request is retied. 
+ * </p>
  * 
  * @version $Revision$
  * @author gregw
@@ -598,6 +609,7 @@ public class SelectChannelConnector extends AbstractConnector
     /* ------------------------------------------------------------ */
     private class RetryContinuation extends Timeout.Task implements Continuation
     {
+        Object _event;
         Object _object;
         HttpEndPoint _endPoint;
         long _timeout;
@@ -611,7 +623,7 @@ public class SelectChannelConnector extends AbstractConnector
             {
                 _endPoint=ep;
             
-                if (_object!=null)
+                if (_event!=null)
                     redispatch();
             }
         }
@@ -641,12 +653,12 @@ public class SelectChannelConnector extends AbstractConnector
             }
         }
         
-        public Object getObject(long timeout)
+        public Object getEvent(long timeout)
         {
             synchronized (this)
             {
                 _new=false;
-                if (!isExpired() && _object==null && timeout>0)
+                if (!isExpired() && _event==null && timeout>0)
                 {
                     if (_endPoint!=null)
                     {
@@ -657,7 +669,7 @@ public class SelectChannelConnector extends AbstractConnector
                 }
             }   
             
-            return _object;
+            return _event;
         }
         
         public void resume(Object object)
@@ -669,7 +681,7 @@ public class SelectChannelConnector extends AbstractConnector
 
                 _pending=false;
                 this.cancel();
-                _object=object==null?this:object;
+                _event=object==null?this:object;
             
                 if (_endPoint!=null)
                     redispatch();
@@ -691,6 +703,16 @@ public class SelectChannelConnector extends AbstractConnector
                     _endPoint.undispatch();
                 }
             }
+        }
+        
+        public Object getObject()
+        {
+            return _object;
+        }
+
+        public void setObject(Object object)
+        {
+            _object = object;
         }
         
     }

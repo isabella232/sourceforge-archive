@@ -97,7 +97,7 @@ public class ChatFilter extends AjaxFilter
             {
                 member = new Member(session,name);
                 chatroom.put(session.getId(),member);
-                member.joinChat();
+                sendEvent(member,"has joined the chat",true);
             }
             
             sendMembers(response);
@@ -116,9 +116,12 @@ public class ChatFilter extends AjaxFilter
         synchronized (mutex)
         {
             member = (Member)chatroom.get(id);
-            if (member==null || !member.isValid())
+            if (member==null)
                 return;
-            member.leaveChat();
+            if ("Elvis".equals(member.getName()))
+                sendEvent(member,"has left the building",true);
+            else
+                sendEvent(member,"has left the chat",true);
             chatroom.remove(id);
         }
         sendMembers(response);
@@ -133,13 +136,16 @@ public class ChatFilter extends AjaxFilter
         String id = session.getId();
         String text = request.getParameter("text");
         
+        Member member=null;
         synchronized (mutex)
         {
-            Member member = (Member)chatroom.get(id);
-            if (member==null || !member.isValid())
-                return;
-            sendEvent(member, text, false);
+            member = (Member)chatroom.get(id);
         }
+        
+        if (member==null)
+            return;
+        sendEvent(member, text, false);
+        
     }
 
 
@@ -148,41 +154,35 @@ public class ChatFilter extends AjaxFilter
     {
         HttpSession session = request.getSession(true);
         String id = session.getId();
-        boolean alerts=false;
         
+        Member member=null;
         synchronized (mutex)
         {
-            Member member = (Member)chatroom.get(id);
-            if (member!=null && member.isValid())
-            {          
-                synchronized (member)
-                {
-                    // Do we have a continuation (ie has this request been tried before)?
-                    Continuation continuation = ContinuationSupport.getContinutaion(request, false);
-                    
-                    // If we don't have a continuation, do we need one (because we have no events to return)?
-                    if (continuation==null && !member.hasEvents())
-                        continuation = ContinuationSupport.getContinutaion(request, true);
-                    
-                    // If we have a new continuation, put it in the member object so it can be resumed.
-                    if (continuation!=null && continuation.isNew())
-                        member.setContinuation(continuation);
-                    
-                    // Get the continuation object (may wait and/or retry request here).  For this demo we don't need return value. 
-                    if (continuation!=null) continuation.getObject(10000L);
-                    
-                    member.setContinuation(null);
-                    alerts=member.sendEvents(response);
-                }
-                
-                if (alerts)
-                    sendMembers(response);
-                
-                // Signal for a new poll
-                response.objectResponse("poll", "<ok/>");
-            }
+            member = (Member)chatroom.get(id);
         }
-        
+
+        boolean alerts=false;
+        if (member!=null)
+        {
+            // Do we have a continuation (ie has this request been tried before)?
+            Continuation continuation = ContinuationSupport.getContinutaion(request, !member.hasEvents());
+            
+            // If we have a new continuation, put it in the member object so it can be resumed.
+            if (continuation!=null && continuation.isNew())
+                member.setContinuation(continuation);
+            
+            // Get the continuation object (may wait and/or retry request here).  For this demo we don't need return value. 
+            if (continuation!=null) continuation.getEvent(10000L);
+            
+            member.setContinuation(null);
+            alerts=member.sendEvents(response);
+            
+            if (alerts)
+                sendMembers(response);
+            
+            // Signal for a new poll
+            response.objectResponse("poll", "<ok/>");
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -197,9 +197,13 @@ public class ChatFilter extends AjaxFilter
             while (iter.hasNext())
             {
                 Member m = (Member)iter.next();
-                if (m.isValid())
+                
+                try 
+                {
+                    m.getSession().getAttribute("anything");
                     m.addEvent(event);
-                else
+                }
+                catch(IllegalStateException e)
                 {
                     if (invalids==null)
                         invalids=new ArrayList();
@@ -212,7 +216,7 @@ public class ChatFilter extends AjaxFilter
         for (int i=0;invalids!=null && i<invalids.size();i++)
         {
             Member m = (Member)invalids.get(i);
-            m.leaveChat();
+            sendEvent(m,"has timed out of the chat",true);
         }
     }
     
@@ -275,12 +279,6 @@ public class ChatFilter extends AjaxFilter
             _session=session;
             _name=name;
         }
-
-        /* ------------------------------------------------------------ */
-        public boolean isValid()
-        {
-            return _session!=null;
-        }
         
         /* ------------------------------------------------------------ */
         /**
@@ -334,9 +332,7 @@ public class ChatFilter extends AjaxFilter
             {
                 _events.add(event);
                 if (_continuation!=null)
-                {
                     _continuation.resume(event);
-                }
             }
         }
 
@@ -344,24 +340,6 @@ public class ChatFilter extends AjaxFilter
         public boolean hasEvents()
         {
             return _events!=null && _events.size()>0;
-        }
-        
-        /* ------------------------------------------------------------ */
-        public void joinChat()
-        {
-            ChatFilter.this.sendEvent(this,"has joined the chat",true);
-        }
-        
-        /* ------------------------------------------------------------ */
-        public void leaveChat()
-        {
-            if ("Elvis".equals(getName()))
-                ChatFilter.this.sendEvent(this,"has left the building",true);
-            else
-                ChatFilter.this.sendEvent(this,"has left the chat",true);
-            _session=null;
-            _events=null;
-            _continuation=null;
         }
         
         /* ------------------------------------------------------------ */

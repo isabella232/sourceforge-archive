@@ -95,6 +95,7 @@ public class AjaxFilter implements Filter
         // TODO - much better implementation of this needed
         s=StringUtil.replace(s, "<", "&lt;");
         s=StringUtil.replace(s, ">", "&gt;");
+        s=StringUtil.replace(s, "&", "&amp;");
         return s;
     }
     

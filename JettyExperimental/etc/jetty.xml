@@ -15,7 +15,7 @@
     <Set name="connectors">
       <Array type="org.mortbay.jetty.Connector"> 
       
-        <!-- Use this connector if NIO is not available.
+        <!-- Use this connector if NIO is not available. 
         <Item>
           <New class="org.mortbay.jetty.bio.SocketConnector">
             <Set name="port">8080</Set>
@@ -31,21 +31,15 @@
         </Item>
         -->
         
-        <!-- Use this connector for many frequently idle connections -->
+        <!-- Use this connector for many frequently idle connections 
+             and for threadless continuations.
+        -->
         <Item>
           <New class="org.mortbay.jetty.nio.SelectChannelConnector">
             <Set name="port">8080</Set>
             <Set name="maxIdleTime">15000</Set>
           </New>
         </Item>
-        
-        <!-- 
-        <Item>
-          <New class="org.mortbay.jetty.nio.SelectBlockingChannelConnector">
-            <Set name="port">8080</Set>
-          </New>
-        </Item>
-        -->
         
       </Array>
     </Set>

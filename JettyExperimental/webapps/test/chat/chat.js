@@ -2,7 +2,7 @@
 
 
 
-var JoinHandler = 
+var MembershipHandler = 
 { 
   join: function()
   {
@@ -24,12 +24,14 @@ var JoinHandler =
        // switch the input form
        $('join').className='';
        $('joined').className='hidden';
+       $('username').focus();
      }
      else
      {
        // switch the input form
        $('join').className='hidden';
        $('joined').className='';
+       $('phrase').focus();
        
        // start polling for events
        ajaxEngine.sendRequest('getEvents');
@@ -44,6 +46,18 @@ var EventHandler =
 {
   last: "",
   
+  chat: function()
+  {
+    var text = $('phrase').value;
+    if (text != null && text.length>0 )
+    {
+        text=text.replace('%','%25');
+        text=text.replace('&','%26');
+	ajaxEngine.sendRequest('chat',"text=" + text); // TODO encode ??
+	$('phrase').value="";
+    }
+  },
+  
   ajaxUpdate: function(ajaxResponse) 
   {
      var event=ajaxResponse.childNodes[0];
@@ -54,7 +68,7 @@ var EventHandler =
      var alert=event.attributes['alert'].value;
      var text=event.childNodes[0].data;
      
-     if ( from == this.last )
+     if ( alert!="true" && from == this.last )
         from="...";
      else
      {
@@ -82,45 +96,43 @@ var PollHandler =
 };
 
 
-
-
 function initPage()
 {
   ajaxEngine.registerRequest('join', "?ajax=join");
   ajaxEngine.registerRequest('leave', "?ajax=leave");
   ajaxEngine.registerRequest('chat', "?ajax=chat"); 
-  ajaxEngine.registerRequest('getMember', "?ajax=getMember&id=member");
   ajaxEngine.registerRequest('getEvents', "?ajax=getEvents&id=event");
   
   ajaxEngine.registerAjaxElement('members');
   
-  ajaxEngine.registerAjaxObject('joined', JoinHandler);
-  ajaxEngine.registerAjaxObject('left', JoinHandler);
+  ajaxEngine.registerAjaxObject('joined', MembershipHandler);
+  ajaxEngine.registerAjaxObject('left', MembershipHandler);
   ajaxEngine.registerAjaxObject('event', EventHandler);
   ajaxEngine.registerAjaxObject('poll', PollHandler);
-  
   
 }
 
 
 var behaviours = 
 { 
+
+  '#username' : function(element)
+  {
+    element.setAttribute("autocomplete","OFF"); 
+    element.onkeypress = function(event)
+    {
+        if (event && (event.keyCode==13 || event.keyCode==10))
+        {
+      	  MembershipHandler.join();
+	}
+    } 
+  },
+  
   '#joinB' : function(element)
   {
     element.onclick = function()
     {
-      JoinHandler.join();
-    }
-  },
-  
-  '#sendB' : function(element)
-  {
-    element.onclick = function()
-    {
-    	var text = $('phrase').value;
-    	if (text != null && text.length>0 )
-	ajaxEngine.sendRequest('chat',"text=" + text); // TODO encode ??
-	$('phrase').value="";
+      MembershipHandler.join();
     }
   },
   
@@ -131,16 +143,21 @@ var behaviours =
     {
         if (event && (event.keyCode==13 || event.keyCode==10))
         {
-          var phrase = $('phrase');
-    	  var text = phrase.value;
-    	  phrase.value='';
-    	  if (text != null && text.length>0 )
-	  ajaxEngine.sendRequest('chat',"text=" + text); // TODO encode ??
+          EventHandler.chat();
 	  return false;
 	}
 	return true;
     }
   },
+  
+  '#sendB' : function(element)
+  {
+    element.onclick = function()
+    {
+    	EventHandler.chat();
+    }
+  },
+  
   
   '#leaveB' : function(element)
   {

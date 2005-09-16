@@ -7,8 +7,8 @@
 <BODY>
 <A HREF="http://jetty.mortbay.org"><IMG SRC="jetty_banner.gif"></A>
 <P>
-<h1>Welcome to Jetty Experimental.</h1>
-This is a test context that serves:
+<h1>Welcome to Jetty 6.0.x</h1>
+This is the development/experimental series of Jetty.  This is a test context that serves:
 <ul>
 <li>static content (
 <a href="d.txt">tiny</a>,
@@ -17,12 +17,12 @@ This is a test context that serves:
 <a href="data.txt">large</a>)</li>
 <li>a <a href="dump/info">Request Dump Servlet</a></li>
 <li>a <a href="session/">Session Dump Servlet</a></li>
-<li>a <a href="chat/chat.jsp">AJAX Chat with continuations</a></li>
+<li>a <a href="chat/chat.html">AJAX Chat with continuations</a></li>
 </ul>
 The <a href="/javadoc">javadoc</a> is served from another context.
 </p>
 
-The features of Jetty Experimental are:
+The features of Jetty 6.0.x are:
 <ul>
 <li>Totally rearchitected and rebuild, so 10 years of cruft could be removed!</li>
 <li>Improved "dependancy injection" and "inversion of control" design of components</li>
@@ -34,11 +34,13 @@ efficient asynchronous flushing and of avoiding chunking.</li>
 <li>Optional use of NIO non-blocking scheduling so that threads are not allocated per connection.</li> 
 <li>Optional use of NIO gather writes, so that for example a HTTP header and a memory mapped file may be
 sent as sent is a single operation.</li> 
+<li>Continuations for efficient AJAX polling</li>
 </ul>
 
 The missing featurs of Jetty Experimental are:
 <ul>
 <li>Named Request Dispatchers</li>
+<li>Dispatcher parameter handling</li>
 <li>More event listeners</li>
 <li>Virtual hosts</li>
 </ul>

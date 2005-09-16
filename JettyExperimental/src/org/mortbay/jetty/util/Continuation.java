@@ -23,7 +23,7 @@ package org.mortbay.jetty.util;
  * suspended and retried after a timeout or an asynchronous event
  * has occured.
  * With the appropriate HTTP Connector, this allows threadless waiting
- * for events.
+ * for events (see {@link org.mortbay.jetty.nio.SelectChannelConnector}).
  * 
  * @author gregw
  *
@@ -32,30 +32,46 @@ public interface Continuation
 {
     
     /* ------------------------------------------------------------ */
-    /** Resume.
-     * Resume a suspended request.  The passed object will be returned in the getObject method.
-     * @param object
+    /** Resume the request.
+     * Resume a suspended request.  The passed event will be returned in the getObject method.
+     * @param event Event to resume the request with.
      */
-    public void resume(Object object);
+    public void resume(Object event);
     
     /* ------------------------------------------------------------ */
-    /** Get object.
+    /** Get resumption event.
      * This method will suspend the request for the timeout or until resume is
      * called.
      * @param timeout
      * @return The object passed to resume or null if timeout.
      */
-    public Object getObject(long timeout);
+    public Object getEvent(long timeout);
     
     /* ------------------------------------------------------------ */
-    /**
+    /** Is this a newly created Continuation.
+     * <p>
+     * A newly created continuation has not had {@link #getEvent(long)} called on it.
+     * </p>
      * @return True if the continuation has just been created and has not yet suspended the request.
      */
     public boolean isNew();
     
     /* ------------------------------------------------------------ */
-    /**
+    /** Is the continuation pending an event or timeout?
      * @return True if neither resume has been called or the continuation has timed out.
      */
     public boolean isPending();
+    
+    /* ------------------------------------------------------------ */
+    /** Arbitrary object associated with the continuation for context.
+     * @return An arbitrary object associated with the continuation
+     */
+    public Object getObject();
+    
+    /* ------------------------------------------------------------ */
+    /** Arbitrary object associated with the continuation for context.
+     * @param o An arbitrary object to associate with the continuation
+     */
+    public void setObject(Object o);
+    
 }
