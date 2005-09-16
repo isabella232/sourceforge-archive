@@ -1,6 +1,8 @@
 Jetty Versions
 --------------
 
+ + ReFixed merge of Dispatcher params
+
 Jetty-5.1.5rc1 - 23 August 2005
  + upgraded to commons logging 1.0.4
  + Release commons logging factories when stopping context.

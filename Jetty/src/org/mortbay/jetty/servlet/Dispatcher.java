@@ -488,8 +488,7 @@ public class Dispatcher implements RequestDispatcher
         {
             if (_parameters==null || !_parameters.containsKey(name))
                 return super.getParameter(name);
-            
-            return _parameters.get(name).toString();
+            return (String)_parameters.getValue(name,0);
         }
         
         /* -------------------------------------------------------------- */
@@ -571,7 +570,6 @@ public class Dispatcher implements RequestDispatcher
                 if (name.equals(__FORWARD_QUERY_STRING))
                     return _servletHttpRequest.getQueryString();
             }
-            
             
             return super.getAttribute(name);
         }
