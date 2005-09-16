@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at 
+// You may obtain a copy of the License at
 // http://www.apache.org/licenses/LICENSE-2.0
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -44,7 +44,7 @@ import org.xml.sax.SAXException;
 /**
  * Configure Objects from XML. This class reads an XML file conforming to the configure.dtd DTD and
  * uses it to configure and object by calling set, put or other methods on the object.
- * 
+ *
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
@@ -100,7 +100,7 @@ public class XmlConfiguration
     /* ------------------------------------------------------------ */
     /**
      * Constructor. Reads the XML configuration file.
-     * 
+     *
      * @param configuration
      */
     public XmlConfiguration(URL configuration) throws SAXException, IOException
@@ -115,7 +115,7 @@ public class XmlConfiguration
     /* ------------------------------------------------------------ */
     /**
      * Constructor.
-     * 
+     *
      * @param configuration String of XML configuration commands excluding the normal XML preamble.
      *            The String should start with a " <Configure ...." element.
      * @exception SAXException
@@ -136,7 +136,7 @@ public class XmlConfiguration
     /* ------------------------------------------------------------ */
     /**
      * Constructor.
-     * 
+     *
      * @param configuration An input stream containing a complete e.g. configuration file
      * @exception SAXException
      * @exception IOException
@@ -155,7 +155,7 @@ public class XmlConfiguration
     /**
      * Configure an object. If the object is of the approprate class, the XML configuration script
      * is applied to the object.
-     * 
+     *
      * @param obj The object to be configured.
      * @exception Exception
      */
@@ -171,7 +171,7 @@ public class XmlConfiguration
     /* ------------------------------------------------------------ */
     /**
      * Create a new object and configure it. A new object is created and configured.
-     * 
+     *
      * @return The newly created configured object.
      * @exception Exception
      */
@@ -190,7 +190,7 @@ public class XmlConfiguration
         String className = node.getAttribute("class");
         if (className == null) return null;
 
-        return Loader.loadClass(XmlConfiguration.class, className);
+        return Loader.findAndLoadClass(XmlConfiguration.class, className);
     }
 
     /* ------------------------------------------------------------ */
@@ -203,7 +203,7 @@ public class XmlConfiguration
         String id = cfg.getAttribute("id");
         if (id!=null)
             _idMap.put(id,obj);
-            
+
         for (; i < cfg.size(); i++)
         {
             Object o = cfg.get(i);
@@ -392,7 +392,7 @@ public class XmlConfiguration
     /* ------------------------------------------------------------ */
     /*
      * Call a put method.
-     * 
+     *
      * @param obj @param node
      */
     private void put(Object obj, XmlParser.Node node) throws Exception
@@ -529,7 +529,7 @@ public class XmlConfiguration
     /* ------------------------------------------------------------ */
     /*
      * Create a new value object.
-     * 
+     *
      * @param obj @param node @return @exception Exception
      */
     private Object newObj(Object obj, XmlParser.Node node) throws Exception
@@ -599,7 +599,7 @@ public class XmlConfiguration
     /* ------------------------------------------------------------ */
     /*
      * Reference an id value object.
-     * 
+     *
      * @param obj @param node @return @exception NoSuchMethodException @exception
      * ClassNotFoundException @exception InvocationTargetException
      */
@@ -616,7 +616,7 @@ public class XmlConfiguration
     /* ------------------------------------------------------------ */
     /*
      * Create a new array object.
-     * 
+     *
      * @param obj @param node @return @exception Exception
      */
     private Object newArray(Object obj, XmlParser.Node node) throws Exception
@@ -637,7 +637,7 @@ public class XmlConfiguration
                 else if ("InetAddress".equals(type))
                     aClass = java.net.InetAddress.class;
                 else
-                    aClass = Loader.loadClass(XmlConfiguration.class, type);
+                    aClass = Loader.findAndLoadClass(XmlConfiguration.class, type);
             }
         }
 

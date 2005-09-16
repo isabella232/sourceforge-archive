@@ -45,5 +45,57 @@ public class Loader
             return Class.forName(name);
         return loader.loadClass(name);
     }
+
+    /* ------------------------------------------------------------ */
+    public static Class findAndLoadClass(Class loadClass,String name)
+        throws ClassNotFoundException
+    {
+        ClassNotFoundException ex=null;
+        Class c =null;
+        ClassLoader loader=Thread.currentThread().getContextClassLoader();
+        if (loader!=null)
+        {
+            try { c=loadClass(loader,name); }
+            catch (ClassNotFoundException e) {ex=e;}
+        }
+        
+        if (c==null && loadClass!=null && loadClass.getClassLoader()!=null)
+        {
+            try { c=loadClass(loader,name); }
+            catch (ClassNotFoundException e) {if(ex==null)ex=e;}
+        }       
+
+        {
+            try { c=Class.forName(name); }
+            catch (ClassNotFoundException e) {if(ex==null)ex=e;}
+        }   
+
+        if (c!=null)
+            return c;
+        throw ex;
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    public static Class loadClass(ClassLoader loader,String name)
+        throws ClassNotFoundException
+    {
+        ClassNotFoundException ex=null;
+        Class c =null;
+        
+        try { c=loader.loadClass(name); }
+        catch (ClassNotFoundException e) {ex=e;}
+        
+        if (c==null && loader.getParent()!=null)
+        {
+            try {loadClass(loader.getParent(),name);}
+            catch (ClassNotFoundException e) {if (ex==null) ex=e;}   
+        }
+
+        if (c!=null)
+            return c;
+        throw ex;
+    }
+    
 }
 
