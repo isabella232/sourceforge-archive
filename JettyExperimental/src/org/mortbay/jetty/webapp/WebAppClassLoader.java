@@ -468,7 +468,7 @@ public class WebAppClassLoader extends URLClassLoader
     /**
      * @param serverClasses The serverClasses to set.
      */
-    void setServerClasses(String[] serverClasses)
+    public void setServerClasses(String[] serverClasses) // TODO - this shouldn't really be public...
     {
         _serverClasses = serverClasses==null?null:(String[])serverClasses.clone();
     }
@@ -481,7 +481,7 @@ public class WebAppClassLoader extends URLClassLoader
     {
         return _systemClasses;
     }
-    
+
     /* ------------------------------------------------------------ */
     /**
      * @param systemClasses The systemClasses to set.
