@@ -50,7 +50,7 @@ public class ServerMBean extends HttpServerMBean
      * @exception MBeanException 
      * @exception InstanceNotFoundException 
      */
-    protected ServerMBean(Server jettyServer)
+    public ServerMBean(Server jettyServer)
         throws MBeanException, InstanceNotFoundException
     {
         super(jettyServer);
