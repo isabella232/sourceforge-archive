@@ -154,6 +154,7 @@ public class ChatFilter extends AjaxFilter
     {
         HttpSession session = request.getSession(true);
         String id = session.getId();
+        long timeoutMS = 10000L; // TODO configure.
         
         Member member=null;
         synchronized (mutex)
@@ -164,15 +165,20 @@ public class ChatFilter extends AjaxFilter
         boolean alerts=false;
         if (member!=null)
         {
-            // Do we have a continuation (ie has this request been tried before)?
-            Continuation continuation = ContinuationSupport.getContinutaion(request, !member.hasEvents());
+            // Get an existing Continuation or create a new one if there are no events.
+            boolean create=!member.hasEvents();
+            Continuation continuation = ContinuationSupport.getContinutaion(request, create);
             
-            // If we have a new continuation, put it in the member object so it can be resumed.
-            if (continuation!=null && continuation.isNew())
-                member.setContinuation(continuation);
+            // If we have a new continuation,
+            if (continuation!=null)
+            {
+                // if it is a new Continuation, register it with the chatroom to receive async events.
+                if(continuation.isNew())
+                    member.setContinuation(continuation);
             
-            // Get the continuation object (may wait and/or retry request here).  For this demo we don't need return value. 
-            if (continuation!=null) continuation.getEvent(10000L);
+                // Get the continuation object (may wait and/or retry request here).  
+                Object event= continuation.getEvent(timeoutMS);
+            }
             
             member.setContinuation(null);
             alerts=member.sendEvents(response);

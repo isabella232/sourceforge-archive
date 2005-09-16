@@ -2,6 +2,7 @@
 
 Jetty-6.0.0APLPA3
     + Added demo for Continuations
+    + Jasper and associated libraries.
 
 Jetty-6.0.0ALPHA2
     + Continuations - way cool way to suspend a request and retry later.
