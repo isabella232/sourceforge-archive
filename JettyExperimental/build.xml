@@ -79,7 +79,6 @@
     <delete dir="${dist}" quiet="false"/>
     <delete dir="${classes}" quiet="true"/>
     <delete dir="${test.classes}" quiet="true"/>
-    <delete dir="${javadoc}" quiet="false"/>
   </target>
   
 
@@ -90,6 +89,7 @@
     <delete file="${start.jar}" quiet="false"/>
     <delete file="${webapps}/javadoc.war"/>
     <delete dir="${webapps}/test/WEB-INF/classes/org"/>
+    <delete dir="${javadoc}" quiet="false"/>
   </target>
 
 
