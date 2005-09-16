@@ -26,7 +26,7 @@ import org.mortbay.jetty.Request;
  */
 public class ContinuationSupport
 {
-    public static Continuation getContinutaion(HttpServletRequest request, boolean create)
+    public static Continuation getContinuation(HttpServletRequest request, boolean create)
     {
         // TODO use reflection to make this portable
         return Request.getRequest(request).getContinuation(create);

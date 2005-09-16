@@ -167,7 +167,7 @@ public class ChatFilter extends AjaxFilter
         {
             // Get an existing Continuation or create a new one if there are no events.
             boolean create=!member.hasEvents();
-            Continuation continuation = ContinuationSupport.getContinutaion(request, create);
+            Continuation continuation = ContinuationSupport.getContinuation(request, create);
             
             // If we have a new continuation,
             if (continuation!=null)
