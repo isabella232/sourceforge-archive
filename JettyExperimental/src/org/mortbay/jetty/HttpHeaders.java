@@ -29,7 +29,8 @@ public class HttpHeaders extends BufferCache
     /* ------------------------------------------------------------ */
     /** General Fields.
      */
-    public final static String CONNECTION= "HttpConnection",
+    public final static String 
+        CONNECTION= "Connection",
         DATE= "Date",
         PRAGMA= "Pragma",
         TRAILER= "Trailer",

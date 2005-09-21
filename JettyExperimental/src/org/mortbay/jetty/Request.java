@@ -1367,7 +1367,13 @@ public class Request implements HttpServletRequest
     {
         _continuation=cont;
     }
-    
+
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        return getMethod()+" "+_uri+" "+getProtocol()+"\n"+
+        _connection.getRequestFields().toString();
+    }
 
     /* ------------------------------------------------------------ */
     public static Request getRequest(HttpServletRequest request)

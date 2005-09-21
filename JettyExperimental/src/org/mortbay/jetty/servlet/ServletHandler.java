@@ -367,12 +367,14 @@ public class ServletHandler extends WrappedHandler
                 th=cause;
             }
             
+            
             /* TODO
             if (th instanceof HttpException)
                 throw (HttpException)th;
             if (th instanceof EOFException)
                 throw (IOException)th;
-            else */ if (log.isDebugEnabled() || !( th instanceof java.io.IOException))
+            else */ 
+            if (log.isDebugEnabled() || !( th instanceof java.io.IOException))
             {
                 _contextLog.warn(request.getRequestURI()+": ",th);
                 if(log.isDebugEnabled())
@@ -381,6 +383,8 @@ public class ServletHandler extends WrappedHandler
                     log.debug(request.toString());
                 }
             }
+            // TODO clean up
+            log.warn(request.getRequestURI(), th);
             
             // TODO httpResponse.getHttpConnection().forceClose();
             if (!response.isCommitted())
@@ -391,12 +395,12 @@ public class ServletHandler extends WrappedHandler
                 {
                     UnavailableException ue = (UnavailableException)th;
                     if (ue.isPermanent())
-                        response.sendError(HttpServletResponse.SC_NOT_FOUND,e.getMessage());
+                        response.sendError(HttpServletResponse.SC_NOT_FOUND,th.getMessage());
                     else
-                        response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,e.getMessage());
+                        response.sendError(HttpServletResponse.SC_SERVICE_UNAVAILABLE,th.getMessage());
                 }
                 else
-                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,e.getMessage());
+                    response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,th.getMessage());
             }
             else
                 if(log.isDebugEnabled())log.debug("Response already committed for handling "+th);

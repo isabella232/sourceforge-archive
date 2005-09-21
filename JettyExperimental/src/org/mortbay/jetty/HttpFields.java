@@ -618,7 +618,7 @@ public class HttpFields
         if (value == null) throw new IllegalArgumentException("null value");
 
         if (!(name instanceof BufferCache.CachedBuffer)) name = HttpHeaders.CACHE.lookup(name);
-
+        
         Field field = (Field) _bufferMap.get(name);
         Field last = null;
         if (field != null)
@@ -648,6 +648,7 @@ public class HttpFields
 
             _fields.add(field);
         }
+        
     }
 
     /* ------------------------------------------------------------ */
@@ -1214,7 +1215,7 @@ public class HttpFields
         /* ------------------------------------------------------------ */
         private Field(Buffer name, Buffer value, long numValue, int revision)
         {
-            _name = name;
+            _name = name.asImmutableBuffer();
             _value = value.isImmutable() ? value : new View(value);
             _numValue = numValue;
             _next = null;

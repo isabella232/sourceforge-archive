@@ -344,7 +344,7 @@ public class HttpConnection
 
             try
             {
-                _uri = new URI(uri.toString());
+                _uri = new URI(new String(uri.asArray(),"UTF-8"));  // TODO - reduce object creation
                 _uri = _uri.normalize();
                 _request.setUri(_uri);
 
@@ -380,12 +380,13 @@ public class HttpConnection
 
                 case HttpHeaders.EXPECT_ORDINAL:
                     _expect = HttpHeaderValues.CACHE.getOrdinal(value);
+                    break;
 
                 case HttpHeaders.CONNECTION_ORDINAL:
-                    // TODO comma list of connections ???
+                    // TODO coma list of connections ???
                     _connection = HttpHeaderValues.CACHE.getOrdinal(value);
                     _responseFields.put(HttpHeaders.CONNECTION_BUFFER, value);
-            // TODO something with this???
+                    // TODO something with this???
             }
 
             _requestFields.add(name, value);
@@ -492,7 +493,7 @@ public class HttpConnection
                 // If unsuccessful and if we are we are not blocking then block
                 if (!_parser.isState(HttpParser.STATE_END) && (_content == null || _content.length() == 0) && (_endp != null && !_endp.isBlocking()))
                 {
-                    _endp.blockWritable(60000); // TODO Configure from connector
+                    _endp.blockReadable(60000); // TODO Configure from connector
                     _parser.parseNext();
                 }
 

@@ -315,6 +315,9 @@ public class Response implements HttpServletResponse
      */
     public void setStatus(int sc, String sm)
     {
+        if (sc==500)
+            new Throwable().printStackTrace();
+        
         _status=sc;
         _reason=sm; 
     }

@@ -8,5 +8,6 @@
 	<classpathentry output="webapps/test/WEB-INF/classes" kind="src" path="webapps/test/WEB-INF/src"/>
 	<classpathentry kind="lib" path="ext/jsp/commons-logging-api.jar"/>
 	<classpathentry kind="lib" path="ext/jsp/ant.jar"/>
+	<classpathentry sourcepath="/java/hessian/src" kind="lib" path="webapps/test/WEB-INF/lib/hessian-3.0.13.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

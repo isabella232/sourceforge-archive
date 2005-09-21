@@ -1,4 +1,6 @@
 
+    + UTF-8 encoding for URLs
+    + Fixed blocking read
 
 Jetty-6.0.0APLPA3
     + Added demo for Continuations
