@@ -48,7 +48,7 @@ your server needs to listen on multiple ports, as for HTTPS.
 <b>Note:</b> For some extremely handy scripts (verified against
 SuSe 7.3) and a detailed <font face=courier>readme.txt</font>,
 download a the tiny tarball <A
-HREF="faq/iptables.tgz">iptables.tgz</A> contributed by Chris Haynes
+HREF="doc/iptables.tgz">iptables.tgz</A> contributed by Chris Haynes
 (thanks Chris!).
 
 
