@@ -115,7 +115,8 @@ public class ProxyHandler extends AbstractHttpHandler
      */
     public String[] getProxyHostsWhiteList()
     {
-        if (_proxyHostsWhiteList == null || _proxyHostsWhiteList.size() == 0) return new String[0];
+        if (_proxyHostsWhiteList == null || _proxyHostsWhiteList.size() == 0)
+            return new String[0];
 
         String[] hosts = new String[_proxyHostsWhiteList.size()];
         hosts = (String[]) _proxyHostsWhiteList.toArray(hosts);
@@ -136,7 +137,8 @@ public class ProxyHandler extends AbstractHttpHandler
         {
             _proxyHostsWhiteList = new HashSet();
             for (int i = 0; i < hosts.length; i++)
-                if (hosts[i] != null && hosts[i].trim().length() > 0) _proxyHostsWhiteList.add(hosts[i]);
+                if (hosts[i] != null && hosts[i].trim().length() > 0)
+                    _proxyHostsWhiteList.add(hosts[i]);
         }
     }
 
@@ -148,7 +150,8 @@ public class ProxyHandler extends AbstractHttpHandler
      */
     public String[] getProxyHostsBlackList()
     {
-        if (_proxyHostsBlackList == null || _proxyHostsBlackList.size() == 0) return new String[0];
+        if (_proxyHostsBlackList == null || _proxyHostsBlackList.size() == 0)
+            return new String[0];
 
         String[] hosts = new String[_proxyHostsBlackList.size()];
         hosts = (String[]) _proxyHostsBlackList.toArray(hosts);
@@ -169,7 +172,8 @@ public class ProxyHandler extends AbstractHttpHandler
         {
             _proxyHostsBlackList = new HashSet();
             for (int i = 0; i < hosts.length; i++)
-                if (hosts[i] != null && hosts[i].trim().length() > 0) _proxyHostsBlackList.add(hosts[i]);
+                if (hosts[i] != null && hosts[i].trim().length() > 0)
+                    _proxyHostsBlackList.add(hosts[i]);
         }
     }
 
@@ -209,11 +213,13 @@ public class ProxyHandler extends AbstractHttpHandler
             URL url = isProxied(uri);
             if (url == null)
             {
-                if (isForbidden(uri)) sendForbid(request, response, uri);
+                if (isForbidden(uri))
+                    sendForbid(request, response, uri);
                 return;
             }
 
-            if (log.isDebugEnabled()) log.debug("PROXY URL=" + url);
+            if (log.isDebugEnabled())
+                log.debug("PROXY URL=" + url);
 
             URLConnection connection = url.openConnection();
             connection.setAllowUserInteraction(false);
@@ -229,7 +235,8 @@ public class ProxyHandler extends AbstractHttpHandler
 
             // check connection header
             String connectionHdr = request.getField(HttpFields.__Connection);
-            if (connectionHdr != null && (connectionHdr.equalsIgnoreCase(HttpFields.__KeepAlive) || connectionHdr.equalsIgnoreCase(HttpFields.__Close))) connectionHdr = null;
+            if (connectionHdr != null && (connectionHdr.equalsIgnoreCase(HttpFields.__KeepAlive) || connectionHdr.equalsIgnoreCase(HttpFields.__Close)))
+                connectionHdr = null;
 
             // copy headers
             boolean xForwardedFor = false;
@@ -240,10 +247,13 @@ public class ProxyHandler extends AbstractHttpHandler
                 // TODO could be better than this!
                 String hdr = (String) enm.nextElement();
 
-                if (_DontProxyHeaders.containsKey(hdr)) continue;
-                if (connectionHdr != null && connectionHdr.indexOf(hdr) >= 0) continue;
+                if (_DontProxyHeaders.containsKey(hdr))
+                    continue;
+                if (connectionHdr != null && connectionHdr.indexOf(hdr) >= 0)
+                    continue;
 
-                if (HttpFields.__ContentType.equals(hdr)) hasContent = true;
+                if (HttpFields.__ContentType.equals(hdr))
+                    hasContent = true;
 
                 Enumeration vals = request.getFieldValues(hdr);
                 while (vals.hasMoreElements())
@@ -259,11 +269,13 @@ public class ProxyHandler extends AbstractHttpHandler
 
             // Proxy headers
             connection.setRequestProperty("Via", "1.1 (jetty)");
-            if (!xForwardedFor) connection.addRequestProperty(HttpFields.__XForwardedFor, request.getRemoteAddr());
+            if (!xForwardedFor)
+                connection.addRequestProperty(HttpFields.__XForwardedFor, request.getRemoteAddr());
 
             // a little bit of cache control
             String cache_control = request.getField(HttpFields.__CacheControl);
-            if (cache_control != null && (cache_control.indexOf("no-cache") >= 0 || cache_control.indexOf("no-store") >= 0)) connection.setUseCaches(false);
+            if (cache_control != null && (cache_control.indexOf("no-cache") >= 0 || cache_control.indexOf("no-store") >= 0))
+                connection.setUseCaches(false);
 
             // customize Connection
             customizeConnection(pathInContext, pathParams, request, connection);
@@ -324,7 +336,8 @@ public class ProxyHandler extends AbstractHttpHandler
             String val = connection.getHeaderField(h);
             while (hdr != null || val != null)
             {
-                if (hdr != null && val != null && !_DontProxyHeaders.containsKey(hdr)) response.addField(hdr, val);
+                if (hdr != null && val != null && !_DontProxyHeaders.containsKey(hdr))
+                    response.addField(hdr, val);
                 h++;
                 hdr = connection.getHeaderFieldKey(h);
                 val = connection.getHeaderField(h);
@@ -333,14 +346,16 @@ public class ProxyHandler extends AbstractHttpHandler
 
             // Handled
             request.setHandled(true);
-            if (proxy_in != null) IO.copy(proxy_in, response.getOutputStream());
+            if (proxy_in != null)
+                IO.copy(proxy_in, response.getOutputStream());
 
         }
         catch (Exception e)
         {
             log.warn(e.toString());
             LogSupport.ignore(log, e);
-            if (!response.isCommitted()) response.sendError(HttpResponse.__400_Bad_Request);
+            if (!response.isCommitted())
+                response.sendError(HttpResponse.__400_Bad_Request);
         }
     }
 
@@ -351,7 +366,8 @@ public class ProxyHandler extends AbstractHttpHandler
 
         try
         {
-            if (log.isDebugEnabled()) log.debug("CONNECT: " + uri);
+            if (log.isDebugEnabled())
+                log.debug("CONNECT: " + uri);
             InetAddrPort addrPort = new InetAddrPort(uri.toString());
 
             if (isForbidden(HttpMessage.__SSL_SCHEME, addrPort.getHost(), addrPort.getPort(), false))
@@ -424,7 +440,8 @@ public class ProxyHandler extends AbstractHttpHandler
     protected URL isProxied(URI uri) throws MalformedURLException
     {
         // Is this a proxy request?
-        if (isForbidden(uri)) return null;
+        if (isForbidden(uri))
+            return null;
 
         // OK return URI as untransformed URL.
         return new URL(uri.toString());
@@ -460,17 +477,21 @@ public class ProxyHandler extends AbstractHttpHandler
         Integer p = new Integer(port);
         if (port > 0 && !_allowedConnectPorts.contains(p))
         {
-            if (!openNonPrivPorts || port <= 1024) return true;
+            if (!openNonPrivPorts || port <= 1024)
+                return true;
         }
 
         // Must be a scheme that can be proxied.
-        if (scheme == null || !_ProxySchemes.containsKey(scheme)) return true;
+        if (scheme == null || !_ProxySchemes.containsKey(scheme))
+            return true;
 
         // Must be in any defined white list
-        if (_proxyHostsWhiteList != null && !_proxyHostsWhiteList.contains(host)) return true;
+        if (_proxyHostsWhiteList != null && !_proxyHostsWhiteList.contains(host))
+            return true;
 
         // Must not be in any defined black list
-        if (_proxyHostsBlackList != null && _proxyHostsBlackList.contains(host)) return true;
+        if (_proxyHostsBlackList != null && _proxyHostsBlackList.contains(host))
+            return true;
 
         return false;
     }
