@@ -97,7 +97,15 @@ public class LineInput extends FilterInputStream
         _buf=ByteArrayPool.getByteArray(bufferSize);
         _byteBuffer=new ByteBuffer(_buf);
         _lineBuffer=new LineBuffer(bufferSize);
-        _reader=new InputStreamReader(_byteBuffer);
+        
+        try
+        {
+            _reader=new InputStreamReader(_byteBuffer,"UTF-8");
+        }
+        catch (UnsupportedEncodingException e)
+        {
+            _reader=new InputStreamReader(_byteBuffer);
+        }
     }
     
     /* ------------------------------------------------------------ */
