@@ -188,13 +188,13 @@ public class ContextLoader extends URLClassLoader
     }
 
     /* ------------------------------------------------------------ */
-    public synchronized Class loadClass(String name) throws ClassNotFoundException
+    public Class loadClass(String name) throws ClassNotFoundException
     {
         return loadClass(name, false);
     }
 
     /* ------------------------------------------------------------ */
-    protected synchronized Class loadClass(String name, boolean resolve) throws ClassNotFoundException
+    protected Class loadClass(String name, boolean resolve) throws ClassNotFoundException
     {
         Class c= findLoadedClass(name);
         ClassNotFoundException ex= null;
@@ -251,7 +251,7 @@ public class ContextLoader extends URLClassLoader
     }
 
     /* ------------------------------------------------------------ */
-    public synchronized URL getResource(String name)
+    public URL getResource(String name)
     {
         URL url= null;
         boolean tried_parent= false;
