@@ -802,7 +802,7 @@ public class HttpRequest extends HttpMessage
         if (encoding == null)
         {
             // No encoding, so use the existing characters.
-            encoding = StringUtil.__ISO_8859_1;
+            encoding = StringUtil.__UTF_8;
             _uri.putParametersTo(_parameters);
         }
         else
