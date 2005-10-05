@@ -62,7 +62,9 @@ public class ProxyHandler extends AbstractHttpHandler
     protected Set _proxyHostsBlackList;
     protected int _tunnelTimeoutMs = 250;
     private boolean _anonymous=false;
+    private transient boolean _chained=false;
 
+    
     /* ------------------------------------------------------------ */
     /**
      * Map of leg by leg headers (not end to end). Should be a set, but more efficient string map is
@@ -78,9 +80,19 @@ public class ProxyHandler extends AbstractHttpHandler
         _DontProxyHeaders.put(HttpFields.__TransferEncoding, o);
         _DontProxyHeaders.put(HttpFields.__TE, o);
         _DontProxyHeaders.put(HttpFields.__Trailer, o);
-        _DontProxyHeaders.put(HttpFields.__ProxyAuthorization, o);
-        _DontProxyHeaders.put(HttpFields.__ProxyAuthenticate, o);
         _DontProxyHeaders.put(HttpFields.__Upgrade, o);
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Map of leg by leg headers (not end to end). Should be a set, but more efficient string map is
+     * used instead.
+     */
+    protected StringMap _ProxyAuthHeaders = new StringMap();
+    {
+        Object o = new Object();
+        _ProxyAuthHeaders.put(HttpFields.__ProxyAuthorization, o);
+        _ProxyAuthHeaders.put(HttpFields.__ProxyAuthenticate, o);
     }
 
     /* ------------------------------------------------------------ */
@@ -109,6 +121,17 @@ public class ProxyHandler extends AbstractHttpHandler
         _allowedConnectPorts.add(new Integer(8888));
         _allowedConnectPorts.add(new Integer(443));
         _allowedConnectPorts.add(new Integer(8443));
+    }
+    
+    
+
+    /* ------------------------------------------------------------ */
+    /* 
+     */
+    public void start() throws Exception
+    {
+        _chained=System.getProperty("http.proxyHost")!=null;
+        super.start();
     }
 
     /* ------------------------------------------------------------ */
@@ -252,7 +275,7 @@ public class ProxyHandler extends AbstractHttpHandler
                 // TODO could be better than this!
                 String hdr = (String) enm.nextElement();
 
-                if (_DontProxyHeaders.containsKey(hdr))
+                if (_DontProxyHeaders.containsKey(hdr) || !_chained && _ProxyAuthHeaders.containsKey(hdr))
                     continue;
                 if (connectionHdr != null && connectionHdr.indexOf(hdr) >= 0)
                     continue;
@@ -342,7 +365,7 @@ public class ProxyHandler extends AbstractHttpHandler
             String val = connection.getHeaderField(h);
             while (hdr != null || val != null)
             {
-                if (hdr != null && val != null && !_DontProxyHeaders.containsKey(hdr))
+                if (hdr != null && val != null && !_DontProxyHeaders.containsKey(hdr) && (_chained || !_ProxyAuthHeaders.containsKey(hdr)))
                     response.addField(hdr, val);
                 h++;
                 hdr = connection.getHeaderFieldKey(h);
