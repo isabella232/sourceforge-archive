@@ -1,6 +1,6 @@
 // ========================================================================
 // $Id$
-// Copyright 199-2004 Mort Bay Consulting Pty. Ltd.
+// Copyright 1991-2005 Mort Bay Consulting Pty. Ltd.
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package org.mortbay.http.handler;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.Socket;
 import java.net.URL;
@@ -27,7 +28,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
+import org.hsqldb.lib.StringUtil;
 import org.mortbay.log.LogFactory;
+import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpException;
 import org.mortbay.http.HttpFields;
 import org.mortbay.http.HttpMessage;
@@ -36,6 +39,7 @@ import org.mortbay.http.HttpResponse;
 import org.mortbay.http.HttpTunnel;
 import org.mortbay.util.IO;
 import org.mortbay.util.InetAddrPort;
+import org.mortbay.util.LineInput;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.StringMap;
 import org.mortbay.util.URI;
@@ -49,6 +53,7 @@ import org.mortbay.util.URI;
  * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
+ * @author giacof@tiscali.it (chained proxy)
  */
 public class ProxyHandler extends AbstractHttpHandler
 {
@@ -57,6 +62,7 @@ public class ProxyHandler extends AbstractHttpHandler
     protected Set _proxyHostsWhiteList;
     protected Set _proxyHostsBlackList;
     protected int _tunnelTimeoutMs = 250;
+    private boolean _anonymous=false;
 
     /* ------------------------------------------------------------ */
     /**
@@ -268,7 +274,8 @@ public class ProxyHandler extends AbstractHttpHandler
             }
 
             // Proxy headers
-            connection.setRequestProperty("Via", "1.1 (jetty)");
+            if (!_anonymous)
+                connection.setRequestProperty("Via", "1.1 (jetty)");
             if (!xForwardedFor)
                 connection.addRequestProperty(HttpFields.__XForwardedFor, request.getRemoteAddr());
 
@@ -342,7 +349,8 @@ public class ProxyHandler extends AbstractHttpHandler
                 hdr = connection.getHeaderFieldKey(h);
                 val = connection.getHeaderField(h);
             }
-            response.setField("Via", "1.1 (jetty)");
+            if (!_anonymous)
+                response.setField("Via", "1.1 (jetty)");
 
             // Handled
             request.setHandled(true);
@@ -376,30 +384,42 @@ public class ProxyHandler extends AbstractHttpHandler
             }
             else
             {
-                Socket socket = new Socket(addrPort.getInetAddress(), addrPort.getPort());
+                HttpConnection http_connection=request.getHttpConnection();
+                http_connection.forceClose();
 
-                // TODO - need to setup semi-busy loop for IE.
+                // Get the timeout
                 int timeoutMs = 30000;
-                if (_tunnelTimeoutMs > 0)
+                Object maybesocket = http_connection.getConnection();
+                if (maybesocket instanceof Socket)
                 {
-                    socket.setSoTimeout(_tunnelTimeoutMs);
-                    Object maybesocket = request.getHttpConnection().getConnection();
-                    try
-                    {
-                        Socket s = (Socket) maybesocket;
-                        timeoutMs = s.getSoTimeout();
-                        s.setSoTimeout(_tunnelTimeoutMs);
-                    }
-                    catch (Exception e)
-                    {
-                        LogSupport.ignore(log, e);
-                    }
+                    Socket s = (Socket) maybesocket;
+                    timeoutMs = s.getSoTimeout();
                 }
-
-                customizeConnection(pathInContext, pathParams, request, socket);
-                request.getHttpConnection().setHttpTunnel(new HttpTunnel(socket, timeoutMs));
-                response.setStatus(HttpResponse.__200_OK);
-                response.setContentLength(0);
+                
+                
+                // Create the tunnel
+                HttpTunnel tunnel = newHttpTunnel(request,response,addrPort.getInetAddress(), addrPort.getPort(),timeoutMs);
+                
+                
+                if (tunnel!=null)
+                {
+                    // TODO - need to setup semi-busy loop for IE.
+                    if (_tunnelTimeoutMs > 0)
+                    {
+                        tunnel.getSocket().setSoTimeout(_tunnelTimeoutMs);
+                        if (maybesocket instanceof Socket)
+                        {
+                            Socket s = (Socket) maybesocket;
+                            s.setSoTimeout(_tunnelTimeoutMs);
+                        }
+                    }
+                    tunnel.setTimeoutMs(timeoutMs);
+                    
+                    customizeConnection(pathInContext, pathParams, request, tunnel.getSocket());
+                    request.getHttpConnection().setHttpTunnel(tunnel);
+                    response.setStatus(HttpResponse.__200_OK);
+                    response.setContentLength(0);
+                }
                 request.setHandled(true);
             }
         }
@@ -410,6 +430,91 @@ public class ProxyHandler extends AbstractHttpHandler
         }
     }
 
+    /* ------------------------------------------------------------ */
+    protected HttpTunnel newHttpTunnel(HttpRequest request, HttpResponse response, InetAddress iaddr, int port, int timeoutMS) throws IOException
+    {
+        try
+        {
+            Socket socket=null;
+            InputStream in=null;
+            
+            String chained_proxy_host=System.getProperty("http.proxyHost");
+            if (chained_proxy_host==null)
+            {
+                socket= new Socket(iaddr, port);
+                socket.setSoTimeout(timeoutMS);
+                socket.setTcpNoDelay(true);
+            }
+            else
+            {
+                int chained_proxy_port = Integer.getInteger("http.proxyPort", 8888).intValue();
+                
+                Socket chain_socket= new Socket(chained_proxy_host, chained_proxy_port);
+                chain_socket.setSoTimeout(timeoutMS);
+                chain_socket.setTcpNoDelay(true);
+                if (log.isDebugEnabled()) log.debug("chain proxy socket="+chain_socket);
+                
+                LineInput line_in = new LineInput(chain_socket.getInputStream());
+                byte[] connect= request.toString().getBytes(org.mortbay.util.StringUtil.__ISO_8859_1);
+                chain_socket.getOutputStream().write(connect);
+                
+                String chain_response_line = line_in.readLine();
+                HttpFields chain_response = new HttpFields();
+                chain_response.read(line_in);
+                
+                // decode response
+                int space0 = chain_response_line.indexOf(' ');
+                if (space0>0 && space0+1<chain_response_line.length())
+                {
+                    int space1 = chain_response_line.indexOf(' ',space0+1);
+                    
+                    if (space1>space0)
+                    {
+                        int code=Integer.parseInt(chain_response_line.substring(space0+1,space1));
+                        
+                        if (code>=200 && code<300)
+                        {
+                            socket=chain_socket;
+                            in=line_in;
+                        }
+                        else
+                        {
+                            Enumeration iter = chain_response.getFieldNames();
+                            while (iter.hasMoreElements())
+                            {
+                                String name=(String)iter.nextElement();
+                                if (!_DontProxyHeaders.containsKey(name))
+                                {
+                                    Enumeration values = chain_response.getValues(name);
+                                    while(values.hasMoreElements())
+                                    {
+                                        String value=(String)values.nextElement();
+                                        response.setField(name, value);
+                                    }
+                                }
+                            }
+                            response.sendError(code);
+                            if (!chain_socket.isClosed())
+                                chain_socket.close();
+                        }
+                    }
+                }
+            }
+            
+            if (socket==null)
+                return null;
+            HttpTunnel tunnel=new HttpTunnel(socket,in,null);
+            return tunnel;
+        }
+        catch(IOException e)
+        {
+            log.debug(e);
+            response.sendError(HttpResponse.__400_Bad_Request);
+            return null;
+        }
+    }
+    
+    
     /* ------------------------------------------------------------ */
     /**
      * Customize proxy Socket connection for CONNECT. Method to allow derived handlers to customize
@@ -504,5 +609,23 @@ public class ProxyHandler extends AbstractHttpHandler
     protected void sendForbid(HttpRequest request, HttpResponse response, URI uri) throws IOException
     {
         response.sendError(HttpResponse.__403_Forbidden, "Forbidden for Proxy");
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the anonymous.
+     */
+    public boolean isAnonymous()
+    {
+        return _anonymous;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param anonymous The anonymous to set.
+     */
+    public void setAnonymous(boolean anonymous)
+    {
+        _anonymous = anonymous;
     }
 }

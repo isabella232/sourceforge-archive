@@ -41,9 +41,11 @@ public class HttpTunnel
 {
     private static Log log= LogFactory.getLog(HttpTunnel.class);
 
-    private Socket _socket;
     private Thread _thread;
     private int _timeoutMs;
+    private Socket _socket;
+    private InputStream _sIn;
+    private OutputStream _sOut;
     private InputStream _in;
     private OutputStream _out;
 
@@ -53,17 +55,27 @@ public class HttpTunnel
     protected HttpTunnel()
     {
     }
-
+    
     /* ------------------------------------------------------------ */
     /** Constructor. 
      * @param socket The tunnel socket.
      * @param timeoutMs The maximum time to wait for a read on the tunnel. Note that
      * sotimer exceptions are ignored by the tunnel.
+     * @param in Alternative input stream or null if using normal socket stream
+     * @param out Alternative output stream or null if using normal socket stream
+     * @param timeoutMs
+     * @throws IOException 
      */
-    public HttpTunnel(Socket socket, int timeoutMs)
+    public HttpTunnel(Socket socket, InputStream in, OutputStream out) throws IOException
     {
         _socket= socket;
-        _timeoutMs=timeoutMs;
+        _sIn=in;
+        _sOut=out;
+        if (_sIn==null)
+            _sIn=_socket.getInputStream();
+        if (_sOut==null)
+            _sOut=socket.getOutputStream();
+        _timeoutMs=30000;
     }
 
     /* ------------------------------------------------------------ */
@@ -85,7 +97,7 @@ public class HttpTunnel
             _thread= Thread.currentThread();
             copy.start();
 
-            copydata(_socket.getInputStream(), _out);
+            copydata(_sIn, _out);
         }
         catch (Exception e)
         {
@@ -96,8 +108,16 @@ public class HttpTunnel
             try
             {
                 _in.close();
-                _socket.shutdownOutput();
-                _socket.close();
+                if (_socket!=null)
+                {
+                    _socket.shutdownOutput();
+                    _socket.close();
+                }
+                else
+                {
+                    _sIn.close();
+                    _sOut.close();
+                }
             }
             catch (Exception e)
             {
@@ -139,8 +159,8 @@ public class HttpTunnel
       * @return Copied bytes count or -1 if no bytes were read *and* EOF was reached
     */
     public static int copyBytes(InputStream in,
-                            OutputStream out,
-                            long byteCount)
+                                OutputStream out,
+                                long byteCount)
          throws IOException
     {     
         byte buffer[] = new byte[IO.bufferSize];
@@ -209,7 +229,7 @@ public class HttpTunnel
         {
             try
             {
-                copydata(_in, _socket.getOutputStream());
+                copydata(_in, _sOut);
             }
             catch (Exception e)
             {
@@ -220,8 +240,16 @@ public class HttpTunnel
                 try
                 {
                     _out.close();
-                    _socket.shutdownInput();
-                    _socket.close();
+                    if (_socket!=null)
+                    {
+                        _socket.shutdownInput();
+                        _socket.close();
+                    }
+                    else
+                    {
+                        _sOut.close();
+                        _sIn.close();
+                    }
                 }
                 catch (Exception e)
                 {
@@ -231,4 +259,33 @@ public class HttpTunnel
             }
         }
     }
+
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the socket.
+     */
+    public Socket getSocket()
+    {
+        return _socket;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the timeoutMs.
+     */
+    public int getTimeoutMs()
+    {
+        return _timeoutMs;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param timeoutMs The timeoutMs to set.
+     */
+    public void setTimeoutMs(int timeoutMs)
+    {
+        _timeoutMs = timeoutMs;
+    }
+
 }
