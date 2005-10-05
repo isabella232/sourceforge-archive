@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry output="target/test-classes" kind="src" path="test"/>
-	<classpathentry kind="var" path="MAVEN_REPO/junit/jars/junit-3.8.1.jar"/>
+	<classpathentry kind="src" path="test"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="ext/slf4j-simple.jar"/>
-	<classpathentry output="webapps/test/WEB-INF/classes" kind="src" path="webapps/test/WEB-INF/src"/>
+	<classpathentry kind="src" path="webapps/test/WEB-INF/src"/>
 	<classpathentry kind="lib" path="ext/jsp/commons-logging-api.jar"/>
 	<classpathentry kind="lib" path="ext/jsp/ant.jar"/>
-	<classpathentry sourcepath="/java/hessian/src" kind="lib" path="webapps/test/WEB-INF/lib/hessian-3.0.13.jar"/>
+	<classpathentry kind="lib" path="/usr/share/ant/lib/ant-junit.jar"/>
+	<classpathentry kind="lib" path="/usr/local/java/eclipse-3.1/plugins/org.junit_3.8.1/junit.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

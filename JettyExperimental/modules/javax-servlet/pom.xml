@@ -1,0 +1,21 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.mortbay</groupId>
+    <artifactId>jetty-project</artifactId>
+    <version>6.0alpha3</version>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.mortbay</groupId>
+  <artifactId>javax.servlet</artifactId>
+  <packaging>jar</packaging>
+  <version>2.4</version>
+  <name>JettyExperimental</name>
+  <url>http://jetty.mortbay.org</url>
+  <build>
+    <sourceDirectory>src</sourceDirectory>
+    <defaultGoal>install</defaultGoal>
+  </build>
+
+</project>

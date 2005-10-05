@@ -1,0 +1,119 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <parent>
+    <groupId>org.mortbay</groupId>
+    <artifactId>jetty-project</artifactId>
+    <version>6.0alpha3</version>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.mortbay</groupId>
+  <artifactId>jetty</artifactId>
+  <packaging>jar</packaging>
+  <version>6.0alpha3</version>
+  <name>JettyExperimental</name>
+  <url>http://jetty.mortbay.org</url>
+
+  <mailingLists>
+   <mailingList>
+    <name>Jetty Discuss List</name>
+    <archive>
+     http://lists.sourceforge.net/lists/listinfo/jetty-discuss
+    </archive>
+   </mailingList>
+   <mailingList>
+    <name>Jetty Support List</name>
+    <archive>
+     http://lists.sourceforge.net/lists/listinfo/jetty-support
+    </archive>
+   </mailingList>
+   <mailingList>
+    <name>Jetty Announce List</name>
+    <archive>
+     http://lists.sourceforge.net/lists/listinfo/jetty-announce
+    </archive>
+   </mailingList>
+  </mailingLists>
+
+  <developers>
+   <developer>
+    <name>Greg Wilkins</name>
+    <id>gregw</id>
+    <email>gregw@apache.org</email>
+    <organization></organization>
+   </developer>
+
+   <developer>
+    <name>Jan Bartel</name>
+    <id>janb</id>
+    <email>janb@apache.org</email>
+    <organization></organization>
+   </developer>
+
+   <developer>
+    <name>Jules Golsnell</name>
+    <id>jules</id>
+    <email>jules@apache.org</email>
+    <organization></organization>
+   </developer>
+  </developers>
+
+  <licenses>
+   <license>
+    <name>Apache License Version 2.0</name>
+    <url>http://jetty.mortbay.org/jetty/LICENSE.TXT</url>
+   </license>
+  </licenses>
+
+  <organization>
+   <name>Mort Bay Consulting</name>
+   <url>http://www.mortbay.com</url>
+  </organization>
+
+  <build>
+   <sourceDirectory>src</sourceDirectory>
+   <testSourceDirectory>test</testSourceDirectory>
+   <outputDirectory>target/classes</outputDirectory>
+   <testOutputDirectory>target/test-classes</testOutputDirectory>
+   <defaultGoal>install</defaultGoal>
+   <resources>
+    <resource>
+     <directory>src</directory>
+     <includes>
+      <include>org/mortbay/**/*.properties</include>
+     </includes>
+    </resource>
+   </resources>
+   <testResources>
+    <testResource>
+     <directory>test</directory>
+     <includes>
+      <include>**/*Test.java</include>
+     </includes>
+     <excludes>
+      <exclude>**/Abstract*.java</exclude>
+     </excludes>
+    </testResource>
+   </testResources>
+  </build>
+
+  <dependencies>
+   <dependency>
+     <groupId>org.mortbay</groupId>
+     <artifactId>javax.servlet</artifactId>
+     <version>2.4</version>
+   </dependency>
+   <dependency>
+
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-simple</artifactId>
+    <version>1.0-beta7</version>
+   </dependency>
+
+   <dependency>
+    <groupId>junit</groupId>
+    <artifactId>junit</artifactId>
+    <version>3.8.1</version>
+    <scope>test</scope>
+   </dependency>
+  </dependencies>
+</project>

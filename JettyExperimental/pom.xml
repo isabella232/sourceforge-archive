@@ -1,0 +1,73 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.mortbay</groupId>
+  <artifactId>jetty-project</artifactId>
+  <packaging>pom</packaging>
+  <version>6.0alpha3</version>
+  <name>JettyExperimental</name>
+  <url>http://jetty.mortbay.org</url>
+
+  <mailingLists>
+   <mailingList>
+    <name>Jetty Discuss List</name>
+    <archive>
+     http://lists.sourceforge.net/lists/listinfo/jetty-discuss
+    </archive>
+   </mailingList>
+   <mailingList>
+    <name>Jetty Support List</name>
+    <archive>
+     http://lists.sourceforge.net/lists/listinfo/jetty-support
+    </archive>
+   </mailingList>
+   <mailingList>
+    <name>Jetty Announce List</name>
+    <archive>
+     http://lists.sourceforge.net/lists/listinfo/jetty-announce
+    </archive>
+   </mailingList>
+  </mailingLists>
+
+  <developers>
+   <developer>
+    <name>Greg Wilkins</name>
+    <id>gregw</id>
+    <email>gregw@apache.org</email>
+    <organization></organization>
+   </developer>
+
+   <developer>
+    <name>Jan Bartel</name>
+    <id>janb</id>
+    <email>janb@apache.org</email>
+    <organization></organization>
+   </developer>
+
+   <developer>
+    <name>Jules Golsnell</name>
+    <id>jules</id>
+    <email>jules@apache.org</email>
+    <organization></organization>
+   </developer>
+  </developers>
+
+  <licenses>
+   <license>
+    <name>Apache License Version 2.0</name>
+    <url>http://jetty.mortbay.org/jetty/LICENSE.TXT</url>
+   </license>
+  </licenses>
+
+  <organization>
+   <name>Mort Bay Consulting</name>
+   <url>http://www.mortbay.com</url>
+  </organization>
+
+  <modules>
+    <module>modules/start</module>
+    <module>modules/javax-servlet</module>
+    <module>modules/jetty</module>
+    <module>modules/test-webapp</module>
+  </modules>
+</project>
