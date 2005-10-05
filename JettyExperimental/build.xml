@@ -71,6 +71,7 @@
     <mkdir dir="${javadoc}" />
     <mkdir dir="${classes}" />
     <mkdir dir="${lib}" />
+    <mkdir dir="${webapps}/test/WEB-INF/classes" />
   </target>
   
 
