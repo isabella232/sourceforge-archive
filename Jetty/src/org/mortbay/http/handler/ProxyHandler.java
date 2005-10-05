@@ -28,7 +28,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.logging.Log;
-import org.hsqldb.lib.StringUtil;
 import org.mortbay.log.LogFactory;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.HttpException;
