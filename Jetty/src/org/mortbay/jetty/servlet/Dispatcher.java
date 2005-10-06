@@ -42,6 +42,7 @@ import org.apache.commons.logging.Log;
 import org.mortbay.log.LogFactory;
 import org.mortbay.http.HttpConnection;
 import org.mortbay.http.PathMap;
+import org.mortbay.util.LazyList;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.StringMap;
@@ -207,10 +208,27 @@ public class Dispatcher implements RequestDispatcher
         MultiMap parameters=null;
         if (query!=null)
         {
+            Map old_params = httpServletRequest.getParameterMap();
+            
             // Add the parameters
             parameters=new MultiMap();
             UrlEncoded.decodeTo(query,parameters,request.getCharacterEncoding());
-            request.addParameters(parameters);
+            
+            if (old_params!=null && old_params.size()>0)
+            {
+                // Merge old parameters.
+                Iterator iter = old_params.entrySet().iterator();
+                while (iter.hasNext())
+                {
+                    Map.Entry entry = (Map.Entry)iter.next();
+                    String name=(String)entry.getKey();
+                    String[] values=(String[])entry.getValue();
+                    for (int i=0;i<values.length;i++)
+                        parameters.add(name, values[i]);
+                }
+            }
+
+            request.setParameters(parameters);
         }
         
         Object old_scope = null;
@@ -461,10 +479,9 @@ public class Dispatcher implements RequestDispatcher
             }
             return encode.encode();
         }
-        
 
         /* ------------------------------------------------------------ */
-        void addParameters(MultiMap parameters)
+        void setParameters(MultiMap parameters)
         {
             _parameters=parameters;
         }
@@ -474,19 +491,14 @@ public class Dispatcher implements RequestDispatcher
         {
             if (_parameters==null)
                 return super.getParameterNames();
-            
-            HashSet set = new HashSet(_parameters.keySet());
-            Enumeration e = super.getParameterNames();
-            while (e.hasMoreElements())
-                set.add(e.nextElement());
 
-            return Collections.enumeration(set);
+            return Collections.enumeration(_parameters.keySet());
         }
         
         /* -------------------------------------------------------------- */
         public String getParameter(String name)
         {
-            if (_parameters==null || !_parameters.containsKey(name))
+            if (_parameters==null)
                 return super.getParameter(name);
             return (String)_parameters.getValue(name,0);
         }
@@ -494,7 +506,7 @@ public class Dispatcher implements RequestDispatcher
         /* -------------------------------------------------------------- */
         public String[] getParameterValues(String name)
         {
-            if (_parameters==null || !_parameters.containsKey(name))
+            if (_parameters==null)
                 return super.getParameterValues(name);
             List l =_parameters.getValues(name);
             return (String[])l.toArray(new String[l.size()]);
@@ -506,19 +518,7 @@ public class Dispatcher implements RequestDispatcher
             if (_parameters==null)
                 return super.getParameterMap();
             
-            Map m0 = super.getParameterMap();
-            if (m0==null || m0.size()==0)
-                return _parameters.toStringArrayMap();
-
-            Enumeration p = getParameterNames();
-            Map m = new HashMap();
-            while(p.hasMoreElements())
-            {
-                String name=(String)p.nextElement();
-                m.put(name,getParameterValues(name));
-            }
-            
-            return m;
+            return _parameters.toStringArrayMap();
         }
 
         /* ------------------------------------------------------------ */
