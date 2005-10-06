@@ -36,6 +36,12 @@
     </typedef>
   </target>
 
+  <target name="clean">
+    <delete dir="target"/>
+    <delete dir="../../webapps"/>
+    <delete dir="../../lib"/>
+    <delete file="../../start.jar"/>
+  </target>
 
   <target name="copy-tmp-deps" depends="initTaskDefs">
     <artifact:pom file="pom.xml" id="my.maven.project"/>

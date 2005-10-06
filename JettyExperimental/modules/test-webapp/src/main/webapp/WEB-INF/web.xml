@@ -75,16 +75,6 @@
   </servlet-mapping>
   
   
-  <servlet>
-    <servlet-name>HessianTest</servlet-name>
-    <servlet-class>com.acme.HessianTestService</servlet-class>
-    <load-on-startup>1</load-on-startup>
-  </servlet>
-  
-  <servlet-mapping>
-    <servlet-name>HessianTest</servlet-name>
-    <url-pattern>/hessian/*</url-pattern>
-  </servlet-mapping>
   
   
   <error-page>
