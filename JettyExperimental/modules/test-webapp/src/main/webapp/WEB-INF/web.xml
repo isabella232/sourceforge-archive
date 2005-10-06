@@ -5,13 +5,14 @@
    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" 
    version="2.4"> 
 
-  <display-name>Template WebApp</display-name>
+  <display-name>Test WebApp</display-name>
 
   <filter>
     <filter-name>Filter</filter-name>
     <filter-class>com.acme.TestFilter</filter-class>
   </filter>
 
+  <!--  
   <filter-mapping>
     <filter-name>Filter</filter-name>
     <url-pattern>/*</url-pattern>
@@ -24,6 +25,7 @@
     <filter-name>Chat</filter-name>
     <url-pattern>/chat/*</url-pattern>
   </filter-mapping>
+  -->
 
   <servlet>
     <servlet-name>Dump</servlet-name>
@@ -73,9 +75,6 @@
     <servlet-name>Dispatch</servlet-name>
     <url-pattern>/dispatch/*</url-pattern>
   </servlet-mapping>
-  
-  
-  
   
   <error-page>
     <error-code>404</error-code>
