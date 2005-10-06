@@ -19,6 +19,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -32,6 +34,9 @@ import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.util.Attributes;
+import org.mortbay.util.LazyList;
+import org.mortbay.util.MultiMap;
+import org.mortbay.util.UrlEncoded;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,7 +110,7 @@ public class Dispatcher implements RequestDispatcher
      */
     public void forward(ServletRequest request, ServletResponse response) throws ServletException, IOException
     {
-        response.reset(); // TODO or just buffer?
+        response.reset(); 
         
         Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
         
@@ -113,10 +118,34 @@ public class Dispatcher implements RequestDispatcher
         String old_context_path=base_request.getContextPath();
         String old_query=base_request.getQueryString();
         Attributes old_attr=base_request.getAttributes();
+        MultiMap old_params=base_request.getParameters();
         try
         {
             // TODO parameters and query
             String query=_query;
+            
+            if (query!=null)
+            {
+                MultiMap parameters=new MultiMap();
+                UrlEncoded.decodeTo(query,parameters,request.getCharacterEncoding());
+                
+                if (old_params!=null && old_params.size()>0)
+                {
+                    // Merge parameters.
+                    Iterator iter = old_params.entrySet().iterator();
+                    while (iter.hasNext())
+                    {
+                        Map.Entry entry = (Map.Entry)iter.next();
+                        String name=(String)entry.getKey();
+                        Object values=entry.getValue();
+                        for (int i=0;i<LazyList.size(values);i++)
+                            parameters.add(name, LazyList.get(values, i));
+                    }
+                    query=UrlEncoded.encode(parameters,null,false);
+                }
+                base_request.setParameters(parameters);
+                base_request.setQueryString(query);
+            }
             
             ForwardAttributes attr = new ForwardAttributes(old_attr); 
             
@@ -138,6 +167,7 @@ public class Dispatcher implements RequestDispatcher
             base_request.setRequestURI(old_uri);
             base_request.setContextPath(old_context_path);
             base_request.setAttributes(old_attr);
+            base_request.setParameters(old_params);
             base_request.setQueryString(old_query);
         }
     }

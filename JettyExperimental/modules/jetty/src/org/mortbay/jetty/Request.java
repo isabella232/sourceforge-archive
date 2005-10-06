@@ -1147,7 +1147,6 @@ public class Request implements HttpServletRequest
         _authType = authType;
     }
     
-    
     /* ------------------------------------------------------------ */
     /**
      * @param cookies The cookies to set.
@@ -1201,6 +1200,7 @@ public class Request implements HttpServletRequest
     {
         return _sessionManager;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param sessionManager The sessionManager to set.
@@ -1209,6 +1209,7 @@ public class Request implements HttpServletRequest
     {
         _sessionManager = sessionManager;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param requestedSessionIdCookie The requestedSessionIdCookie to set.
@@ -1217,6 +1218,7 @@ public class Request implements HttpServletRequest
     {
         _requestedSessionIdFromCookie = requestedSessionIdCookie;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param session The session to set.
@@ -1225,6 +1227,7 @@ public class Request implements HttpServletRequest
     {
         _session = session;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param scheme The scheme to set.
@@ -1328,7 +1331,6 @@ public class Request implements HttpServletRequest
         }
     }
 
-
     /* ------------------------------------------------------------ */
     /* 
      */
@@ -1369,6 +1371,24 @@ public class Request implements HttpServletRequest
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the parameters.
+     */
+    public MultiMap getParameters()
+    {
+        return _parameters;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param parameters The parameters to set.
+     */
+    public void setParameters(MultiMap parameters)
+    {
+        _parameters = parameters;
+    }
+    
+    /* ------------------------------------------------------------ */
     public String toString()
     {
         return getMethod()+" "+_uri+" "+getProtocol()+"\n"+
@@ -1389,7 +1409,6 @@ public class Request implements HttpServletRequest
         
         return HttpConnection.getCurrentConnection().getRequest();
     }
-    
     
 
 }

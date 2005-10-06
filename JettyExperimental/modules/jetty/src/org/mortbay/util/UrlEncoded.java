@@ -105,13 +105,23 @@ public class UrlEncoded extends MultiMap
      */
     public synchronized String encode(String charset, boolean equalsForNullValue)
     {
+        return encode(this,charset,equalsForNullValue);
+    }
+    
+    /* -------------------------------------------------------------- */
+    /** Encode Hashtable with % encoding.
+     * @param equalsForNullValue if True, then an '=' is always used, even
+     * for parameters without a value. e.g. "blah?a=&b=&c=".
+     */
+    public static String encode(MultiMap map, String charset, boolean equalsForNullValue)
+    {
         if (charset==null)
-            charset=StringUtil.__ISO_8859_1;
+            charset=StringUtil.__UTF8;
         
         StringBuffer result = new StringBuffer(128);
         synchronized(result)
         {
-            Iterator iter = entrySet().iterator();
+            Iterator iter = map.entrySet().iterator();
             while(iter.hasNext())
             {
                 Map.Entry entry = (Map.Entry)iter.next();

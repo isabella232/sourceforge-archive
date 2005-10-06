@@ -817,17 +817,18 @@ public class XmlConfiguration
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
-    public static void main(String[] arg)
+    public static void main(String[] args)
     {
         try
         {
-            for (int i = 0; i < arg.length; i++)
-                new XmlConfiguration(Resource.newResource(arg[i]).getURL()).newInstance();
+            for (int i = 0; i < args.length; i++)
+                new XmlConfiguration(Resource.newResource(args[i]).getURL()).newInstance();
         }
         catch (Exception e)
         {
             log.warn(LogSupport.EXCEPTION, e);
         }
+        
     }
 }
 
