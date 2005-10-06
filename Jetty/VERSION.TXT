@@ -1,11 +1,12 @@
 Jetty Versions
 --------------
 
+Jetty-5.1.5rc2 - 6 October 2005
+ + Reverted dispatcher params to RI rather than spec behaviour.
  + ProxyHandler can handle chained proxies
  + unsynchronized ContextLoader
  + ReFixed merge of Dispatcher params
  + public ServerMBean constructor
- + Implemented RI Dispatcher parameters rather than spec
  + UTF-8 encoding for URLs 
 
 Jetty-5.1.5rc1 - 23 August 2005
