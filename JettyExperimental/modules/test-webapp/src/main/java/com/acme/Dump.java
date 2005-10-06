@@ -32,10 +32,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 
-import org.mortbay.util.Loader;
-import org.mortbay.util.LogSupport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** Dump Servlet Request.
@@ -43,9 +39,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Dump extends HttpServlet
 {
-
-    private static Logger log = LoggerFactory.getLogger(Dump.class);
-
     /* ------------------------------------------------------------ */
     String pageType;
 
@@ -72,7 +65,7 @@ public class Dump extends HttpServlet
         {
             try
             {
-                throw (Throwable) (Loader.loadClass(this.getClass(), info.substring(1)).newInstance());
+                throw (Throwable) Thread.currentThread().getContextClassLoader().loadClass(info.substring(1)).newInstance();
             }
             catch (Throwable th)
             {
@@ -121,7 +114,7 @@ public class Dump extends HttpServlet
             }
             catch (Exception e)
             {
-                LogSupport.ignore(log, e);
+                e.printStackTrace();
                 response.setLocale(Locale.getDefault());
             }
         }
@@ -430,7 +423,7 @@ public class Dump extends HttpServlet
         }
         catch (Exception e)
         {
-            log.warn(LogSupport.EXCEPTION, e);
+            e.printStackTrace();
         }
 
         String data= request.getParameter("data");
@@ -469,7 +462,6 @@ public class Dump extends HttpServlet
     /* ------------------------------------------------------------ */
     public synchronized void destroy()
     {
-        log.debug("Destroyed");
     }
 
     /* ------------------------------------------------------------ */
