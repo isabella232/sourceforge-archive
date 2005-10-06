@@ -56,7 +56,8 @@
         <Item>
           <New id="testWebAppContext"  class="org.mortbay.jetty.webapp.WebAppHandler">
             <Set name="contextPath">/test</Set>
-            <Set name="war">./webapps/test</Set>
+            <Set name="war">./webapps/test-webapp.war</Set>
+            <Set name="extractWAR" type="boolean">True</Set>
             <Get name="SessionHandler">
               <Set name="SessionManager"><New class="org.mortbay.jetty.servlet.HashSessionManager"/></Set>
             </Get>
