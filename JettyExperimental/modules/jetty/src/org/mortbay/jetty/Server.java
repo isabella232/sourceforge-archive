@@ -141,17 +141,33 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
             _threadPool=btp;
         }
         
-        try{_threadPool.start();}catch(Throwable e){mex.add(e);}
+        try{_threadPool.start();}
+        catch(Throwable e)
+        {
+            mex.add(e);
+        }
         
         if (_handlers!=null)
         {
             for (int i=0;i<_handlers.length;i++)
-                try{_handlers[i].start();}catch(Throwable e){mex.add(e);}
+            {
+                try{_handlers[i].start();}
+                catch(Throwable e)
+                {
+                    mex.add(e);
+                }
+            }
         }
         if (_connectors!=null)
         {
             for (int i=0;i<_connectors.length;i++)
-                try{_connectors[i].start();}catch(Throwable e){mex.add(e);}
+            {
+                try{_connectors[i].start();}
+                catch(Throwable e)
+                {
+                    mex.add(e);
+                }
+            }
         }
 
         mex.ifExceptionThrow();

@@ -12,7 +12,6 @@
     <filter-class>com.acme.TestFilter</filter-class>
   </filter>
 
-  <!--  
   <filter-mapping>
     <filter-name>Filter</filter-name>
     <url-pattern>/*</url-pattern>
@@ -25,7 +24,6 @@
     <filter-name>Chat</filter-name>
     <url-pattern>/chat/*</url-pattern>
   </filter-mapping>
-  -->
 
   <servlet>
     <servlet-name>Dump</servlet-name>

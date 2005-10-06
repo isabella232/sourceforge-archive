@@ -706,8 +706,8 @@ public class WebAppHandler extends ContextHandler
                 if (o instanceof WebAppHandler)
                 {
                     WebAppHandler w = (WebAppHandler)o;
-                    if (app.equals(Resource.newResource(w.getWar())) && context.equals(w.getContextPath()))
-                            continue files;
+                    if (app.equals(Resource.newResource(w.getWar())))
+                        continue files;
                 }
             }
             
