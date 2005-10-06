@@ -16,6 +16,15 @@
   <build>
     <sourceDirectory>src</sourceDirectory>
     <defaultGoal>install</defaultGoal>
+    <resources>
+      <resource>
+       <directory>src</directory>
+       <includes>
+        <include>**/*.properties</include>
+        <include>**/*.dtd</include>
+        <include>**/*.xsd</include>
+       </includes>
+      </resource>
+   </resources>
   </build>
-
 </project>
