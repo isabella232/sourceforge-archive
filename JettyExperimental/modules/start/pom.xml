@@ -12,6 +12,14 @@
   <build>
     <sourceDirectory>src</sourceDirectory>
     <defaultGoal>install</defaultGoal>
+   <resources>
+    <resource>
+     <directory>src</directory>
+     <includes>
+      <include>org/mortbay/start/*.config</include>
+     </includes>
+    </resource>
+   </resources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

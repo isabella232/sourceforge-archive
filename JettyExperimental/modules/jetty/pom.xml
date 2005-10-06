@@ -80,6 +80,8 @@
      <directory>src</directory>
      <includes>
       <include>org/mortbay/**/*.properties</include>
+      <include>org/mortbay/**/*.dtd</include>
+      <include>org/mortbay/**/*.xml</include>
      </includes>
     </resource>
    </resources>

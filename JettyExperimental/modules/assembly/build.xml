@@ -1,4 +1,4 @@
-<project name="jetty" default="jetty" basedir="." xmlns:artifact="urn:maven-artifact-ant">
+<project name="jetty" default="jetty" xmlns:artifact="urn:maven-artifact-ant">
 <!--
 <project name="foo" default="foo" xmlns:artifact="antlib:org.apache.maven.artifact.ant">
 -->
@@ -50,19 +50,41 @@
   </target>
 
   <target name="copy-final-deps" depends="copy-tmp-deps">
-    <move todir="${assembly.final.dir}/webapps" flatten="true">
+    <move todir="${assembly.final.dir}/webapps">
+      <mapper>
+        <chainedmapper>
+          <flattenmapper/>
+          <mapper type="regexp" from="(.*)-(.*).war" to="\1.war"/>
+        </chainedmapper>
+      </mapper>
       <fileset dir="${assembly.tmp.dir}">
         <include name="**/*.war"/>
       </fileset>
     </move>
-    <move todir="${assembly.final.dir}/lib" flatten="true" verbose="true">
+    <move todir="${assembly.final.dir}/lib" verbose="true">
+      <mapper>
+        <chainedmapper>
+          <flattenmapper/>
+          <mapper type="regexp" from="(.*)-(.*).jar" to="\1.jar"/>
+        </chainedmapper>
+      </mapper>
       <fileset dir="${assembly.tmp.dir}">
         <include name="org/mortbay/**/*.jar"/>
-        <include name="org/slf4j/**/*.jar"/>
         <exclude name="**/start*.jar"/>
       </fileset>
     </move>
+    <move todir="${assembly.final.dir}/lib" flatten="true" verbose="true">
+      <fileset dir="${assembly.tmp.dir}">
+        <include name="org/slf4j/**/*.jar"/>
+      </fileset>
+    </move>
     <move todir="${assembly.final.dir}" flatten="true" verbose="true">
+      <mapper>
+        <chainedmapper>
+          <flattenmapper/>
+          <mapper type="regexp" from="(.*)-(.*).jar" to="\1.jar"/>
+        </chainedmapper>
+      </mapper>
       <fileset dir="${assembly.tmp.dir}">
         <include name="**/start*.jar"/>
       </fileset>
@@ -80,7 +102,16 @@
     </delete>   
   </target>
 
-  <target name="assemble" depends="fix-bad-commons-deps">
+  <target name="copy-final" depends="fix-bad-commons-deps">
+    <artifact:pom file="pom.xml" id="my.maven.project"/>
+    <copy todir="../..">
+      <fileset dir="${assembly.final.dir}">
+        <include name="**/**"/>
+      </fileset>
+    </copy>
+  </target>
+
+  <target name="assemble" depends="copy-final">
   </target>
 </project>
 
