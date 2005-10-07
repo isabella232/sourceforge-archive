@@ -75,6 +75,29 @@
    <outputDirectory>target/classes</outputDirectory>
    <testOutputDirectory>target/test-classes</testOutputDirectory>
    <defaultGoal>install</defaultGoal>
+  <plugins>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>install</phase>
+              <configuration>
+                <tasks>
+                  <copy tofile="../../lib/${project.artifactId}.${project.packaging}" file="target/${project.artifactId}-${project.version}.${project.packaging}"/>
+                  <copy todir="../../lib/" flatten="true">
+                    <fileset dir="${user.home}/.m2/repository/org/slf4j/slf4j-simple/1.0-beta7">
+                      <include name="**/*.jar"/>
+                    </fileset>
+                  </copy>
+                </tasks>
+              </configuration>
+              <goals>
+                <goal>run</goal>
+              </goals>
+          </execution>
+        </executions>
+      </plugin>
+  </plugins>
    <resources>
     <resource>
      <directory>src</directory>

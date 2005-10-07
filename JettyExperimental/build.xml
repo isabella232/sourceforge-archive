@@ -1,0 +1,16 @@
+<project name="jetty" default="clean">
+  <target name="clean">
+    <delete>
+      <fileset dir="webapps">
+        <include  name="**/*"/>
+      </fileset>
+    </delete>
+    <delete dir="lib"/>
+    <delete file="start.jar"/>
+  </target>
+
+</project>
+
+
+
+

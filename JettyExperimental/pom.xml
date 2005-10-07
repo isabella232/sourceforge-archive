@@ -67,6 +67,7 @@
   <modules>
     <module>modules/start</module>
     <module>modules/javax-servlet</module>
+    <module>modules/jsp</module>
     <module>modules/jetty</module>
     <module>modules/test-webapp</module>
   </modules>

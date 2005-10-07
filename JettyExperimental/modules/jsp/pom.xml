@@ -6,31 +6,45 @@
     <artifactId>jetty-project</artifactId>
     <version>6.0alpha3</version>
   </parent>
-  <artifactId>assembly</artifactId>
-  <version>6.0alpha3</version>
+  <artifactId>jsp</artifactId>
+  <version>5.0.28</version>
   <build>
     <plugins>
-      <!-- plugin>
-           <artifactId>maven-assembly-plugin</artifactId>
-           <version>2.0-beta-1</version>
-           <configuration>
-             <descriptor>assembly.xml</descriptor>
-             <finalName>jetty</finalName>
-             <outputDirectory>output</outputDirectory>
-             <workDirectory>target/assembly/work</workDirectory>
-           </configuration>
-      </plugin -->
-      <!-- plugin>
+      <plugin>
         <artifactId>maven-antrun-plugin</artifactId>
-          <configuration>
-            <tasks>
-              <ant antfile="build.xml" target="clean" inheritAll="true"/>
-            </tasks>
-          </configuration>
-          <goals>
-            <goal>run</goal>
-          </goals>
-      </plugin -->
+        <executions>
+          <execution>
+            <phase>install</phase>
+              <configuration>
+                <tasks>
+                  <copy todir="../../lib/jsp" flatten="true">
+                    <fileset dir="${user.home}/.m2/repository/xerces/xercesImpl/2.6.2">
+                      <include name="**/*.jar"/>
+                    </fileset>
+                    <fileset dir="${user.home}/.m2/repository/xerces/xmlParserAPIs/2.6.2">
+                      <include name="**/*.jar"/>
+                    </fileset>
+                    <fileset dir="${user.home}/.m2/repository/ant/ant/1.6.4">
+                      <include name="**/*.jar"/>
+                    </fileset>
+                    <fileset dir="${user.home}/.m2/repository/commons-el/commons-el/1.0">
+                      <include name="**/*.jar"/>
+                    </fileset>
+                    <fileset dir="${user.home}/.m2/repository/commons-logging/commons-logging-api/1.0.4">
+                      <include name="**/*.jar"/>
+                    </fileset>
+                    <fileset dir="${user.home}/.m2/repository/tomcat">
+                      <include name="**/5.0.28/*.jar"/>
+                    </fileset>
+                  </copy>
+                </tasks>
+              </configuration>
+              <goals>
+                <goal>run</goal>
+              </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
 
@@ -74,27 +88,6 @@
       <groupId>tomcat</groupId>
       <artifactId>jasper-runtime</artifactId>
       <version>5.0.28</version>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay</groupId>
-      <artifactId>javax.servlet</artifactId>
-      <version>2.4</version>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay</groupId>
-      <artifactId>jetty</artifactId>
-      <version>6.0alpha3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay</groupId>
-      <artifactId>start</artifactId>
-      <version>6.0alpha3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.mortbay</groupId>
-      <artifactId>test-webapp</artifactId>
-      <type>war</type>
-      <version>6.0alpha3</version>
     </dependency>
   </dependencies>
 </project>

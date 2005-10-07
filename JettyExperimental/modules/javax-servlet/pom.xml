@@ -16,6 +16,24 @@
   <build>
     <sourceDirectory>src</sourceDirectory>
     <defaultGoal>install</defaultGoal>
+   <plugins>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>install</phase>
+              <configuration>
+                <tasks>
+                  <copy tofile="../../lib/${project.artifactId}.${project.packaging}" file="target/${project.artifactId}-${project.version}.${project.packaging}"/>
+                </tasks>
+              </configuration>
+              <goals>
+                <goal>run</goal>
+              </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
     <resources>
       <resource>
        <directory>src</directory>
