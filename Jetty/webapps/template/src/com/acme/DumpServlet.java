@@ -6,6 +6,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.util.Enumeration;
+import java.util.Locale;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;

@@ -234,36 +234,39 @@ public class ServletHttpResponse implements HttpServletResponse
      */
     public void setLocale(Locale locale)
     {
-        if (this._outputState!=0 || locale == null || isCommitted())
+        if (locale == null || isCommitted())
             return; 
 
         _locale = locale;
         setHeader(HttpFields.__ContentLanguage,locale.toString().replace('_','-'));
-                          
-        /* get current MIME type from Content-Type header */                  
-        String type=_httpResponse.getField(HttpFields.__ContentType);
-        if (type==null)
+                         
+        if (this._outputState==0)
         {
-            // servlet did not set Content-Type yet
-            // so lets assume default one
-            type="application/octet-stream";
-        }
-   
-        HttpContext httpContext=_servletHttpRequest.getServletHandler().getHttpContext();
-        if (httpContext instanceof ServletHttpContext)
-        {
-            String charset = ((ServletHttpContext)httpContext).getLocaleEncoding(locale);
-            if (charset != null && charset.length()>0)
+            /* get current MIME type from Content-Type header */                  
+            String type=_httpResponse.getField(HttpFields.__ContentType);
+            if (type==null)
             {
-                int semi=type.indexOf(';');
-                if (semi<0)
-                    type += "; charset="+charset;
-                else if (!_explicitEncoding)
-                    type = type.substring(0,semi)+"; charset="+charset;
-
-                setHeader(HttpFields.__ContentType,type);
+                // servlet did not set Content-Type yet
+                // so lets assume default one
+                type="application/octet-stream";
             }
+            
+            HttpContext httpContext=_servletHttpRequest.getServletHandler().getHttpContext();
+            if (httpContext instanceof ServletHttpContext)
+            {
+                String charset = ((ServletHttpContext)httpContext).getLocaleEncoding(locale);
+                if (charset != null && charset.length()>0)
+                {
+                    int semi=type.indexOf(';');
+                    if (semi<0)
+                        type += "; charset="+charset;
+                    else if (!_explicitEncoding)
+                        type = type.substring(0,semi)+"; charset="+charset;
+                    
+                    setHeader(HttpFields.__ContentType,type);
+                }
                 
+            }
         }
     }
     

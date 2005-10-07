@@ -8,6 +8,7 @@ Jetty-5.1.5rc2 - 6 October 2005
  + ReFixed merge of Dispatcher params
  + public ServerMBean constructor
  + UTF-8 encoding for URLs 
+ + Response.setLocale will set locale even if getWriter called.
 
 Jetty-5.1.5rc1 - 23 August 2005
  + upgraded to commons logging 1.0.4
