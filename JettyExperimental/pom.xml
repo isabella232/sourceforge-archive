@@ -4,7 +4,7 @@
   <groupId>org.mortbay</groupId>
   <artifactId>jetty-project</artifactId>
   <packaging>pom</packaging>
-  <version>6.0alpha3</version>
+  <version>6.0.0Beta0</version>
   <name>JettyExperimental</name>
   <url>http://jetty.mortbay.org</url>
 

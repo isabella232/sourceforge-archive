@@ -1,4 +1,7 @@
-<project name="jetty" default="clean">
+<project name="jetty" default="maven">
+  <target name="maven">
+    <echo>Please use maven2 to build jetty 6</echo>
+  </target>
   <target name="clean">
     <delete>
       <fileset dir="webapps">
