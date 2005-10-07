@@ -1,4 +1,4 @@
-Jetty-6.0.0BETA0
+Jetty-6.0.0Beta0
 
     + Maven 2 build
     + Dispatcher parameters

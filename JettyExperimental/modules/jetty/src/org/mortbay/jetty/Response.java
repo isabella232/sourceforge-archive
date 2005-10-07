@@ -588,12 +588,15 @@ public class Response implements HttpServletResponse
      */
     public void setLocale(Locale locale)
     {
-        if (this._outputState!=0 || locale == null || isCommitted())
+        if (locale == null || isCommitted())
             return; 
 
         _locale = locale;
         _connection.getResponseFields().put(HttpHeaders.CONTENT_TYPE_BUFFER,locale.toString().replace('_','-'));
-                          
+                  
+        if (this._outputState!=0 )
+            return; 
+        
         /* get current MIME type from Content-Type header */                  
         String type=getContentType();
         if (type==null)
