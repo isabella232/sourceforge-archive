@@ -1,6 +1,0 @@
-SECTION: 100-FAQ
-TITLE: FAQ Where
-QUESTION: Where is the latest FAQ?
-
-The Jetty FAQ is included in the demo of the extra Jetty release. But for the latest
-FAQ entries, visit the <a href="http://jetty.mortbay.org">Jetty site</a>.
