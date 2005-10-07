@@ -81,6 +81,7 @@ public class SslListener extends SocketListener
     private transient Password _password;
     private transient Password _keypassword;
     private boolean _needClientAuth = false; // Set to true if we require client certificate authentication.
+    private boolean _wantClientAuth = false; // Set to true if we would like client certificate authentication.
     private String _protocol= "TLS";
     private String _algorithm = "SunX509"; // cert algorithm
     private String _keystoreType = "JKS"; // type of the key store
@@ -203,6 +204,23 @@ public class SslListener extends SocketListener
     {
         return _needClientAuth;
     }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Set the value of the needClientAuth property
+     * 
+     * @param wantClientAuth true iff we would like client certificate authentication.
+     */
+    public void setWantClientAuth(boolean wantClientAuth)
+    {
+        _wantClientAuth = wantClientAuth;
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean getWantClientAuth()
+    {
+        return _wantClientAuth;
+    }
 
     /* ------------------------------------------------------------ */
     /**
@@ -275,7 +293,7 @@ public class SslListener extends SocketListener
             }
 
             socket.setNeedClientAuth(_needClientAuth);
-            log.info("SslListener.needClientAuth=" + _needClientAuth);
+            socket.setWantClientAuth(_wantClientAuth);
             if(cipherSuites != null && cipherSuites.length >0) {
             	socket.setEnabledCipherSuites(cipherSuites);
             	for ( int i=0; i<cipherSuites.length; i++ ) {
