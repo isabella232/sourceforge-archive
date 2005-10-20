@@ -254,5 +254,10 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
     {
         return (Server)__server.get();
     }
+
+	public void join() throws InterruptedException 
+	{
+		getThreadPool().join();
+	}
     
 }

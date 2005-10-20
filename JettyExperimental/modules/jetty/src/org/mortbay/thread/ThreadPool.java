@@ -26,5 +26,5 @@ public interface ThreadPool extends LifeCycle
     public abstract boolean dispatch(Runnable job);
 
     /* ------------------------------------------------------------ */
-    public void join();
+    public void join() throws InterruptedException;
 }
