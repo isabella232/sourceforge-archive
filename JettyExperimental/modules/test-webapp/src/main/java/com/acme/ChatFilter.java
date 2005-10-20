@@ -26,9 +26,9 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
-import org.mortbay.ajax.AjaxFilter;
-import org.mortbay.jetty.util.Continuation;
-import org.mortbay.jetty.util.ContinuationSupport;
+import org.mortbay.util.ajax.AjaxFilter;
+import org.mortbay.util.ajax.Continuation;
+import org.mortbay.util.ajax.ContinuationSupport;
 
 public class ChatFilter extends AjaxFilter
 {       
