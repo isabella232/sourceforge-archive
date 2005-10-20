@@ -22,10 +22,11 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 
 import org.mortbay.io.Buffer;
-import org.mortbay.jetty.util.Continuation;
+import org.mortbay.log.LogSupport;
 import org.mortbay.thread.AbstractLifeCycle;
 import org.mortbay.thread.ThreadPool;
-import org.mortbay.util.LogSupport;
+import org.mortbay.util.ajax.Continuation;
+import org.mortbay.util.ajax.WaitingContinuation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -457,70 +458,5 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     public Continuation newContinuation()
     {
         return new WaitingContinuation();
-    }
-    
-    private static class WaitingContinuation implements org.mortbay.jetty.util.Continuation
-    {
-        Object _object;
-        Object _event;
-        boolean _waited;
-        boolean _new=true;
-        boolean _pending=true;
-        
-        public void resume(Object object)
-        {
-            synchronized (this)
-            {
-                _event=object==null?this:object;
-                _pending=false;
-                notify();
-            }
-        }
-
-        public boolean isNew()
-        {
-            return _new;
-        }
-
-        public Object getEvent(long timeout)
-        {
-            if (timeout < 0)
-                throw new IllegalArgumentException();
-            
-            synchronized (this)
-            {
-                _new=false;
-                try
-                {
-                    if (!_waited && _event==null && timeout>0)
-                    {
-                        _waited=true;
-                        wait(timeout);
-                    }
-                }
-                catch (InterruptedException e)
-                {
-                    e.printStackTrace();
-                }
-                _pending=false;
-            }
-            return _event;
-        }
-        
-        public boolean isPending()
-        {
-            return _pending;
-        }
-
-        public Object getObject()
-        {
-            return _object;
-        }
-
-        public void setObject(Object object)
-        {
-            _object = object;
-        }
-    
     }
 }

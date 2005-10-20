@@ -19,8 +19,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.mortbay.log.LogSupport;
 import org.mortbay.util.LazyList;
-import org.mortbay.util.LogSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

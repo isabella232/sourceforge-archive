@@ -24,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
-import org.mortbay.util.LogSupport;
+import org.mortbay.log.LogSupport;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;

@@ -26,17 +26,15 @@ import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.mortbay.io.Buffer;
 import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.RetryRequest;
-import org.mortbay.jetty.util.Continuation;
+import org.mortbay.log.LogSupport;
 import org.mortbay.thread.Timeout;
-import org.mortbay.util.LogSupport;
+import org.mortbay.util.ajax.Continuation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +49,7 @@ import org.slf4j.LoggerFactory;
  * This connector is best used when there are a many connections that have idle periods.
  * </p>
  * <p>
- * When used with {@link org.mortbay.jetty.util.Continuation}, threadless waits are
+ * When used with {@link org.mortbay.util.ajax.Continuation}, threadless waits are
  * supported.  When a filter or servlet calls getEvent on a Continuation, a
  * {@link org.mortbay.jetty.RetryRequest} runtime exception is thrown to allow the
  * thread to exit the current request handling.  Jetty will catch this exception and will not

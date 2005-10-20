@@ -43,16 +43,16 @@ import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandler.Context;
-import org.mortbay.jetty.util.Continuation;
+import org.mortbay.log.LogSupport;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
 import org.mortbay.util.LazyList;
-import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 import org.mortbay.util.UrlEncoded;
+import org.mortbay.util.ajax.Continuation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -179,6 +179,11 @@ public class Request implements HttpServletRequest
      */
     public Object getAttribute(String name)
     {
+        if ("org.mortbay.jetty.ajax.Continuation".equals(name))
+            return getContinuation(false);
+        if ("org.mortbay.jetty.ajax.Continuation.create".equals(name))
+            return getContinuation(true);
+            
         if (_attributes==null)
             return null;
         return _attributes.getAttribute(name);
@@ -213,22 +218,6 @@ public class Request implements HttpServletRequest
         return _characterEncoding;
     }
     
-
-    /* ------------------------------------------------------------ */
-    public Object getContent()
-        throws IOException
-    {
-        // TODO 
-        return null;
-    }
-
-    /* ------------------------------------------------------------ */
-    public Object getContentAs(Object type)
-    	throws IOException
-    {
-        // TODO 
-        return null;
-    }
 
     /* ------------------------------------------------------------ */
     /* 

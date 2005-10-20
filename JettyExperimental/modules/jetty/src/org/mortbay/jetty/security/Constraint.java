@@ -15,18 +15,10 @@
 
 package org.mortbay.jetty.security;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 
-import javax.servlet.http.HttpServletResponse;
-
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.HttpConnection;
-import org.mortbay.jetty.Request;
-import org.mortbay.jetty.Response;
 import org.mortbay.util.LazyList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

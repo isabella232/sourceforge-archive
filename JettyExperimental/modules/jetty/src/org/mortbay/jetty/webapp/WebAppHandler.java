@@ -38,11 +38,11 @@ import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.SessionHandler;
+import org.mortbay.log.LogSupport;
 import org.mortbay.resource.JarResource;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.Loader;
-import org.mortbay.util.LogSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

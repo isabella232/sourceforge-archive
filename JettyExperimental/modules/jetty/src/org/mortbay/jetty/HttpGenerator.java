@@ -27,12 +27,8 @@ import org.mortbay.io.BufferUtil;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
-import org.mortbay.io.IO;
 import org.mortbay.io.Portable;
-import org.mortbay.util.LogSupport;
 import org.mortbay.util.UrlEncoded;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /**

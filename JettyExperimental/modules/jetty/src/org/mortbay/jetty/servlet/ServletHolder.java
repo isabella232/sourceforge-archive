@@ -30,7 +30,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 
-import org.mortbay.util.LogSupport;
+import org.mortbay.log.LogSupport;
 
 
 

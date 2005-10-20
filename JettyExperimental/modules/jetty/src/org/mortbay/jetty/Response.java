@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Locale;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -28,11 +27,10 @@ import org.mortbay.io.IO;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.util.LogSupport;
+import org.mortbay.log.LogSupport;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
-import org.mortbay.util.UrlEncoded;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

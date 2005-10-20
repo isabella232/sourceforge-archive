@@ -23,7 +23,7 @@ import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-import org.mortbay.util.LogSupport;
+import org.mortbay.log.LogSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

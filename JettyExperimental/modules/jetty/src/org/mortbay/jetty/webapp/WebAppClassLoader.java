@@ -26,8 +26,8 @@ import java.security.PermissionCollection;
 import java.util.StringTokenizer;
 
 import org.mortbay.io.IO;
+import org.mortbay.log.LogSupport;
 import org.mortbay.resource.Resource;
-import org.mortbay.util.LogSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -401,12 +401,12 @@ public class WebAppClassLoader extends URLClassLoader
             return false;
         }
 
-        if (name.equals("org.mortbay.jetty.servlet.DefaultServlet") ||
-            name.startsWith("org.mortbay.jetty.util."))
-            return false;
         
         // Arbitrary list that covers the worst security problems.
         // If you are worried by this, then use a permissions file!
+        if (name.equals("org.mortbay.jetty.servlet.DefaultServlet") ||
+                        name.startsWith("org.mortbay.util."))
+                        return false;
         return name.startsWith("org.mortbay.jetty.");
     }
 

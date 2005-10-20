@@ -13,7 +13,7 @@
 // limitations under the License.
 // ========================================================================
 
-package org.mortbay.util;
+package org.mortbay.log;
 import java.lang.reflect.Method;
 
 import org.slf4j.Logger;

@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.Date;
 
 import org.mortbay.io.IO;
-import org.mortbay.util.LogSupport;
+import org.mortbay.log.LogSupport;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 import org.slf4j.Logger;

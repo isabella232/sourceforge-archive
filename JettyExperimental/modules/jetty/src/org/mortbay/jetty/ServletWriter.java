@@ -22,7 +22,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 
 import org.mortbay.io.IO;
-import org.mortbay.util.LogSupport;
+import org.mortbay.log.LogSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -27,8 +27,8 @@ import javax.servlet.ServletOutputStream;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
-import org.mortbay.jetty.util.Continuation;
 import org.mortbay.util.URIUtil;
+import org.mortbay.util.ajax.Continuation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -16,7 +16,7 @@
 package org.mortbay.jetty.security;
 import java.io.IOException;
 
-import org.mortbay.util.LogSupport;
+import org.mortbay.log.LogSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
