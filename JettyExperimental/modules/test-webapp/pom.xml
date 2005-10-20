@@ -3,14 +3,14 @@
   <parent>
     <groupId>org.mortbay.jetty</groupId>
     <artifactId>project</artifactId>
-    <version>6.0.0beta1</version>
+    <version>6.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>test</artifactId>
   <packaging>war</packaging>
-  <version>6.0.0beta1</version>
-  <name>JettyExperimental</name>
+  <version>6.0-SNAPSHOT</version>
+  <name>Jetty Test Webapp</name>
   <url>http://jetty.mortbay.org</url>
   <build>
    <defaultGoal>install</defaultGoal>
@@ -45,14 +45,8 @@
    <dependency>
      <groupId>org.mortbay.jetty</groupId>
      <artifactId>jetty.util</artifactId>
-     <version>6.0.0beta1</version>
+     <version>6.0-SNAPSHOT</version>
    </dependency>
 
-   <dependency>
-     <groupId>org.mortbay.jetty</groupId>
-     <artifactId>jetty</artifactId>
-     <version>6.0.0beta1</version>
-     <scope>provided</scope>
-   </dependency>
   </dependencies>
 </project>

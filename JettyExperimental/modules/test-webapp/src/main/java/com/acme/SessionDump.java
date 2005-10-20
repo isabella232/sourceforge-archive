@@ -26,8 +26,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.mortbay.log.LogSupport;
-
 
 /* ------------------------------------------------------------ */
 /** Test Servlet Sessions.
@@ -80,7 +78,7 @@ public class SessionDump extends HttpServlet
                 }
                 catch(Exception e)
                 {
-                    LogSupport.ignore(e);
+		    e.printStackTrace();
                 }
             }
             else if (action.equals("Remove"))
