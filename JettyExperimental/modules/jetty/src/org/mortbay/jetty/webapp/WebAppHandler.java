@@ -69,8 +69,6 @@ public class WebAppHandler extends ContextHandler
     private String _defaultsDescriptor="org/mortbay/jetty/webapp/webdefault.xml";
     private boolean distributable=false;
     
-    private transient Resource _webApp;
-    private transient Resource _webInf;
 
     /* ------------------------------------------------------------ */
     public WebAppHandler()
@@ -283,51 +281,56 @@ public class WebAppHandler extends ContextHandler
     
     
     /* ------------------------------------------------------------ */
+    /** Resolve Web App directory
+     * If the BaseResource has not been set, use the war resource to
+     * derive a webapp resource (expanding WAR if required).
+     */
     protected void resolveWebApp() throws IOException
     {
-        if (_webApp == null)
+        Resource web_app = super.getBaseResource();
+        if (web_app == null)
         {
             if (_war==null || _war.length()==0)
                 _war=getResourceBase();
             
             // Set dir or WAR
-            _webApp= Resource.newResource(_war);
+            web_app= Resource.newResource(_war);
 
             // Accept aliases for WAR files
-            if (_webApp.getAlias() != null)
+            if (web_app.getAlias() != null)
             {
-                log.info(_webApp + " anti-aliased to " + _webApp.getAlias());
-                _webApp= Resource.newResource(_webApp.getAlias());
+                log.info(web_app + " anti-aliased to " + web_app.getAlias());
+                web_app= Resource.newResource(web_app.getAlias());
             }
 
             if (log.isDebugEnabled())
-                log.debug("Try webapp=" + _webApp + ", exists=" + _webApp.exists() + ", directory=" + _webApp.isDirectory());
+                log.debug("Try webapp=" + web_app + ", exists=" + web_app.exists() + ", directory=" + web_app.isDirectory());
 
             // Is the WAR usable directly?
-            if (_webApp.exists() && !_webApp.isDirectory() && !_webApp.toString().startsWith("jar:"))
+            if (web_app.exists() && !web_app.isDirectory() && !web_app.toString().startsWith("jar:"))
             {
                 // No - then lets see if it can be turned into a jar URL.
-                Resource jarWebApp= Resource.newResource("jar:" + _webApp + "!/");
+                Resource jarWebApp= Resource.newResource("jar:" + web_app + "!/");
                 if (jarWebApp.exists() && jarWebApp.isDirectory())
                 {
-                    _webApp= jarWebApp;
-                    _war= _webApp.toString();
+                    web_app= jarWebApp;
+                    _war= web_app.toString();
                     if (log.isDebugEnabled())
                         log.debug(
                             "Try webapp="
-                                + _webApp
+                                + web_app
                                 + ", exists="
-                                + _webApp.exists()
+                                + web_app.exists()
                                 + ", directory="
-                                + _webApp.isDirectory());
+                                + web_app.isDirectory());
                 }
             }
 
             // If we should extract or the URL is still not usable
-            if (_webApp.exists()
-                && (!_webApp.isDirectory()
-                    || (_extractWAR && _webApp.getFile() == null)
-                    || (_extractWAR && _webApp.getFile() != null && !_webApp.getFile().isDirectory())))
+            if (web_app.exists()
+                && (!web_app.isDirectory()
+                    || (_extractWAR && web_app.getFile() == null)
+                    || (_extractWAR && web_app.getFile() != null && !web_app.getFile().isDirectory())))
             {
                 // Then extract it.
                 File tempDir= new File(getTempDirectory(), "webapp");
@@ -336,57 +339,45 @@ public class WebAppHandler extends ContextHandler
                 tempDir.mkdir();
                 tempDir.deleteOnExit();
                 log.info("Extract " + _war + " to " + tempDir);
-                JarResource.extract(_webApp, tempDir, true);
-                _webApp= Resource.newResource(tempDir.getCanonicalPath());
+                JarResource.extract(web_app, tempDir, true);
+                web_app= Resource.newResource(tempDir.getCanonicalPath());
 
                 if (log.isDebugEnabled())
                     log.debug(
                         "Try webapp="
-                            + _webApp
+                            + web_app
                             + ", exists="
-                            + _webApp.exists()
+                            + web_app.exists()
                             + ", directory="
-                            + _webApp.isDirectory());
+                            + web_app.isDirectory());
             }
 
             // Now do we have something usable?
-            if (!_webApp.exists() || !_webApp.isDirectory())
+            if (!web_app.exists() || !web_app.isDirectory())
             {
                 log.warn("Web application not found " + _war);
                 throw new java.io.FileNotFoundException(_war);
             }
 
             if (log.isDebugEnabled())
-                log.debug("webapp=" + _webApp);
-
-            // Iw there a WEB-INF directory?
-            _webInf= _webApp.addPath("WEB-INF/");
-            if (!_webInf.exists() || !_webInf.isDirectory())
-                _webInf= null;
-            else
-            {
-                // Is there a WEB-INF work directory
-                Resource work= _webInf.addPath("work");
-                if (work.exists()
-                    && work.isDirectory()
-                    && work.getFile() != null
-                    && work.getFile().canWrite()
-                    && getAttribute("javax.servlet.context.tempdir") == null)
-                    setAttribute("javax.servlet.context.tempdir", work.getFile());
-            }
+                log.debug("webapp=" + web_app);
 
             // ResourcePath
-            super.setBaseResource(_webApp);
+            super.setBaseResource(web_app);
         }
     }
-
 
     /* ------------------------------------------------------------ */
     public Resource getWebInf() throws IOException
     {
-        if (_webInf==null)
-            resolveWebApp();
-        return _webInf;
+        resolveWebApp();
+
+        // Iw there a WEB-INF directory?
+        Resource web_inf= super.getBaseResource().addPath("WEB-INF/");
+        if (!web_inf.exists() || !web_inf.isDirectory())
+            return null;
+        
+        return web_inf;
     }
     
     
@@ -590,6 +581,15 @@ public class WebAppHandler extends ContextHandler
         // Configure defaults
         for (int i=0;i<_configurations.length;i++)
             _configurations[i].configureDefaults();
+        
+        // Is there a WEB-INF work directory
+        Resource work= getWebInf().addPath("work");
+        if (work.exists()
+            && work.isDirectory()
+            && work.getFile() != null
+            && work.getFile().canWrite()
+            && getAttribute("javax.servlet.context.tempdir") == null)
+            setAttribute("javax.servlet.context.tempdir", work.getFile());
         
         // Configure webapp
         for (int i=0;i<_configurations.length;i++)
