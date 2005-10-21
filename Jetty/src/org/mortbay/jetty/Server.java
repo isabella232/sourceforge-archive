@@ -20,6 +20,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 
 import org.apache.commons.logging.Log;
 import org.mortbay.log.LogFactory;
@@ -61,12 +63,14 @@ public class Server extends HttpServer
         new String[]{"org.mortbay.jetty.servlet.XMLConfiguration", "org.mortbay.jetty.servlet.JettyWebConfiguration"};
     private String _configuration;
     private String _rootWebApp;
-
+    private static ShutdownHookThread hookThread = new ShutdownHookThread();
+    
     /* ------------------------------------------------------------ */
     /** Constructor. 
      */
     public Server()
-    {}
+    {
+    }
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -99,6 +103,7 @@ public class Server extends HttpServer
         throws IOException
     {
         _configuration=configuration.toString();
+        Server.hookThread.add(this);
         try
         {
             XmlConfiguration config=new XmlConfiguration(configuration);
@@ -118,6 +123,21 @@ public class Server extends HttpServer
             log.warn(LogSupport.EXCEPTION,e);
             throw new IOException("Jetty configuration problem: "+e);
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    public boolean getStopAtShutdown()
+    {
+        return hookThread.contains(this);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setStopAtShutdown(boolean stop)
+    {
+        if (stop)
+            hookThread.add(this);
+        else
+            hookThread.remove(this);
     }
 
     /* ------------------------------------------------------------ */
@@ -436,6 +456,7 @@ public class Server extends HttpServer
             try
             {
                 servers[i] = new Server(arg[i]);
+                servers[i].setStopAtShutdown(true);
                 servers[i].start();
 
             }
@@ -444,43 +465,7 @@ public class Server extends HttpServer
                 log.warn(LogSupport.EXCEPTION,e);
             }
         }
-
-        // Create and add a shutdown hook
-        if (!Boolean.getBoolean("JETTY_NO_SHUTDOWN_HOOK"))
-        {
-            try
-            {
-                Method shutdownHook=
-                    java.lang.Runtime.class
-                    .getMethod("addShutdownHook",new Class[] {java.lang.Thread.class});
-                Thread hook = 
-                    new Thread() {
-                            public void run()
-                            {
-                                setName("Shutdown");
-                                log.info("Shutdown hook executing");
-                                for (int i=0;i<servers.length;i++)
-                                {
-				    if (servers[i]==null) continue;
-                                    try{servers[i].stop();}
-                                    catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
-                                }
-                                log.info("Shutdown hook complete");
-                                
-                                // Try to avoid JVM crash
-                                try{Thread.sleep(1000);}
-                                catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
-                            }
-                        };
-                shutdownHook.invoke(Runtime.getRuntime(),
-                                    new Object[]{hook});
-            }
-            catch(Exception e)
-            {
-                if(log.isDebugEnabled())log.debug("No shutdown hook in JVM ",e);
-            }
-        }
-
+        
         // create and start the servers.
         for (int i=0;i<arg.length;i++)
         {
@@ -488,6 +473,106 @@ public class Server extends HttpServer
             catch (Exception e){LogSupport.ignore(log,e);}
         }
     }
+    
+   /**
+    * ShutdownHook thread for stopping all servers.
+    * 
+    * Thread is hooked first time list of servers is changed.
+    */
+  private static class ShutdownHookThread extends Thread {
+    private boolean hooked = false;
+    private ArrayList servers = new ArrayList();
+
+    /**
+     * Hooks this thread for shutdown.
+     * @see java.lang.Runtime#addShutdownHook(java.lang.Thread)
+     */
+    private void createShutdownHook() {
+      if (!Boolean.getBoolean("JETTY_NO_SHUTDOWN_HOOK") && !hooked) {
+        try {
+          Method shutdownHook = java.lang.Runtime.class.getMethod("addShutdownHook",
+              new Class[] { java.lang.Thread.class });
+          shutdownHook.invoke(Runtime.getRuntime(), new Object[] { this });
+          this.hooked = true;
+        } catch (Exception e) {
+          if (log.isDebugEnabled()) log.debug("No shutdown hook in JVM ", e);
+        }
+      }
+    }
+
+    /**
+     * Add Server to servers list.
+     */
+    public boolean add(Server server) {
+      createShutdownHook();
+      return this.servers.add(server);
+    }
+    
+    /**
+     * Contains Server in servers list?
+     */
+    public boolean contains(Server server) {
+      return this.servers.contains(server);
+    }
+
+    /**
+     * Append all Servers from Collection
+     */
+    public boolean addAll(Collection c) {
+      createShutdownHook();
+      return this.servers.addAll(c);
+    }
+
+    /**
+     * Clear list of Servers.
+     */
+    public void clear() {
+      createShutdownHook();
+      this.servers.clear();
+    }
+
+    /**
+     * Remove Server from list.
+     */
+    public boolean remove(Server server) {
+      createShutdownHook();
+      return this.servers.remove(server);
+    }
+
+    /**
+     * Remove all Servers in Collection from list.
+     */
+    public boolean removeAll(Collection c) {
+      createShutdownHook();
+      return this.servers.removeAll(c);
+    }
+
+    /**
+     * Stop all Servers in list.
+     */
+    public void run() {
+      setName("Shutdown");
+      log.info("Shutdown hook executing");
+      Iterator it = servers.iterator();
+      while (it.hasNext()) {
+        Server svr = (Server) it.next();
+        if (svr == null) continue;
+        try {
+          svr.stop();
+        } catch (Exception e) {
+          log.warn(LogSupport.EXCEPTION, e);
+        }
+        log.info("Shutdown hook complete");
+
+        // Try to avoid JVM crash
+        try {
+          Thread.sleep(1000);
+        } catch (Exception e) {
+          log.warn(LogSupport.EXCEPTION, e);
+        }
+      }
+    }
+  }
 }
 
 
