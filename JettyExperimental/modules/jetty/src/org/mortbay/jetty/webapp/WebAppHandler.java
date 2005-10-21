@@ -90,6 +90,8 @@ public class WebAppHandler extends ContextHandler
      */
     public String getWar()
     {
+        if (_war==null)
+            _war=getResourceBase();
         return _war;
     }
     
