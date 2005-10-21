@@ -47,16 +47,23 @@ public class ErrorHandler extends AbstractHandler
         response.setContentType(MimeTypes.TEXT_HTML);
         ByteArrayISO8859Writer writer= new ByteArrayISO8859Writer(2048);
         HttpConnection connection = HttpConnection.getCurrentConnection();
-        writeErrorPage(request, writer, connection.getResponse().getStatus(), connection.getResponse().getReason());
+        handleErrorPage(request, writer, connection.getResponse().getStatus(), connection.getResponse().getReason());
         writer.flush();
         response.setContentLength(writer.size());
         writer.writeTo(response.getOutputStream());
         writer.destroy();
         return true;
     }
+
+    /* ------------------------------------------------------------ */
+    protected void handleErrorPage(HttpServletRequest request, Writer writer, int code, String message)
+        throws IOException
+    {
+        writeErrorPage(request, writer, code, message);
+    }
     
     /* ------------------------------------------------------------ */
-    protected void writeErrorPage(HttpServletRequest request, Writer writer, int code, String message)
+    public static void writeErrorPage(HttpServletRequest request, Writer writer, int code, String message)
         throws IOException
     {
         if (message != null)

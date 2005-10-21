@@ -42,6 +42,8 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.log.LogSupport;
 import org.mortbay.resource.Resource;
+import org.mortbay.util.Attributes;
+import org.mortbay.util.AttributesMap;
 import org.mortbay.util.Loader;
 import org.mortbay.util.URIUtil;
 import org.slf4j.Logger;
@@ -57,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * @author gregw
  *
  */
-public class ContextHandler extends WrappedHandler
+public class ContextHandler extends WrappedHandler implements Attributes
 {
     private static Logger log = LoggerFactory.getLogger(ContextHandler.class);
     private static ThreadLocal __context=new ThreadLocal();
@@ -77,7 +79,7 @@ public class ContextHandler extends WrappedHandler
         return context;
     }
     
-    private HashMap _attributes;
+    private Attributes _attributes;
     private ClassLoader _classLoader;
     private Context _context;
     private String _contextPath;
@@ -89,6 +91,8 @@ public class ContextHandler extends WrappedHandler
     private Map _localeEncodingMap;
     private String[] _welcomeFiles;
     private ErrorHandler _errorHandler;
+    private String[] _hosts;
+    private String[] _vhosts;
     
     /* ------------------------------------------------------------ */
     /**
@@ -98,17 +102,68 @@ public class ContextHandler extends WrappedHandler
     {
         super();
         _context=new Context();
-        _attributes=new HashMap();
+        _attributes=new AttributesMap();
         _initParams=new HashMap();
     }
 
+    /* ------------------------------------------------------------ */
+    /** Set the virtual hosts for the context.
+     * Only requests that have a matching host header or fully qualified
+     * URL will be passed to that context with a virtual host name.
+     * A context with no virtual host names or a null virtual host name is
+     * available to all requests that are not served by a context with a
+     * matching virtual host name.
+     * @param hosts Array of virtual hosts that this context responds to. A
+     * null host name or null/empty array means any hostname is acceptable.
+     * Host names may String representation of IP addresses.
+     */
+    public void setVirtualHosts(String[] vhosts)
+    {
+        _vhosts=(String[])vhosts.clone();
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get the virtual hosts for the context.
+     * Only requests that have a matching host header or fully qualified
+     * URL will be passed to that context with a virtual host name.
+     * A context with no virtual host names or a null virtual host name is
+     * available to all requests that are not served by a context with a
+     * matching virtual host name.
+     * @return Array of virtual hosts that this context responds to. A
+     * null host name or empty array means any hostname is acceptable.
+     * Host names may be String representation of IP addresses.
+     */
+    public String[] getVirtualHosts()
+    {
+        return (String[])_vhosts.clone();
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Set the hosts for the context.
+     * Set the real hosts that this context will accept requests for.
+     * If not null or empty, then only requests from server for hosts
+     * in this array are accepted by this context. 
+     */
+    public void setHosts(String[] hosts)
+    {
+        _hosts=(String[])hosts.clone();
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Get the hosts for the context.
+     */
+    public String[] getHosts()
+    {
+        return (String[])_hosts.clone();
+    }
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.ServletContext#getAttribute(java.lang.String)
      */
     public Object getAttribute(String name)
     {
-        return _attributes.get(name);
+        return _attributes.getAttribute(name);
     }
 
     /* ------------------------------------------------------------ */
@@ -117,14 +172,14 @@ public class ContextHandler extends WrappedHandler
      */
     public Enumeration getAttributeNames()
     {
-        return Collections.enumeration(_attributes.keySet());
+        return _attributes.getAttributeNames();
     }
     
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the attributes.
      */
-    public HashMap getAttributes()
+    public Attributes getAttributes()
     {
         return _attributes;
     }
@@ -284,48 +339,72 @@ public class ContextHandler extends WrappedHandler
         Thread current_thread=null;
         
         
+        base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
+        old_context=base_request.getContext();
+        
+        // Are we already in this context?
+        if (old_context!=_context)
+        {
+            // Nope - so check the target.
+            if (dispatch==REQUEST)
+            {
+                if (target.startsWith(_contextPath))
+                    target=target.substring(_contextPath.length());
+                else 
+                {
+                    // Not for this context!
+                    return false;
+                }
+            }
+            
+            // Check the vhosts
+            if (_vhosts!=null && _vhosts.length>0)
+            {
+                String vhost=request.getServerName();
+                boolean match=false;
+                // TODO consider non-linear lookup
+                for (int i=0;!match && i<_vhosts.length;i++)
+                    match=_vhosts[i]!=null && _vhosts[i].equalsIgnoreCase(vhost);
+                if (!match)
+                    return false;
+            }
+            
+            // Check the real hosts
+            if (_hosts!=null && _hosts.length>0)
+            {
+                String host=request.getLocalName();
+                boolean match=false;
+                // TODO consider non-linear lookup
+                for (int i=0;!match && i<_hosts.length;i++)
+                    match=_hosts[i]!=null && _hosts[i].equalsIgnoreCase(host);
+                if (!match)
+                    return false;
+            }
+        }
+        
         try
         {
-            base_request=(request instanceof Request)?(Request)request:HttpConnection.getCurrentConnection().getRequest();
-            old_context=base_request.getContext();
             old_context_path=base_request.getContextPath();
             old_servlet_path=base_request.getServletPath();
             old_path_info=base_request.getPathInfo();
-
-            // Are we already in this context?
-            if (old_context!=_context)
+            
+            // Update the paths
+            base_request.setContext(_context);
+            if (dispatch!=INCLUDE && target.startsWith("/"))
             {
-                
-                // Nope - so check the target.
-                if (dispatch==REQUEST)
-                {
-                    if (target.startsWith(_contextPath))
-                        target=target.substring(_contextPath.length());
-                    else 
-                    {
-                        // Not for this context!
-                        old_context=_context;
-                        return false;
-                    }
-                }
-                
-                // Update the paths
-                base_request.setContext(_context);
-                if (dispatch!=INCLUDE && target.startsWith("/"))
-                {
-                    base_request.setContextPath(_context.getContextPath());
-                    base_request.setServletPath(null);
-                    base_request.setPathInfo(target);
-                }
-                
-                // Set the classloader
-                if (_classLoader!=null)
-                {
-                    current_thread=Thread.currentThread();
-                    old_classloader=current_thread.getContextClassLoader();
-                    current_thread.setContextClassLoader(_classLoader);
-                }
+                base_request.setContextPath(_context.getContextPath());
+                base_request.setServletPath(null);
+                base_request.setPathInfo(target);
             }
+            
+            // Set the classloader
+            if (_classLoader!=null)
+            {
+                current_thread=Thread.currentThread();
+                old_classloader=current_thread.getContextClassLoader();
+                current_thread.setContextClassLoader(_classLoader);
+            }
+            
             handled = getHandler().handle(target, base_request, response, dispatch);
             
         }
@@ -356,7 +435,7 @@ public class ContextHandler extends WrappedHandler
      */
     public void removeAttribute(String name)
     {
-        _attributes.remove(name);
+        _attributes.removeAttribute(name);
     }
 
     /* ------------------------------------------------------------ */
@@ -365,16 +444,22 @@ public class ContextHandler extends WrappedHandler
      */
     public void setAttribute(String name, Object object)
     {
-        _attributes.put(name,object);
+        _attributes.setAttribute(name,object);
     }
     
     /* ------------------------------------------------------------ */
     /**
      * @param attributes The attributes to set.
      */
-    public void setAttributes(HashMap attributes)
+    public void setAttributes(Attributes attributes)
     {
         _attributes = attributes;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void clearAttributes()
+    {
+        _attributes.clearAttributes();
     }
     
     /* ------------------------------------------------------------ */
@@ -925,6 +1010,5 @@ public class ContextHandler extends WrappedHandler
         }
 
     }
-
 
 }

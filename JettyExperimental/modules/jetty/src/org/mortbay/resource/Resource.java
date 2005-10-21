@@ -383,7 +383,7 @@ public abstract class Resource implements Serializable
             buf.append(StringUtil.replace(StringUtil.replace(ls[i],"<","&lt;"),">","&gt;"));
             buf.append("&nbsp;");
             buf.append("</TD><TD ALIGN=right>");
-            buf.append(""+item.length());
+            buf.append(item.length());
             buf.append(" bytes&nbsp;</TD><TD>");
             buf.append(dfmt.format(new Date(item.lastModified())));
             buf.append("</TD></TR>\n");

@@ -39,6 +39,8 @@ import org.mortbay.util.StringUtil;
  */
 public class NotFoundHandler extends AbstractHandler
 {
+    Server _server;
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.jetty.Handler#handle(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
@@ -68,10 +70,10 @@ public class NotFoundHandler extends AbstractHandler
         writer.write("Contexts known to this server are: <ul>");
 
 
-        Handler[] handlers = Server.getCurrentServer().getAllHandlers();
+        Handler[] handlers = _server==null?null:_server.getAllHandlers();
         
-        
-        for (int i=0;i<handlers.length;i++)
+ 
+        for (int i=0;handlers!=null && i<handlers.length;i++)
         {
             if (!(handlers[i] instanceof ContextHandler))
                 continue;
@@ -98,6 +100,24 @@ public class NotFoundHandler extends AbstractHandler
         out.close();
         
         return true;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the server.
+     */
+    public Server getServer()
+    {
+        return _server;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param server The server to set.
+     */
+    public void setServer(Server server)
+    {
+        _server = server;
     }
 
 

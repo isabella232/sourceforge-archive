@@ -110,6 +110,24 @@ public class Dispatcher implements RequestDispatcher
      */
     public void forward(ServletRequest request, ServletResponse response) throws ServletException, IOException
     {
+        dispatch(request, response, Handler.FORWARD);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see javax.servlet.RequestDispatcher#forward(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
+     */
+    public void error(ServletRequest request, ServletResponse response) throws ServletException, IOException
+    {
+        dispatch(request, response, Handler.ERROR);
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see javax.servlet.RequestDispatcher#forward(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
+     */
+    protected void dispatch(ServletRequest request, ServletResponse response, int dispatch) throws ServletException, IOException
+    {
         response.reset(); 
         
         Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
@@ -160,7 +178,7 @@ public class Dispatcher implements RequestDispatcher
             base_request.setAttributes(attr);
             base_request.setQueryString(query);
             
-            _contextHandler.handle(_path, (HttpServletRequest)request, (HttpServletResponse)response, Handler.FORWARD);
+            _contextHandler.handle(_path, (HttpServletRequest)request, (HttpServletResponse)response, dispatch);
         }
         finally
         {
@@ -282,7 +300,7 @@ public class Dispatcher implements RequestDispatcher
         }
 
         /* ------------------------------------------------------------ */
-        public void clear()
+        public void clearAttributes()
         {
             throw new IllegalStateException();
         }
@@ -389,7 +407,7 @@ public class Dispatcher implements RequestDispatcher
         }
 
         /* ------------------------------------------------------------ */
-        public void clear()
+        public void clearAttributes()
         {
             throw new IllegalStateException();
         }

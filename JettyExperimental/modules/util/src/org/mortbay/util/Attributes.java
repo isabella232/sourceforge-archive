@@ -29,5 +29,5 @@ public interface Attributes
     public void setAttribute(String name, Object attribute);
     public Object getAttribute(String name);
     public Enumeration getAttributeNames();
-    public void clear();
+    public void clearAttributes();
 }

@@ -20,12 +20,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EventListener;
+import java.util.Map;
 
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestListener;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionBindingListener;
@@ -35,7 +39,9 @@ import org.mortbay.io.IO;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
+import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.security.SecurityHandler;
+import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.log.LogSupport;
@@ -43,6 +49,7 @@ import org.mortbay.resource.JarResource;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.Loader;
+import org.mortbay.util.TypeUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,8 +87,9 @@ public class WebAppHandler extends ContextHandler
         
         _securityHandler = new SecurityHandler();
         _securityHandler.setHandler(_sessionHandler);
-        
         setHandler(_securityHandler);
+        
+        setErrorHandler(new WebAppErrorHandler());
     }
 
     /* ------------------------------------------------------------ */
@@ -726,5 +734,85 @@ public class WebAppHandler extends ContextHandler
         }
 
         server.setHandlers((Handler[])wacs.toArray(new Handler[wacs.size()]));
+    }
+    
+    public class WebAppErrorHandler extends ErrorHandler
+    {
+        Map _errorPages; // code or exception to URL
+        
+        /* ------------------------------------------------------------ */
+        /* 
+         * @see org.mortbay.jetty.handler.ErrorHandler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
+         */
+        public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException
+        {
+            if (_errorPages!=null)
+            {
+                String error_page= null;
+                Class exClass= (Class)request.getAttribute(ServletHandler.__J_S_ERROR_EXCEPTION_TYPE);
+                
+                if (ServletException.class.equals(exClass))
+                {
+                    error_page= (String)_errorPages.get(exClass.getName());
+                    if (error_page == null)
+                    {
+                        Throwable th= (Throwable)request.getAttribute(ServletHandler.__J_S_ERROR_EXCEPTION);
+                        while (th instanceof ServletException)
+                            th= ((ServletException)th).getRootCause();
+                        if (th != null)
+                            exClass= th.getClass();
+                    }
+                }
+                
+                while (error_page == null && exClass != null )
+                {
+                    error_page= (String)_errorPages.get(exClass.getName());
+                    exClass= exClass.getSuperclass();
+                }
+                
+                if (error_page == null)
+                {
+                    Integer code=(Integer)request.getAttribute(ServletHandler.__J_S_ERROR_STATUS_CODE);
+                    if (code!=null)
+                        error_page= (String)_errorPages.get(TypeUtil.toString(code.intValue()));
+                }
+                
+                if (error_page!=null)
+                {
+                    Dispatcher dispatcher = (Dispatcher) getServletHandler().getServletContext().getRequestDispatcher(error_page);
+                    try
+                    {
+                        dispatcher.error(request, response);
+                    }
+                    catch (ServletException e)
+                    {
+                        log.warn(LogSupport.EXCEPTION, e);
+                    }
+                    return true;
+                }
+            }
+            
+            return super.handle(target, request, response, dispatch);
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @return Returns the errorPages.
+         */
+        public Map getErrorPages()
+        {
+            return _errorPages;
+        }
+
+        /* ------------------------------------------------------------ */
+        /**
+         * @param errorPages The errorPages to set.
+         */
+        public void setErrorPages(Map errorPages)
+        {
+            _errorPages = errorPages;
+        }
+
+        
     }
 }

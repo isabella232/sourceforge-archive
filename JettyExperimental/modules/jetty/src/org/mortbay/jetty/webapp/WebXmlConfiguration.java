@@ -18,8 +18,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.EventListener;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.UnavailableException;
 
@@ -55,6 +57,7 @@ public class WebXmlConfiguration implements Configuration
     protected List servletMappings;
     protected List welcomeFiles;
     protected List constraintMappings;
+    protected Map errorPages;
 
     
     public WebXmlConfiguration()
@@ -217,6 +220,8 @@ public class WebXmlConfiguration implements Configuration
         servletMappings=LazyList.array2List(servlet_handler.getServletMappings());
         welcomeFiles = LazyList.array2List(getWebAppHandler().getWelcomeFiles());
         constraintMappings = LazyList.array2List(getWebAppHandler().getSecurityHandler().getConstraintMappings());
+        errorPages = getWebAppHandler().getErrorHandler() instanceof WebAppHandler.WebAppErrorHandler ?
+                        ((WebAppHandler.WebAppErrorHandler)getWebAppHandler().getErrorHandler()).getErrorPages():null;
         
         Iterator iter=config.iterator();
         XmlParser.Node node=null;
@@ -247,6 +252,8 @@ public class WebXmlConfiguration implements Configuration
         servlet_handler.setServlets((ServletHolder[])servlets.toArray(new ServletHolder[servlets.size()]));
         servlet_handler.setServletMappings((ServletMapping[])servletMappings.toArray(new ServletMapping[servletMappings.size()]));
         getWebAppHandler().setWelcomeFiles((String[])welcomeFiles.toArray(new String[welcomeFiles.size()]));
+        if (errorPages!=null && getWebAppHandler().getErrorHandler() instanceof WebAppHandler.WebAppErrorHandler)
+            ((WebAppHandler.WebAppErrorHandler)getWebAppHandler().getErrorHandler()).setErrorPages(errorPages);
         
     }
 
@@ -534,7 +541,9 @@ public class WebXmlConfiguration implements Configuration
             error=node.getString("exception-type",false,true);
         String location=node.getString("location",false,true);
         
-        // TODO getWebAppHandler().setErrorPage(error,location);
+        if (errorPages==null)
+            errorPages=new HashMap();
+        errorPages.put(error,location);
     }
 
     /* ------------------------------------------------------------ */

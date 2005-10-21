@@ -57,6 +57,7 @@
           <New id="testWebAppContext"  class="org.mortbay.jetty.webapp.WebAppHandler">
             <Set name="contextPath">/test</Set>
             <Set name="war">./webapps/test</Set>
+            <Set name="VirtualHosts"><Array type="java.lang.String"></Array></Set>
             <Get name="SessionHandler">
               <Set name="SessionManager"><New class="org.mortbay.jetty.servlet.HashSessionManager"/></Set>
             </Get>
@@ -102,9 +103,10 @@
         <!-- Handle anything not already handled                     -->
         <!-- ======================================================= -->
         <Item>
-          <New  class="org.mortbay.jetty.handler.NotFoundHandler"/>
+          <New  class="org.mortbay.jetty.handler.NotFoundHandler">
+            <Set name="Server"><Ref id="Server"/></Set>
+          </New>
         </Item>
-        
       </Array>
     </Set>
 

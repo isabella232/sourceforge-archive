@@ -28,6 +28,7 @@ import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.log.LogSupport;
+import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
@@ -167,6 +168,7 @@ public class Response implements HttpServletResponse
     public void sendError(int code, String message) throws IOException
     {
         reset();
+        message=message==null?HttpGenerator.getReason(code):message; 
         setStatus(code,message);
         
         // If we are allowed to have a body 
@@ -188,6 +190,17 @@ public class Response implements HttpServletResponse
                 error_handler=context.getContextHandler().getErrorHandler();
             if (error_handler!=null)
                 error_handler.handle(null,_connection.getRequest(),this, Handler.ERROR);
+            else
+            {
+                setContentType(MimeTypes.TEXT_HTML);
+                ByteArrayISO8859Writer writer= new ByteArrayISO8859Writer(2048);
+                HttpConnection connection = HttpConnection.getCurrentConnection();
+                ErrorHandler.writeErrorPage(request, writer, connection.getResponse().getStatus(), connection.getResponse().getReason());
+                writer.flush();
+                setContentLength(writer.size());
+                writer.writeTo(getOutputStream());
+                writer.destroy();
+            }
         }
         else if (code!=SC_PARTIAL_CONTENT) 
         {
@@ -317,7 +330,7 @@ public class Response implements HttpServletResponse
             new Throwable().printStackTrace();
         
         _status=sc;
-        _reason=sm; 
+        _reason=sm==null?HttpGenerator.getReason(sc):sm; 
     }
 
     /* ------------------------------------------------------------ */

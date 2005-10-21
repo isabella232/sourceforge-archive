@@ -442,7 +442,7 @@ public abstract class AbstractBuffer implements Buffer
 
     public void setGetIndex(int getIndex)
     {
-        /* TODO
+        /* TODO bounds checking
         if (isImmutable()) new throw IllegalStateException(__IMMUTABLE);
         if (getIndex < 0) throw new IllegalArgumentException("getIndex<0: " + getIndex + "<0");
         if (getIndex > putIndex()) throw new IllegalArgumentException("getIndex>putIndex: " + getIndex + ">" + putIndex());
@@ -460,7 +460,7 @@ public abstract class AbstractBuffer implements Buffer
 
     public void setPutIndex(int putIndex)
     {
-        /* TODO
+        /* TODO bounds checking
         if (isImmutable()) new throw IllegalStateException(__IMMUTABLE);
         if (putIndex > capacity())
                 throw new IllegalArgumentException("putIndex>capacity: " + putIndex + ">" + capacity());

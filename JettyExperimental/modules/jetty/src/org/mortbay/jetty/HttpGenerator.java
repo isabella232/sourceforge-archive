@@ -28,6 +28,7 @@ import org.mortbay.io.Buffers;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
+import org.mortbay.util.TypeUtil;
 import org.mortbay.util.UrlEncoded;
 
 /* ------------------------------------------------------------ */
@@ -39,7 +40,6 @@ import org.mortbay.util.UrlEncoded;
  */
 public class HttpGenerator implements HttpTokens
 {
-    
     // states
     public final static int STATE_HEADER = 0;
     public final static int STATE_CONTENT = 2;
@@ -83,6 +83,13 @@ public class HttpGenerator implements HttpTokens
             }    
         }
     }
+    
+    public static String getReason(int code)
+    {
+        if (code<__reasons.length)
+            return __reasons[code];
+        return TypeUtil.toString(code);
+    }
 
     // data
     private int _state = STATE_HEADER;
@@ -109,6 +116,7 @@ public class HttpGenerator implements HttpTokens
     private int _headerBufferSize;
     private int _contentBufferSize;
 
+    
     /* ------------------------------------------------------------------------------- */
     /**
      * Constructor.
@@ -332,8 +340,9 @@ public class HttpGenerator implements HttpTokens
                 if (_reason.length()>_header.capacity()/2)
                     _reason=_reason.substring(0,_header.capacity()/2);
             }
-            if (_reason==null && _status<__reasons.length)
-                _reason=__reasons[_status];
+            
+            if (_reason==null)
+                _reason=getReason(_status);
             
             if (line == null)
             {

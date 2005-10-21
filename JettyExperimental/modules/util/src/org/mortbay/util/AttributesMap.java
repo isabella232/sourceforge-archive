@@ -81,7 +81,7 @@ public class AttributesMap implements Attributes
     /* 
      * @see org.mortbay.util.Attributes#clear()
      */
-    public void clear()
+    public void clearAttributes()
     {
         _map.clear();
     }

@@ -8,7 +8,7 @@
 
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
-  <artifactId>javax.servlet</artifactId>
+  <artifactId>servlet-api</artifactId>
   <packaging>jar</packaging>
   <version>2.4</version>
   <name>Servlet API</name>

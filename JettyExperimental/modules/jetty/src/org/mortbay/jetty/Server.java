@@ -42,7 +42,6 @@ import org.mortbay.util.MultiException;
  */
 public class Server extends AbstractLifeCycle implements Handler, ThreadPool
 {
-    private static ThreadLocal __server = new ThreadLocal();
     private ThreadPool _threadPool;
     private Connector[] _connectors;
     private Handler[] _handlers;
@@ -207,8 +206,6 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
      */
     public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
-        __server.set(this);
-        
         if (_handlers==null || _handlers.length==0)
         {
             response.sendError(500);
@@ -249,12 +246,8 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
                 expandHandler(ha[i], list);
         }
     }
-    
-    public static Server getCurrentServer()
-    {
-        return (Server)__server.get();
-    }
 
+    /* ------------------------------------------------------------ */
 	public void join() throws InterruptedException 
 	{
 		getThreadPool().join();

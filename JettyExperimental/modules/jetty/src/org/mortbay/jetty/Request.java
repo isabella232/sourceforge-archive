@@ -117,7 +117,7 @@ public class Request implements HttpServletRequest
     void recycle()
     {
         if(_attributes!=null)
-            _attributes.clear();
+            _attributes.clearAttributes();
         _authType=null;
         _characterEncoding=null;
         _context=null;
