@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import javax.servlet.http.HttpServletRequest;
@@ -97,7 +98,8 @@ public class MultiPartRequest
      */
     public String[] getPartNames()
     {
-        return (String[]) _partMap.keySet().toArray(new String[0]);
+        Set s = _partMap.keySet();
+        return (String[]) s.toArray(new String[s.size()]);
     }
     
     /* ------------------------------------------------------------ */
