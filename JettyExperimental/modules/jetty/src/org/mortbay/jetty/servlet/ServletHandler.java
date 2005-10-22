@@ -86,7 +86,7 @@ public class ServletHandler extends WrappedHandler
     
     /* ------------------------------------------------------------ */
     private static final boolean __Slosh2Slash=File.separatorChar=='\\';
-    private static Logger log = LoggerFactory.getLogger(ServletHolder.class);
+    private static Logger log = LoggerFactory.getLogger(ServletHandler.class);
 
     
     
@@ -131,9 +131,17 @@ public class ServletHandler extends WrappedHandler
         _servletContext=ContextHandler.getCurrentContext();
         _contextHandler=_servletContext.getContextHandler();
         
-        _contextLog = LoggerFactory.getLogger(_servletContext.getServletContextName());
-        if (_contextLog==null)
-            _contextLog=log;
+        try
+        {
+        	_contextLog = LoggerFactory.getLogger(_servletContext.getServletContextName());
+        	if (_contextLog==null)
+        		_contextLog=log;
+        }
+        catch (Exception e)
+        {
+        	_contextLog=log;
+        	log.warn("Can't get context log for context="+_servletContext.getServletContextName()+", using default", e);
+        }
 
         updateMappings();
         
