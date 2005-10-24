@@ -740,6 +740,8 @@ public class HttpConnection
         _request.setHandled(true);
         
         _outputStream.writeHeader(_response);
+        _outputStream.flush();
+        
     }
 
     
