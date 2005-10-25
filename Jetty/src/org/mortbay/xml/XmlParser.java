@@ -79,7 +79,8 @@ public class XmlParser
             catch(Exception e)
             {
                 log.warn("Schema validation may not be supported");
-		log.debug("",e);
+                log.debug("",e);
+                notValidating=true;
             }
             _parser.getXMLReader().setFeature("http://xml.org/sax/features/validation",!notValidating);
             _parser.getXMLReader().setFeature("http://xml.org/sax/features/namespaces",!notValidating);
