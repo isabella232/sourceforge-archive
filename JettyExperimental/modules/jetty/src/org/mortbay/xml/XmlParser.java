@@ -46,8 +46,8 @@ import org.xml.sax.helpers.DefaultHandler;
  * XML Parser wrapper. This class wraps any standard JAXP1.1 parser with convieniant error and
  * entity handlers and a mini dom-like document tree.
  * <P>
- * By default, the parser is created as a validating parser. This can be changed by setting the
- * "org.mortbay.xml.XmlParser.NotValidating" system property to true.
+ * By default, the parser is created as a validating parser only if xercers is present. This can be 
+ * configured by setting the "org.mortbay.xml.XmlParser.Validating" system property.
  * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
@@ -73,7 +73,8 @@ public class XmlParser
             
             boolean validating_dft=factory.getClass().toString().startsWith("org.apache.xerces.");
             String validating_prop = System.getProperty("org.mortbay.xml.XmlParser.Validating", validating_dft?"true":"false");
-            boolean validating = Boolean.valueOf(validating_prop).booleanValue();
+            boolean notValidating=Boolean.getBoolean("org.mortbay.xml.XmlParser.NotValidating"); // deprecated!
+            boolean validating = !notValidating && Boolean.valueOf(validating_prop).booleanValue();
             factory.setValidating(validating);
             _parser = factory.newSAXParser();
 
@@ -84,6 +85,7 @@ public class XmlParser
             catch (Exception e)
             {
                 if (log.isDebugEnabled()) log.warn("Schema validation may not be supported: ", e);
+                validating=false;
             }
 
             _parser.getXMLReader().setFeature("http://xml.org/sax/features/validation",validating);
