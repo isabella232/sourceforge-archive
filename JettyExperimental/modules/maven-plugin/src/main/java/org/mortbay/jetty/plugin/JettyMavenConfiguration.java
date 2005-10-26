@@ -22,7 +22,7 @@ import java.util.List;
 import org.apache.maven.plugin.logging.Log;
 import org.mortbay.jetty.webapp.Configuration;
 import org.mortbay.jetty.webapp.WebAppClassLoader;
-import org.mortbay.jetty.webapp.WebAppHandler;
+import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.jetty.webapp.WebXmlConfiguration;
 import org.mortbay.xml.XmlParser;
 
@@ -73,15 +73,15 @@ public class JettyMavenConfiguration extends WebXmlConfiguration
     public void configureClassLoader() throws Exception 
     {
         getLog().info("Setting up classpath ...");
-        ((WebAppClassLoader)getWebAppHandler().getClassLoader()).addClassPath(classesDir.getCanonicalPath());
+        ((WebAppClassLoader)getWebAppContext().getClassLoader()).addClassPath(classesDir.getCanonicalPath());
         
         Iterator itor = libFiles.iterator();
         while (itor.hasNext())
-            ((WebAppClassLoader)getWebAppHandler().getClassLoader()).addClassPath(((File)itor.next()).getCanonicalPath());
+            ((WebAppClassLoader)getWebAppContext().getClassLoader()).addClassPath(((File)itor.next()).getCanonicalPath());
         
         itor = tldFiles.iterator();
         while (itor.hasNext())
-            ((WebAppClassLoader)getWebAppHandler().getClassLoader()).addClassPath(((File)itor.next()).getCanonicalPath());
+            ((WebAppClassLoader)getWebAppContext().getClassLoader()).addClassPath(((File)itor.next()).getCanonicalPath());
 
         getLog().info("Finished setting up classpath");
     }
@@ -102,14 +102,14 @@ public class JettyMavenConfiguration extends WebXmlConfiguration
     public void configureWebApp() throws Exception 
     {
         //cannot configure if the context is already started
-        if (getWebAppHandler().isStarted())
+        if (getWebAppContext().isStarted())
         {
             getLog().info("Cannot configure webapp after it is started");
             return;
         }
         
         getLog().info("Started configuring web.xml, resource base="+webAppDir.getCanonicalPath());
-        getWebAppHandler().setResourceBase(webAppDir.getCanonicalPath());
+        getWebAppContext().setResourceBase(webAppDir.getCanonicalPath());
         XmlParser.Node config = null;               
         config=_xmlParser.parse(webXmlFile.getCanonicalPath());          
         initialize(config);

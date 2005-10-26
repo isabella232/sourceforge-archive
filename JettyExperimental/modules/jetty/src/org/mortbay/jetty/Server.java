@@ -18,6 +18,7 @@ package org.mortbay.jetty;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -25,6 +26,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.WrappedHandler;
+import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.thread.AbstractLifeCycle;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.ThreadPool;
@@ -45,8 +47,8 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
     private ThreadPool _threadPool;
     private Connector[] _connectors;
     private Handler[] _handlers;
+    private UserRealm[] _realms;
     
-
     /* ------------------------------------------------------------ */
     public Server()
     	throws Exception
@@ -252,5 +254,23 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
 	{
 		getThreadPool().join();
 	}
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Map of realm name to UserRealm instances.
+     */
+    public UserRealm[] getUserRealms()
+    {
+        return _realms;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param realms Map of realm name to UserRealm instances.
+     */
+    public void setUserRealms(UserRealm[] realms)
+    {
+        _realms=realms;
+    }
     
 }

@@ -46,6 +46,9 @@ import org.mortbay.io.EndPoint;
 import org.mortbay.io.Portable;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ContextHandler.Context;
+import org.mortbay.jetty.security.Authenticator;
+import org.mortbay.jetty.security.SecurityHandler;
+import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.log.LogSupport;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
@@ -696,9 +699,10 @@ public class Request implements HttpServletRequest
      */
     public String getRemoteUser()
     {
-        if (_userPrincipal==null)
+        Principal p = getUserPrincipal();
+        if (p==null)
             return null;
-        return _userPrincipal.toString();
+        return p.toString();
     }
 
     /* ------------------------------------------------------------ */
@@ -924,6 +928,31 @@ public class Request implements HttpServletRequest
      */
     public Principal getUserPrincipal()
     {
+        if (_userPrincipal != null && _userPrincipal instanceof SecurityHandler.NotChecked)
+        {
+            SecurityHandler.NotChecked not_checked=(SecurityHandler.NotChecked)_userPrincipal;
+            _userPrincipal = SecurityHandler.__NO_USER;
+            
+            Authenticator auth=not_checked.getSecurityHandler().getAuthenticator();
+            UserRealm realm=not_checked.getSecurityHandler().getUserRealm();
+            String pathInContext=getPathInfo()==null?getServletPath():(getServletPath()+getPathInfo());
+            
+            if (realm != null && auth != null)
+            {
+                try
+                {
+                    System.err.println("Lazy AUTH "+pathInContext);
+                    auth.authenticate(realm, pathInContext, this, null);
+                }
+                catch (Exception e)
+                {
+                    LogSupport.ignore(log, e);
+                }
+            }
+        }
+        
+        if (_userPrincipal == SecurityHandler.__NO_USER) 
+            return null;
         return _userPrincipal;
     }
 

@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
  * initialized, then a HashSessionManager with a standard
  * java.util.Random generator is created.
  * <P>
- * @see org.mortbay.jetty.servlet.WebAppHandler
+ * @see org.mortbay.jetty.servlet.WebAppContext
  * @version $Id$
  * @author Greg Wilkins
  */

@@ -34,18 +34,18 @@ import org.slf4j.LoggerFactory;
 public class JettyWebXmlConfiguration implements Configuration
 {
     private static Logger log= LoggerFactory.getLogger(JettyWebXmlConfiguration.class);
-    private WebAppHandler _context;
+    private WebAppContext _context;
 
     
     /**
      * @see org.mortbay.jetty.servlet.WebApplicationContext.Configuration#setWebApplicationContext(org.mortbay.jetty.servlet.WebApplicationContext)
      */
-    public void setWebAppHandler (WebAppHandler context)
+    public void setWebAppContext (WebAppContext context)
     {
        _context = context;
     }
 
-    public WebAppHandler getWebAppHandler ()
+    public WebAppContext getWebAppContext ()
     {
         return _context;
     }
@@ -82,7 +82,7 @@ public class JettyWebXmlConfiguration implements Configuration
         if(log.isDebugEnabled())
             log.debug("Configuring web-jetty.xml");
         
-        Resource webInf=getWebAppHandler().getWebInf();
+        Resource webInf=getWebAppContext().getWebInf();
         // handle any WEB-INF descriptors
         if(webInf!=null&&webInf.isDirectory())
         {
@@ -98,7 +98,7 @@ public class JettyWebXmlConfiguration implements Configuration
                 if(log.isDebugEnabled())
                     log.debug("Configure: "+jetty);
                 XmlConfiguration jetty_config=new XmlConfiguration(jetty.getURL());
-                jetty_config.configure(getWebAppHandler());
+                jetty_config.configure(getWebAppContext());
             }
         }
         

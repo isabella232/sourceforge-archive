@@ -25,8 +25,14 @@ import java.util.Map;
 import javax.servlet.UnavailableException;
 
 import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.security.Authenticator;
+import org.mortbay.jetty.security.BasicAuthenticator;
+import org.mortbay.jetty.security.ClientCertAuthenticator;
 import org.mortbay.jetty.security.Constraint;
 import org.mortbay.jetty.security.ConstraintMapping;
+import org.mortbay.jetty.security.DigestAuthenticator;
+import org.mortbay.jetty.security.FormAuthenticator;
+import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.FilterMapping;
@@ -48,7 +54,7 @@ public class WebXmlConfiguration implements Configuration
 {
     private static Logger log=LoggerFactory.getLogger(WebXmlConfiguration.class);
     
-    protected WebAppHandler _context;
+    protected WebAppContext _context;
     protected XmlParser _xmlParser;
     protected Object _filters;
     protected Object _filterMappings;
@@ -69,16 +75,16 @@ public class WebXmlConfiguration implements Configuration
     {
         XmlParser xmlParser=new XmlParser();
         //set up cache of DTDs and schemas locally
-        URL dtd22=WebAppHandler.class.getResource("/javax/servlet/resources/web-app_2_2.dtd");
-        URL dtd23=WebAppHandler.class.getResource("/javax/servlet/resources/web-app_2_3.dtd");
-        URL jsp20xsd=WebAppHandler.class.getResource("/javax/servlet/resources/jsp_2_0.xsd");
-        URL j2ee14xsd=WebAppHandler.class.getResource("/javax/servlet/resources/j2ee_1_4.xsd");
-        URL webapp24xsd=WebAppHandler.class.getResource("/javax/servlet/resources/web-app_2_4.xsd");
-        URL schemadtd=WebAppHandler.class.getResource("/javax/servlet/resources/XMLSchema.dtd");
-        URL xmlxsd=WebAppHandler.class.getResource("/javax/servlet/resources/xml.xsd");
-        URL webservice11xsd=WebAppHandler.class
+        URL dtd22=WebAppContext.class.getResource("/javax/servlet/resources/web-app_2_2.dtd");
+        URL dtd23=WebAppContext.class.getResource("/javax/servlet/resources/web-app_2_3.dtd");
+        URL jsp20xsd=WebAppContext.class.getResource("/javax/servlet/resources/jsp_2_0.xsd");
+        URL j2ee14xsd=WebAppContext.class.getResource("/javax/servlet/resources/j2ee_1_4.xsd");
+        URL webapp24xsd=WebAppContext.class.getResource("/javax/servlet/resources/web-app_2_4.xsd");
+        URL schemadtd=WebAppContext.class.getResource("/javax/servlet/resources/XMLSchema.dtd");
+        URL xmlxsd=WebAppContext.class.getResource("/javax/servlet/resources/xml.xsd");
+        URL webservice11xsd=WebAppContext.class
                 .getResource("/javax/servlet/resources/j2ee_web_services_client_1_1.xsd");
-        URL datatypesdtd=WebAppHandler.class.getResource("/javax/servlet/resources/datatypes.dtd");
+        URL datatypesdtd=WebAppContext.class.getResource("/javax/servlet/resources/datatypes.dtd");
         xmlParser.redirectEntity("web-app_2_2.dtd",dtd22);
         xmlParser.redirectEntity("-//Sun Microsystems, Inc.//DTD Web Application 2.2//EN",dtd22);
         xmlParser.redirectEntity("web.dtd",dtd23);
@@ -103,13 +109,13 @@ public class WebXmlConfiguration implements Configuration
     }
 
     /* ------------------------------------------------------------------------------- */
-    public void setWebAppHandler (WebAppHandler context)
+    public void setWebAppContext (WebAppContext context)
     {
         _context = context;
     }   
 
     /* ------------------------------------------------------------------------------- */
-    public WebAppHandler getWebAppHandler()
+    public WebAppContext getWebAppContext()
     {
         return _context;
     }
@@ -159,7 +165,7 @@ public class WebXmlConfiguration implements Configuration
             return;
         }
         
-        String defaultsDescriptor=getWebAppHandler().getDefaultsDescriptor();
+        String defaultsDescriptor=getWebAppContext().getDefaultsDescriptor();
         if(defaultsDescriptor!=null&&defaultsDescriptor.length()>0)
         {
             Resource dftResource=Resource.newSystemResource(defaultsDescriptor);
@@ -180,7 +186,7 @@ public class WebXmlConfiguration implements Configuration
             return;
         }
         
-        Resource webInf=getWebAppHandler().getWebInf();
+        Resource webInf=getWebAppContext().getWebInf();
         // handle any WEB-INF descriptors
         if(webInf!=null&&webInf.isDirectory())
         {
@@ -188,7 +194,7 @@ public class WebXmlConfiguration implements Configuration
             Resource web=webInf.addPath("web.xml");
             if(!web.exists())
             {
-                log.info("No WEB-INF/web.xml in "+getWebAppHandler().getWar()
+                log.info("No WEB-INF/web.xml in "+getWebAppContext().getWar()
                         +". Serving files and default/dynamic servlets only");
             }
             else
@@ -210,7 +216,7 @@ public class WebXmlConfiguration implements Configuration
     /* ------------------------------------------------------------ */
     protected void initialize(XmlParser.Node config) throws ClassNotFoundException,UnavailableException
     {
-        ServletHandler servlet_handler = getWebAppHandler().getServletHandler();
+        ServletHandler servlet_handler = getWebAppContext().getServletHandler();
         
         // Get any existing servlets and mappings.
         _filters=LazyList.array2List(servlet_handler.getFilters());
@@ -218,12 +224,12 @@ public class WebXmlConfiguration implements Configuration
         _servlets=LazyList.array2List(servlet_handler.getServlets());
         _servletMappings=LazyList.array2List(servlet_handler.getServletMappings());
 
-        _listeners = LazyList.array2List(getWebAppHandler().getEventListeners());
-        _welcomeFiles = LazyList.array2List(getWebAppHandler().getWelcomeFiles());
-        _constraintMappings = LazyList.array2List(getWebAppHandler().getSecurityHandler().getConstraintMappings());
+        _listeners = LazyList.array2List(getWebAppContext().getEventListeners());
+        _welcomeFiles = LazyList.array2List(getWebAppContext().getWelcomeFiles());
+        _constraintMappings = LazyList.array2List(getWebAppContext().getSecurityHandler().getConstraintMappings());
         
-        _errorPages = getWebAppHandler().getErrorHandler() instanceof WebAppHandler.WebAppErrorHandler ?
-                        ((WebAppHandler.WebAppErrorHandler)getWebAppHandler().getErrorHandler()).getErrorPages():null;
+        _errorPages = getWebAppContext().getErrorHandler() instanceof WebAppContext.WebAppErrorHandler ?
+                        ((WebAppContext.WebAppErrorHandler)getWebAppContext().getErrorHandler()).getErrorPages():null;
         
         Iterator iter=config.iterator();
         XmlParser.Node node=null;
@@ -254,12 +260,12 @@ public class WebXmlConfiguration implements Configuration
         servlet_handler.setServlets((ServletHolder[])LazyList.toArray(_servlets,ServletHolder.class));
         servlet_handler.setServletMappings((ServletMapping[])LazyList.toArray(_servletMappings,ServletMapping.class));
 
-        getWebAppHandler().setEventListeners((EventListener[])LazyList.toArray(_listeners,EventListener.class));
-        getWebAppHandler().setWelcomeFiles((String[])LazyList.toArray(_welcomeFiles,String.class));
-        getWebAppHandler().getSecurityHandler().setConstraintMappings((ConstraintMapping[])LazyList.toArray(_constraintMappings, ConstraintMapping.class));
+        getWebAppContext().setEventListeners((EventListener[])LazyList.toArray(_listeners,EventListener.class));
+        getWebAppContext().setWelcomeFiles((String[])LazyList.toArray(_welcomeFiles,String.class));
+        getWebAppContext().getSecurityHandler().setConstraintMappings((ConstraintMapping[])LazyList.toArray(_constraintMappings, ConstraintMapping.class));
    
-        if (_errorPages!=null && getWebAppHandler().getErrorHandler() instanceof WebAppHandler.WebAppErrorHandler)
-            ((WebAppHandler.WebAppErrorHandler)getWebAppHandler().getErrorHandler()).setErrorPages(_errorPages);
+        if (_errorPages!=null && getWebAppContext().getErrorHandler() instanceof WebAppContext.WebAppErrorHandler)
+            ((WebAppContext.WebAppErrorHandler)getWebAppContext().getErrorHandler()).setErrorPages(_errorPages);
         
     }
 
@@ -330,7 +336,7 @@ public class WebXmlConfiguration implements Configuration
     /* ------------------------------------------------------------ */
     protected void initDisplayName(XmlParser.Node node)
     {
-        getWebAppHandler().setServletContextName(node.toString(false,true));
+        getWebAppContext().setDisplayName(node.toString(false,true));
     }
 
     /* ------------------------------------------------------------ */
@@ -340,7 +346,7 @@ public class WebXmlConfiguration implements Configuration
         String value=node.getString("param-value",false,true);
         if(log.isDebugEnabled())
             log.debug("ContextParam: "+name+"="+value);
-        getWebAppHandler().getInitParams().put(name, value);
+        getWebAppContext().getInitParams().put(name, value);
     }
 
     /* ------------------------------------------------------------ */
@@ -465,8 +471,7 @@ public class WebXmlConfiguration implements Configuration
         Object listener=null;
         try
         {
-            System.err.println("LISTENER="+className);
-            Class listenerClass=getWebAppHandler().loadClass(className);
+            Class listenerClass=getWebAppContext().loadClass(className);
             listener=listenerClass.newInstance();
             if(!(listener instanceof EventListener))
             {
@@ -487,7 +492,7 @@ public class WebXmlConfiguration implements Configuration
     {
         // the element has no content, so its simple presence
         // indicates that the webapp is distributable...
-        WebAppHandler wac=getWebAppHandler();
+        WebAppContext wac=getWebAppContext();
         if (!wac.isDistributable())
             wac.setDistributable(true);
     }
@@ -499,7 +504,7 @@ public class WebXmlConfiguration implements Configuration
         if(tNode!=null)
         {
             int timeout=Integer.parseInt(tNode.toString(false,true));
-            getWebAppHandler().getSessionHandler().getSessionManager().setMaxInactiveInterval(timeout*60);
+            getWebAppContext().getSessionHandler().getSessionManager().setMaxInactiveInterval(timeout*60);
         }
     }
 
@@ -510,7 +515,7 @@ public class WebXmlConfiguration implements Configuration
         if(extension!=null&&extension.startsWith("."))
             extension=extension.substring(1);
         String mimeType=node.getString("mime-type",false,true);
-        getWebAppHandler().getMimeTypes().addMimeMapping(extension, mimeType);
+        getWebAppContext().getMimeTypes().addMimeMapping(extension, mimeType);
     }
 
     /* ------------------------------------------------------------ */
@@ -534,7 +539,7 @@ public class WebXmlConfiguration implements Configuration
             XmlParser.Node mapping=(XmlParser.Node)iter.next();
             String locale=mapping.getString("locale",false,true);
             String encoding=mapping.getString("encoding",false,true);
-            getWebAppHandler().addLocaleEncoding(locale,encoding);
+            getWebAppContext().addLocaleEncoding(locale,encoding);
         }
     }
 
@@ -654,30 +659,48 @@ public class WebXmlConfiguration implements Configuration
     /* ------------------------------------------------------------ */
     protected void initLoginConfig(XmlParser.Node node)
     {
-        /*
         XmlParser.Node method=node.get("auth-method");
         FormAuthenticator _formAuthenticator=null;
         if(method!=null)
         {
             Authenticator authenticator=null;
             String m=method.toString(false,true);
-            if(SecurityConstraint.__FORM_AUTH.equals(m))
+            if(Constraint.__FORM_AUTH.equals(m))
                 authenticator=_formAuthenticator=new FormAuthenticator();
-            else if(SecurityConstraint.__BASIC_AUTH.equals(m))
+            else if(Constraint.__BASIC_AUTH.equals(m))
                 authenticator=new BasicAuthenticator();
-            else if(SecurityConstraint.__DIGEST_AUTH.equals(m))
+            else if(Constraint.__DIGEST_AUTH.equals(m))
                 authenticator=new DigestAuthenticator();
-            else if(SecurityConstraint.__CERT_AUTH.equals(m))
+            else if(Constraint.__CERT_AUTH.equals(m))
                 authenticator=new ClientCertAuthenticator();
-            else if(SecurityConstraint.__CERT_AUTH2.equals(m))
+            else if(Constraint.__CERT_AUTH2.equals(m))
                 authenticator=new ClientCertAuthenticator();
             else
                 log.warn("UNKNOWN AUTH METHOD: "+m);
-            getWebAppHandler().setAuthenticator(authenticator);
+            getWebAppContext().getSecurityHandler().setAuthenticator(authenticator);
         }
         XmlParser.Node name=node.get("realm-name");
         if(name!=null)
-            getWebAppHandler().setRealmName(name.toString(false,true));
+        {
+            String realm_name=name.toString(false,true);
+            
+            UserRealm[] realms=WebAppContext.getCurrentContext().getContextHandler().getServer().getUserRealms();
+            UserRealm realm=null;
+            for (int i=0;realm==null && realms!=null && i<realms.length; i++)
+            {
+                if (realms[i]!=null && realm_name.equals(realms[i].getName()))
+                    realm=realms[i];
+            }
+            
+            if (realm==null)
+            {
+                String msg = "Unknown realm: "+realm_name;
+                log.warn(msg);
+                throw new IllegalStateException(msg);
+            }
+            else
+                getWebAppContext().getSecurityHandler().setUserRealm(realm);
+        }
         XmlParser.Node formConfig=node.get("form-login-config");
         if(formConfig!=null)
         {
@@ -696,7 +719,6 @@ public class WebXmlConfiguration implements Configuration
                 }
             }
         }
-        */
     }
 
     /* ------------------------------------------------------------ */

@@ -36,7 +36,7 @@ import org.mortbay.jetty.handler.NotFoundHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.webapp.Configuration;
 import org.mortbay.jetty.webapp.JettyWebXmlConfiguration;
-import org.mortbay.jetty.webapp.WebAppHandler;
+import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.jetty.webapp.WebAppClassLoader;
 
 /**
@@ -127,7 +127,7 @@ public class JettyMojo extends AbstractMojo
     /**
      * The webapp
      */
-    private WebAppHandler webAppHandler;
+    private WebAppContext webAppHandler;
    
     public static SelectChannelConnector DEFAULT_CONNECTOR = new SelectChannelConnector();
     public static int DEFAULT_PORT = 8080;
@@ -244,7 +244,7 @@ public class JettyMojo extends AbstractMojo
 	public Handler getWebApplication ()
 	{
 		if (this.webAppHandler==null)
-			this.webAppHandler = new WebAppHandler();
+			this.webAppHandler = new WebAppContext();
 		
 		return this.webAppHandler;
 	}
@@ -341,7 +341,8 @@ public class JettyMojo extends AbstractMojo
             }          
             server.setConnectors(getConnectors());
             
-            WebAppHandler webapp = (WebAppHandler)configureWebApplication(webXmlFile);
+            WebAppContext webapp = (WebAppContext)configureWebApplication(webXmlFile);
+            webapp.setServer(server);
             
             
             //include any other ContextHandlers that the user has configured in their project's pom
@@ -430,7 +431,7 @@ public class JettyMojo extends AbstractMojo
     throws Exception
     { 	  
         //make a webapp handler and set the context
-        WebAppHandler webapp = (WebAppHandler)getWebApplication();
+        WebAppContext webapp = (WebAppContext)getWebApplication();
         
         String contextPath = getContextPath();
         if (!contextPath.startsWith("/"))

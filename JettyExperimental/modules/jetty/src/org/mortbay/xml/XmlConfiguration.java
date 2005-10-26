@@ -617,7 +617,6 @@ public class XmlConfiguration
     /*
      * Create a new array object.
      *
-     * @param obj @param node @return @exception Exception
      */
     private Object newArray(Object obj, XmlParser.Node node) throws Exception
     {
@@ -642,7 +641,7 @@ public class XmlConfiguration
         }
 
         Object array = Array.newInstance(aClass, node.size());
-        if (id != null) _idMap.put(id, obj);
+        if (id != null) _idMap.put(id, array);
 
         for (int i = 0; i < node.size(); i++)
         {
@@ -657,6 +656,56 @@ public class XmlConfiguration
         }
 
         return array;
+    }
+    /* ------------------------------------------------------------ */
+    /*
+     * Create a new map object.
+     *
+     */
+    private Object newMap(Object obj, XmlParser.Node node) throws Exception
+    {
+        String id = node.getAttribute("id");
+
+        Map map = new HashMap();
+        if (id != null) _idMap.put(id, map);
+
+        for (int i = 0; i < node.size(); i++)
+        {
+            Object o = node.get(i);
+            if (o instanceof String) continue;
+            XmlParser.Node entry = (XmlParser.Node) o;
+            if (!entry.getTag().equals("Entry")) throw new IllegalStateException("Not an Entry");
+            
+            
+            XmlParser.Node key=null;
+            XmlParser.Node value=null;
+
+            for (int j = 0; j < entry.size(); j++)
+            {
+                o = entry.get(j);
+                if (o instanceof String) continue;
+                XmlParser.Node item = (XmlParser.Node) o;
+                if (!item.getTag().equals("Item")) throw new IllegalStateException("Not an Item");
+                if (key==null) 
+                    key=item;
+                else
+                    value=item;
+            }
+            
+            if (key==null || value==null)
+                throw new IllegalStateException("Missing Item in Entry");
+            String kid = key.getAttribute("id");
+            String vid = value.getAttribute("id");
+             
+            Object k = value(obj, key);
+            Object v = value(obj, value);
+            map.put(k,v);
+            
+            if (kid != null) _idMap.put(kid, k);
+            if (vid != null) _idMap.put(vid, v);
+        }
+
+        return map;
     }
 
     /* ------------------------------------------------------------ */
@@ -802,6 +851,7 @@ public class XmlConfiguration
         if ("New".equals(tag)) return newObj(obj, node);
         if ("Ref".equals(tag)) return refObj(obj, node);
         if ("Array".equals(tag)) return newArray(obj, node);
+        if ("Map".equals(tag)) return newMap(obj, node);
 
         if ("SystemProperty".equals(tag))
         {

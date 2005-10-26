@@ -32,13 +32,13 @@ public interface Configuration extends Serializable
     /** Set up a context on which to perform the configuration.
      * @param context
      */
-    public void setWebAppHandler (WebAppHandler context);
+    public void setWebAppContext (WebAppContext context);
     
     /* ------------------------------------------------------------------------------- */
     /** Get the context on which the configuration is performed.
      * @return
      */
-    public WebAppHandler getWebAppHandler ();
+    public WebAppContext getWebAppContext();
     
     /* ------------------------------------------------------------------------------- */
     /** Configure ClassPath.

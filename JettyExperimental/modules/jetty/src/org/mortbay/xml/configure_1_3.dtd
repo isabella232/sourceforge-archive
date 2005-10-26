@@ -176,7 +176,7 @@ the type of the new array and the contained Item elements
 are used for each element of the array
 
  <Array type="java.lang.String">
-   <Item>value0</Arg>
+   <Item>value0</Item>
    <Item><New class="java.lang.String"><Arg>value1</Arg></New></Item>
  </Array>
 
@@ -187,10 +187,32 @@ This is equivalent to:
 <!ELEMENT Array (Item*)>
 <!ATTLIST Array %TYPEATTR; %IDATTR; >
 
+<!--
+Map Element.
+This element allows the creation of a new array as part of a 
+value of a Set, Put or Arg element. The type attribute determines
+the type of the new array and the contained Item elements 
+are used for each element of the array
+
+ <Map>
+   <Entry>
+     <Item>keyName</Item>
+     <Item><New class="java.lang.String"><Arg>value1</Arg></New></Item>
+   </Entry>
+ </Map>
+
+This is equivalent to:
+ String[] a = new String[] { "value0", new String("value1") };
+
+-->
+<!ELEMENT Map (Entry*)>
+<!ATTLIST Map %IDATTR; >
+<!ELEMENT Entry (Item,Item)>
+
 
 <!--
 Item Element.
-This element defines a positional argument for the Array element.
+This element defines an entry for the Array or Map Entry elements.
 The optional type attribute can force the type of the value.
 
 An Item element can contain value text and/or the value elements Call,

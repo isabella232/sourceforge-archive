@@ -51,6 +51,7 @@ public class SecurityHandler extends WrappedHandler
     private ConstraintMapping[] _constraintMappings;
     private PathMap _constraintMap=new PathMap();
     private Authenticator _authenticator;
+    private NotChecked _notChecked=new NotChecked();
     
     /* ------------------------------------------------------------ */
     /**
@@ -162,7 +163,7 @@ public class SecurityHandler extends WrappedHandler
     public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException 
     {
         if (dispatch==REQUEST && !checkSecurityConstraints(target,(Request)request,(Response)response))
-            return false;
+            return true;
         if (getHandler()!=null)
             return getHandler().handle(target, request, response, dispatch);
         return false;
@@ -214,7 +215,8 @@ public class SecurityHandler extends WrappedHandler
                 request,
                 response);
         }
-        request.setUserPrincipal(__NOT_CHECKED);
+        
+        request.setUserPrincipal(_notChecked);
         return true;
     }
     
@@ -231,7 +233,7 @@ public class SecurityHandler extends WrappedHandler
      * @exception HttpException 
      * @exception IOException 
      */
-    private static boolean check(
+    private boolean check(
         Object constraints,
         Authenticator authenticator,
         UserRealm realm,
@@ -402,24 +404,37 @@ public class SecurityHandler extends WrappedHandler
         }
         else
         {
-            request.setUserPrincipal(SecurityHandler.__NOT_CHECKED);
+            request.setUserPrincipal(_notChecked);
         }
 
         return true;
     }
 
-    static Principal __NO_USER = new Principal()
+    public static Principal __NO_USER = new Principal()
     {
         public String getName()
         {
             return null;
         }
+        public String toString()
+        {
+            return "No User";
+        }
     };
-    static Principal __NOT_CHECKED = new Principal()
+    
+    public class NotChecked implements Principal
     {
         public String getName()
         {
             return null;
+        }
+        public String toString()
+        {
+            return "NOT CHECKED";
+        }
+        public SecurityHandler getSecurityHandler()
+        {
+            return SecurityHandler.this;
         }
     };
 
@@ -434,11 +449,16 @@ public class SecurityHandler extends WrappedHandler
      * FormAuthenticator to allow access to logon and error pages within an
      * authenticated URI tree.
      */
-    static Principal __NOBODY = new Principal()
+    public static Principal __NOBODY = new Principal()
     {
         public String getName()
         {
             return "Nobody";
+        }
+        
+        public String toString()
+        {
+            return getName();
         }
     };
 }

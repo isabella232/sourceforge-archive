@@ -72,6 +72,80 @@
     <location>/dump/ERROR</location>
   </error-page>
 
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Any User</web-resource-name>
+      <url-pattern>/dump/auth/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>*</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>relax</web-resource-name>
+      <url-pattern>/dump/auth/relax/*</url-pattern>
+      <http-method>GET</http-method>
+      <http-method>HEAD</http-method>
+    </web-resource-collection>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Admin Role</web-resource-name>
+      <url-pattern>/dump/auth/admin/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>content-administrator</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Forbidden</web-resource-name>
+      <url-pattern>/dump/auth/noaccess/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint/>
+  </security-constraint>
+
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>SSL</web-resource-name>
+      <url-pattern>/dump/auth/ssl/*</url-pattern>
+    </web-resource-collection>
+    <user-data-constraint>
+      <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+    </user-data-constraint>
+  </security-constraint>
+
+  <login-config>
+    <auth-method>BASIC</auth-method>
+    <realm-name>Test Realm</realm-name>
+  </login-config>
+
+<!--
+  <login-config>
+    <auth-method>DIGEST</auth-method>
+    <realm-name>Test Realm</realm-name>
+  </login-config>
+-->
+
+<!--
+  <login-config>
+    <auth-method>FORM</auth-method>
+    <realm-name>Test Realm</realm-name>
+    <form-login-config>
+       <form-login-page>/logon.html?param=test</form-login-page>
+       <form-error-page>/logonError.html?param=test</form-error-page>
+    </form-login-config>
+  </login-config>
+-->
+
+
+
+
 </web-app>
 
 

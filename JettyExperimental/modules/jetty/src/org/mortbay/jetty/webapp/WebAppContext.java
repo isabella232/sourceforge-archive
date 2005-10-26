@@ -52,11 +52,11 @@ import org.slf4j.LoggerFactory;
  * @author gregw
  *
  */
-public class WebAppHandler extends ContextHandler
+public class WebAppContext extends ContextHandler
 {
 
     /* ------------------------------------------------------------ */
-    private static Logger log= LoggerFactory.getLogger(WebAppHandler.class);
+    private static Logger log= LoggerFactory.getLogger(WebAppContext.class);
     
     private SecurityHandler _securityHandler;
     private SessionHandler _sessionHandler;
@@ -71,7 +71,7 @@ public class WebAppHandler extends ContextHandler
     
 
     /* ------------------------------------------------------------ */
-    public WebAppHandler()
+    public WebAppContext()
     {
         _servletHandler = new ServletHandler();
         
@@ -548,7 +548,7 @@ public class WebAppHandler extends ContextHandler
         // Setup configurations 
         loadConfigurations();
         for (int i=0;i<_configurations.length;i++)
-            _configurations[i].setWebAppHandler(this);
+            _configurations[i].setWebAppContext(this);
         
         
         // Configure classloader
@@ -683,16 +683,17 @@ public class WebAppHandler extends ContextHandler
             for (int i=0;i<wacs.size();i++)
             {
                 Object o =wacs.get(i);
-                if (o instanceof WebAppHandler)
+                if (o instanceof WebAppContext)
                 {
-                    WebAppHandler w = (WebAppHandler)o;
+                    WebAppContext w = (WebAppContext)o;
                     if (app.equals(Resource.newResource(w.getWar())))
                         continue files;
                 }
             }
             
             // add it
-            WebAppHandler wah = new WebAppHandler();
+            WebAppContext wah = new WebAppContext();
+            wah.setServer(server);
             wah.setContextPath(context);
             if (defaults!=null)
                 wah.setDefaultsDescriptor(defaults);

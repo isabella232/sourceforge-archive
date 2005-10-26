@@ -54,7 +54,8 @@
         <!-- Configure a test web application with web.xml           -->
         <!-- ======================================================= -->
         <Item>
-          <New id="testWebAppContext"  class="org.mortbay.jetty.webapp.WebAppHandler">
+          <New id="testWebAppContext"  class="org.mortbay.jetty.webapp.WebAppContext">
+            <Set name="Server"><Ref id="Server"/></Set>
             <Set name="contextPath">/test</Set>
             <Set name="war">./webapps/test</Set>
             <Set name="VirtualHosts"><Array type="java.lang.String"></Array></Set>
@@ -69,6 +70,7 @@
         <!-- ======================================================= -->
         <Item>
           <New id="javadocContext"  class="org.mortbay.jetty.handler.ContextHandler">
+            <Set name="Server"><Ref id="Server"/></Set>
             <Set name="contextPath">/javadoc</Set>
             <Set name="resourceBase">./javadoc</Set>
             <Set name="handler">
@@ -113,9 +115,9 @@
 
 
     <!-- =========================================================== -->
-    <!-- Additional configuration for the components defined above   -->
+    <!-- Additional contexts not defined above                       -->
     <!-- =========================================================== -->
-    <Call class="org.mortbay.jetty.webapp.WebAppHandler" name="addWebApplications">
+    <Call class="org.mortbay.jetty.webapp.WebAppContext" name="addWebApplications">
       <Arg><Ref id="Server"/></Arg>
       <Arg>./webapps</Arg>
       <Arg>org/mortbay/jetty/webapp/webdefault.xml</Arg>
@@ -123,6 +125,25 @@
       <Arg type="boolean">True</Arg>
     </Call>
 
+
+
+    <!-- =========================================================== -->
+    <!-- Configure Realms                                            -->
+    <!-- =========================================================== -->
+    <Set name="UserRealms">
+      <Array type="org.mortbay.jetty.security.UserRealm">
+        <Item>
+          <New class="org.mortbay.jetty.security.HashUserRealm">
+            <Set name="name">Test Realm</Set>
+            <Call name="put"><Arg>jetty</Arg><Arg>jetty</Arg></Call>
+          </New>
+        </Item>
+      </Array>
+    </Set>
+
+    <!-- =========================================================== -->
+    <!-- Start the server                                            -->
+    <!-- =========================================================== -->
     <Call name="start"/>
 
 </Configure>

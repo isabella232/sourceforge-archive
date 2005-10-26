@@ -47,6 +47,7 @@ import org.mortbay.io.Buffer;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.Request;
+import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.log.LogSupport;
 import org.mortbay.resource.Resource;
@@ -88,12 +89,13 @@ public class ContextHandler extends WrappedHandler implements Attributes
         return context;
     }
     
+    private Server _server;
     private Attributes _attributes;
     private ClassLoader _classLoader;
     private Context _context;
     private String _contextPath;
     private HashMap _initParams;
-    private String _servletContextName;
+    private String _displayName;
     private String _docRoot;
     private Resource _baseResource;  
     private MimeTypes _mimeTypes;
@@ -109,6 +111,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
     private Object _requestListeners;
     private Object _requestAttributeListeners;
     
+    
     /* ------------------------------------------------------------ */
     /**
      * 
@@ -119,6 +122,26 @@ public class ContextHandler extends WrappedHandler implements Attributes
         _context=new Context();
         _attributes=new AttributesMap();
         _initParams=new HashMap();
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the server.
+     */
+    public Server getServer()
+    {
+        return _server;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param server The server to set.
+     */
+    public void setServer(Server server)
+    {
+        if (isStarted())
+            throw new IllegalStateException("Started");
+        _server = server;
     }
 
     /* ------------------------------------------------------------ */
@@ -248,9 +271,9 @@ public class ContextHandler extends WrappedHandler implements Attributes
     /* 
      * @see javax.servlet.ServletContext#getServletContextName()
      */
-    public String getServletContextName()
+    public String getDisplayName()
     {
-        return _servletContextName;
+        return _displayName;
     }
 
     /* ------------------------------------------------------------ */
@@ -268,7 +291,6 @@ public class ContextHandler extends WrappedHandler implements Attributes
         _requestAttributeListeners=null;
         
         _eventListeners=eventListeners;
-        System.err.println("EVENT LISTENERS = "+LazyList.array2List(eventListeners));
         
         for (int i=0; eventListeners!=null && i<eventListeners.length;i ++)
         {
@@ -358,7 +380,9 @@ public class ContextHandler extends WrappedHandler implements Attributes
     {
         ClassLoader old_classloader=null;
         Thread current_thread=null;
-        
+
+        Object old_context=__context.get();
+        __context.set(_context);
         try
         {
             // Set the classloader
@@ -383,11 +407,10 @@ public class ContextHandler extends WrappedHandler implements Attributes
         }
         finally
         {
+            __context.set(old_context);
             // reset the classloader
             if (_classLoader!=null)
-            {
                 current_thread.setContextClassLoader(old_classloader);
-            }
         }
     }
     
@@ -420,8 +443,19 @@ public class ContextHandler extends WrappedHandler implements Attributes
             // Nope - so check the target.
             if (dispatch==REQUEST)
             {
-                if (target.startsWith(_contextPath))
+                if (target.equals(_contextPath))
+                {
+                    target=_contextPath;
+                    if (!target.endsWith("/"))
+                    {
+                        response.sendRedirect(target+"/");
+                        return true;
+                    }
+                }
+                else if (target.startsWith(_contextPath))
+                {
                     target=target.substring(_contextPath.length());
+                }
                 else 
                 {
                     // Not for this context!
@@ -624,9 +658,9 @@ public class ContextHandler extends WrappedHandler implements Attributes
     /**
      * @param servletContextName The servletContextName to set.
      */
-    public void setServletContextName(String servletContextName)
+    public void setDisplayName(String servletContextName)
     {
-        _servletContextName = servletContextName;
+        _displayName = servletContextName;
     }
     
     /* ------------------------------------------------------------ */
@@ -1121,7 +1155,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public String getServletContextName()
         {
-            return ContextHandler.this.getServletContextName();
+            return ContextHandler.this.getDisplayName();
         }
 
         /* ------------------------------------------------------------ */
