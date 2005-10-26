@@ -20,6 +20,16 @@ import org.apache.commons.logging.LogFactory;
 
 public class DumpServlet extends HttpServlet
 {
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see javax.servlet.http.HttpServlet#doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException
+    {
+        doGet(req, resp);
+    }
+
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException,
             ServletException
     {
@@ -56,6 +66,7 @@ public class DumpServlet extends HttpServlet
 
         String referer = request.getHeader("referer");
         response.setContentType("text/html");
+        
 
         out.write("<html><body>");
         out.write("<h1>Dump from " + getServletContext().getServerInfo() + "</h1>");
