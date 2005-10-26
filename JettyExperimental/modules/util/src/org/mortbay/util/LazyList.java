@@ -15,6 +15,7 @@
 
 package org.mortbay.util;
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -245,7 +246,6 @@ public class LazyList
         if (list instanceof List)
         {
             List l = (List)list;
-            
             String[] a = new String[l.size()];
             for (int i=l.size();i-->0;)
             {
@@ -259,6 +259,22 @@ public class LazyList
         return new String[] {list.toString()};
     }
 
+    /* ------------------------------------------------------------ */
+    public static Object[] toArray(Object list,Class aClass)
+    {
+        if (list==null)
+            return (Object[])Array.newInstance(aClass,0);
+        
+        if (list instanceof List)
+        {
+            List l = (List)list;
+            return l.toArray((Object[])Array.newInstance(aClass,l.size()));
+        }
+        
+        Object[] a = (Object[])Array.newInstance(aClass,1);
+        a[0]=list;
+        return a;
+    }
 
     /* ------------------------------------------------------------ */
     /** The size of a lazy List 
