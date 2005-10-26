@@ -34,6 +34,8 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.NotFoundHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
+import org.mortbay.jetty.security.HashUserRealm;
+import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.webapp.Configuration;
 import org.mortbay.jetty.webapp.JettyWebXmlConfiguration;
 import org.mortbay.jetty.webapp.WebAppContext;
@@ -104,7 +106,14 @@ public class JettyMojo extends AbstractMojo
     
     
     /**
-     * The context path for the webapp. Defaults to the
+     * List of security realms to set up. Optional.
+     * @parameter
+     */
+    private UserRealm[] userRealms;
+    
+    
+    /**
+     * The context path for the webapp. Defaults to thes
      * name of the webapp's artifact.
      * 
      * @parameter expression="/${project.artifactId}"
@@ -239,7 +248,24 @@ public class JettyMojo extends AbstractMojo
 		this.scanIntervalSeconds = scanIntervalSeconds;
 	}
 
+	/**
+	 * @return Returns the realms.
+	 */
+	public UserRealm[] getUserRealms()
+	{
+		return this.userRealms;
+	}
+
+	/**
+	 * @param realms The realms to set.
+	 */
 	
+	public void setUserRealms(UserRealm[] realms)
+	{
+		this.userRealms = realms;
+	}
+	
+    
 	
 	public Handler getWebApplication ()
 	{
@@ -353,6 +379,12 @@ public class JettyMojo extends AbstractMojo
 
             handlers[handlers.length-1]=new NotFoundHandler();            
             server.setHandlers(handlers);
+            
+            //set up security realms
+            for (int i=0;(getUserRealms()!=null)&&i<getUserRealms().length;i++)
+            getLog().debug(getUserRealms()[i].getClass().getName()+ ": "+getUserRealms()[i].toString());
+            
+            server.setUserRealms(getUserRealms());
             
             //start Jetty
             server.start();
@@ -500,6 +532,7 @@ public class JettyMojo extends AbstractMojo
     	}
     	return tldFiles;
     }
+
     
     
 }
