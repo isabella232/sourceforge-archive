@@ -149,6 +149,8 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
             return;
         }
         
+        getWebApplicationContext().setWelcomeFiles(null);
+        
         String defaultsDescriptor=getWebApplicationContext().getDefaultsDescriptor();
         if(defaultsDescriptor!=null&&defaultsDescriptor.length()>0)
         {

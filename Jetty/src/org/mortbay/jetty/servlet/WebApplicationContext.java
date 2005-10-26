@@ -436,8 +436,6 @@ public class WebApplicationContext extends ServletHttpContext implements Externa
         if (isStarted())
             return;
 
-        setWelcomeFiles(null);
-
         // save context classloader
         Thread thread= Thread.currentThread();
         ClassLoader lastContextLoader= thread.getContextClassLoader();
