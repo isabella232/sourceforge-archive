@@ -22,6 +22,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.EventListener;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
@@ -31,7 +32,14 @@ import java.util.Set;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.Servlet;
 import javax.servlet.ServletContext;
+import javax.servlet.ServletContextAttributeEvent;
+import javax.servlet.ServletContextAttributeListener;
+import javax.servlet.ServletContextEvent;
+import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequestAttributeListener;
+import javax.servlet.ServletRequestEvent;
+import javax.servlet.ServletRequestListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -44,6 +52,7 @@ import org.mortbay.log.LogSupport;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
+import org.mortbay.util.LazyList;
 import org.mortbay.util.Loader;
 import org.mortbay.util.URIUtil;
 import org.slf4j.Logger;
@@ -93,6 +102,12 @@ public class ContextHandler extends WrappedHandler implements Attributes
     private ErrorHandler _errorHandler;
     private String[] _hosts;
     private String[] _vhosts;
+    private EventListener[] _eventListeners;
+
+    private Object _contextListeners;
+    private Object _contextAttributeListeners;
+    private Object _requestListeners;
+    private Object _requestAttributeListeners;
     
     /* ------------------------------------------------------------ */
     /**
@@ -239,6 +254,41 @@ public class ContextHandler extends WrappedHandler implements Attributes
     }
 
     /* ------------------------------------------------------------ */
+    public EventListener[] getEventListeners()
+    {
+        return _eventListeners;
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setEventListeners(EventListener[] eventListeners)
+    {
+        _contextListeners=null;
+        _contextAttributeListeners=null;
+        _requestListeners=null;
+        _requestAttributeListeners=null;
+        
+        _eventListeners=eventListeners;
+        System.err.println("EVENT LISTENERS = "+LazyList.array2List(eventListeners));
+        
+        for (int i=0; eventListeners!=null && i<eventListeners.length;i ++)
+        {
+            EventListener listener = _eventListeners[i];
+            
+            if (listener instanceof ServletContextListener)
+                _contextListeners= LazyList.add(_contextListeners, listener);
+            
+            if (listener instanceof ServletContextAttributeListener)
+                _contextAttributeListeners= LazyList.add(_contextAttributeListeners, listener);
+            
+            if (listener instanceof ServletRequestListener)
+                _requestListeners= LazyList.add(_requestListeners, listener);
+            
+            if (listener instanceof ServletRequestAttributeListener)
+                _requestAttributeListeners= LazyList.add(_requestAttributeListeners, listener);
+        }
+    }
+    
+    /* ------------------------------------------------------------ */
     /* 
      * @see org.mortbay.thread.AbstractLifeCycle#doStart()
      */
@@ -288,6 +338,16 @@ public class ContextHandler extends WrappedHandler implements Attributes
     	throws Exception
     {
         super.doStart();
+
+        // Context listeners
+        if (_contextListeners != null )
+        {
+            ServletContextEvent event= new ServletContextEvent(_context);
+            for (int i= 0; i < LazyList.size(_contextListeners); i++)
+            {
+                ((ServletContextListener)LazyList.get(_contextListeners, i)).contextInitialized(event);
+            }
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -311,6 +371,15 @@ public class ContextHandler extends WrappedHandler implements Attributes
             
             super.doStop();
             
+            // Context listeners
+            if (_contextListeners != null )
+            {
+                ServletContextEvent event= new ServletContextEvent(_context);
+                for (int i= 0; i < LazyList.size(_contextListeners); i++)
+                {
+                    ((ServletContextListener)LazyList.get(_contextListeners, i)).contextDestroyed(event);
+                }
+            }
         }
         finally
         {
@@ -330,6 +399,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
             throws IOException, ServletException
     {
         boolean handled=false;
+        boolean new_context=false;
         Request base_request=null;
         Context old_context=null;
         String old_context_path=null;
@@ -345,6 +415,8 @@ public class ContextHandler extends WrappedHandler implements Attributes
         // Are we already in this context?
         if (old_context!=_context)
         {
+            new_context=true;
+            
             // Nope - so check the target.
             if (dispatch==REQUEST)
             {
@@ -405,8 +477,37 @@ public class ContextHandler extends WrappedHandler implements Attributes
                 current_thread.setContextClassLoader(_classLoader);
             }
             
-            handled = getHandler().handle(target, base_request, response, dispatch);
+            // Handle the REALLY SILLY request events!
+            ServletRequestEvent event=null;
+            if (new_context)
+            {
+                if (_requestListeners!=null)
+                {
+                    event = new ServletRequestEvent(_context,request);
+                    for(int i=0;i<LazyList.size(_requestListeners);i++)
+                        ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestInitialized(event);
+                }
+                for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
+                    base_request.addEventListener(((ServletRequestListener)LazyList.get(_requestAttributeListeners,i)));
+            }
             
+            // Handle the request
+            try
+            {
+                handled = getHandler().handle(target, base_request, response, dispatch);
+            }
+            finally
+            {
+                // Handle more REALLY SILLY request events!
+                if (new_context)
+                {
+                    for(int i=0;i<LazyList.size(_requestListeners);i++)
+                        ((ServletRequestListener)LazyList.get(_requestListeners,i)).requestDestroyed(event);
+                    
+                    for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
+                        base_request.removeEventListener(((ServletRequestListener)LazyList.get(_requestAttributeListeners,i)));
+                }
+            }
         }
         finally
         {
@@ -435,16 +536,46 @@ public class ContextHandler extends WrappedHandler implements Attributes
      */
     public void removeAttribute(String name)
     {
+        Object old_value=_attributes==null?null:_attributes.getAttribute(name);
         _attributes.removeAttribute(name);
+        if (old_value!=null)
+        {
+            if (_contextAttributeListeners!=null)
+            {
+                ServletContextAttributeEvent event =
+                    new ServletContextAttributeEvent(_context,name, old_value);
+
+                for(int i=0;i<LazyList.size(_contextAttributeListeners);i++)
+                    ((ServletContextAttributeListener)LazyList.get(_contextAttributeListeners,i)).attributeRemoved(event);
+            }
+        }
     }
 
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.ServletContext#setAttribute(java.lang.String, java.lang.Object)
      */
-    public void setAttribute(String name, Object object)
+    public void setAttribute(String name, Object value)
     {
-        _attributes.setAttribute(name,object);
+        Object old_value=_attributes==null?null:_attributes.getAttribute(name);
+        _attributes.setAttribute(name,value);
+        if (_contextAttributeListeners!=null)
+        {
+            ServletContextAttributeEvent event =
+                new ServletContextAttributeEvent(_context,name, old_value==null?value:old_value);
+
+            for(int i=0;i<LazyList.size(_contextAttributeListeners);i++)
+            {
+                ServletContextAttributeListener l = (ServletContextAttributeListener)LazyList.get(_contextAttributeListeners,i);
+                
+                if (old_value==null)
+                    l.attributeAdded(event);
+                else if (value==null)
+                    l.attributeRemoved(event);
+                else
+                    l.attributeReplaced(event);
+            }
+        }
     }
     
     /* ------------------------------------------------------------ */

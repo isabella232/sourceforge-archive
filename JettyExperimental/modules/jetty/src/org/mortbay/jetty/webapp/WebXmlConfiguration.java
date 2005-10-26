@@ -20,7 +20,6 @@ import java.net.URL;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.UnavailableException;
@@ -50,20 +49,20 @@ public class WebXmlConfiguration implements Configuration
     private static Logger log=LoggerFactory.getLogger(WebXmlConfiguration.class);
     
     protected WebAppHandler _context;
-    protected XmlParser xmlParser;
-    protected List filters;
-    protected List filterMappings;
-    protected List servlets;
-    protected List servletMappings;
-    protected List welcomeFiles;
-    protected List constraintMappings;
-    protected Map errorPages;
-
+    protected XmlParser _xmlParser;
+    protected Object _filters;
+    protected Object _filterMappings;
+    protected Object _servlets;
+    protected Object _servletMappings;
+    protected Object _welcomeFiles;
+    protected Object _constraintMappings;
+    protected Object _listeners;
+    protected Map _errorPages;
     
     public WebXmlConfiguration()
     {
         // Get parser
-        xmlParser=webXmlParser();
+        _xmlParser=webXmlParser();
     }
     
     public static XmlParser webXmlParser()
@@ -166,7 +165,7 @@ public class WebXmlConfiguration implements Configuration
             Resource dftResource=Resource.newSystemResource(defaultsDescriptor);
             if(dftResource==null)
                 dftResource=Resource.newResource(defaultsDescriptor);
-            XmlParser.Node defaultConfig=xmlParser.parse(dftResource.getURL().toString());
+            XmlParser.Node defaultConfig=_xmlParser.parse(dftResource.getURL().toString());
             initialize(defaultConfig);
         }
     }
@@ -195,7 +194,7 @@ public class WebXmlConfiguration implements Configuration
             else
             {
                 XmlParser.Node config=null;
-                config=xmlParser.parse(web.getURL().toString());
+                config=_xmlParser.parse(web.getURL().toString());
                 initialize(config);
                 
             }
@@ -214,13 +213,16 @@ public class WebXmlConfiguration implements Configuration
         ServletHandler servlet_handler = getWebAppHandler().getServletHandler();
         
         // Get any existing servlets and mappings.
-        filters=LazyList.array2List(servlet_handler.getFilters());
-        filterMappings=LazyList.array2List(servlet_handler.getFilterMappings());
-        servlets=LazyList.array2List(servlet_handler.getServlets());
-        servletMappings=LazyList.array2List(servlet_handler.getServletMappings());
-        welcomeFiles = LazyList.array2List(getWebAppHandler().getWelcomeFiles());
-        constraintMappings = LazyList.array2List(getWebAppHandler().getSecurityHandler().getConstraintMappings());
-        errorPages = getWebAppHandler().getErrorHandler() instanceof WebAppHandler.WebAppErrorHandler ?
+        _filters=LazyList.array2List(servlet_handler.getFilters());
+        _filterMappings=LazyList.array2List(servlet_handler.getFilterMappings());
+        _servlets=LazyList.array2List(servlet_handler.getServlets());
+        _servletMappings=LazyList.array2List(servlet_handler.getServletMappings());
+
+        _listeners = LazyList.array2List(getWebAppHandler().getEventListeners());
+        _welcomeFiles = LazyList.array2List(getWebAppHandler().getWelcomeFiles());
+        _constraintMappings = LazyList.array2List(getWebAppHandler().getSecurityHandler().getConstraintMappings());
+        
+        _errorPages = getWebAppHandler().getErrorHandler() instanceof WebAppHandler.WebAppErrorHandler ?
                         ((WebAppHandler.WebAppErrorHandler)getWebAppHandler().getErrorHandler()).getErrorPages():null;
         
         Iterator iter=config.iterator();
@@ -247,13 +249,17 @@ public class WebXmlConfiguration implements Configuration
             }
         }
 
-        servlet_handler.setFilters((FilterHolder[])filters.toArray(new FilterHolder[filters.size()]));
-        servlet_handler.setFilterMappings((FilterMapping[])filterMappings.toArray(new FilterMapping[filterMappings.size()]));
-        servlet_handler.setServlets((ServletHolder[])servlets.toArray(new ServletHolder[servlets.size()]));
-        servlet_handler.setServletMappings((ServletMapping[])servletMappings.toArray(new ServletMapping[servletMappings.size()]));
-        getWebAppHandler().setWelcomeFiles((String[])welcomeFiles.toArray(new String[welcomeFiles.size()]));
-        if (errorPages!=null && getWebAppHandler().getErrorHandler() instanceof WebAppHandler.WebAppErrorHandler)
-            ((WebAppHandler.WebAppErrorHandler)getWebAppHandler().getErrorHandler()).setErrorPages(errorPages);
+        servlet_handler.setFilters((FilterHolder[])LazyList.toArray(_filters,FilterHolder.class));
+        servlet_handler.setFilterMappings((FilterMapping[])LazyList.toArray(_filterMappings,FilterMapping.class));
+        servlet_handler.setServlets((ServletHolder[])LazyList.toArray(_servlets,ServletHolder.class));
+        servlet_handler.setServletMappings((ServletMapping[])LazyList.toArray(_servletMappings,ServletMapping.class));
+
+        getWebAppHandler().setEventListeners((EventListener[])LazyList.toArray(_listeners,EventListener.class));
+        getWebAppHandler().setWelcomeFiles((String[])LazyList.toArray(_welcomeFiles,String.class));
+        getWebAppHandler().getSecurityHandler().setConstraintMappings((ConstraintMapping[])LazyList.toArray(_constraintMappings, ConstraintMapping.class));
+   
+        if (_errorPages!=null && getWebAppHandler().getErrorHandler() instanceof WebAppHandler.WebAppErrorHandler)
+            ((WebAppHandler.WebAppErrorHandler)getWebAppHandler().getErrorHandler()).setErrorPages(_errorPages);
         
     }
 
@@ -352,7 +358,7 @@ public class WebXmlConfiguration implements Configuration
             String pvalue=paramNode.getString("param-value",false,true);
             holder.setInitParameter(pname, pvalue);
         }
-        filters.add(holder);
+        _filters=LazyList.add(_filters,holder);
     }
 
     /* ------------------------------------------------------------ */
@@ -370,7 +376,7 @@ public class WebXmlConfiguration implements Configuration
             dispatcher|=Dispatcher.type(d);
         }
         mapping.setDispatches(dispatcher);
-        filterMappings.add(mapping);
+        _filterMappings=LazyList.add(_filterMappings,mapping);
     }
 
     /* ------------------------------------------------------------ */
@@ -440,7 +446,7 @@ public class WebXmlConfiguration implements Configuration
             if(roleName!=null)
                 holder.setRunAs(roleName);
         }
-        servlets.add(holder);
+        _servlets=LazyList.add(_servlets,holder);
     }
 
     /* ------------------------------------------------------------ */
@@ -449,7 +455,7 @@ public class WebXmlConfiguration implements Configuration
         ServletMapping mapping = new ServletMapping();
         mapping.setServletName(node.getString("servlet-name",false,true));
         mapping.setPathSpec(node.getString("url-pattern",false,true));
-        servletMappings.add(mapping);
+        _servletMappings=LazyList.add(_servletMappings,mapping);
     }
 
     /* ------------------------------------------------------------ */
@@ -459,22 +465,21 @@ public class WebXmlConfiguration implements Configuration
         Object listener=null;
         try
         {
+            System.err.println("LISTENER="+className);
             Class listenerClass=getWebAppHandler().loadClass(className);
             listener=listenerClass.newInstance();
+            if(!(listener instanceof EventListener))
+            {
+                log.warn("Not an EventListener: "+listener);
+                return;
+            }
+            _listeners=LazyList.add(_listeners, listener);
         }
         catch(Exception e)
         {
             log.warn("Could not instantiate listener "+className,e);
             return;
         }
-        if(!(listener instanceof EventListener))
-        {
-            log.warn("Not an EventListener: "+listener);
-            return;
-        }
-            
-        getWebAppHandler().addEventListener((EventListener)listener);
-       
     }
 
     /* ------------------------------------------------------------ */
@@ -516,7 +521,7 @@ public class WebXmlConfiguration implements Configuration
         {
             XmlParser.Node indexNode=(XmlParser.Node)iter.next();
             String welcome=indexNode.toString(false,true);
-            welcomeFiles.add(welcome);
+            _welcomeFiles=LazyList.add(_welcomeFiles,welcome);
         }
     }
 
@@ -541,9 +546,9 @@ public class WebXmlConfiguration implements Configuration
             error=node.getString("exception-type",false,true);
         String location=node.getString("location",false,true);
         
-        if (errorPages==null)
-            errorPages=new HashMap();
-        errorPages.put(error,location);
+        if (_errorPages==null)
+            _errorPages=new HashMap();
+        _errorPages.put(error,location);
     }
 
     /* ------------------------------------------------------------ */
@@ -626,7 +631,7 @@ public class WebXmlConfiguration implements Configuration
                             mapping.setMethod(method);
                             mapping.setPathSpec(url);
                             mapping.setConstraint(sc);
-                            constraintMappings.add(mapping);
+                            _constraintMappings=LazyList.add(_constraintMappings,mapping);
                         }
                     }
                     else
@@ -634,7 +639,7 @@ public class WebXmlConfiguration implements Configuration
                         ConstraintMapping mapping = new ConstraintMapping(); 
                         mapping.setPathSpec(url);
                         mapping.setConstraint(sc);
-                        constraintMappings.add(mapping);
+                        _constraintMappings=LazyList.add(_constraintMappings,mapping);
                     }
                 }
             }

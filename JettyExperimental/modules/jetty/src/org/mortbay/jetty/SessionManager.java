@@ -111,15 +111,14 @@ public interface SessionManager extends LifeCycle, Serializable
      *   HttpSessionAttributeListener,
      *   HttpSessionBindingListener,
      *   HttpSessionListener
-     * @exception IllegalArgumentException If an unsupported listener
-     * is passed.
      */
-    public void addEventListener(EventListener listener)
-        throws IllegalArgumentException;
+    public void addEventListener(EventListener listener);
     
     /* ------------------------------------------------------------ */
     public void removeEventListener(EventListener listener);
     
+    /* ------------------------------------------------------------ */
+    public void clearEventListeners();
 
     /* ------------------------------------------------------------ */
     /** Get a Cookie for a session.
@@ -166,4 +165,5 @@ public interface SessionManager extends LifeCycle, Serializable
         public void addSession(HttpSession session);
         public void invalidateAll(String id);
     }
+
 }

@@ -56,7 +56,6 @@ public class SessionDump extends HttpServlet
         String action = request.getParameter("Action");
         String name =  request.getParameter("Name");
         String value =  request.getParameter("Value");
-        String age =  request.getParameter("MaxAge");
 
         String nextUrl = getURI(request)+"?R="+redirectCount++;
         if (action.equals("New Session"))
@@ -71,15 +70,6 @@ public class SessionDump extends HttpServlet
             else if (action.equals("Set") && name!=null && name.length()>0)
             {   
                 session.setAttribute(name,value);
-                try
-                {
-                    int m = Integer.parseInt(age);
-                    session.setMaxInactiveInterval(m);
-                }
-                catch(Exception e)
-                {
-		    e.printStackTrace();
-                }
             }
             else if (action.equals("Remove"))
                 session.removeAttribute(name);
@@ -130,13 +120,12 @@ public class SessionDump extends HttpServlet
                     out.println("<b>"+name+":</b> "+value+"<br/>");
                 }
 
-                out.println("<b>Name:</b><input type=\"text\" name=\"Name\" />");
-                out.println("<b>Value:</b><input type=\"text\" name=\"Value\" />");
-                out.println("<b>MaxAge:</b><input type=\"text\" name=\"MaxAge\" />");
+                out.println("<b>Name:</b><input type=\"text\" name=\"Name\" /><br/>");
+                out.println("<b>Value:</b><input type=\"text\" name=\"Value\" /><br/>");
 
                 out.println("<input type=\"submit\" name=\"Action\" value=\"Set\"/>");
                 out.println("<input type=\"submit\" name=\"Action\" value=\"Remove\"/>");
-                out.println("<input type=\"submit\" name=\"Action\" value=\"Invalidate\"/>");
+                out.println("<input type=\"submit\" name=\"Action\" value=\"Invalidate\"/><br/>");
                 
                 out.println("</form><br/>");
                 

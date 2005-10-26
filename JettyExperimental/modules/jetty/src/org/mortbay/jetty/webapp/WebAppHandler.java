@@ -22,12 +22,7 @@ import java.util.Arrays;
 import java.util.EventListener;
 import java.util.Map;
 
-import javax.servlet.ServletContextAttributeListener;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
 import javax.servlet.ServletException;
-import javax.servlet.ServletRequestAttributeListener;
-import javax.servlet.ServletRequestListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSessionActivationListener;
@@ -47,7 +42,6 @@ import org.mortbay.jetty.servlet.SessionHandler;
 import org.mortbay.log.LogSupport;
 import org.mortbay.resource.JarResource;
 import org.mortbay.resource.Resource;
-import org.mortbay.util.LazyList;
 import org.mortbay.util.Loader;
 import org.mortbay.util.TypeUtil;
 import org.slf4j.Logger;
@@ -70,7 +64,6 @@ public class WebAppHandler extends ContextHandler
     private String[] _configurationClasses;
     private Configuration[] _configurations;
     private File _tmpDir;
-    private Object _contextListeners;
     private String _war;
     private boolean _extractWAR=true;
     private String _defaultsDescriptor="org/mortbay/jetty/webapp/webdefault.xml";
@@ -256,37 +249,29 @@ public class WebAppHandler extends ContextHandler
     {
         this.distributable = distributable;
     }
-    
+
     /* ------------------------------------------------------------ */
-    public synchronized void addEventListener(EventListener listener) throws IllegalArgumentException
+    public void setEventListeners(EventListener[] eventListeners)
     {
-        // TODO - make sure all events handling is actually implemented....
-        
-        if (listener instanceof ServletContextListener)
+        if (_sessionHandler!=null)
+            _sessionHandler.clearEventListeners();
+            
+        super.setEventListeners(eventListeners);
+      
+        for (int i=0; eventListeners!=null && i<eventListeners.length;i ++)
         {
-            _contextListeners= LazyList.add(_contextListeners, listener);
+            EventListener listener = eventListeners[i];
+            
+            if ((listener instanceof HttpSessionActivationListener)
+                            || (listener instanceof HttpSessionAttributeListener)
+                            || (listener instanceof HttpSessionBindingListener)
+                            || (listener instanceof HttpSessionListener))
+            {
+                if (_sessionHandler!=null)
+                    _sessionHandler.addEventListener(listener);
+            }
+            
         }
-
-
-        if ((listener instanceof HttpSessionActivationListener)
-            || (listener instanceof HttpSessionAttributeListener)
-            || (listener instanceof HttpSessionBindingListener)
-            || (listener instanceof HttpSessionListener))
-        {
-            if (_sessionHandler!=null)
-                _sessionHandler.addEventListener(listener);
-        }
-
-        if (listener instanceof ServletRequestListener ||
-            listener instanceof ServletRequestAttributeListener ||
-            listener instanceof ServletContextAttributeListener ||
-            listener instanceof ServletRequestAttributeListener ||
-            listener instanceof ServletContextAttributeListener)
-        {
-            _servletHandler.addEventListener(listener);
-        }
-
-
     }
     
     
@@ -605,26 +590,13 @@ public class WebAppHandler extends ContextHandler
         for (int i=0;i<_configurations.length;i++)
             _configurations[i].configureWebApp();
         
-        
         _servletHandler.setInitializeAtStart(false);
         
         super.startContext();
 
-        // Context listeners
-        if (_contextListeners != null && _servletHandler != null)
-        {
-            ServletContextEvent event= new ServletContextEvent(_servletHandler.getServletContext());
-            for (int i= 0; i < LazyList.size(_contextListeners); i++)
-            {
-                ((ServletContextListener)LazyList.get(_contextListeners, i)).contextInitialized(event);
-            }
-        }
-
         // OK to Initialize servlet handler now
         if (_servletHandler != null && _servletHandler.isStarted())
-        {
             _servletHandler.initialize();
-        }
     }
     
     /* ------------------------------------------------------------ */
@@ -646,9 +618,7 @@ public class WebAppHandler extends ContextHandler
             setClassLoader(null);
         }
     }
-
     
-
     /* ------------------------------------------------------------ */
     /**  Add Web Applications.
      * Add auto webapplications to the server.  The name of the
@@ -815,4 +785,5 @@ public class WebAppHandler extends ContextHandler
 
         
     }
+
 }

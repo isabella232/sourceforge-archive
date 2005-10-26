@@ -54,10 +54,13 @@ public class TestFilter implements Filter
         long start = System.currentTimeMillis();
         try
         {
+            request.setAttribute("testFilter", "value");
+            request.setAttribute("testFilter", "value2");
             chain.doFilter(request, response);
         }
         finally
         {
+            request.setAttribute("testFilter", null);
             HttpServletRequest srequest = (HttpServletRequest)request;
             _context.log((System.currentTimeMillis()-start)+"ms handling "+srequest.getRequestURI()+(srequest.getQueryString()==null?"":("?"+srequest.getQueryString())));
         }

@@ -26,12 +26,15 @@ import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.EventListener;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequestAttributeEvent;
+import javax.servlet.ServletRequestAttributeListener;
 import javax.servlet.ServletRequestWrapper;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -102,6 +105,7 @@ public class Request implements HttpServletRequest
     private long _timeStamp;
     private String _timeStampStr;
     private Continuation _continuation;
+    private Object _requestAttributeListeners;
     
     /* ------------------------------------------------------------ */
     /**
@@ -114,6 +118,7 @@ public class Request implements HttpServletRequest
         _dns=_connection.useDNS();
     }
 
+    /* ------------------------------------------------------------ */
     void recycle()
     {
         if(_attributes!=null)
@@ -995,19 +1000,53 @@ public class Request implements HttpServletRequest
      */
     public void removeAttribute(String name)
     {
+        Object old_value=_attributes==null?null:_attributes.getAttribute(name);
+        
         if (_attributes!=null)
             _attributes.removeAttribute(name);
+        
+        if (old_value!=null)
+        {
+            if (_requestAttributeListeners!=null)
+            {
+                ServletRequestAttributeEvent event =
+                    new ServletRequestAttributeEvent(_context,this,name, old_value);
+
+                for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
+                    ((ServletRequestAttributeListener)LazyList.get(_requestAttributeListeners,i)).attributeRemoved(event);
+            }
+        }
     }
 
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.ServletRequest#setAttribute(java.lang.String, java.lang.Object)
      */
-    public void setAttribute(String name, Object attribute)
+    public void setAttribute(String name, Object value)
     {
+        Object old_value=_attributes==null?null:_attributes.getAttribute(name);
+        
         if (_attributes==null)
             _attributes=new AttributesMap();
-        _attributes.setAttribute(name, attribute);
+        _attributes.setAttribute(name, value);
+        
+        if (_requestAttributeListeners!=null)
+        {
+            ServletRequestAttributeEvent event =
+                new ServletRequestAttributeEvent(_context,this,name, old_value==null?value:old_value);
+
+            for(int i=0;i<LazyList.size(_requestAttributeListeners);i++)
+            {
+                ServletRequestAttributeListener l = (ServletRequestAttributeListener)LazyList.get(_requestAttributeListeners,i);
+                
+                if (old_value==null)
+                    l.attributeAdded(event);
+                else if (value==null)
+                    l.attributeRemoved(event);
+                else
+                    l.attributeReplaced(event);
+            }
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -1399,6 +1438,19 @@ public class Request implements HttpServletRequest
         return HttpConnection.getCurrentConnection().getRequest();
     }
     
+
+    /* ------------------------------------------------------------ */
+    public synchronized void addEventListener(EventListener listener) 
+    {
+        if (listener instanceof ServletRequestAttributeListener)
+            _requestAttributeListeners= LazyList.add(_requestAttributeListeners, listener);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public synchronized void removeEventListener(EventListener listener) 
+    {
+        _requestAttributeListeners= LazyList.remove(_requestAttributeListeners, listener);
+    }
 
 }
 

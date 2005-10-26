@@ -6,6 +6,10 @@
    version="2.4"> 
 
   <display-name>Test WebApp</display-name>
+  
+  <listener>
+    <listener-class>com.acme.TestListener</listener-class>
+  </listener>
 
   <filter>
     <filter-name>Filter</filter-name>

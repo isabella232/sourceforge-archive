@@ -86,8 +86,8 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     
     private transient SessionScavenger _scavenger = null;
     protected boolean _secureCookies=false;
-    protected transient ArrayList _sessionAttributeListeners=new ArrayList();
-    protected transient ArrayList _sessionListeners=new ArrayList();
+    protected transient Object _sessionAttributeListeners;
+    protected transient Object _sessionListeners;
     protected transient Map _sessions;
     private boolean _usingCookies=true;
     private String _workerName ;
@@ -105,16 +105,21 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     {
         _random=random;
     }
+
+    /* ------------------------------------------------------------ */
+    public void clearEventListeners()
+    {        
+        _sessionAttributeListeners=null;
+        _sessionListeners=null;
+    }
     
     /* ------------------------------------------------------------ */
     public void addEventListener(EventListener listener)
-    throws IllegalArgumentException
-    {
-        
+    {        
         if (listener instanceof HttpSessionAttributeListener)
-            _sessionAttributeListeners.add(listener);
+            _sessionAttributeListeners=LazyList.add(_sessionAttributeListeners,listener);
         if (listener instanceof HttpSessionListener)
-            _sessionListeners.add(listener);
+            _sessionListeners=LazyList.add(_sessionListeners,listener);
     }
     
     /* ------------------------------------------------------------ */
@@ -272,10 +277,8 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         }
         
         HttpSessionEvent event=new HttpSessionEvent(session);
-        
-        for(int i=0;i<_sessionListeners.size();i++)
-            ((HttpSessionListener)_sessionListeners.get(i))
-            .sessionCreated(event);
+        for(int i=0;i<LazyList.size(_sessionListeners);i++)
+            ((HttpSessionListener)LazyList.get(_sessionListeners,i)).sessionCreated(event);
         
         if (!(_metaManager instanceof NullMetaManager))
             request.setAttribute(__NEW_SESSION_ID, session.getId());
@@ -334,9 +337,9 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     public void removeEventListener(EventListener listener)
     {
         if (listener instanceof HttpSessionAttributeListener)
-            _sessionAttributeListeners.remove(listener);
+            _sessionAttributeListeners=LazyList.remove(_sessionAttributeListeners,listener);
         if (listener instanceof HttpSessionListener)
-            _sessionListeners.remove(listener);
+            _sessionListeners=LazyList.remove(_sessionListeners,listener);
     }
     
     /* ------------------------------------------------------------ */
@@ -572,11 +575,9 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         private void bindValue(java.lang.String name, Object value)
         {
             if (value!=null && value instanceof HttpSessionBindingListener)
-                ((HttpSessionBindingListener)value)
-                .valueBound(new HttpSessionBindingEvent(this,name));            
+                ((HttpSessionBindingListener)value).valueBound(new HttpSessionBindingEvent(this,name));            
         }
-        
-        
+                
         /* ------------------------------------------------------------ */
         public synchronized Object getAttribute(String name)
         {
@@ -685,8 +686,8 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                     if (_sessionListeners!=null)
                     {
                         HttpSessionEvent event=new HttpSessionEvent(this);
-                        for (int i=0; i<_sessionListeners.size(); i++)
-                            ((HttpSessionListener)_sessionListeners.get(i)).sessionDestroyed(event);
+                        for (int i=0; i<LazyList.size(_sessionListeners); i++)
+                            ((HttpSessionListener)LazyList.get(_sessionListeners,i)).sessionDestroyed(event);
                     }
 
                     if (_values!=null)
@@ -699,14 +700,12 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                             iter.remove();
                             unbindValue(key,value);
 
-                            if (_sessionAttributeListeners.size()>0)
+                            if (_sessionAttributeListeners!=null)
                             {
                                 HttpSessionBindingEvent event=new HttpSessionBindingEvent(this,key,value);
 
-                                for (int i=0; i<_sessionAttributeListeners.size(); i++)
-                                {
-                                    ((HttpSessionAttributeListener)_sessionAttributeListeners.get(i)).attributeRemoved(event);
-                                }
+                                for (int i=0; i<LazyList.size(_sessionAttributeListeners); i++)
+                                    ((HttpSessionAttributeListener)LazyList.get(_sessionAttributeListeners,i)).attributeRemoved(event);
                             }
                         }
                     }
@@ -768,18 +767,13 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
             if (old!=null)
             {
                 unbindValue(name, old);
-                if (_sessionAttributeListeners.size()>0)
+                if (_sessionAttributeListeners!=null)
                 {
                     HttpSessionBindingEvent event =
                         new HttpSessionBindingEvent(this,name,old);
                     
-                    for(int i=0;i<_sessionAttributeListeners.size();i++)
-                    {
-                        HttpSessionAttributeListener l =
-                            (HttpSessionAttributeListener)
-                            _sessionAttributeListeners.get(i);
-                        l.attributeRemoved(event);
-                    }
+                    for(int i=0;i<LazyList.size(_sessionAttributeListeners);i++)
+                        ((HttpSessionAttributeListener)LazyList.get(_sessionAttributeListeners,i)).attributeRemoved(event);
                 }
             }
         }
@@ -808,17 +802,15 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                 unbindValue(name, oldValue);
                 bindValue(name, value);
                 
-                if (_sessionAttributeListeners.size()>0)
+                if (_sessionAttributeListeners!=null)
                 {
                     HttpSessionBindingEvent event =
                         new HttpSessionBindingEvent(this,name,
                                 oldValue==null?value:oldValue);
-                    
-                    for(int i=0;i<_sessionAttributeListeners.size();i++)
+
+                    for(int i=0;i<LazyList.size(_sessionAttributeListeners);i++)
                     {
-                        HttpSessionAttributeListener l =
-                            (HttpSessionAttributeListener)
-                            _sessionAttributeListeners.get(i);
+                        HttpSessionAttributeListener l = (HttpSessionAttributeListener)LazyList.get(_sessionAttributeListeners,i);
                         
                         if (oldValue==null)
                             l.attributeAdded(event);
@@ -844,8 +836,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         private void unbindValue(java.lang.String name, Object value)
         {
             if (value!=null && value instanceof HttpSessionBindingListener)
-                ((HttpSessionBindingListener)value)
-                .valueUnbound(new HttpSessionBindingEvent(this,name));
+                ((HttpSessionBindingListener)value).valueUnbound(new HttpSessionBindingEvent(this,name));
         }
     }
     

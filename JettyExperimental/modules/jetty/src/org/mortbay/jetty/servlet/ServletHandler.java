@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EventListener;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,11 +28,8 @@ import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
-import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
-import javax.servlet.ServletRequestAttributeListener;
-import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServletRequest;
@@ -113,9 +109,6 @@ public class ServletHandler extends WrappedHandler
     protected transient HashMap _chainCache[];
     protected transient HashMap _namedChainCache[];
 
-    private Object _requestAttributeListeners;
-    private Object _contextAttributeListeners;
-    private Object _requestListeners;
 
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -776,37 +769,6 @@ public class ServletHandler extends WrappedHandler
         updateMappings();
     }
 
-    /* ------------------------------------------------------------ */
-    /**
-     * @param listener
-     */
-    public void addEventListener(EventListener listener)
-    {
-        if (listener instanceof ServletRequestAttributeListener)
-        {
-             _requestAttributeListeners= LazyList.add(_requestAttributeListeners, listener);
-        }
-
-        if (listener instanceof ServletContextAttributeListener)
-        {            
-            _contextAttributeListeners= LazyList.add(_contextAttributeListeners, listener);
-        }
-        
-        if (listener instanceof ServletRequestListener)
-        {
-            _requestListeners= LazyList.add(_requestListeners, listener);
-        }
-
-        if (listener instanceof ServletRequestAttributeListener)
-        {
-             _requestAttributeListeners= LazyList.add(_requestAttributeListeners, listener);
-        }
-
-        if (listener instanceof ServletContextAttributeListener)
-        {            
-            _contextAttributeListeners= LazyList.add(_contextAttributeListeners, listener);
-        }
-    }
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -917,5 +879,6 @@ public class ServletHandler extends WrappedHandler
             return b.toString();
         }
     }
+
 
 }

@@ -175,7 +175,14 @@ public class SessionHandler extends WrappedHandler
      */
     public void addEventListener(EventListener listener)
     {
-        // TODO Auto-generated method stub
-        
+        if(_sessionManager!=null)
+            _sessionManager.addEventListener(listener);
+    }
+
+    /* ------------------------------------------------------------ */
+    public void clearEventListeners()
+    {
+        if(_sessionManager!=null)
+            _sessionManager.clearEventListeners();
     }
 }
