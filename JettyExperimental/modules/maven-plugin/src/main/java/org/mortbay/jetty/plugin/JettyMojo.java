@@ -377,7 +377,8 @@ public class JettyMojo extends AbstractMojo
             for (int i=0; (getContextHandlers()!=null && i < getContextHandlers().length); i++)
             	handlers[1+i] = getContextHandlers()[i];
 
-            handlers[handlers.length-1]=new NotFoundHandler();            
+            handlers[handlers.length-1]=new NotFoundHandler();   
+            ((NotFoundHandler)handlers[handlers.length-1]).setServer(server);
             server.setHandlers(handlers);
             
             //set up security realms
