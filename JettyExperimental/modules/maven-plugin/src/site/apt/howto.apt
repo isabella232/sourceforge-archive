@@ -1,0 +1,159 @@
+ ------
+ Maven2 Jetty6 Plugin: Configuration Guide
+ ------
+ Jan Bartel
+ <janb@mortbay.com>
+ ------
+ October 26 2005
+
+Introduction
+
+  In order to run Jetty6 on a webapp project which is structured according to the usual Maven defaults (resources in <<<${basedir}/src/main/webapp>>>, classes in <<<${project.build.outputDirectory}>>> and the <<<web.xml>>> descriptor at <<<${basedir}/src/main/webapp/WEB-INF/web.xml>>>), then you don't have to configure anything. To start Jetty6 on port 8080 for your project run:
+
+
++--------+
+  mvn jetty6:run
++--------+
+
+
+Simple Configuration Example
+
+  Let's take a look at an example where we override all of the default parameter settings.
+
++--------+
+<project>
+  ...
+  <plugins>
+    ...
+      <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>maven-jetty6-plugin</artifactId>
+        <configuration>
+          <scanIntervalSeconds>10</scanIntervalSeconds>
+          <contextPath>/biggerstrongerbetterfaster</contextPath>
+          <webAppSourceDirectory>src/some/other/location</webAppSourceDirectory> 
+          <webXmlFile>src/over/here/web.xml</webXmlFile>
+          <classesDirectory>target/never/do/this</classesDirectory>
+        </configuration>
+      </plugin>
+  </plugins>
+</project>
++--------+
+
+  * <<scanIntervalSeconds>> By default, this is 0, which disables hot deployment scanning. Set it to an integer to have the plugin check periodically if any class files, dependencies, web.xml file or other configuration information has changed, and automatically redeploy the webapp if so.
+
+  * <<contextPath>> By default, this is set to the <<<artifactId>>> from the project's pom.xml. You can override it and set it to anything you like here.
+
+  * <<webAppSourceDirectory>> By default, this is set to <<<${basedir}/src/main/webapp>>>. Set this parameter to change the location.
+
+  * <<webXmlFile>> By default, this is set to either the variable <<<${maven.war.webxml}>>> or <<<${basedir}/src/main/webapp/WEB-INF/web.xml>>>, whichever is not null. Otherwise, set this parameter to override these defaults.
+
+  * <<classesDirectory>> You should never need to set this parameter. Rather, you should set your <<<\<build\>\<outputDirectory\>>>> in your <<<pom.xml>>>.
+
+
+
+Complex Configuration Example
+
+  Now let's examine how to configure extra contexts, connectors and other Jetty objects in the plugin configuration.  First, here's a reminder of how a normal Jetty6  jetty.xml file looks:
+
++--------+
+<Configure id="Server" class="org.mortbay.jetty.Server">
+    <Set name="connectors">
+      <Array type="org.mortbay.jetty.Connector">
+        <Item>
+          <New class="org.mortbay.jetty.nio.SelectChannelConnector">
+            <Set name="port">9090</Set>
+            <Set name="maxIdleTime">60000</Set>
+          </New>
+        </Item>
+      </Array>
+    </Set>
+    <Set name="handlers">
+      <Array type="org.mortbay.jetty.Handler">
+        <Item>
+          <New id="javadocContext"  class="org.mortbay.jetty.handler.ContextHandler">
+            <Set name="contextPath">/javadoc</Set>
+            <Set name="resourceBase">../modules/jetty/target/javadoc</Set>
+            <Set name="handler">
+              <New id="javadocServletHandler" class="org.mortbay.jetty.servlet.ServletHandler">
+                <Set name="servlets">
+                    <Array type="org.mortbay.jetty.servlet.ServletHolder">
+                        <Item>
+                           <New class="org.mortbay.jetty.servlet.ServletHolder">
+                               <Set name="name">Default</Set>
+                               <Set name="className">org.mortbay.jetty.servlet.DefaultServlet</Set>
+                           </New>
+                        </Item>
+                     </Array>
+                 </Set>
+
+                <Set name="servletMappings">
+                    <Array type="org.mortbay.jetty.servlet.ServletMapping">
+                        <Item>
+                           <New class="org.mortbay.jetty.servlet.ServletMapping">
+                             <Set name="pathSpec">/</Set>
+                             <Set name="servletName">Default</Set>
+                           </New>
+                        </Item>
+                    </Array>
+                </Set>
+              </New>
+            </Set>
+          </New>
+        </Item>
+      </Array>
+    </Set>
+    ....
+</Configure>
++--------+
+
+  Now, here is the same configuration for the Jetty6 Maven plugin:
+
++--------+
+<project>
+  ...
+  <plugins>
+    ...
+      <plugin>
+        <groupId>org.mortbay.jetty</groupId>
+        <artifactId>maven-jetty6-plugin</artifactId>
+        <configuration>
+          <scanIntervalSeconds>10</scanIntervalSeconds>
+          <connectors>
+            <connector implementation="org.mortbay.jetty.nio.SelectChannelConnector">
+              <port>9090</port>
+              <maxIdleTime>60000</maxIdleTime>
+            </connector>
+          </connectors>
+          <contextHandlers>
+            <contextHandler implementation="org.mortbay.jetty.handler.ContextHandler">
+              <contextPath>/javadoc</contextPath>
+              <resourceBase>../jetty/target/javadoc/apidocs</resourceBase>
+              <handler implementation="org.mortbay.jetty.servlet.ServletHandler">
+                <servlets>
+                  <servlet implementation="org.mortbay.jetty.servlet.ServletHolder">
+                       <name>Default</name>
+                       <className>org.mortbay.jetty.servlet.DefaultServlet</className>
+                  </servlet>
+                 </servlets>
+                <servletMappings>
+                    <servletMapping implmentation="org.mortbay.jetty.servlet.ServletMapping">
+                       <pathSpec>/*</pathSpec>
+                       <servletName>Default</servletName>
+                    </servletMapping>
+                </servletMappings>
+              </handler>
+            </contextHandler>
+          </contextHandlers>
+        </configuration>
+      </plugin>
+  </plugins>
+</project>
++---------+
+
+
+  * <<connectors>> The list of connectors that Jetty will listen with can be configured. This example sets up only one connector on port 9090, but others can be configured by specifying more <<<connector>>> elements. Don't forget to use the <<<implementation>>> attribute to set up the type of connector to configure.
+
+  * <<contextHandlers>> If you have other Jetty6 contexts that you want to set up, you put the configuration for them in here.
+
+

@@ -1,0 +1,18 @@
+ ------
+ Maven Jetty6 Plugin
+ ------
+Jan Bartel
+ <janb@mortbay.com>
+ ------
+ October 26 2005
+
+Introduction
+
+  This plugin runs the {{{http://jetty.mortbay.org}Jetty6}} web container in-situ on a Maven project without first requiring that the project is assembled into a war or exploded web application.
+
+  The plugin uses a combination of information from the project's pom.xml and configurable parameters to determine the location of the webapp's resources, web.xml descriptor, classes and dependencies to form a virtual webapp. The type of connector and the port to listen on can optionally be configured, defaulting to an <<<org.mortbay.jetty.nio.SelectChannelConnector>>> at port <<<8080>>>. Anything that can be configured in the normal <<<jetty.xml>>> can be configured for this plugin. See {{{howto.html}Configuration How-To}} for some examples.
+
+  A particularly convenient and time-saving feature of this plugin is that it can be configured to periodically scan the virtual webapp for changes to the class files, dependency libraries etc and automatically redeploy the webapp when any watched file changes. 
+
+  The full description of goals and configuration parameters is available {{{index.html}here}}.
+

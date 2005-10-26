@@ -5,5 +5,6 @@
 	<classpathentry sourcepath="JRE_SRC" kind="var" path="JRE_LIB"/>
 	<classpathentry kind="var" path="M2_REPO/junit/junit/3.8.1/junit-3.8.1.jar"/>
 	<classpathentry kind="src" path="/javax.servlet"/>
+	<classpathentry kind="var" path="M2_REPO/org/mortbay/jetty/javax.servlet/2.4/javax.servlet-2.4.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
