@@ -59,7 +59,7 @@ import org.slf4j.LoggerFactory;
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
-public class HashUserRealm extends HashMap implements UserRealm, SSORealm, Externalizable
+public class HashUserRealm implements UserRealm, SSORealm
 {
     private static Logger log = LoggerFactory.getLogger(HashUserRealm.class);
 
@@ -70,8 +70,10 @@ public class HashUserRealm extends HashMap implements UserRealm, SSORealm, Exter
     /* ------------------------------------------------------------ */
     private String _realmName;
     private String _config;
+    private HashMap _users=new HashMap();
     protected HashMap _roles=new HashMap(7);
     private SSORealm _ssoRealm;
+    
     
 
     /* ------------------------------------------------------------ */
@@ -101,23 +103,6 @@ public class HashUserRealm extends HashMap implements UserRealm, SSORealm, Exter
         load(config);
     }
     
-    /* ------------------------------------------------------------ */
-    public void writeExternal(java.io.ObjectOutput out)
-        throws java.io.IOException
-    {
-        out.writeObject(_realmName);
-        out.writeObject(_config);
-    }
-    
-    /* ------------------------------------------------------------ */
-    public void readExternal(java.io.ObjectInput in)
-        throws java.io.IOException, ClassNotFoundException
-    {
-        _realmName= (String)in.readObject();
-        _config=(String)in.readObject();
-        if (_config!=null)
-            load(_config);
-    }
     
 
     /* ------------------------------------------------------------ */
@@ -187,7 +172,7 @@ public class HashUserRealm extends HashMap implements UserRealm, SSORealm, Exter
     /* ------------------------------------------------------------ */
     public Principal getPrincipal(String username)
     {
-        return (Principal)super.get(username);
+        return (Principal)_users.get(username);
     }
     
     /* ------------------------------------------------------------ */
@@ -196,7 +181,7 @@ public class HashUserRealm extends HashMap implements UserRealm, SSORealm, Exter
         KnownUser user;
         synchronized (this)
         {
-            user = (KnownUser)super.get(username);
+            user = (KnownUser)_users.get(username);
         }
         if (user==null)
             return null;
@@ -238,12 +223,12 @@ public class HashUserRealm extends HashMap implements UserRealm, SSORealm, Exter
     public synchronized Object put(Object name, Object credentials)
     {
         if (credentials instanceof Principal)
-            return super.put(name.toString(),credentials);
+            return _users.put(name.toString(),credentials);
         
         if (credentials instanceof Password)
-            return super.put(name,new KnownUser(name.toString(),(Password)credentials));
+            return _users.put(name,new KnownUser(name.toString(),(Password)credentials));
         if (credentials != null)
-            return super.put(name,new KnownUser(name.toString(),Credential.getCredential(credentials.toString())));
+            return _users.put(name,new KnownUser(name.toString(),Credential.getCredential(credentials.toString())));
         return null;
     }
 
@@ -294,7 +279,7 @@ public class HashUserRealm extends HashMap implements UserRealm, SSORealm, Exter
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        return "Realm["+_realmName+"]=="+keySet();
+        return "Realm["+_realmName+"]=="+_users.keySet();
     }
     
     /* ------------------------------------------------------------ */
