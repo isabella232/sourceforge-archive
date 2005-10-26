@@ -135,7 +135,7 @@
         <Item>
           <New class="org.mortbay.jetty.security.HashUserRealm">
             <Set name="name">Test Realm</Set>
-            <Call name="put"><Arg>jetty</Arg><Arg>jetty</Arg></Call>
+            <Call name="load"><Arg>etc/realm.properties</Arg></Call>
           </New>
         </Item>
       </Array>

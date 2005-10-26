@@ -476,8 +476,6 @@ public class JettyMojo extends AbstractMojo
     	return libFiles;	
     }
     
-    
-    
     private List getTldFiles ()
     {
     	List tldFiles = new ArrayList();
