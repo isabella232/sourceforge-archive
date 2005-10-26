@@ -941,7 +941,6 @@ public class Request implements HttpServletRequest
             {
                 try
                 {
-                    System.err.println("Lazy AUTH "+pathInContext);
                     auth.authenticate(realm, pathInContext, this, null);
                 }
                 catch (Exception e)

@@ -696,7 +696,6 @@ public class WebXmlConfiguration implements Configuration
             {
                 String msg = "Unknown realm: "+realm_name;
                 log.warn(msg);
-                throw new IllegalStateException(msg);
             }
             else
                 getWebAppContext().getSecurityHandler().setUserRealm(realm);

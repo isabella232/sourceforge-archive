@@ -345,7 +345,7 @@ public class SecurityHandler extends WrappedHandler
         {
             if (realm == null)
             {
-                response.sendError(Response.SC_INTERNAL_SERVER_ERROR,"Configuration error");
+                response.sendError(Response.SC_INTERNAL_SERVER_ERROR,"No realm");
                 return false;
             }
 
