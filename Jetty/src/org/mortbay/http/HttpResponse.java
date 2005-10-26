@@ -274,9 +274,9 @@ public class HttpResponse extends HttpMessage
             _state=__MSG_BAD;
             writer.write(_version);
             writer.write(' ');
-	    writer.write('0'+((_status/100)%10));
-	    writer.write('0'+((_status/10)%10));
-	    writer.write('0'+(_status%10));
+            writer.write('0'+((_status/100)%10));
+            writer.write('0'+((_status/10)%10));
+            writer.write('0'+(_status%10));
             writer.write(' ');
             writer.write(getReason());
             writer.write(HttpFields.__CRLF);
