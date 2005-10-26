@@ -100,10 +100,13 @@ public class HashUserRealm implements UserRealm, SSORealm
         throws IOException
     {
         _realmName=name;
-        load(config);
+        setConfig(config);
     }
     
-    
+    public String getConfig()
+    {
+        return _config;
+    }
 
     /* ------------------------------------------------------------ */
     /** Load realm users from properties file.
@@ -113,7 +116,7 @@ public class HashUserRealm implements UserRealm, SSORealm
      * @param config Filename or url of user properties file.
      * @exception IOException 
      */
-    public void load(String config)
+    public void setConfig(String config)
         throws IOException
     {
         _config=config;
