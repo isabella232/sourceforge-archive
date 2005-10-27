@@ -20,9 +20,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.apache.maven.plugin.logging.Log;
-import org.mortbay.jetty.webapp.Configuration;
 import org.mortbay.jetty.webapp.WebAppClassLoader;
-import org.mortbay.jetty.webapp.WebAppContext;
 import org.mortbay.jetty.webapp.WebXmlConfiguration;
 import org.mortbay.xml.XmlParser;
 

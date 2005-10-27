@@ -5,7 +5,6 @@ package org.mortbay.jetty.plugin;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,8 +12,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.maven.plugin.logging.Log;
-import org.mortbay.jetty.Handler;
-import org.mortbay.thread.LifeCycle;
 
 /**
  * Scanner

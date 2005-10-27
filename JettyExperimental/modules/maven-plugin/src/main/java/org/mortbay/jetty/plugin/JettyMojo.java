@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
@@ -34,12 +33,10 @@ import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.NotFoundHandler;
 import org.mortbay.jetty.nio.SelectChannelConnector;
-import org.mortbay.jetty.security.HashUserRealm;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.jetty.webapp.Configuration;
 import org.mortbay.jetty.webapp.JettyWebXmlConfiguration;
 import org.mortbay.jetty.webapp.WebAppContext;
-import org.mortbay.jetty.webapp.WebAppClassLoader;
 
 /**
  * 

@@ -16,7 +16,6 @@
 package org.mortbay.jetty.handler;
 
 import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.HttpConnection;
 import org.mortbay.thread.AbstractLifeCycle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

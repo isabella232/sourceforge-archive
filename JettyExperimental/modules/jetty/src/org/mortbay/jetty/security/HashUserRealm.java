@@ -15,7 +15,6 @@
 
 package org.mortbay.jetty.security;
 
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.security.Principal;

@@ -24,7 +24,6 @@ import javax.servlet.http.Cookie;
 
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
-import org.mortbay.jetty.webapp.WebAppClassLoader;
 import org.mortbay.jetty.webapp.WebAppContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
