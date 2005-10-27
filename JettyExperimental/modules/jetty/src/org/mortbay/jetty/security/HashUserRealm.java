@@ -120,6 +120,9 @@ public class HashUserRealm implements UserRealm, SSORealm
         throws IOException
     {
         _config=config;
+        _users.clear();
+        _roles.clear();
+        
         if(log.isDebugEnabled())log.debug("Load "+this+" from "+config);
         Properties properties = new Properties();
         Resource resource=Resource.newResource(config);
