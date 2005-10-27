@@ -355,6 +355,7 @@ public class JettyMojo extends AbstractMojo
         {
             getLog().info("Starting Jetty Server ...");
             Server server = new Server();
+            server.setStopAtShutdown(true);
             
             //if the user hasn't configured their project's pom to use a different set of connectors,
             //use the default

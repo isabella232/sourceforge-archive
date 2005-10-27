@@ -51,7 +51,7 @@ public class TestFilter implements Filter
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException
     {
-        long start = System.currentTimeMillis();
+        // long start = System.currentTimeMillis();
         try
         {
             request.setAttribute("testFilter", "value");
@@ -61,8 +61,8 @@ public class TestFilter implements Filter
         finally
         {
             request.setAttribute("testFilter", null);
-            HttpServletRequest srequest = (HttpServletRequest)request;
-            _context.log((System.currentTimeMillis()-start)+"ms handling "+srequest.getRequestURI()+(srequest.getQueryString()==null?"":("?"+srequest.getQueryString())));
+            // HttpServletRequest srequest = (HttpServletRequest)request;
+            // _context.log((System.currentTimeMillis()-start)+"ms handling "+srequest.getRequestURI()+(srequest.getQueryString()==null?"":("?"+srequest.getQueryString())));
         }
     }
 
