@@ -39,11 +39,17 @@ import org.mortbay.jetty.webapp.JettyWebXmlConfiguration;
 import org.mortbay.jetty.webapp.WebAppContext;
 
 /**
- * 
- * 
- * Mojo to run Jetty in-situ from a Maven webapp project without necessitating
- * building an actual war or exploded war.
- * 
+ *  This plugin runs the <a href="http://jetty.mortbay.org">Jetty6</a> web container in-situ on a Maven project without 
+ *  first requiring that the project is assembled into a war or exploded web application, saving time during the development cycle.
+ *  <p>
+ *  Furthermore, once invoked, the plugin can be configured to run continuously, scanning for changes in the project and automatically performing a 
+ *  hot redeploy when necessary. This allows the developer to concentrate on coding changes to the project using their IDE of choice and have those changes
+ *  immediately and transparently reflected in the running web container, eliminating development time that is wasted on rebuilding, reassembling and redeploying.
+ *  
+ *  There is a <a href="run-mojo.html">reference guide</a> to the configuration parameters for this plugin, and more detailed information
+ *  with examples in the <a href="howto.html">Configuration How-To</a>.
+ *  </p>
+ *  
  * @goal run
  * @description Runs jetty6 directly from a maven project
  *

@@ -34,8 +34,8 @@
     </links>
 
     <menu name="Overview">
-      <item name="Introduction" href="intro.html"/>
-      <item name="Configuration" href="howto.html"/>
+      <item name="Configuration How-To" href="howto.html"/>
+      <item name="Parameter Reference" href="run-mojo.html"/>
     </menu>
     ${reports}
   </body>
