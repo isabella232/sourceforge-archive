@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  */
 public class URLResource extends Resource
 {
-    private static Logger log = LoggerFactory.getLogger(Resource.class);
+    private static Logger log = LoggerFactory.getLogger(URLResource.class);
 
     protected URL _url;
     protected String _urlString;

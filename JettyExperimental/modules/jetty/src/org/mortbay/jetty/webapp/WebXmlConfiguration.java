@@ -210,7 +210,21 @@ public class WebXmlConfiguration implements Configuration
     /* ------------------------------------------------------------------------------- */
     public void deconfigureWebApp() throws Exception
     {
-        // TODO
+        // TODO presever any configuration that pre-existed.
+
+        ServletHandler servlet_handler = getWebAppContext().getServletHandler();
+        
+        servlet_handler.setFilters(null);
+        servlet_handler.setFilterMappings(null);
+        servlet_handler.setServlets(null);
+        servlet_handler.setServletMappings(null);
+
+        getWebAppContext().setEventListeners(null);
+        getWebAppContext().setWelcomeFiles(null);
+        getWebAppContext().getSecurityHandler().setConstraintMappings(null);
+   
+        if (getWebAppContext().getErrorHandler() instanceof WebAppContext.WebAppErrorHandler)
+            ((WebAppContext.WebAppErrorHandler)getWebAppContext().getErrorHandler()).setErrorPages(null);
     }
 
     /* ------------------------------------------------------------ */

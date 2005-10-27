@@ -735,7 +735,7 @@ public class ServletHandler extends WrappedHandler
      */
     public void setFilterMappings(FilterMapping[] filterMappings)
     {
-        _filterMappings = (FilterMapping[])filterMappings.clone();
+        _filterMappings = filterMappings;
         if (isStarted())
             updateMappings();
     }
@@ -746,8 +746,9 @@ public class ServletHandler extends WrappedHandler
      */
     public synchronized void setFilters(FilterHolder[] holders)
     {
-        _filters=(FilterHolder[])holders.clone();
+        _filters=holders;
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param servletMappings The servletMappings to set.
@@ -765,7 +766,7 @@ public class ServletHandler extends WrappedHandler
      */
     public synchronized void setServlets(ServletHolder[] holders)
     {
-        _servlets=(ServletHolder[])holders.clone();
+        _servlets=holders;
         updateMappings();
     }
 

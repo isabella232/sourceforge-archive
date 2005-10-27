@@ -69,8 +69,9 @@ import org.slf4j.LoggerFactory;
  */
 public class Request implements HttpServletRequest
 {
+    private static Logger log = LoggerFactory.getLogger(Request.class);
+    
     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
-    private static Logger log = LoggerFactory.getLogger(HttpConnection.class);
     private static final int NONE=0, STREAM=1, READER=2;
     private static Cookie[] __noCookies = new Cookie[0];
     

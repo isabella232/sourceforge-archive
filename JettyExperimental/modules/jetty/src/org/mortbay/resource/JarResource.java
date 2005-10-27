@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 /* ------------------------------------------------------------ */
 public class JarResource extends URLResource
 {
-    private static Logger log = LoggerFactory.getLogger(Resource.class);
+    private static Logger log = LoggerFactory.getLogger(JarResource.class);
 
     protected transient JarURLConnection _jarConnection;
     

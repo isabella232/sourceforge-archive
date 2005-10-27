@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractHandler extends AbstractLifeCycle implements Handler
 {
-    private static Logger log = LoggerFactory.getLogger(HttpConnection.class);
+    private static Logger log = LoggerFactory.getLogger(AbstractHandler.class);
     
 
     /* ------------------------------------------------------------ */
@@ -46,7 +46,7 @@ public abstract class AbstractHandler extends AbstractLifeCycle implements Handl
      */
     protected void doStart() throws Exception
     {
-        log.info("start {}",this);
+        log.debug("starting {}",this);
     }
 
     /* ------------------------------------------------------------ */
@@ -55,7 +55,7 @@ public abstract class AbstractHandler extends AbstractLifeCycle implements Handl
      */
     protected void doStop() throws Exception
     {
-        log.info("stop {}",this);
+        log.debug("stopping {}",this);
     }
 
 }

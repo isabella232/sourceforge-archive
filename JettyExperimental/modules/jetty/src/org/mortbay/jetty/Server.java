@@ -16,7 +16,10 @@
 package org.mortbay.jetty;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -27,10 +30,12 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.WrappedHandler;
 import org.mortbay.jetty.security.UserRealm;
-import org.mortbay.thread.AbstractLifeCycle;
+import org.mortbay.log.LogSupport;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.MultiException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** Jetty HTTP Servlet Server.
@@ -42,11 +47,14 @@ import org.mortbay.util.MultiException;
  * @author gregw
  *
  */
-public class Server extends AbstractLifeCycle implements Handler, ThreadPool
+public class Server extends HandlerCollection implements Handler, ThreadPool
 {
+    private static Logger log = LoggerFactory.getLogger(Server.class);
+
+    private static ShutdownHookThread hookThread = new ShutdownHookThread();
+    
     private ThreadPool _threadPool;
     private Connector[] _connectors;
-    private Handler[] _handlers;
     private UserRealm[] _realms;
     
     /* ------------------------------------------------------------ */
@@ -55,6 +63,21 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
     {
     }
 
+    /* ------------------------------------------------------------ */
+    public boolean getStopAtShutdown()
+    {
+        return hookThread.contains(this);
+    }
+    
+    /* ------------------------------------------------------------ */
+    public void setStopAtShutdown(boolean stop)
+    {
+        if (stop)
+            hookThread.add(this);
+        else
+            hookThread.remove(this);
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the connectors.
@@ -96,24 +119,6 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
     
     /* ------------------------------------------------------------ */
     /**
-     * @return Returns the handlers.
-     */
-    public Handler[] getHandlers()
-    {
-        return _handlers;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param handlers The handlers to set.
-     */
-    public void setHandlers(Handler[] handlers)
-    {
-        _handlers = handlers;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
      * @return Returns the threadPool.
      */
     public ThreadPool getThreadPool()
@@ -142,23 +147,10 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
             _threadPool=btp;
         }
         
-        try{_threadPool.start();}
-        catch(Throwable e)
-        {
-            mex.add(e);
-        }
+        try{_threadPool.start();} catch(Throwable e) { mex.add(e);}
         
-        if (_handlers!=null)
-        {
-            for (int i=0;i<_handlers.length;i++)
-            {
-                try{_handlers[i].start();}
-                catch(Throwable e)
-                {
-                    mex.add(e);
-                }
-            }
-        }
+        try { super.doStart(); } catch(Throwable e) { mex.add(e);}
+        
         if (_connectors!=null)
         {
             for (int i=0;i<_connectors.length;i++)
@@ -184,11 +176,9 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
             for (int i=_connectors.length;i-->0;)
                 try{_connectors[i].stop();}catch(Throwable e){mex.add(e);}
         }
-        if (_handlers!=null)
-        {
-            for (int i=_handlers.length;i-->0;)
-                try{_handlers[i].stop();}catch(Throwable e){mex.add(e);}
-        }
+
+        try { super.doStop(); } catch(Throwable e) { mex.add(e);}
+        
         try{_threadPool.stop();}catch(Throwable e){mex.add(e);}
         
         mex.ifExceptionThrow();
@@ -208,16 +198,17 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
      */
     public boolean handle(String target, HttpServletRequest request, HttpServletResponse response, int dispatch) throws IOException, ServletException
     {
-        if (_handlers==null || _handlers.length==0)
+        Handler[] handlers = getHandlers();
+        if (handlers==null || handlers.length==0)
         {
             response.sendError(500);
             return true;
         }
         else
         {
-            for (int i=0;i<_handlers.length;i++)
+            for (int i=0;i<handlers.length;i++)
             {
-                if (_handlers[i].handle(target,request, response, dispatch))
+                if (handlers[i].handle(target,request, response, dispatch))
                     return true;
             }
         }    
@@ -227,9 +218,10 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
     /* ------------------------------------------------------------ */
     public Handler[] getAllHandlers()
     {
+        Handler[] handlers = getHandlers();
         List list = new ArrayList();
-        for (int i=0;i<_handlers.length;i++)
-            expandHandler(_handlers[i],list);
+        for (int i=0;i<handlers.length;i++)
+            expandHandler(handlers[i],list);
         return (Handler[])list.toArray(new Handler[list.size()]);
     }
 
@@ -273,4 +265,130 @@ public class Server extends AbstractLifeCycle implements Handler, ThreadPool
         _realms=realms;
     }
     
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /**
+     * ShutdownHook thread for stopping all servers.
+     * 
+     * Thread is hooked first time list of servers is changed.
+     */
+    private static class ShutdownHookThread extends Thread
+    {
+        private boolean hooked = false;
+        private ArrayList servers = new ArrayList();
+
+        /**
+         * Hooks this thread for shutdown.
+         * 
+         * @see java.lang.Runtime#addShutdownHook(java.lang.Thread)
+         */
+        private void createShutdownHook()
+        {
+            if (!Boolean.getBoolean("JETTY_NO_SHUTDOWN_HOOK") && !hooked)
+            {
+                try
+                {
+                    Method shutdownHook = java.lang.Runtime.class.getMethod("addShutdownHook", new Class[]
+                    { java.lang.Thread.class});
+                    shutdownHook.invoke(Runtime.getRuntime(), new Object[]
+                    { this});
+                    this.hooked = true;
+                }
+                catch (Exception e)
+                {
+                    if (log.isDebugEnabled())
+                        log.debug("No shutdown hook in JVM ", e);
+                }
+            }
+        }
+
+        /**
+         * Add Server to servers list.
+         */
+        public boolean add(Server server)
+        {
+            createShutdownHook();
+            return this.servers.add(server);
+        }
+
+        /**
+         * Contains Server in servers list?
+         */
+        public boolean contains(Server server)
+        {
+            return this.servers.contains(server);
+        }
+
+        /**
+         * Append all Servers from Collection
+         */
+        public boolean addAll(Collection c)
+        {
+            createShutdownHook();
+            return this.servers.addAll(c);
+        }
+
+        /**
+         * Clear list of Servers.
+         */
+        public void clear()
+        {
+            createShutdownHook();
+            this.servers.clear();
+        }
+
+        /**
+         * Remove Server from list.
+         */
+        public boolean remove(Server server)
+        {
+            createShutdownHook();
+            return this.servers.remove(server);
+        }
+
+        /**
+         * Remove all Servers in Collection from list.
+         */
+        public boolean removeAll(Collection c)
+        {
+            createShutdownHook();
+            return this.servers.removeAll(c);
+        }
+
+        /**
+         * Stop all Servers in list.
+         */
+        public void run()
+        {
+            setName("Shutdown");
+            log.info("Shutdown hook executing");
+            Iterator it = servers.iterator();
+            while (it.hasNext())
+            {
+                Server svr = (Server) it.next();
+                if (svr == null)
+                    continue;
+                try
+                {
+                    svr.stop();
+                }
+                catch (Exception e)
+                {
+                    log.warn(LogSupport.EXCEPTION, e);
+                }
+                log.info("Shutdown hook complete");
+
+                // Try to avoid JVM crash
+                try
+                {
+                    Thread.sleep(1000);
+                }
+                catch (Exception e)
+                {
+                    log.warn(LogSupport.EXCEPTION, e);
+                }
+            }
+        }
+    }
 }

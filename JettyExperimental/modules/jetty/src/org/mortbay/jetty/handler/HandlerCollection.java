@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.util.MultiException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HandlerCollection extends AbstractHandler implements Handler
 {
-    private static Logger log = LoggerFactory.getLogger(HttpConnection.class);
+    private static Logger log = LoggerFactory.getLogger(HandlerCollection.class);
 
     private Handler[] _handlers;
 
@@ -79,5 +80,62 @@ public class HandlerCollection extends AbstractHandler implements Handler
             }
         }    
         return false;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.jetty.handler.AbstractHandler#doStart()
+     */
+    protected void doStart() throws Exception
+    {
+        MultiException mex=new MultiException();
+        if (_handlers!=null)
+        {
+            for (int i=0;i<_handlers.length;i++)
+                try{_handlers[i].start();}catch(Throwable e){mex.add(e);}
+        }
+        mex.ifExceptionThrow();
+        super.doStart();
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.jetty.handler.AbstractHandler#doStop()
+     */
+    protected void doStop() throws Exception
+    {
+        MultiException mex=new MultiException();
+        try { super.doStop(); } catch(Throwable e){mex.add(e);}
+        if (_handlers!=null)
+        {
+            for (int i=_handlers.length;i-->0;)
+                try{_handlers[i].stop();}catch(Throwable e){mex.add(e);}
+        }
+        mex.ifExceptionThrow();
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    /**
+     * Conveniance method to set a single handler
+     * @return  the handler.
+     */
+    public Handler getHandler()
+    {
+        if (_handlers==null || _handlers.length==0)
+            return null;
+        if (_handlers.length>1)
+            throw new IllegalStateException("Multiple Handlers");
+        return _handlers[0];
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * Conveniance method to set a single handler
+     * @param handler The handler to set.
+     */
+    public void setHandler(Handler handler)
+    {
+        _handlers = new Handler[]{handler};
     }
 }

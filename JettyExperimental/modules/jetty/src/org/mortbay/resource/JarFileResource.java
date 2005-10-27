@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
 /* ------------------------------------------------------------ */
 class JarFileResource extends JarResource
 {
-    private static Logger log = LoggerFactory.getLogger(Resource.class);
+    private static Logger log = LoggerFactory.getLogger(JarFileResource.class);
     
     transient JarFile _jarFile;
     transient File _file;

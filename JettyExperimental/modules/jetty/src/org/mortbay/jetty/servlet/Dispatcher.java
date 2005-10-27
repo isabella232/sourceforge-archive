@@ -48,7 +48,7 @@ import org.slf4j.LoggerFactory;
  */
 public class Dispatcher implements RequestDispatcher
 {
-    private static Logger log = LoggerFactory.getLogger(DefaultServlet.class);
+    private static Logger log = LoggerFactory.getLogger(Dispatcher.class);
     
     /** Dispatch include attribute names */
     public final static String __INCLUDE_REQUEST_URI= "javax.servlet.include.request_uri";

@@ -1,4 +1,7 @@
 
+    + maven2 plugin
+    + shutdown hook
+    + refactored start/stop
     + Implemented all listeners
     + Error pages
     + Virtual hosts
