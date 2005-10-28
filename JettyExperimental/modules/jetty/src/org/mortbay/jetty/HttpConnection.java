@@ -245,6 +245,8 @@ public class HttpConnection
                 _generator.reset(!_generator.isPersistent()); // TODO true or false?
                 _responseFields.clear();
                 _response.recycle();
+                
+                // TODO low resources handling?
             }
         }
     }

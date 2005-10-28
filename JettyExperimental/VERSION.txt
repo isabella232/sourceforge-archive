@@ -1,3 +1,4 @@
+Jetty-6.0.0Beta1
 
     + SSL connector
     + maven2 plugin
