@@ -26,8 +26,6 @@ import org.mortbay.xml.XmlParser;
 
 public class JettyMavenConfiguration extends WebXmlConfiguration 
 {
-
-   
     private Log log;
     private List tldFiles;
     private List libFiles;

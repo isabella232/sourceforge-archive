@@ -260,6 +260,9 @@ public class HttpConnection
                 _request.setRequestURI(_uri.getRawPath());
                 _request.setQueryString(_uri.getQuery());
                 String target = URIUtil.canonicalPath(_uri.getPath());
+                
+                _connector.customize(_endp, _request);
+                
                 _handler.handle(target, _request, _response, Handler.REQUEST);
             }
             catch (RetryRequest r)

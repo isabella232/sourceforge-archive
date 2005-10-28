@@ -16,14 +16,18 @@
 package org.mortbay.jetty.bio;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketAddress;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
+import org.mortbay.io.EndPoint;
 import org.mortbay.io.bio.SocketEndPoint;
 import org.mortbay.jetty.AbstractConnector;
 import org.mortbay.jetty.HttpConnection;
+import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.log.LogSupport;
 import org.slf4j.Logger;
@@ -45,7 +49,7 @@ public class SocketConnector extends AbstractConnector
 {
     private static Logger log= LoggerFactory.getLogger(SocketConnector.class);
     
-    ServerSocket _acceptSocket;
+    protected ServerSocket _serverSocket;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -55,32 +59,37 @@ public class SocketConnector extends AbstractConnector
     {
     }
 
+    
     /* ------------------------------------------------------------ */
     public void open() throws IOException
     {
         // Create a new server socket and set to non blocking mode
-        _acceptSocket= new ServerSocket();
-
-        // Bind the server socket to the local host and port
-        _acceptSocket.bind(getAddress());
-        
-        log.info("Opened "+_acceptSocket);
-        
+        _serverSocket= newServerSocket(getAddress(),getAcceptQueueSize());
+        log.info("Opened "+_serverSocket);
     }
 
     /* ------------------------------------------------------------ */
+    protected ServerSocket newServerSocket(SocketAddress addr,int backlog) throws IOException
+    {
+        ServerSocket ss= new ServerSocket();
+        ss.bind(addr,backlog);
+        
+        return ss;
+    }
+    
+    /* ------------------------------------------------------------ */
     public void close() throws IOException
     {
-        if (_acceptSocket!=null)
-            _acceptSocket.close();
-        _acceptSocket=null;
+        if (_serverSocket!=null)
+            _serverSocket.close();
+        _serverSocket=null;
     }
     
     /* ------------------------------------------------------------ */
     public void accept()
     	throws IOException, InterruptedException
     {   
-        Socket socket = _acceptSocket.accept();
+        Socket socket = _serverSocket.accept();
         configure(socket);
 
         Connection connection=new Connection(socket);
@@ -93,21 +102,27 @@ public class SocketConnector extends AbstractConnector
         return new ByteArrayBuffer(size);
     }
 
+    /* ------------------------------------------------------------ */
+    public void customize(EndPoint endpoint, Request request)
+    {
+        super.customize(endpoint, request);
+    }
+    
     /* ------------------------------------------------------------------------------- */
     /* ------------------------------------------------------------------------------- */
     /* ------------------------------------------------------------------------------- */
-    private class Connection extends SocketEndPoint implements Runnable
+    protected class Connection extends SocketEndPoint implements Runnable
     {
         boolean _dispatched=false;
         HttpConnection _connection;
         
-        Connection(Socket socket) throws IOException
+        public Connection(Socket socket) throws IOException
         {
             super(socket);
             _connection = new HttpConnection(SocketConnector.this,this,getHandler());
         }
         
-        void dispatch() throws InterruptedException
+        public void dispatch() throws InterruptedException
         {
             getThreadPool().dispatch(this);
         }
@@ -119,6 +134,7 @@ public class SocketConnector extends AbstractConnector
                 close();
             return l;
         }
+        
         
         public void run()
         {
@@ -157,4 +173,5 @@ public class SocketConnector extends AbstractConnector
             }
         }
     }
+
 }

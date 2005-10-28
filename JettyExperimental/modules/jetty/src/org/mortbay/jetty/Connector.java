@@ -18,6 +18,7 @@ package org.mortbay.jetty;
 import java.io.IOException;
 
 import org.mortbay.io.Buffers;
+import org.mortbay.io.EndPoint;
 import org.mortbay.thread.LifeCycle;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.ajax.Continuation;
@@ -94,9 +95,17 @@ public interface Connector extends LifeCycle, Buffers
     
 
     /* ------------------------------------------------------------ */
+    int getIntegralPort();
+    String getIntegralScheme();
+    boolean isIntegral(Request request);
+
+    /* ------------------------------------------------------------ */
     int getConfidentialPort();
     String getConfidentialScheme();
     boolean isConfidential(Request request);
+
+    /* ------------------------------------------------------------ */
+    void customize(EndPoint endpoint, Request request);
     
     Continuation newContinuation();
     

@@ -22,6 +22,7 @@ import java.net.SocketAddress;
 import java.util.ArrayList;
 
 import org.mortbay.io.Buffer;
+import org.mortbay.io.EndPoint;
 import org.mortbay.log.LogSupport;
 import org.mortbay.thread.AbstractLifeCycle;
 import org.mortbay.thread.ThreadPool;
@@ -56,6 +57,11 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     private Handler _handler;
     private String _host;
     private int _port=8080;
+    private String _integralScheme=HttpSchemes.HTTPS;
+    private int _integralPort=0;
+    private String _confidentialScheme=HttpSchemes.HTTPS;
+    private int _confidentialPort=0;
+    private int _acceptQueueSize=0;
     
     protected long _maxIdleTime=30000; 
     protected long _soLingerTime=1000; 
@@ -231,6 +237,24 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     {
         return _soLingerTime;
     }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the acceptQueueSize.
+     */
+    public int getAcceptQueueSize()
+    {
+        return _acceptQueueSize;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param acceptQueueSize The acceptQueueSize to set.
+     */
+    public void setAcceptQueueSize(int acceptQueueSize)
+    {
+        _acceptQueueSize = acceptQueueSize;
+    }
     
     /* ------------------------------------------------------------ */
     /**
@@ -303,6 +327,12 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
         }
     }
 
+
+    /* ------------------------------------------------------------ */
+    public void customize(EndPoint endpoint, Request request)
+    {      
+    }
+    
     /* ------------------------------------------------------------ */
     protected abstract Buffer newBuffer(int size);
 
@@ -381,7 +411,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
      */
     public int getConfidentialPort()
     {
-        return 443;
+        return _confidentialPort;
     }
     
     /* ------------------------------------------------------------ */
@@ -390,7 +420,34 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
      */
     public String getConfidentialScheme()
     {
-        return "https";
+        return _confidentialScheme;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.jetty.Connector#isConfidential(org.mortbay.jetty.Request)
+     */
+    public boolean isIntegral(Request request)
+    {
+        return false;
+    }
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.jetty.Connector#getConfidentialPort()
+     */
+    public int getIntegralPort()
+    {
+        return _integralPort;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see org.mortbay.jetty.Connector#getIntegralScheme()
+     */
+    public String getIntegralScheme()
+    {
+        return _integralScheme;
     }
     
     /* ------------------------------------------------------------ */
@@ -400,6 +457,47 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     public boolean isConfidential(Request request)
     {
         return false;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param confidentialPort The confidentialPort to set.
+     */
+    public void setConfidentialPort(int confidentialPort)
+    {
+        _confidentialPort = confidentialPort;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param confidentialScheme The confidentialScheme to set.
+     */
+    public void setConfidentialScheme(String confidentialScheme)
+    {
+        _confidentialScheme = confidentialScheme;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param integralPort The integralPort to set.
+     */
+    public void setIntegralPort(int integralPort)
+    {
+        _integralPort = integralPort;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param integralScheme The integralScheme to set.
+     */
+    public void setIntegralScheme(String integralScheme)
+    {
+        _integralScheme = integralScheme;
+    }
+    
+    public Continuation newContinuation()
+    {
+        return new WaitingContinuation();
     }
     
     /* ------------------------------------------------------------ */
@@ -431,6 +529,10 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
                     {
                         accept(); 
                     }
+                    catch(IOException e)
+                    {
+                        log.debug("select ",e);
+                    }
                     catch(Exception e)
                     {
                         log.error("select ",e);
@@ -455,8 +557,5 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     }
 
     
-    public Continuation newContinuation()
-    {
-        return new WaitingContinuation();
-    }
+
 }

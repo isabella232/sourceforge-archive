@@ -311,6 +311,25 @@ public class SecurityHandler extends WrappedHandler
             switch (dataConstraint)
             {
                 case Constraint.DC_INTEGRAL :
+                    if (connector.isIntegral(request))
+                        break;
+                    if (connector.getConfidentialPort() > 0)
+                    {
+                        String url=
+                            connector.getIntegralScheme()
+                                + "://"
+                                + request.getServerName()
+                                + ":"
+                                + connector.getIntegralPort()
+                                + request.getRequestURI();
+                        if (request.getQueryString() != null)
+                            url += "?" + request.getQueryString();
+                        response.setContentLength(0);
+                        response.sendRedirect(url);
+                    }
+                    else
+                        response.sendError(Response.SC_FORBIDDEN,null);
+                    return false;
                 case Constraint.DC_CONFIDENTIAL :
                     if (connector.isConfidential(request))
                         break;
