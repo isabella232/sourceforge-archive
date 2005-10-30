@@ -971,13 +971,14 @@ public class ContextHandler extends WrappedHandler implements Attributes
             try
             {
                 Resource resource=_baseResource.addPath(URIUtil.canonicalPath(path));
-                return resource.getURL();
+                if (resource.exists())
+                    return resource.getURL();
             }
             catch(Exception e)
             {
                 LogSupport.ignore(log,e);
-                return null;
             }
+            return null;
         }
 
         /* ------------------------------------------------------------ */
@@ -1005,7 +1006,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
          * @see javax.servlet.ServletContext#getResourcePaths(java.lang.String)
          */
         public Set getResourcePaths(String path)
-        {
+        {            
             if (path==null || !path.startsWith("/"))
                 return Collections.EMPTY_SET;
             
@@ -1015,14 +1016,17 @@ public class ContextHandler extends WrappedHandler implements Attributes
             try
             {
                 Resource resource=_baseResource.addPath(URIUtil.canonicalPath(path));
-                String[] l=resource.list();
-                if (l!=null)
+                if (resource.exists())
                 {
-                    HashSet set = new HashSet();
-                    for(int i=0;i<l.length;i++)
-                        set.add(l[i]);
-                    return set;
-                }   
+                    String[] l=resource.list();
+                    if (l!=null)
+                    {
+                        HashSet set = new HashSet();
+                        for(int i=0;i<l.length;i++)
+                            set.add(path+"/"+l[i]);
+                        return set;
+                    }   
+                }
             }
             catch(Exception e)
             {

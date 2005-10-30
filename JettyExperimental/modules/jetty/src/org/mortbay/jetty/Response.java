@@ -167,6 +167,9 @@ public class Response implements HttpServletResponse
      */
     public void sendError(int code, String message) throws IOException
     {
+        if (isCommitted())
+            log.warn("Committed before "+code+" "+message);
+        
         reset();
         message=message==null?HttpGenerator.getReason(code):message; 
         setStatus(code,message);
@@ -326,9 +329,6 @@ public class Response implements HttpServletResponse
      */
     public void setStatus(int sc, String sm)
     {
-        if (sc==500)
-            new Throwable().printStackTrace();
-        
         _status=sc;
         _reason=sm==null?HttpGenerator.getReason(sc):sm; 
     }
