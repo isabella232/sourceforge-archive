@@ -282,10 +282,13 @@ public class Dispatcher implements RequestDispatcher
                 else if (key.equals(__FORWARD_SERVLET_PATH)) _servletPath=(String)value;
                 else if (key.equals(__FORWARD_CONTEXT_PATH)) _contextPath=(String)value;
                 else if (key.equals(__FORWARD_QUERY_STRING)) _query=(String)value;
+                
+                /* TODO should any be settable ???
                 else if (value==null)
                     _attr.removeAttribute(key);
                 else
-                    _attr.setAttribute(key,value); // TODO ???
+                    _attr.setAttribute(key,value); 
+                */
             }
             else if (value==null)
                 _attr.removeAttribute(key);
@@ -389,10 +392,12 @@ public class Dispatcher implements RequestDispatcher
                 else if (key.equals(__INCLUDE_SERVLET_PATH)) _servletPath=(String)value;
                 else if (key.equals(__INCLUDE_CONTEXT_PATH)) _contextPath=(String)value;
                 else if (key.equals(__INCLUDE_QUERY_STRING)) _query=(String)value;
+                /* TODO should any be settable ???
                 else if (value==null)
                     _attr.removeAttribute(key);
                 else
-                    _attr.setAttribute(key,value); // TODO ???
+                    _attr.setAttribute(key,value); 
+                */
             }
             else if (value==null)
                 _attr.removeAttribute(key);

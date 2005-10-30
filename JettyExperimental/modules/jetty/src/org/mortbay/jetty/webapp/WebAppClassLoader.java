@@ -49,7 +49,7 @@ public class WebAppClassLoader extends URLClassLoader
 {
     private static Logger log= LoggerFactory.getLogger(WebAppClassLoader.class);
 
-    private boolean _parentLoaderPriority= false;
+    private boolean _parentLoaderPriority= true;
     private ClassLoader _parent;
     private PermissionCollection _permissions;
     private String _urlClassPath;

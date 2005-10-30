@@ -318,7 +318,7 @@ public class ServletHandler extends WrappedHandler
                     
                     if (type==INCLUDE)
                     {
-                        base_request.setAttribute(Dispatcher.__FORWARD_SERVLET_PATH,servlet_path);
+                        base_request.setAttribute(Dispatcher.__INCLUDE_SERVLET_PATH,servlet_path);
                         base_request.setAttribute(Dispatcher.__INCLUDE_PATH_INFO, path_info);
                     }
                     else

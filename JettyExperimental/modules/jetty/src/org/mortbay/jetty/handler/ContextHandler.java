@@ -855,7 +855,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
         public ServletContext getContext(String uripath)
         {
             // TODO Auto-generated method stub
-            return null;
+            throw new IllegalStateException("Not Implemented");
         }
 
         /* ------------------------------------------------------------ */
@@ -897,7 +897,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
         public RequestDispatcher getNamedDispatcher(String name)
         {
             // TODO Auto-generated method stub
-            return null;
+            throw new IllegalStateException("Not Implemented");
         }
 
         /* ------------------------------------------------------------ */

@@ -148,7 +148,19 @@ public class Dump extends HttpServlet
                 throw new UnavailableException("test ex2");
         }
 
-        PrintWriter pout= response.getWriter();
+        
+        PrintWriter pout=null;
+        
+        try
+        {
+            pout =response.getWriter();
+        }
+        catch(IllegalStateException e)
+        {
+            pout=new PrintWriter(response.getOutputStream());
+        }
+        
+        
         try
         {
             pout.write("<h1>Dump Servlet</h1>\n");
@@ -438,7 +450,7 @@ public class Dump extends HttpServlet
             }
         }
 
-        // TODO pout.close();
+        pout.flush();
 
         if (pi != null)
         {

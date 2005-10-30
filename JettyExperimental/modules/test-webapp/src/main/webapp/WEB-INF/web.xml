@@ -67,11 +67,12 @@
     <url-pattern>/dispatch/*</url-pattern>
   </servlet-mapping>
   
+  <!--  
   <error-page>
     <error-code>404</error-code>
     <location>/dump/ERROR</location>
   </error-page>
-
+  -->
 
   <security-constraint>
     <web-resource-collection>

@@ -196,7 +196,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     }
 
     /* ------------------------------------------------------------ */
-    public Cookie getSessionCookie(HttpSession session,boolean requestIsSecure)
+    public Cookie getSessionCookie(HttpSession session,String contextPath, boolean requestIsSecure)
     {
         if (isUsingCookies())
         {
@@ -204,7 +204,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                 ?new HttpOnlyCookie(SessionManager.__SessionCookie,session.getId())
                 :new Cookie(SessionManager.__SessionCookie,session.getId());  
          
-            cookie.setPath("/");
+            cookie.setPath(contextPath==null?"/":contextPath);
             cookie.setMaxAge(-1);
             cookie.setSecure(requestIsSecure && getSecureCookies());
             
@@ -214,7 +214,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                 String maxAge=_context.getInitParameter(SessionManager.__MaxAge);
                 String path=_context.getInitParameter(SessionManager.__SessionPath);
                 
-                if (path==null)
+                if (path!=null)
                     cookie.setPath(path);
                 if (domain!=null)
                     cookie.setDomain(domain);       
