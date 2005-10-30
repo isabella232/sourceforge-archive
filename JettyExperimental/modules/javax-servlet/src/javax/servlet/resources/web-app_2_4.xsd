@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright 2004 Sun Microsystems, Inc. All rights reserved.
+ SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+-->
+
 <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema"
 	    targetNamespace="http://java.sun.com/xml/ns/j2ee"
 	    xmlns:j2ee="http://java.sun.com/xml/ns/j2ee"
@@ -8,14 +14,14 @@
 	    version="2.4">
   <xsd:annotation>
     <xsd:documentation>
-      %W% %E%
+      @(#)web-app_2_4.xsds	1.60 03/08/26
     </xsd:documentation>
   </xsd:annotation>
 
   <xsd:annotation>
     <xsd:documentation>
 
-      Copyright 2002 Sun Microsystems, Inc., 901 San Antonio
+      Copyright 2004 Sun Microsystems, Inc., 901 San Antonio
       Road, Palo Alto, California 94303, U.S.A. All rights
       reserved.
 
@@ -789,7 +795,7 @@
 
     <xsd:simpleContent>
       <xsd:restriction base="j2ee:string">
-	<xsd:pattern value="[\p{L}\-\p{Nd}]+/[\p{L}\-\p{Nd}\.]+"/>
+        <xsd:pattern value="[^\p{Cc}^\s]+/[^\p{Cc}^\s]+"/>
       </xsd:restriction>
     </xsd:simpleContent>
   </xsd:complexType>

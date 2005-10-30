@@ -59,6 +59,13 @@
    </license>
   </licenses>
 
+  <scm>
+    <connection>scm:cvs:pserver:anonymous@cvs.sourceforge.net:/cvsroot/jetty:JettyExperimental</connection>
+    <developerConnection>scm:cvs:ext:gregwilkins@cvs.sourceforge.net:/cvsroot/jetty:JettyExperimental</developerConnection>
+    <tag>HEAD</tag>
+    <url>http://cvs.sourceforge.net/viewcvs.py/jetty/JettyExperimental/</url>
+  </scm>
+
   <organization>
    <name>Mort Bay Consulting</name>
    <url>http://www.mortbay.com</url>

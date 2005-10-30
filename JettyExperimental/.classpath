@@ -9,13 +9,14 @@
 	<classpathentry kind="lib" path="lib/jsp/ant-1.6.4.jar"/>
 	<classpathentry kind="lib" path="lib/jsp/commons-el-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/jsp/commons-logging-api-1.0.4.jar"/>
-	<classpathentry kind="lib" path="lib/jsp/jasper-compiler-5.0.28.jar"/>
-	<classpathentry kind="lib" path="lib/jsp/jasper-runtime-5.0.28.jar"/>
 	<classpathentry kind="lib" path="lib/jsp/xercesImpl-2.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/jsp/xmlParserAPIs-2.6.2.jar"/>
 	<classpathentry kind="lib" path="lib/slf4j-simple-1.0-beta7.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-plugin-api-2.0.1-SNAPSHOT.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-artifact-2.0.1-SNAPSHOT.jar"/>
 	<classpathentry kind="var" path="MAVEN_HOME/lib/maven-project-2.0.1-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/jasper-compiler-5.5.9.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/jasper-compiler-jdt-5.5.9.jar"/>
+	<classpathentry kind="lib" path="lib/jsp/jasper-runtime-5.5.9.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

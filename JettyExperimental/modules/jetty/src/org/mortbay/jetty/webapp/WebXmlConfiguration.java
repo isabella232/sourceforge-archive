@@ -78,8 +78,10 @@ public class WebXmlConfiguration implements Configuration
         URL dtd22=WebAppContext.class.getResource("/javax/servlet/resources/web-app_2_2.dtd");
         URL dtd23=WebAppContext.class.getResource("/javax/servlet/resources/web-app_2_3.dtd");
         URL jsp20xsd=WebAppContext.class.getResource("/javax/servlet/resources/jsp_2_0.xsd");
+        URL jsp21xsd=WebAppContext.class.getResource("/javax/servlet/resources/jsp_2_1.xsd");
         URL j2ee14xsd=WebAppContext.class.getResource("/javax/servlet/resources/j2ee_1_4.xsd");
         URL webapp24xsd=WebAppContext.class.getResource("/javax/servlet/resources/web-app_2_4.xsd");
+        URL webapp25xsd=WebAppContext.class.getResource("/javax/servlet/resources/web-app_2_5.xsd");
         URL schemadtd=WebAppContext.class.getResource("/javax/servlet/resources/XMLSchema.dtd");
         URL xmlxsd=WebAppContext.class.getResource("/javax/servlet/resources/xml.xsd");
         URL webservice11xsd=WebAppContext.class
@@ -95,16 +97,23 @@ public class WebXmlConfiguration implements Configuration
         xmlParser.redirectEntity("-//W3C//DTD XMLSCHEMA 200102//EN",schemadtd);
         xmlParser.redirectEntity("jsp_2_0.xsd",jsp20xsd);
         xmlParser.redirectEntity("http://java.sun.com/xml/ns/j2ee/jsp_2_0.xsd",jsp20xsd);
+        xmlParser.redirectEntity("jsp_2_1.xsd",jsp21xsd);
+        xmlParser.redirectEntity("http://java.sun.com/xml/ns/j2ee/jsp_2_1.xsd",jsp21xsd);
         xmlParser.redirectEntity("j2ee_1_4.xsd",j2ee14xsd);
         xmlParser.redirectEntity("http://java.sun.com/xml/ns/j2ee/j2ee_1_4.xsd",j2ee14xsd);
         xmlParser.redirectEntity("web-app_2_4.xsd",webapp24xsd);
         xmlParser.redirectEntity("http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd",webapp24xsd);
+        xmlParser.redirectEntity("web-app_2_5.xsd",webapp25xsd);
+        xmlParser.redirectEntity("http://java.sun.com/xml/ns/j2ee/web-app_2_5.xsd",webapp25xsd);
         xmlParser.redirectEntity("xml.xsd",xmlxsd);
         xmlParser.redirectEntity("http://www.w3.org/2001/xml.xsd",xmlxsd);
         xmlParser.redirectEntity("datatypes.dtd",datatypesdtd);
         xmlParser.redirectEntity("http://www.w3.org/2001/datatypes.dtd",datatypesdtd);
         xmlParser.redirectEntity("j2ee_web_services_client_1_1.xsd",webservice11xsd);
         xmlParser.redirectEntity("http://www.ibm.com/webservices/xsd/j2ee_web_services_client_1_1.xsd",webservice11xsd);
+        
+        // TODO add the javaee_5 xsds
+        
         return xmlParser;
     }
 
@@ -384,11 +393,21 @@ public class WebXmlConfiguration implements Configuration
     /* ------------------------------------------------------------ */
     protected void initFilterMapping(XmlParser.Node node)
     {
+        String filter_name=node.getString("filter-name",false,true);
+        String servlet_name=node.getString("servlet-name",false,true);
+        
+        
+        
         FilterMapping mapping = new FilterMapping();
-        mapping.setFilterName(node.getString("filter-name",false,true));
+        
+        // TODO handle * servlet name
+        mapping.setFilterName(filter_name);
+        mapping.setServletName(servlet_name);
+        
+        // TODO multiple URL-patterns
         mapping.setPathSpec(node.getString("url-pattern",false,true));
-        mapping.setServletName(node.getString("servlet-name",false,true));
         int dispatcher=Handler.DEFAULT;
+        
         Iterator iter=node.iterator("dispatcher");
         while(iter.hasNext())
         {
@@ -472,10 +491,21 @@ public class WebXmlConfiguration implements Configuration
     /* ------------------------------------------------------------ */
     protected void initServletMapping(XmlParser.Node node)
     {
-        ServletMapping mapping = new ServletMapping();
-        mapping.setServletName(node.getString("servlet-name",false,true));
-        mapping.setPathSpec(node.getString("url-pattern",false,true));
-        _servletMappings=LazyList.add(_servletMappings,mapping);
+        String servlet_name = node.getString("servlet-name",false,true);
+
+        // TODO perhaps had multiple patterns to one mapping.
+        Iterator iter=node.iterator("url-pattern");
+        while(iter.hasNext())
+        {
+            XmlParser.Node patternNode=(XmlParser.Node)iter.next();
+            String pattern=patternNode.toString(false,true);
+
+            ServletMapping mapping = new ServletMapping();
+            mapping.setServletName(servlet_name);
+            mapping.setPathSpec(pattern);
+
+            _servletMappings=LazyList.add(_servletMappings,mapping);
+        }
     }
 
     /* ------------------------------------------------------------ */

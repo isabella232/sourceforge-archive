@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+ Copyright 2004 Sun Microsystems, Inc. All rights reserved.
+ SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+-->
+
 <xsd:schema
      targetNamespace="http://java.sun.com/xml/ns/j2ee"
      xmlns:j2ee="http://java.sun.com/xml/ns/j2ee"
@@ -8,14 +14,14 @@
      version="1.4">
   <xsd:annotation>
     <xsd:documentation>
-      @(#)j2ee_1_4.xsds	1.42 03/08/01
+      @(#)j2ee_1_4.xsds	1.43 03/09/16
     </xsd:documentation>
   </xsd:annotation>
 
   <xsd:annotation>
     <xsd:documentation>
 
-      Copyright 2002 Sun Microsystems, Inc., 901 San Antonio
+      Copyright 2003 Sun Microsystems, Inc., 901 San Antonio
       Road, Palo Alto, California 94303, U.S.A. All rights
       reserved.
 
@@ -46,6 +52,7 @@
 
     </xsd:documentation>
   </xsd:annotation>
+
 <xsd:annotation>
 <xsd:documentation>
 
@@ -497,7 +504,11 @@ Deployment File may indicate one of the following:
       <xsd:documentation>
 
 	The elements that use this type designate the name of a
-	Java class or interface.
+	Java class or interface.  The name is in the form of a
+	"binary name", as defined in the JLS.  This is the form
+	of name used in Class.forName().  Tools that need the
+	canonical name (the name used in source code) will need
+	to convert this binary name to the canonical name.
 
       </xsd:documentation>
     </xsd:annotation>

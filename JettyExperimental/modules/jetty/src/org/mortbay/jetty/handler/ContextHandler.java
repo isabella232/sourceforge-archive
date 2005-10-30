@@ -887,7 +887,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public int getMinorVersion()
         {
-            return 4;
+            return 5;
         }
 
         /* ------------------------------------------------------------ */
