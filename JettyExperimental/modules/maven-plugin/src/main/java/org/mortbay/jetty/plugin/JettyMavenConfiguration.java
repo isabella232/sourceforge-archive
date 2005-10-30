@@ -69,8 +69,11 @@ public class JettyMavenConfiguration extends WebXmlConfiguration
     public void configureClassLoader() throws Exception 
     {
         getLog().info("Setting up classpath ...");
+        
+        //put the classes into the classpath
         ((WebAppClassLoader)getWebAppContext().getClassLoader()).addClassPath(classesDir.getCanonicalPath());
         
+        //put the dependencies into the classpath
         Iterator itor = libFiles.iterator();
         while (itor.hasNext())
             ((WebAppClassLoader)getWebAppContext().getClassLoader()).addClassPath(((File)itor.next()).getCanonicalPath());
@@ -79,6 +82,11 @@ public class JettyMavenConfiguration extends WebXmlConfiguration
         while (itor.hasNext())
             ((WebAppClassLoader)getWebAppContext().getClassLoader()).addClassPath(((File)itor.next()).getCanonicalPath());
 
+        //put tools.jar into the classpath
+        //File toolsJar = findToolsJar();
+        //if (toolsJar != null)       	
+        //	((WebAppClassLoader)getWebAppContext().getClassLoader()).addClassPath(toolsJar.getCanonicalPath());
+        
         getLog().info("Finished setting up classpath");
     }
 
@@ -122,6 +130,35 @@ public class JettyMavenConfiguration extends WebXmlConfiguration
        super.deconfigureWebApp();
     }
     
+    
+    private File findToolsJar()
+    throws Exception
+    {
+    	 String javaHomeStr = System.getProperty("java.home");
+         if ((javaHomeStr==null) || (javaHomeStr.equals("")))
+         {
+         		getLog().info("Environment variable JAVA_HOME not set, JSP compilation not available");
+         		return null;
+         }
+         
+    	getLog().info("java.home="+javaHomeStr);
+    	File jdkHomeDir = new File (javaHomeStr);
+    	File jdkLibDir = new File(jdkHomeDir, "lib");
+    	File toolsJar = new File (jdkLibDir, "tools.jar");
+    	
+    	if (!toolsJar.exists())
+    	{
+    		jdkLibDir = new File (jdkHomeDir.getParentFile(), "lib");
+    		toolsJar = new File(jdkLibDir, "tools.jar");
+    		
+    		if (!toolsJar.exists())
+    		{
+    			getLog().info("tools.jar does not exist, JSP compilation not available");
+    			return null;
+    		}
+    	}
+    	return toolsJar;
+    }
    
 
 }

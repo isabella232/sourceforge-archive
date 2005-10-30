@@ -51,6 +51,7 @@ import org.mortbay.jetty.webapp.WebAppContext;
  *  </p>
  *  
  * @goal run
+ * @requiresDependencyResolution runtime
  * @description Runs jetty6 directly from a maven project
  *
  */

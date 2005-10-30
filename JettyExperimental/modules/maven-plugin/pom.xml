@@ -58,13 +58,23 @@
     </dependency>
     <dependency>
       <groupId>tomcat</groupId>
+      <artifactId>jasper-compiler-jdt</artifactId>
+      <version>5.5.9</version>
+    </dependency>
+    <dependency>
+      <groupId>tomcat</groupId>
       <artifactId>jasper-compiler</artifactId>
-      <version>5.0.28</version>
+      <version>5.5.9</version>
     </dependency>
     <dependency>
       <groupId>tomcat</groupId>
       <artifactId>jasper-runtime</artifactId>
-      <version>5.0.28</version>
+      <version>5.5.9</version>
+    </dependency>
+    <dependency>
+      <groupId>tomcat</groupId>
+      <artifactId>jsp-api</artifactId>
+      <version>5.0.18</version>
     </dependency>
   </dependencies>
 </project>
