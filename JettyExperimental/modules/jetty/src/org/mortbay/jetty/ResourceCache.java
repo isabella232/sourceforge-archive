@@ -140,6 +140,9 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
             if (entry==null)
             {
                 Resource resource=factory.getResource(pathInContext);
+                if (resource==null)
+                    return null;
+                
                 long len = resource.length();
                 if (resource.exists())
                 {

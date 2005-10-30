@@ -236,6 +236,9 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
      */
     public Resource getResource(String pathInContext)
     {
+        if (_resourceBase==null)
+            return null;
+        
         Resource r=null;
         try
         {

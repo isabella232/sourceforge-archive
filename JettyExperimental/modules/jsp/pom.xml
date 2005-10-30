@@ -37,7 +37,7 @@
                       <include name="**/*.jar"/>
                     </fileset>
                     <fileset dir="${user.home}/.m2/repository/tomcat">
-                      <include name="**/5.0.28/*.jar"/>
+                      <include name="**/5.5.9/*.jar"/>
                     </fileset>
                   </copy>
                 </tasks>
@@ -84,13 +84,18 @@
     </dependency>
     <dependency>
       <groupId>tomcat</groupId>
+      <artifactId>jasper-compiler-jdt</artifactId>
+      <version>5.5.9</version>
+    </dependency>
+    <dependency>
+      <groupId>tomcat</groupId>
       <artifactId>jasper-compiler</artifactId>
-      <version>5.0.28</version>
+      <version>5.5.9</version>
     </dependency>
     <dependency>
       <groupId>tomcat</groupId>
       <artifactId>jasper-runtime</artifactId>
-      <version>5.0.28</version>
+      <version>5.5.9</version>
     </dependency>
   </dependencies>
 </project>
