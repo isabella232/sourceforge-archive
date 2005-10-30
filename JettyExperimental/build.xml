@@ -5,7 +5,7 @@
   <target name="clean">
     <delete>
       <fileset dir="webapps">
-        <include  name="**/*"/>
+        <include  name="test/**/*"/>
       </fileset>
     </delete>
     <delete dir="lib"/>

@@ -915,7 +915,8 @@ public class ContextHandler extends WrappedHandler implements Attributes
             
             if (!path.startsWith("/"))
                 path="/"+path;
-            path.replace('/', File.pathSeparatorChar);
+            if (File.separatorChar!='/')
+                path =path.replace('/', File.separatorChar);
             
             return _docRoot+path;
         }
@@ -1015,7 +1016,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
             {
                 Resource resource=_baseResource.addPath(URIUtil.canonicalPath(path));
                 String[] l=resource.list();
-                if (l==null)
+                if (l!=null)
                 {
                     HashSet set = new HashSet();
                     for(int i=0;i<l.length;i++)

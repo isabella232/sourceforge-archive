@@ -114,14 +114,6 @@
           </New>
         </Item>
         
-        <!-- ======================================================= -->
-        <!-- Handle anything not already handled                     -->
-        <!-- ======================================================= -->
-        <Item>
-          <New  class="org.mortbay.jetty.handler.NotFoundHandler">
-            <Set name="Server"><Ref id="Server"/></Set>
-          </New>
-        </Item>
       </Array>
     </Set>
 

@@ -93,8 +93,8 @@ public class HandlerCollection extends AbstractHandler implements Handler
             for (int i=0;i<_handlers.length;i++)
                 try{_handlers[i].start();}catch(Throwable e){mex.add(e);}
         }
-        mex.ifExceptionThrow();
         super.doStart();
+        mex.ifExceptionThrow();
     }
 
     /* ------------------------------------------------------------ */

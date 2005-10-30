@@ -53,6 +53,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     private int _requestBufferSize=16*1024;
     private int _responseBufferSize=48*1024;
 
+    private Server _server;
     private ThreadPool _threadPool;
     private Handler _handler;
     private String _host;
@@ -81,6 +82,20 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     {
     }
 
+    /* ------------------------------------------------------------------------------- */
+    /*
+     */
+    public Server getServer()
+    {
+        return _server;
+    }
+
+    /* ------------------------------------------------------------------------------- */
+    public void setServer(Server server)
+    {
+        _server=server;
+    }
+    
     /* ------------------------------------------------------------------------------- */
     /*
      * @see org.mortbay.jetty.HttpListener#getHttpServer()
@@ -275,6 +290,16 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
         _requestBuffers=new ArrayList();
         _responseBuffers=new ArrayList();
         
+        if (_threadPool==null)
+            _threadPool=_server.getThreadPool();
+        if (_handler==null)
+            _handler=_server;
+        
+        if (_threadPool!=_server.getThreadPool())
+            _threadPool.start();
+        if (_handler!=_server)
+            _handler.start();
+        
         // Start selector thread
         _threadPool.dispatch(new Acceptor());
     }
@@ -282,6 +307,11 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     /* ------------------------------------------------------------ */
     protected void doStop() throws Exception
     {
+        if (_threadPool!=_server.getThreadPool())
+            _threadPool.stop();
+        if (_handler!=_server)
+            _handler.stop();
+        
         if (_acceptorThread != null)
             _acceptorThread.interrupt();
         _acceptorThread=null;
@@ -523,7 +553,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
             _acceptorThread.setName(name+" - Acceptor "+AbstractConnector.this);
             try
             {
-                while (isRunning())
+                while (isRunning() && getThreadPool().isRunning())
                 {
                     try
                     {
@@ -540,7 +570,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
                 }
             }
             finally
-            {
+            {   
                 log.info("Stopping " + this);
                 Thread.currentThread().setName(name);
                 try

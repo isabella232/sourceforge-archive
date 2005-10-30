@@ -218,9 +218,9 @@ public class DigestAuthenticator implements Authenticator
             long ts=0;
             long sk=nonceSecret;
             byte[] n2 = new byte[16];
+            System.arraycopy(n, 0, n2, 0, 8);
             for (int i=0;i<8;i++)
             {
-                n2[i]=n[i];
                 n2[8+i]=(byte)(sk&0xff);
                 sk=sk>>8;
                 ts=(ts<<8)+(0xff&(long)n[7-i]);

@@ -40,13 +40,9 @@ public interface Connector extends LifeCycle, Buffers
 { 
     public void open() throws IOException;
     public void close() throws IOException;
-    
-    public void setThreadPool(ThreadPool pool);
-    public ThreadPool getThreadPool();
-    
-    public void setHandler(Handler handler);
-    public Handler getHandler();
-    
+
+    public void setServer(Server server);
+    public Server getServer();
 
     /* ------------------------------------------------------------ */
     /**

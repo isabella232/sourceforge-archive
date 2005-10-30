@@ -697,7 +697,7 @@ public class SelectChannelConnector extends AbstractConnector
             {
                 if (!dispatch_done)
                 {
-                    log.warn("dispatch failed");
+                    log.warn("redispatch failed");
                     _endPoint.undispatch();
                 }
             }

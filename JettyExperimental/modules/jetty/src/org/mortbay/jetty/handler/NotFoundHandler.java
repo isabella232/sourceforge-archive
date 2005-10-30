@@ -78,13 +78,25 @@ public class NotFoundHandler extends AbstractHandler
             if (!(handlers[i] instanceof ContextHandler))
                 continue;
             ContextHandler context = (ContextHandler)handlers[i];
-            writer.write("<li><a href=\"");
-            writer.write(context.getContextPath());
-            writer.write("/\">");
-            writer.write(context.getContextPath());
-            writer.write("&nbsp;--->&nbsp;");
-            writer.write(context.toString());
-            writer.write("</a></li>\n");
+            if (context.isRunning())
+            {
+                writer.write("<li><a href=\"");
+                writer.write(context.getContextPath());
+                writer.write("/\">");
+                writer.write(context.getContextPath());
+                writer.write("&nbsp;--->&nbsp;");
+                writer.write(context.toString());
+                writer.write("</a></li>\n");
+            }
+            else
+            {
+                writer.write("<li>");
+                writer.write(context.getContextPath());
+                writer.write("&nbsp;--->&nbsp;");
+                writer.write(context.toString());
+                writer.write(" [stopped]");
+                writer.write("</li>\n");
+            }
         }
         
         writer.write("</ul><small><I>The links above may not work if a virtual host is configured</I></small>");

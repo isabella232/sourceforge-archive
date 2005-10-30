@@ -61,6 +61,7 @@ public class SessionDump extends HttpServlet
         if (action.equals("New Session"))
         {   
             session = request.getSession(true);
+            session.setAttribute("test","value");
         }
         else 
         if (session!=null)

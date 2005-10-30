@@ -27,6 +27,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.handler.HandlerCollection;
+import org.mortbay.jetty.handler.NotFoundHandler;
 import org.mortbay.jetty.handler.WrappedHandler;
 import org.mortbay.jetty.security.UserRealm;
 import org.mortbay.log.LogSupport;
@@ -55,6 +56,7 @@ public class Server extends HandlerCollection implements Handler, ThreadPool
     private ThreadPool _threadPool;
     private Connector[] _connectors;
     private UserRealm[] _realms;
+    private Handler _notFoundHandler;
     
     /* ------------------------------------------------------------ */
     public Server()
@@ -96,23 +98,13 @@ public class Server extends HandlerCollection implements Handler, ThreadPool
         if (_connectors!=null)
         {
             for (int i=0;i<_connectors.length;i++)
-            {
-                if (_connectors[i].getThreadPool()==this)
-                    _connectors[i].setThreadPool(null);
-                if (_connectors[i].getHandler()==this)
-                    _connectors[i].setHandler(null);
-            }
+                _connectors[i].setServer(null);
         }
         _connectors = connectors;
         if (_connectors!=null)
         {
             for (int i=0;i<_connectors.length;i++)
-            {
-                if (_connectors[i].getThreadPool()==null)
-                    _connectors[i].setThreadPool(this);
-                if (_connectors[i].getHandler()==null)
-                    _connectors[i].setHandler(this);
-            }
+                _connectors[i].setServer(this);
         }
     }
     
@@ -211,6 +203,26 @@ public class Server extends HandlerCollection implements Handler, ThreadPool
                     return true;
             }
         }    
+        
+        synchronized(this)
+        {
+            if (_notFoundHandler==null)
+            {
+                try
+                {
+                    NotFoundHandler nfh=new NotFoundHandler();
+                    nfh.setServer(this);
+                    nfh.start();
+                    _notFoundHandler=nfh;
+                }
+                catch(Exception e)
+                {
+                    log.warn(LogSupport.EXCEPTION, e);
+                }
+            }
+            _notFoundHandler.handle(target, request, response, dispatch);
+        }
+        
         return false;
     }
 
@@ -389,5 +401,23 @@ public class Server extends HandlerCollection implements Handler, ThreadPool
                 }
             }
         }
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the notFoundHandler.
+     */
+    public Handler getNotFoundHandler()
+    {
+        return _notFoundHandler;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param notFoundHandler The notFoundHandler to set.
+     */
+    public void setNotFoundHandler(Handler notFoundHandler)
+    {
+        _notFoundHandler = notFoundHandler;
     }
 }
