@@ -386,6 +386,7 @@ public class JettyMojo extends AbstractMojo
             ((NotFoundHandler)handlers[handlers.length-1]).setServer(server);
             server.setHandlers(handlers);
             
+            
             //set up security realms
             for (int i=0;(getUserRealms()!=null)&&i<getUserRealms().length;i++)
             getLog().debug(getUserRealms()[i].getClass().getName()+ ": "+getUserRealms()[i].toString());

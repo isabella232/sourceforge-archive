@@ -81,11 +81,6 @@ public class JettyMavenConfiguration extends WebXmlConfiguration
         itor = tldFiles.iterator();
         while (itor.hasNext())
             ((WebAppClassLoader)getWebAppContext().getClassLoader()).addClassPath(((File)itor.next()).getCanonicalPath());
-
-        //put tools.jar into the classpath
-        //File toolsJar = findToolsJar();
-        //if (toolsJar != null)       	
-        //	((WebAppClassLoader)getWebAppContext().getClassLoader()).addClassPath(toolsJar.getCanonicalPath());
         
         getLog().info("Finished setting up classpath");
     }
