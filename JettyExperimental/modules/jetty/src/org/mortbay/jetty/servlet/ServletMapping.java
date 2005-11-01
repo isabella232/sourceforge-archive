@@ -15,10 +15,12 @@
 
 package org.mortbay.jetty.servlet;
 
+import java.util.Arrays;
+
 
 public class ServletMapping
 {
-    private String _pathSpec;
+    private String[] _pathSpecs;
     private String _servletName;
 
     /* ------------------------------------------------------------ */
@@ -27,19 +29,12 @@ public class ServletMapping
     }
     
     /* ------------------------------------------------------------ */
-    public ServletMapping(String pathSpec,String servlet)
-    {
-        _pathSpec=pathSpec;
-        _servletName=servlet;
-    }
-    
-    /* ------------------------------------------------------------ */
     /**
      * @return Returns the pathSpec.
      */
-    public String getPathSpec()
+    public String[] getPathSpecs()
     {
-        return _pathSpec;
+        return _pathSpecs;
     }
     
     /* ------------------------------------------------------------ */
@@ -55,9 +50,18 @@ public class ServletMapping
     /**
      * @param pathSpec The pathSpec to set.
      */
+    public void setPathSpecs(String[] pathSpecs)
+    {
+        _pathSpecs = pathSpecs;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param pathSpec The pathSpec to set.
+     */
     public void setPathSpec(String pathSpec)
     {
-        _pathSpec = pathSpec;
+        _pathSpecs = new String[]{pathSpec};
     }
     
     /* ------------------------------------------------------------ */
@@ -67,5 +71,12 @@ public class ServletMapping
     public void setServletName(String servletName)
     {
         _servletName = servletName;
+    }
+    
+
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        return "[S="+_servletName+","+(_pathSpecs==null?"[]":Arrays.asList(_pathSpecs).toString())+"]"; 
     }
 }

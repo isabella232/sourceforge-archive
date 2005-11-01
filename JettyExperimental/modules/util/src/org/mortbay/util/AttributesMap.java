@@ -56,7 +56,10 @@ public class AttributesMap implements Attributes
      */
     public void setAttribute(String name, Object attribute)
     {
-        _map.put(name, attribute);
+        if (attribute==null)
+            _map.remove(name);
+        else
+            _map.put(name, attribute);
     }
 
     /* ------------------------------------------------------------ */

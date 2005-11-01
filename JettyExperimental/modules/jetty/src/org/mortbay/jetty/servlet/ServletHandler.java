@@ -328,7 +328,7 @@ public class ServletHandler extends WrappedHandler
                     }
                     
                     if (servlet_holder!=null && _filterMappings!=null && _filterMappings.length>0)
-                        chain=getChainForPath(type, target, servlet_holder);
+                        chain=getFilterChain(type, target, servlet_holder);
                 }      
             }
             else
@@ -336,7 +336,7 @@ public class ServletHandler extends WrappedHandler
                 // look for a servlet by name!
                 servlet_holder=(ServletHolder)_servletNameMap.get(target);
                 if (servlet_holder!=null && _filterMappings!=null && _filterMappings.length>0)
-                    chain=getChainForName(type, servlet_holder);
+                    chain=getFilterChain(type, null,servlet_holder);
             }
 
             if (log.isDebugEnabled()) 
@@ -431,60 +431,16 @@ public class ServletHandler extends WrappedHandler
     }
 
     /* ------------------------------------------------------------ */
-    private FilterChain getChainForName(int requestType, ServletHolder servletHolder) {
-        if (servletHolder == null) {
-            throw new IllegalStateException("Named dispatch must be to an explicitly named servlet");
-        }
-        
-        if (_filterChainsCached)
-        {
-            synchronized(this)
-            {
-                if (_namedChainCache[requestType].containsKey(servletHolder.getName()))
-                    return (FilterChain)_namedChainCache[requestType].get(servletHolder.getName());
-            }
-        }
-        
-        // Build list of filters
-        Object filters= null;
-        
-        // Servlet filters
-        if (_filterNameMappings.size() > 0)
-        {
-            Object o= _filterNameMappings.get(servletHolder.getName());
-            for (int i=0; i<LazyList.size(o);i++)
-            {
-                FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
-                if (mapping.appliesTo(null,requestType))
-                    filters=LazyList.add(filters,mapping.getFilterHolder());
-            }
-        }
-
-        FilterChain chain = null;
-        if (_filterChainsCached)
-        {
-            synchronized(this)
-            {
-                if (LazyList.size(filters) > 0)
-                    chain= new CachedChain(filters, servletHolder);
-                _namedChainCache[requestType].put(servletHolder.getName(),chain);
-            }
-        }
-        else if (LazyList.size(filters) > 0)
-            chain = new Chain(filters, servletHolder);
-        
-        return chain;   
-    }
-
-    /* ------------------------------------------------------------ */
-    private FilterChain getChainForPath(int requestType, String pathInContext, ServletHolder servletHolder) 
+    private FilterChain getFilterChain(int requestType, String pathInContext, ServletHolder servletHolder) 
     {
+        String key=pathInContext==null?servletHolder.getName():pathInContext;
+        
         if (_filterChainsCached && _chainCache!=null)
         {
             synchronized(this)
             {
-                if(_chainCache[requestType].containsKey(pathInContext))
-                    return (FilterChain)_chainCache[requestType].get(pathInContext);
+                if(_chainCache[requestType].containsKey(key))
+                    return (FilterChain)_chainCache[requestType].get(key);
             }
         }
         
@@ -494,7 +450,7 @@ public class ServletHandler extends WrappedHandler
     
         
         // Path filters
-        if (_filterPathMappings!=null)
+        if (pathInContext!=null && _filterPathMappings!=null)
         {
             for (int i= 0; i < _filterPathMappings.size(); i++)
             {
@@ -503,18 +459,31 @@ public class ServletHandler extends WrappedHandler
                     filters= LazyList.add(filters, mapping.getFilterHolder());
             }
         }
-        
-        // Servlet filters
+
+        // Servlet name filters
         if (servletHolder != null && _filterNameMappings!=null && _filterNameMappings.size() > 0)
         {
-            Object o= _filterNameMappings.get(servletHolder.getName());
-            for (int i=0; i<LazyList.size(o);i++)
+            // Servlet name filters
+            if (_filterNameMappings.size() > 0)
             {
-                FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
-                if (mapping.appliesTo(null,requestType))
-                    filters=LazyList.add(filters,mapping.getFilterHolder());
+                Object o= _filterNameMappings.get(servletHolder.getName());
+                for (int i=0; i<LazyList.size(o);i++)
+                {
+                    FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
+                    if (mapping.appliesTo(requestType))
+                        filters=LazyList.add(filters,mapping.getFilterHolder());
+                }
+                
+                o= _filterNameMappings.get("*");
+                for (int i=0; i<LazyList.size(o);i++)
+                {
+                    FilterMapping mapping = (FilterMapping)LazyList.get(o,i);
+                    if (mapping.appliesTo(requestType))
+                        filters=LazyList.add(filters,mapping.getFilterHolder());
+                }
             }
         }
+        
         if (filters==null)
             return null;
         
@@ -525,7 +494,7 @@ public class ServletHandler extends WrappedHandler
             {
                 if (LazyList.size(filters) > 0)
                     chain= new CachedChain(filters, servletHolder);
-                _chainCache[requestType].put(pathInContext,chain);
+                _chainCache[requestType].put(key,chain);
             }
         }
         else if (LazyList.size(filters) > 0)
@@ -599,7 +568,7 @@ public class ServletHandler extends WrappedHandler
     
     /* ------------------------------------------------------------ */
     protected synchronized void updateMappings()
-    {
+    {   
         // Map servlet names to holders
         if (_servlets==null)
         {
@@ -633,8 +602,13 @@ public class ServletHandler extends WrappedHandler
                 ServletHolder servlet_holder = (ServletHolder)_servletNameMap.get(_servletMappings[i].getServletName());
                 if (servlet_holder==null)
                     throw new IllegalStateException("No such servlet: "+_servletMappings[i].getServletName());
-                else if (_servletMappings[i].getPathSpec()!=null)
-                    pm.put(_servletMappings[i].getPathSpec(),servlet_holder);
+                else if (_servletMappings[i].getPathSpecs()!=null)
+                {
+                    String[] pathSpecs = _servletMappings[i].getPathSpecs();
+                    for (int j=0;j<pathSpecs.length;j++)
+                        if (pathSpecs[j]!=null)
+                            pm.put(pathSpecs[j],servlet_holder);
+                }
             }
             
             _servletPathMap=pm;
@@ -670,14 +644,22 @@ public class ServletHandler extends WrappedHandler
             _filterNameMappings=new MultiMap();
             for (int i=0;i<_filterMappings.length;i++)
             {
-                FilterHolder holder = (FilterHolder)_filterNameMap.get(_filterMappings[i].getFilterName());
-                if (holder==null)
+                FilterHolder filter_holder = (FilterHolder)_filterNameMap.get(_filterMappings[i].getFilterName());
+                if (filter_holder==null)
                     throw new IllegalStateException("No filter named "+_filterMappings[i].getFilterName());
-                _filterMappings[i].setFilterHolder(holder);    
-                if (_filterMappings[i].getPathSpec()!=null)
+                _filterMappings[i].setFilterHolder(filter_holder);    
+                if (_filterMappings[i].getPathSpecs()!=null)
                     _filterPathMappings.add(_filterMappings[i]);
-                else if (_filterMappings[i].getServletName()!=null)
-                    _filterNameMappings.add(_filterMappings[i].getServletName(), holder);         
+                
+                if (_filterMappings[i].getServletNames()!=null)
+                {
+                    String[] names=_filterMappings[i].getServletNames();
+                    for (int j=0;j<names.length;j++)
+                    {
+                        if (names[j]!=null)
+                            _filterNameMappings.add(names[j], _filterMappings[i]);  
+                    }
+                }
             }
         }
 

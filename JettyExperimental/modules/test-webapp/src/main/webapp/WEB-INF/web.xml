@@ -2,8 +2,8 @@
 <web-app 
    xmlns="http://java.sun.com/xml/ns/j2ee" 
    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-   xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd" 
-   version="2.4"> 
+   xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_5.xsd" 
+   version="2.5"> 
 
   <display-name>Test WebApp</display-name>
   
@@ -12,14 +12,17 @@
   </listener>
 
   <filter>
-    <filter-name>Filter</filter-name>
+    <filter-name>TestFilter</filter-name>
     <filter-class>com.acme.TestFilter</filter-class>
   </filter>
 
   <filter-mapping>
-    <filter-name>Filter</filter-name>
-    <url-pattern>/*</url-pattern>
+    <filter-name>TestFilter</filter-name>
+    <url-pattern>/dump/*</url-pattern>
+    <url-pattern>*.dump</url-pattern>
+    <servlet-name>*</servlet-name>
   </filter-mapping>
+  
   <filter>
     <filter-name>Chat</filter-name>
     <filter-class>com.acme.ChatFilter</filter-class>
@@ -38,13 +41,9 @@
   <servlet-mapping>
     <servlet-name>Dump</servlet-name>
     <url-pattern>/dump/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet-mapping>
-    <servlet-name>Dump</servlet-name>
     <url-pattern>*.dump</url-pattern>
   </servlet-mapping>
-  
+
   <servlet>
     <servlet-name>Session</servlet-name>
     <servlet-class>com.acme.SessionDump</servlet-class>

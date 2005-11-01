@@ -15,6 +15,8 @@
 
 package org.mortbay.jetty.servlet;
 
+import java.util.Arrays;
+
 import org.mortbay.jetty.Handler;
 
 
@@ -23,32 +25,41 @@ public class FilterMapping
     private int _dispatches=Handler.REQUEST;
     private String _filterName;
     private transient FilterHolder _holder;
-    private String _pathSpec;
-    private String _servletName;
+    private String[] _pathSpecs;
+    private String[] _servletNames;
 
     /* ------------------------------------------------------------ */
     public FilterMapping()
     {}
     
     /* ------------------------------------------------------------ */
-    public FilterMapping(String pathSpec, String servletName,int dispatches,String filter)
-    {
-        _pathSpec=pathSpec;
-        _servletName=servletName;
-        _filterName=filter;
-        _dispatches=dispatches;
-    }
-    
-    /* ------------------------------------------------------------ */
     /** Check if this filter applies to a path.
-     * @param path The path to check.
+     * @param path The path to check or null to just check type
      * @param type The type of request: __REQUEST,__FORWARD,__INCLUDE or __ERROR.
      * @return True if this filter applies
      */
     boolean appliesTo(String path, int type)
     {
-       boolean b=((_dispatches&type)!=0 || (_dispatches==0 && type==Handler.REQUEST)) && (_pathSpec==null || PathMap.match(_pathSpec, path,true));
-       return b;
+       if ( ((_dispatches&type)!=0 || (_dispatches==0 && type==Handler.REQUEST)) && _pathSpecs!=null )
+       {
+           for (int i=0;i<_pathSpecs.length;i++)
+               if (_pathSpecs[i]!=null &&  PathMap.match(_pathSpecs[i], path,true))
+                   return true;
+       }
+       return false;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Check if this filter applies to a path.
+     * @param path The path to check or null to just check type
+     * @param type The type of request: __REQUEST,__FORWARD,__INCLUDE or __ERROR.
+     * @return True if this filter applies
+     */
+    boolean appliesTo(int type)
+    {
+       if ( ((_dispatches&type)!=0 || (_dispatches==0 && type==Handler.REQUEST)) && _pathSpecs!=null )
+           return true;
+       return false;
     }
 
     
@@ -83,9 +94,9 @@ public class FilterMapping
     /**
      * @return Returns the pathSpec.
      */
-    public String getPathSpec()
+    public String[] getPathSpecs()
     {
-        return _pathSpec;
+        return _pathSpecs;
     }
     
     /* ------------------------------------------------------------ */
@@ -114,22 +125,41 @@ public class FilterMapping
     {
         _holder = holder;
     }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param pathSpec The pathSpecs to set.
+     */
+    public void setPathSpecs(String[] pathSpecs)
+    {
+        _pathSpecs = pathSpecs;
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param pathSpec The pathSpec to set.
      */
     public void setPathSpec(String pathSpec)
     {
-        _pathSpec = pathSpec;
+        _pathSpecs = new String[]{pathSpec};
     }
     
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the servletName.
      */
-    public String getServletName()
+    public String[] getServletNames()
     {
-        return _servletName;
+        return _servletNames;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param servletName The servletName to set.
+     */
+    public void setServletNames(String[] servletNames)
+    {
+        _servletNames = servletNames;
     }
     
     /* ------------------------------------------------------------ */
@@ -138,6 +168,12 @@ public class FilterMapping
      */
     public void setServletName(String servletName)
     {
-        _servletName = servletName;
+        _servletNames = new String[]{servletName};
+    }
+
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        return "[F="+_filterName+","+(_pathSpecs==null?"[]":Arrays.asList(_pathSpecs).toString())+","+(_servletNames==null?"[]":Arrays.asList(_servletNames).toString())+"]"; 
     }
 }

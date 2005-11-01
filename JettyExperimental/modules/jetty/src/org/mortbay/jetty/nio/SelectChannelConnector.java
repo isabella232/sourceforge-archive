@@ -101,7 +101,6 @@ public class SelectChannelConnector extends AbstractConnector
      */
     protected void doStop() throws Exception
     {
-        // TODO Auto-generated method stub
         super.doStop();
         _idleTimeout.cancelAll();
         _idleTimeout=null;

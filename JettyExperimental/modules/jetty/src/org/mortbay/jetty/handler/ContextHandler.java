@@ -854,7 +854,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public ServletContext getContext(String uripath)
         {
-            // TODO Auto-generated method stub
+            // TODO Not implemented yet
             throw new IllegalStateException("Not Implemented");
         }
 
@@ -896,7 +896,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public RequestDispatcher getNamedDispatcher(String name)
         {
-            // TODO Auto-generated method stub
+            // TODO Not implemented
             throw new IllegalStateException("Not Implemented");
         }
 
@@ -1041,8 +1041,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public String getServerInfo()
         {
-            // TODO Auto-generated method stub
-            return "JettyE";
+            return "Jetty-6.0";
         }
 
         /* ------------------------------------------------------------ */

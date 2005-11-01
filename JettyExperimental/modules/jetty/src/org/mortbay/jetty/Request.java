@@ -1019,7 +1019,6 @@ public class Request implements HttpServletRequest
     {
         // TODO lookup user role link in context!!!
         
-        // TODO Auto-generated method stub
         return false;
     }
 

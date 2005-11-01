@@ -50,18 +50,20 @@ public class TestFilter implements Filter
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException
     {
-        // long start = System.currentTimeMillis();
+        Integer old_value=null;
         try
         {
-            request.setAttribute("testFilter", "value");
-            request.setAttribute("testFilter", "value2");
+            old_value=(Integer)request.getAttribute("testFilter");
+            Integer value=(old_value==null)?new Integer(1):new Integer(old_value.intValue()+1);
+            
+            request.setAttribute("testFilter", value);
+            _context.setAttribute("request"+request.hashCode(),value);
             chain.doFilter(request, response);
         }
         finally
         {
-            request.setAttribute("testFilter", null);
-            // HttpServletRequest srequest = (HttpServletRequest)request;
-            // _context.log((System.currentTimeMillis()-start)+"ms handling "+srequest.getRequestURI()+(srequest.getQueryString()==null?"":("?"+srequest.getQueryString())));
+            request.setAttribute("testFilter", old_value);
+            _context.setAttribute("request"+request.hashCode(),old_value);
         }
     }
 
@@ -71,8 +73,6 @@ public class TestFilter implements Filter
      */
     public void destroy()
     {
-        // TODO Auto-generated method stub
-
     }
 
 }

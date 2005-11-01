@@ -17,6 +17,7 @@ package org.mortbay.jetty.webapp;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -111,8 +112,6 @@ public class WebXmlConfiguration implements Configuration
         xmlParser.redirectEntity("http://www.w3.org/2001/datatypes.dtd",datatypesdtd);
         xmlParser.redirectEntity("j2ee_web_services_client_1_1.xsd",webservice11xsd);
         xmlParser.redirectEntity("http://www.ibm.com/webservices/xsd/j2ee_web_services_client_1_1.xsd",webservice11xsd);
-        
-        // TODO add the javaee_5 xsds
         
         return xmlParser;
     }
@@ -394,27 +393,42 @@ public class WebXmlConfiguration implements Configuration
     protected void initFilterMapping(XmlParser.Node node)
     {
         String filter_name=node.getString("filter-name",false,true);
-        String servlet_name=node.getString("servlet-name",false,true);
         
         
         
         FilterMapping mapping = new FilterMapping();
         
-        // TODO handle * servlet name
         mapping.setFilterName(filter_name);
-        mapping.setServletName(servlet_name);
         
-        // TODO multiple URL-patterns
-        mapping.setPathSpec(node.getString("url-pattern",false,true));
+        ArrayList paths = new ArrayList();
+        Iterator iter=node.iterator("url-pattern");
+        while(iter.hasNext())
+        {
+            String p=((XmlParser.Node)iter.next()).toString(false,true);
+            paths.add(p);
+        }
+        mapping.setPathSpecs((String[])paths.toArray(new String[paths.size()]));
+        
+
+        ArrayList names = new ArrayList();
+        iter=node.iterator("servlet-name");
+        while(iter.hasNext())
+        {
+            String n=((XmlParser.Node)iter.next()).toString(false,true);
+            names.add(n);
+        }
+        mapping.setServletNames((String[])names.toArray(new String[names.size()]));
+        
+        
         int dispatcher=Handler.DEFAULT;
-        
-        Iterator iter=node.iterator("dispatcher");
+        iter=node.iterator("dispatcher");
         while(iter.hasNext())
         {
             String d=((XmlParser.Node)iter.next()).toString(false,true);
             dispatcher|=Dispatcher.type(d);
         }
         mapping.setDispatches(dispatcher);
+        
         _filterMappings=LazyList.add(_filterMappings,mapping);
     }
 
@@ -492,20 +506,19 @@ public class WebXmlConfiguration implements Configuration
     protected void initServletMapping(XmlParser.Node node)
     {
         String servlet_name = node.getString("servlet-name",false,true);
+        ServletMapping mapping = new ServletMapping();
+        mapping.setServletName(servlet_name);
 
-        // TODO perhaps had multiple patterns to one mapping.
+        ArrayList paths = new ArrayList();
         Iterator iter=node.iterator("url-pattern");
         while(iter.hasNext())
         {
-            XmlParser.Node patternNode=(XmlParser.Node)iter.next();
-            String pattern=patternNode.toString(false,true);
-
-            ServletMapping mapping = new ServletMapping();
-            mapping.setServletName(servlet_name);
-            mapping.setPathSpec(pattern);
-
-            _servletMappings=LazyList.add(_servletMappings,mapping);
+            String p=((XmlParser.Node)iter.next()).toString(false,true);
+            paths.add(p);
         }
+        mapping.setPathSpecs((String[])paths.toArray(new String[paths.size()]));
+        
+        _servletMappings=LazyList.add(_servletMappings,mapping);
     }
 
     /* ------------------------------------------------------------ */

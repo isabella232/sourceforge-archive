@@ -22,6 +22,7 @@ import java.util.Locale;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.mortbay.io.IO;
 import org.mortbay.jetty.handler.ContextHandler;
@@ -130,8 +131,48 @@ public class Response implements HttpServletResponse
      */
     public String encodeURL(String url)
     {
-        // TODO Auto-generated method stub
-        return url;
+        Request request=_connection.getRequest();
+        
+        // should not encode if cookies in evidence
+        if (url==null || request==null || request.isRequestedSessionIdFromCookie())
+            return url;        
+        
+        // get session;
+        HttpSession session=request.getSession(false);
+        
+        // no session 
+        if (session == null)
+            return url;
+        
+        // invalid session
+        String id = session.getId();
+        if (id == null)
+            return url;
+        
+        // TODO Check host and port are for this server
+        
+        // Already encoded
+        int prefix=url.indexOf(SessionManager.__SessionUrlPrefix);
+        if (prefix!=-1)
+        {
+            int suffix=url.indexOf("?",prefix);
+            if (suffix<0)
+                suffix=url.indexOf("#",prefix);
+
+            if (suffix<=prefix)
+                return url.substring(0,prefix+SessionManager.__SessionUrlPrefix.length())+id;
+            return url.substring(0,prefix+SessionManager.__SessionUrlPrefix.length())+id+
+                url.substring(suffix);
+        }        
+        
+        // edit the session
+        int suffix=url.indexOf('?');
+        if (suffix<0)
+            suffix=url.indexOf('#');
+        if (suffix<0)
+            return url+SessionManager.__SessionUrlPrefix+id;
+        return url.substring(0,suffix)+
+            SessionManager.__SessionUrlPrefix+id+url.substring(suffix);
     }
 
     /* ------------------------------------------------------------ */
@@ -579,8 +620,6 @@ public class Response implements HttpServletResponse
             throw new IllegalStateException("Committed");
         if (_writer!=null)
             _writer.reset();
-        
-        // TODO Auto-generated method stub
     }
 
     /* ------------------------------------------------------------ */

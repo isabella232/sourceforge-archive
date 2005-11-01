@@ -161,7 +161,7 @@ public class HttpConnection
      */
     public boolean useDNS()
     {
-        // TODO Auto-generated method stub
+        // TODO configure
         return false;
     }
 
