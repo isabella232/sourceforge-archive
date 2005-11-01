@@ -5,3 +5,5 @@ lib
 start.jar
 work
 .settings
+webapps
+release.properties
