@@ -91,6 +91,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
     
     private Server _server;
     private Attributes _attributes;
+    private Attributes _contextAttributes;
     private ClassLoader _classLoader;
     private Context _context;
     private String _contextPath;
@@ -319,7 +320,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
         ClassLoader old_classloader=null;
         Thread current_thread=null;
         Object old_context=null;
-        
+        _contextAttributes=new AttributesMap();
         try
         {
             // Set the classloader
@@ -412,6 +413,9 @@ public class ContextHandler extends WrappedHandler implements Attributes
             if (_classLoader!=null)
                 current_thread.setContextClassLoader(old_classloader);
         }
+
+        _contextAttributes.clearAttributes();
+        _contextAttributes=null;
     }
     
     /* ------------------------------------------------------------ */
@@ -1123,7 +1127,10 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public Object getAttribute(String name)
         {
-            return ContextHandler.this.getAttribute(name);
+            Object o = _contextAttributes.getAttribute(name);
+            if (o==null)
+                o=ContextHandler.this.getAttribute(name);
+            return o;
         }
 
         /* ------------------------------------------------------------ */
@@ -1132,7 +1139,15 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public Enumeration getAttributeNames()
         {
-            return ContextHandler.this.getAttributeNames();
+            HashSet set = new HashSet();
+            Enumeration e = _contextAttributes.getAttributeNames();
+            while(e.hasMoreElements())
+                set.add(e.nextElement());
+            e = ContextHandler.this.getAttributeNames();
+            while(e.hasMoreElements())
+                set.add(e.nextElement());
+            
+            return Collections.enumeration(set);
         }
 
         /* ------------------------------------------------------------ */
@@ -1141,7 +1156,9 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public void setAttribute(String name, Object object)
         {
-            ContextHandler.this.setAttribute(name,object);
+            _contextAttributes.setAttribute(name,object);
+            if (object==null)
+                ContextHandler.this.setAttribute(name,object);
         }
 
         /* ------------------------------------------------------------ */
@@ -1150,6 +1167,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public void removeAttribute(String name)
         {
+            _contextAttributes.removeAttribute(name);
             ContextHandler.this.removeAttribute(name);
         }
 

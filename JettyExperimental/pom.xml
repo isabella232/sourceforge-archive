@@ -83,10 +83,15 @@
 
   <distributionManagement>
     <repository>
-      <id>MortBayMaven2</id>
-      <name>Mort Bay Maven2 Repository</name>
-      <url>scpexe://jetty.mortbay.org/home/ftp/pub/maven2</url> 
+      <id>MortBayRelease</id>
+      <name>Mort Bay Maven2 Release Repository</name>
+      <url>scpexe://jetty.mortbay.org/home/ftp/pub/maven2/release</url> 
     </repository> 
+    <snapshotRepository>
+      <id>MortBaySnapshot</id>
+      <name>Mort Bay Maven2 Snapshot Repository</name>
+      <url>scpexe://jetty.mortbay.org/home/ftp/pub/maven2/snapshot</url> 
+    </snapshotRepository> 
   </distributionManagement>
 
   <build>
