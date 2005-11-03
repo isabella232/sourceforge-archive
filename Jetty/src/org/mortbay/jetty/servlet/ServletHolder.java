@@ -414,7 +414,8 @@ public class ServletHolder extends Holder
         {
             // Handle aliased path
             if (_forcedPath!=null)
-                request.setAttribute("javax.servlet.include.servlet_path",_forcedPath);
+                // TODO complain about poor naming to the Jasper folks
+                request.setAttribute("org.apache.catalina.jsp_file",_forcedPath);
 
             // Handle run as
             if (_runAs!=null && _realm!=null)
