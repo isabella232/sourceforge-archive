@@ -467,7 +467,7 @@ public class UrlEncoded extends MultiMap
 
                 if (bytes==null)
                 {
-                    bytes=new byte[length*2];
+                    bytes=new byte[length];
                     encoded.getBytes(offset, offset+i, bytes, 0);
                     n=i;
                 }

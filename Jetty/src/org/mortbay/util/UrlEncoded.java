@@ -333,30 +333,22 @@ public class UrlEncoded extends MultiMap
             charset=StringUtil.__ISO_8859_1;
         byte[] bytes=null;
         int n=0;
-        StringBuffer buf=null;
         
         for (int i=0;i<length;i++)
         {
             char c = encoded.charAt(offset+i);
             if (c<0||c>0xff)
-                throw new IllegalArgumentException("Not decoded");
+                throw new IllegalArgumentException("Not encoded");
             
             if (c=='+')
             {
-                if (buf==null)
+                if (bytes==null)
                 {
-                    buf=new StringBuffer(length);
-                    for (int j=0;j<i;j++)
-                        buf.append(encoded.charAt(offset+j));
+                    bytes=new byte[length*2];
+                    encoded.getBytes(offset, offset+i, bytes, 0);
+                    n=i;
                 }
-                if (n>0)
-                {
-                    try {buf.append(new String(bytes,0,n,charset));}
-                    catch(UnsupportedEncodingException e)
-                    {buf.append(new String(bytes,0,n));}
-                    n=0;
-                }        
-                buf.append(' ');
+                bytes[n++] = (byte) ' ';
             }
             else if (c=='%' && (i+2)<length)
             {
@@ -375,46 +367,36 @@ public class UrlEncoded extends MultiMap
                     b=(byte)(b*16+10+cn-'A');
                 else
                     b=(byte)(b*16+cn-'0');
-                
-                if (buf==null)
+
+                if (bytes==null)
                 {
-                    buf=new StringBuffer(length);
-                    for (int j=0;j<i;j++)
-                        buf.append(encoded.charAt(offset+j));
+                    bytes=new byte[length*2];
+                    encoded.getBytes(offset, offset+i, bytes, 0);
+                    n=i;
                 }
                 i+=2;
-                if (bytes==null)
-                    bytes=new byte[length];
                 bytes[n++]=b;
             }
-            else if (buf!=null)
-            {
-                if (n>0)
-                {
-                    try {buf.append(new String(bytes,0,n,charset));}
-                    catch(UnsupportedEncodingException e)
-                    {buf.append(new String(bytes,0,n));}
-                    n=0;
-                }                
-                buf.append(c);
-            }
+            else if (n>0)
+                bytes[n++] = (byte) c;
         }
 
-        if (buf==null)
+        if (bytes==null)
         {
             if (offset==0 && encoded.length()==length)
                 return encoded;
             return encoded.substring(offset,offset+length);
         }
-
-        if (n>0)
+        
+        try
         {
-            try {buf.append(new String(bytes,0,n,charset));}
-            catch(UnsupportedEncodingException e)
-            {buf.append(new String(bytes,0,n));}
+            return new String(bytes,0,n,charset);
         }
-
-        return buf.toString();
+        catch (UnsupportedEncodingException e)
+        {
+            return new String(bytes,0,n);
+        }
+        
     }
     
     /* ------------------------------------------------------------ */
