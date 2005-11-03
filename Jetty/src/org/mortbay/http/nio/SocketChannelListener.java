@@ -180,7 +180,7 @@ public class SocketChannelListener extends ThreadPool implements HttpListener
      */
     public void customizeRequest(HttpConnection connection, HttpRequest request)
     {
-        // TODO Auto-generated method stub
+        // Nothing to do
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -189,7 +189,7 @@ public class SocketChannelListener extends ThreadPool implements HttpListener
      */
     public void persistConnection(HttpConnection connection)
     {
-        // TODO Auto-generated method stub
+        // TODO low resources check?
     }
 
     /* ------------------------------------------------------------------------------- */

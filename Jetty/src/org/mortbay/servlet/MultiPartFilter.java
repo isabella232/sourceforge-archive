@@ -276,7 +276,6 @@ public class MultiPartFilter implements Filter
      */
     public void destroy()
     {
-        // TODO Auto-generated method stub
     }
     
     private static class Wrapper extends HttpServletRequestWrapper
