@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry output="modules/javax-servlet/target/classes" kind="src" path="modules/javax-servlet/src"/>
+	<classpathentry output="modules/util/target/test-classes" kind="src" path="modules/util/test"/>
 	<classpathentry output="modules/maven-plugin/target/classes" kind="src" path="modules/maven-plugin/src/main/java"/>
 	<classpathentry output="modules/test-webapp/target/classes" kind="src" path="modules/test-webapp/src/main/java"/>
 	<classpathentry output="modules/jetty/target/classes" kind="src" path="modules/jetty/src"/>
@@ -18,5 +19,6 @@
 	<classpathentry kind="lib" path="lib/jsp/jasper-compiler-5.5.9.jar"/>
 	<classpathentry kind="lib" path="lib/jsp/jasper-compiler-jdt-5.5.9.jar"/>
 	<classpathentry kind="lib" path="lib/jsp/jasper-runtime-5.5.9.jar"/>
+	<classpathentry kind="var" path="M2_REPO/junit/junit/3.8.1/junit-3.8.1.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

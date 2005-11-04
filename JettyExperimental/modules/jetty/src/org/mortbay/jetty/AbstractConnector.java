@@ -394,7 +394,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
             {
                 if (_requestBuffers.size()==0)
                     return newBuffer(size);
-                return (Buffer) _requestBuffers.remove(_headerBuffers.size()-1);
+                return (Buffer) _requestBuffers.remove(_requestBuffers.size()-1);
             }   
         }
         
