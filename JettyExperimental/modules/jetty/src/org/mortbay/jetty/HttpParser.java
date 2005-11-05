@@ -73,7 +73,7 @@ public class HttpParser implements HttpTokens
     private EventHandler _handler;
     private View _tok0; // Saved token: header name, request method or response version
     private View _tok1; // Saved token: header value, request URI or response code
-    private String _continuation;
+    private String _multiLineValue;
     private boolean _response = false;
 
     /* ------------------------------------------------------------------------------- */
@@ -348,7 +348,7 @@ public class HttpParser implements HttpTokens
                         _state = STATE_HEADER;
                         _tok0.setPutIndex(_tok0.getIndex());
                         _tok1.setPutIndex(_tok1.getIndex());
-                        _continuation = null;
+                        _multiLineValue = null;
                         return;
                     }
                     break;
@@ -364,11 +364,11 @@ public class HttpParser implements HttpTokens
                     else
                     {
                         // handler last header if any
-                        if (_tok0.length() > 0 || _tok1.length() > 0 || _continuation != null)
+                        if (_tok0.length() > 0 || _tok1.length() > 0 || _multiLineValue != null)
                         {
                             Buffer header = HttpHeaders.CACHE.lookup(_tok0);
-                            Buffer value = _continuation == null ? (Buffer) _tok1
-                                    : (Buffer) new ByteArrayBuffer(_continuation);
+                            Buffer value = _multiLineValue == null ? (Buffer) _tok1
+                                    : (Buffer) new ByteArrayBuffer(_multiLineValue);
 
                             int ho = HttpHeaders.CACHE.getOrdinal(header);
                             if (ho >= 0)
@@ -418,7 +418,7 @@ public class HttpParser implements HttpTokens
                             _handler.parsedHeader(header, value);
                             _tok0.setPutIndex(_tok0.getIndex());
                             _tok1.setPutIndex(_tok1.getIndex());
-                            _continuation = null;
+                            _multiLineValue = null;
                         }
 
                         
@@ -445,7 +445,7 @@ public class HttpParser implements HttpTokens
                                     if(_buffers!=null && _buffer==_header)
                                     {
                                         _buffer=_buffers.getBuffer(_contentBufferSize);
-                                        _buffer.put(_header); // TODO try to avoid this?
+                                        _buffer.put(_header); 
                                         _header.clear();
                                         
                                     }
@@ -456,7 +456,7 @@ public class HttpParser implements HttpTokens
                                 	if(_buffers!=null && _buffer==_header)
                                 	{
                                 	    _buffer=_buffers.getBuffer(_contentBufferSize);
-                                	    _buffer.put(_header); // TODO try to avoid this?
+                                	    _buffer.put(_header); 
                                         _header.clear();
                                 	}
                                     _handler.headerComplete(); // May recurse here !
@@ -472,7 +472,7 @@ public class HttpParser implements HttpTokens
                                 	if(_buffers!=null && _buffer==_header && _contentLength>_buffer.capacity()-_buffer.getIndex())
                                     {
                                 	    _buffer=_buffers.getBuffer(_contentBufferSize);
-                                	    _buffer.put(_header); // TODO try to avoid this?
+                                	    _buffer.put(_header); 
                                         _header.clear();
                                     }
                                     _handler.headerComplete(); // May recurse here !
@@ -523,9 +523,9 @@ public class HttpParser implements HttpTokens
                             {
                                 // Continuation line!
                                 // TODO - deal with CR LF and COLON?
-                                if (_continuation == null) _continuation = _tok1.toString();
+                                if (_multiLineValue == null) _multiLineValue = _tok1.toString();
                                 _tok1.update(_buffer.markIndex(), _buffer.markIndex() + _length);
-                                _continuation += " " + _tok1.toString();
+                                _multiLineValue += " " + _tok1.toString();
                             }
                         }
                         _eol = ch;

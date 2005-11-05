@@ -17,19 +17,25 @@ package org.mortbay.util.ajax;
 
 public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
 {
+    Object _mutex;
     Object _object;
     Object _event;
     boolean _waited;
     boolean _new=true;
     boolean _pending=true;
     
+    WaitingContinuation(Object mutex)
+    {
+        _mutex=mutex==null?this:mutex;
+    }
+    
     public void resume(Object object)
     {
-        synchronized (this)
+        synchronized (_mutex)
         {
             _event=object==null?this:object;
             _pending=false;
-            notify();
+            _mutex.notify();
         }
     }
 
@@ -43,7 +49,7 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
         if (timeout < 0)
             throw new IllegalArgumentException();
         
-        synchronized (this)
+        synchronized (_mutex)
         {
             _new=false;
             try
@@ -51,7 +57,7 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
                 if (!_waited && _event==null && timeout>0)
                 {
                     _waited=true;
-                    wait(timeout);
+                    _mutex.wait(timeout);
                 }
             }
             catch (InterruptedException e)

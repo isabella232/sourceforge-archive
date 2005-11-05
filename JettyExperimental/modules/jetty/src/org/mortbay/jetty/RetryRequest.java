@@ -15,9 +15,10 @@
 
 package org.mortbay.jetty;
 
+import java.util.HashMap;
+
 
 public class RetryRequest extends RuntimeException
 {
-    private static final long serialVersionUID = 1939935091196907199L;
-    
+    private HashMap idMap;
 }

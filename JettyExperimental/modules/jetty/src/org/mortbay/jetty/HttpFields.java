@@ -315,6 +315,7 @@ public class HttpFields
      */
     public String getStringField(String name)
     {
+        // TODO - really reuse strings from previous requests!
         Field field = getField(name);
         if (field != null && field._revision == _revision) return field._value.toString();
         return null;
@@ -328,6 +329,7 @@ public class HttpFields
      */
     public String getStringField(Buffer name)
     {
+        // TODO - really reuse strings from previous requests!
         Field field = getField(name);
         if (field != null && field._revision == _revision) return field._value.toString();
         return null;
@@ -1239,19 +1241,18 @@ public class HttpFields
 
         /* ------------------------------------------------------------ */
         /**
-         * Reassign a value to this field. Checks if the value is the same as that in the char
+         * Reassign a value to this field. Checks if the string value is the same as that in the char
          * array, if so then just reuse existing value.
          */
         private void reset(Buffer value, long numValue, int revision)
         {
             if (_value == null)
             {
-                _value = new View(value);
+                _value = value.isImmutable() ? value : new View(value);
                 _numValue = numValue;
             }
             else if (!_value.equals(value))
             {
-                // TODO - the chances of this being right are small, as no copy is made!
                 if (value.isImmutable())
                     _value = value;
                 else if (_value instanceof View)

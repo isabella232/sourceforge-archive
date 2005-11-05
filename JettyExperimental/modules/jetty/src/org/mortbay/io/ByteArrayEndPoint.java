@@ -128,7 +128,9 @@ public class ByteArrayEndPoint implements EndPoint
             throw new IOException("CLOSED");
         if (_in.length()<=0)
             return -1;
-        return buffer.put(_in);
+        int len = buffer.put(_in);
+        _in.skip(len);
+        return len;
     }
 
     /* ------------------------------------------------------------ */
@@ -139,7 +141,9 @@ public class ByteArrayEndPoint implements EndPoint
     {
         if (_closed)
             throw new IOException("CLOSED");
-        return _out.put(buffer);
+        int len = _out.put(buffer);
+        buffer.skip(len);
+        return len;
     }
 
     /* ------------------------------------------------------------ */
@@ -152,17 +156,29 @@ public class ByteArrayEndPoint implements EndPoint
             throw new IOException("CLOSED");
         int flushed=0;
         if (header!=null && header.length()>0)
-            flushed+=_out.put(header);
+        {
+            int len=_out.put(header);
+            header.skip(len);
+            flushed+=len;
+        }
         
         if (header==null || header.length()==0)
         {
             if (buffer!=null && buffer.length()>0)
-                flushed+=_out.put(buffer);
+            {
+                int len=_out.put(buffer);
+                buffer.skip(len);
+                flushed+=len;
+            }
             
             if (buffer==null || buffer.length()==0)
             {
                 if (trailer!=null && trailer.length()>0)
-                    flushed+=_out.put(trailer);
+                {
+                    int len=_out.put(trailer);
+                    trailer.skip(len);
+                    flushed+=len;
+                }
             }
         }
         

@@ -25,12 +25,12 @@ import javax.servlet.http.HttpServletRequest;
  */
 public class ContinuationSupport
 {
-    public static Continuation getContinuation(HttpServletRequest request, boolean create)
+    public static Continuation getContinuation(HttpServletRequest request, boolean create, Object lock)
     {
         Object c=request.getAttribute(create?"org.mortbay.jetty.ajax.Continuation.create":"org.mortbay.jetty.ajax.Continuation");
         Continuation continuation = (Continuation) c;
-        if (continuation==null)
-            continuation=new WaitingContinuation();
+        if (continuation==null && create==true)
+            continuation=new WaitingContinuation(lock);
         return continuation;
     }
 }

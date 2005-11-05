@@ -26,6 +26,7 @@ import javax.servlet.http.HttpSession;
 
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
+import org.mortbay.jetty.RetryRequest;
 import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.WrappedHandler;
 import org.slf4j.Logger;
@@ -91,7 +92,7 @@ public class SessionHandler extends WrappedHandler
             throws IOException, ServletException
     {
         boolean result=false;
-        Request jetty_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
+        Request base_request = (request instanceof Request) ? (Request)request:HttpConnection.getCurrentConnection().getRequest();
         SessionManager old_session_manager=null;
         HttpSession old_session=null;
         
@@ -144,27 +145,40 @@ public class SessionHandler extends WrappedHandler
                     }
                 }
                 
-                jetty_request.setRequestedSessionId(requested_session_id);
-                jetty_request.setRequestedSessionIdFromCookie(requested_session_id!=null && requested_session_id_from_cookie);
+                base_request.setRequestedSessionId(requested_session_id);
+                base_request.setRequestedSessionIdFromCookie(requested_session_id!=null && requested_session_id_from_cookie);
             }
             
-            old_session_manager = jetty_request.getSessionManager();
-            old_session = jetty_request.getSession(false);
+            old_session_manager = base_request.getSessionManager();
+            old_session = base_request.getSession(false);
             
-            jetty_request.setSessionManager(_sessionManager);
-            jetty_request.setSession(null);
+            base_request.setSessionManager(_sessionManager);
+            base_request.setSession(null);
             
             HttpSession session=request.getSession(false);
             if (session!=null)
                 ((SessionManager.Session)session).access();
+            else
+            {
+                session=base_request.recoverNewSession(_sessionManager);
+                if (session!=null)
+                    base_request.setSession(session);
+            }
             if(log.isDebugEnabled())log.debug("session="+session);
             
-            result=getHandler().handle(target, jetty_request, response, dispatch);
+            result=getHandler().handle(target, base_request, response, dispatch);
+        }
+        catch (RetryRequest r)
+        {
+            HttpSession session=base_request.getSession(false);
+            if (session!=null && session.isNew())
+                base_request.saveNewSession(_sessionManager,session);
+            throw r;
         }
         finally
         {
-            jetty_request.setSessionManager(old_session_manager);
-            jetty_request.setSession(old_session);
+            base_request.setSessionManager(old_session_manager);
+            base_request.setSession(old_session);
         }
         return result;
     }

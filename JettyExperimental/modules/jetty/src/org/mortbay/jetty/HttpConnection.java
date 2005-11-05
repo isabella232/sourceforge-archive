@@ -60,7 +60,6 @@ public class HttpConnection
     private HttpFields _responseFields;
     private Response _response;
     private Output _out;
-    private RetryRequest _retry;
 
     private transient Buffer _content;
     private transient int _connection = UNKNOWN;
@@ -634,17 +633,6 @@ public class HttpConnection
     HttpGenerator getGenerator()
     {
         return _generator;
-    }
-
-    /* ------------------------------------------------------------ */
-    public RetryRequest getRetryRequest()
-    {
-        return _retry;
-    }
-
-    public void setRetryRequest(RetryRequest retry)
-    {
-        _retry = retry;
     }
 
 }

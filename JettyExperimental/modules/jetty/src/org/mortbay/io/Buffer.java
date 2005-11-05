@@ -38,10 +38,10 @@ import java.io.OutputStream;
 public interface Buffer extends Cloneable
 {
     public final static int 
-      IMMUTABLE=0,
-      READONLY=1,
-      READWRITE=2;
-    public final boolean VOLATILE=true;
+      IMMUTABLE=0,  // neither indexes or contexts can be changed
+      READONLY=1,   // indexes may be changed, but not content
+      READWRITE=2;  // anything can be changed
+    public final boolean VOLATILE=true;     // The buffer may change outside of current scope.
     public final boolean NON_VOLATILE=false;
 
     /**
@@ -232,7 +232,7 @@ public interface Buffer extends Cloneable
     /**
      * Put the contents of the buffer at the specific index.
      * @param index an <code>int</code> value
-     * @param src a <code>Buffer</code>. If the source buffer is immutable, it is not modified, otherwise it's getIndex is updated.
+     * @param src a <code>Buffer</code>. If the source buffer is not modified
     
      * @return The number of bytes actually poked
      */

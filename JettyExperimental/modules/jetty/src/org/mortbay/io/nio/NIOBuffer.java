@@ -116,8 +116,6 @@ public class NIOBuffer extends AbstractBuffer
         if (array!=null)
         {
             int length = poke(index,array,src.getIndex(),src.length());
-            if (!src.isImmutable())
-                src.setGetIndex(src.getIndex()+length);
             return length;
         }
         else
@@ -139,8 +137,6 @@ public class NIOBuffer extends AbstractBuffer
                     
                     _buf.position(index);
                     _buf.put(src_bytebuf);
-                    if (!src.isImmutable())
-                        src.setGetIndex(src.getIndex()+length);
                     return length;
                 }
                 finally

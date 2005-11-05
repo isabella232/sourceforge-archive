@@ -139,11 +139,7 @@ public abstract class AbstractBuffer implements Buffer
                 if (array != null)
                     Portable.arraycopy(array(), s, array(), 0, length);
                 else
-                {
                     poke(0, peek(s, length));
-                    // for (int i = length; i-- > 0;)
-                    //     poke(i, peek(s + i));
-                }
             }
             if (markIndex() > 0) setMarkIndex(markIndex() - s);
             setGetIndex(getIndex() - s);
@@ -359,9 +355,6 @@ public abstract class AbstractBuffer implements Buffer
             for (int i=0;i<length;i++)
                 poke(index++,src.peek(s++));
         }
-        
-        if (!src.isImmutable())
-            src.setGetIndex(src.getIndex()+length);
         
         return length;
     }

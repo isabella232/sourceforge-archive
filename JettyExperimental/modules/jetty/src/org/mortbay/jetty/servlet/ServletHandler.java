@@ -539,6 +539,7 @@ public class ServletHandler extends WrappedHandler
         
         if (_servlets!=null)
         {
+            
             // Sort and Initialize servlets
             ServletHolder[] servlets = (ServletHolder[])_servlets.clone();
             Arrays.sort(servlets);
@@ -546,6 +547,17 @@ public class ServletHandler extends WrappedHandler
             {
                 try
                 {
+                    if (servlets[i].getClassName()==null && servlets[i].getForcedPath()!=null)
+                    {
+                        ServletHolder forced_holder = (ServletHolder)_servletPathMap.match(servlets[i].getForcedPath());
+                        if (forced_holder==null)
+                        {    
+                            mx.add(new IllegalStateException("No servlet for "+servlets[i].getForcedPath()));
+                            continue;
+                        }
+                        servlets[i].setClassName(forced_holder.getClassName());
+                    }
+                    
                     servlets[i].start();
                 }
                 catch(Exception e)

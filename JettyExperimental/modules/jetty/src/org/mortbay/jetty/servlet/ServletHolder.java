@@ -101,7 +101,8 @@ public class ServletHolder extends Holder
                 return 1;
             if (sh._initOrder>_initOrder)
                 return -1;
-            int c=_className.compareTo(sh._className);
+            
+            int c=(_className!=null && sh._className!=null)?_className.compareTo(sh._className):0;
             if (c==0)
                 c=_name.compareTo(sh._name);
             if (c==0)

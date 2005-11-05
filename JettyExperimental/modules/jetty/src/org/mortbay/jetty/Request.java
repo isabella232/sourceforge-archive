@@ -27,6 +27,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.EventListener;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -110,6 +111,7 @@ public class Request implements HttpServletRequest
     private String _timeStampStr;
     private Continuation _continuation;
     private Object _requestAttributeListeners;
+    private Map _savedNewSessions;
     
     /* ------------------------------------------------------------ */
     /**
@@ -150,6 +152,9 @@ public class Request implements HttpServletRequest
         _reader=null; 
         _cookiesExtracted=false;
         _continuation=null;
+        if (_savedNewSessions!=null)
+            _savedNewSessions.clear();
+        _savedNewSessions=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -1480,5 +1485,19 @@ public class Request implements HttpServletRequest
         _requestAttributeListeners= LazyList.remove(_requestAttributeListeners, listener);
     }
 
+    /* ------------------------------------------------------------ */
+    public void saveNewSession(Object key,HttpSession session)
+    {
+        if (_savedNewSessions==null)
+            _savedNewSessions=new HashMap();
+        _savedNewSessions.put(key,session);
+    }
+    /* ------------------------------------------------------------ */
+    public HttpSession recoverNewSession(Object key)
+    {
+        if (_savedNewSessions==null)
+            return null;
+        return (HttpSession) _savedNewSessions.get(key);
+    }
 }
 

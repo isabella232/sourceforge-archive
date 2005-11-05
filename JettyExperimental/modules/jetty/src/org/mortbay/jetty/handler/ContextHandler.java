@@ -456,9 +456,10 @@ public class ContextHandler extends WrappedHandler implements Attributes
                         return true;
                     }
                 }
-                else if (target.startsWith(_contextPath))
+                else if (target.startsWith(_contextPath) && (_contextPath.length()==1 || target.charAt(_contextPath.length())=='/'))
                 {
-                    target=target.substring(_contextPath.length());
+                    if (_contextPath.length()>1)
+                        target=target.substring(_contextPath.length());
                 }
                 else 
                 {

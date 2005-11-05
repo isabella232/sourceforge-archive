@@ -524,10 +524,11 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     {
         _integralScheme = integralScheme;
     }
-    
+
+    /* ------------------------------------------------------------ */
     public Continuation newContinuation()
     {
-        return new WaitingContinuation();
+        return null;
     }
     
     /* ------------------------------------------------------------ */

@@ -201,4 +201,31 @@ public class BufferTest extends TestCase
 
     }
 
+    public void testView()
+    {
+        Buffer b = new ByteArrayBuffer(" Test 1234 ".getBytes());
+        b.setGetIndex(b.getIndex()+1);
+        b.setPutIndex(b.putIndex()-1);
+        View v0 = new View(b);
+        View v1 = new View(b);
+        View v2 = new View(v0);
+        
+        String s=b.toString();
+        String s0=v0.toString();
+        String s1=v1.toString();
+        String s2=v2.toString();
+        String s3=v0.toString();
+        String s4=v1.toString();
+        String s5=v2.toString();
+        
+        assertEquals(s, s0);
+        assertEquals(s0, s1);
+        assertEquals(s1, s2);
+        assertEquals(s2, s3);
+        assertEquals(s3, s4);
+        assertEquals(s4, s5);
+        
+    }
+    
+
 }

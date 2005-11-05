@@ -21,6 +21,7 @@ import junit.framework.TestCase;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
+import org.mortbay.io.View;
 
 /* ------------------------------------------------------------------------------- */
 /**
@@ -372,5 +373,18 @@ public class HttpHeaderTest extends TestCase
         assertEquals("-47",header.getStringField("I6"));
        
     }
-    
+
+    public void testToString()
+        throws Exception
+    {
+        HttpFields header = new HttpFields();
+        
+        header.put(new ByteArrayBuffer("name0"), new View(new ByteArrayBuffer("value0")));
+        header.put(new ByteArrayBuffer("name1"), new View(new ByteArrayBuffer("value1".getBytes())));
+        String s1=header.toString();
+        String s2=header.toString();
+        System.err.println(s1);
+        System.err.println(s2);
+        assertEquals(s1,s2);
+    }
 }

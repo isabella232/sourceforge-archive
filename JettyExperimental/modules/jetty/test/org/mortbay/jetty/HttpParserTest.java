@@ -334,6 +334,8 @@ public class HttpParserTest extends TestCase
     
     class Handler extends HttpParser.EventHandler
     {   
+        HttpFields fields;
+        
         public void content(int index, Buffer ref)
         {
             if (index == 0)
@@ -354,11 +356,13 @@ public class HttpParserTest extends TestCase
             else
                 f2=null;
             
+            fields=new HttpFields();
             // System.out.println(f0+" "+f1+" "+f2);
         }
 
         public void parsedHeader(Buffer name, Buffer value)
         {
+            fields.add(name, value);
             hdr[++h]= name.toString();
             val[h]= value.toString();
         }
@@ -366,6 +370,14 @@ public class HttpParserTest extends TestCase
         public void headerComplete()
         {
             _content= null;
+            String s0=fields.toString();
+            String s1=fields.toString();
+            if (!s0.equals(s1))
+            {
+                System.err.println(s0);
+                System.err.println(s1);
+                throw new IllegalStateException();
+            }
         }
 
         public void messageComplete(int contentLength)

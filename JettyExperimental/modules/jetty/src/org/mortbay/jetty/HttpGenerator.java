@@ -296,7 +296,8 @@ public class HttpGenerator implements HttpTokens
             if (_buffer == null) _buffer = _buffers.getBuffer(_contentBufferSize);
 
             // Copy _content to buffer;
-            _buffer.put(_content);
+            int len=_buffer.put(_content);
+            _content.skip(len);
             if (_content.length() == 0) _content = null;
         }
     }
@@ -666,7 +667,8 @@ public class HttpGenerator implements HttpTokens
             // Refill buffer if possible
             if (_content != null && _content.length() > 0 && _buffer != null && _buffer.space() > 0)
             {
-                _buffer.put(_content);
+                int len = _buffer.put(_content);
+                _content.skip(len);
                 if (_content.length() == 0) _content = null;
             }
 
