@@ -7,6 +7,7 @@ Jetty-6.0.0Beta1
     + Implemented all listeners
     + Error pages
     + Virtual hosts
+    + Multiple select sets
 
 Jetty-6.0.0Beta0
     + Maven 2 build
