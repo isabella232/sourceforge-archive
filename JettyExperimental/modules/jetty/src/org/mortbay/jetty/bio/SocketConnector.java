@@ -86,7 +86,7 @@ public class SocketConnector extends AbstractConnector
     }
     
     /* ------------------------------------------------------------ */
-    public void accept()
+    public void accept(int acceptorID)
     	throws IOException, InterruptedException
     {   
         Socket socket = _serverSocket.accept();

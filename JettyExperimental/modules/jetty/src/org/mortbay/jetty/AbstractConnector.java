@@ -63,6 +63,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     private String _confidentialScheme=HttpSchemes.HTTPS;
     private int _confidentialPort=0;
     private int _acceptQueueSize=0;
+    private int _acceptors=1;
     
     protected long _maxIdleTime=30000; 
     protected long _soLingerTime=1000; 
@@ -72,7 +73,8 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     private transient ArrayList _headerBuffers;
     private transient ArrayList _requestBuffers;
     private transient ArrayList _responseBuffers;
-    private transient Thread _acceptorThread;
+    private transient Thread[] _acceptorThread;
+   
     
     
     /* ------------------------------------------------------------------------------- */
@@ -273,6 +275,24 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     
     /* ------------------------------------------------------------ */
     /**
+     * @return Returns the number of acceptor threads.
+     */
+    public int getAcceptors()
+    {
+        return _acceptors;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param acceptQueueSize The number of acceptor threads to set.
+     */
+    public void setAcceptors(int acceptors)
+    {
+        _acceptors = acceptors;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
      * @param soLingerTime The soLingerTime to set.
      */
     public void setSoLingerTime(long soLingerTime)
@@ -313,7 +333,9 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
             _handler.stop();
         
         if (_acceptorThread != null)
-            _acceptorThread.interrupt();
+            for (int i=0;i<_acceptorThread.length;i++)
+                if (_acceptorThread[i]!=null)
+                    _acceptorThread[i].interrupt();
         _acceptorThread=null;
         _address=null;
         
@@ -333,8 +355,11 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     /* ------------------------------------------------------------ */
     public void join() throws InterruptedException
     {
-        if (_acceptorThread!=null)
-            _acceptorThread.join();
+        Thread[] threads=_acceptorThread;
+        if (threads!=null)
+            for (int i=0;i<threads.length;i++)
+                if (threads[i]!=null)
+                    threads[i].join();
     }
 
     /* ------------------------------------------------------------ */
@@ -532,7 +557,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     }
     
     /* ------------------------------------------------------------ */
-    protected abstract void accept() throws IOException, InterruptedException;
+    protected abstract void accept(int acceptorID) throws IOException, InterruptedException;
 
     /* ------------------------------------------------------------ */
     public String toString()
@@ -546,19 +571,31 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     /* ------------------------------------------------------------ */
     private class Acceptor implements Runnable
     {
+        int _acceptor=0;
+        
         /* ------------------------------------------------------------ */
         public void run()
         {   
-            _acceptorThread=Thread.currentThread();
-            String name =_acceptorThread.getName();
-            _acceptorThread.setName(name+" - Acceptor "+AbstractConnector.this);
+            synchronized(AbstractConnector.this)
+            {
+                if (_acceptorThread==null)
+                    _acceptorThread=new Thread[_acceptors];
+                
+                while(_acceptorThread[_acceptor]!=null)
+                    _acceptor++;
+            
+                _acceptorThread[_acceptor]=Thread.currentThread();
+            }
+            String name =_acceptorThread[_acceptor].getName();
+            _acceptorThread[_acceptor].setName(name+" - Acceptor"+_acceptor+" "+AbstractConnector.this);
+            
             try
             {
                 while (isRunning() && getThreadPool().isRunning())
                 {
                     try
                     {
-                        accept(); 
+                        accept(_acceptor); 
                     }
                     catch(IOException e)
                     {

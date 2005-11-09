@@ -60,7 +60,6 @@ public class Server extends HandlerCollection implements Handler, ThreadPool
     
     /* ------------------------------------------------------------ */
     public Server()
-    	throws Exception
     {
     }
 

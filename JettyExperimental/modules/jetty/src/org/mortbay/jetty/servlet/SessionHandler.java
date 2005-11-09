@@ -158,14 +158,19 @@ public class SessionHandler extends WrappedHandler
             HttpSession session=request.getSession(false);
             if (session!=null)
                 ((SessionManager.Session)session).access();
-            else
+            else if (_sessionManager!=null)
             {
                 session=base_request.recoverNewSession(_sessionManager);
                 if (session!=null)
                     base_request.setSession(session);
             }
-            if(log.isDebugEnabled())log.debug("session="+session);
             
+            if(log.isDebugEnabled())
+            {
+                log.debug("sessionManager="+base_request.getSessionManager());
+                log.debug("session="+session);
+            }
+        
             result=getHandler().handle(target, base_request, response, dispatch);
         }
         catch (RetryRequest r)

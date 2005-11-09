@@ -107,7 +107,7 @@ public class SelectBlockingChannelConnector extends AbstractConnector
     }
 
     /* ------------------------------------------------------------ */
-    public void accept()
+    public void accept(int acceptorID)
     	throws IOException
     {      
         // Make any key changes required

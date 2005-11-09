@@ -105,4 +105,6 @@ public interface Connector extends LifeCycle, Buffers
     
     Continuation newContinuation();
     
+    void setHost(String hostname);
+    void setPort(int port);
 }
