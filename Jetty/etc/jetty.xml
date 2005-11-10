@@ -61,7 +61,6 @@
         <Set name="acceptQueueSize">0</Set>
         <Set name="ConfidentialPort">8443</Set>
         <Set name="IntegralPort">8443</Set>
-        <Set name="Acceptors">4</Set>
       </New>
     </Arg>
   </Call>

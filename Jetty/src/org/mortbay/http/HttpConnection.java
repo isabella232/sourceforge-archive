@@ -135,9 +135,7 @@ public class HttpConnection
         _request = new HttpRequest(this); 
         _response = new HttpResponse(this);
 
-        _resolveRemoteHost =
-            _listener!=null &&
-            _listener.getHttpServer().getResolveRemoteHost();
+        _resolveRemoteHost=_listener!=null && _listener.getHttpServer()!=null && _listener.getHttpServer().getResolveRemoteHost();
     }
 
     /* ------------------------------------------------------------ */
