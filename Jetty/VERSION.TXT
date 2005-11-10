@@ -1,7 +1,7 @@
 Jetty Versions
 --------------
 
-Jetty-5.1.5 - 3 November 2005
+Jetty-5.1.5 - 10 November 2005
  + Improved shutdown hook
  + Improved URL Decoding
 
