@@ -28,13 +28,11 @@ import org.mortbay.io.IO;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.ErrorHandler;
 import org.mortbay.jetty.servlet.ServletHandler;
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** Response.
@@ -42,9 +40,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class Response implements HttpServletResponse
-{
-    private static Logger log = LoggerFactory.getLogger(Response.class);
-    
+{   
     public static final int
         DISABLED=-1,
         NONE=0,
@@ -62,7 +58,7 @@ public class Response implements HttpServletResponse
         }
         catch (Exception e)
         {
-            log.error(LogSupport.EXCEPTION,e);
+            Log.warn(e);
         }
     }
     
@@ -209,7 +205,7 @@ public class Response implements HttpServletResponse
     public void sendError(int code, String message) throws IOException
     {
         if (isCommitted())
-            log.warn("Committed before "+code+" "+message);
+            Log.warn("Committed before "+code+" "+message);
         
         reset();
         message=message==null?HttpGenerator.getReason(code):message; 

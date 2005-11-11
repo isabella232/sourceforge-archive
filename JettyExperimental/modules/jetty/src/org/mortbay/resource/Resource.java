@@ -27,11 +27,9 @@ import java.util.Arrays;
 import java.util.Date;
 
 import org.mortbay.io.IO;
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /* ------------------------------------------------------------ */
@@ -43,7 +41,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class Resource implements Serializable
 {
-    private static Logger log = LoggerFactory.getLogger(Resource.class);
 
     Object _associate;
     
@@ -68,7 +65,7 @@ public abstract class Resource implements Serializable
             }
             catch(Exception e)
             {
-                log.debug(LogSupport.EXCEPTION,e);
+                Log.debug(Log.EXCEPTION,e);
                 return new BadResource(url,e.toString());
             }
         }
@@ -119,13 +116,13 @@ public abstract class Resource implements Serializable
                 }
                 catch(Exception e2)
                 {
-                    log.debug(LogSupport.EXCEPTION,e2);
+                    Log.debug(Log.EXCEPTION,e2);
                     throw e;
                 }
             }
             else
             {
-                log.warn("Bad Resource: "+resource);
+                Log.warn("Bad Resource: "+resource);
                 throw e;
             }
         }

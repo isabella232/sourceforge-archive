@@ -24,15 +24,12 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
 
 import org.mortbay.io.IO;
-import org.mortbay.log.LogSupport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.mortbay.log.Log;
 
 
 /* ------------------------------------------------------------ */
 public class JarResource extends URLResource
 {
-    private static Logger log = LoggerFactory.getLogger(JarResource.class);
 
     protected transient JarURLConnection _jarConnection;
     
@@ -60,7 +57,7 @@ public class JarResource extends URLResource
         }
         catch(IOException e)
         {
-            LogSupport.ignore(log,e);
+            Log.ignore(e);
             _jarConnection=null;
         }
         
@@ -108,7 +105,7 @@ public class JarResource extends URLResource
     public static void extract(Resource resource, File directory, boolean deleteOnExit)
         throws IOException
     {
-        if(log.isDebugEnabled())log.debug("Extract "+resource+" to "+directory);
+        if(Log.isDebugEnabled())Log.debug("Extract "+resource+" to "+directory);
         JarInputStream jin = new JarInputStream(resource.getInputStream());
         JarEntry entry=null;
         while((entry=jin.getNextJarEntry())!=null)

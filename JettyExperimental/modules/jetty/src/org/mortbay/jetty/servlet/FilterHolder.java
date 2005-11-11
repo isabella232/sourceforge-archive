@@ -22,8 +22,6 @@ import javax.servlet.FilterConfig;
 import javax.servlet.ServletContext;
 
 import org.mortbay.jetty.Handler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /* --------------------------------------------------------------------- */
 /** 
@@ -33,7 +31,6 @@ import org.slf4j.LoggerFactory;
 public class FilterHolder
     extends Holder
 {
-    private static Logger log = LoggerFactory.getLogger(FilterHolder.class);
 
     /* ------------------------------------------------------------ */
     /** Dispatch type from name

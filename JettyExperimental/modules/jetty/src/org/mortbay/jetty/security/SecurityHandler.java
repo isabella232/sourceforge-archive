@@ -30,9 +30,8 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.handler.WrappedHandler;
 import org.mortbay.jetty.servlet.PathMap;
+import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /* ------------------------------------------------------------ */
@@ -43,7 +42,6 @@ import org.slf4j.LoggerFactory;
  */
 public class SecurityHandler extends WrappedHandler
 {   
-    private static Logger log = LoggerFactory.getLogger(SecurityHandler.class);
 
     /* ------------------------------------------------------------ */
     private String _authMethod=Constraint.__BASIC_AUTH;
@@ -107,7 +105,7 @@ public class SecurityHandler extends WrappedHandler
         _constraintMappings=constraintMappings;
         if (_constraintMappings!=null)
         {
-            this._constraintMappings = (ConstraintMapping[])constraintMappings.clone();
+            this._constraintMappings = constraintMappings;
             _constraintMap.clear();
             
             for (int i=0;i<_constraintMappings.length;i++)
@@ -149,7 +147,7 @@ public class SecurityHandler extends WrappedHandler
             else if (Constraint.__FORM_AUTH.equalsIgnoreCase(_authMethod))
                 _authenticator=new FormAuthenticator();
             else
-                log.error("Unknown Authentication method:"+_authMethod);
+                Log.warn("Unknown Authentication method:"+_authMethod);
         }
         
         super.doStart();
@@ -388,7 +386,7 @@ public class SecurityHandler extends WrappedHandler
             else
             {
                 // don't know how authenticate
-                log.warn("Mis-configured Authenticator for " + request.getRequestURI());
+                Log.warn("Mis-configured Authenticator for " + request.getRequestURI());
                 response.sendError(Response.SC_INTERNAL_SERVER_ERROR,"Configuration error");
             }
 
@@ -412,7 +410,7 @@ public class SecurityHandler extends WrappedHandler
 
                 if (!inRole)
                 {
-                    log.warn("AUTH FAILURE: role for " + user.getName());
+                    Log.warn("AUTH FAILURE: role for " + user.getName());
                     if ("BASIC".equalsIgnoreCase(authenticator.getAuthMethod()))
                          ((BasicAuthenticator)authenticator).sendChallenge(realm, response);
                     else

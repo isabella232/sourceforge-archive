@@ -425,7 +425,7 @@ public interface ServletContext {
     /**
      *
      * Writes the specified message to a servlet log file, usually
-     * an event log. The name and type of the servlet log file is 
+     * an event Log. The name and type of the servlet log file is 
      * specific to the servlet container.
      *
      *
@@ -461,7 +461,7 @@ public interface ServletContext {
      * Writes an explanatory message and a stack trace
      * for a given <code>Throwable</code> exception
      * to the servlet log file. The name and type of the servlet log 
-     * file is specific to the servlet container, usually an event log.
+     * file is specific to the servlet container, usually an event Log.
      *
      *
      * @param message 		a <code>String</code> that 

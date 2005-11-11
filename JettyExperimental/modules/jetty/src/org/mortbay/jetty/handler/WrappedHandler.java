@@ -22,8 +22,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** HandlerCollection.
@@ -32,9 +30,6 @@ import org.slf4j.LoggerFactory;
  */
 public class WrappedHandler extends AbstractHandler
 {
-    
-    private static Logger log = LoggerFactory.getLogger(WrappedHandler.class);
-
     private Handler _handler;
 
     /* ------------------------------------------------------------ */

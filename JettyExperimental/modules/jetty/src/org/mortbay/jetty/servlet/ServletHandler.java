@@ -40,13 +40,11 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.jetty.handler.ContextHandler;
 import org.mortbay.jetty.handler.WrappedHandler;
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.URIUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /* --------------------------------------------------------------------- */
@@ -82,21 +80,19 @@ public class ServletHandler extends WrappedHandler
     
     /* ------------------------------------------------------------ */
     private static final boolean __Slosh2Slash=File.separatorChar=='\\';
-    private static Logger log = LoggerFactory.getLogger(ServletHandler.class);
 
     
     
     /* ------------------------------------------------------------ */
     private ContextHandler _contextHandler;
     private ContextHandler.Context _servletContext;
-    private FilterHolder[] _filters;
+    private FilterHolder[] _filterHolders;
     private FilterMapping[] _filterMappings;
     private boolean _filterChainsCached=true;
     
     private ServletHolder[] _servlets;
     private ServletMapping[] _servletMappings;
     
-    private Logger _contextLog;
     private boolean _initializeAtStart=true;
     
     private transient Map _filterNameMap;
@@ -124,24 +120,12 @@ public class ServletHandler extends WrappedHandler
         _servletContext=ContextHandler.getCurrentContext();
         _contextHandler=_servletContext.getContextHandler();
         
-        try
-        {
-        	_contextLog = LoggerFactory.getLogger(_servletContext.getServletContextName());
-        	if (_contextLog==null)
-        		_contextLog=log;
-        }
-        catch (Exception e)
-        {
-        	_contextLog=log;
-        	log.warn("Can't get context log for context="+_servletContext.getServletContextName()+", using default", e);
-        }
-
         updateMappings();
         
         if (isInitializeAtStart())
             initialize();
 
-        if(_filterChainsCached && _filters!=null && _filters.length>0)
+        if(_filterChainsCached && _filterHolders!=null && _filterHolders.length>0)
         {
             _chainCache=     new HashMap[]{null,new HashMap(),new HashMap(),null,new HashMap(),null,null,null,new HashMap()};
             _namedChainCache=new HashMap[]{null,null,new HashMap(),null,new HashMap(),null,null,null,new HashMap()};
@@ -156,11 +140,11 @@ public class ServletHandler extends WrappedHandler
         super.doStop();
         
         // Stop filters
-        if (_filters!=null)
+        if (_filterHolders!=null)
         {
-            for (int i=_filters.length; i-->0;)
+            for (int i=_filterHolders.length; i-->0;)
             {
-                try { _filters[i].stop(); }catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
+                try { _filterHolders[i].stop(); }catch(Exception e){Log.warn(Log.EXCEPTION,e);}
             }
         }
         
@@ -169,7 +153,7 @@ public class ServletHandler extends WrappedHandler
         {
             for (int i=_servlets.length; i-->0;)
             {
-                try { _servlets[i].stop(); }catch(Exception e){log.warn(LogSupport.EXCEPTION,e);}
+                try { _servlets[i].stop(); }catch(Exception e){Log.warn(Log.EXCEPTION,e);}
             }
         }
 
@@ -187,9 +171,9 @@ public class ServletHandler extends WrappedHandler
     /**
      * @return Returns the contextLog.
      */
-    public Logger getContextLog()
+    public Object getContextLog()
     {
-        return _contextLog;
+        return null;
     }
     /* ------------------------------------------------------------ */
     /**
@@ -206,7 +190,7 @@ public class ServletHandler extends WrappedHandler
      */
     public FilterHolder[] getFilters()
     {
-        return _filters;
+        return _filterHolders;
     }
     
     /* ------------------------------------------------------------ */
@@ -250,7 +234,7 @@ public class ServletHandler extends WrappedHandler
         }
         catch(Exception e)
         {
-            LogSupport.ignore(log,e);
+            Log.ignore(e);
         }
         return null;
     }
@@ -310,7 +294,7 @@ public class ServletHandler extends WrappedHandler
                 if (map!=null)
                 {
                     servlet_holder=(ServletHolder)map.getValue();
-                    if(log.isDebugEnabled())log.debug("servlet="+servlet_holder);
+                    if(Log.isDebugEnabled())Log.debug("servlet="+servlet_holder);
                     
                     String servlet_path_spec=(String)map.getKey(); 
                     String servlet_path=PathMap.pathMatch(servlet_path_spec,target);
@@ -339,10 +323,10 @@ public class ServletHandler extends WrappedHandler
                     chain=getFilterChain(type, null,servlet_holder);
             }
 
-            if (log.isDebugEnabled()) 
+            if (Log.isDebugEnabled()) 
             {
-                log.debug("chain="+chain);
-                log.debug("servelet holder="+servlet_holder);
+                Log.debug("chain="+chain);
+                Log.debug("servelet holder="+servlet_holder);
             }
             
             // Do the filter/handling thang
@@ -375,17 +359,17 @@ public class ServletHandler extends WrappedHandler
             if (th instanceof EOFException)
                 throw (IOException)th;
             else */ 
-            if (log.isDebugEnabled() || !( th instanceof java.io.IOException))
+            if (Log.isDebugEnabled() || !( th instanceof java.io.IOException))
             {
-                _contextLog.warn(request.getRequestURI()+": ",th);
-                if(log.isDebugEnabled())
+                Log.warn(request.getRequestURI()+": ",th);
+                if(Log.isDebugEnabled())
                 {
-                    log.warn(request.getRequestURI()+": ",th);
-                    log.debug(request.toString());
+                    Log.warn(request.getRequestURI()+": ",th);
+                    Log.debug(request.toString());
                 }
             }
             // TODO clean up
-            log.warn(request.getRequestURI(), th);
+            Log.warn(request.getRequestURI(), th);
             
             // TODO httpResponse.getHttpConnection().forceClose();
             if (!response.isCommitted())
@@ -404,12 +388,12 @@ public class ServletHandler extends WrappedHandler
                     response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,th.getMessage());
             }
             else
-                if(log.isDebugEnabled())log.debug("Response already committed for handling "+th);
+                if(Log.isDebugEnabled())Log.debug("Response already committed for handling "+th);
         }
         catch(Error e)
         {   
-            log.warn("Error for "+request.getRequestURI(),e);
-            if(log.isDebugEnabled())log.debug(request.toString());
+            Log.warn("Error for "+request.getRequestURI(),e);
+            if(Log.isDebugEnabled())Log.debug(request.toString());
             
             // TODO httpResponse.getHttpConnection().forceClose();
             if (!response.isCommitted())
@@ -419,7 +403,7 @@ public class ServletHandler extends WrappedHandler
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,e.getMessage());
             }
             else
-                if(log.isDebugEnabled())log.debug("Response already committed for handling ",e);
+                if(Log.isDebugEnabled())Log.debug("Response already committed for handling ",e);
         }
         finally
         {
@@ -531,10 +515,10 @@ public class ServletHandler extends WrappedHandler
         MultiException mx = new MultiException();
 
         // Start filters
-        if (_filters!=null)
+        if (_filterHolders!=null)
         {
-            for (int i=_filters.length; i-->0;)
-                _filters[i].start();
+            for (int i=_filterHolders.length; i-->0;)
+                _filterHolders[i].start();
         }
         
         if (_servlets!=null)
@@ -562,7 +546,7 @@ public class ServletHandler extends WrappedHandler
                 }
                 catch(Exception e)
                 {
-                    log.debug(LogSupport.EXCEPTION,e);
+                    Log.debug(Log.EXCEPTION,e);
                     mx.add(e);
                 }
             } 
@@ -629,17 +613,17 @@ public class ServletHandler extends WrappedHandler
         
         
         // update filter name map
-        if (_filters==null)
+        if (_filterHolders==null)
         {
             _filterNameMap=null;
         }
         else
         {   
             HashMap nm = new HashMap();
-            for (int i=0;i<_filters.length;i++)
+            for (int i=0;i<_filterHolders.length;i++)
             {
-                nm.put(_filters[i].getName(),_filters[i]);
-                _filters[i].setServletHandler(this);
+                nm.put(_filterHolders[i].getName(),_filterHolders[i]);
+                _filterHolders[i].setServletHandler(this);
             }
             _filterNameMap=nm;
         }
@@ -675,13 +659,13 @@ public class ServletHandler extends WrappedHandler
             }
         }
 
-        if (log.isDebugEnabled()) 
+        if (Log.isDebugEnabled()) 
         {
-            log.debug("filterNameMap="+_filterNameMap);
-            log.debug("pathFilters="+_filterPathMappings);
-            log.debug("servletFilterMap="+_filterNameMappings);
-            log.debug("servletPathMap="+_servletPathMap);
-            log.debug("servletNameMap="+_servletNameMap);
+            Log.debug("filterNameMap="+_filterNameMap);
+            Log.debug("pathFilters="+_filterPathMappings);
+            Log.debug("servletFilterMap="+_filterNameMappings);
+            Log.debug("servletPathMap="+_servletPathMap);
+            Log.debug("servletNameMap="+_servletNameMap);
         }
         
         
@@ -702,7 +686,7 @@ public class ServletHandler extends WrappedHandler
                   HttpServletResponse response)
         throws IOException
     {
-        if(log.isDebugEnabled())log.debug("Not Found "+request.getRequestURI());
+        if(Log.isDebugEnabled())Log.debug("Not Found "+request.getRequestURI());
         response.sendError(HttpServletResponse.SC_NOT_FOUND);
         
     }
@@ -710,10 +694,11 @@ public class ServletHandler extends WrappedHandler
     /**
      * @param contextLog The contextLog to set.
      */
-    public void setContextLog(Logger contextLog)
+    public void setContextLog(Object contextLog)
     {
-        _contextLog = contextLog;
+        // TODO
     }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param filterChainsCached The filterChainsCached to set.
@@ -740,7 +725,7 @@ public class ServletHandler extends WrappedHandler
      */
     public synchronized void setFilters(FilterHolder[] holders)
     {
-        _filters=holders;
+        _filterHolders=holders;
     }
     
     /* ------------------------------------------------------------ */
@@ -793,8 +778,8 @@ public class ServletHandler extends WrappedHandler
             // pass to next filter
             if (_filterHolder!=null)
             {
-                if (log.isDebugEnabled())
-                    log.debug("call filter " + _filterHolder);
+                if (Log.isDebugEnabled())
+                    Log.debug("call filter " + _filterHolder);
                 Filter filter= _filterHolder.getFilter();
                 filter.doFilter(request, response, _next);
                 return;
@@ -803,8 +788,8 @@ public class ServletHandler extends WrappedHandler
             // Call servlet
             if (_servletHolder != null)
             {
-                if (log.isDebugEnabled())
-                    log.debug("call servlet " + _servletHolder);
+                if (Log.isDebugEnabled())
+                    Log.debug("call servlet " + _servletHolder);
                 _servletHolder.handle(request, response);
             }
             else // Not found
@@ -840,13 +825,13 @@ public class ServletHandler extends WrappedHandler
         public void doFilter(ServletRequest request, ServletResponse response)
             throws IOException, ServletException
         {
-            if (log.isDebugEnabled()) log.debug("doFilter " + _filter);
+            if (Log.isDebugEnabled()) Log.debug("doFilter " + _filter);
 
             // pass to next filter
             if (_filter < LazyList.size(_filters))
             {
                 FilterHolder holder= (FilterHolder)LazyList.get(_filters, _filter++);
-                if (log.isDebugEnabled()) log.debug("call filter " + holder);
+                if (Log.isDebugEnabled()) Log.debug("call filter " + holder);
                 Filter filter= holder.getFilter();
                 filter.doFilter(request, response, this);
                 return;
@@ -855,7 +840,7 @@ public class ServletHandler extends WrappedHandler
             // Call servlet
             if (_servletHolder != null)
             {
-                if (log.isDebugEnabled()) log.debug("call servlet " + _servletHolder);
+                if (Log.isDebugEnabled()) Log.debug("call servlet " + _servletHolder);
                 _servletHolder.handle(request, response);
             }
             else // Not found

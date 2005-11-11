@@ -15,9 +15,7 @@
 
 package org.mortbay.thread;
 
-import org.mortbay.log.LogSupport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.mortbay.log.Log;
 
 
 /* ------------------------------------------------------------ */
@@ -34,7 +32,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Timeout
 {
-    private final static Logger log = LoggerFactory.getLogger(Timeout.class);
     
     private long _duration;
     private long _now;
@@ -99,7 +96,7 @@ public class Timeout
             }
             catch(Throwable th)
             {
-                log.warn(LogSupport.EXCEPTION,th);
+                Log.warn(Log.EXCEPTION,th);
             }
         }
     }

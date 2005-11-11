@@ -27,9 +27,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.security.Permission;
 
-import org.mortbay.log.LogSupport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.mortbay.log.Log;
 
 
 /* ------------------------------------------------------------ */
@@ -49,7 +47,6 @@ import org.slf4j.LoggerFactory;
  */
 public class FileResource extends URLResource
 {
-    private static Logger log = LoggerFactory.getLogger(Resource.class);
     private static boolean __checkAliases;
     static
     {
@@ -58,7 +55,7 @@ public class FileResource extends URLResource
             (System.getProperty("org.mortbay.util.FileResource.checkAliases","true"));
  
        if (__checkAliases)
-            log.info("Checking Resource aliases");
+            Log.info("Checking Resource aliases");
     }
     
     /* ------------------------------------------------------------ */
@@ -97,7 +94,7 @@ public class FileResource extends URLResource
         }
         catch (Exception e)
         {
-            LogSupport.ignore(log,e);
+            Log.ignore(e);
             try
             {
                 // Assume that File.toURL produced unencoded chars. So try
@@ -108,7 +105,7 @@ public class FileResource extends URLResource
             }
             catch (Exception e2)
             {
-                LogSupport.ignore(log,e2);
+                Log.ignore(e2);
 
                 // Still can't get the file.  Doh! try good old hack!
                 checkConnection();
@@ -167,15 +164,15 @@ public class FileResource extends URLResource
                 
                 _aliasChecked=true;
                 
-                if (_alias!=null && log.isDebugEnabled())
+                if (_alias!=null && Log.isDebugEnabled())
                 {
-                    log.debug("ALIAS abs="+abs);
-                    log.debug("ALIAS can="+can);
+                    Log.debug("ALIAS abs="+abs);
+                    Log.debug("ALIAS can="+can);
                 }
             }
             catch(Exception e)
             {
-                log.warn(LogSupport.EXCEPTION,e);
+                Log.warn(Log.EXCEPTION,e);
                 return getURL();
             }                
         }

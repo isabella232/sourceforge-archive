@@ -26,9 +26,7 @@ import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.log.LogSupport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.mortbay.log.Log;
 
 
 /* ------------------------------------------------------------------------------- */
@@ -43,8 +41,6 @@ import org.slf4j.LoggerFactory;
  */
 public class BlockingChannelConnector extends AbstractConnector
 {
-    private static Logger log= LoggerFactory.getLogger(BlockingChannelConnector.class);
-    
     private transient ServerSocketChannel _acceptChannel;
     
     /* ------------------------------------------------------------ */
@@ -133,21 +129,21 @@ public class BlockingChannelConnector extends AbstractConnector
                 // TODO - better than this
                 if ("BAD".equals(e.getMessage()))
                 {
-                    log.warn("BAD Request");
-                    log.debug("BAD",e);
+                    Log.warn("BAD Request");
+                    Log.debug("BAD",e);
                 }
                 else if ("EOF".equals(e.getMessage()))
-                    log.debug("EOF",e);
+                    Log.debug("EOF",e);
                 else
-                    log.warn("IO",e);
+                    Log.warn("IO",e);
                 try{close();}
-                catch(IOException e2){LogSupport.ignore(log, e2);}
+                catch(IOException e2){Log.ignore(e2);}
             }
             catch(Throwable e)
             {
-                log.warn("handle failed",e);
+                Log.warn("handle failed",e);
                 try{close();}
-                catch(IOException e2){LogSupport.ignore(log, e2);}
+                catch(IOException e2){Log.ignore(e2);}
             }
             finally
             {

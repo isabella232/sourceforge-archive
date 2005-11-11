@@ -20,8 +20,6 @@ import java.util.Collections;
 import java.util.List;
 
 import org.mortbay.util.LazyList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** Describe an auth and/or data constraint. 
@@ -31,8 +29,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Constraint implements Cloneable, Serializable
 {
-    private static Logger log= LoggerFactory.getLogger(Constraint.class);
-
     /* ------------------------------------------------------------ */
     public final static String __BASIC_AUTH= "BASIC";
     public final static String __FORM_AUTH= "FORM";

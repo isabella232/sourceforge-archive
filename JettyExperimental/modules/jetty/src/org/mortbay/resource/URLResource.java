@@ -23,10 +23,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.security.Permission;
 
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 import org.mortbay.util.URIUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** Abstract resource class.
@@ -37,7 +35,6 @@ import org.slf4j.LoggerFactory;
  */
 public class URLResource extends Resource
 {
-    private static Logger log = LoggerFactory.getLogger(URLResource.class);
 
     protected URL _url;
     protected String _urlString;
@@ -62,7 +59,7 @@ public class URLResource extends Resource
             }
             catch(IOException e)
             {
-                LogSupport.ignore(log,e);
+                Log.ignore(e);
             }
         }
         return _connection!=null;
@@ -75,7 +72,7 @@ public class URLResource extends Resource
     {
         if (_in!=null)
         {
-            try{_in.close();}catch(IOException e){LogSupport.ignore(log,e);}
+            try{_in.close();}catch(IOException e){Log.ignore(e);}
             _in=null;
         }
 
@@ -99,7 +96,7 @@ public class URLResource extends Resource
         }
         catch (IOException e)
         {
-            LogSupport.ignore(log,e);
+            Log.ignore(e);
         }
         return _in!=null;
     }
@@ -166,7 +163,7 @@ public class URLResource extends Resource
 
         // Try the URL file arg
         try {return new File(_url.getFile());}
-        catch(Exception e) {LogSupport.ignore(log,e);}
+        catch(Exception e) {Log.ignore(e);}
 
         // Don't know the file
         return null;    

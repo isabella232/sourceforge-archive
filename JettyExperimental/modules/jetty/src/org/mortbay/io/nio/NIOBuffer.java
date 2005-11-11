@@ -36,8 +36,6 @@ public class NIOBuffer extends AbstractBuffer
   		DIRECT=true,
   		INDIRECT=false;
   	
-    private String _string;
-    private boolean _volatile;
     private ByteBuffer _buf;
 
     public NIOBuffer(int size, boolean direct)

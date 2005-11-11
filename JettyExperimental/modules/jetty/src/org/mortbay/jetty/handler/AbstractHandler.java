@@ -16,9 +16,8 @@
 package org.mortbay.jetty.handler;
 
 import org.mortbay.jetty.Handler;
+import org.mortbay.log.Log;
 import org.mortbay.thread.AbstractLifeCycle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /* ------------------------------------------------------------ */
@@ -28,9 +27,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractHandler extends AbstractLifeCycle implements Handler
 {
-    private static Logger log = LoggerFactory.getLogger(AbstractHandler.class);
-    
-
     /* ------------------------------------------------------------ */
     /**
      * 
@@ -45,7 +41,7 @@ public abstract class AbstractHandler extends AbstractLifeCycle implements Handl
      */
     protected void doStart() throws Exception
     {
-        log.debug("starting {}",this);
+        Log.debug("starting {}",this);
     }
 
     /* ------------------------------------------------------------ */
@@ -54,7 +50,7 @@ public abstract class AbstractHandler extends AbstractLifeCycle implements Handl
      */
     protected void doStop() throws Exception
     {
-        log.debug("stopping {}",this);
+        Log.debug("stopping {}",this);
     }
 
 }

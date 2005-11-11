@@ -22,10 +22,8 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.Writer;
 
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 import org.mortbay.thread.BoundedThreadPool;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /* ======================================================================== */
 /** IO Utilities.
@@ -34,8 +32,6 @@ import org.slf4j.LoggerFactory;
  */
 public class IO extends BoundedThreadPool
 {
-    private static Logger log = LoggerFactory.getLogger(IO.class);
-
     /* ------------------------------------------------------------------- */
     public final static String
         CRLF      = "\015\012";
@@ -53,7 +49,7 @@ public class IO extends BoundedThreadPool
         static
         {
             try{__instance.start();}
-            catch(Exception e){log.error("IO",e); System.exit(1);}
+            catch(Exception e){Log.warn(e); System.exit(1);}
         }
     }
     
@@ -99,7 +95,7 @@ public class IO extends BoundedThreadPool
             }
             catch(IOException e)
             {
-                LogSupport.ignore(log,e);
+                Log.ignore(e);
                 try{
                     if (out!=null)
                         out.close();
@@ -108,7 +104,7 @@ public class IO extends BoundedThreadPool
                 }
                 catch(IOException e2)
                 {
-                    LogSupport.ignore(log,e2);
+                    Log.ignore(e2);
                 }
             }
         }
@@ -125,7 +121,7 @@ public class IO extends BoundedThreadPool
         }
         catch(Exception e)
         {
-            log.warn(LogSupport.EXCEPTION,e);
+            Log.warn(e);
         }
     }
     
@@ -150,7 +146,7 @@ public class IO extends BoundedThreadPool
         }
         catch(Exception e)
         {
-            log.warn(LogSupport.EXCEPTION,e);
+            Log.warn(e);
         }
     }
     
@@ -286,7 +282,7 @@ public class IO extends BoundedThreadPool
         }
         catch (IOException e)
         {
-            LogSupport.ignore(log,e);
+            Log.ignore(e);
         }
     }
 
@@ -305,7 +301,7 @@ public class IO extends BoundedThreadPool
         }
         catch (IOException e)
         {
-            LogSupport.ignore(log,e);
+            Log.ignore(e);
         }
     }
 

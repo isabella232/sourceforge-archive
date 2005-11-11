@@ -29,8 +29,7 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.RetryRequest;
 import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.WrappedHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.mortbay.log.Log;
 
 /* ------------------------------------------------------------ */
 /** SessionHandler.
@@ -39,7 +38,6 @@ import org.slf4j.LoggerFactory;
  */
 public class SessionHandler extends WrappedHandler
 {
-    private static Logger log = LoggerFactory.getLogger(SessionHandler.class);
 
     /* -------------------------------------------------------------- */
     SessionManager _sessionManager=new HashSessionManager();
@@ -123,7 +121,7 @@ public class SessionHandler extends WrappedHandler
                             
                             requested_session_id=cookies[i].getValue();
                             requested_session_id_from_cookie = true;
-                            if(log.isDebugEnabled())log.debug("Got Session ID "+requested_session_id+" from cookie");
+                            if(Log.isDebugEnabled())Log.debug("Got Session ID "+requested_session_id+" from cookie");
                         }
                     }
                 }
@@ -140,7 +138,7 @@ public class SessionHandler extends WrappedHandler
                         if (path_params!=null && path_params.startsWith(SessionManager.__SessionURL))
                         {
                             requested_session_id = path_params.substring(SessionManager.__SessionURL.length()+1);
-                            if(log.isDebugEnabled())log.debug("Got Session ID "+requested_session_id+" from URL");
+                            if(Log.isDebugEnabled())Log.debug("Got Session ID "+requested_session_id+" from URL");
                         }
                     }
                 }
@@ -165,10 +163,10 @@ public class SessionHandler extends WrappedHandler
                     base_request.setSession(session);
             }
             
-            if(log.isDebugEnabled())
+            if(Log.isDebugEnabled())
             {
-                log.debug("sessionManager="+base_request.getSessionManager());
-                log.debug("session="+session);
+                Log.debug("sessionManager="+base_request.getSessionManager());
+                Log.debug("session="+session);
             }
         
             result=getHandler().handle(target, base_request, response, dispatch);

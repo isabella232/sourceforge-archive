@@ -22,9 +22,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 
 import org.mortbay.io.IO;
-import org.mortbay.log.LogSupport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.mortbay.log.Log;
 
 
 /* ------------------------------------------------------------ */
@@ -37,8 +35,6 @@ import org.slf4j.LoggerFactory;
  */
 class ServletWriter extends PrintWriter
 {
-    private static Logger log = LoggerFactory.getLogger(ServletWriter.class);
-    
     String encoding=null;
     OutputStream os=null;
     boolean written=false;
@@ -80,7 +76,7 @@ class ServletWriter extends PrintWriter
         }
         catch(UnsupportedEncodingException e)
         {
-            LogSupport.ignore(log,e);
+            Log.ignore(e);
         }
     }
     
@@ -123,7 +119,7 @@ class ServletWriter extends PrintWriter
             written=true;
             out.write(c);
         }
-        catch (IOException e){LogSupport.ignore(log,e);setError();}
+        catch (IOException e){Log.ignore(e);setError();}
     }
     
     public void write(char[] cbuf, int off, int len)
@@ -135,7 +131,7 @@ class ServletWriter extends PrintWriter
             written=true;
             out.write(cbuf,off,len);
         }
-        catch (IOException e){LogSupport.ignore(log,e);setError();}
+        catch (IOException e){Log.ignore(e);setError();}
     }
     
     public void write(char[] cbuf)
@@ -147,7 +143,7 @@ class ServletWriter extends PrintWriter
             written=true;
             out.write(cbuf,0,cbuf.length);
         }
-        catch (IOException e){LogSupport.ignore(log,e);setError();}
+        catch (IOException e){Log.ignore(e);setError();}
     }
 
     public void write(String s, int off, int len)
@@ -159,7 +155,7 @@ class ServletWriter extends PrintWriter
             written=true;
             out.write(s,off,len);
         }
-        catch (IOException e){LogSupport.ignore(log,e);setError();}
+        catch (IOException e){Log.ignore(e);setError();}
     }
 
     public void write(String s)
@@ -171,7 +167,7 @@ class ServletWriter extends PrintWriter
             written=true;
             out.write(s,0,s.length());
         }
-        catch (IOException e){LogSupport.ignore(log,e);setError();}
+        catch (IOException e){Log.ignore(e);setError();}
     }
     
 }

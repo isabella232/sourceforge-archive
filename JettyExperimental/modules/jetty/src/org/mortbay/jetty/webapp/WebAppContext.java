@@ -39,13 +39,11 @@ import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.SessionHandler;
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 import org.mortbay.resource.JarResource;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.Loader;
 import org.mortbay.util.TypeUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** WebApplicationHandler.
@@ -56,7 +54,6 @@ public class WebAppContext extends ContextHandler
 {
 
     /* ------------------------------------------------------------ */
-    private static Logger log= LoggerFactory.getLogger(WebAppContext.class);
     
     private SecurityHandler _securityHandler;
     private SessionHandler _sessionHandler;
@@ -294,12 +291,12 @@ public class WebAppContext extends ContextHandler
             // Accept aliases for WAR files
             if (web_app.getAlias() != null)
             {
-                log.info(web_app + " anti-aliased to " + web_app.getAlias());
+                Log.info(web_app + " anti-aliased to " + web_app.getAlias());
                 web_app= Resource.newResource(web_app.getAlias());
             }
 
-            if (log.isDebugEnabled())
-                log.debug("Try webapp=" + web_app + ", exists=" + web_app.exists() + ", directory=" + web_app.isDirectory());
+            if (Log.isDebugEnabled())
+                Log.debug("Try webapp=" + web_app + ", exists=" + web_app.exists() + ", directory=" + web_app.isDirectory());
 
             // Is the WAR usable directly?
             if (web_app.exists() && !web_app.isDirectory() && !web_app.toString().startsWith("jar:"))
@@ -310,8 +307,8 @@ public class WebAppContext extends ContextHandler
                 {
                     web_app= jarWebApp;
                     _war= web_app.toString();
-                    if (log.isDebugEnabled())
-                        log.debug(
+                    if (Log.isDebugEnabled())
+                        Log.debug(
                             "Try webapp="
                                 + web_app
                                 + ", exists="
@@ -333,12 +330,12 @@ public class WebAppContext extends ContextHandler
                     tempDir.delete();
                 tempDir.mkdir();
                 tempDir.deleteOnExit();
-                log.info("Extract " + _war + " to " + tempDir);
+                Log.info("Extract " + _war + " to " + tempDir);
                 JarResource.extract(web_app, tempDir, true);
                 web_app= Resource.newResource(tempDir.getCanonicalPath());
 
-                if (log.isDebugEnabled())
-                    log.debug(
+                if (Log.isDebugEnabled())
+                    Log.debug(
                         "Try webapp="
                             + web_app
                             + ", exists="
@@ -350,12 +347,12 @@ public class WebAppContext extends ContextHandler
             // Now do we have something usable?
             if (!web_app.exists() || !web_app.isDirectory())
             {
-                log.warn("Web application not found " + _war);
+                Log.warn("Web application not found " + _war);
                 throw new java.io.FileNotFoundException(_war);
             }
 
-            if (log.isDebugEnabled())
-                log.debug("webapp=" + web_app);
+            if (Log.isDebugEnabled())
+                Log.debug("webapp=" + web_app);
 
             // ResourcePath
             super.setBaseResource(web_app);
@@ -389,7 +386,7 @@ public class WebAppContext extends ContextHandler
         if (dir!=null)
         {
             try{dir=new File(dir.getCanonicalPath());}
-            catch (IOException e){log.warn(LogSupport.EXCEPTION,e);}
+            catch (IOException e){Log.warn(Log.EXCEPTION,e);}
         }
 
         if (dir!=null && !dir.exists())
@@ -432,14 +429,14 @@ public class WebAppContext extends ContextHandler
 
                 if (_tmpDir.isDirectory() && _tmpDir.canWrite())
                 {
-                    if(log.isDebugEnabled())log.debug("Converted to File "+_tmpDir+" for "+this);
+                    if(Log.isDebugEnabled())Log.debug("Converted to File "+_tmpDir+" for "+this);
                     setAttribute("javax.servlet.context.tempdir",_tmpDir);
                     return _tmpDir;
                 }
             }
             catch(Exception e)
             {
-                log.warn(LogSupport.EXCEPTION,e);
+                Log.warn(Log.EXCEPTION,e);
             }
         }
 
@@ -453,7 +450,7 @@ public class WebAppContext extends ContextHandler
         }
         catch(Exception e)
         {
-            LogSupport.ignore(log,e);
+            Log.ignore(e);
         }
 
         // No tempdir set so make one!
@@ -473,10 +470,10 @@ public class WebAppContext extends ContextHandler
                 
                 if (_tmpDir.exists())
                 {
-                    if(log.isDebugEnabled())log.debug("Delete existing temp dir "+_tmpDir+" for "+this);
+                    if(Log.isDebugEnabled())Log.debug("Delete existing temp dir "+_tmpDir+" for "+this);
                     if (!IO.delete(_tmpDir))
                     {
-                        if(log.isDebugEnabled())log.debug("Failed to delete temp dir "+_tmpDir);
+                        if(Log.isDebugEnabled())Log.debug("Failed to delete temp dir "+_tmpDir);
                     }
                 
                     if (_tmpDir.exists())
@@ -485,7 +482,7 @@ public class WebAppContext extends ContextHandler
                         _tmpDir=File.createTempFile(temp+"_","");
                         if (_tmpDir.exists())
                             _tmpDir.delete();
-                        log.warn("Can't reuse "+old+", using "+_tmpDir);
+                        Log.warn("Can't reuse "+old+", using "+_tmpDir);
                     }
                 }
             }
@@ -494,12 +491,12 @@ public class WebAppContext extends ContextHandler
                 _tmpDir.mkdir();
             if (work==null)
                 _tmpDir.deleteOnExit();
-            if(log.isDebugEnabled())log.debug("Created temp dir "+_tmpDir+" for "+this);
+            if(Log.isDebugEnabled())Log.debug("Created temp dir "+_tmpDir+" for "+this);
         }
         catch(Exception e)
         {
             _tmpDir=null;
-            LogSupport.ignore(log,e);
+            Log.ignore(e);
         }
 
         if (_tmpDir==null)
@@ -511,11 +508,11 @@ public class WebAppContext extends ContextHandler
                     _tmpDir.delete();
                 _tmpDir.mkdir();
                 _tmpDir.deleteOnExit();
-                if(log.isDebugEnabled())log.debug("Created temp dir "+_tmpDir+" for "+this);
+                if(Log.isDebugEnabled())Log.debug("Created temp dir "+_tmpDir+" for "+this);
             }
             catch(IOException e)
             {
-                log.warn("tmpdir",e); System.exit(1);
+                Log.warn("tmpdir",e); System.exit(1);
             }
         }
 
@@ -757,7 +754,7 @@ public class WebAppContext extends ContextHandler
                     }
                     catch (ServletException e)
                     {
-                        log.warn(LogSupport.EXCEPTION, e);
+                        Log.warn(Log.EXCEPTION, e);
                     }
                     return true;
                 }

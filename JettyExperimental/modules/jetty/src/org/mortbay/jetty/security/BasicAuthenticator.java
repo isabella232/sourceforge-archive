@@ -23,10 +23,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 import org.mortbay.util.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** BASIC authentication.
@@ -36,8 +34,6 @@ import org.slf4j.LoggerFactory;
  */
 public class BasicAuthenticator implements Authenticator
 {
-    private static Logger log = LoggerFactory.getLogger(BasicAuthenticator.class);
-
     /* ------------------------------------------------------------ */
     /** 
      * @return UserPrinciple if authenticated or null if not. If
@@ -59,7 +55,7 @@ public class BasicAuthenticator implements Authenticator
         {
             try
             {
-                if(log.isDebugEnabled())log.debug("Credentials: "+credentials);
+                if(Log.isDebugEnabled())Log.debug("Credentials: "+credentials);
                 credentials = credentials.substring(credentials.indexOf(' ')+1);
                 credentials = B64Code.decode(credentials,StringUtil.__ISO_8859_1);
                 int i = credentials.indexOf(':');
@@ -68,7 +64,7 @@ public class BasicAuthenticator implements Authenticator
                 user = realm.authenticate(username,password,request);
                 
                 if (user==null)
-                    log.warn("AUTH FAILURE: user "+username);
+                    Log.warn("AUTH FAILURE: user {}",username);
                 else
                 {
                     request.setAuthType(Constraint.__BASIC_AUTH);
@@ -77,8 +73,8 @@ public class BasicAuthenticator implements Authenticator
             }
             catch (Exception e)
             {
-                log.warn("AUTH FAILURE: "+e.toString());
-                LogSupport.ignore(log,e);
+                Log.warn("AUTH FAILURE: "+e.toString());
+                Log.ignore(e);
             }
         }
 

@@ -317,7 +317,7 @@ public class HttpFields
     {
         // TODO - really reuse strings from previous requests!
         Field field = getField(name);
-        if (field != null && field._revision == _revision) return field._value.toString();
+        if (field != null && field._revision == _revision) return field.getValue();
         return null;
     }
 
@@ -378,7 +378,7 @@ public class HttpFields
                 do
                     f = f._next;
                 while (f != null && f._revision != _revision);
-                return n._value.toString();
+                return n.getValue();
             }
         };
     }
@@ -387,7 +387,7 @@ public class HttpFields
     /**
      * Get multi headers
      * 
-     * @return Enumeration of the value Buffers, or null if no such header.
+     * @return Enumeration of the value Strings, or null if no such header.
      * @param name the case-insensitive field name
      */
     public Enumeration getValues(Buffer name)
@@ -411,10 +411,10 @@ public class HttpFields
             {
                 if (f == null) throw new NoSuchElementException();
                 Field n = f;
-                do
+                f = f._next;
+                while (f != null && f._revision != _revision)
                     f = f._next;
-                while (f != null && f._revision != _revision);
-                return n._value;
+                return n.getValue();
             }
         };
     }
@@ -1209,6 +1209,7 @@ public class HttpFields
     {
         private Buffer _name;
         private Buffer _value;
+        private String _stringValue;
         private long _numValue;
         private Field _next;
         private Field _prev;
@@ -1219,12 +1220,14 @@ public class HttpFields
         {
             _name = name.asImmutableBuffer();
             _value = value.isImmutable() ? value : new View(value);
-            _numValue = numValue;
             _next = null;
             _prev = null;
             _revision = revision;
+            _numValue = numValue;
+            _stringValue=null;
         }
 
+        /* ------------------------------------------------------------ */
         private void clear()
         {
             _revision = -1;
@@ -1237,6 +1240,7 @@ public class HttpFields
             _value = null;
             _next = null;
             _prev = null;
+            _stringValue=null;
         }
 
         /* ------------------------------------------------------------ */
@@ -1246,22 +1250,45 @@ public class HttpFields
          */
         private void reset(Buffer value, long numValue, int revision)
         {
+            _revision = revision;
             if (_value == null)
             {
                 _value = value.isImmutable() ? value : new View(value);
                 _numValue = numValue;
+                _stringValue=null;
             }
-            else if (!_value.equals(value))
+            else if (value.isImmutable())
             {
-                if (value.isImmutable())
-                    _value = value;
-                else if (_value instanceof View)
+                _value = value;
+                _numValue = numValue;
+                _stringValue=null;
+            }
+            else
+            {
+                if (_value instanceof View)
                     ((View) _value).update(value);
                 else
                     _value = new View(value);
                 _numValue = numValue;
+                
+                // check to see if string value is still valid.
+                if (_stringValue!=null)
+                {
+                    if (_stringValue.length()!=value.length())
+                        _stringValue=null;
+                    else
+                    {
+                        for (int i=value.length();i-->0;)
+                        {
+                            if (value.peek(value.getIndex()+i)!=_stringValue.charAt(i))
+                            {
+                                _stringValue=null;
+                                break;
+                            }
+                        }
+                    }
+                }
             }
-            _revision = revision;
         }
 
         /* ------------------------------------------------------------ */
@@ -1304,7 +1331,9 @@ public class HttpFields
         /* ------------------------------------------------------------ */
         public String getValue()
         {
-            return _value.toString();
+            if (_stringValue==null)
+                _stringValue=_value.toString();
+            return _stringValue;
         }
 
         /* ------------------------------------------------------------ */

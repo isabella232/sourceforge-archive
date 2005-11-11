@@ -20,7 +20,6 @@ import java.io.IOException;
 import org.mortbay.io.Buffers;
 import org.mortbay.io.EndPoint;
 import org.mortbay.thread.LifeCycle;
-import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.ajax.Continuation;
 
 /** HTTP Connector.

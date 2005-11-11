@@ -21,10 +21,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.mortbay.log.Log;
 import org.mortbay.thread.AbstractLifeCycle;
 import org.mortbay.util.Loader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /* --------------------------------------------------------------------- */
@@ -34,7 +33,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Holder extends AbstractLifeCycle implements Serializable
 {
-    private static Logger log = LoggerFactory.getLogger(Holder.class);
     protected transient Class _class;
     protected String _className;
     protected String _displayName;
@@ -53,7 +51,7 @@ public class Holder extends AbstractLifeCycle implements Serializable
         throws Exception
     {
         _class=Loader.loadClass(Holder.class, _className);
-        if(log.isDebugEnabled())log.debug("Holding {}",_class);
+        if(Log.isDebugEnabled())Log.debug("Holding {}",_class);
     }
 
     

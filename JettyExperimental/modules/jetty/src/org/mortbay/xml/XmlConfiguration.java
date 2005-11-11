@@ -31,12 +31,10 @@ import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.Loader;
 import org.mortbay.util.TypeUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
@@ -50,7 +48,6 @@ import org.xml.sax.SAXException;
  */
 public class XmlConfiguration
 {
-    private static Logger log = LoggerFactory.getLogger(XmlConfiguration.class);
 
     private static Class[] __primitives = { Boolean.TYPE, Character.TYPE, Byte.TYPE, Short.TYPE,
             Integer.TYPE, Long.TYPE, Float.TYPE, Double.TYPE, Void.TYPE};
@@ -230,7 +227,7 @@ public class XmlConfiguration
             }
             catch (Exception e)
             {
-                log.warn("Config error at " + node, e.toString());
+                Log.warn("Config error at " + node, e.toString());
                 throw e;
             }
         }
@@ -260,8 +257,8 @@ public class XmlConfiguration
         Class[] vClass = { Object.class};
         if (value != null) vClass[0] = value.getClass();
 
-        if (log.isDebugEnabled())
-                log.debug(obj + "." + name + "(" + vClass[0] + " " + value + ")");
+        if (Log.isDebugEnabled())
+                Log.debug(obj + "." + name + "(" + vClass[0] + " " + value + ")");
 
         // Try for trivial match
         try
@@ -272,15 +269,15 @@ public class XmlConfiguration
         }
         catch (IllegalArgumentException e)
         {
-            LogSupport.ignore(log, e);
+            Log.ignore(e);
         }
         catch (IllegalAccessException e)
         {
-            LogSupport.ignore(log, e);
+            Log.ignore(e);
         }
         catch (NoSuchMethodException e)
         {
-            LogSupport.ignore(log, e);
+            Log.ignore(e);
         }
 
         // Try for native match
@@ -294,19 +291,19 @@ public class XmlConfiguration
         }
         catch (NoSuchFieldException e)
         {
-            LogSupport.ignore(log, e);
+            Log.ignore(e);
         }
         catch (IllegalArgumentException e)
         {
-            LogSupport.ignore(log, e);
+            Log.ignore(e);
         }
         catch (IllegalAccessException e)
         {
-            LogSupport.ignore(log, e);
+            Log.ignore(e);
         }
         catch (NoSuchMethodException e)
         {
-            LogSupport.ignore(log, e);
+            Log.ignore(e);
         }
 
         // Try a field
@@ -321,7 +318,7 @@ public class XmlConfiguration
         }
         catch (NoSuchFieldException e)
         {
-            LogSupport.ignore(log, e);
+            Log.ignore(e);
         }
 
         // Search for a match by trying all the set methods
@@ -340,11 +337,11 @@ public class XmlConfiguration
                 }
                 catch (IllegalArgumentException e)
                 {
-                    LogSupport.ignore(log, e);
+                    Log.ignore(e);
                 }
                 catch (IllegalAccessException e)
                 {
-                    LogSupport.ignore(log, e);
+                    Log.ignore(e);
                 }
             }
         }
@@ -373,15 +370,15 @@ public class XmlConfiguration
             }
             catch (NoSuchMethodException e)
             {
-                LogSupport.ignore(log, e);
+                Log.ignore(e);
             }
             catch (IllegalAccessException e)
             {
-                LogSupport.ignore(log, e);
+                Log.ignore(e);
             }
             catch (InstantiationException e)
             {
-                LogSupport.ignore(log, e);
+                Log.ignore(e);
             }
         }
 
@@ -404,7 +401,7 @@ public class XmlConfiguration
         String name = node.getAttribute("name");
         Object value = value(obj, node);
         map.put(name, value);
-        if (log.isDebugEnabled()) log.debug(obj + ".put(" + name + "+" + value + ")");
+        if (Log.isDebugEnabled()) Log.debug(obj + ".put(" + name + "+" + value + ")");
     }
 
     /* ------------------------------------------------------------ */
@@ -422,7 +419,7 @@ public class XmlConfiguration
 
         String name = node.getAttribute("name");
         String id = node.getAttribute("id");
-        if (log.isDebugEnabled()) log.debug("get " + name);
+        if (Log.isDebugEnabled()) Log.debug("get " + name);
 
         try
         {
@@ -489,7 +486,7 @@ public class XmlConfiguration
         }
 
         String method = node.getAttribute("name");
-        if (log.isDebugEnabled()) log.debug("call " + method);
+        if (Log.isDebugEnabled()) Log.debug("call " + method);
 
         // Lets just try all methods for now
         Method[] methods = oClass.getMethods();
@@ -509,11 +506,11 @@ public class XmlConfiguration
             }
             catch (IllegalAccessException e)
             {
-                LogSupport.ignore(log, e);
+                Log.ignore(e);
             }
             catch (IllegalArgumentException e)
             {
-                LogSupport.ignore(log, e);
+                Log.ignore(e);
             }
             if (called)
             {
@@ -558,7 +555,7 @@ public class XmlConfiguration
             arg[j++] = value(obj, (XmlParser.Node) o);
         }
 
-        if (log.isDebugEnabled()) log.debug("new " + oClass);
+        if (Log.isDebugEnabled()) Log.debug("new " + oClass);
 
         // Lets just try all constructors for now
         Constructor[] constructors = oClass.getConstructors();
@@ -575,15 +572,15 @@ public class XmlConfiguration
             }
             catch (IllegalAccessException e)
             {
-                LogSupport.ignore(log, e);
+                Log.ignore(e);
             }
             catch (InstantiationException e)
             {
-                LogSupport.ignore(log, e);
+                Log.ignore(e);
             }
             catch (IllegalArgumentException e)
             {
-                LogSupport.ignore(log, e);
+                Log.ignore(e);
             }
             if (called)
             {
@@ -860,7 +857,7 @@ public class XmlConfiguration
             return System.getProperty(name, defaultValue);
         }
 
-        log.warn("Unknown value tag: " + node, new Throwable());
+        Log.warn("Unknown value tag: " + node, new Throwable());
         return null;
     }
 
@@ -876,7 +873,7 @@ public class XmlConfiguration
         }
         catch (Exception e)
         {
-            log.warn(LogSupport.EXCEPTION, e);
+            Log.warn(Log.EXCEPTION, e);
         }
         
     }

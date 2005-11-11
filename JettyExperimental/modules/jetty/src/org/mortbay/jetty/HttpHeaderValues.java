@@ -33,9 +33,9 @@ public class HttpHeaderValues extends BufferCache
         KEEP_ALIVE="keep-alive",
         CONTINUE="100-continue",
         
-        CLIENT0="ISO-8859-1,utf-8;q=0.7, *;q=0.7",
-        CLIENT1="video/x-mng,image/png,image/jpeg,image/gif;q=0.2,*/*;q=0.1",
-        CLIENT2="300";
+        CLIENT0="gzip",
+        CLIENT1="gzip,deflate",
+        CLIENT2="deflate";
 
     private static int index=1;
     public final static int

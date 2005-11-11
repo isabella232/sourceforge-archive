@@ -27,9 +27,8 @@ import javax.servlet.http.HttpSessionBindingListener;
 
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
+import org.mortbay.log.Log;
 import org.mortbay.util.URIUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /* ------------------------------------------------------------ */
@@ -44,8 +43,6 @@ import org.slf4j.LoggerFactory;
  */
 public class FormAuthenticator implements Authenticator
 {
-    static Logger log = LoggerFactory.getLogger(FormAuthenticator.class);
-
     /* ------------------------------------------------------------ */
     public final static String __J_URI="org.mortbay.jetty.URI";
     public final static String __J_AUTHENTICATED="org.mortbay.jetty.Auth";
@@ -69,7 +66,7 @@ public class FormAuthenticator implements Authenticator
     {
         if (!path.startsWith("/"))
         {
-            log.warn("form-login-page must start with /");
+            Log.warn("form-login-page must start with /");
             path="/"+path;
         }
         _formLoginPage=path;
@@ -96,7 +93,7 @@ public class FormAuthenticator implements Authenticator
         {
             if (!path.startsWith("/"))
             {
-                log.warn("form-error-page must start with /");
+                Log.warn("form-error-page must start with /");
                 path="/"+path;
             }
             _formErrorPage=path;
@@ -153,7 +150,7 @@ public class FormAuthenticator implements Authenticator
             if (form_cred._userPrincipal!=null)
             {
                 // Authenticated OK
-                if(log.isDebugEnabled())log.debug("Form authentication OK for "+form_cred._jUserName);
+                if(Log.isDebugEnabled())Log.debug("Form authentication OK for "+form_cred._jUserName);
                 session.removeAttribute(__J_URI); // Remove popped return URI.
                 request.setAuthType(Constraint.__FORM_AUTH);
                 request.setUserPrincipal(form_cred._userPrincipal);
@@ -174,7 +171,7 @@ public class FormAuthenticator implements Authenticator
             }   
             else if (response!=null)
             {
-                if(log.isDebugEnabled())log.debug("Form authentication FAILED for "+form_cred._jUserName);
+                if(Log.isDebugEnabled())Log.debug("Form authentication FAILED for "+form_cred._jUserName);
                 if (_formErrorPage!=null)
                 {
                     response.setContentLength(0);
@@ -216,7 +213,7 @@ public class FormAuthenticator implements Authenticator
             // If this credential is still authenticated
             if (form_cred._userPrincipal!=null)
             {
-                if(log.isDebugEnabled())log.debug("FORM Authenticated for "+form_cred._userPrincipal.getName());
+                if(Log.isDebugEnabled())Log.debug("FORM Authenticated for "+form_cred._userPrincipal.getName());
                 request.setAuthType(Constraint.__FORM_AUTH);
                 request.setUserPrincipal(form_cred._userPrincipal);
                 return form_cred._userPrincipal;
@@ -236,7 +233,7 @@ public class FormAuthenticator implements Authenticator
                 form_cred._jUserName=form_cred._userPrincipal.getName();
                 if (cred!=null)
                     form_cred._jPassword=cred.toString();
-                if(log.isDebugEnabled())log.debug("SSO for "+form_cred._userPrincipal);
+                if(Log.isDebugEnabled())Log.debug("SSO for "+form_cred._userPrincipal);
                            
                 request.setAuthType(Constraint.__FORM_AUTH);
                 session.setAttribute(__J_AUTHENTICATED,form_cred);
@@ -303,7 +300,7 @@ public class FormAuthenticator implements Authenticator
         
         public void valueUnbound(HttpSessionBindingEvent event)
         {
-            if(log.isDebugEnabled())log.debug("Logout "+_jUserName);
+            if(Log.isDebugEnabled())Log.debug("Logout "+_jUserName);
             
             if(_realm instanceof SSORealm)
                 ((SSORealm)_realm).clearSingleSignOn(_jUserName);

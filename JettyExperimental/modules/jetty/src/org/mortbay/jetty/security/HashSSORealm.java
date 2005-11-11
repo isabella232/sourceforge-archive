@@ -25,15 +25,13 @@ import javax.servlet.http.Cookie;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.webapp.WebAppContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.mortbay.log.Log;
 
 
 
 
 public class HashSSORealm implements SSORealm
 {
-    private static Logger log = LoggerFactory.getLogger(HashSSORealm.class);
     
     /* ------------------------------------------------------------ */
     public static final String SSO_COOKIE_NAME = "SSO_ID";
@@ -55,7 +53,7 @@ public class HashSSORealm implements SSORealm
                 break;
             }
         }
-        if(log.isDebugEnabled())log.debug("get ssoID="+ssoID);
+        if(Log.isDebugEnabled())Log.debug("get ssoID="+ssoID);
         
         Principal principal=null;
         Credential credential=null;
@@ -65,7 +63,7 @@ public class HashSSORealm implements SSORealm
             credential=(Credential)_ssoPrincipal2Credential.get(principal);
         }
         
-        if(log.isDebugEnabled())log.debug("SSO principal="+principal);
+        if(Log.isDebugEnabled())Log.debug("SSO principal="+principal);
         
         if (principal!=null && credential!=null)
         {
@@ -110,7 +108,7 @@ public class HashSSORealm implements SSORealm
                     break;
             }
             
-            if(log.isDebugEnabled())log.debug("set ssoID="+ssoID);
+            if(Log.isDebugEnabled())Log.debug("set ssoID="+ssoID);
             _ssoId2Principal.put(ssoID,principal);
             _ssoPrincipal2Credential.put(principal,credential);
             _ssoUsername2Id.put(principal.getName(),ssoID);

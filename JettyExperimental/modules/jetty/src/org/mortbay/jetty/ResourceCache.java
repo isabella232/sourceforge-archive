@@ -20,11 +20,10 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.resource.ResourceFactory;
 import org.mortbay.thread.AbstractLifeCycle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /* ------------------------------------------------------------ */
@@ -33,9 +32,7 @@ import org.slf4j.LoggerFactory;
  * @author Greg Wilkins
  */
 public class ResourceCache extends AbstractLifeCycle implements Serializable
-{
-    private static Logger log = LoggerFactory.getLogger(ResourceCache.class);
-    
+{   
     private int _maxCachedFileSize =254*1024;
     private int _maxCachedFiles=1024;
     private int _maxCacheSize =4096*1024;
@@ -119,7 +116,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
      */
     public Entry lookup(String pathInContext, ResourceFactory factory)
     {
-        if(log.isDebugEnabled())log.debug("lookup "+pathInContext);
+        if (Log.isDebugEnabled()) Log.debug("lookup {}",pathInContext);
         
         Entry entry=null;
         boolean newEntry=false;
@@ -134,7 +131,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                 if (entry!=null && !entry.isValid())
                     entry=null;
                 else
-                    if(log.isDebugEnabled())log.debug("CACHE HIT: "+entry);
+                    if (Log.isDebugEnabled()) Log.debug("CACHE HIT: {}",entry);
             }
 
             if (entry==null)
@@ -157,7 +154,7 @@ public class ResourceCache extends AbstractLifeCycle implements Serializable
                         while(_cacheSize>needed || (_maxCachedFiles>0 && _cachedFiles>_maxCachedFiles))
                             _leastRecentlyUsed.invalidate();
                         
-                        if(log.isDebugEnabled())log.debug("CACHED: "+resource);
+                        if(Log.isDebugEnabled())Log.debug("CACHED: {}",resource);
                         entry= new Entry(pathInContext,resource);
                         newEntry=true;
                     }

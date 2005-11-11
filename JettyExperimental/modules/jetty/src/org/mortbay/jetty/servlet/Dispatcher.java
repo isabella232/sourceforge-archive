@@ -37,8 +37,6 @@ import org.mortbay.util.Attributes;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiMap;
 import org.mortbay.util.UrlEncoded;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** Servlet RequestDispatcher.
@@ -48,7 +46,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Dispatcher implements RequestDispatcher
 {
-    private static Logger log = LoggerFactory.getLogger(Dispatcher.class);
     
     /** Dispatch include attribute names */
     public final static String __INCLUDE_REQUEST_URI= "javax.servlet.include.request_uri";

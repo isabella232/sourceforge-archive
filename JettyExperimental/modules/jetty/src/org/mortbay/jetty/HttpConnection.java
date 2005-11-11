@@ -27,10 +27,9 @@ import javax.servlet.ServletOutputStream;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
+import org.mortbay.log.Log;
 import org.mortbay.util.URIUtil;
 import org.mortbay.util.ajax.Continuation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author gregw
@@ -40,7 +39,6 @@ import org.slf4j.LoggerFactory;
  */
 public class HttpConnection
 {
-    private static Logger log = LoggerFactory.getLogger(HttpConnection.class);
     private static int UNKNOWN = -2;
     private static ThreadLocal __currentConnection = new ThreadLocal();
 
@@ -268,12 +266,12 @@ public class HttpConnection
             }
             catch (RetryRequest r)
             {
-                log.debug("retry ", r);
+                Log.ignore(r);
                 retry = true;
             }
             catch (ServletException e)
             {
-                log.warn("handling", e);
+                Log.warn(e);
                 _generator.sendError(500, null, null, true);
             }
             finally
@@ -385,11 +383,22 @@ public class HttpConnection
                 case HttpHeaders.EXPECT_ORDINAL:
                     _expect = HttpHeaderValues.CACHE.getOrdinal(value);
                     break;
+                    
+                case HttpHeaders.ACCEPT_ENCODING_ORDINAL:
+                    value = HttpHeaderValues.CACHE.lookup(value);
+                    break;
 
                 case HttpHeaders.CONNECTION_ORDINAL:
                     // TODO coma list of connections ???
                     _connection = HttpHeaderValues.CACHE.getOrdinal(value);
-                    _responseFields.put(HttpHeaders.CONNECTION_BUFFER, value);
+                    if (_connection<0)
+                        _responseFields.put(HttpHeaders.CONNECTION_BUFFER, value);
+                    else
+                    {
+                        value=HttpHeaderValues.CACHE.get(_connection);
+                        _responseFields.put(HttpHeaders.CONNECTION_BUFFER,value);
+                    }
+                        
                     // TODO something with this???
             }
 
@@ -413,7 +422,6 @@ public class HttpConnection
                     _generator.setHead(_head);
                     if (!_host)
                     {
-                        // TODO prebuilt response
                         _generator.setResponse(400, null);
                         _responseFields.put(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CLOSE_BUFFER);
                         _generator.complete();
@@ -425,6 +433,7 @@ public class HttpConnection
                         if (_expect == HttpHeaderValues.CONTINUE_ORDINAL)
                         {
                             _expectingContinues = true;
+                            
                             // TODO delay sending 100 response until a read is attempted.
                             _generator.setResponse(100, null);
                             _generator.complete();
@@ -478,17 +487,11 @@ public class HttpConnection
     /* ------------------------------------------------------------ */
     private class Input extends ServletInputStream
     {
-        // TODO - more effecient methods!
-
-        /* ------------------------------------------------------------ */
-        /*
-         * @see java.io.InputStream#read()
-         */
-        public int read() throws IOException
+        private boolean blockForContent() throws IOException
         {
             while (_content == null || _content.length() == 0)
             {
-                if (_parser.isState(HttpParser.STATE_END)) return -1;
+                if (_parser.isState(HttpParser.STATE_END)) return false;
 
                 // Try to get more _content
                 _content = null;
@@ -504,9 +507,30 @@ public class HttpConnection
                 // if still no _content - this is a timeout
                 if (!_parser.isState(HttpParser.STATE_END) && (_content == null || _content.length() == 0)) throw new InterruptedIOException("timeout");
             }
-
-            return _content.get();
+            return true;
         }
+        
+        /* ------------------------------------------------------------ */
+        /*
+         * @see java.io.InputStream#read()
+         */
+        public int read() throws IOException
+        {
+            if (blockForContent())
+                return _content.get();
+            return -1;
+        }
+
+        /* ------------------------------------------------------------ */
+        /* 
+         * @see java.io.InputStream#read(byte[], int, int)
+         */
+        public int read(byte[] b, int off, int len) throws IOException
+        {
+            if (blockForContent())
+               return _content.get(b, off, len);
+            return -1;
+        }       
     }
 
     public class Output extends ServletOutputStream

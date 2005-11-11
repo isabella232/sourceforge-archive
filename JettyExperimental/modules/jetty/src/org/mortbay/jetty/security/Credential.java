@@ -17,11 +17,9 @@ package org.mortbay.jetty.security;
 
 import java.security.MessageDigest;
 
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /* ------------------------------------------------------------ */
@@ -41,8 +39,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class Credential
 {
-    static Logger log = LoggerFactory.getLogger(Credential.class);
-
     /* ------------------------------------------------------------ */
     /** Check a credential
      * @param credentials The credential to check against. This may either be
@@ -91,7 +87,7 @@ public abstract class Credential
         {
             if (!(credentials instanceof String) &&
                 !(credentials instanceof Password))
-                log.warn("Can't check "+credentials.getClass()+" against CRYPT");
+                Log.warn("Can't check "+credentials.getClass()+" against CRYPT");
             
             String passwd = credentials.toString();
             return _cooked.equals(UnixCrypt.crypt(passwd,_cooked));
@@ -171,13 +167,13 @@ public abstract class Credential
                 }
                 else
                 {
-                    log.warn("Can't check "+credentials.getClass()+" against MD5");
+                    Log.warn("Can't check "+credentials.getClass()+" against MD5");
                     return false;
                 }
             }
             catch (Exception e)
             {
-                log.warn(LogSupport.EXCEPTION,e);
+                Log.warn(e);
                 return false;
             }
         }
@@ -193,7 +189,7 @@ public abstract class Credential
                     if (__md==null)
                     {
                         try{__md = MessageDigest.getInstance("MD5");}
-                        catch (Exception e ) {log.warn(LogSupport.EXCEPTION,e);return null;}
+                        catch (Exception e ) {Log.warn(e);return null;}
                     }
                     
                     __md.reset();
@@ -205,7 +201,7 @@ public abstract class Credential
             }
             catch (Exception e)
             {
-                log.warn(LogSupport.EXCEPTION,e);
+                Log.warn(e);
                 return null;
             }
         }

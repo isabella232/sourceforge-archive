@@ -30,7 +30,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
 
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 
 
 
@@ -413,7 +413,7 @@ public class ServletHolder extends Holder
         catch(UnavailableException e)
         {
             if (_servlets!=null && servlet!=null)
-                try{stop();}catch(Exception e2){LogSupport.ignore(e2);}
+                try{stop();}catch(Exception e2){Log.ignore(e2);}
             makeUnavailable(e);
         }
         finally

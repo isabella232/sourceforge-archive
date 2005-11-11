@@ -24,8 +24,6 @@ import java.util.ResourceBundle;
 import org.mortbay.io.Buffer;
 import org.mortbay.io.BufferCache;
 import org.mortbay.util.StringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /* ------------------------------------------------------------ */
@@ -35,8 +33,6 @@ import org.slf4j.LoggerFactory;
  */
 public class MimeTypes
 {
-    private static Logger log = LoggerFactory.getLogger(MimeTypes.class);
-        
     public final static String
       FORM_ENCODED="application/x-www-form-urlencoded",
       MESSAGE_HTTP="message/http",

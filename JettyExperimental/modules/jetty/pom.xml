@@ -49,11 +49,6 @@
             <configuration>
               <tasks>
                 <copy file="target/${project.artifactId}-${project.version}.${project.packaging}" tofile="../../lib/${project.artifactId}.${project.packaging}"></copy>
-                <copy todir="../../lib/" flatten="true">
-                  <fileset dir="${user.home}/.m2/repository/org/slf4j/slf4j-simple/1.0-beta7">
-                    <include name="**/*.jar"></include>
-                  </fileset>
-                </copy>
               </tasks>
             </configuration>
           </execution>
@@ -62,11 +57,6 @@
     </plugins>
   </build>
   <dependencies>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>1.0-beta7</version>
-    </dependency>
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

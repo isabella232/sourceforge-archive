@@ -50,7 +50,7 @@ import org.mortbay.jetty.handler.ContextHandler.Context;
 import org.mortbay.jetty.security.Authenticator;
 import org.mortbay.jetty.security.SecurityHandler;
 import org.mortbay.jetty.security.UserRealm;
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
 import org.mortbay.util.LazyList;
@@ -60,8 +60,6 @@ import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 import org.mortbay.util.UrlEncoded;
 import org.mortbay.util.ajax.Continuation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** Request.
@@ -70,8 +68,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Request implements HttpServletRequest
 {
-    private static Logger log = LoggerFactory.getLogger(Request.class);
-    
     private static final Collection __defaultLocale = Collections.singleton(Locale.getDefault());
     private static final int NONE=0, STREAM=1, READER=2;
     private static Cookie[] __noCookies = new Cookie[0];
@@ -286,7 +282,7 @@ public class Request implements HttpServletRequest
                 Enumeration enm = _connection.getRequestFields().getValues(HttpHeaders.COOKIE_BUFFER);
                 while (enm.hasMoreElements())
                 {
-                    String c = enm.nextElement().toString();
+                    String c = (String)enm.nextElement();
                     if (last >= _lastCookies.length || !c.equals(_lastCookies[last]))
                     {
                         _lastCookies = null;
@@ -313,7 +309,7 @@ public class Request implements HttpServletRequest
             while (enm.hasMoreElements())
             {
                 // Save a copy of the unparsed header as cache.
-                String hdr = enm.nextElement().toString();
+                String hdr = (String)enm.nextElement();
                 lastCookies = LazyList.add(lastCookies, hdr);
 
                 // Parse the header
@@ -362,7 +358,7 @@ public class Request implements HttpServletRequest
                     }
                     catch (Exception ex)
                     {
-                        LogSupport.ignore(log, ex);
+                        Log.ignore(ex);
                     }
                 }
             }
@@ -381,7 +377,7 @@ public class Request implements HttpServletRequest
         }
         catch (Exception e)
         {
-            log.warn(LogSupport.EXCEPTION, e);
+            Log.warn(e);
         }
 
         return _cookies;
@@ -843,7 +839,7 @@ public class Request implements HttpServletRequest
         }
         catch (java.net.UnknownHostException e)
         {
-            LogSupport.ignore(log, e);
+            Log.ignore(e);
         }
         return _serverName;
     }
@@ -951,7 +947,7 @@ public class Request implements HttpServletRequest
                 }
                 catch (Exception e)
                 {
-                    LogSupport.ignore(log, e);
+                    Log.ignore(e);
                 }
             }
         }
@@ -1130,9 +1126,7 @@ public class Request implements HttpServletRequest
             if (MimeTypes.FORM_ENCODED.equalsIgnoreCase(content_type) && HttpMethods.POST.equals(getMethod()))
             {
                 int content_length = getContentLength();
-                if (content_length <= 0)
-                    log.debug("No form _content");
-                else
+                if (content_length > 0)
                 {
                     try
                     {
@@ -1143,10 +1137,10 @@ public class Request implements HttpServletRequest
                     }
                     catch (IOException e)
                     {
-                        if (log.isDebugEnabled())
-                            log.warn(LogSupport.EXCEPTION, e);
+                        if (Log.isDebugEnabled())
+                            Log.warn(e);
                         else
-                            log.warn(e.toString());
+                            Log.warn(e.toString());
                     }
                 }
             }

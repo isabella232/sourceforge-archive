@@ -24,12 +24,10 @@ import javax.servlet.http.HttpServletResponse;
 import org.mortbay.jetty.HttpHeaders;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 import org.mortbay.util.QuotedStringTokenizer;
 import org.mortbay.util.StringUtil;
 import org.mortbay.util.TypeUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** DIGEST authentication.
@@ -39,8 +37,6 @@ import org.slf4j.LoggerFactory;
  */
 public class DigestAuthenticator implements Authenticator
 {
-    static Logger log = LoggerFactory.getLogger(DigestAuthenticator.class);
-
     protected long maxNonceAge=0;
     protected long nonceSecret=this.hashCode() ^ System.currentTimeMillis();
     protected boolean useStale=false;
@@ -66,7 +62,7 @@ public class DigestAuthenticator implements Authenticator
         
         if (credentials!=null )
         {
-            if(log.isDebugEnabled())log.debug("Credentials: "+credentials);
+            if(Log.isDebugEnabled())Log.debug("Credentials: "+credentials);
             QuotedStringTokenizer tokenizer = new QuotedStringTokenizer(credentials,
                                                                         "=, ",
                                                                         true,
@@ -124,7 +120,7 @@ public class DigestAuthenticator implements Authenticator
                 stale = true;
             
             if (user==null)
-                log.warn("AUTH FAILURE: user "+digest.username);
+                Log.warn("AUTH FAILURE: user "+digest.username);
             else    
             {
                 request.setAuthType(Constraint.__DIGEST_AUTH);
@@ -188,7 +184,7 @@ public class DigestAuthenticator implements Authenticator
         }
         catch(Exception e)
         {
-            log.error(LogSupport.EXCEPTION,e);
+            Log.warn(e);
         }
         
         for (int i=0;i<hash.length;i++)
@@ -227,7 +223,7 @@ public class DigestAuthenticator implements Authenticator
             }
             
             long age=request.getTimeStamp()-ts;
-            if (log.isDebugEnabled()) log.debug("age="+age);
+            if (Log.isDebugEnabled()) Log.debug("age="+age);
             
             byte[] hash=null;
             try
@@ -239,7 +235,7 @@ public class DigestAuthenticator implements Authenticator
             }
             catch(Exception e)
             {
-                log.error(LogSupport.EXCEPTION,e);
+                Log.warn(e);
             }
             
             for (int i=0;i<16;i++)
@@ -253,7 +249,7 @@ public class DigestAuthenticator implements Authenticator
         }
         catch(Exception e)
         {
-            log.debug("",e);
+            Log.ignore(e);
         }
         return -1;
     }
@@ -340,7 +336,7 @@ public class DigestAuthenticator implements Authenticator
                 return (TypeUtil.toString(digest,16).equalsIgnoreCase(response));
             }
             catch (Exception e)
-            {log.warn(LogSupport.EXCEPTION,e);}
+            {Log.warn(e);}
 
             return false;
         }

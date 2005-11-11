@@ -30,9 +30,7 @@ import java.util.Stack;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import org.mortbay.log.LogSupport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.mortbay.log.Log;
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
@@ -54,7 +52,6 @@ import org.xml.sax.helpers.DefaultHandler;
  */
 public class XmlParser
 {
-    private static Logger log = LoggerFactory.getLogger(XmlParser.class);
 
     private Map _redirectMap = new HashMap();
     private SAXParser _parser;
@@ -84,7 +81,7 @@ public class XmlParser
             }
             catch (Exception e)
             {
-                if (log.isDebugEnabled()) log.warn("Schema validation may not be supported: ", e);
+                if (Log.isDebugEnabled()) Log.warn("Schema validation may not be supported: ", e);
             }
 
             _parser.getXMLReader().setFeature("http://xml.org/sax/features/validation",validating);
@@ -93,7 +90,7 @@ public class XmlParser
         }
         catch (Exception e)
         {
-            log.warn(LogSupport.EXCEPTION, e);
+            Log.warn(Log.EXCEPTION, e);
         }
     }
 
@@ -118,9 +115,9 @@ public class XmlParser
             catch (Exception e)
             {
                 if (validating)
-                    log.warn("Schema validation may not be supported: ", e);
+                    Log.warn("Schema validation may not be supported: ", e);
                 else
-                    LogSupport.ignore(log, e);
+                    Log.ignore(e);
             }
 
             _parser.getXMLReader().setFeature("http://xml.org/sax/features/validation", validating);
@@ -130,7 +127,7 @@ public class XmlParser
         }
         catch (Exception e)
         {
-            log.warn(LogSupport.EXCEPTION, e);
+            Log.warn(Log.EXCEPTION, e);
             throw new Error(e.toString());
         }
 
@@ -169,8 +166,8 @@ public class XmlParser
         reader.setContentHandler(handler);
         reader.setErrorHandler(handler);
         reader.setEntityResolver(handler);
-        if (log.isDebugEnabled())
-                log.debug("parsing: sid=" + source.getSystemId() + ",pid=" + source.getPublicId());
+        if (Log.isDebugEnabled())
+                Log.debug("parsing: sid=" + source.getSystemId() + ",pid=" + source.getPublicId());
         _parser.parse(source, handler);
         if (handler._error != null) throw handler._error;
         Node doc = (Node) handler._top.get(0);
@@ -184,7 +181,7 @@ public class XmlParser
      */
     public synchronized Node parse(String url) throws IOException, SAXException
     {
-        if (log.isDebugEnabled()) log.debug("parse: " + url);
+        if (Log.isDebugEnabled()) Log.debug("parse: " + url);
         return parse(new InputSource(url));
     }
 
@@ -194,7 +191,7 @@ public class XmlParser
      */
     public synchronized Node parse(File file) throws IOException, SAXException
     {
-        if (log.isDebugEnabled()) log.debug("parse: " + file);
+        if (Log.isDebugEnabled()) Log.debug("parse: " + file);
         return parse(new InputSource(file.toURL().toString()));
     }
 
@@ -281,8 +278,8 @@ public class XmlParser
         /* ------------------------------------------------------------ */
         public void warning(SAXParseException ex)
         {
-            log.debug(LogSupport.EXCEPTION, ex);
-            log.warn("WARNING@" + getLocationString(ex) + " : " + ex.toString());
+            Log.debug(Log.EXCEPTION, ex);
+            Log.warn("WARNING@" + getLocationString(ex) + " : " + ex.toString());
         }
 
         /* ------------------------------------------------------------ */
@@ -290,16 +287,16 @@ public class XmlParser
         {
             // Save error and continue to report other errors
             if (_error == null) _error = ex;
-            log.debug(LogSupport.EXCEPTION, ex);
-            log.warn("ERROR@" + getLocationString(ex) + " : " + ex.toString());
+            Log.debug(Log.EXCEPTION, ex);
+            Log.warn("ERROR@" + getLocationString(ex) + " : " + ex.toString());
         }
 
         /* ------------------------------------------------------------ */
         public void fatalError(SAXParseException ex) throws SAXException
         {
             _error = ex;
-            log.debug(LogSupport.EXCEPTION, ex);
-            log.warn("FATAL@" + getLocationString(ex) + " : " + ex.toString());
+            Log.debug(Log.EXCEPTION, ex);
+            Log.warn("FATAL@" + getLocationString(ex) + " : " + ex.toString());
             throw ex;
         }
 
@@ -314,7 +311,7 @@ public class XmlParser
         public InputSource resolveEntity(String pid, String sid)
         {
 
-            if (log.isDebugEnabled()) log.debug("resolveEntity(" + pid + ", " + sid + ")");
+            if (Log.isDebugEnabled()) Log.debug("resolveEntity(" + pid + ", " + sid + ")");
 
             URL entity = null;
             if (pid != null) entity = (URL) _redirectMap.get(pid);
@@ -324,8 +321,8 @@ public class XmlParser
                 String dtd = sid;
                 if (dtd.lastIndexOf('/') >= 0) dtd = dtd.substring(dtd.lastIndexOf('/') + 1);
 
-                if (log.isDebugEnabled())
-                        log.debug("Can't exact match entity in redirect map, trying " + dtd);
+                if (Log.isDebugEnabled())
+                        Log.debug("Can't exact match entity in redirect map, trying " + dtd);
                 entity = (URL) _redirectMap.get(dtd);
             }
 
@@ -334,15 +331,15 @@ public class XmlParser
                 try
                 {
                     InputStream in = entity.openStream();
-                    if (log.isDebugEnabled())
-                            log.debug("Redirected entity " + sid + " --> " + entity);
+                    if (Log.isDebugEnabled())
+                            Log.debug("Redirected entity " + sid + " --> " + entity);
                     InputSource is = new InputSource(in);
                     is.setSystemId(sid);
                     return is;
                 }
                 catch (IOException e)
                 {
-                    LogSupport.ignore(log, e);
+                    Log.ignore(e);
                 }
             }
             return null;

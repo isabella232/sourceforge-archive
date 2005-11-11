@@ -30,12 +30,10 @@ import org.mortbay.jetty.handler.HandlerCollection;
 import org.mortbay.jetty.handler.NotFoundHandler;
 import org.mortbay.jetty.handler.WrappedHandler;
 import org.mortbay.jetty.security.UserRealm;
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 import org.mortbay.thread.BoundedThreadPool;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.MultiException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** Jetty HTTP Servlet Server.
@@ -49,8 +47,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Server extends HandlerCollection implements Handler, ThreadPool
 {
-    private static Logger log = LoggerFactory.getLogger(Server.class);
-
     private static ShutdownHookThread hookThread = new ShutdownHookThread();
     
     private ThreadPool _threadPool;
@@ -216,7 +212,7 @@ public class Server extends HandlerCollection implements Handler, ThreadPool
                 }
                 catch(Exception e)
                 {
-                    log.warn(LogSupport.EXCEPTION, e);
+                    Log.warn(e);
                 }
             }
             _notFoundHandler.handle(target, request, response, dispatch);
@@ -307,8 +303,8 @@ public class Server extends HandlerCollection implements Handler, ThreadPool
                 }
                 catch (Exception e)
                 {
-                    if (log.isDebugEnabled())
-                        log.debug("No shutdown hook in JVM ", e);
+                    if (Log.isDebugEnabled())
+                        Log.debug("No shutdown hook in JVM ", e);
                 }
             }
         }
@@ -372,7 +368,7 @@ public class Server extends HandlerCollection implements Handler, ThreadPool
         public void run()
         {
             setName("Shutdown");
-            log.info("Shutdown hook executing");
+            Log.info("Shutdown hook executing");
             Iterator it = servers.iterator();
             while (it.hasNext())
             {
@@ -385,9 +381,9 @@ public class Server extends HandlerCollection implements Handler, ThreadPool
                 }
                 catch (Exception e)
                 {
-                    log.warn(LogSupport.EXCEPTION, e);
+                    Log.warn(e);
                 }
-                log.info("Shutdown hook complete");
+                Log.info("Shutdown hook complete");
 
                 // Try to avoid JVM crash
                 try
@@ -396,7 +392,7 @@ public class Server extends HandlerCollection implements Handler, ThreadPool
                 }
                 catch (Exception e)
                 {
-                    log.warn(LogSupport.EXCEPTION, e);
+                    Log.warn(e);
                 }
             }
         }

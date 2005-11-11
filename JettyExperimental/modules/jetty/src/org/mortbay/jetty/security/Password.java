@@ -16,9 +16,7 @@
 package org.mortbay.jetty.security;
 import java.io.IOException;
 
-import org.mortbay.log.LogSupport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.mortbay.log.Log;
 
 
 /* ------------------------------------------------------------ */
@@ -49,7 +47,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Password extends Credential
 {
-    private static Logger log = LoggerFactory.getLogger(Password.class);
 
     private String _pw;
     
@@ -203,7 +200,7 @@ public class Password extends Credential
             }
             catch(IOException e)
             {
-                log.warn(LogSupport.EXCEPTION,e);
+                Log.warn(Log.EXCEPTION,e);
             }
             if (passwd==null || passwd.length()==0)
                 passwd=promptDft;

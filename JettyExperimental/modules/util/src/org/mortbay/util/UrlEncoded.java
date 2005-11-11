@@ -523,7 +523,7 @@ public class UrlEncoded extends MultiMap
         }
         catch(UnsupportedEncodingException e)
         {
-            // log.warn(LogSupport.EXCEPTION,e);
+            // Log.warn(LogSupport.EXCEPTION,e);
             bytes=string.getBytes();
         }
         
@@ -573,7 +573,7 @@ public class UrlEncoded extends MultiMap
         }
         catch(UnsupportedEncodingException e)
         {
-            // log.warn(LogSupport.EXCEPTION,e);
+            // Log.warn(LogSupport.EXCEPTION,e);
             return new String(encoded,0,n);
         }
     }

@@ -33,12 +33,9 @@ import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.RetryRequest;
-import org.mortbay.log.LogSupport;
-import org.mortbay.thread.AbstractLifeCycle;
+import org.mortbay.log.Log;
 import org.mortbay.thread.Timeout;
 import org.mortbay.util.ajax.Continuation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------------------------- */
 /**
@@ -66,11 +63,9 @@ import org.slf4j.LoggerFactory;
  */
 public class SelectChannelConnector extends AbstractConnector
 {
-    private static Logger log = LoggerFactory.getLogger(SelectChannelConnector.class);
-
     private transient ServerSocketChannel _acceptChannel;
     private transient SelectionKey _acceptKey;
-    private transient SelectSet[] _selectSet;
+    private transient SelectSet[] _selectSets;
 
     /* ------------------------------------------------------------------------------- */
     /**
@@ -87,9 +82,9 @@ public class SelectChannelConnector extends AbstractConnector
      */
     protected void doStart() throws Exception
     {
-        _selectSet = new SelectSet[getAcceptors()];
-        for (int i=0;i<_selectSet.length;i++)
-            _selectSet[i]= new SelectSet(i);
+        _selectSets = new SelectSet[getAcceptors()];
+        for (int i=0;i<_selectSets.length;i++)
+            _selectSets[i]= new SelectSet(i);
         
         super.doStart();
     }
@@ -101,9 +96,9 @@ public class SelectChannelConnector extends AbstractConnector
     protected void doStop() throws Exception
     {
         super.doStop();
-        for (int i=0;i<_selectSet.length;i++)
-            _selectSet[i].destroy();
-        _selectSet=null;
+        for (int i=0;i<_selectSets.length;i++)
+            _selectSets[i].destroy();
+        _selectSets=null;
     }
 
     /* ------------------------------------------------------------ */
@@ -129,7 +124,7 @@ public class SelectChannelConnector extends AbstractConnector
             _acceptChannel.socket().bind(getAddress());
 
             // Register accepts on the server socket with the selector.
-            _acceptKey = _acceptChannel.register(_selectSet[0].getSelector(), SelectionKey.OP_ACCEPT);
+            _acceptKey = _acceptChannel.register(_selectSets[0].getSelector(), SelectionKey.OP_ACCEPT);
         }
     }
 
@@ -147,8 +142,8 @@ public class SelectChannelConnector extends AbstractConnector
     /* ------------------------------------------------------------ */
     public void accept(int acceptorID) throws IOException
     {
-        if (_selectSet!=null && _selectSet.length>acceptorID && _selectSet[acceptorID]!=null)
-            _selectSet[acceptorID].accept();
+        if (_selectSets!=null && _selectSets.length>acceptorID && _selectSets[acceptorID]!=null)
+            _selectSets[acceptorID].accept();
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -162,17 +157,18 @@ public class SelectChannelConnector extends AbstractConnector
     /* ------------------------------------------------------------------------------- */
     private class SelectSet 
     {
-        private transient int _acceptorID;
+        private transient int _setID;
         private transient Timeout _idleTimeout;
         private transient Timeout _retryTimeout;
         private transient Selector _selector;
-        private transient List _keyChanges;
+        private transient List _changes;
+        private transient int _nextSet;
 
         /* ------------------------------------------------------------ */
  
         SelectSet(int acceptorID) throws Exception
         {
-            _acceptorID=acceptorID;
+            _setID=acceptorID;
             
             _idleTimeout = new Timeout();
             _idleTimeout.setDuration(getMaxIdleTime());
@@ -181,7 +177,7 @@ public class SelectChannelConnector extends AbstractConnector
 
             // create a selector;
             _selector = Selector.open();
-            _keyChanges = new ArrayList();
+            _changes = new ArrayList();
 
         }
 
@@ -206,7 +202,7 @@ public class SelectChannelConnector extends AbstractConnector
             }
             catch (IOException e)
             {
-                LogSupport.ignore(log, e);
+                Log.ignore(e);
             }
 
             _selector = null;
@@ -217,30 +213,46 @@ public class SelectChannelConnector extends AbstractConnector
         public void accept() throws IOException
         {
             // Make any key changes required
-            synchronized (_keyChanges)
+            synchronized (_changes)
             {
-                for (int i = 0; i < _keyChanges.size(); i++)
+                for (int i = 0; i < _changes.size(); i++)
                 {
                     try
                     {
-                        HttpEndPoint c = (HttpEndPoint) _keyChanges.get(i);
-                        if (c._interestOps >= 0 && c._key != null && c._key.isValid())
+                        Object o = _changes.get(i);
+                        if (o instanceof SocketChannel)
                         {
-                            c._key.interestOps(c._interestOps);
+                            // finish accepting this connection
+                            SocketChannel channel=(SocketChannel)o;
+                            SelectionKey cKey = channel.register(_selector, SelectionKey.OP_READ);
+                            HttpEndPoint connection = new HttpEndPoint(channel,this);
+                            connection.setKey(cKey);
+                           
+                            // assume something to do for this connection.
+                            connection.dispatch();
                         }
                         else
                         {
-                            if (c._key != null && c._key.isValid())
-                                c._key.cancel();
-                            c._key = null;
+                            // Update the operatios for a key.
+                            HttpEndPoint c = (HttpEndPoint) o;
+                            if (c._interestOps >= 0 && c._key != null && c._key.isValid())
+                            {
+                                c._key.interestOps(c._interestOps);
+                            }
+                            else
+                            {
+                                if (c._key != null && c._key.isValid())
+                                    c._key.cancel();
+                                c._key = null;
+                            }
                         }
                     }
                     catch (CancelledKeyException e)
                     {
-                        log.warn("???", e);
+                        Log.warn(e);
                     }
                 }
-                _keyChanges.clear();
+                _changes.clear();
             }
 
             // workout how low to wait in select
@@ -251,7 +263,7 @@ public class SelectChannelConnector extends AbstractConnector
             to_next = _retryTimeout.getTimeToNext();
             if (wait < 0 || to_next >= 0 && wait > to_next)
                 wait = to_next;
-
+            
             // Do the select.
             if (wait > 0)
                 _selector.select(wait);
@@ -265,6 +277,7 @@ public class SelectChannelConnector extends AbstractConnector
             _idleTimeout.setNow(now);
             _retryTimeout.setNow(now);
 
+            
             // Look for things to do
             Iterator iter = _selector.selectedKeys().iterator();
             while (iter.hasNext())
@@ -287,18 +300,35 @@ public class SelectChannelConnector extends AbstractConnector
                     {
                         if (key.isAcceptable())
                         {
+                            // Accept a new connection.
                             SocketChannel channel = _acceptChannel.accept();
                             channel.configureBlocking(false);
                             Socket socket = channel.socket();
                             configure(socket);
-                            SelectionKey cKey = channel.register(_selector, SelectionKey.OP_READ);
                             
-                            
-                            HttpEndPoint connection = new HttpEndPoint(channel,_selectSet[(int)System.currentTimeMillis()%_selectSet.length]);
-                            connection.setKey(cKey);
 
-                            // assume something to do
-                            connection.dispatch();
+                            // TODO make it reluctant to leave 0
+                            _nextSet=++_nextSet%_selectSets.length;
+                            
+                            
+                            // Is this for this selectset
+                            if (_nextSet!=_setID)
+                            {
+                                // nope - give it to another.
+                                _selectSets[_nextSet].addChange(channel);
+                                _selectSets[_nextSet].wakeup();
+                            }
+                            else
+                            {
+                                // bind connections to this select set.
+                                SelectionKey cKey = channel.register(_selectSets[_nextSet].getSelector(), SelectionKey.OP_READ);
+                                HttpEndPoint connection = new HttpEndPoint(channel,_selectSets[_nextSet]);
+                                connection.setKey(cKey);
+                                
+                                // assume something to do for this connection.
+                                connection.dispatch();
+                            }
+                            
                         }
                     }
                     else
@@ -313,7 +343,7 @@ public class SelectChannelConnector extends AbstractConnector
                 catch (Exception e)
                 {
                     if (isRunning())
-                        log.warn("selector", e);
+                        Log.warn(e);
                     if (key != null && key != _acceptKey)
                         key.interestOps(0);
                 }
@@ -338,11 +368,11 @@ public class SelectChannelConnector extends AbstractConnector
             _retryTimeout.schedule(task, timeout);
         }
 
-        public void addChange(HttpEndPoint point)
+        public void addChange(Object point)
         {
-            synchronized (_keyChanges)
+            synchronized (_changes)
             {
-                _keyChanges.add(point);
+                _changes.add(point);
             }
         }
 
@@ -435,7 +465,7 @@ public class SelectChannelConnector extends AbstractConnector
             {
                 if (!dispatch_done)
                 {
-                    log.warn("dispatch failed");
+                    Log.warn("dispatch failed");
                     undispatch();
                 }
             }
@@ -457,7 +487,7 @@ public class SelectChannelConnector extends AbstractConnector
             }
             catch (Exception e)
             {
-                log.error("???", e);
+                Log.warn(e);
                 _interestOps = -1;
                 _selectSet.addChange(this);
             }
@@ -582,20 +612,20 @@ public class SelectChannelConnector extends AbstractConnector
             }
             catch (ClosedChannelException e)
             {
-                log.debug("handle", e);
+                Log.ignore(e);
             }
             catch (IOException e)
             {
                 // TODO - better than this
                 if ("BAD".equals(e.getMessage()))
                 {
-                    log.warn("BAD Request");
-                    log.debug("BAD", e);
+                    Log.warn("BAD Request");
+                    Log.debug("BAD", e);
                 }
                 else if ("EOF".equals(e.getMessage()))
-                    log.debug("EOF", e);
+                    Log.debug("EOF", e);
                 else
-                    log.warn("IO", e);
+                    Log.warn("IO", e);
                 if (_key != null)
                     _key.cancel();
                 _key = null;
@@ -605,12 +635,12 @@ public class SelectChannelConnector extends AbstractConnector
                 }
                 catch (IOException e2)
                 {
-                    LogSupport.ignore(log, e2);
+                    Log.ignore(e2);
                 }
             }
             catch (Throwable e)
             {
-                log.warn("handle failed", e);
+                Log.warn("handle failed", e);
                 if (_key != null)
                     _key.cancel();
                 _key = null;
@@ -620,7 +650,7 @@ public class SelectChannelConnector extends AbstractConnector
                 }
                 catch (IOException e2)
                 {
-                    LogSupport.ignore(log, e2);
+                    Log.ignore(e2);
                 }
             }
             finally
@@ -631,7 +661,7 @@ public class SelectChannelConnector extends AbstractConnector
                     if (continuation != null && continuation.isPending())
                     {
                         // We have a continuation
-                        log.debug("continuation {}", continuation);
+                        Log.debug("continuation {}", continuation);
                         long timeout = continuation.getTimeout();
                         continuation.setEndPoint(this);
                         _selectSet.scheduleTimeout(continuation,timeout);
@@ -665,7 +695,7 @@ public class SelectChannelConnector extends AbstractConnector
                 }
                 catch (IOException e)
                 {
-                    LogSupport.ignore(log, e);
+                    Log.ignore(e);
                 }
             }
 
@@ -778,7 +808,7 @@ public class SelectChannelConnector extends AbstractConnector
             {
                 if (!dispatch_done)
                 {
-                    log.warn("redispatch failed");
+                    Log.warn("redispatch failed");
                     _endPoint.undispatch();
                 }
             }

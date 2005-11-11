@@ -32,9 +32,7 @@ import org.mortbay.io.nio.ChannelEndPoint;
 import org.mortbay.io.nio.NIOBuffer;
 import org.mortbay.jetty.AbstractConnector;
 import org.mortbay.jetty.HttpConnection;
-import org.mortbay.log.LogSupport;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.mortbay.log.Log;
 
 /* ------------------------------------------------------------------------------- */
 /**  Selecting Blocking NIO connector.
@@ -50,8 +48,6 @@ import org.slf4j.LoggerFactory;
  */
 public class SelectBlockingChannelConnector extends AbstractConnector
 {
-    private static Logger log= LoggerFactory.getLogger(SelectBlockingChannelConnector.class);
-    
     private transient ServerSocketChannel _acceptChannel;
     private transient SelectionKey _acceptKey;
     private transient Selector _selector;
@@ -100,7 +96,7 @@ public class SelectBlockingChannelConnector extends AbstractConnector
         }
         catch (IOException e)
         {
-            LogSupport.ignore(log, e);
+            Log.ignore(e);
         }
 
         _selector= null;
@@ -132,7 +128,7 @@ public class SelectBlockingChannelConnector extends AbstractConnector
                 }
                 catch(CancelledKeyException e)
                 {
-                    log.warn("???",e);
+                    Log.warn(e);
                 }
             }
             _unDispatched.clear();
@@ -186,7 +182,7 @@ public class SelectBlockingChannelConnector extends AbstractConnector
             catch (Exception e)
             {
                 if (isRunning())
-                    log.warn("selector", e);
+                    Log.warn(e);
                 if (key != null && key!=_acceptKey)
                     key.interestOps(0);
             }
@@ -260,7 +256,7 @@ public class SelectBlockingChannelConnector extends AbstractConnector
             {
                 if (!dispatch_done)
                 {
-                    log.warn("dispatch failed");
+                    Log.warn("dispatch failed");
                     undispatch();
                 }
             }
@@ -308,40 +304,40 @@ public class SelectBlockingChannelConnector extends AbstractConnector
             }
             catch(ClosedChannelException e)
             {
-                log.debug("handle",e);
+                Log.ignore(e);
             }
             catch(IOException e)
             {
                 // TODO - better than this
                 if ("BAD".equals(e.getMessage()))
                 {
-                    log.warn("BAD Request");
-                    log.debug("BAD",e);
+                    Log.warn("BAD Request");
+                    Log.debug("BAD",e);
                 }
                 else if ("EOF".equals(e.getMessage()))
-                    log.debug("EOF",e);
+                    Log.debug("EOF",e);
                 else
-                    log.warn("IO",e);
+                    Log.warn("IO",e);
                 if (_key!=null)
                     _key.cancel();
                 _key=null;
                 try{close();}
-                catch(IOException e2){LogSupport.ignore(log, e2);}
+                catch(IOException e2){Log.ignore(e2);}
             }
             catch(Throwable e)
             {
-                log.warn("handle failed",e);
+                Log.warn("handle failed",e);
                 if (_key!=null)
                     _key.cancel();
                 _key=null;
                 try{close();}
-                catch(IOException e2){LogSupport.ignore(log, e2);}
+                catch(IOException e2){Log.ignore(e2);}
             }
             finally
             {
                 synchronized(this)
                 {
-                    try{undispatch();}catch(Exception e){ log.warn(LogSupport.EXCEPTION,e); }
+                    try{undispatch();}catch(Exception e){ Log.warn(e); }
                 }
             }
         }

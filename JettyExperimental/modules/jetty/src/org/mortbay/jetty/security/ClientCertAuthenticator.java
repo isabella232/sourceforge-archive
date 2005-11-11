@@ -23,8 +23,7 @@ import javax.net.ssl.SSLSocket;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.mortbay.log.Log;
 
 
 
@@ -39,14 +38,12 @@ import org.slf4j.LoggerFactory;
  */
 public class ClientCertAuthenticator implements Authenticator
 {
-    private static Logger log = LoggerFactory.getLogger(ClientCertAuthenticator.class);
-
     private int _maxHandShakeSeconds =60;
     
     /* ------------------------------------------------------------ */
     public ClientCertAuthenticator()
     {
-        log.warn("Client Cert Authentication is EXPERIMENTAL");
+        Log.warn("Client Cert Authentication is EXPERIMENTAL");
     }
     
     /* ------------------------------------------------------------ */

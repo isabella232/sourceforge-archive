@@ -49,15 +49,13 @@ import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Dispatcher;
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.Loader;
 import org.mortbay.util.URIUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /* ------------------------------------------------------------ */
@@ -71,7 +69,6 @@ import org.slf4j.LoggerFactory;
  */
 public class ContextHandler extends WrappedHandler implements Attributes
 {
-    private static Logger log = LoggerFactory.getLogger(ContextHandler.class);
     private static ThreadLocal __context=new ThreadLocal();
     
     /* ------------------------------------------------------------ */
@@ -158,7 +155,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
      */
     public void setVirtualHosts(String[] vhosts)
     {
-        _vhosts=(String[])vhosts.clone();
+        _vhosts=vhosts;
     }
 
     /* ------------------------------------------------------------ */
@@ -174,7 +171,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
      */
     public String[] getVirtualHosts()
     {
-        return (String[])_vhosts.clone();
+        return _vhosts;
     }
 
     /* ------------------------------------------------------------ */
@@ -185,7 +182,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
      */
     public void setHosts(String[] hosts)
     {
-        _hosts=(String[])hosts.clone();
+        _hosts=hosts;
     }
 
     /* ------------------------------------------------------------ */
@@ -193,7 +190,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
      */
     public String[] getHosts()
     {
-        return (String[])_hosts.clone();
+        return _hosts;
     }
     
     /* ------------------------------------------------------------ */
@@ -711,7 +708,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
         }
         catch (Exception e)
         {
-            log.warn(LogSupport.EXCEPTION,e);
+            Log.warn(e);
             throw new IllegalArgumentException(base.toString());
         }
     }
@@ -728,7 +725,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
         }
         catch (Exception e)
         {
-            log.warn(LogSupport.EXCEPTION,e);
+            Log.warn(e);
             throw new IllegalArgumentException(resourceBase);
         }
     }
@@ -956,7 +953,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
             }
             catch(Exception e)
             {
-                LogSupport.ignore(log,e);
+                Log.ignore(e);
             }
             return null;
         }
@@ -981,7 +978,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
             }
             catch(Exception e)
             {
-                LogSupport.ignore(log,e);
+                Log.ignore(e);
             }
             return null;
         }
@@ -1001,7 +998,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
             }
             catch(Exception e)
             {
-                LogSupport.ignore(log,e);
+                Log.ignore(e);
                 return null;
             }
         }
@@ -1035,7 +1032,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
             }
             catch(Exception e)
             {
-                LogSupport.ignore(log,e);
+                Log.ignore(e);
             }
             return Collections.EMPTY_SET;
         }
@@ -1083,7 +1080,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
         public void log(Exception exception, String msg)
         {
             // TODO better logging
-            log.info(msg,exception);
+            Log.info(msg,exception);
         }
 
         /* ------------------------------------------------------------ */
@@ -1092,7 +1089,8 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public void log(String msg)
         {
-            log.info(msg);
+            // TODO better logging
+            Log.info(msg);
         }
 
         /* ------------------------------------------------------------ */
@@ -1101,7 +1099,8 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public void log(String message, Throwable throwable)
         {
-            log.info(message,throwable);
+            // TODO context
+            Log.info(message,throwable);
         }
 
         /* ------------------------------------------------------------ */

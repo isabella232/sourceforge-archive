@@ -48,12 +48,10 @@ import org.mortbay.jetty.MultiPartResponse;
 import org.mortbay.jetty.ResourceCache;
 import org.mortbay.jetty.Response;
 import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.resource.ResourceFactory;
 import org.mortbay.util.URIUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 
@@ -99,10 +97,8 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultServlet extends HttpServlet implements ResourceFactory
 {
-    private static Logger log = LoggerFactory.getLogger(DefaultServlet.class);
     
     private ContextHandler.Context _context;
-    private String _AllowString="GET, POST, HEAD, OPTIONS, TRACE";
     
     private int _maxByteBuffer=1024;
     private int _maxDirectBuffer=128*1024;
@@ -147,7 +143,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             }
             catch (Exception e) 
             {
-                log.warn(LogSupport.EXCEPTION,e);
+                Log.warn(Log.EXCEPTION,e);
                 throw new UnavailableException(e.toString()); 
             }
         }
@@ -160,7 +156,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         {
             try{_resourceBase=Resource.newResource(rb);}
             catch (Exception e) {
-                log.warn(LogSupport.EXCEPTION,e);
+                Log.warn(Log.EXCEPTION,e);
                 throw new UnavailableException(e.toString()); 
             }
         }
@@ -196,12 +192,12 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         }
         catch (Exception e) 
         {
-            log.warn(LogSupport.EXCEPTION,e);
+            Log.warn(Log.EXCEPTION,e);
             throw new UnavailableException(e.toString()); 
         }
         
         
-        if (log.isDebugEnabled()) log.debug("resource base = "+_resourceBase);
+        if (Log.isDebugEnabled()) Log.debug("resource base = "+_resourceBase);
     }
     
     /* ------------------------------------------------------------ */
@@ -243,11 +239,11 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         try
         {
             r = _resourceBase.addPath(pathInContext);
-            if (log.isDebugEnabled()) log.debug("RESOURCE="+r);
+            if (Log.isDebugEnabled()) Log.debug("RESOURCE="+r);
         }
         catch (IOException e)
         {
-            LogSupport.ignore(log, e);
+            Log.ignore(e);
         }
         return r;
     }
@@ -293,7 +289,6 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         String path=null;
         Resource resource=null;
         ResourceCache.Entry cache=null;
-        ResourceCache.Entry gzcache=null;
         Content content=null;
         try
         {   
@@ -345,8 +340,8 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
                 }
             }
             
-            if (log.isDebugEnabled())
-                log.debug("resource="+resource+(cache!=null?" cache":"")+(content!=null?" content":"")+(gzip?" gzip":""));
+            if (Log.isDebugEnabled())
+                Log.debug("resource="+resource+(cache!=null?" cache":"")+(content!=null?" content":"")+(gzip?" gzip":""));
                         
             // Handle resource
             if (resource==null || !resource.exists())
@@ -416,7 +411,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         }
         catch(IllegalArgumentException e)
         {
-            log.warn(LogSupport.EXCEPTION,e);
+            Log.warn(Log.EXCEPTION,e);
         }
         finally
         {
@@ -484,8 +479,8 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             if (buffer!=null)
             {
                 content.setBuffer(buffer);
-                if (log.isDebugEnabled())
-                    log.debug("content buffer is "+buffer.getClass());
+                if (Log.isDebugEnabled())
+                    Log.debug("content buffer is "+buffer.getClass());
             }
         }
         return content;
@@ -601,9 +596,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
             				Enumeration reqRanges)
     throws IOException
     {
-        Resource encodedResource=resource;
         long content_length=resource.length();
-        Buffer cached;
         
         // Get the output stream (or writer)
         OutputStream out =null;
@@ -762,7 +755,7 @@ public class DefaultServlet extends HttpServlet implements ResourceFactory
         }
         catch(Exception e)
         {
-            log.warn(LogSupport.EXCEPTION,e);
+            Log.warn(Log.EXCEPTION,e);
         }
         finally
         {

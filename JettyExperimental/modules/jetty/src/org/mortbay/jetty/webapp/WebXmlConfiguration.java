@@ -40,12 +40,10 @@ import org.mortbay.jetty.servlet.FilterMapping;
 import org.mortbay.jetty.servlet.ServletHandler;
 import org.mortbay.jetty.servlet.ServletHolder;
 import org.mortbay.jetty.servlet.ServletMapping;
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.LazyList;
 import org.mortbay.xml.XmlParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 /* ------------------------------------------------------------------------------- */
 /**
  * @version $Revision$
@@ -53,7 +51,6 @@ import org.slf4j.LoggerFactory;
  */
 public class WebXmlConfiguration implements Configuration
 {
-    private static Logger log=LoggerFactory.getLogger(WebXmlConfiguration.class);
     
     protected WebAppContext _context;
     protected XmlParser _xmlParser;
@@ -142,7 +139,7 @@ public class WebXmlConfiguration implements Configuration
         //cannot configure if the context is already started
         if (_context.isStarted())
         {
-            if (log.isDebugEnabled()){log.debug("Cannot configure webapp after it is started");};
+            if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");};
             return;
         }
         
@@ -169,7 +166,7 @@ public class WebXmlConfiguration implements Configuration
         //cannot configure if the context is already started
         if (_context.isStarted())
         {
-            if (log.isDebugEnabled()){log.debug("Cannot configure webapp after it is started");};
+            if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");};
             return;
         }
         
@@ -190,7 +187,7 @@ public class WebXmlConfiguration implements Configuration
         //cannot configure if the context is already started
         if (_context.isStarted())
         {
-            if (log.isDebugEnabled()){log.debug("Cannot configure webapp after it is started");};
+            if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");};
             return;
         }
         
@@ -202,7 +199,7 @@ public class WebXmlConfiguration implements Configuration
             Resource web=webInf.addPath("web.xml");
             if(!web.exists())
             {
-                log.info("No WEB-INF/web.xml in "+getWebAppContext().getWar()
+                Log.info("No WEB-INF/web.xml in "+getWebAppContext().getWar()
                         +". Serving files and default/dynamic servlets only");
             }
             else
@@ -272,7 +269,7 @@ public class WebXmlConfiguration implements Configuration
             }
             catch(Exception e)
             {
-                log.warn("Configuration problem at "+node,e);
+                Log.warn("Configuration problem at "+node,e);
                 throw new UnavailableException("Configuration problem");
             }
         }
@@ -328,8 +325,8 @@ public class WebXmlConfiguration implements Configuration
             initJspConfig(node);
         else if("resource-ref".equals(element))
         {
-            if(log.isDebugEnabled())
-                log.debug("No implementation: "+node);
+            if(Log.isDebugEnabled())
+                Log.debug("No implementation: "+node);
         }
         else if("security-constraint".equals(element))
             initSecurityConstraint(node);
@@ -347,10 +344,10 @@ public class WebXmlConfiguration implements Configuration
             initDistributable(node);
         else
         {
-            if(log.isDebugEnabled())
+            if(Log.isDebugEnabled())
             {
-                log.debug("Element {} not handled in {}",element,this);
-                log.debug(node.toString());
+                Log.debug("Element {} not handled in {}",element,this);
+                Log.debug(node.toString());
             }
         }
     }
@@ -366,8 +363,8 @@ public class WebXmlConfiguration implements Configuration
     {
         String name=node.getString("param-name",false,true);
         String value=node.getString("param-value",false,true);
-        if(log.isDebugEnabled())
-            log.debug("ContextParam: "+name+"="+value);
+        if(Log.isDebugEnabled())
+            Log.debug("ContextParam: "+name+"="+value);
         getWebAppContext().getInitParams().put(name, value);
     }
 
@@ -456,7 +453,7 @@ public class WebXmlConfiguration implements Configuration
             String s=startup.toString(false,true).toLowerCase();
             if(s.startsWith("t"))
             {
-                log.warn("Deprecated boolean load-on-startup.  Please use integer");
+                Log.warn("Deprecated boolean load-on-startup.  Please use integer");
                 holder.setInitOrder(1);
             }
             else
@@ -469,8 +466,8 @@ public class WebXmlConfiguration implements Configuration
                 }
                 catch(Exception e)
                 {
-                    log.warn("Cannot parse load-on-startup "+s+". Please use integer");
-                    LogSupport.ignore(log,e);
+                    Log.warn("Cannot parse load-on-startup "+s+". Please use integer");
+                    Log.ignore(e);
                 }
                 holder.setInitOrder(order);
             }
@@ -483,13 +480,13 @@ public class WebXmlConfiguration implements Configuration
             String roleLink=securityRef.getString("role-link",false,true);
             if(roleName!=null&&roleName.length()>0&&roleLink!=null&&roleLink.length()>0)
             {
-                if(log.isDebugEnabled())
-                    log.debug("link role "+roleName+" to "+roleLink+" for "+this);
+                if(Log.isDebugEnabled())
+                    Log.debug("link role "+roleName+" to "+roleLink+" for "+this);
                 holder.setUserRoleLink(roleName,roleLink);
             }
             else
             {
-                log.warn("Ignored invalid security-role-ref element: "+"servlet-name="+holder.getName()+", "+securityRef);
+                Log.warn("Ignored invalid security-role-ref element: "+"servlet-name="+holder.getName()+", "+securityRef);
             }
         }
         XmlParser.Node run_as=node.get("run-as");
@@ -532,14 +529,14 @@ public class WebXmlConfiguration implements Configuration
             listener=listenerClass.newInstance();
             if(!(listener instanceof EventListener))
             {
-                log.warn("Not an EventListener: "+listener);
+                Log.warn("Not an EventListener: "+listener);
                 return;
             }
             _listeners=LazyList.add(_listeners, listener);
         }
         catch(Exception e)
         {
-            log.warn("Could not instantiate listener "+className,e);
+            Log.warn("Could not instantiate listener "+className,e);
             return;
         }
     }
@@ -665,7 +662,7 @@ public class WebXmlConfiguration implements Configuration
                     scBase.setDataConstraint(Constraint.DC_CONFIDENTIAL);
                 else
                 {
-                    log.warn("Unknown user-data-constraint:" + guarantee);
+                    Log.warn("Unknown user-data-constraint:" + guarantee);
                     scBase.setDataConstraint(Constraint.DC_CONFIDENTIAL);
                 }
             }
@@ -708,7 +705,7 @@ public class WebXmlConfiguration implements Configuration
         }
         catch (CloneNotSupportedException e)
         {
-            log.error(LogSupport.EXCEPTION,e);
+            Log.warn(e);
         }
             
     }
@@ -733,7 +730,7 @@ public class WebXmlConfiguration implements Configuration
             else if(Constraint.__CERT_AUTH2.equals(m))
                 authenticator=new ClientCertAuthenticator();
             else
-                log.warn("UNKNOWN AUTH METHOD: "+m);
+                Log.warn("UNKNOWN AUTH METHOD: "+m);
             getWebAppContext().getSecurityHandler().setAuthenticator(authenticator);
         }
         XmlParser.Node name=node.get("realm-name");
@@ -752,7 +749,7 @@ public class WebXmlConfiguration implements Configuration
             if (realm==null)
             {
                 String msg = "Unknown realm: "+realm_name;
-                log.warn(msg);
+                Log.warn(msg);
             }
             else
                 getWebAppContext().getSecurityHandler().setUserRealm(realm);
@@ -761,7 +758,7 @@ public class WebXmlConfiguration implements Configuration
         if(formConfig!=null)
         {
             if(_formAuthenticator==null)
-                log.warn("FORM Authentication miss-configured");
+                Log.warn("FORM Authentication miss-configured");
             else
             {
                 XmlParser.Node loginPage=formConfig.get("form-login-page");

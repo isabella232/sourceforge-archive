@@ -15,10 +15,9 @@
 
 package org.mortbay.jetty.webapp;
 
+import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.xml.XmlConfiguration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -33,7 +32,6 @@ import org.slf4j.LoggerFactory;
  */
 public class JettyWebXmlConfiguration implements Configuration
 {
-    private static Logger log= LoggerFactory.getLogger(JettyWebXmlConfiguration.class);
     private WebAppContext _context;
 
     
@@ -75,12 +73,12 @@ public class JettyWebXmlConfiguration implements Configuration
         //cannot configure if the _context is already started
         if (_context.isStarted())
         {
-            if (log.isDebugEnabled()){log.debug("Cannot configure webapp after it is started");};
+            if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");};
             return;
         }
         
-        if(log.isDebugEnabled())
-            log.debug("Configuring web-jetty.xml");
+        if(Log.isDebugEnabled())
+            Log.debug("Configuring web-jetty.xml");
         
         Resource webInf=getWebAppContext().getWebInf();
         // handle any WEB-INF descriptors
@@ -95,8 +93,8 @@ public class JettyWebXmlConfiguration implements Configuration
             
             if(jetty.exists())
             {
-                if(log.isDebugEnabled())
-                    log.debug("Configure: "+jetty);
+                if(Log.isDebugEnabled())
+                    Log.debug("Configure: "+jetty);
                 XmlConfiguration jetty_config=new XmlConfiguration(jetty.getURL());
                 jetty_config.configure(getWebAppContext());
             }

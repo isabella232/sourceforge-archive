@@ -26,10 +26,8 @@ import java.security.PermissionCollection;
 import java.util.StringTokenizer;
 
 import org.mortbay.io.IO;
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /* ------------------------------------------------------------ */
@@ -47,7 +45,6 @@ import org.slf4j.LoggerFactory;
  */
 public class WebAppClassLoader extends URLClassLoader
 {
-    private static Logger log= LoggerFactory.getLogger(WebAppClassLoader.class);
 
     private boolean _parentLoaderPriority= true;
     private ClassLoader _parent;
@@ -144,8 +141,8 @@ public class WebAppClassLoader extends URLClassLoader
         while (tokenizer.hasMoreTokens())
         {
             Resource resource= Resource.newResource(tokenizer.nextToken());
-            if (log.isDebugEnabled())
-                log.debug("Path resource=" + resource);
+            if (Log.isDebugEnabled())
+                Log.debug("Path resource=" + resource);
 
             // Resolve file path if possible
             File file= resource.getFile();
@@ -176,8 +173,8 @@ public class WebAppClassLoader extends URLClassLoader
                     File jar= File.createTempFile("Jetty-", ".jar", lib);
                     
                     jar.deleteOnExit();
-                    if (log.isDebugEnabled())
-                        log.debug("Extract " + resource + " to " + jar);
+                    if (Log.isDebugEnabled())
+                        Log.debug("Extract " + resource + " to " + jar);
                     FileOutputStream out = null;
                     try
                     {
@@ -229,7 +226,7 @@ public class WebAppClassLoader extends URLClassLoader
                 }
                 catch (Exception ex)
                 {
-                    log.warn(LogSupport.EXCEPTION,ex);
+                    Log.warn(Log.EXCEPTION,ex);
                 }
             }
         }
@@ -253,7 +250,7 @@ public class WebAppClassLoader extends URLClassLoader
     /* ------------------------------------------------------------ */
     public String toString()
     {
-        if (log.isDebugEnabled())
+        if (Log.isDebugEnabled())
             return "ContextLoader@" + hashCode() + "(" + _urlClassPath + ") / " + _parent;
         return "ContextLoader@" + hashCode();
     }
@@ -262,8 +259,8 @@ public class WebAppClassLoader extends URLClassLoader
     public PermissionCollection getPermissions(CodeSource cs)
     {
         PermissionCollection pc= (_permissions == null) ? super.getPermissions(cs) : _permissions;
-        if (log.isDebugEnabled())
-            log.debug("loader.getPermissions(" + cs + ")=" + pc);
+        if (Log.isDebugEnabled())
+            Log.debug("loader.getPermissions(" + cs + ")=" + pc);
         return pc;
     }
 
@@ -281,14 +278,14 @@ public class WebAppClassLoader extends URLClassLoader
         boolean tried_parent= false;
         if (c == null && (_parentLoaderPriority || isSystemPath(name)) && !isServerPath(name) && _parent!=null)
         {
-            if (log.isDebugEnabled())
-                log.debug("try loadClass " + name + " from " + _parent);
+            if (Log.isDebugEnabled())
+                Log.debug("try loadClass " + name + " from " + _parent);
             tried_parent= true;
             try
             {
                 c= _parent.loadClass(name);
-                if (log.isDebugEnabled())
-                    log.debug("loaded " + c);
+                if (Log.isDebugEnabled())
+                    Log.debug("loaded " + c);
             }
             catch (ClassNotFoundException e)
             {
@@ -298,13 +295,13 @@ public class WebAppClassLoader extends URLClassLoader
 
         if (c == null)
         {
-            if (log.isDebugEnabled())
-                log.debug("try findClass " + name + " from " + _urlClassPath);
+            if (Log.isDebugEnabled())
+                Log.debug("try findClass " + name + " from " + _urlClassPath);
             try
             {
                 c= this.findClass(name);
-                if (log.isDebugEnabled())
-                    log.debug("loaded " + c);
+                if (Log.isDebugEnabled())
+                    Log.debug("loaded " + c);
             }
             catch (ClassNotFoundException e)
             {
@@ -314,11 +311,11 @@ public class WebAppClassLoader extends URLClassLoader
 
         if (c == null && !tried_parent && !isServerPath(name) && _parent!=null)
         {
-            if (log.isDebugEnabled())
-                log.debug("try loadClass " + name + " from " + _parent);
+            if (Log.isDebugEnabled())
+                Log.debug("try loadClass " + name + " from " + _parent);
             c= _parent.loadClass(name);
-            if (log.isDebugEnabled())
-                log.debug("loaded " + c);
+            if (Log.isDebugEnabled())
+                Log.debug("loaded " + c);
         }
 
         if (c == null)
@@ -337,8 +334,8 @@ public class WebAppClassLoader extends URLClassLoader
         boolean tried_parent= false;
         if (_parentLoaderPriority || isSystemPath(name))
         {
-            if (log.isDebugEnabled())
-                log.debug("try getResource " + name + " from " + _parent);
+            if (Log.isDebugEnabled())
+                Log.debug("try getResource " + name + " from " + _parent);
             tried_parent= true;
             
             if (_parent!=null)
@@ -347,29 +344,29 @@ public class WebAppClassLoader extends URLClassLoader
 
         if (url == null)
         {
-            if (log.isDebugEnabled())
-                log.debug("try findResource " + name + " from " + _urlClassPath);
+            if (Log.isDebugEnabled())
+                Log.debug("try findResource " + name + " from " + _urlClassPath);
             url= this.findResource(name);
 
             if (url == null && name.startsWith("/"))
             {
-                if (log.isDebugEnabled())
-                    log.debug("HACK leading / off " + name);
+                if (Log.isDebugEnabled())
+                    Log.debug("HACK leading / off " + name);
                 url= this.findResource(name.substring(1));
             }
         }
 
         if (url == null && !tried_parent)
         {
-            if (log.isDebugEnabled())
-                log.debug("try getResource " + name + " from " + _parent);
+            if (Log.isDebugEnabled())
+                Log.debug("try getResource " + name + " from " + _parent);
             if (_parent!=null)
                 url= _parent.getResource(name);
         }
 
         if (url != null)
-            if (log.isDebugEnabled())
-                log.debug("found " + url);
+            if (Log.isDebugEnabled())
+                Log.debug("found " + url);
 
         return url;
     }

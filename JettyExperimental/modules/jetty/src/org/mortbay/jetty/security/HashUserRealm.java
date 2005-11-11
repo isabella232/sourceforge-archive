@@ -28,9 +28,8 @@ import java.util.StringTokenizer;
 
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Response;
+import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** HashMapped User Realm.
@@ -60,7 +59,6 @@ import org.slf4j.LoggerFactory;
  */
 public class HashUserRealm implements UserRealm, SSORealm
 {
-    private static Logger log = LoggerFactory.getLogger(HashUserRealm.class);
 
     /** HttpContext Attribute to set to activate SSO.
      */
@@ -122,7 +120,7 @@ public class HashUserRealm implements UserRealm, SSORealm
         _users.clear();
         _roles.clear();
         
-        if(log.isDebugEnabled())log.debug("Load "+this+" from "+config);
+        if(Log.isDebugEnabled())Log.debug("Load "+this+" from "+config);
         Properties properties = new Properties();
         Resource resource=Resource.newResource(config);
         properties.load(resource.getInputStream());

@@ -39,12 +39,10 @@ import javax.servlet.http.HttpSessionListener;
 import org.mortbay.jetty.HttpOnlyCookie;
 import org.mortbay.jetty.SessionManager;
 import org.mortbay.jetty.handler.ContextHandler;
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 import org.mortbay.thread.AbstractLifeCycle;
 import org.mortbay.util.LazyList;
 import org.mortbay.util.MultiMap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /* ------------------------------------------------------------ */
@@ -71,7 +69,6 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
     /* ------------------------------------------------------------ */
     public final static int __distantFuture = 60*60*24*7*52*20;
     private final static String __NEW_SESSION_ID="org.mortbay.jetty.newSessionId";
-    private static Logger log = LoggerFactory.getLogger(AbstractSessionManager.class);
     
     /* ------------------------------------------------------------ */
     // Setting of max inactive interval for new sessions
@@ -488,11 +485,11 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         _loader = Thread.currentThread().getContextClassLoader();
         if (_random==null)
         {
-            log.debug("New random session seed");
+            Log.debug("New random session seed");
             _random=new Random();
         }
         else
-            if(log.isDebugEnabled())log.debug("Initializing random session key: "+_random);
+            if(Log.isDebugEnabled())Log.debug("Initializing random session key: "+_random);
         _random.nextLong();
         
         if (_sessions==null)
@@ -674,7 +671,7 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
         /* ------------------------------------------------------------- */
         public void invalidate() throws IllegalStateException
         {
-            if (log.isDebugEnabled()) log.debug("Invalidate session "+getId());
+            if (Log.isDebugEnabled()) Log.debug("Invalidate session "+getId());
             try
             {
                 // Notify listeners and unbind values
@@ -862,21 +859,21 @@ public abstract class AbstractSessionManager extends AbstractLifeCycle implement
                     try {
                         if (period!=_scavengePeriodMs)
                         {
-                            if(log.isDebugEnabled())log.debug("Session scavenger period = "+_scavengePeriodMs/1000+"s");
+                            if(Log.isDebugEnabled())Log.debug("Session scavenger period = "+_scavengePeriodMs/1000+"s");
                             period=_scavengePeriodMs;
                         }
                         sleep(period>1000?period:1000);
                         AbstractSessionManager.this.scavenge();
                     }
                     catch (InterruptedException ex){continue;}
-                    catch (Error e) {log.warn(LogSupport.EXCEPTION,e);}
-                    catch (Exception e) {log.warn(LogSupport.EXCEPTION,e);}
+                    catch (Error e) {Log.warn(Log.EXCEPTION,e);}
+                    catch (Exception e) {Log.warn(Log.EXCEPTION,e);}
                 }
             }
             finally
             {
                 AbstractSessionManager.this._scavenger=null;
-                log.debug("Session scavenger exited");
+                Log.debug("Session scavenger exited");
             }
         }
         

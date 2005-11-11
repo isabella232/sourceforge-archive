@@ -23,13 +23,10 @@ import java.util.ArrayList;
 
 import org.mortbay.io.Buffer;
 import org.mortbay.io.EndPoint;
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 import org.mortbay.thread.AbstractLifeCycle;
 import org.mortbay.thread.ThreadPool;
 import org.mortbay.util.ajax.Continuation;
-import org.mortbay.util.ajax.WaitingContinuation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /** Abstract Connector implementation.
@@ -47,8 +44,6 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractConnector extends AbstractLifeCycle implements Connector
 {
-    private static Logger log= LoggerFactory.getLogger(AbstractConnector.class);
-
     private int _headerBufferSize=2*1024;
     private int _requestBufferSize=16*1024;
     private int _responseBufferSize=48*1024;
@@ -321,7 +316,9 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
             _handler.start();
         
         // Start selector thread
-        _threadPool.dispatch(new Acceptor());
+        _acceptorThread=new Thread[getAcceptors()];
+        for (int i=0;i<_acceptorThread.length;i++)
+            _threadPool.dispatch(new Acceptor(i));
     }
     
     /* ------------------------------------------------------------ */
@@ -349,7 +346,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
             _responseBuffers.clear();
         _responseBuffers=null;
         
-        try{close();} catch(IOException e) {log.warn("stop",e);}
+        try{close();} catch(IOException e) {Log.warn(e);}
     }
 
     /* ------------------------------------------------------------ */
@@ -378,7 +375,7 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
         }
         catch (Exception e)
         {
-            LogSupport.ignore(log, e);
+            Log.ignore(e);
         }
     }
 
@@ -573,22 +570,18 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     {
         int _acceptor=0;
         
+        Acceptor(int id)
+        {
+            _acceptor=id;
+        }
+        
         /* ------------------------------------------------------------ */
         public void run()
         {   
-            synchronized(AbstractConnector.this)
-            {
-                if (_acceptorThread==null)
-                    _acceptorThread=new Thread[_acceptors];
-                
-                while(_acceptorThread[_acceptor]!=null)
-                    _acceptor++;
-            
-                _acceptorThread[_acceptor]=Thread.currentThread();
-            }
+            _acceptorThread[_acceptor]=Thread.currentThread();
             String name =_acceptorThread[_acceptor].getName();
             _acceptorThread[_acceptor].setName(name+" - Acceptor"+_acceptor+" "+AbstractConnector.this);
-            
+            Log.info("Starting " + this);
             try
             {
                 while (isRunning() && getThreadPool().isRunning())
@@ -599,17 +592,17 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
                     }
                     catch(IOException e)
                     {
-                        log.debug("select ",e);
+                        Log.ignore(e);
                     }
                     catch(Exception e)
                     {
-                        log.error("select ",e);
+                        Log.warn(e);
                     }
                 }
             }
             finally
             {   
-                log.info("Stopping " + this);
+                Log.info("Stopping " + this);
                 Thread.currentThread().setName(name);
                 try
                 {
@@ -617,13 +610,9 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
                 }
                 catch (IOException e)
                 {
-                    log.warn("close", e);
+                    Log.warn(e);
                 }
             }
         }
-
     }
-
-    
-
 }

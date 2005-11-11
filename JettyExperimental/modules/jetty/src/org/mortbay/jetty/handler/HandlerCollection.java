@@ -23,8 +23,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.jetty.Handler;
 import org.mortbay.util.MultiException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /** HandlerCollection.
@@ -33,8 +31,6 @@ import org.slf4j.LoggerFactory;
  */
 public class HandlerCollection extends AbstractHandler implements Handler
 {
-    private static Logger log = LoggerFactory.getLogger(HandlerCollection.class);
-
     private Handler[] _handlers;
 
     /* ------------------------------------------------------------ */

@@ -161,7 +161,7 @@ public class Scanner extends Thread
 						}
 						catch (Exception e)
 						{
-							log.error("Error doing stop/start", e);
+							log.warn("Error doing stop/start", e);
 						}
 					}
 				}				

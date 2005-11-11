@@ -26,7 +26,6 @@ import java.security.cert.X509Certificate;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -35,16 +34,11 @@ import javax.net.ssl.SSLSocket;
 
 import org.mortbay.io.EndPoint;
 import org.mortbay.io.bio.SocketEndPoint;
-import org.mortbay.jetty.AbstractConnector;
-import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.HttpSchemes;
 import org.mortbay.jetty.Request;
 import org.mortbay.jetty.bio.SocketConnector;
-import org.mortbay.jetty.handler.AbstractHandler;
-import org.mortbay.log.LogSupport;
+import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /* ------------------------------------------------------------ */
 /**
@@ -64,7 +58,6 @@ import org.slf4j.LoggerFactory;
  */
 public class SslSocketConnector extends SocketConnector
 {
-    private static Logger log = LoggerFactory.getLogger(SslSocketConnector.class);
     
 
     /** Default value for the cipher Suites. */
@@ -284,11 +277,11 @@ public class SslSocketConnector extends SocketConnector
             if(cipherSuites != null && cipherSuites.length >0) {
                 socket.setEnabledCipherSuites(cipherSuites);
                 for ( int i=0; i<cipherSuites.length; i++ ) {
-                    log.debug("SslListener enabled ciphersuite: " + cipherSuites[i]);
+                    Log.debug("SslListener enabled ciphersuite: " + cipherSuites[i]);
                 }            
             }
             
-            log.info("JsseListener.needClientAuth=" + _needClientAuth);
+            Log.info("JsseListener.needClientAuth=" + _needClientAuth);
         }
         catch (IOException e)
         {
@@ -296,7 +289,7 @@ public class SslSocketConnector extends SocketConnector
         }
         catch (Exception e)
         {
-            log.warn(LogSupport.EXCEPTION, e);
+            Log.warn(Log.EXCEPTION, e);
             throw new IOException("Could not create JsseListener: " + e.toString());
         }
         return socket;
@@ -370,7 +363,7 @@ public class SslSocketConnector extends SocketConnector
         }
         catch (Exception e)
         {
-            log.warn(LogSupport.EXCEPTION, e);
+            Log.warn(Log.EXCEPTION, e);
         }
     }
 
@@ -412,7 +405,7 @@ public class SslSocketConnector extends SocketConnector
         }
         catch (Exception e)
         {
-            log.warn(LogSupport.EXCEPTION, e);
+            Log.warn(Log.EXCEPTION, e);
             return null;
         }
     }

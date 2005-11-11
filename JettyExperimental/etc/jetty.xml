@@ -37,13 +37,15 @@
         <Item>
           <New class="org.mortbay.jetty.nio.SelectChannelConnector">
             <Set name="port">8080</Set>
-            <Set name="maxIdleTime">30000</Set>
+            <Set name="maxIdleTime">50000</Set>
+            <Set name="Acceptors">2</Set>
           </New>
         </Item>
 
         <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
         <!-- Add a HTTPS SSL listener on port 8443                           -->
         <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+        <!--  
         <Item>
           <New class="org.mortbay.jetty.security.SslSocketConnector">
             <Set name="Port">8443</Set>
@@ -53,7 +55,7 @@
             <Set name="KeyPassword">OBF:1u2u1wml1z7s1z7a1wnl1u2g</Set>
           </New>
         </Item>
-
+        -->
       </Array>
     </Set>
 

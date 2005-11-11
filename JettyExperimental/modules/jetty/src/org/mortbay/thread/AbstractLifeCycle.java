@@ -14,15 +14,14 @@
 //========================================================================
 
 package org.mortbay.thread;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import org.mortbay.log.Log;
 
 /**
  * @author gregw
  */
 public abstract class AbstractLifeCycle implements LifeCycle
 {
-    private final static Logger log = LoggerFactory.getLogger(AbstractLifeCycle.class);
     private final int FAILED=-1,STOPPED=0,STARTING=1,STARTED=2,STOPPING=3;
     private transient int _state=0;
     protected void doStart() throws Exception {};
@@ -36,18 +35,18 @@ public abstract class AbstractLifeCycle implements LifeCycle
                 return;
             _state=STARTING;
             doStart();
-            log.info("started {}",this);
+            Log.info("started {}",this);
             _state=STARTED;
         }
         catch (Exception e)
         {
-            log.info("failed {}",this);
+            Log.info("failed {}",this);
             _state=FAILED;
             throw e;
         }
         catch(Error e)
         {
-            log.info("failed {}",this);
+            Log.info("failed {}",this);
             _state=FAILED;
             throw e;
         }
@@ -61,18 +60,18 @@ public abstract class AbstractLifeCycle implements LifeCycle
                 return;
             _state=STOPPING;
             doStop();
-            log.info("stopped {}",this);
+            Log.info("stopped {}",this);
             _state=STOPPED;
         }
         catch (Exception e)
         {
-            log.info("failed {}",this);
+            Log.info("failed {}",this);
             _state=FAILED;
             throw e;
         }
         catch(Error e)
         {
-            log.info("failed {}",this);
+            Log.info("failed {}",this);
             _state=FAILED;
             throw e;
         }
