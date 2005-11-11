@@ -108,13 +108,6 @@ public class HttpParser implements HttpTokens
         _handler = handler;
         _headerBufferSize=headerBufferSize;
         _contentBufferSize=contentBufferSize;
-
-        _header = _buffers.getBuffer(_headerBufferSize);
-        _buffer = _header;
-        _tok0 = new View(_header);
-        _tok1 = new View(_header);
-        _tok0.setPutIndex(_tok0.getIndex());
-        _tok1.setPutIndex(_tok1.getIndex());
     }
 
     /* ------------------------------------------------------------------------------- */
@@ -171,7 +164,7 @@ public class HttpParser implements HttpTokens
     public void parse() throws IOException
     {
         if (_state==STATE_END)
-            reset();
+            reset(false);
         if (_state!=STATE_START)
             throw new IllegalStateException("!START");
 
@@ -205,6 +198,16 @@ public class HttpParser implements HttpTokens
      */
     public void parseNext() throws IOException
     {
+        if (_buffer==null)
+        {
+            _header = _buffers.getBuffer(_headerBufferSize);
+            _buffer = _header;
+            _tok0 = new View(_header);
+            _tok1 = new View(_header);
+            _tok0.setPutIndex(_tok0.getIndex());
+            _tok1.setPutIndex(_tok1.getIndex());
+        }
+        
         if (_state == STATE_END) throw new IllegalStateException("STATE_END");
         if (_state == STATE_CONTENT && _contentPosition == _contentLength)
         {
@@ -663,8 +666,9 @@ public class HttpParser implements HttpTokens
     }
 
     /* ------------------------------------------------------------------------------- */
-    public void reset()
+    public void reset(boolean returnBuffers)
     {
+        System.err.println("RESET "+returnBuffers);
         _state = STATE_START;
         _contentLength = UNKNOWN_CONTENT;
         _contentPosition = 0;
@@ -673,20 +677,47 @@ public class HttpParser implements HttpTokens
         _hasContent = false;
         _response = false;
         
-        if (_buffer==_content && _content.length()<=_header.space())
+        if (_buffer!=null)
         {
-            _buffer=_header;
-            if (_content.length()>0)
-                _header.put(_content);
-            if (_buffers!=null)
-                _buffers.returnBuffer(_content);
-            _content=null;
+            
+            if ( _buffer==_content && _content.length()<=_header.space())
+            {
+                _buffer=_header;
+                if (_content.length()>0)
+                {
+                    if (_eol == CARRIAGE_RETURN && _content.peek() == LINE_FEED)
+                    {
+                        _content.skip(1);
+                        _eol = LINE_FEED;
+                    }
+                    _header.put(_content);
+                }
+                if (_buffers!=null && returnBuffers)
+                    _buffers.returnBuffer(_content);
+                _content=null;
+            }
+            else if (_buffer.length()>0 && _eol == CARRIAGE_RETURN && _buffer.peek() == LINE_FEED)
+            {
+                _buffer.skip(1);
+                _eol = LINE_FEED;
+                
+            }
+            
+            if (!_header.hasContent() && _buffers!=null && returnBuffers)
+            {
+                _buffers.returnBuffer(_header);
+                _header=null;
+                _buffer=null;
+            }   
+            else
+            {
+                _buffer.compact();
+                _tok0.update(_buffer);
+                _tok0.update(0,0);
+                _tok1.update(_buffer);
+                _tok1.update(0,0);
+            }
         }
-        _buffer.compact();
-        _tok0.update(_buffer);
-        _tok0.update(0,0);
-        _tok1.update(_buffer);
-        _tok1.update(0,0);
     }
 
     public static abstract class EventHandler

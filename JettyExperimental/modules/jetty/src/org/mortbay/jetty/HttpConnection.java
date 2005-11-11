@@ -235,11 +235,11 @@ public class HttpConnection
             if (_parser.isState(HttpParser.STATE_END) && _generator.isState(HttpGenerator.STATE_END))
             {
                 _expectingContinues = false; // TODO do something with this!
-                _parser.reset(); // TODO return header buffer???
+                _parser.reset(true); // TODO maybe only release when low on resources
                 _requestFields.clear();
                 _request.recycle();
 
-                _generator.reset(!_generator.isPersistent()); // TODO true or false?
+                _generator.reset(true); // TODO maybe only release when low on resources
                 _responseFields.clear();
                 _response.recycle();
                 
@@ -358,7 +358,7 @@ public class HttpConnection
             }
             catch (URISyntaxException e)
             {
-                _parser.reset();
+                _parser.reset(true); 
                 // TODO prebuilt response
                 _generator.setResponse(400, null);
                 _responseFields.put(HttpHeaders.CONNECTION_BUFFER, HttpHeaderValues.CLOSE_BUFFER);
