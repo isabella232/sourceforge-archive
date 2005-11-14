@@ -16,6 +16,8 @@
 package org.mortbay.log;
 import java.lang.reflect.Method;
 
+import org.mortbay.util.Loader;
+
 
 
 /*-----------------------------------------------------------------------*/
@@ -39,63 +41,59 @@ public class Log
     public final static String IGNORED= "IGNORED";
     public final static String IGNORED_FMT= "IGNORED: {}";
     public final static String NOT_IMPLEMENTED= "NOT IMPLEMENTED ";
-    private static boolean debug = System.getProperty("DEBUG",null)!=null;
+    
+    private static String logClass=System.getProperty("org.mortbay.log.class","org.mortbay.log.Slf4JLog");
     private static boolean verbose = System.getProperty("VERBOSE",null)!=null;
-    private static Log log=new Log();
-    private static boolean disabled;
+    private static Logger log;
    
     static
     {
+        Class log_class=null;
         try
         {
-            log=new Slf4jLog();
-            log.doInfo("Logging to slf4j",null,null);
+            log_class=Loader.loadClass(Log.class, logClass);
+            log=(Logger) log_class.newInstance();
+            log.info("Logging to slf4j",null,null);
         }
         catch(Exception e)
         {
-            if(debug&&verbose)
+            log_class=StdErrLog.class;
+            log=new StdErrLog();
+            if(verbose)
                 e.printStackTrace();
-            log.doInfo("Logging to stderr",null,null);
         }
+        
+        log.info("Logging to {} via {}",log,log_class.getName());
     }
     
-    public static void setDisabled(boolean d)
-    {
-        disabled=d;
-    }
-    
-    public static boolean getDisabled()
-    {
-        return disabled;
-    }
     
     public static void debug(Throwable th)
     {
-        if (disabled)
+        if (log==null)
             return;
-        log.doDebug(EXCEPTION,th);
+        log.debug(EXCEPTION,th);
         unwind(th);
     }
 
     public static void debug(String msg)
     {
-        if (disabled)
+        if (log==null)
             return;
-        log.doDebug(msg,null,null);
+        log.debug(msg,null,null);
     }
     
     public static void debug(String msg,Object arg)
     {
-        if (disabled)
+        if (log==null)
             return;
-        log.doDebug(msg,arg,null);
+        log.debug(msg,arg,null);
     }
     
     public static void debug(String msg,Object arg0, Object arg1)
     {
-        if (disabled)
+        if (log==null)
             return;
-        log.doDebug(msg,arg0,arg1);
+        log.debug(msg,arg0,arg1);
     }
     
     /* ------------------------------------------------------------ */
@@ -105,80 +103,88 @@ public class Log
      */
     public static void ignore(Throwable th)
     {
-        if (disabled)
+        if (log==null)
             return;
         if (verbose)
         {
-            log.doDebug(IGNORED,th);
+            log.debug(IGNORED,th);
             unwind(th);
         }
-        else if (debug)
-            log.doDebug(IGNORED_FMT,th.toString(),null);
+        else
+            log.debug(IGNORED_FMT,th.toString(),null);
     }
     
     public static void info(String msg)
     {
-        if (disabled)
+        if (log==null)
             return;
-        log.doInfo(msg,null,null);
+        log.info(msg,null,null);
     }
     
     public static void info(String msg,Object arg)
     {
-        if (disabled)
+        if (log==null)
             return;
-        log.doInfo(msg,arg,null);
+        log.info(msg,arg,null);
     }
     
     public static void info(String msg,Object arg0, Object arg1)
     {
-        if (disabled)
+        if (log==null)
             return;
-        log.doInfo(msg,arg0,arg1);
+        log.info(msg,arg0,arg1);
     }
     
     public static boolean isDebugEnabled()
     {
-        if (disabled)
+        if (log==null)
             return false;
-        return log.doDebugEnabled();
+        return log.isDebugEnabled();
     }
     
     public static void warn(String msg)
     {
-        if (disabled)
+        if (log==null)
             return;
-        log.doWarn(msg,null,null);
+        log.warn(msg,null,null);
     }
     
     public static void warn(String msg,Object arg)
     {
-        if (disabled)
+        if (log==null)
             return;
-        log.doWarn(msg,arg,null);        
+        log.warn(msg,arg,null);        
     }
     
     public static void warn(String msg,Object arg0, Object arg1)
     {
-        if (disabled)
+        if (log==null)
             return;
-        log.doWarn(msg,arg0,arg1);        
+        log.warn(msg,arg0,arg1);        
     }
     
     public static void warn(String msg, Throwable th)
     {
-        if (disabled)
+        if (log==null)
             return;
-        log.doWarn(msg,th);
+        log.warn(msg,th);
         unwind(th);
     }
 
     public static void warn(Throwable th)
     {
-        if (disabled)
+        if (log==null)
             return;
-        log.doWarn(EXCEPTION,th);
+        log.warn(EXCEPTION,th);
         unwind(th);
+    }
+    
+
+    public static Logger getLogger(String name)
+    {
+        if (log==null)
+            return null;
+        return log.getLogger(name);
     }
 
     private static void unwind(Throwable th)
@@ -197,146 +203,6 @@ public class Log
             catch(Exception ignore){}
         }
     }
-    
 
-    boolean doDebugEnabled()
-    {
-        return debug;
-    }
-    
-    void doInfo(String msg,Object arg0, Object arg1)
-    {
-        System.err.println("INFO:  "+format(msg,arg0,arg1));
-    }
-    
-    void doDebug(String msg,Throwable th)
-    {
-        if (debug)
-        {
-            System.err.println("DEBUG: "+msg);
-            th.printStackTrace();
-        }
-    }
-    
-    void doDebug(String msg,Object arg0, Object arg1)
-    {
-        if (debug)
-        {
-            System.err.println("DEBUG: "+format(msg,arg0,arg1));
-        }
-    }
-    
-    void doWarn(String msg,Object arg0, Object arg1)
-    {
-        System.err.println("WARN:  "+format(msg,arg0,arg1));
-    }
-    
-    void doWarn(String msg, Throwable th)
-    {
-        System.err.println("WARN:  "+msg);
-        th.printStackTrace();
-    }
-
-    private String format(String msg, Object arg0, Object arg1)
-    {
-        int i0=msg.indexOf("{}");
-        int i1=i0<0?-1:msg.indexOf("{}",i0+2);
-        
-        if (arg1!=null && i1>=0)
-            msg=msg.substring(0,i1)+arg1+msg.substring(i1+2);
-        if (arg0!=null && i0>=0)
-            msg=msg.substring(0,i0)+arg0+msg.substring(i0+2);
-        return msg;
-    }
-    
-    
-    private static class Slf4jLog extends Log
-    {
-        private static final String LOGGER="org.slf4j.Logger";
-        private static final String LOGGERFACTORY="org.slf4j.LoggerFactory";
-        private Method infoSOO;
-        private Method debugSOO;
-        private Method debugST;
-        private Method debugEnabled;
-        private Method warnSOO;
-        private Method warnST;
-        private Object logger;
-        
-        Slf4jLog() throws Exception
-        {
-            Class slf4j = Thread.currentThread().getContextClassLoader()==null?Class.forName(LOGGER):Thread.currentThread().getContextClassLoader().loadClass(LOGGER);
-            infoSOO = slf4j.getMethod("info", new Class[]{String.class,Object.class,Object.class});
-            debugSOO = slf4j.getMethod("debug", new Class[]{String.class,Object.class,Object.class});
-            debugST = slf4j.getMethod("debug", new Class[]{String.class,Throwable.class});
-            debugEnabled = slf4j.getMethod("isDebugEnabled", new Class[]{});
-            warnSOO = slf4j.getMethod("warn", new Class[]{String.class,Object.class,Object.class});
-            warnST = slf4j.getMethod("warn", new Class[]{String.class,Throwable.class});
-            
-            Class slf4jf = Thread.currentThread().getContextClassLoader()==null?Class.forName(LOGGERFACTORY):Thread.currentThread().getContextClassLoader().loadClass(LOGGERFACTORY);
-            Method getLogger = slf4jf.getMethod("getLogger", new Class[]{String.class});
-            logger=getLogger.invoke(null, new Object[]{"org.mortbay.log"});
-        }
-        
-        /* ------------------------------------------------------------ */
-        /* 
-         * @see org.mortbay.log.Log#doDebug(java.lang.String, java.lang.Object, java.lang.Object)
-         */
-        void doDebug(String msg, Object arg0, Object arg1)
-        {
-            try{debugSOO.invoke(logger, new Object[]{msg,arg0,arg1});}
-            catch (Exception e) {e.printStackTrace();}
-        }
-
-        /* ------------------------------------------------------------ */
-        /* 
-         * @see org.mortbay.log.Log#doDebug(java.lang.String, java.lang.Throwable)
-         */
-        void doDebug(String msg, Throwable th)
-        {
-            try{debugST.invoke(logger, new Object[]{msg,th});}
-            catch (Exception e) {e.printStackTrace();}
-        }
-
-        /* ------------------------------------------------------------ */
-        /* 
-         * @see org.mortbay.log.Log#doDebugEnabled()
-         */
-        boolean doDebugEnabled()
-        {
-            try{return ((Boolean)debugEnabled.invoke(logger, new Object[]{})).booleanValue();}
-            catch (Exception e) {e.printStackTrace();return true;}
-        }
-
-        /* ------------------------------------------------------------ */
-        /* 
-         * @see org.mortbay.log.Log#doInfo(java.lang.String, java.lang.Object, java.lang.Object)
-         */
-        void doInfo(String msg, Object arg0, Object arg1)
-        {
-            try{infoSOO.invoke(logger, new Object[]{msg,arg0,arg1});}
-            catch (Exception e) {e.printStackTrace();}
-        }
-
-        /* ------------------------------------------------------------ */
-        /* 
-         * @see org.mortbay.log.Log#doWarn(java.lang.String, java.lang.Object, java.lang.Object)
-         */
-        void doWarn(String msg, Object arg0, Object arg1)
-        {
-            try{warnSOO.invoke(logger, new Object[]{msg,arg0,arg1});}
-            catch (Exception e) {e.printStackTrace();}
-        }
-
-        /* ------------------------------------------------------------ */
-        /* 
-         * @see org.mortbay.log.Log#doWarn(java.lang.String, java.lang.Throwable)
-         */
-        void doWarn(String msg, Throwable th)
-        {
-            try{warnST.invoke(logger, new Object[]{msg,th});}
-            catch (Exception e) {e.printStackTrace();}
-        }
-        
-    }
 }
 
