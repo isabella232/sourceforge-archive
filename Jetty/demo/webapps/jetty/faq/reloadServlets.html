@@ -13,5 +13,9 @@ It is also possible to have a second context mapped to the same context path.  T
 second context can handle the requests while the main context is being restarted.  This
 allows &quote;Under Maintenance&quote; style pages to be displayed during the restart.
 <P>
-If you run Jetty within <A HREF="http://sourceforge.net/projects/jboss/">JBoss</A>, then it supports automatic
-redeployment of war, ear and sar files.
+For development mode, you can run Jetty as a normal application in any IDE that supports
+class reloading.   Also there now is a i
+<a href="http://jetty.mortbay.org/jetty6/maven-plugin/index.html">Jetty 6 plugin</a>
+for <a href="http://maven.apache.org/">maven2 </a> users that will
+run a webapplication and automatically hot redploy if anything changes.
+
