@@ -67,7 +67,6 @@
   </build>
   <modules>
     <module>modules/javax-servlet</module>
-    <module>modules/util</module>
     <module>modules/jetty</module>
     <module>modules/jsp</module>
     <module>modules/test-webapp</module>

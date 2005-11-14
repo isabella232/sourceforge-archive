@@ -59,6 +59,7 @@ public class Dump extends HttpServlet
     {
         request.setAttribute("Dump", this);
         getServletContext().setAttribute("Dump",this);
+        getServletContext().log("dump "+request.getRequestURI());
         
         String info= request.getPathInfo();
         if (info != null && info.endsWith("Exception"))
@@ -435,7 +436,7 @@ public class Dump extends HttpServlet
         }
         catch (Exception e)
         {
-            e.printStackTrace();
+            getServletContext().log("dump", e);
         }
 
         String data= request.getParameter("data");

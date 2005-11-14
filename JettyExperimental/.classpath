@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry output="modules/javax-servlet/target/classes" kind="src" path="modules/javax-servlet/src"/>
+	<classpathentry output="modules/start/target/classes" kind="src" path="modules/start/src"/>
 	<classpathentry kind="src" path="modules/jetty/test"/>
-	<classpathentry output="modules/util/target/test-classes" kind="src" path="modules/util/test"/>
 	<classpathentry output="modules/maven-plugin/target/classes" kind="src" path="modules/maven-plugin/src/main/java"/>
 	<classpathentry output="modules/test-webapp/target/classes" kind="src" path="modules/test-webapp/src/main/java"/>
 	<classpathentry output="modules/jetty/target/classes" kind="src" path="modules/jetty/src"/>
-	<classpathentry output="modules/util/target/classes" kind="src" path="modules/util/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/jsp/ant-1.6.4.jar"/>
 	<classpathentry kind="lib" path="lib/jsp/commons-el-1.0.jar"/>

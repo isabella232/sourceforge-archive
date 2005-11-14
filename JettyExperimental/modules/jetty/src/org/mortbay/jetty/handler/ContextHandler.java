@@ -50,6 +50,7 @@ import org.mortbay.jetty.Request;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.servlet.Dispatcher;
 import org.mortbay.log.Log;
+import org.mortbay.log.Logger;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.Attributes;
 import org.mortbay.util.AttributesMap;
@@ -103,6 +104,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
     private String[] _hosts;
     private String[] _vhosts;
     private EventListener[] _eventListeners;
+    Logger logger;
 
     private Object _contextListeners;
     private Object _contextAttributeListeners;
@@ -314,6 +316,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
      */
     protected void doStart() throws Exception
     {
+        logger=Log.getLogger(getDisplayName()==null?getContextPath():getDisplayName());
         ClassLoader old_classloader=null;
         Thread current_thread=null;
         Object old_context=null;
@@ -839,9 +842,11 @@ public class ContextHandler extends WrappedHandler implements Attributes
      */
     public class Context implements ServletContext
     {
+        
         /* ------------------------------------------------------------ */
         private Context()
-        {}
+        {
+        }
 
         /* ------------------------------------------------------------ */
         public ContextHandler getContextHandler()
@@ -1079,8 +1084,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public void log(Exception exception, String msg)
         {
-            // TODO better logging
-            Log.info(msg,exception);
+            logger.warn(msg,exception);
         }
 
         /* ------------------------------------------------------------ */
@@ -1089,8 +1093,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public void log(String msg)
         {
-            // TODO better logging
-            Log.info(msg);
+            logger.info(msg, null, null);
         }
 
         /* ------------------------------------------------------------ */
@@ -1099,8 +1102,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public void log(String message, Throwable throwable)
         {
-            // TODO context
-            Log.info(message,throwable);
+            logger.warn(message,throwable);
         }
 
         /* ------------------------------------------------------------ */
@@ -1177,7 +1179,10 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public String getServletContextName()
         {
-            return ContextHandler.this.getDisplayName();
+            String name = ContextHandler.this.getDisplayName();
+            if (name==null)
+                name=ContextHandler.this.getContextPath();
+            return name;
         }
 
         /* ------------------------------------------------------------ */

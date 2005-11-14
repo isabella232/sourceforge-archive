@@ -45,13 +45,12 @@ import org.mortbay.resource.Resource;
  */
 public class WebAppClassLoader extends URLClassLoader
 {
-
     private boolean _parentLoaderPriority= true;
     private ClassLoader _parent;
     private PermissionCollection _permissions;
     private String _urlClassPath;
-    private String[] _systemClasses;
-    private String[] _serverClasses;
+    private String[] _systemClasses = new String[]{"java.","javax.servlet.","javax.xml.","org.mortbay.","org.xml.","org.w3c."};
+    private String[] _serverClasses = new String[]{"-org.mortbay.jetty.servlet.","-org.mortbay.util.","org.mortbay."};
     private File _tmpdir;
     
     /* ------------------------------------------------------------ */
@@ -382,30 +381,24 @@ public class WebAppClassLoader extends URLClassLoader
         {
             for (int i=0;i<_serverClasses.length;i++)
             {
-                if (_serverClasses[i].startsWith("-"))
+                boolean result=true;
+                String c=_serverClasses[i];
+                if (c.startsWith("-"))
                 {
-                    if (name.equals(_serverClasses[i].substring(1)))
-                        return false;
+                    c=c.substring(1); // TODO cache
+                    result=false;
                 }
-                else if (_serverClasses[i].endsWith("."))
+                
+                if (c.endsWith("."))
                 {
-                    if (name.startsWith(_serverClasses[i]))
-                        return true;
+                    if (name.startsWith(c))
+                        return result;
                 }
-                else if (name.equals(_serverClasses[i]))
-                    return true;
+                else if (name.equals(c))
+                    return result;
             }
-            return false;
         }
-
-        
-        // Arbitrary list that covers the worst security problems.
-        // If you are worried by this, then use a permissions file!
-        if (name.equals("org.mortbay.jetty.servlet.DefaultServlet") ||
-            name.startsWith("org.mortbay.util.")||
-            name.startsWith("org.mortbay.servlet."))
-                        return false;
-        return name.startsWith("org.mortbay.jetty.");
+        return false;
     }
 
     /* ------------------------------------------------------------ */
@@ -419,30 +412,27 @@ public class WebAppClassLoader extends URLClassLoader
         {
             for (int i=0;i<_systemClasses.length;i++)
             {
-                if (_systemClasses[i].startsWith("-"))
+                boolean result=true;
+                String c=_systemClasses[i];
+                
+                if (c.startsWith("-"))
                 {
-                    if (name.equals(_systemClasses[i].substring(1)))
-                        return false;
+                    c=c.substring(1); // TODO cache
+                    result=false;
                 }
-                else if (_systemClasses[i].endsWith("."))
+                
+                if (c.endsWith("."))
                 {
-                    if (name.startsWith(_systemClasses[i]))
-                        return true;
+                    if (name.startsWith(c))
+                        return result;
                 }
-                else if (name.equals(_systemClasses[i]))
-                    return true;
+                else if (name.equals(c))
+                    return result;
             }
-            return false;
         }
         
-        // guessing a list
-        return (
-                   name.startsWith("java.")
-                || name.startsWith("javax.servlet.")
-                || name.startsWith("javax.xml.")
-                || name.startsWith("org.mortbay.")
-                || name.startsWith("org.xml.")
-                || name.startsWith("org.w3c."));
+        return false;
+        
     }
 
     /* ------------------------------------------------------------ */
@@ -466,7 +456,7 @@ public class WebAppClassLoader extends URLClassLoader
     /**
      * @param serverClasses The serverClasses to set.
      */
-    public void setServerClasses(String[] serverClasses) // TODO - this shouldn't really be public...
+    public void setServerClasses(String[] serverClasses) 
     {
         _serverClasses = serverClasses==null?null:(String[])serverClasses.clone();
     }

@@ -38,7 +38,6 @@ public class StdErrLog implements Logger
     
     StdErrLog(String name)
     {    
-        System.err.println("NEW LOGGER "+name);
         this.name=name==null?"":name;
     }
     
