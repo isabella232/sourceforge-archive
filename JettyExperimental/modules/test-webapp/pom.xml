@@ -1,22 +1,35 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project>
   <parent>
-    <groupId>org.mortbay.jetty</groupId>
     <artifactId>project</artifactId>
-    <version>6.0-SNAPSHOT</version>
+    <groupId>org.mortbay.jetty</groupId>
+    <version>6.0.0beta2</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.mortbay.jetty</groupId>
   <artifactId>test</artifactId>
   <packaging>war</packaging>
-  <version>6.0-SNAPSHOT</version>
   <name>Jetty Test Webapp</name>
+  <version>6.0.0beta2</version>
   <url>http://jetty.mortbay.org</url>
   <build>
-   <defaultGoal>install</defaultGoal>
-   <plugins>
-   
-      <!--  Jetty plugin to run webapp unassembled -->
+    <defaultGoal>install</defaultGoal>
+    <plugins>
+      <plugin>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>install</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <tasks>
+                <unjar src="target/${project.artifactId}-${project.version}.${project.packaging}" dest="../../webapps/test/"></unjar>
+              </tasks>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
       <plugin>
         <groupId>org.mortbay.jetty</groupId>
         <artifactId>maven-jetty6-plugin</artifactId>
@@ -24,43 +37,20 @@
           <scanIntervalSeconds>10</scanIntervalSeconds>
         </configuration>
       </plugin>
-   
-      <!-- Ant plugin to copy artifacts to top level -->
-      <plugin>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <executions>
-          <execution>
-            <phase>install</phase>
-              <configuration>
-                <tasks>
-                  <unjar dest="../../webapps/test/" src="target/${project.artifactId}-${project.version}.${project.packaging}"/>
-                </tasks>
-              </configuration>
-              <goals>
-                <goal>run</goal>
-              </goals>
-          </execution>
-        </executions>
-      </plugin>
-      
-   </plugins>
+    </plugins>
   </build>
-
   <dependencies>
-   <dependency>
-     <groupId>org.mortbay.jetty</groupId>
-     <artifactId>servlet-api-2.5</artifactId>
-     <version>6.0-SNAPSHOT</version>
-     <scope>compile</scope>
-   </dependency>
-
-   <dependency>
-     <groupId>org.mortbay.jetty</groupId>
-     <artifactId>jetty</artifactId>
-     <version>6.0-SNAPSHOT</version>
-     <scope>compile</scope>
-   </dependency>
-
-
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>jetty</artifactId>
+      <version>6.0.0beta2</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.mortbay.jetty</groupId>
+      <artifactId>servlet-api-2.5</artifactId>
+      <version>6.0.0beta2</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 </project>
