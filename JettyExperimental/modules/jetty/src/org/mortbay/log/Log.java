@@ -42,6 +42,7 @@ public class Log
     private static boolean debug = System.getProperty("DEBUG",null)!=null;
     private static boolean verbose = System.getProperty("VERBOSE",null)!=null;
     private static Log log=new Log();
+    private static boolean disabled;
    
     static
     {
@@ -58,24 +59,42 @@ public class Log
         }
     }
     
+    public static void setDisabled(boolean d)
+    {
+        disabled=d;
+    }
+    
+    public static boolean getDisabled()
+    {
+        return disabled;
+    }
+    
     public static void debug(Throwable th)
     {
+        if (disabled)
+            return;
         log.doDebug(EXCEPTION,th);
         unwind(th);
     }
 
     public static void debug(String msg)
     {
+        if (disabled)
+            return;
         log.doDebug(msg,null,null);
     }
     
     public static void debug(String msg,Object arg)
     {
+        if (disabled)
+            return;
         log.doDebug(msg,arg,null);
     }
     
     public static void debug(String msg,Object arg0, Object arg1)
     {
+        if (disabled)
+            return;
         log.doDebug(msg,arg0,arg1);
     }
     
@@ -86,6 +105,8 @@ public class Log
      */
     public static void ignore(Throwable th)
     {
+        if (disabled)
+            return;
         if (verbose)
         {
             log.doDebug(IGNORED,th);
@@ -97,47 +118,65 @@ public class Log
     
     public static void info(String msg)
     {
+        if (disabled)
+            return;
         log.doInfo(msg,null,null);
     }
     
     public static void info(String msg,Object arg)
     {
+        if (disabled)
+            return;
         log.doInfo(msg,arg,null);
     }
     
     public static void info(String msg,Object arg0, Object arg1)
     {
+        if (disabled)
+            return;
         log.doInfo(msg,arg0,arg1);
     }
     
     public static boolean isDebugEnabled()
     {
+        if (disabled)
+            return false;
         return log.doDebugEnabled();
     }
     
     public static void warn(String msg)
     {
+        if (disabled)
+            return;
         log.doWarn(msg,null,null);
     }
     
     public static void warn(String msg,Object arg)
     {
+        if (disabled)
+            return;
         log.doWarn(msg,arg,null);        
     }
     
     public static void warn(String msg,Object arg0, Object arg1)
     {
+        if (disabled)
+            return;
         log.doWarn(msg,arg0,arg1);        
     }
     
     public static void warn(String msg, Throwable th)
     {
+        if (disabled)
+            return;
         log.doWarn(msg,th);
         unwind(th);
     }
 
     public static void warn(Throwable th)
     {
+        if (disabled)
+            return;
         log.doWarn(EXCEPTION,th);
         unwind(th);
     }
