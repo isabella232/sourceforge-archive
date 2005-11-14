@@ -1,3 +1,5 @@
+    + Simpler continuation API
+    + loosely coupled with JSP servlet
     + loosely coupled with SLF4J
     + Improved reuse of HttpField values and cookies.
     + Improved buffer return

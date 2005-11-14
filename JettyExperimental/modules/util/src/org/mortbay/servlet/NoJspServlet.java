@@ -13,27 +13,25 @@
 //limitations under the License.
 //========================================================================
 
-package org.mortbay.util.ajax;
+package org.mortbay.servlet;
 
+import java.io.IOException;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-/* ------------------------------------------------------------ */
-/** ContinuationSupport.
- * Conveniance class to avoid classloading visibility issues.
- * @author gregw
- *
- */
-public class ContinuationSupport
+public class NoJspServlet extends HttpServlet
 {
-    public static Continuation getContinuation(HttpServletRequest request, Object lock)
+
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see javax.servlet.http.HttpServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+     */
+    protected void doGet(HttpServletRequest req, HttpServletResponse response) throws ServletException, IOException
     {
-        Object c=request.getAttribute("org.mortbay.jetty.ajax.Continuation");
-        Continuation continuation = (Continuation) c;
-        if (continuation==null)
-        {
-            continuation=new WaitingContinuation(lock);
-            // TODO Save for next request?
-        }
-        return continuation;
+        response.sendError(500,"JSP support not configured");
     }
+
 }

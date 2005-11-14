@@ -668,7 +668,6 @@ public class HttpParser implements HttpTokens
     /* ------------------------------------------------------------------------------- */
     public void reset(boolean returnBuffers)
     {
-        System.err.println("RESET "+returnBuffers);
         _state = STATE_START;
         _contentLength = UNKNOWN_CONTENT;
         _contentPosition = 0;

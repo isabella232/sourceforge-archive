@@ -166,18 +166,11 @@ public class ChatFilter extends AjaxFilter
         if (member!=null)
         {
             // Get an existing Continuation or create a new one if there are no events.
-            boolean create=!member.hasEvents();
-            Continuation continuation = ContinuationSupport.getContinuation(request, create, mutex);
-            
-            // If we have a new continuation,
-            if (continuation!=null)
+            if (!member.hasEvents())
             {
-                // if it is a new Continuation, register it with the chatroom to receive async events.
-                if(continuation.isNew())
-                    member.setContinuation(continuation);
-            
-                // Get the continuation object (may wait and/or retry request here).  
-                continuation.getEvent(timeoutMS);
+                Continuation continuation = ContinuationSupport.getContinuation(request, mutex);
+                member.setContinuation(continuation);
+                continuation.suspend(timeoutMS);
             }
             
             member.setContinuation(null);
@@ -338,7 +331,7 @@ public class ChatFilter extends AjaxFilter
             {
                 _events.add(event);
                 if (_continuation!=null)
-                    _continuation.resume(event);
+                    _continuation.resume();
             }
         }
 

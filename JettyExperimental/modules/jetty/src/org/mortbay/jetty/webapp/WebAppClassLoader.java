@@ -402,7 +402,8 @@ public class WebAppClassLoader extends URLClassLoader
         // Arbitrary list that covers the worst security problems.
         // If you are worried by this, then use a permissions file!
         if (name.equals("org.mortbay.jetty.servlet.DefaultServlet") ||
-                        name.startsWith("org.mortbay.util."))
+            name.startsWith("org.mortbay.util.")||
+            name.startsWith("org.mortbay.servlet."))
                         return false;
         return name.startsWith("org.mortbay.jetty.");
     }

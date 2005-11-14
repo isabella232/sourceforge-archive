@@ -727,7 +727,8 @@ public class SelectChannelConnector extends AbstractConnector
         HttpEndPoint _endPoint;
         long _timeout;
         boolean _new = true;
-        boolean _pending = true;
+        boolean _pending = false;
+        boolean _resumed = false;
 
         void setEndPoint(HttpEndPoint ep)
         {
@@ -761,16 +762,25 @@ public class SelectChannelConnector extends AbstractConnector
             {
                 if (_pending)
                     redispatch();
-                _pending = false;
             }
         }
 
-        public Object getEvent(long timeout)
+        public boolean suspend(long timeout)
         {
             synchronized (this)
             {
                 _new = false;
-                if (!isExpired() && _event == null && timeout > 0)
+                
+                if (_pending)
+                { 
+                    _pending=false;
+                    return _resumed;
+                }
+                
+                _pending=true;
+                _resumed=false;
+                
+                if (!isExpired() && timeout > 0)
                 {
                     if (_endPoint != null) { throw new IllegalStateException(); }
                     _timeout = timeout;
@@ -778,21 +788,21 @@ public class SelectChannelConnector extends AbstractConnector
                 }
             }
 
-            return _event;
+            return _resumed;
         }
 
-        public void resume(Object object)
+        public void resume()
         {
             synchronized (this)
             {
                 if (isExpired())
                     return;
 
-                _pending = false;
+                boolean wakeup=_pending && !_resumed;
+                _resumed = true;
+                
                 this.cancel();
-                _event = object == null ? this : object;
-
-                if (_endPoint != null)
+                if (wakeup && _endPoint != null)
                     redispatch();
             }
         }

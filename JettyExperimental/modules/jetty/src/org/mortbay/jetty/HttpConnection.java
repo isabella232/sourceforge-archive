@@ -214,9 +214,15 @@ public class HttpConnection
             __currentConnection.set(this);
 
             Continuation continuation = _request.getContinuation();
-            if (continuation != null)
+            if (continuation != null && continuation.isPending())
             {
+                Log.debug("resume continuation {}",continuation);
                 doHandler();
+                if (continuation.isPending())
+                {
+                    Log.debug("continuation still pending {}",continuation);
+                    continuation.suspend(0);
+                }
             }
             else
             {

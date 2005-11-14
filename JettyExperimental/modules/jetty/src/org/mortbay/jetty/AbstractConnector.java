@@ -392,6 +392,8 @@ public abstract class AbstractConnector extends AbstractLifeCycle implements Con
     /* ------------------------------------------------------------ */
     public Buffer getBuffer(int size)
     {
+        // TODO - try a thread local based buffer "pool"
+        
         if (size==_headerBufferSize)
         {
             synchronized(_headerBuffers)

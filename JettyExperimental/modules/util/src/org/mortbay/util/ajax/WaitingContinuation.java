@@ -19,7 +19,6 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
 {
     Object _mutex;
     Object _object;
-    Object _event;
     boolean _waited;
     boolean _new=true;
     boolean _pending=true;
@@ -29,11 +28,10 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
         _mutex=mutex==null?this:mutex;
     }
     
-    public void resume(Object object)
+    public void resume()
     {
         synchronized (_mutex)
         {
-            _event=object==null?this:object;
             _pending=false;
             _mutex.notify();
         }
@@ -44,7 +42,7 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
         return _new;
     }
 
-    public Object getEvent(long timeout)
+    public boolean suspend(long timeout)
     {
         if (timeout < 0)
             throw new IllegalArgumentException();
@@ -54,7 +52,7 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
             _new=false;
             try
             {
-                if (!_waited && _event==null && timeout>0)
+                if (!_waited && _pending && timeout>0)
                 {
                     _waited=true;
                     _mutex.wait(timeout);
@@ -64,9 +62,10 @@ public class WaitingContinuation implements org.mortbay.util.ajax.Continuation
             {
                 e.printStackTrace();
             }
+            boolean timed_out=_pending;
             _pending=false;
+            return timed_out;
         }
-        return _event;
     }
     
     public boolean isPending()

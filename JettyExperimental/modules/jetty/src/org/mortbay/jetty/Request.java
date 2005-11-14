@@ -190,8 +190,6 @@ public class Request implements HttpServletRequest
     public Object getAttribute(String name)
     {
         if ("org.mortbay.jetty.ajax.Continuation".equals(name))
-            return getContinuation(false);
-        if ("org.mortbay.jetty.ajax.Continuation.create".equals(name))
             return getContinuation(true);
             
         if (_attributes==null)

@@ -36,16 +36,16 @@ public interface Continuation
      * Resume a suspended request.  The passed event will be returned in the getObject method.
      * @param event Event to resume the request with.
      */
-    public void resume(Object event);
+    public void resume();
     
     /* ------------------------------------------------------------ */
-    /** Get resumption event.
+    /** Suspend handling.
      * This method will suspend the request for the timeout or until resume is
      * called.
      * @param timeout
-     * @return The object passed to resume or null if timeout.
+     * @return True if resume called or false if timeout.
      */
-    public Object getEvent(long timeout);
+    public boolean suspend(long timeout);
     
     /* ------------------------------------------------------------ */
     /** Is this a newly created Continuation.

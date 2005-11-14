@@ -43,6 +43,7 @@ import org.mortbay.jetty.servlet.ServletMapping;
 import org.mortbay.log.Log;
 import org.mortbay.resource.Resource;
 import org.mortbay.util.LazyList;
+import org.mortbay.util.Loader;
 import org.mortbay.xml.XmlParser;
 /* ------------------------------------------------------------------------------- */
 /**
@@ -62,6 +63,7 @@ public class WebXmlConfiguration implements Configuration
     protected Object _constraintMappings;
     protected Object _listeners;
     protected Map _errorPages;
+    protected boolean _hasJSP;
     
     public WebXmlConfiguration()
     {
@@ -433,10 +435,31 @@ public class WebXmlConfiguration implements Configuration
     protected void initServlet(XmlParser.Node node) throws ClassNotFoundException,UnavailableException,IOException,
             MalformedURLException
     {
+        String id=node.getAttribute("id");
+        
+        String servlet_name=node.getString("servlet-name",false,true);
+        String servlet_class=node.getString("servlet-class",false,true);
+        String jsp_file=node.getString("jsp-file",false,true);
+        
+        if (id!=null && id.equals("jsp"))
+        {
+            try
+            {
+                Loader.loadClass(this.getClass(), servlet_class);
+                _hasJSP=true;
+            }
+            catch(ClassNotFoundException e)
+            {
+                Log.info("NO JSP Support for {}, did not find {}",_context.getContextPath(),servlet_class);
+                _hasJSP=false;
+                servlet_class="org.mortbay.servlet.NoJspServlet";
+            }
+        }
+
         ServletHolder holder = new ServletHolder();
-        holder.setName(node.getString("servlet-name",false,true));
-        holder.setClassName(node.getString("servlet-class",false,true));
-        holder.setForcedPath(node.getString("jsp-file",false,true));
+        holder.setName(servlet_name);
+        holder.setClassName(servlet_class);
+        holder.setForcedPath(jsp_file);
         
         // handle JSP classpath
         Iterator iParamsIter=node.iterator("init-param");
@@ -501,7 +524,7 @@ public class WebXmlConfiguration implements Configuration
 
     /* ------------------------------------------------------------ */
     protected void initServletMapping(XmlParser.Node node)
-    {
+    {   
         String servlet_name = node.getString("servlet-name",false,true);
         ServletMapping mapping = new ServletMapping();
         mapping.setServletName(servlet_name);
