@@ -27,9 +27,13 @@ Geronimo and avalon.  If you want hot deployment for a stand-alone Jetty, it is 
 difficult to write code to detect your own hotdeployment criteria and then to stop/start
 the jetty components that you know are affected.
 </p>
-
-
-
-
-
-
+<p>
+For development mode, you can run Jetty as a normal application in any IDE that supports
+class reloading.   Also there now is a i
+<a href="http://jetty.mortbay.org/jetty6/maven-plugin/index.html">Jetty 6 plugin</a>
+for <a href="http://maven.apache.org/">maven2 </a> users that will
+run a webapplication and automatically hot redploy if anything changes.
+</p>
+<p>
+See also <a href="faq?s=500-Servlets&t=reload">Reload Servlet</a>.
+</p>
