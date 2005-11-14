@@ -1,3 +1,5 @@
+Jetty-6.0.0Beta2
+    + merged util jar back into jetty jar
     + Simpler continuation API
     + loosely coupled with JSP servlet
     + loosely coupled with SLF4J
