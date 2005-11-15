@@ -522,20 +522,22 @@ public class HttpConnection
          */
         public int read() throws IOException
         {
+            int c=-1;
             if (blockForContent())
-                return _content.get();
-            return -1;
+                c= _content.get();
+            return c;
         }
-
+        
         /* ------------------------------------------------------------ */
         /* 
          * @see java.io.InputStream#read(byte[], int, int)
          */
         public int read(byte[] b, int off, int len) throws IOException
         {
+            int l=-1;
             if (blockForContent())
-               return _content.get(b, off, len);
-            return -1;
+                l= _content.get(b, off, len);
+            return l;
         }       
     }
 

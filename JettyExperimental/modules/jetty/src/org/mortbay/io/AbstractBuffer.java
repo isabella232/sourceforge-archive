@@ -221,6 +221,9 @@ public abstract class AbstractBuffer implements Buffer
     public int get(byte[] b, int offset, int length)
     {
         int gi = getIndex();
+        int l=length();
+        if (length>l)
+            length=l;
         length = peek(gi, b, offset, length);
         setGetIndex(gi + length);
         return length;

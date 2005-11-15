@@ -14,7 +14,9 @@
 // ========================================================================
 
 package com.acme;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
@@ -72,6 +74,46 @@ public class Dump extends HttpServlet
             {
                 throw new ServletException(th);
             }
+        }
+        
+        if ("text/xml".equals(request.getContentType()))
+        {
+//            InputStream in =request.getInputStream();
+//            int ch=0;
+//            int i=0;
+//            while((ch=in.read())>=0)
+//            {
+//                if (i++>40)
+//                    throw new IllegalStateException();
+//                if (Character.isLetterOrDigit((char)ch))
+//                    System.err.println("ch="+(char)ch);
+//                else
+//                    System.err.println("ch=["+ch+"]");
+//            }
+            
+//            BufferedReader in =request.getReader();
+//            int ch=0;
+//            int i=0;
+//            while((ch=in.read())>=0)
+//            {
+//                if (i++>40)
+//                    throw new IllegalStateException();
+//                if (Character.isLetterOrDigit((char)ch))
+//                    System.err.println("ch="+(char)ch);
+//                else
+//                    System.err.println("ch=["+ch+"]");
+//            }
+            
+//            BufferedReader reader = request.getReader();
+//            String line=null;
+//            int i=0;
+//            while((line=reader.readLine())!=null)
+//            {
+//                if (i++>4)
+//                    throw new IllegalStateException();
+//                System.err.println("length="+line.length());
+//                System.err.println("line='"+line+"'");
+//            }
         }
 
         String redirect= request.getParameter("redirect");
@@ -147,6 +189,7 @@ public class Dump extends HttpServlet
                 throw new IOException("test ex1");
             if ("/ex2".equals(pi))
                 throw new UnavailableException("test ex2");
+            throw new RuntimeException("test");
         }
 
         
@@ -406,8 +449,7 @@ public class Dump extends HttpServlet
             pout.write("HTML reference: D&uuml;rst<br/>");
             pout.write("Decimal (252) 8859-1: D&#252;rst<br/>");
             pout.write("Hex (xFC) 8859-1: D&#xFC;rst<br/>");
-            pout.write(
-                "Javascript unicode (00FC) : <script language='javascript'>document.write(\"D\u00FCrst\");</script><br/>");
+            pout.write("Javascript unicode (00FC) : <script language='javascript'>document.write(\"D\u00FCrst\");</script><br/>");
             pout.write("<br/>");
             pout.write("<h2>Form to generate GET content</h2>");
             pout.write("<form method=\"GET\" action=\""+response.encodeURL(getURI(request))+"\">");
