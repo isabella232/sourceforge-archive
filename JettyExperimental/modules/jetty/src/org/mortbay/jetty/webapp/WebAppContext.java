@@ -64,8 +64,11 @@ public class WebAppContext extends ContextHandler
     private String _war;
     private boolean _extractWAR=true;
     private String _defaultsDescriptor="org/mortbay/jetty/webapp/webdefault.xml";
-    private boolean distributable=false;
-    
+    private boolean _distributable=false;
+    private boolean _ownClassLoader=false;
+
+    private String[] _systemClasses = new String[]{"java.","javax.servlet.","javax.xml.","org.mortbay.","org.xml.","org.w3c."};
+    private String[] _serverClasses = new String[]{"-org.mortbay.jetty.servlet.","-org.mortbay.util.","org.mortbay."};
 
     /* ------------------------------------------------------------ */
     public WebAppContext()
@@ -235,7 +238,7 @@ public class WebAppContext extends ContextHandler
      */
     public boolean isDistributable()
     {
-        return distributable;
+        return _distributable;
     }
     
     /* ------------------------------------------------------------ */
@@ -244,7 +247,7 @@ public class WebAppContext extends ContextHandler
      */
     public void setDistributable(boolean distributable)
     {
-        this.distributable = distributable;
+        this._distributable = distributable;
     }
 
     /* ------------------------------------------------------------ */
@@ -535,6 +538,42 @@ public class WebAppContext extends ContextHandler
             _configurations[i]=(Configuration)Loader.loadClass(this.getClass(), _configurationClasses[i]).newInstance();
         }
     }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the serverClasses.
+     */
+    String[] getServerClasses()
+    {
+        return _serverClasses;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param serverClasses The serverClasses to set.
+     */
+    void setServerClasses(String[] serverClasses) 
+    {
+        _serverClasses = serverClasses==null?null:(String[])serverClasses.clone();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the systemClasses.
+     */
+    String[] getSystemClasses()
+    {
+        return _systemClasses;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param systemClasses The systemClasses to set.
+     */
+    void setSystemClasses(String[] systemClasses)
+    {
+        _systemClasses = systemClasses==null?null:(String[])systemClasses.clone();
+    }
     
     /* ------------------------------------------------------------ */
     /* 
@@ -549,15 +588,22 @@ public class WebAppContext extends ContextHandler
         
         
         // Configure classloader
-        ClassLoader parent = Thread.currentThread().getContextClassLoader();
-        if (parent==null)
-            parent=this.getClass().getClassLoader();
-        if (parent==null)
-            parent=ClassLoader.getSystemClassLoader();
+        _ownClassLoader=false;
+        if (getClassLoader()==null)
+        {
+            ClassLoader parent = Thread.currentThread().getContextClassLoader();
+            if (parent==null)
+                parent=this.getClass().getClassLoader();
+            if (parent==null)
+                parent=ClassLoader.getSystemClassLoader();
+            
+            WebAppClassLoader classLoader = new WebAppClassLoader(parent,this);
+            classLoader.setTempDirectory(getTempDirectory());
+            setClassLoader(classLoader);
+            _ownClassLoader=true;
+        }
         
-        WebAppClassLoader classLoader = new WebAppClassLoader(parent);
-        classLoader.setTempDirectory(getTempDirectory());
-        setClassLoader(classLoader);
+        
         for (int i=0;i<_configurations.length;i++)
             _configurations[i].configureClassLoader();
 
@@ -612,7 +658,8 @@ public class WebAppContext extends ContextHandler
         }
         finally
         {
-            setClassLoader(null);
+            if (_ownClassLoader)
+                setClassLoader(null);
         }
     }
     

@@ -45,21 +45,21 @@ import org.mortbay.resource.Resource;
  */
 public class WebAppClassLoader extends URLClassLoader
 {
+    private WebAppContext _context;
     private boolean _parentLoaderPriority= true;
     private ClassLoader _parent;
     private PermissionCollection _permissions;
     private String _urlClassPath;
-    private String[] _systemClasses = new String[]{"java.","javax.servlet.","javax.xml.","org.mortbay.","org.xml.","org.w3c."};
-    private String[] _serverClasses = new String[]{"-org.mortbay.jetty.servlet.","-org.mortbay.util.","org.mortbay."};
     private File _tmpdir;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
      */
-    public WebAppClassLoader(ClassLoader parent)
+    public WebAppClassLoader(ClassLoader parent, WebAppContext context)
     {
         super(new URL[0], parent);
         _parent=parent;
+        _context=context;
         if (parent==null)
             throw new IllegalArgumentException("no parent classloader!");
     }
@@ -377,12 +377,13 @@ public class WebAppClassLoader extends URLClassLoader
         while(name.startsWith("."))
             name=name.substring(1);
 
-        if (_serverClasses!=null)
+        String[] server_classes = _context.getServerClasses();
+        if (server_classes!=null)
         {
-            for (int i=0;i<_serverClasses.length;i++)
+            for (int i=0;i<server_classes.length;i++)
             {
                 boolean result=true;
-                String c=_serverClasses[i];
+                String c=server_classes[i];
                 if (c.startsWith("-"))
                 {
                     c=c.substring(1); // TODO cache
@@ -407,13 +408,13 @@ public class WebAppClassLoader extends URLClassLoader
         name=name.replace('/','.');
         while(name.startsWith("."))
             name=name.substring(1);
-        
-        if (_systemClasses!=null)
+        String[] system_classes = _context.getSystemClasses();
+        if (system_classes!=null)
         {
-            for (int i=0;i<_systemClasses.length;i++)
+            for (int i=0;i<system_classes.length;i++)
             {
                 boolean result=true;
-                String c=_systemClasses[i];
+                String c=system_classes[i];
                 
                 if (c.startsWith("-"))
                 {
@@ -443,39 +444,4 @@ public class WebAppClassLoader extends URLClassLoader
         this._urlClassPath=null;
     }
     
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the serverClasses.
-     */
-    String[] getServerClasses()
-    {
-        return _serverClasses;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param serverClasses The serverClasses to set.
-     */
-    public void setServerClasses(String[] serverClasses) 
-    {
-        _serverClasses = serverClasses==null?null:(String[])serverClasses.clone();
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the systemClasses.
-     */
-    String[] getSystemClasses()
-    {
-        return _systemClasses;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @param systemClasses The systemClasses to set.
-     */
-    void setSystemClasses(String[] systemClasses)
-    {
-        _systemClasses = systemClasses==null?null:(String[])systemClasses.clone();
-    }
 }

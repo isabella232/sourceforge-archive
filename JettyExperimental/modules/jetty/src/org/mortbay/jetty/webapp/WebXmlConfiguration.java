@@ -148,8 +148,9 @@ public class WebXmlConfiguration implements Configuration
         Resource webInf=_context.getWebInf();
         
         // Add WEB-INF classes and lib classpaths
-        if (webInf != null && webInf.isDirectory())
+        if (webInf != null && webInf.isDirectory() && _context.getClassLoader() instanceof WebAppClassLoader)
         {
+            
             // Look for classes directory
             Resource classes= webInf.addPath("classes/");
             if (classes.exists())
@@ -232,6 +233,8 @@ public class WebXmlConfiguration implements Configuration
    
         if (getWebAppContext().getErrorHandler() instanceof WebAppContext.WebAppErrorHandler)
             ((WebAppContext.WebAppErrorHandler)getWebAppContext().getErrorHandler()).setErrorPages(null);
+        
+        // TODO remove classpaths from classloader
     }
 
     /* ------------------------------------------------------------ */
