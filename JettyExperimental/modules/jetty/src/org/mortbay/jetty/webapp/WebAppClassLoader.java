@@ -46,11 +46,8 @@ import org.mortbay.resource.Resource;
 public class WebAppClassLoader extends URLClassLoader
 {
     private WebAppContext _context;
-    private boolean _parentLoaderPriority= true;
     private ClassLoader _parent;
-    private PermissionCollection _permissions;
     private String _urlClassPath;
-    private File _tmpdir;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -62,66 +59,6 @@ public class WebAppClassLoader extends URLClassLoader
         _context=context;
         if (parent==null)
             throw new IllegalArgumentException("no parent classloader!");
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the java2compliant.
-     */
-    public boolean isParentLoaderPriority()
-    {
-        return _parentLoaderPriority;
-    }
-    /* ------------------------------------------------------------ */
-    /**
-     * @param java2compliant The java2compliant to set.
-     */
-    public void setParentLoaderPriority(boolean java2compliant)
-    {
-        _parentLoaderPriority = java2compliant;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the permissions.
-     */
-    public PermissionCollection getPermissions()
-    {
-        return _permissions;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param permissions The permissions to set.
-     */
-    public void setPermissions(PermissionCollection permissions)
-    {
-        _permissions = permissions;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the urlClassPath.
-     */
-    public String getUrlClassPath()
-    {
-        return _urlClassPath;
-    }
-
-    /* ------------------------------------------------------------ */
-    public void setTempDirectory(File tmpdir)
-    {
-        if (_tmpdir!=null || _urlClassPath!=null)
-            throw new IllegalStateException();
-        _tmpdir=tmpdir;
-    }
-    
-    /* ------------------------------------------------------------ */
-    public File getTempDirectory()
-    {
-        if (_tmpdir!=null)
-            return _tmpdir;
-        return null;
     }
     
     /* ------------------------------------------------------------ */
@@ -157,13 +94,14 @@ public class WebAppClassLoader extends URLClassLoader
                 if (!resource.isDirectory() && file == null)
                 {
                     InputStream in= resource.getInputStream();
-                    if (_tmpdir==null)
+                    File tmp_dir=_context.getTempDirectory();
+                    if (tmp_dir==null)
                     {
-                        _tmpdir = File.createTempFile("jetty.cl.lib",null);
-                        _tmpdir.mkdir();
-                        _tmpdir.deleteOnExit();
+                        tmp_dir = File.createTempFile("jetty.cl.lib",null);
+                        tmp_dir.mkdir();
+                        tmp_dir.deleteOnExit();
                     }
-                    File lib= new File(_tmpdir, "lib");
+                    File lib= new File(tmp_dir, "lib");
                     if (!lib.exists())
                     {
                         lib.mkdir();
@@ -200,6 +138,9 @@ public class WebAppClassLoader extends URLClassLoader
             }
         }
     }
+
+    
+    
     /* ------------------------------------------------------------ */
     /** Add elements to the class path for the context from the jar and zip files found
      *  in the specified resource.
@@ -230,100 +171,21 @@ public class WebAppClassLoader extends URLClassLoader
             }
         }
     }
+    /* ------------------------------------------------------------ */
+    public void destroy()
+    {
+        this._parent=null;
+        this._urlClassPath=null;
+    }
     
-    /* ------------------------------------------------------------ */
-    /** Set Java2 compliant status.
-     * @param compliant 
-     */
-    public void setJava2Compliant(boolean compliant)
-    {
-        _parentLoaderPriority= compliant;
-    }
-
-    /* ------------------------------------------------------------ */
-    public boolean isJava2Compliant()
-    {
-        return _parentLoaderPriority;
-    }
-
-    /* ------------------------------------------------------------ */
-    public String toString()
-    {
-        if (Log.isDebugEnabled())
-            return "ContextLoader@" + hashCode() + "(" + _urlClassPath + ") / " + _parent;
-        return "ContextLoader@" + hashCode();
-    }
 
     /* ------------------------------------------------------------ */
     public PermissionCollection getPermissions(CodeSource cs)
     {
-        PermissionCollection pc= (_permissions == null) ? super.getPermissions(cs) : _permissions;
-        if (Log.isDebugEnabled())
-            Log.debug("loader.getPermissions(" + cs + ")=" + pc);
+        // TODO check CodeSource
+        PermissionCollection permissions=_context.getPermissions();
+        PermissionCollection pc= (permissions == null) ? super.getPermissions(cs) : permissions;
         return pc;
-    }
-
-    /* ------------------------------------------------------------ */
-    public synchronized Class loadClass(String name) throws ClassNotFoundException
-    {
-        return loadClass(name, false);
-    }
-
-    /* ------------------------------------------------------------ */
-    protected synchronized Class loadClass(String name, boolean resolve) throws ClassNotFoundException
-    {
-        Class c= findLoadedClass(name);
-        ClassNotFoundException ex= null;
-        boolean tried_parent= false;
-        if (c == null && (_parentLoaderPriority || isSystemPath(name)) && !isServerPath(name) && _parent!=null)
-        {
-            if (Log.isDebugEnabled())
-                Log.debug("try loadClass " + name + " from " + _parent);
-            tried_parent= true;
-            try
-            {
-                c= _parent.loadClass(name);
-                if (Log.isDebugEnabled())
-                    Log.debug("loaded " + c);
-            }
-            catch (ClassNotFoundException e)
-            {
-                ex= e;
-            }
-        }
-
-        if (c == null)
-        {
-            if (Log.isDebugEnabled())
-                Log.debug("try findClass " + name + " from " + _urlClassPath);
-            try
-            {
-                c= this.findClass(name);
-                if (Log.isDebugEnabled())
-                    Log.debug("loaded " + c);
-            }
-            catch (ClassNotFoundException e)
-            {
-                ex= e;
-            }
-        }
-
-        if (c == null && !tried_parent && !isServerPath(name) && _parent!=null)
-        {
-            if (Log.isDebugEnabled())
-                Log.debug("try loadClass " + name + " from " + _parent);
-            c= _parent.loadClass(name);
-            if (Log.isDebugEnabled())
-                Log.debug("loaded " + c);
-        }
-
-        if (c == null)
-            throw ex;
-
-        if (resolve)
-            resolveClass(c);
-
-        return c;
     }
 
     /* ------------------------------------------------------------ */
@@ -331,7 +193,7 @@ public class WebAppClassLoader extends URLClassLoader
     {
         URL url= null;
         boolean tried_parent= false;
-        if (_parentLoaderPriority || isSystemPath(name))
+        if (_context.isParentLoaderPriority() || isSystemPath(name))
         {
             if (Log.isDebugEnabled())
                 Log.debug("try getResource " + name + " from " + _parent);
@@ -368,6 +230,15 @@ public class WebAppClassLoader extends URLClassLoader
                 Log.debug("found " + url);
 
         return url;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the urlClassPath.
+     */
+    public String getUrlClassPath()
+    {
+        return _urlClassPath;
     }
 
     /* ------------------------------------------------------------ */
@@ -437,11 +308,74 @@ public class WebAppClassLoader extends URLClassLoader
     }
 
     /* ------------------------------------------------------------ */
-    public void destroy()
+    public synchronized Class loadClass(String name) throws ClassNotFoundException
     {
-        this._parent=null;
-        this._permissions=null;
-        this._urlClassPath=null;
+        return loadClass(name, false);
+    }
+
+    /* ------------------------------------------------------------ */
+    protected synchronized Class loadClass(String name, boolean resolve) throws ClassNotFoundException
+    {
+        Class c= findLoadedClass(name);
+        ClassNotFoundException ex= null;
+        boolean tried_parent= false;
+        if (c == null && (_context.isParentLoaderPriority() || isSystemPath(name)) && !isServerPath(name) && _parent!=null)
+        {
+            if (Log.isDebugEnabled())
+                Log.debug("try loadClass " + name + " from " + _parent);
+            tried_parent= true;
+            try
+            {
+                c= _parent.loadClass(name);
+                if (Log.isDebugEnabled())
+                    Log.debug("loaded " + c);
+            }
+            catch (ClassNotFoundException e)
+            {
+                ex= e;
+            }
+        }
+
+        if (c == null)
+        {
+            if (Log.isDebugEnabled())
+                Log.debug("try findClass " + name + " from " + _urlClassPath);
+            try
+            {
+                c= this.findClass(name);
+                if (Log.isDebugEnabled())
+                    Log.debug("loaded " + c);
+            }
+            catch (ClassNotFoundException e)
+            {
+                ex= e;
+            }
+        }
+
+        if (c == null && !tried_parent && !isServerPath(name) && _parent!=null)
+        {
+            if (Log.isDebugEnabled())
+                Log.debug("try loadClass " + name + " from " + _parent);
+            c= _parent.loadClass(name);
+            if (Log.isDebugEnabled())
+                Log.debug("loaded " + c);
+        }
+
+        if (c == null)
+            throw ex;
+
+        if (resolve)
+            resolveClass(c);
+
+        return c;
+    }
+
+    /* ------------------------------------------------------------ */
+    public String toString()
+    {
+        if (Log.isDebugEnabled())
+            return "ContextLoader@" + hashCode() + "(" + _urlClassPath + ") / " + _parent;
+        return "ContextLoader@" + hashCode();
     }
     
 }

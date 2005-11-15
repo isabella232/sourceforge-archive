@@ -17,6 +17,7 @@ package org.mortbay.jetty.webapp;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.PermissionCollection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EventListener;
@@ -51,25 +52,113 @@ import org.mortbay.util.TypeUtil;
  *
  */
 public class WebAppContext extends ContextHandler
-{
-
-    /* ------------------------------------------------------------ */
-    
-    private SecurityHandler _securityHandler;
-    private SessionHandler _sessionHandler;
-    private ServletHandler _servletHandler;
+{    
     private String[] _configurationClasses;
     private Configuration[] _configurations;
-    private File _tmpDir;
-    private String _war;
-    private boolean _extractWAR=true;
     private String _defaultsDescriptor="org/mortbay/jetty/webapp/webdefault.xml";
     private boolean _distributable=false;
-    private boolean _ownClassLoader=false;
-
+    private boolean _extractWAR=true;
+    private boolean _parentLoaderPriority= true;
+    private PermissionCollection _permissions;
+    private SecurityHandler _securityHandler;
+    private ServletHandler _servletHandler;
+    private SessionHandler _sessionHandler;
     private String[] _systemClasses = new String[]{"java.","javax.servlet.","javax.xml.","org.mortbay.","org.xml.","org.w3c."};
-    private String[] _serverClasses = new String[]{"-org.mortbay.jetty.servlet.","-org.mortbay.util.","org.mortbay."};
+    private String[] _serverClasses = new String[]{"-org.mortbay.servlet.","-org.mortbay.jetty.servlet.DefaultServlet","-org.mortbay.util.","org.mortbay."};
+    private File _tmpDir;
+    private String _war;
 
+
+    private transient boolean _ownClassLoader=false;
+    
+    /* ------------------------------------------------------------ */
+    /**  Add Web Applications.
+     * Add auto webapplications to the server.  The name of the
+     * webapp directory or war is used as the context name. If the
+     * webapp matches the rootWebApp it is added as the "/" context.
+     * @param host Virtual host name or null
+     * @param webapps Directory file name or URL to look for auto
+     * webapplication.
+     * @param defaults The defaults xml filename or URL which is
+     * loaded before any in the web app. Must respect the web.dtd.
+     * If null the default defaults file is used. If the empty string, then
+     * no defaults file is used.
+     * @param extract If true, extract war files
+     * @param java2CompliantClassLoader True if java2 compliance is applied to all webapplications
+     * @exception IOException 
+     */
+    public static void addWebApplications(Server server,
+                                          String webapps,
+                                          String defaults,
+                                          boolean extract,
+                                          boolean java2CompliantClassLoader)
+        throws IOException
+    {
+        ArrayList wacs = new ArrayList(Arrays.asList(server.getHandlers()));
+        Resource r=Resource.newResource(webapps);
+        if (!r.exists())
+            throw new IllegalArgumentException("No such webapps resource "+r);
+        
+        if (!r.isDirectory())
+            throw new IllegalArgumentException("Not directory webapps resource "+r);
+        
+        String[] files=r.list();
+        
+        files: for (int f=0;files!=null && f<files.length;f++)
+        {
+            String context=files[f];
+            
+            if (context.equalsIgnoreCase("CVS/") ||
+                    context.equalsIgnoreCase("CVS") ||
+                    context.startsWith("."))
+                continue;
+            
+            Resource app = r.addPath(r.encode(files[f]));
+            
+            if (context.toLowerCase().endsWith(".war") ||
+                    context.toLowerCase().endsWith(".jar"))
+            {
+                context=context.substring(0,context.length()-4);
+                Resource unpacked=r.addPath(context);
+                if (unpacked!=null && unpacked.exists() && unpacked.isDirectory())
+                    continue;
+            }
+            
+            if (context.equalsIgnoreCase("root")||context.equalsIgnoreCase("root/"))
+                context="/";
+            else
+                context="/"+context;
+            if (context.endsWith("/") && context.length()>0)
+                context=context.substring(0,context.length()-1);
+            
+            // Check the webapp has not already been added.
+            for (int i=0;i<wacs.size();i++)
+            {
+                Object o =wacs.get(i);
+                if (o instanceof WebAppContext)
+                {
+                    WebAppContext w = (WebAppContext)o;
+                    if (app.equals(Resource.newResource(w.getWar())))
+                        continue files;
+                }
+            }
+            
+            // add it
+            WebAppContext wah = new WebAppContext();
+            wah.setServer(server);
+            wah.setContextPath(context);
+            if (defaults!=null)
+                wah.setDefaultsDescriptor(defaults);
+            wah.setExtractWAR(extract);
+            wah.setWar(app.toString());
+            // TODO java2 classloader
+            
+            wacs.add(wah);
+        }
+
+        server.setHandlers((Handler[])wacs.toArray(new Handler[wacs.size()]));
+    }
+    
     /* ------------------------------------------------------------ */
     public WebAppContext()
     {
@@ -84,25 +173,61 @@ public class WebAppContext extends ContextHandler
         
         setErrorHandler(new WebAppErrorHandler());
     }
-
+    
     /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the war as a file or URL string (Resource)
+    /* 
+     * @see org.mortbay.thread.AbstractLifeCycle#doStart()
      */
-    public String getWar()
+    protected void doStart() throws Exception
     {
-        if (_war==null)
-            _war=getResourceBase();
-        return _war;
+        // Setup configurations 
+        loadConfigurations();
+        for (int i=0;i<_configurations.length;i++)
+            _configurations[i].setWebAppContext(this);
+        
+        
+        // Configure classloader
+        _ownClassLoader=false;
+        if (getClassLoader()==null)
+        {
+            ClassLoader parent = Thread.currentThread().getContextClassLoader();
+            if (parent==null)
+                parent=this.getClass().getClassLoader();
+            if (parent==null)
+                parent=ClassLoader.getSystemClassLoader();
+            
+            WebAppClassLoader classLoader = new WebAppClassLoader(parent,this);
+            setClassLoader(classLoader);
+            _ownClassLoader=true;
+        }
+        
+        
+        for (int i=0;i<_configurations.length;i++)
+            _configurations[i].configureClassLoader();
+
+        super.doStart();
+
     }
     
     /* ------------------------------------------------------------ */
-    /**
-     * @param war The war to set as a file name or URL
+    /* 
+     * @see org.mortbay.thread.AbstractLifeCycle#doStop()
      */
-    public void setWar(String war)
+    protected void doStop() throws Exception
     {
-        _war = war;
+        super.doStop();
+
+        try
+        {
+            // Configure classloader
+            for (int i=_configurations.length;i-->0;)
+                _configurations[i].deconfigureWebApp();
+        }
+        finally
+        {
+            if (_ownClassLoader)
+                setClassLoader(null);
+        }
     }
     
     /* ------------------------------------------------------------ */
@@ -116,16 +241,6 @@ public class WebAppContext extends ContextHandler
     
     /* ------------------------------------------------------------ */
     /**
-     * @param configurations The configuration class names.  If setConfigurations is not called
-     * these classes are used to create a configurations array.
-     */
-    public void setConfigurationClasses(String[] configurations)
-    {
-        _configurationClasses = configurations==null?null:(String[])configurations.clone();
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
      * @return Returns the configurations.
      */
     public Configuration[] getConfigurations()
@@ -133,69 +248,6 @@ public class WebAppContext extends ContextHandler
         return _configurations;
     }
     
-    /* ------------------------------------------------------------ */
-    /**
-     * @param configurations The configurations to set.
-     */
-    public void setConfigurations(Configuration[] configurations)
-    {
-        _configurations = configurations==null?null:(Configuration[])configurations.clone();
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the servletHandler.
-     */
-    public ServletHandler getServletHandler()
-    {
-        return _servletHandler;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param servletHandler The servletHandler to set.
-     */
-    public void setServletHandler(ServletHandler servletHandler)
-    {
-        _servletHandler = servletHandler;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the sessionHandler.
-     */
-    public SessionHandler getSessionHandler()
-    {
-        return _sessionHandler;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param sessionHandler The sessionHandler to set.
-     */
-    public void setSessionHandler(SessionHandler sessionHandler)
-    {
-        _sessionHandler = sessionHandler;
-    }
-
-    /* ------------------------------------------------------------ */
-    /**
-     * @return Returns the securityHandler.
-     */
-    public SecurityHandler getSecurityHandler()
-    {
-        return _securityHandler;
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**
-     * @param sessionHandler The sessionHandler to set.
-     */
-    public void setSecurityHandler(SecurityHandler securityHandler)
-    {
-        _securityHandler = securityHandler;
-    }
-
     /* ------------------------------------------------------------ */
     /**
      * @return Returns the defaultsDescriptor.
@@ -207,204 +259,58 @@ public class WebAppContext extends ContextHandler
     
     /* ------------------------------------------------------------ */
     /**
-     * @param defaultsDescriptor The defaultsDescriptor to set.
+     * @return Returns the permissions.
      */
-    public void setDefaultsDescriptor(String defaultsDescriptor)
+    public PermissionCollection getPermissions()
     {
-        _defaultsDescriptor = defaultsDescriptor;
+        return _permissions;
     }
     
     /* ------------------------------------------------------------ */
     /**
-     * @return Returns the extractWAR.
+     * @return Returns the securityHandler.
      */
-    public boolean isExtractWAR()
+    public SecurityHandler getSecurityHandler()
     {
-        return _extractWAR;
+        return _securityHandler;
     }
-    /* ------------------------------------------------------------ */
-    /**
-     * @param extractWAR The extractWAR to set.
-     */
-    public void setExtractWAR(boolean extractWAR)
-    {
-        _extractWAR = extractWAR;
-    }
-    
 
     /* ------------------------------------------------------------ */
     /**
-     * @return Returns the distributable.
+     * @return Returns the serverClasses.
      */
-    public boolean isDistributable()
+    String[] getServerClasses()
     {
-        return _distributable;
+        return _serverClasses;
     }
     
     /* ------------------------------------------------------------ */
     /**
-     * @param distributable The distributable to set.
+     * @return Returns the servletHandler.
      */
-    public void setDistributable(boolean distributable)
+    public ServletHandler getServletHandler()
     {
-        this._distributable = distributable;
+        return _servletHandler;
     }
 
     /* ------------------------------------------------------------ */
-    public void setEventListeners(EventListener[] eventListeners)
-    {
-        if (_sessionHandler!=null)
-            _sessionHandler.clearEventListeners();
-            
-        super.setEventListeners(eventListeners);
-      
-        for (int i=0; eventListeners!=null && i<eventListeners.length;i ++)
-        {
-            EventListener listener = eventListeners[i];
-            
-            if ((listener instanceof HttpSessionActivationListener)
-                            || (listener instanceof HttpSessionAttributeListener)
-                            || (listener instanceof HttpSessionBindingListener)
-                            || (listener instanceof HttpSessionListener))
-            {
-                if (_sessionHandler!=null)
-                    _sessionHandler.addEventListener(listener);
-            }
-            
-        }
-    }
-    
-    
-    /* ------------------------------------------------------------ */
-    /** Resolve Web App directory
-     * If the BaseResource has not been set, use the war resource to
-     * derive a webapp resource (expanding WAR if required).
+    /**
+     * @return Returns the sessionHandler.
      */
-    protected void resolveWebApp() throws IOException
+    public SessionHandler getSessionHandler()
     {
-        Resource web_app = super.getBaseResource();
-        if (web_app == null)
-        {
-            if (_war==null || _war.length()==0)
-                _war=getResourceBase();
-            
-            // Set dir or WAR
-            web_app= Resource.newResource(_war);
-
-            // Accept aliases for WAR files
-            if (web_app.getAlias() != null)
-            {
-                Log.info(web_app + " anti-aliased to " + web_app.getAlias());
-                web_app= Resource.newResource(web_app.getAlias());
-            }
-
-            if (Log.isDebugEnabled())
-                Log.debug("Try webapp=" + web_app + ", exists=" + web_app.exists() + ", directory=" + web_app.isDirectory());
-
-            // Is the WAR usable directly?
-            if (web_app.exists() && !web_app.isDirectory() && !web_app.toString().startsWith("jar:"))
-            {
-                // No - then lets see if it can be turned into a jar URL.
-                Resource jarWebApp= Resource.newResource("jar:" + web_app + "!/");
-                if (jarWebApp.exists() && jarWebApp.isDirectory())
-                {
-                    web_app= jarWebApp;
-                    _war= web_app.toString();
-                    if (Log.isDebugEnabled())
-                        Log.debug(
-                            "Try webapp="
-                                + web_app
-                                + ", exists="
-                                + web_app.exists()
-                                + ", directory="
-                                + web_app.isDirectory());
-                }
-            }
-
-            // If we should extract or the URL is still not usable
-            if (web_app.exists()
-                && (!web_app.isDirectory()
-                    || (_extractWAR && web_app.getFile() == null)
-                    || (_extractWAR && web_app.getFile() != null && !web_app.getFile().isDirectory())))
-            {
-                // Then extract it.
-                File tempDir= new File(getTempDirectory(), "webapp");
-                if (tempDir.exists())
-                    tempDir.delete();
-                tempDir.mkdir();
-                tempDir.deleteOnExit();
-                Log.info("Extract " + _war + " to " + tempDir);
-                JarResource.extract(web_app, tempDir, true);
-                web_app= Resource.newResource(tempDir.getCanonicalPath());
-
-                if (Log.isDebugEnabled())
-                    Log.debug(
-                        "Try webapp="
-                            + web_app
-                            + ", exists="
-                            + web_app.exists()
-                            + ", directory="
-                            + web_app.isDirectory());
-            }
-
-            // Now do we have something usable?
-            if (!web_app.exists() || !web_app.isDirectory())
-            {
-                Log.warn("Web application not found " + _war);
-                throw new java.io.FileNotFoundException(_war);
-            }
-
-            if (Log.isDebugEnabled())
-                Log.debug("webapp=" + web_app);
-
-            // ResourcePath
-            super.setBaseResource(web_app);
-        }
-    }
-
-    /* ------------------------------------------------------------ */
-    public Resource getWebInf() throws IOException
-    {
-        resolveWebApp();
-
-        // Iw there a WEB-INF directory?
-        Resource web_inf= super.getBaseResource().addPath("WEB-INF/");
-        if (!web_inf.exists() || !web_inf.isDirectory())
-            return null;
-        
-        return web_inf;
+        return _sessionHandler;
     }
     
-    
     /* ------------------------------------------------------------ */
-    /** Set temporary directory for context.
-     * The javax.servlet.context.tempdir attribute is also set.
-     * @param dir Writable temporary directory.
+    /**
+     * @return Returns the systemClasses.
      */
-    public void setTempDirectory(File dir)
+    String[] getSystemClasses()
     {
-        if (isStarted())
-            throw new IllegalStateException("Started");
-
-        if (dir!=null)
-        {
-            try{dir=new File(dir.getCanonicalPath());}
-            catch (IOException e){Log.warn(Log.EXCEPTION,e);}
-        }
-
-        if (dir!=null && !dir.exists())
-        {
-            dir.mkdir();
-            dir.deleteOnExit();
-        }
-
-        if (dir!=null && ( !dir.exists() || !dir.isDirectory() || !dir.canWrite()))
-            throw new IllegalArgumentException("Bad temp directory: "+dir);
-
-        _tmpDir=dir;
-        setAttribute("javax.servlet.context.tempdir",_tmpDir);
+        return _systemClasses;
     }
-
+    
     /* ------------------------------------------------------------ */
     public File getTempDirectory()
     {
@@ -522,7 +428,58 @@ public class WebAppContext extends ContextHandler
         setAttribute("javax.servlet.context.tempdir",_tmpDir);
         return _tmpDir;
     }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the war as a file or URL string (Resource)
+     */
+    public String getWar()
+    {
+        if (_war==null)
+            _war=getResourceBase();
+        return _war;
+    }
 
+    /* ------------------------------------------------------------ */
+    public Resource getWebInf() throws IOException
+    {
+        resolveWebApp();
+
+        // Iw there a WEB-INF directory?
+        Resource web_inf= super.getBaseResource().addPath("WEB-INF/");
+        if (!web_inf.exists() || !web_inf.isDirectory())
+            return null;
+        
+        return web_inf;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the distributable.
+     */
+    public boolean isDistributable()
+    {
+        return _distributable;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the extractWAR.
+     */
+    public boolean isExtractWAR()
+    {
+        return _extractWAR;
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the java2compliant.
+     */
+    public boolean isParentLoaderPriority()
+    {
+        return _parentLoaderPriority;
+    }
+    
     /* ------------------------------------------------------------ */
     protected void loadConfigurations() 
     	throws Exception
@@ -538,14 +495,191 @@ public class WebAppContext extends ContextHandler
             _configurations[i]=(Configuration)Loader.loadClass(this.getClass(), _configurationClasses[i]).newInstance();
         }
     }
+    /* ------------------------------------------------------------ */
+    /** Resolve Web App directory
+     * If the BaseResource has not been set, use the war resource to
+     * derive a webapp resource (expanding WAR if required).
+     */
+    protected void resolveWebApp() throws IOException
+    {
+        Resource web_app = super.getBaseResource();
+        if (web_app == null)
+        {
+            if (_war==null || _war.length()==0)
+                _war=getResourceBase();
+            
+            // Set dir or WAR
+            web_app= Resource.newResource(_war);
+
+            // Accept aliases for WAR files
+            if (web_app.getAlias() != null)
+            {
+                Log.info(web_app + " anti-aliased to " + web_app.getAlias());
+                web_app= Resource.newResource(web_app.getAlias());
+            }
+
+            if (Log.isDebugEnabled())
+                Log.debug("Try webapp=" + web_app + ", exists=" + web_app.exists() + ", directory=" + web_app.isDirectory());
+
+            // Is the WAR usable directly?
+            if (web_app.exists() && !web_app.isDirectory() && !web_app.toString().startsWith("jar:"))
+            {
+                // No - then lets see if it can be turned into a jar URL.
+                Resource jarWebApp= Resource.newResource("jar:" + web_app + "!/");
+                if (jarWebApp.exists() && jarWebApp.isDirectory())
+                {
+                    web_app= jarWebApp;
+                    _war= web_app.toString();
+                    if (Log.isDebugEnabled())
+                        Log.debug(
+                            "Try webapp="
+                                + web_app
+                                + ", exists="
+                                + web_app.exists()
+                                + ", directory="
+                                + web_app.isDirectory());
+                }
+            }
+
+            // If we should extract or the URL is still not usable
+            if (web_app.exists()
+                && (!web_app.isDirectory()
+                    || (_extractWAR && web_app.getFile() == null)
+                    || (_extractWAR && web_app.getFile() != null && !web_app.getFile().isDirectory())))
+            {
+                // Then extract it.
+                File tempDir= new File(getTempDirectory(), "webapp");
+                if (tempDir.exists())
+                    tempDir.delete();
+                tempDir.mkdir();
+                tempDir.deleteOnExit();
+                Log.info("Extract " + _war + " to " + tempDir);
+                JarResource.extract(web_app, tempDir, true);
+                web_app= Resource.newResource(tempDir.getCanonicalPath());
+
+                if (Log.isDebugEnabled())
+                    Log.debug(
+                        "Try webapp="
+                            + web_app
+                            + ", exists="
+                            + web_app.exists()
+                            + ", directory="
+                            + web_app.isDirectory());
+            }
+
+            // Now do we have something usable?
+            if (!web_app.exists() || !web_app.isDirectory())
+            {
+                Log.warn("Web application not found " + _war);
+                throw new java.io.FileNotFoundException(_war);
+            }
+
+            if (Log.isDebugEnabled())
+                Log.debug("webapp=" + web_app);
+
+            // ResourcePath
+            super.setBaseResource(web_app);
+        }
+    }
+    
 
     /* ------------------------------------------------------------ */
     /**
-     * @return Returns the serverClasses.
+     * @param configurations The configuration class names.  If setConfigurations is not called
+     * these classes are used to create a configurations array.
      */
-    String[] getServerClasses()
+    public void setConfigurationClasses(String[] configurations)
     {
-        return _serverClasses;
+        _configurationClasses = configurations==null?null:(String[])configurations.clone();
+    }
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param configurations The configurations to set.
+     */
+    public void setConfigurations(Configuration[] configurations)
+    {
+        _configurations = configurations==null?null:(Configuration[])configurations.clone();
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param defaultsDescriptor The defaultsDescriptor to set.
+     */
+    public void setDefaultsDescriptor(String defaultsDescriptor)
+    {
+        _defaultsDescriptor = defaultsDescriptor;
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param distributable The distributable to set.
+     */
+    public void setDistributable(boolean distributable)
+    {
+        this._distributable = distributable;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setEventListeners(EventListener[] eventListeners)
+    {
+        if (_sessionHandler!=null)
+            _sessionHandler.clearEventListeners();
+            
+        super.setEventListeners(eventListeners);
+      
+        for (int i=0; eventListeners!=null && i<eventListeners.length;i ++)
+        {
+            EventListener listener = eventListeners[i];
+            
+            if ((listener instanceof HttpSessionActivationListener)
+                            || (listener instanceof HttpSessionAttributeListener)
+                            || (listener instanceof HttpSessionBindingListener)
+                            || (listener instanceof HttpSessionListener))
+            {
+                if (_sessionHandler!=null)
+                    _sessionHandler.addEventListener(listener);
+            }
+            
+        }
+    }
+    
+    
+    /* ------------------------------------------------------------ */
+    /**
+     * @param extractWAR The extractWAR to set.
+     */
+    public void setExtractWAR(boolean extractWAR)
+    {
+        _extractWAR = extractWAR;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param java2compliant The java2compliant to set.
+     */
+    public void setParentLoaderPriority(boolean java2compliant)
+    {
+        _parentLoaderPriority = java2compliant;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param permissions The permissions to set.
+     */
+    public void setPermissions(PermissionCollection permissions)
+    {
+        _permissions = permissions;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @param sessionHandler The sessionHandler to set.
+     */
+    public void setSecurityHandler(SecurityHandler securityHandler)
+    {
+        _securityHandler = securityHandler;
     }
     
     /* ------------------------------------------------------------ */
@@ -559,13 +693,22 @@ public class WebAppContext extends ContextHandler
     
     /* ------------------------------------------------------------ */
     /**
-     * @return Returns the systemClasses.
+     * @param servletHandler The servletHandler to set.
      */
-    String[] getSystemClasses()
+    public void setServletHandler(ServletHandler servletHandler)
     {
-        return _systemClasses;
+        _servletHandler = servletHandler;
     }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * @param sessionHandler The sessionHandler to set.
+     */
+    public void setSessionHandler(SessionHandler sessionHandler)
+    {
+        _sessionHandler = sessionHandler;
+    }
+    
     /* ------------------------------------------------------------ */
     /**
      * @param systemClasses The systemClasses to set.
@@ -575,43 +718,45 @@ public class WebAppContext extends ContextHandler
         _systemClasses = systemClasses==null?null:(String[])systemClasses.clone();
     }
     
+
     /* ------------------------------------------------------------ */
-    /* 
-     * @see org.mortbay.thread.AbstractLifeCycle#doStart()
+    /** Set temporary directory for context.
+     * The javax.servlet.context.tempdir attribute is also set.
+     * @param dir Writable temporary directory.
      */
-    protected void doStart() throws Exception
+    public void setTempDirectory(File dir)
     {
-        // Setup configurations 
-        loadConfigurations();
-        for (int i=0;i<_configurations.length;i++)
-            _configurations[i].setWebAppContext(this);
-        
-        
-        // Configure classloader
-        _ownClassLoader=false;
-        if (getClassLoader()==null)
+        if (isStarted())
+            throw new IllegalStateException("Started");
+
+        if (dir!=null)
         {
-            ClassLoader parent = Thread.currentThread().getContextClassLoader();
-            if (parent==null)
-                parent=this.getClass().getClassLoader();
-            if (parent==null)
-                parent=ClassLoader.getSystemClassLoader();
-            
-            WebAppClassLoader classLoader = new WebAppClassLoader(parent,this);
-            classLoader.setTempDirectory(getTempDirectory());
-            setClassLoader(classLoader);
-            _ownClassLoader=true;
+            try{dir=new File(dir.getCanonicalPath());}
+            catch (IOException e){Log.warn(Log.EXCEPTION,e);}
         }
-        
-        
-        for (int i=0;i<_configurations.length;i++)
-            _configurations[i].configureClassLoader();
 
-        super.doStart();
+        if (dir!=null && !dir.exists())
+        {
+            dir.mkdir();
+            dir.deleteOnExit();
+        }
 
+        if (dir!=null && ( !dir.exists() || !dir.isDirectory() || !dir.canWrite()))
+            throw new IllegalArgumentException("Bad temp directory: "+dir);
+
+        _tmpDir=dir;
+        setAttribute("javax.servlet.context.tempdir",_tmpDir);
     }
     
-
+    /* ------------------------------------------------------------ */
+    /**
+     * @param war The war to set as a file name or URL
+     */
+    public void setWar(String war)
+    {
+        _war = war;
+    }
+    
     /* ------------------------------------------------------------ */
     protected void startContext()
     throws Exception
@@ -642,119 +787,19 @@ public class WebAppContext extends ContextHandler
             _servletHandler.initialize();
     }
     
-    /* ------------------------------------------------------------ */
-    /* 
-     * @see org.mortbay.thread.AbstractLifeCycle#doStop()
-     */
-    protected void doStop() throws Exception
-    {
-        super.doStop();
-
-        try
-        {
-            // Configure classloader
-            for (int i=_configurations.length;i-->0;)
-                _configurations[i].deconfigureWebApp();
-        }
-        finally
-        {
-            if (_ownClassLoader)
-                setClassLoader(null);
-        }
-    }
-    
-    /* ------------------------------------------------------------ */
-    /**  Add Web Applications.
-     * Add auto webapplications to the server.  The name of the
-     * webapp directory or war is used as the context name. If the
-     * webapp matches the rootWebApp it is added as the "/" context.
-     * @param host Virtual host name or null
-     * @param webapps Directory file name or URL to look for auto
-     * webapplication.
-     * @param defaults The defaults xml filename or URL which is
-     * loaded before any in the web app. Must respect the web.dtd.
-     * If null the default defaults file is used. If the empty string, then
-     * no defaults file is used.
-     * @param extract If true, extract war files
-     * @param java2CompliantClassLoader True if java2 compliance is applied to all webapplications
-     * @exception IOException 
-     */
-    public static void addWebApplications(Server server,
-                                          String webapps,
-                                          String defaults,
-                                          boolean extract,
-                                          boolean java2CompliantClassLoader)
-        throws IOException
-    {
-        ArrayList wacs = new ArrayList(Arrays.asList(server.getHandlers()));
-        Resource r=Resource.newResource(webapps);
-        if (!r.exists())
-            throw new IllegalArgumentException("No such webapps resource "+r);
-        
-        if (!r.isDirectory())
-            throw new IllegalArgumentException("Not directory webapps resource "+r);
-        
-        String[] files=r.list();
-        
-        files: for (int f=0;files!=null && f<files.length;f++)
-        {
-            String context=files[f];
-            
-            if (context.equalsIgnoreCase("CVS/") ||
-                    context.equalsIgnoreCase("CVS") ||
-                    context.startsWith("."))
-                continue;
-            
-            Resource app = r.addPath(r.encode(files[f]));
-            
-            if (context.toLowerCase().endsWith(".war") ||
-                    context.toLowerCase().endsWith(".jar"))
-            {
-                context=context.substring(0,context.length()-4);
-                Resource unpacked=r.addPath(context);
-                if (unpacked!=null && unpacked.exists() && unpacked.isDirectory())
-                    continue;
-            }
-            
-            if (context.equalsIgnoreCase("root")||context.equalsIgnoreCase("root/"))
-                context="/";
-            else
-                context="/"+context;
-            if (context.endsWith("/") && context.length()>0)
-                context=context.substring(0,context.length()-1);
-            
-            // Check the webapp has not already been added.
-            for (int i=0;i<wacs.size();i++)
-            {
-                Object o =wacs.get(i);
-                if (o instanceof WebAppContext)
-                {
-                    WebAppContext w = (WebAppContext)o;
-                    if (app.equals(Resource.newResource(w.getWar())))
-                        continue files;
-                }
-            }
-            
-            // add it
-            WebAppContext wah = new WebAppContext();
-            wah.setServer(server);
-            wah.setContextPath(context);
-            if (defaults!=null)
-                wah.setDefaultsDescriptor(defaults);
-            wah.setExtractWAR(extract);
-            wah.setWar(app.toString());
-            // TODO java2 classloader
-            
-            wacs.add(wah);
-        }
-
-        server.setHandlers((Handler[])wacs.toArray(new Handler[wacs.size()]));
-    }
-    
     public class WebAppErrorHandler extends ErrorHandler
     {
         Map _errorPages; // code or exception to URL
         
+        /* ------------------------------------------------------------ */
+        /**
+         * @return Returns the errorPages.
+         */
+        public Map getErrorPages()
+        {
+            return _errorPages;
+        }
+
         /* ------------------------------------------------------------ */
         /* 
          * @see org.mortbay.jetty.handler.ErrorHandler#handle(java.lang.String, javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse, int)
@@ -812,23 +857,12 @@ public class WebAppContext extends ContextHandler
 
         /* ------------------------------------------------------------ */
         /**
-         * @return Returns the errorPages.
-         */
-        public Map getErrorPages()
-        {
-            return _errorPages;
-        }
-
-        /* ------------------------------------------------------------ */
-        /**
          * @param errorPages The errorPages to set.
          */
         public void setErrorPages(Map errorPages)
         {
             _errorPages = errorPages;
         }
-
-        
     }
 
 }
