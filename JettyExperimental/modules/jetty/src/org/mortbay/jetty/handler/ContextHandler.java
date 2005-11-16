@@ -903,8 +903,7 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public RequestDispatcher getNamedDispatcher(String name)
         {
-            // TODO Not implemented
-            throw new IllegalStateException("Not Implemented");
+            return new Dispatcher(ContextHandler.this, name);
         }
 
         /* ------------------------------------------------------------ */

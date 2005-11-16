@@ -83,7 +83,7 @@ public class Dispatcher implements RequestDispatcher
     private ContextHandler _contextHandler;
     private String _uri;
     private String _path;
-    private String _query;
+    private String _dQuery;
     private String _named;
     
     /* ------------------------------------------------------------ */
@@ -98,9 +98,22 @@ public class Dispatcher implements RequestDispatcher
         _contextHandler=contextHandler;
         _uri=uri;
         _path=pathInContext;
-        _query=query;
+        _dQuery=query;
     }
 
+
+    /* ------------------------------------------------------------ */
+    /** Constructor. 
+     * @param servletHandler
+     * @param name
+     */
+    public Dispatcher(ContextHandler contextHandler,String name)
+        throws IllegalStateException
+    {
+        _contextHandler=contextHandler;
+        _named=name;
+    }
+    
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.RequestDispatcher#forward(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
@@ -136,46 +149,50 @@ public class Dispatcher implements RequestDispatcher
         MultiMap old_params=base_request.getParameters();
         try
         {
-            // TODO parameters and query
-            String query=_query;
-            
-            if (query!=null)
+            if (_named!=null)
+                _contextHandler.handle(_named, (HttpServletRequest)request, (HttpServletResponse)response, dispatch);
+            else 
             {
-                MultiMap parameters=new MultiMap();
-                UrlEncoded.decodeTo(query,parameters,request.getCharacterEncoding());
+                String query=_dQuery;
                 
-                if (old_params!=null && old_params.size()>0)
+                if (query!=null)
                 {
-                    // Merge parameters.
-                    Iterator iter = old_params.entrySet().iterator();
-                    while (iter.hasNext())
+                    MultiMap parameters=new MultiMap();
+                    UrlEncoded.decodeTo(query,parameters,request.getCharacterEncoding());
+                    
+                    if (old_params!=null && old_params.size()>0)
                     {
-                        Map.Entry entry = (Map.Entry)iter.next();
-                        String name=(String)entry.getKey();
-                        Object values=entry.getValue();
-                        for (int i=0;i<LazyList.size(values);i++)
-                            parameters.add(name, LazyList.get(values, i));
+                        // Merge parameters.
+                        Iterator iter = old_params.entrySet().iterator();
+                        while (iter.hasNext())
+                        {
+                            Map.Entry entry = (Map.Entry)iter.next();
+                            String name=(String)entry.getKey();
+                            Object values=entry.getValue();
+                            for (int i=0;i<LazyList.size(values);i++)
+                                parameters.add(name, LazyList.get(values, i));
+                        }
+                        query=UrlEncoded.encode(parameters,null,false);
                     }
-                    query=UrlEncoded.encode(parameters,null,false);
+                    base_request.setParameters(parameters);
+                    base_request.setQueryString(query);
                 }
-                base_request.setParameters(parameters);
+                
+                ForwardAttributes attr = new ForwardAttributes(old_attr); 
+                
+                attr._requestURI=base_request.getRequestURI();
+                attr._contextPath=base_request.getContextPath();
+                attr._servletPath=base_request.getServletPath();
+                attr._pathInfo=base_request.getPathInfo();
+                attr._query=base_request.getQueryString();
+                
+                base_request.setRequestURI(_uri);
+                base_request.setContextPath(_contextHandler.getContextPath());
+                base_request.setAttributes(attr);
                 base_request.setQueryString(query);
+                
+                _contextHandler.handle(_path, (HttpServletRequest)request, (HttpServletResponse)response, dispatch);
             }
-            
-            ForwardAttributes attr = new ForwardAttributes(old_attr); 
-            
-            attr._requestURI=base_request.getRequestURI();
-            attr._contextPath=base_request.getContextPath();
-            attr._servletPath=base_request.getServletPath();
-            attr._pathInfo=base_request.getPathInfo();
-            attr._query=base_request.getQueryString();
-
-            base_request.setRequestURI(_uri);
-            base_request.setContextPath(_contextHandler.getContextPath());
-            base_request.setAttributes(attr);
-            base_request.setQueryString(query);
-            
-            _contextHandler.handle(_path, (HttpServletRequest)request, (HttpServletResponse)response, dispatch);
         }
         finally
         {
@@ -198,18 +215,22 @@ public class Dispatcher implements RequestDispatcher
         Attributes old_attr=base_request.getAttributes();
         try
         {
-            // TODO parameters and query
-            String query=_query;
-            
-            IncludeAttributes attr = new IncludeAttributes(old_attr); 
-            
-            attr._requestURI=_uri;
-            attr._contextPath=_contextHandler.getContextPath();
-            attr._query=query;
-            
-            base_request.setAttributes(attr);
-            
-            _contextHandler.handle(_path, (HttpServletRequest)request, (HttpServletResponse)response, Handler.INCLUDE);
+            if (_named!=null)
+                _contextHandler.handle(_named, (HttpServletRequest)request, (HttpServletResponse)response, Handler.INCLUDE);
+            else 
+            {
+                String query=_dQuery;
+                
+                IncludeAttributes attr = new IncludeAttributes(old_attr); 
+                
+                attr._requestURI=_uri;
+                attr._contextPath=_contextHandler.getContextPath();
+                attr._query=query;
+                
+                base_request.setAttributes(attr);
+                
+                _contextHandler.handle(_named==null?_path:_named, (HttpServletRequest)request, (HttpServletResponse)response, Handler.INCLUDE);
+            }
         }
         finally
         {

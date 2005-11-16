@@ -4,7 +4,7 @@
 // ------------------------------------------------------------------------
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at 
+// You may obtain a copy of the License at
 // http://www.apache.org/licenses/LICENSE-2.0
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,7 +52,6 @@ import org.mortbay.xml.XmlParser;
  */
 public class WebXmlConfiguration implements Configuration
 {
-    
     protected WebAppContext _context;
     protected XmlParser _xmlParser;
     protected Object _filters;
@@ -64,13 +63,13 @@ public class WebXmlConfiguration implements Configuration
     protected Object _listeners;
     protected Map _errorPages;
     protected boolean _hasJSP;
-    
+
     public WebXmlConfiguration()
     {
         // Get parser
         _xmlParser=webXmlParser();
     }
-    
+
     public static XmlParser webXmlParser()
     {
         XmlParser xmlParser=new XmlParser();
@@ -111,7 +110,7 @@ public class WebXmlConfiguration implements Configuration
         xmlParser.redirectEntity("http://www.w3.org/2001/datatypes.dtd",datatypesdtd);
         xmlParser.redirectEntity("j2ee_web_services_client_1_1.xsd",webservice11xsd);
         xmlParser.redirectEntity("http://www.ibm.com/webservices/xsd/j2ee_web_services_client_1_1.xsd",webservice11xsd);
-        
+
         return xmlParser;
     }
 
@@ -119,17 +118,17 @@ public class WebXmlConfiguration implements Configuration
     public void setWebAppContext (WebAppContext context)
     {
         _context = context;
-    }   
+    }
 
     /* ------------------------------------------------------------------------------- */
     public WebAppContext getWebAppContext()
     {
         return _context;
     }
-    
+
     /* ------------------------------------------------------------------------------- */
     /** Configure ClassPath.
-     * This method is called before the context ClassLoader is created.  
+     * This method is called before the context ClassLoader is created.
      * Paths and libraries should be added to the context using the setClassPath,
      * addClassPath and addClassPaths methods.  The default implementation looks
      * for WEB-INF/classes, WEB-INF/lib/*.zip and WEB-INF/lib/*.jar
@@ -144,13 +143,12 @@ public class WebXmlConfiguration implements Configuration
             if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");};
             return;
         }
-        
+
         Resource webInf=_context.getWebInf();
-        
+
         // Add WEB-INF classes and lib classpaths
         if (webInf != null && webInf.isDirectory() && _context.getClassLoader() instanceof WebAppClassLoader)
         {
-            
             // Look for classes directory
             Resource classes= webInf.addPath("classes/");
             if (classes.exists())
@@ -172,7 +170,7 @@ public class WebXmlConfiguration implements Configuration
             if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");};
             return;
         }
-        
+
         String defaultsDescriptor=getWebAppContext().getDefaultsDescriptor();
         if(defaultsDescriptor!=null&&defaultsDescriptor.length()>0)
         {
@@ -193,7 +191,7 @@ public class WebXmlConfiguration implements Configuration
             if (Log.isDebugEnabled()){Log.debug("Cannot configure webapp after it is started");};
             return;
         }
-        
+
         Resource webInf=getWebAppContext().getWebInf();
         // handle any WEB-INF descriptors
         if(webInf!=null&&webInf.isDirectory())
@@ -210,7 +208,7 @@ public class WebXmlConfiguration implements Configuration
                 XmlParser.Node config=null;
                 config=_xmlParser.parse(web.getURL().toString());
                 initialize(config);
-                
+
             }
         }
     }
@@ -221,7 +219,7 @@ public class WebXmlConfiguration implements Configuration
         // TODO presever any configuration that pre-existed.
 
         ServletHandler servlet_handler = getWebAppContext().getServletHandler();
-        
+
         servlet_handler.setFilters(null);
         servlet_handler.setFilterMappings(null);
         servlet_handler.setServlets(null);
@@ -230,10 +228,10 @@ public class WebXmlConfiguration implements Configuration
         getWebAppContext().setEventListeners(null);
         getWebAppContext().setWelcomeFiles(null);
         getWebAppContext().getSecurityHandler().setConstraintMappings(null);
-   
+
         if (getWebAppContext().getErrorHandler() instanceof WebAppContext.WebAppErrorHandler)
             ((WebAppContext.WebAppErrorHandler)getWebAppContext().getErrorHandler()).setErrorPages(null);
-        
+
         // TODO remove classpaths from classloader
     }
 
@@ -241,7 +239,7 @@ public class WebXmlConfiguration implements Configuration
     protected void initialize(XmlParser.Node config) throws ClassNotFoundException,UnavailableException
     {
         ServletHandler servlet_handler = getWebAppContext().getServletHandler();
-        
+
         // Get any existing servlets and mappings.
         _filters=LazyList.array2List(servlet_handler.getFilters());
         _filterMappings=LazyList.array2List(servlet_handler.getFilterMappings());
@@ -251,10 +249,10 @@ public class WebXmlConfiguration implements Configuration
         _listeners = LazyList.array2List(getWebAppContext().getEventListeners());
         _welcomeFiles = LazyList.array2List(getWebAppContext().getWelcomeFiles());
         _constraintMappings = LazyList.array2List(getWebAppContext().getSecurityHandler().getConstraintMappings());
-        
+
         _errorPages = getWebAppContext().getErrorHandler() instanceof WebAppContext.WebAppErrorHandler ?
                         ((WebAppContext.WebAppErrorHandler)getWebAppContext().getErrorHandler()).getErrorPages():null;
-        
+
         Iterator iter=config.iterator();
         XmlParser.Node node=null;
         while(iter.hasNext())
@@ -287,10 +285,10 @@ public class WebXmlConfiguration implements Configuration
         getWebAppContext().setEventListeners((EventListener[])LazyList.toArray(_listeners,EventListener.class));
         getWebAppContext().setWelcomeFiles((String[])LazyList.toArray(_welcomeFiles,String.class));
         getWebAppContext().getSecurityHandler().setConstraintMappings((ConstraintMapping[])LazyList.toArray(_constraintMappings, ConstraintMapping.class));
-   
+
         if (_errorPages!=null && getWebAppContext().getErrorHandler() instanceof WebAppContext.WebAppErrorHandler)
             ((WebAppContext.WebAppErrorHandler)getWebAppContext().getErrorHandler()).setErrorPages(_errorPages);
-        
+
     }
 
     /* ------------------------------------------------------------ */
@@ -298,7 +296,7 @@ public class WebXmlConfiguration implements Configuration
      * Handle web.xml element. This method is called for each top level element within the web.xml
      * file. It may be specialized by derived WebAppHandlers to provide additional
      * configuration and handling.
-     * 
+     *
      * @param element The element name
      * @param node The node containing the element.
      */
@@ -379,7 +377,7 @@ public class WebXmlConfiguration implements Configuration
         FilterHolder holder= new FilterHolder();
         holder.setName(node.getString("filter-name",false,true));
         holder.setClassName(node.getString("filter-class",false,true));
-        
+
         Iterator iter=node.iterator("init-param");
         while(iter.hasNext())
         {
@@ -395,13 +393,13 @@ public class WebXmlConfiguration implements Configuration
     protected void initFilterMapping(XmlParser.Node node)
     {
         String filter_name=node.getString("filter-name",false,true);
-        
-        
-        
+
+
+
         FilterMapping mapping = new FilterMapping();
-        
+
         mapping.setFilterName(filter_name);
-        
+
         ArrayList paths = new ArrayList();
         Iterator iter=node.iterator("url-pattern");
         while(iter.hasNext())
@@ -410,7 +408,7 @@ public class WebXmlConfiguration implements Configuration
             paths.add(p);
         }
         mapping.setPathSpecs((String[])paths.toArray(new String[paths.size()]));
-        
+
 
         ArrayList names = new ArrayList();
         iter=node.iterator("servlet-name");
@@ -420,8 +418,8 @@ public class WebXmlConfiguration implements Configuration
             names.add(n);
         }
         mapping.setServletNames((String[])names.toArray(new String[names.size()]));
-        
-        
+
+
         int dispatcher=Handler.DEFAULT;
         iter=node.iterator("dispatcher");
         while(iter.hasNext())
@@ -430,7 +428,7 @@ public class WebXmlConfiguration implements Configuration
             dispatcher|=Dispatcher.type(d);
         }
         mapping.setDispatches(dispatcher);
-        
+
         _filterMappings=LazyList.add(_filterMappings,mapping);
     }
 
@@ -439,11 +437,11 @@ public class WebXmlConfiguration implements Configuration
             MalformedURLException
     {
         String id=node.getAttribute("id");
-        
+
         String servlet_name=node.getString("servlet-name",false,true);
         String servlet_class=node.getString("servlet-class",false,true);
         String jsp_file=node.getString("jsp-file",false,true);
-        
+
         if (id!=null && id.equals("jsp"))
         {
             try
@@ -463,7 +461,7 @@ public class WebXmlConfiguration implements Configuration
         holder.setName(servlet_name);
         holder.setClassName(servlet_class);
         holder.setForcedPath(jsp_file);
-        
+
         // handle JSP classpath
         Iterator iParamsIter=node.iterator("init-param");
         while(iParamsIter.hasNext())
@@ -527,7 +525,7 @@ public class WebXmlConfiguration implements Configuration
 
     /* ------------------------------------------------------------ */
     protected void initServletMapping(XmlParser.Node node)
-    {   
+    {
         String servlet_name = node.getString("servlet-name",false,true);
         ServletMapping mapping = new ServletMapping();
         mapping.setServletName(servlet_name);
@@ -540,7 +538,7 @@ public class WebXmlConfiguration implements Configuration
             paths.add(p);
         }
         mapping.setPathSpecs((String[])paths.toArray(new String[paths.size()]));
-        
+
         _servletMappings=LazyList.add(_servletMappings,mapping);
     }
 
@@ -630,7 +628,7 @@ public class WebXmlConfiguration implements Configuration
         if(error==null||error.length()==0)
             error=node.getString("exception-type",false,true);
         String location=node.getString("location",false,true);
-        
+
         if (_errorPages==null)
             _errorPages=new HashMap();
         _errorPages.put(error,location);
@@ -641,10 +639,10 @@ public class WebXmlConfiguration implements Configuration
     {
         String uri=node.getString("taglib-uri",false,true);
         String location=node.getString("taglib-location",false,true);
-        
+
         // TODO getWebAppHandler().setResourceAlias(uri,location);
     }
-    
+
     /* ------------------------------------------------------------ */
     protected void initJspConfig(XmlParser.Node node)
     {
@@ -660,7 +658,7 @@ public class WebXmlConfiguration implements Configuration
     protected void initSecurityConstraint(XmlParser.Node node)
     {
         Constraint scBase = new Constraint();
-         
+
         try
         {
             XmlParser.Node auths = node.get("auth-constraint");
@@ -699,20 +697,20 @@ public class WebXmlConfiguration implements Configuration
                 String name = collection.getString("web-resource-name", false, true);
                 Constraint sc = (Constraint) scBase.clone();
                 sc.setName(name);
-                
-                
+
+
                 Iterator iter2 = collection.iterator("url-pattern");
                 while (iter2.hasNext())
                 {
                     String url = ((XmlParser.Node) iter2.next()).toString(false, true);
-                    
+
                     Iterator iter3 = collection.iterator("http-method");
                     if (iter3.hasNext())
                     {
-                        while (iter3.hasNext())    
+                        while (iter3.hasNext())
                         {
                             String method=((XmlParser.Node) iter3.next()).toString(false, true);
-                            ConstraintMapping mapping = new ConstraintMapping(); 
+                            ConstraintMapping mapping = new ConstraintMapping();
                             mapping.setMethod(method);
                             mapping.setPathSpec(url);
                             mapping.setConstraint(sc);
@@ -721,7 +719,7 @@ public class WebXmlConfiguration implements Configuration
                     }
                     else
                     {
-                        ConstraintMapping mapping = new ConstraintMapping(); 
+                        ConstraintMapping mapping = new ConstraintMapping();
                         mapping.setPathSpec(url);
                         mapping.setConstraint(sc);
                         _constraintMappings=LazyList.add(_constraintMappings,mapping);
@@ -733,7 +731,7 @@ public class WebXmlConfiguration implements Configuration
         {
             Log.warn(e);
         }
-            
+
     }
 
     /* ------------------------------------------------------------ */
@@ -763,7 +761,7 @@ public class WebXmlConfiguration implements Configuration
         if(name!=null)
         {
             String realm_name=name.toString(false,true);
-            
+
             UserRealm[] realms=WebAppContext.getCurrentContext().getContextHandler().getServer().getUserRealms();
             UserRealm realm=null;
             for (int i=0;realm==null && realms!=null && i<realms.length; i++)
@@ -771,7 +769,7 @@ public class WebXmlConfiguration implements Configuration
                 if (realms[i]!=null && realm_name.equals(realms[i].getName()))
                     realm=realms[i];
             }
-            
+
             if (realm==null)
             {
                 String msg = "Unknown realm: "+realm_name;

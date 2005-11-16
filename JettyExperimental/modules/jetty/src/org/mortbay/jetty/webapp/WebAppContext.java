@@ -182,6 +182,7 @@ public class WebAppContext extends ContextHandler
     {
         // Setup configurations 
         loadConfigurations();
+        
         for (int i=0;i<_configurations.length;i++)
             _configurations[i].setWebAppContext(this);
         
@@ -222,6 +223,7 @@ public class WebAppContext extends ContextHandler
             // Configure classloader
             for (int i=_configurations.length;i-->0;)
                 _configurations[i].deconfigureWebApp();
+            _configurations=null;
         }
         finally
         {

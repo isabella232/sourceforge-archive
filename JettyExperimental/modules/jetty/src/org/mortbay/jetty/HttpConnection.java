@@ -218,11 +218,7 @@ public class HttpConnection
             {
                 Log.debug("resume continuation {}",continuation);
                 doHandler();
-                if (continuation.isPending())
-                {
-                    Log.debug("continuation still pending {}",continuation);
-                    continuation.suspend(0);
-                }
+                
             }
             else
             {
@@ -284,7 +280,12 @@ public class HttpConnection
             {
                 if (!retry)
                 {
-                    _request.setContinuation(null);
+                    if (_request.getContinuation()!=null && _request.getContinuation().isPending())
+                    {
+                        Log.debug("continuation still pending {}");
+                        _request.getContinuation().suspend(0);
+                    }
+                    
                     if (_response != null) _response.complete();
 
                     if (!_generator.isComplete())

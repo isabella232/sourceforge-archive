@@ -55,7 +55,10 @@ import org.mortbay.util.ajax.Continuation;
  * runtime exception is thrown to allow the thread to exit the current request handling. Jetty will
  * catch this exception and will not send a response to the client. Instead the thread is released
  * and the Continuation is placed on the timer queue. If the Continuation timeout expires, or it's
- * resume method is called, then the request is again allocated a thread and the request is retied.
+ * resume method is called, then the request is again allocated a thread and the request is retried.
+ * The limitation of this approach is that request content is not available on the retried request,
+ * thus if possible it should be read after the continuation or saved as a request attribute or as the
+ * associated object of the Continuation instance.
  * </p>
  * 
  * @version $Revision$

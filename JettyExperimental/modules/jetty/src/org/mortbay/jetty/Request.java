@@ -744,7 +744,7 @@ public class Request implements HttpServletRequest
      */
     public String getRequestURI()
     {
-        if (_requestURI==null)
+        if (_requestURI==null && _uri!=null)
             _requestURI=_uri.getRawPath();
         return _requestURI;
     }
