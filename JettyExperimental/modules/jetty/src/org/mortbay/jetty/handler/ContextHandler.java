@@ -44,6 +44,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.mortbay.io.Buffer;
+import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.HttpConnection;
 import org.mortbay.jetty.MimeTypes;
 import org.mortbay.jetty.Request;
@@ -861,8 +862,25 @@ public class ContextHandler extends WrappedHandler implements Attributes
          */
         public ServletContext getContext(String uripath)
         {
-            // TODO Not implemented yet
-            throw new IllegalStateException("Not Implemented");
+            // TODO this is a very poor implementation!
+            ContextHandler context=null;
+            Handler[] handlers = _server.getAllHandlers();
+            for (int i=0;i<handlers.length;i++)
+            {
+                if (handlers[i]==null || !handlers[i].isStarted() || !(handlers[i] instanceof ContextHandler))
+                    continue;
+                ContextHandler ch = (ContextHandler)handlers[i];
+                String context_path=ch.getContextPath();
+                if (uripath.equals(context_path) || (uripath.startsWith(context_path)&&uripath.charAt(context_path.length())=='/'))
+                {
+                    if (context==null || context_path.length()>context.getContextPath().length())
+                        context=ch;
+                }
+            }
+            
+            if (context!=null)
+                return context._context;
+            return null;
         }
 
         /* ------------------------------------------------------------ */

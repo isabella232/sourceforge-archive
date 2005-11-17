@@ -72,7 +72,6 @@ public class HttpConnection
     }
 
     /**
-     * @param handler TODO
      * 
      */
     public HttpConnection(Connector connector, EndPoint endpoint, Handler handler)

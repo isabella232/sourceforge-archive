@@ -121,8 +121,9 @@ public class HttpGenerator implements HttpTokens
     /**
      * Constructor.
      * 
-     * @param headerBufferSize TODO
-     * @param contentBufferSize TODO
+     * @param buffers buffer pool
+     * @param headerBufferSize Size of the buffer to allocate for HTTP header
+     * @param contentBufferSize Size of the buffer to allocate for HTTP content
      */
     public HttpGenerator(Buffers buffers, EndPoint io, int headerBufferSize, int contentBufferSize)
     {
