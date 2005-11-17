@@ -90,17 +90,34 @@ public class JettyWebXmlConfiguration implements Configuration
                 jetty=webInf.addPath("jetty-web.xml");
             if(!jetty.exists())
                 jetty=webInf.addPath("web-jetty.xml");
-            
+
             if(jetty.exists())
             {
-                if(Log.isDebugEnabled())
-                    Log.debug("Configure: "+jetty);
-                XmlConfiguration jetty_config=new XmlConfiguration(jetty.getURL());
-                jetty_config.configure(getWebAppContext());
+                // Give permission to see Jetty classes
+                String[] old_server_classes = _context.getServerClasses();
+                String[] server_classes = new String[2+(old_server_classes==null?0:old_server_classes.length)];
+                
+                server_classes[0]="-org.mortbay.jetty.";
+                server_classes[1]="-org.mortbay.util.";
+                if (server_classes!=null)
+                    System.arraycopy(old_server_classes, 0, server_classes, 2, old_server_classes.length);
+                try
+                {
+                    _context.setServerClasses(server_classes);
+                    if(Log.isDebugEnabled())
+                        Log.debug("Configure: "+jetty);
+                    XmlConfiguration jetty_config=new XmlConfiguration(jetty.getURL());
+                    jetty_config.configure(getWebAppContext());
+                }
+                finally
+                {
+                    _context.setServerClasses(old_server_classes);
+                }
             }
         }
-        
     }
+    
+    
     /** configureWebApp
      * Apply web-jetty.xml configuration
      * @see org.mortbay.jetty.servlet.WebApplicationContext.Configuration#configureWebApp()
