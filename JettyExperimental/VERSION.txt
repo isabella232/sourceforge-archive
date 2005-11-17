@@ -1,5 +1,7 @@
+Jetty-6.0.0Beta3
     + Fixed error in block read
     + Named dispatch.
+    + Fixed classloader issue with server classes
 
 Jetty-6.0.0Beta2
     + merged util jar back into jetty jar
