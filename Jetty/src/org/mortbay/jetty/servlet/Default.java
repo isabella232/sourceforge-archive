@@ -197,8 +197,9 @@ public class Default extends HttpServlet
             pathInfo = (String) request.getAttribute(Dispatcher.__INCLUDE_PATH_INFO);
 
         String pathInContext = URI.addPaths(servletPath, pathInfo);
+                
         boolean endsWithSlash = pathInContext.endsWith("/");
-        Resource resource = getResource(pathInfo == null ? servletPath : pathInfo);
+        Resource resource = getResource(pathInContext);
 
         // Is the method allowed?
         String method = request.getMethod();

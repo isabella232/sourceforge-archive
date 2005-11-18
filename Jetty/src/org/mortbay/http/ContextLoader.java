@@ -53,8 +53,7 @@ public class ContextLoader extends URLClassLoader
     private ClassLoader _parent;
     private PermissionCollection _permissions;
     private String _urlClassPath;
-    private String[] _systemClasses;
-    private String[] _serverClasses;
+    private HttpContext _context;
     
     /* ------------------------------------------------------------ */
     /** Constructor.
@@ -67,14 +66,9 @@ public class ContextLoader extends URLClassLoader
         throws MalformedURLException, IOException
     {
         super(new URL[0], parent);
+        _context=context;
         _permissions= permisions;
         _parent= parent;
-        _systemClasses=context.getSystemClasses();
-        if (_systemClasses==null && context.getHttpServer()!=null)
-            _systemClasses=context.getHttpServer().getSystemClasses();
-        _serverClasses=context.getServerClasses();
-        if (_serverClasses==null && context.getHttpServer()!=null)
-            _serverClasses=context.getHttpServer().getServerClasses();
         
         if (_parent == null)
             _parent= getSystemClassLoader();
@@ -298,32 +292,30 @@ public class ContextLoader extends URLClassLoader
         while(name.startsWith("."))
             name=name.substring(1);
 
-        if (_serverClasses!=null)
-        {
-            for (int i=0;i<_serverClasses.length;i++)
-            {
-                if (_serverClasses[i].startsWith("-"))
-                {
-                    if (name.equals(_serverClasses[i].substring(1)))
-                        return false;
-                }
-                else if (_serverClasses[i].endsWith("."))
-                {
-                    if (name.startsWith(_serverClasses[i]))
-                        return true;
-                }
-                else if (name.equals(_serverClasses[i]))
-                    return true;
-            }
-            return false;
-        }
+        String[] server_classes=_context.getServerClasses();
         
-        // Arbitrary list that covers the worst security problems.
-        // If you are worried by this, then use a permissions file!
-        return name.equals("org.mortbay.jetty.Server")
-            || name.startsWith("org.mortbay.http.")
-            || name.startsWith("org.mortbay.start.")
-            || name.startsWith("org.mortbay.stop.");
+        if (server_classes!=null)
+        {
+            for (int i=0;i<server_classes.length;i++)
+            {
+                boolean result=true;
+                String c=server_classes[i];
+                if (c.startsWith("-"))
+                {
+                    c=c.substring(1);
+                    result=false;
+                }
+                
+                else if (c.endsWith("."))
+                {
+                    if (name.startsWith(c))
+                        return result;
+                }
+                else if (name.equals(c))
+                    return result;
+            }
+        }
+        return false;
     }
 
     /* ------------------------------------------------------------ */
@@ -332,35 +324,31 @@ public class ContextLoader extends URLClassLoader
         name=name.replace('/','.');
         while(name.startsWith("."))
             name=name.substring(1);
-        
-        if (_systemClasses!=null)
+
+        String[] system_classes=_context.getSystemClasses();
+        if (system_classes!=null)
         {
-            for (int i=0;i<_systemClasses.length;i++)
+            for (int i=0;i<system_classes.length;i++)
             {
-                if (_systemClasses[i].startsWith("-"))
+                boolean result=true;
+                String c=system_classes[i];
+                if (c.startsWith("-"))
                 {
-                    if (name.equals(_systemClasses[i].substring(1)))
-                        return false;
+                    c=c.substring(1);
+                    result=false;
                 }
-                else if (_systemClasses[i].endsWith("."))
+                
+                else if (c.endsWith("."))
                 {
-                    if (name.startsWith(_systemClasses[i]))
-                        return true;
+                    if (name.startsWith(c))
+                        return result;
                 }
-                else if (name.equals(_systemClasses[i]))
-                    return true;
+                else if (name.equals(c))
+                    return result;
             }
-            return false;
         }
         
-        // guessing a list
-        return (
-                   name.startsWith("java.")
-                || name.startsWith("javax.servlet.")
-                || name.startsWith("javax.xml.")
-                || name.startsWith("org.mortbay.")
-                || name.startsWith("org.xml.")
-                || name.startsWith("org.w3c."));
+        return false;
     }
 
     /* ------------------------------------------------------------ */
@@ -377,7 +365,7 @@ public class ContextLoader extends URLClassLoader
      */
     String[] getServerClasses()
     {
-        return _serverClasses;
+        return _context.getServerClasses();
     }
     
     /* ------------------------------------------------------------ */
@@ -386,7 +374,7 @@ public class ContextLoader extends URLClassLoader
      */
     void setServerClasses(String[] serverClasses)
     {
-        _serverClasses = serverClasses;
+        _context.setServerClasses(serverClasses);
     }
     
     /* ------------------------------------------------------------ */
@@ -395,7 +383,7 @@ public class ContextLoader extends URLClassLoader
      */
     String[] getSystemClasses()
     {
-        return _systemClasses;
+        return _context.getSystemClasses();
     }
     
     /* ------------------------------------------------------------ */
@@ -404,6 +392,6 @@ public class ContextLoader extends URLClassLoader
      */
     void setSystemClasses(String[] systemClasses)
     {
-        _systemClasses = systemClasses;
+        _context.setSystemClasses(systemClasses);
     }
 }

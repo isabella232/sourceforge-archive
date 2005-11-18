@@ -17,6 +17,7 @@ package org.mortbay.jetty.servlet;
 
 import org.apache.commons.logging.Log;
 import org.mortbay.log.LogFactory;
+import org.mortbay.http.ContextLoader;
 import org.mortbay.jetty.servlet.WebApplicationContext.Configuration;
 import org.mortbay.util.Resource;
 import org.mortbay.xml.XmlConfiguration;
@@ -91,10 +92,28 @@ public class JettyWebConfiguration implements Configuration
                 jetty=webInf.addPath("jetty-web.xml");
             if(!getWebApplicationContext().isIgnoreWebJetty()&&jetty.exists())
             {
-                if(log.isDebugEnabled())
-                    log.debug("Configure: "+jetty);
-                XmlConfiguration jetty_config=new XmlConfiguration(jetty.getURL());
-                jetty_config.configure(getWebApplicationContext());
+                
+                // Give permission to see Jetty classes
+                String[] old_server_classes = _context.getServerClasses();
+                String[] server_classes = new String[1+(old_server_classes==null?0:old_server_classes.length)];
+                server_classes[0]="-org.mortbay.";
+                if (server_classes!=null)
+                    System.arraycopy(old_server_classes, 0, server_classes, 1, old_server_classes.length);
+                
+                try
+                {
+                    _context.setServerClasses(server_classes);
+                    if(log.isDebugEnabled())
+                        log.debug("Configure: "+jetty);
+                    
+                    XmlConfiguration jetty_config=new XmlConfiguration(jetty.getURL());
+                    jetty_config.configure(getWebApplicationContext());
+                }
+                finally
+                {
+                    if (_context.getServerClasses()==server_classes)
+                        _context.setServerClasses(old_server_classes);
+                }
             }
         }
         

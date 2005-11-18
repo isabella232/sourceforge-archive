@@ -129,10 +129,8 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
             // Look for classes directory
             Resource classes= webInf.addPath("classes/");
             if (classes.exists())
-                _context.setClassPath(classes.toString());
-            else
-                _context.setClassPath(null);
-
+                _context.addClassPath(classes.toString());
+  
             // Look for jars
             Resource lib= webInf.addPath("lib/");
             _context.addClassPaths(lib);

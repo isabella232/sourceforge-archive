@@ -142,11 +142,16 @@ public class FileResource extends URLResource
             if (path.startsWith("/"))
                 path = path.substring(1);
             
-            File newFile = new File(_file,path);
-            
+            File newFile = new File(_file,path.replace('/', File.separatorChar));
             r=new FileResource(newFile.toURI().toURL(),null,newFile);
         }
-                                  
+
+        if (!r._urlString.endsWith(path))
+        {
+            r._urlString=this._urlString+path;
+            r._alias=r._url;
+            r._aliasChecked=true;
+        }                   
         return r;
     }
    

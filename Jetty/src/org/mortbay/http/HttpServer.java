@@ -116,8 +116,6 @@ public class HttpServer extends Container
     private RequestLog _requestLog;
     private int _requestsPerGC ;
     private boolean _resolveRemoteHost =false;
-    private List _systemClasses;
-    private List _serverClasses;
     
     private transient int _gcRequests;
     private transient HttpContext _notFoundContext=null;
@@ -658,61 +656,38 @@ public class HttpServer extends Container
 
     /* ------------------------------------------------------------ */
     /** Set system classes.
-     * System classes cannot be overriden by context classloaders.
-     * The global defaults set here may be overriden in HttpContext.
-     * @param classes array of classname Strings.  Names ending with '.' are treated as package names. Names starting with '-' are treated as
-     * negative matches and must be listed before any enclosing packages.
+     * @deprecated. Use HttpContext
      */
     public void setSystemClasses(String[] classes)
     {
-        if (classes==null)
-            _systemClasses=null;
-        else
-            _systemClasses=Arrays.asList(classes);
+        log.warn("setSystemClasses is deprecated on HttpServer");
     }
 
     /* ------------------------------------------------------------ */
     /** Get system classes.
-     * System classes cannot be overriden by context classloaders.
-     * The global defaults set here may be overriden in HttpContext.
-     * @return array of classname Strings.  Names ending with '.' are treated as package names. Names starting with '-' are treated as
-     * negative matches and must be listed before any enclosing packages. Null if not set.
+     * @deprecated. Use HttpContext
      */
     public String[] getSystemClasses()
     {
-        if (_systemClasses==null)
-            return null;
-        return (String[])_systemClasses.toArray(new String[_systemClasses.size()]);
+        return null;
     }
-    
 
     /* ------------------------------------------------------------ */
     /** Set system classes.
-     * Servers classes cannot be seen by context classloaders.
-     * The global defaults set here may be overriden in HttpContext.
-     * @param classes array of classname Strings.  Names ending with '.' are treated as package names. Names starting with '-' are treated as
-     * negative matches and must be listed before any enclosing packages.
+     * @deprecated. Use HttpContext
      */
     public void setServerClasses(String[] classes)
     {
-        if (classes==null)
-            _serverClasses=null;
-        else
-            _serverClasses=Arrays.asList(classes);
+        log.warn("setServerClasses is deprecated on HttpServer");
     }
 
     /* ------------------------------------------------------------ */
     /** Get system classes.
-     * System classes cannot be seen by context classloaders.
-     * The global defaults set here may be overriden in HttpContext.
-     * @return array of classname Strings.  Names ending with '.' are treated as package names. Names starting with '-' are treated as
-     * negative matches and must be listed before any enclosing packages. Null if not set.
+     * @deprecated. Use HttpContext
      */
     public String[] getServerClasses()
     {
-        if (_serverClasses==null )
-            return null;
-        return (String[])_serverClasses.toArray(new String[_serverClasses.size()]);
+        return null;
     }
 
 

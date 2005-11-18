@@ -47,7 +47,7 @@
       <Arg><New class="org.mortbay.http.handler.ProxyHandler">
         <Set name="proxyHostsBlackList">
           <Array type="java.lang.String">
-            <Item>www.microsoft.com</Item>
+            <Item>www.micro$oft.com</Item>
             <Item>www.saddam.net</Item>
           </Array>
         </Set>
@@ -62,7 +62,7 @@
   <!-- =============================================================== -->
   <Set name="RequestLog">
     <New class="org.mortbay.http.NCSARequestLog">
-      <Arg><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.request.log</Arg>
+      <Arg><SystemProperty name="jetty.home" default="."/>/logs/yyyy_mm_dd.proxy.log</Arg>
       <Set name="retainDays">90</Set>
       <Set name="append">true</Set>
       <Set name="extended">false</Set>
