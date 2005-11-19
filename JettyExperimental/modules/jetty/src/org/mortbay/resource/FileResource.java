@@ -113,6 +113,8 @@ public class FileResource extends URLResource
                 _file = new File(perm==null?url.getFile():perm.getName());
             }
         }
+        if (_file.isDirectory() && !_urlString.endsWith("/"))
+            _urlString=_urlString+"/";
     }
     
     /* -------------------------------------------------------- */
@@ -120,6 +122,8 @@ public class FileResource extends URLResource
     {
         super(url,connection);
         _file=file;
+        if (_file.isDirectory() && !_urlString.endsWith("/"))
+            _urlString=_urlString+"/";
     }
     
     /* -------------------------------------------------------- */
@@ -140,11 +144,17 @@ public class FileResource extends URLResource
             if (path.startsWith("/"))
                 path = path.substring(1);
             
-            File newFile = new File(_file,path);
-            
+            File newFile = new File(_file,path.replace('/', File.separatorChar));
             r=new FileResource(newFile.toURI().toURL(),null,newFile);
         }
-                                  
+
+        int expected=r._urlString.length()-path.length();
+        int index = r._urlString.lastIndexOf(path, expected);
+        if (expected!=index && ((expected-1)!=index || path.endsWith("/") || !r.isDirectory()))
+        {
+            r._alias=r._url;
+            r._aliasChecked=true;
+        }                             
         return r;
     }
    

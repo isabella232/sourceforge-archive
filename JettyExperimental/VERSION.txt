@@ -1,3 +1,7 @@
+
+    + Fixed JSP visibility security issue.
+    + Improved jetty-web.xml access to org.mortbay classes.
+
 Jetty-6.0.0Beta3
     + Fixed error in block read
     + Named dispatch.
