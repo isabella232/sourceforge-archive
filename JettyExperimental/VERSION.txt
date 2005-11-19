@@ -1,4 +1,5 @@
 
+    + System property support in plugin
     + Fixed JSP visibility security issue.
     + Improved jetty-web.xml access to org.mortbay classes.
 
