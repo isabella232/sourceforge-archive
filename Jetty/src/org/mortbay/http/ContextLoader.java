@@ -306,13 +306,15 @@ public class ContextLoader extends URLClassLoader
                     result=false;
                 }
                 
-                else if (c.endsWith("."))
+                if (c.endsWith("."))
                 {
                     if (name.startsWith(c))
                         return result;
                 }
                 else if (name.equals(c))
+                {
                     return result;
+                }
             }
         }
         return false;
@@ -338,7 +340,7 @@ public class ContextLoader extends URLClassLoader
                     result=false;
                 }
                 
-                else if (c.endsWith("."))
+                if (c.endsWith("."))
                 {
                     if (name.startsWith(c))
                         return result;

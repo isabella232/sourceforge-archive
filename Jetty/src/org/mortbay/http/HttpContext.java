@@ -114,9 +114,9 @@ public class HttpContext extends Container
     private PermissionCollection _permissions;
     private boolean _classLoaderJava2Compliant=true;
     private ResourceCache _resources;
-    private String[] _systemClasses=new String [] {"java.","javax.servlet.","javax.xml.","org.mortbay.","org.xml.","org.w3c."};
-    private String[] _serverClasses = new String[] {"org.mortbay.jetty.Server","org.mortbay.http.","org.mortbay.start.","org.mortbay.stop."};
-
+    private String[] _systemClasses=new String [] {"java.","javax.servlet.","javax.xml.","org.mortbay.","org.xml.","org.w3c.","org.apache.commons.logging."};
+    private String[] _serverClasses = new String[] {"-org.mortbay.http.PathMap","-org.mortbay.jetty.servlet.Invoker","-org.mortbay.jetty.servlet.JSR154Filter","-org.mortbay.jetty.servlet.Default","org.mortbay.jetty.Server","org.mortbay.http.","org.mortbay.start.","org.mortbay.stop."};
+  
     /* ------------------------------------------------------------ */
     private String _contextName;
     private String _classPath;
@@ -209,6 +209,7 @@ public class HttpContext extends Container
     {
         _httpServer=httpServer;
         _contextName=null;
+      
     }
 
     /* ------------------------------------------------------------ */
@@ -1627,6 +1628,11 @@ public class HttpContext extends Container
     {
         if (isStarted())
             return;
+
+        if (_httpServer.getServerClasses()!=null)
+            _serverClasses=_httpServer.getServerClasses();
+        if (_httpServer.getSystemClasses()!=null)
+            _systemClasses=_httpServer.getSystemClasses();
         
         _resources.start();
         

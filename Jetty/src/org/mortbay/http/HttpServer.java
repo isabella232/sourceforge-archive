@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -36,14 +35,10 @@ import org.mortbay.log.LogFactory;
 import org.mortbay.http.handler.DumpHandler;
 import org.mortbay.http.handler.NotFoundHandler;
 import org.mortbay.http.handler.ResourceHandler;
-import org.mortbay.util.ComponentEvent;
-import org.mortbay.util.ComponentListener;
 import org.mortbay.util.Container;
 import org.mortbay.util.EventProvider;
 import org.mortbay.util.InetAddrPort;
-import org.mortbay.util.LazyList;
 import org.mortbay.util.LifeCycle;
-import org.mortbay.util.LifeCycleListener;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.MultiException;
 import org.mortbay.util.Resource;
@@ -116,6 +111,9 @@ public class HttpServer extends Container
     private RequestLog _requestLog;
     private int _requestsPerGC ;
     private boolean _resolveRemoteHost =false;
+    
+    private String[] _serverClasses;
+    private String[] _systemClasses;
     
     private transient int _gcRequests;
     private transient HttpContext _notFoundContext=null;
@@ -660,7 +658,7 @@ public class HttpServer extends Container
      */
     public void setSystemClasses(String[] classes)
     {
-        log.warn("setSystemClasses is deprecated on HttpServer");
+        _systemClasses=classes;
     }
 
     /* ------------------------------------------------------------ */
@@ -669,7 +667,7 @@ public class HttpServer extends Container
      */
     public String[] getSystemClasses()
     {
-        return null;
+        return _systemClasses;
     }
 
     /* ------------------------------------------------------------ */
@@ -678,7 +676,7 @@ public class HttpServer extends Container
      */
     public void setServerClasses(String[] classes)
     {
-        log.warn("setServerClasses is deprecated on HttpServer");
+        _serverClasses=classes;
     }
 
     /* ------------------------------------------------------------ */
@@ -687,7 +685,7 @@ public class HttpServer extends Container
      */
     public String[] getServerClasses()
     {
-        return null;
+        return _serverClasses;
     }
 
 

@@ -209,7 +209,7 @@
   <Set name="statsOn">false</Set>
   <Set class="org.mortbay.util.FileResource" name="checkAliases" type="boolean">true</Set>
 
-  <!-- System classes cannot be overriden by a HttpContext or webapp -->
+  <!-- System classes cannot be overriden by a HttpContext or webapp 
   <Set name="systemClasses">
     <Array type="java.lang.String">
       <Item>java.</Item>
@@ -221,8 +221,9 @@
       <Item>org.apache.commons.logging.</Item>
     </Array>
   </Set>
+  -->
 
-  <!-- Server classes are hidden from a HttpContext or webapp -->
+  <!-- Server classes are hidden from a HttpContext or webapp
   <Set name="serverClasses">
     <Array type="java.lang.String">
       <Item>-org.mortbay.http.PathMap</Item>
@@ -233,9 +234,9 @@
       <Item>org.mortbay.jetty.</Item>
       <Item>org.mortbay.start.</Item>
       <Item>org.mortbay.stop.</Item>
-      <Item>org.mortbay.jetty.Server</Item>
     </Array>
   </Set>
+  -->
 
 </Configure>
 
