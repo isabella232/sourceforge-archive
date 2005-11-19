@@ -189,6 +189,17 @@ public class TestResource extends junit.framework.TestCase
                            "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
         data[i++]=new Data(data[tj],"/subdir/alphabet",EXISTS,!DIR,
                            "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        
+        Resource base = Resource.newResource(__userDir);
+        Resource dir0 = base.addPath("TestData");
+        assertTrue(dir0.isDirectory());
+        assertTrue(dir0.toString().endsWith("/"));
+        assertTrue(dir0.getAlias()==null);
+        Resource dir1 = base.addPath("TestData/");
+        assertTrue(dir1.isDirectory());
+        assertTrue(dir1.toString().endsWith("/"));
+        assertTrue(dir1.getAlias()==null);
+        
     }
 
     

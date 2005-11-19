@@ -8,6 +8,7 @@ Jetty-5.1.6 - 18 November 2005
 Jetty-5.1.5 - 10 November 2005
  + Improved shutdown hook
  + Improved URL Decoding
+ + Improved mapping of JSP files.
 
 Jetty-5.1.5rc2 - 7 October 2005
  + Reverted dispatcher params to RI rather than spec behaviour.
