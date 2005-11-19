@@ -22,19 +22,20 @@
   <bannerLeft>
     <name>Maven Jetty6 Plugin</name>
     <src>http://jetty.mortbay.org/jetty/images/jetty_banner_still.gif</src>
-    <href>http://jetty.mortbay.org/</href>
+    <href>http://jetty.mortbay.org/jetty6</href>
   </bannerLeft>
   <bannerRight>
     <src>http://maven.apache.org/images/maven-small.gif</src>
   </bannerRight>
   <body>
     <links>
-      <item name="Maven 2" href="http://maven.apache.org/maven2/"/>
-      <item name="Jetty" href="http://jetty.mortbay.org/"/>
+      <item name="Maven2" href="http://maven.apache.org/maven2/"/>
+      <item name="Jetty6" href="http://jetty.mortbay.org/jetty6"/>
     </links>
 
     <menu name="Overview">
-      <item name="Configuration How-To" href="howto.html"/>
+      <item name="Installation Guide" href="install.html"/>
+      <item name="Configuration Guide" href="howto.html"/>
       <item name="Parameter Reference" href="run-mojo.html"/>
     </menu>
     ${reports}

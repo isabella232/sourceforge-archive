@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugin.AbstractMojo;
@@ -39,7 +40,7 @@ import org.mortbay.jetty.webapp.JettyWebXmlConfiguration;
 import org.mortbay.jetty.webapp.WebAppContext;
 
 /**
- *  This plugin runs the <a href="http://jetty.mortbay.org">Jetty6</a> web container in-situ on a Maven project without 
+ *  This plugin runs the <a href="http://jetty.mortbay.org/jetty6">Jetty6</a> web container in-situ on a Maven project without 
  *  first requiring that the project is assembled into a war or exploded web application, saving time during the development cycle.
  *  <p>
  *  Furthermore, once invoked, the plugin can be configured to run continuously, scanning for changes in the project and automatically performing a 
@@ -57,6 +58,7 @@ import org.mortbay.jetty.webapp.WebAppContext;
  */
 public class JettyMojo extends AbstractMojo 
 {
+	
     
     /**
      * The maven project.
@@ -135,6 +137,13 @@ public class JettyMojo extends AbstractMojo
      * @required
      */
     private int scanIntervalSeconds;
+    
+    
+    /**
+     * System properties to set before execution.Optional.
+     * @parameter 
+     */
+    private SystemProperty[] systemProperties;
     
     
     /**
@@ -270,6 +279,15 @@ public class JettyMojo extends AbstractMojo
 	}
 	
     
+	public void setSystemProperties(SystemProperty[] systemProperties)
+	{
+		this.systemProperties = systemProperties;
+	}
+	
+	public SystemProperty[] getSystemProperties ()
+	{
+		return this.systemProperties;
+	}
 	
 	public Handler getWebApplication ()
 	{
@@ -288,6 +306,8 @@ public class JettyMojo extends AbstractMojo
         throws MojoExecutionException, MojoFailureException
     {
         getLog().info("Configuring Jetty for project: " + getProject().getName());
+        
+      
         
         //check the location of the static content/jsps etc
         try
@@ -339,6 +359,13 @@ public class JettyMojo extends AbstractMojo
             throw new MojoExecutionException("Location of classesDirectory does not exist");
         }
   
+        //get the system properties set up
+        for (int i=0; (getSystemProperties() != null) && i < getSystemProperties().length;i++)
+        {
+        	boolean result = getSystemProperties()[i].setIfNotSetAlready();       	
+        	getLog().info("Property "+getSystemProperties()[i].getName()
+        			+"="+getSystemProperties()[i].getValue() +" was "+(result?"set":"skipped"));
+        }
         
         startJetty (webXmlFile);
     }
