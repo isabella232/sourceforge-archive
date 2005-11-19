@@ -96,11 +96,11 @@ public class JettyWebXmlConfiguration implements Configuration
                 // Give permission to see Jetty classes
                 String[] old_server_classes = _context.getServerClasses();
                 String[] server_classes = new String[2+(old_server_classes==null?0:old_server_classes.length)];
-                
                 server_classes[0]="-org.mortbay.jetty.";
                 server_classes[1]="-org.mortbay.util.";
                 if (server_classes!=null)
                     System.arraycopy(old_server_classes, 0, server_classes, 2, old_server_classes.length);
+                
                 try
                 {
                     _context.setServerClasses(server_classes);
@@ -111,7 +111,8 @@ public class JettyWebXmlConfiguration implements Configuration
                 }
                 finally
                 {
-                    _context.setServerClasses(old_server_classes);
+                    if (_context.getServerClasses()==server_classes)
+                        _context.setServerClasses(old_server_classes);
                 }
             }
         }
