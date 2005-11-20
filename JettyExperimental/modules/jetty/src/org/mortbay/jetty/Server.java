@@ -45,7 +45,7 @@ import org.mortbay.util.MultiException;
  * @author gregw
  *
  */
-public class Server extends HandlerCollection implements Handler, ThreadPool
+public class Server extends HandlerCollection implements Handler
 {
     private static ShutdownHookThread hookThread = new ShutdownHookThread();
     
@@ -170,13 +170,6 @@ public class Server extends HandlerCollection implements Handler, ThreadPool
         mex.ifExceptionThrow();
     }
 
-    /* ------------------------------------------------------------ */
-    public boolean dispatch(Runnable job)
-    {
-        if (isRunning())
-            return _threadPool.dispatch(job);
-        return false;
-    }
 
     /* ------------------------------------------------------------ */
     /* 

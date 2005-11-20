@@ -27,4 +27,7 @@ public interface ThreadPool extends LifeCycle
 
     /* ------------------------------------------------------------ */
     public void join() throws InterruptedException;
+    
+    public int getThreads();
+    public int getIdleThreads();
 }

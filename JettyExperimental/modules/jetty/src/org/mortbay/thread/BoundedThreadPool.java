@@ -61,7 +61,7 @@ public class BoundedThreadPool extends AbstractLifeCycle implements Serializable
     private int _minThreads=1;
     private String _name;
     int _priority= Thread.NORM_PRIORITY;
-    private boolean _queue;
+    private boolean _queue=true;
     private transient Set _threads;
 
     /* ------------------------------------------------------------------- */

@@ -343,6 +343,13 @@ public class SelectChannelConnector extends AbstractConnector
 
                     key = null;
                 }
+                catch (CancelledKeyException e)
+                {
+                    if (isRunning())
+                        Log.warn(e.toString());
+                    if (key != null && key != _acceptKey)
+                        key.interestOps(0);
+                }
                 catch (Exception e)
                 {
                     if (isRunning())
@@ -468,7 +475,7 @@ public class SelectChannelConnector extends AbstractConnector
             {
                 if (!dispatch_done)
                 {
-                    Log.warn("dispatch failed");
+                    Log.warn("dispatch failed! threads="+getThreadPool().getThreads()+" idle="+getThreadPool().getIdleThreads());
                     undispatch();
                 }
             }
