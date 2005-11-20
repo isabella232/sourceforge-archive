@@ -345,10 +345,8 @@ public class SelectChannelConnector extends AbstractConnector
                 }
                 catch (CancelledKeyException e)
                 {
-                    if (isRunning())
-                        Log.warn(e.toString());
-                    if (key != null && key != _acceptKey)
-                        key.interestOps(0);
+                    if (isRunning()) // TODO investigate if this actually is a problem?
+                        Log.debug(e.toString());
                 }
                 catch (Exception e)
                 {
