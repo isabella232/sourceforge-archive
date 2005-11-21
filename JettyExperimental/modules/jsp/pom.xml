@@ -8,7 +8,7 @@
   <artifactId>jsp</artifactId>
   <packaging>pom</packaging>
   <name>Jasper JSP dependancies</name>
-  <version>5.0.28-SNAPSHOT</version>
+  <version>5.5.9-SNAPSHOT</version>
   <build>
     <defaultGoal>install</defaultGoal>
     <plugins>
