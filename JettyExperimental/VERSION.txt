@@ -1,7 +1,9 @@
 
+Jetty-6.0.0Beta4
     + System property support in plugin
     + Fixed JSP visibility security issue.
     + Improved jetty-web.xml access to org.mortbay classes.
+    + Jasper 5.5.12
 
 Jetty-6.0.0Beta3
     + Fixed error in block read

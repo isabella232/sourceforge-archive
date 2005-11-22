@@ -8,7 +8,7 @@
   <artifactId>jsp</artifactId>
   <packaging>pom</packaging>
   <name>Jasper JSP dependancies</name>
-  <version>5.5.9-SNAPSHOT</version>
+  <version>5.5.12-SNAPSHOT</version>
   <build>
     <defaultGoal>install</defaultGoal>
     <plugins>
@@ -53,7 +53,7 @@
     <dependency>
       <groupId>tomcat</groupId>
       <artifactId>jasper-compiler-jdt</artifactId>
-      <version>5.5.9</version>
+      <version>5.5.12</version>
     </dependency>
     <dependency>
       <groupId>commons-el</groupId>
