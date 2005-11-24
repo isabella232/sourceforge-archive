@@ -274,6 +274,10 @@ public class SelectChannelConnector extends AbstractConnector
                 _selector.selectNow();
             else
                 _selector.select();
+            
+            // have we been destroyed while sleeping
+            if (_selector==null)
+                return;
 
             // update the timers for task schedule in this loop
             long now = System.currentTimeMillis();
