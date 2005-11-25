@@ -35,7 +35,10 @@
                   <fileset dir="${user.home}/.m2/repository/commons-el/commons-el/1.0">
                     <include name="**/*.jar"></include>
                   </fileset>
-                  <fileset dir="${user.home}/.m2/repository/commons-logging/commons-logging-api/1.0.4">
+                  <fileset dir="${user.home}/.m2/repository/org/slf4j/jcl104-over-slf4j/1.0-rc1">
+                    <include name="**/*.jar"></include>
+                  </fileset>
+                  <fileset dir="${user.home}/.m2/repository/org/slf4j/slf4j-simple/1.0-rc1">
                     <include name="**/*.jar"></include>
                   </fileset>
                   <fileset dir="${user.home}/.m2/repository/tomcat">
@@ -67,12 +70,27 @@
       <version>2.6.2</version>
       <scope>runtime</scope>
     </dependency>
+    <!--
     <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging-api</artifactId>
       <version>1.0.4</version>
       <scope>runtime</scope>
     </dependency>
+    -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl104-over-slf4j</artifactId>
+      <version>1.0-rc1</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>1.0-rc1</version>
+      <scope>runtime</scope>
+    </dependency>
+
     <dependency>
       <groupId>tomcat</groupId>
       <artifactId>jasper-compiler</artifactId>

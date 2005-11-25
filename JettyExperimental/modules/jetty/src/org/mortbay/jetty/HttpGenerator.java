@@ -171,7 +171,8 @@ public class HttpGenerator implements HttpTokens
     /* ------------------------------------------------------------------------------- */
     public void resetBuffer()
     {
-        ???
+        // TODO THIS IS NOT RIGHT
+        // Got to deal with close - reopen, the whole include thang and not changing headers etc.
                         
         _last = false;
         _close = false;
@@ -330,8 +331,6 @@ public class HttpGenerator implements HttpTokens
     /* ------------------------------------------------------------ */
     public void completeHeader(HttpFields fields, boolean allContentAdded) throws IOException
     {
-        ????
-                        
         if (_state != STATE_HEADER) return;
 
         if (_last && !allContentAdded) throw new IllegalStateException("last?");
