@@ -17,6 +17,9 @@ package org.mortbay.jetty;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -28,6 +31,8 @@ import org.mortbay.io.Buffer;
 import org.mortbay.io.ByteArrayBuffer;
 import org.mortbay.io.EndPoint;
 import org.mortbay.log.Log;
+import org.mortbay.util.ByteArrayOutputStream2;
+import org.mortbay.util.StringUtil;
 import org.mortbay.util.URIUtil;
 import org.mortbay.util.ajax.Continuation;
 
@@ -58,6 +63,8 @@ public class HttpConnection
     private HttpFields _responseFields;
     private Response _response;
     private Output _out;
+    private OutputWriter _writer;
+    private PrintWriter _printWriter;
 
     private transient Buffer _content;
     private transient int _connection = UNKNOWN;
@@ -200,6 +207,42 @@ public class HttpConnection
     }
 
     /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    public PrintWriter getPrintWriter(String encoding)
+    {
+        getOutputStream();
+        if (_writer==null)
+        {
+            _writer=new OutputWriter();
+            _printWriter=new PrintWriter(_writer)
+            {
+
+                /* ------------------------------------------------------------ */
+                /* 
+                 * @see java.io.PrintWriter#close()
+                 */
+                public void close() 
+                {
+                    try
+                    {
+                        _out.close();
+                    }
+                    catch(IOException e)
+                    {
+                        Log.debug(e);
+                        setError();
+                    }
+                }
+                
+            };
+        }
+        _writer.setCharacterEncoding(encoding);
+        return _printWriter;
+    }
+    
+    /* ------------------------------------------------------------ */
     public boolean isResponseCommitted()
     {
         return _generator.isCommitted();
@@ -330,6 +373,16 @@ public class HttpConnection
         _generator.flushBuffers();
     }
 
+    /* ------------------------------------------------------------ */
+    /**
+     * @return
+     */
+    HttpGenerator getGenerator()
+    {
+        return _generator;
+    }
+    
+    
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -491,6 +544,8 @@ public class HttpConnection
     }
 
     /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     private class Input extends ServletInputStream
     {
         private boolean blockForContent() throws IOException
@@ -541,10 +596,14 @@ public class HttpConnection
         }       
     }
 
-    public class Output extends ServletOutputStream
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public class Output extends ServletOutputStream 
     {
         ByteArrayBuffer _buf1 = null;
         ByteArrayBuffer _bufn = null;
+        
 
         /* ------------------------------------------------------------ */
         /*
@@ -552,7 +611,12 @@ public class HttpConnection
          */
         public void close() throws IOException
         {
-            commitResponse(HttpGenerator.LAST);
+            flushResponse();
+            
+            // TODO sometimes can do a last here!
+            // commitResponse(HttpGenerator.LAST);
+            
+            // TODO need IOExceptions for any further writes.
         }
 
         /* ------------------------------------------------------------ */
@@ -628,11 +692,13 @@ public class HttpConnection
             // Block until our buffer is free
             while (buffer.length() > 0 && !_endp.isClosed() && !_endp.isBlocking())
             {
-                _endp.blockWritable(60000); // TODO Configure timeout
+                
+                _endp.blockWritable(_connector.getMaxIdleTime()); // TODO Configure timeout
                 _generator.flushBuffers();
             }
         }
 
+        /* ------------------------------------------------------------ */
         public void sendContent(Object content) throws IOException
         {
             if (_generator.getContentAdded() > 0) throw new IllegalStateException("!empty");
@@ -655,16 +721,128 @@ public class HttpConnection
             else
                 throw new IllegalArgumentException("unknown content type?");
         }
-
+        
     }
 
     /* ------------------------------------------------------------ */
-    /**
-     * @return
-     */
-    HttpGenerator getGenerator()
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
+    public class OutputWriter extends Writer
     {
-        return _generator;
+        int _maxChar;
+        String _characterEncoding;
+        Writer _writer;
+        ByteArrayOutputStream2 _bytes;
+
+
+        public void setCharacterEncoding(String encoding)
+        {
+            if (_characterEncoding==null || !_characterEncoding.equalsIgnoreCase(encoding))
+                _writer=null;
+            _characterEncoding=encoding;
+        }
+        
+        public void close() throws IOException
+        {
+            _out.close();
+        }
+
+        public void flush() throws IOException
+        {
+            _out.flush();
+        }
+        
+        public void write (String s,int offset, int length) throws IOException
+        {
+            if (_bytes==null)
+            {
+                _bytes=new ByteArrayOutputStream2(length);
+                if (_characterEncoding==null)
+                    _maxChar=0;
+                else if (StringUtil.__ISO_8859_1.equalsIgnoreCase(_characterEncoding))
+                    _maxChar=0x100;
+                else if (StringUtil.__UTF8.equalsIgnoreCase(_characterEncoding))
+                    _maxChar=0x80;
+                else
+                    _maxChar=0;
+            }
+            
+            
+            int end=offset+length;
+            for (int i=offset;i<end; i++)
+            {
+                char c=s.charAt(i);
+                
+                if (c<_maxChar) 
+                    _bytes.write(c);
+                else
+                {
+                    if (_writer==null)
+                    {
+                        _writer=new OutputStreamWriter(_bytes,_characterEncoding);
+                        System.err.println("writer for "+_characterEncoding);
+                    }
+                    
+                    
+                    int i0=i++;
+                    while(i<end && s.charAt(i)>=_maxChar) 
+                        i++;
+                    _writer.write(s,i0,i-i0);
+                    _writer.flush();
+                }
+            }
+            
+            byte[] b=_bytes.getBuf();
+            _out.write(_bytes.getBuf(),0,_bytes.getCount());
+            _bytes.reset();
+        }
+        
+
+        public void write (char[] s,int offset, int length) throws IOException
+        {
+            if (_bytes==null)
+            {
+                _bytes=new ByteArrayOutputStream2(length);
+                if (_characterEncoding==null)
+                    _maxChar=0;
+                else if (StringUtil.__ISO_8859_1.equalsIgnoreCase(_characterEncoding))
+                    _maxChar=0x100;
+                else if (StringUtil.__UTF8.equalsIgnoreCase(_characterEncoding))
+                    _maxChar=0x80;
+                else
+                    _maxChar=0;
+            }
+            
+            
+            int end=offset+length;
+            for (int i=offset;i<end; i++)
+            {
+                char c=s[i];
+                
+                if (c<_maxChar) 
+                    _bytes.write(c);
+                else
+                {
+                    if (_writer==null)
+                    {
+                        _writer=new OutputStreamWriter(_bytes,_characterEncoding);
+                        System.err.println("writer for "+_characterEncoding);
+                    }
+                    
+                    int i0=i++;
+                    while(i<end && s[i]>=_maxChar) 
+                        i++;
+                    _writer.write(s,i0,i-i0);
+                    _writer.flush();
+                }
+            }
+            
+            byte[] b=_bytes.getBuf();
+            _out.write(_bytes.getBuf(),0,_bytes.getCount());
+            _bytes.reset();
+        }
+
     }
+    
 
 }

@@ -168,6 +168,22 @@ public class HttpGenerator implements HttpTokens
         _needEOC = false;
     }
 
+    /* ------------------------------------------------------------------------------- */
+    public void resetBuffer()
+    {
+        ???
+                        
+        _last = false;
+        _close = false;
+        _contentAdded = 0;
+        _contentLength = UNKNOWN_CONTENT;
+        _direct=false;
+        _content=null;
+        if (_buffer!=null)
+            _buffer.clear();
+        
+        
+    }
     /* ------------------------------------------------------------ */
     public int getState()
     {
@@ -314,6 +330,8 @@ public class HttpGenerator implements HttpTokens
     /* ------------------------------------------------------------ */
     public void completeHeader(HttpFields fields, boolean allContentAdded) throws IOException
     {
+        ????
+                        
         if (_state != STATE_HEADER) return;
 
         if (_last && !allContentAdded) throw new IllegalStateException("last?");

@@ -493,7 +493,7 @@ public class Dump extends HttpServlet
             }
         }
 
-        pout.flush();
+        pout.close();
 
         if (pi != null)
         {

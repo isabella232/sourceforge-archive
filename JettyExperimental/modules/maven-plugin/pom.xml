@@ -61,6 +61,13 @@
       <artifactId>ant</artifactId>
       <version>1.6.4</version>
     </dependency>
+    <!--
+    <dependency>
+      <groupId>tomcat</groupId>
+      <artifactId>jsp-api</artifactId>
+      <version>5.0.18</version>
+    </dependency>
+    -->
     <dependency>
       <groupId>tomcat</groupId>
       <artifactId>jasper-runtime</artifactId>

@@ -47,13 +47,13 @@ public class Response implements HttpServletResponse
         STREAM=1,
         WRITER=2;
     
-    private static ServletWriter __nullServletWriter;
+    private static PrintWriter __nullPrintWriter;
     private static ServletOutputStream __nullServletOut;
 
     static
     {
         try{
-            __nullServletWriter = new ServletWriter(IO.getNullStream());
+            __nullPrintWriter = new PrintWriter(IO.getNullWriter());
             __nullServletOut = new NullOutput();
         }
         catch (Exception e)
@@ -71,7 +71,7 @@ public class Response implements HttpServletResponse
     private boolean _explicitEncoding;
     private String _contentType;    
     private int _outputState;
-    private ServletWriter _writer;
+    private PrintWriter _writer;
 
 
 
@@ -413,7 +413,7 @@ public class Response implements HttpServletResponse
     public PrintWriter getWriter() throws IOException
     {
         if (_outputState==DISABLED)
-            return __nullServletWriter;
+            return __nullPrintWriter;
                                    
         if (_outputState!=NONE && _outputState!=WRITER)
             throw new IllegalStateException("STREAM");
@@ -437,7 +437,7 @@ public class Response implements HttpServletResponse
             }
             
             /* construct Writer using correct encoding */
-            _writer = new ServletWriter(_connection.getOutputStream(), encoding);
+            _writer = _connection.getPrintWriter(encoding);
         }                    
         _outputState=WRITER;
         return _writer;
@@ -614,8 +614,7 @@ public class Response implements HttpServletResponse
     {
         if (isCommitted())
             throw new IllegalStateException("Committed");
-        if (_writer!=null)
-            _writer.reset();
+        // TODO implement
     }
 
     /* ------------------------------------------------------------ */
@@ -716,8 +715,6 @@ public class Response implements HttpServletResponse
     public void complete()
     	throws IOException
     {	
-        if (_outputState==WRITER && _writer!=null && _writer.isWritten())
-            _writer.close();
         _connection.completeResponse();
     }
 
