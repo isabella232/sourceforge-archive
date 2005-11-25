@@ -150,11 +150,13 @@ public class JettyMojo extends AbstractMojo
      * The webapp
      */
     private WebAppContext webAppHandler;
+    
+    
    
     public static SelectChannelConnector DEFAULT_CONNECTOR = new SelectChannelConnector();
     public static int DEFAULT_PORT = 8080;
     public static long DEFAULT_MAX_IDLE_TIME = 30000L;
-  
+   
 
     
     public MavenProject getProject()
@@ -399,7 +401,9 @@ public class JettyMojo extends AbstractMojo
             }          
             server.setConnectors(getConnectors());
             
-            WebAppContext webapp = (WebAppContext)configureWebApplication(webXmlFile);
+
+            List classPathFiles = setUpClassPath();          
+            WebAppContext webapp = (WebAppContext)configureWebApplication(webXmlFile, classPathFiles);
             webapp.setServer(server);
             
             
@@ -424,21 +428,36 @@ public class JettyMojo extends AbstractMojo
             server.start();
             
             //start the scanner thread (if necessary) on the main webapp
-            ArrayList scanList = new ArrayList ();
+            final ArrayList scanList = new ArrayList ();
         	scanList.add(webXmlFile);
         	scanList.add(getProject().getFile());
-        	scanList.add(getClassesDirectory());
+        	scanList.addAll(classPathFiles);
         	ArrayList listeners = new ArrayList();
         	listeners.add(new Scanner.Listener()
         	{
-        		public void changeDetected ()
-        		{
+				public void changesDetected(Scanner scanner, List changes)
+				{
         			try
         			{
         				getLog().info("Stopping webapp ...");
         				getWebApplication().stop();
         				getLog().info("Reconfiguring webapp ...");
-        				configureWebApplication(webXmlFile);
+        				      
+        	            List classPathFiles = setUpClassPath();
+        				configureWebApplication(webXmlFile, classPathFiles);
+        				
+        				//check if we need to reconfigure the scanner, 
+        				//which is if the pom changes
+        				if (changes.contains(getProject().getFile().getCanonicalPath()))
+        				{
+        					getLog().info("Reconfiguring scanner after change to pom.xml ...");
+        					scanList.clear();
+        					scanList.add(webXmlFile);
+        					scanList.add(getProject().getFile());
+        					scanList.addAll(classPathFiles);
+        					scanner.setRoots(scanList);
+        				}
+        				
         				getLog().info("Restarting webapp ...");
         				getWebApplication().start();
         				getLog().info("Restart completed.");
@@ -447,7 +466,7 @@ public class JettyMojo extends AbstractMojo
         			{
         				getLog().error("Error reconfiguring/restarting webapp after change in watched files", e);
         			}
-        		}
+				}
         	});
             startScanner(getScanIntervalSeconds(), scanList, listeners);
             
@@ -482,18 +501,17 @@ public class JettyMojo extends AbstractMojo
     		return;
     	
     	Scanner scanner = new Scanner ();
-    	scanner.setScanInterval(scanInterval);
-    	scanner.setRoots(scanList);
-    	
-    	scanner.setListeners(scanListeners);
     	scanner.setLog(getLog());
+    	scanner.setScanInterval(scanInterval);
+    	scanner.setRoots(scanList); 	
+    	scanner.setListeners(scanListeners); 	
     	getLog().info("Starting scanner at interval of "+scanInterval+" seconds.");
     	scanner.start();
     }
     
     
     
-    private Handler configureWebApplication (File webXmlFile)
+    private Handler configureWebApplication (File webXmlFile, List classPathFiles)
     throws Exception
     { 	  
         //make a webapp handler and set the context
@@ -509,7 +527,7 @@ public class JettyMojo extends AbstractMojo
         
         //do special configuration of classpaths and web.xml etc in Jetty startup
         JettyMavenConfiguration mavenConfig = new JettyMavenConfiguration();
-        mavenConfig.setClassPathConfiguration (getWebAppSourceDirectory(), getClassesDirectory(), getTldFiles(), getLibFiles());
+        mavenConfig.setClassPathConfiguration (getWebAppSourceDirectory(), classPathFiles);
         mavenConfig.setWebXml (webXmlFile);
         mavenConfig.setLog (getLog());           
         webapp.setConfigurations(new Configuration[]{mavenConfig, new JettyWebXmlConfiguration()});
@@ -535,10 +553,11 @@ public class JettyMojo extends AbstractMojo
     			}
     			else
     			{
-    				getLog().debug( "Skipping artifact of type " + type + " for WEB-INF" );
+    				getLog().debug( "Looking for jar files, skipping artifact of type " + type + " for WEB-INF" );
     			}
     		}
     	}
+    	
     	return libFiles;	
     }
     
@@ -560,13 +579,20 @@ public class JettyMojo extends AbstractMojo
     			}
     			else
     			{
-    				getLog().debug( "Skipping artifact of type " + type + " for WEB-INF" );
+    				getLog().debug( "Looking for tld files, kipping artifact of type " + type + " for WEB-INF" );
     			}
     		}
     	}
     	return tldFiles;
     }
 
-    
+    private List setUpClassPath()
+    {
+    	List classPathFiles = new ArrayList();
+    	classPathFiles.addAll(getLibFiles());
+    	classPathFiles.addAll(getTldFiles());
+    	classPathFiles.add(getClassesDirectory());
+    	return classPathFiles;
+    }
     
 }

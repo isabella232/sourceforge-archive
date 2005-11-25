@@ -5,11 +5,14 @@ package org.mortbay.jetty.plugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.maven.plugin.logging.Log;
 
@@ -43,12 +46,13 @@ public class Scanner extends Thread
 	
 	public interface Listener
 	{
-		public void changeDetected();
+		public void changesDetected(Scanner scanner, List changes);
 	}
 	
 	
 	public Scanner ()
 	{	
+		setDaemon(true);
 	}
 	
 	
@@ -69,6 +73,8 @@ public class Scanner extends Thread
 	public void setRoots(List roots)
 	{
 		this.roots = roots;
+		//do an initializing scan
+		scanInfo = scan();
 	}
 
 	/**
@@ -131,11 +137,8 @@ public class Scanner extends Thread
 	 * @see java.lang.Runnable#run()
 	 */
 	public void run ()
-	{
-		//do preliminary scan to get last modified times
-		scanInfo = scan ();
-		
-		//sleep for our interval
+	{	
+		// set the sleep interval
 		long sleepMillis = getScanInterval()*1000L;
 		boolean running = true;
 		while (running)
@@ -146,7 +149,9 @@ public class Scanner extends Thread
 				Thread.currentThread().sleep(sleepMillis);
 				Map latestScanInfo = scan();
 				
-				if (!latestScanInfo.equals(scanInfo))
+				List filesWithDifferences = getDifferences(latestScanInfo, scanInfo);
+				
+				if (!filesWithDifferences.isEmpty())
 				{
 					if ((getListeners() != null) && (!getListeners().isEmpty()))
 					{
@@ -155,7 +160,7 @@ public class Scanner extends Thread
 							getLog().info("Calling scanner listeners ...");
 							
 							for (int i=0; i<getListeners().size();i++)
-								((Scanner.Listener)getListeners().get(i)).changeDetected();
+								((Scanner.Listener)getListeners().get(i)).changesDetected(this, filesWithDifferences);
 							
 							getLog().info("Listeners completed.");
 						}
@@ -241,5 +246,29 @@ public class Scanner extends Thread
 	}
 
 
+	private List getDifferences (Map newScan, Map oldScan)
+	{
+		ArrayList fileNames = new ArrayList();
+		Set oldScanKeys = new HashSet(oldScan.keySet());
+		Iterator itor = newScan.entrySet().iterator();
+		while (itor.hasNext())
+		{
+			Map.Entry entry = (Map.Entry)itor.next();
+			if (!oldScanKeys.contains(entry.getKey()))
+				fileNames.add(entry.getKey());
+			else if (!oldScan.get(entry.getKey()).equals(entry.getValue()))
+			{
+				fileNames.add(entry.getKey());
+				oldScanKeys.remove(entry.getKey());
+			}
+			else
+				oldScanKeys.remove(entry.getKey());
+		}
+		
+		if (!oldScanKeys.isEmpty())
+			fileNames.addAll(oldScanKeys);
+		
+		return fileNames;
+	}
 	
 }

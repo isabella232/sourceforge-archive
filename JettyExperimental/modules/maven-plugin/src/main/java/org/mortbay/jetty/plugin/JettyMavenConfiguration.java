@@ -27,9 +27,7 @@ import org.mortbay.xml.XmlParser;
 public class JettyMavenConfiguration extends WebXmlConfiguration 
 {
     private Log log;
-    private List tldFiles;
-    private List libFiles;
-    private File classesDir;
+    private List classPathFiles;
     private File webXmlFile;
     private File webAppDir;
     
@@ -39,13 +37,10 @@ public class JettyMavenConfiguration extends WebXmlConfiguration
         super();
     }
 
-    public void setClassPathConfiguration(File webAppDir, File classesDir, List tldFiles, List libFiles)
+    public void setClassPathConfiguration(File webAppDir, List classPathFiles)
     {
         this.webAppDir = webAppDir;
-        this.classesDir = classesDir;
-        this.tldFiles = tldFiles;
-        this.libFiles = libFiles;
-        
+        this.classPathFiles = classPathFiles;
     }
     
     public void setWebXml (File webXmlFile)
@@ -69,16 +64,9 @@ public class JettyMavenConfiguration extends WebXmlConfiguration
     public void configureClassLoader() throws Exception 
     {
         getLog().info("Setting up classpath ...");
-        
-        //put the classes into the classpath
-        ((WebAppClassLoader)getWebAppContext().getClassLoader()).addClassPath(classesDir.getCanonicalPath());
-        
-        //put the dependencies into the classpath
-        Iterator itor = libFiles.iterator();
-        while (itor.hasNext())
-            ((WebAppClassLoader)getWebAppContext().getClassLoader()).addClassPath(((File)itor.next()).getCanonicalPath());
-        
-        itor = tldFiles.iterator();
+      
+        //put the classes dir and all dependencies into the classpath
+        Iterator itor = classPathFiles.iterator();
         while (itor.hasNext())
             ((WebAppClassLoader)getWebAppContext().getClassLoader()).addClassPath(((File)itor.next()).getCanonicalPath());
         
