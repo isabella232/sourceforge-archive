@@ -22,6 +22,7 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -133,7 +134,18 @@ public class DispatchServlet extends HttpServlet
                 info += "&Dispatch=forward";
             RequestDispatcher dispatch= getServletContext().getRequestDispatcher(info);
             if (dispatch != null)
+            {
+                ServletOutputStream out =sres.getOutputStream();
+                out.print("Can't see this");
                 dispatch.forward(sreq, sres);
+                try
+                {
+                    out.println("IOException");
+                    throw new IllegalStateException();
+                }
+                catch(IOException e)
+                {}
+            }
             else
             {
                 sres.setContentType("text/html");

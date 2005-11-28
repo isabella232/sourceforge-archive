@@ -303,7 +303,8 @@ public class Response implements HttpServletResponse
      */
     public void setDateHeader(String name, long date)
     {
-        _connection.getResponseFields().putDateField(name, date);
+        if (!_connection.isIncluding())
+            _connection.getResponseFields().putDateField(name, date);
     }
 
     /* ------------------------------------------------------------ */
@@ -312,7 +313,8 @@ public class Response implements HttpServletResponse
      */
     public void addDateHeader(String name, long date)
     {
-        _connection.getResponseFields().addDateField(name, date);
+        if (!_connection.isIncluding())
+            _connection.getResponseFields().addDateField(name, date);
     }
 
     /* ------------------------------------------------------------ */
@@ -321,7 +323,8 @@ public class Response implements HttpServletResponse
      */
     public void setHeader(String name, String value)
     {
-        _connection.getResponseFields().put(name, value);
+        if (!_connection.isIncluding())
+            _connection.getResponseFields().put(name, value);
     }
 
     /* ------------------------------------------------------------ */
@@ -330,7 +333,8 @@ public class Response implements HttpServletResponse
      */
     public void addHeader(String name, String value)
     {
-        _connection.getResponseFields().put(name, value);
+        if (!_connection.isIncluding())
+            _connection.getResponseFields().put(name, value);
     }
 
     /* ------------------------------------------------------------ */
@@ -339,7 +343,8 @@ public class Response implements HttpServletResponse
      */
     public void setIntHeader(String name, int value)
     {
-        _connection.getResponseFields().putLongField(name, value);
+        if (!_connection.isIncluding())
+            _connection.getResponseFields().putLongField(name, value);
     }
 
     /* ------------------------------------------------------------ */
@@ -348,7 +353,8 @@ public class Response implements HttpServletResponse
      */
     public void addIntHeader(String name, int value)
     {
-        _connection.getResponseFields().addLongField(name, value);
+        if (!_connection.isIncluding())
+            _connection.getResponseFields().addLongField(name, value);
     }
 
     /* ------------------------------------------------------------ */
@@ -366,8 +372,11 @@ public class Response implements HttpServletResponse
      */
     public void setStatus(int sc, String sm)
     {
-        _status=sc;
-        _reason=sm==null?HttpGenerator.getReason(sc):sm; 
+        if (!_connection.isIncluding())
+        {
+            _status=sc;
+            _reason=sm==null?HttpGenerator.getReason(sc):sm; 
+        }
     }
 
     /* ------------------------------------------------------------ */
@@ -614,7 +623,7 @@ public class Response implements HttpServletResponse
     {
         if (isCommitted())
             throw new IllegalStateException("Committed");
-        // TODO implement
+        _connection.getGenerator().resetBuffer();
     }
 
     /* ------------------------------------------------------------ */

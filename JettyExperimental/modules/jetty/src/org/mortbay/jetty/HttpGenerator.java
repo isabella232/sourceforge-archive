@@ -170,10 +170,10 @@ public class HttpGenerator implements HttpTokens
 
     /* ------------------------------------------------------------------------------- */
     public void resetBuffer()
-    {
-        // TODO THIS IS NOT RIGHT
-        // Got to deal with close - reopen, the whole include thang and not changing headers etc.
-                        
+    {                   
+        if(_state>=STATE_FLUSHING)
+            throw new IllegalStateException("Flushed");
+        
         _last = false;
         _close = false;
         _contentAdded = 0;
@@ -181,10 +181,9 @@ public class HttpGenerator implements HttpTokens
         _direct=false;
         _content=null;
         if (_buffer!=null)
-            _buffer.clear();
-        
-        
+            _buffer.clear();  
     }
+    
     /* ------------------------------------------------------------ */
     public int getState()
     {
@@ -286,7 +285,8 @@ public class HttpGenerator implements HttpTokens
     {
         if (content.isImmutable()) throw new IllegalArgumentException("immutable");
 
-        if (_last) throw new IllegalStateException("last");
+        if (_last || _state==STATE_END) 
+            throw new IllegalStateException("Closed");
         _last = last;
 
         // Handle any unfinished business?
@@ -598,8 +598,7 @@ public class HttpGenerator implements HttpTokens
             switch (to_flush)
             {
                 case 7:
-                    len = _endp.flush(_header, _buffer, _content); // should never happen!
-                    break;
+                    throw new IllegalStateException(); // should never happen!
                 case 6:
                     len = _endp.flush(_header, _buffer, null);
                     break;
@@ -610,8 +609,7 @@ public class HttpGenerator implements HttpTokens
                     len = _endp.flush(_header);
                     break;
                 case 3:
-                    len = _endp.flush(_buffer, _content, null); // should never happen!
-                    break;
+                    throw new IllegalStateException(); // should never happen!
                 case 2:
                     len = _endp.flush(_buffer);
                     break;

@@ -120,7 +120,7 @@ public class Dispatcher implements RequestDispatcher
      */
     public void forward(ServletRequest request, ServletResponse response) throws ServletException, IOException
     {
-        dispatch(request, response, Handler.FORWARD);
+        forward(request, response, Handler.FORWARD);
     }
     
     /* ------------------------------------------------------------ */
@@ -129,14 +129,53 @@ public class Dispatcher implements RequestDispatcher
      */
     public void error(ServletRequest request, ServletResponse response) throws ServletException, IOException
     {
-        dispatch(request, response, Handler.ERROR);
+        forward(request, response, Handler.ERROR);
     }
+    
+    /* ------------------------------------------------------------ */
+    /* 
+     * @see javax.servlet.RequestDispatcher#include(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
+     */
+    public void include(ServletRequest request, ServletResponse response) throws ServletException, IOException
+    {
+        Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
+        
+        // TODO - allow stream or writer????
+        
+        Attributes old_attr=base_request.getAttributes();
+        try
+        {
+            base_request.getConnection().include();
+            if (_named!=null)
+                _contextHandler.handle(_named, (HttpServletRequest)request, (HttpServletResponse)response, Handler.INCLUDE);
+            else 
+            {
+                String query=_dQuery;
+                
+                IncludeAttributes attr = new IncludeAttributes(old_attr); 
+                
+                attr._requestURI=_uri;
+                attr._contextPath=_contextHandler.getContextPath();
+                attr._query=query;
+                
+                base_request.setAttributes(attr);
+                
+                _contextHandler.handle(_named==null?_path:_named, (HttpServletRequest)request, (HttpServletResponse)response, Handler.INCLUDE);
+            }
+        }
+        finally
+        {
+            base_request.setAttributes(old_attr);
+            base_request.getConnection().included();
+        }
+    }
+
     
     /* ------------------------------------------------------------ */
     /* 
      * @see javax.servlet.RequestDispatcher#forward(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
      */
-    protected void dispatch(ServletRequest request, ServletResponse response, int dispatch) throws ServletException, IOException
+    protected void forward(ServletRequest request, ServletResponse response, int dispatch) throws ServletException, IOException
     {
         response.reset(); 
         
@@ -201,44 +240,17 @@ public class Dispatcher implements RequestDispatcher
             base_request.setAttributes(old_attr);
             base_request.setParameters(old_params);
             base_request.setQueryString(old_query);
+            
+            
+            base_request.getConnection().getOutputStream().close();
+            
         }
     }
+
 
     /* ------------------------------------------------------------ */
-    /* 
-     * @see javax.servlet.RequestDispatcher#include(javax.servlet.ServletRequest, javax.servlet.ServletResponse)
-     */
-    public void include(ServletRequest request, ServletResponse response) throws ServletException, IOException
-    {
-        Request base_request=(request instanceof Request)?((Request)request):HttpConnection.getCurrentConnection().getRequest();
-        
-        Attributes old_attr=base_request.getAttributes();
-        try
-        {
-            if (_named!=null)
-                _contextHandler.handle(_named, (HttpServletRequest)request, (HttpServletResponse)response, Handler.INCLUDE);
-            else 
-            {
-                String query=_dQuery;
-                
-                IncludeAttributes attr = new IncludeAttributes(old_attr); 
-                
-                attr._requestURI=_uri;
-                attr._contextPath=_contextHandler.getContextPath();
-                attr._query=query;
-                
-                base_request.setAttributes(attr);
-                
-                _contextHandler.handle(_named==null?_path:_named, (HttpServletRequest)request, (HttpServletResponse)response, Handler.INCLUDE);
-            }
-        }
-        finally
-        {
-            base_request.setAttributes(old_attr);
-        }
-    }
-
-
+    /* ------------------------------------------------------------ */
+    /* ------------------------------------------------------------ */
     private class ForwardAttributes implements Attributes
     {
         Attributes _attr;

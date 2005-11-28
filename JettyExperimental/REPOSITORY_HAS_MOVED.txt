@@ -1,0 +1,8 @@
+
+
+This repository has moved to 
+
+svn://svn.jetty.codehaus.org/jetty/scm/jetty
+svn+ssh://svn.jetty.codehaus.org/home/projects/jetty/scm/jetty
+
+

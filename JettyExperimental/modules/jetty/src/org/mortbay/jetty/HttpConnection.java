@@ -22,6 +22,8 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.util.Locale;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -66,6 +68,8 @@ public class HttpConnection
     private OutputWriter _writer;
     private PrintWriter _printWriter;
 
+    int _include;
+    
     private transient Buffer _content;
     private transient int _connection = UNKNOWN;
     private transient int _expect = UNKNOWN;
@@ -303,6 +307,8 @@ public class HttpConnection
                 _request.setRequestURI(_uri.getRawPath());
                 _request.setQueryString(_uri.getQuery());
                 String target = URIUtil.canonicalPath(_uri.getPath());
+                if (_out!=null)
+                    _out.reopen();
                 
                 _connector.customize(_endp, _request);
                 
@@ -382,6 +388,26 @@ public class HttpConnection
         return _generator;
     }
     
+
+    /* ------------------------------------------------------------ */
+    public boolean isIncluding()
+    {
+        return _include>0;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void include()
+    {
+        _include++;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void included()
+    {
+        _include--;
+        if (_out!=null)
+            _out.reopen();
+    }
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -603,22 +629,34 @@ public class HttpConnection
     {
         ByteArrayBuffer _buf1 = null;
         ByteArrayBuffer _bufn = null;
+        boolean _closed;
         
-
         /* ------------------------------------------------------------ */
         /*
          * @see java.io.OutputStream#close()
          */
         public void close() throws IOException
         {
+            if (_closed)
+                return;
+            
             flushResponse();
             
             // TODO sometimes can do a last here!
             // commitResponse(HttpGenerator.LAST);
             
             // TODO need IOExceptions for any further writes.
+            
+            _closed=true;
         }
 
+        /* ------------------------------------------------------------ */
+        void reopen()
+        {
+            _closed=false;
+            
+        }
+        
         /* ------------------------------------------------------------ */
         /*
          * @see java.io.OutputStream#flush()
@@ -663,7 +701,7 @@ public class HttpConnection
             if (_buf1 == null)
                 _buf1 = new ByteArrayBuffer(1);
             else
-                _buf1.compact();
+                _buf1.clear();
             _buf1.put((byte) b);
             write(_buf1);
         }
@@ -671,6 +709,9 @@ public class HttpConnection
         /* ------------------------------------------------------------ */
         private void write(Buffer buffer) throws IOException
         {
+            if (_closed)
+                throw new IOException("Closed");
+            
             // Block until we can add _content.
             while (_generator.isBufferFull() && !_endp.isClosed() && !_endp.isBlocking())
             {
@@ -699,8 +740,23 @@ public class HttpConnection
         }
 
         /* ------------------------------------------------------------ */
+        /* 
+         * @see javax.servlet.ServletOutputStream#print(java.lang.String)
+         */
+        public void print(String s) throws IOException
+        {
+            if (_closed)
+                throw new IOException("Closed");
+            PrintWriter writer=getPrintWriter(null);
+            writer.print(s);
+        }
+
+        /* ------------------------------------------------------------ */
         public void sendContent(Object content) throws IOException
         {
+            if (_closed)
+                throw new IOException("Closed");
+            
             if (_generator.getContentAdded() > 0) throw new IllegalStateException("!empty");
 
             if (content instanceof HttpContent)
@@ -755,10 +811,10 @@ public class HttpConnection
         public void write (String s,int offset, int length) throws IOException
         {
             if (_bytes==null)
-            {
+            {   
                 _bytes=new ByteArrayOutputStream2(length);
                 if (_characterEncoding==null)
-                    _maxChar=0;
+                    _maxChar=0; // TODO maybe 0x80 if we know default encoding is 8859
                 else if (StringUtil.__ISO_8859_1.equalsIgnoreCase(_characterEncoding))
                     _maxChar=0x100;
                 else if (StringUtil.__UTF8.equalsIgnoreCase(_characterEncoding))
@@ -778,14 +834,12 @@ public class HttpConnection
                 else
                 {
                     if (_writer==null)
-                    {
-                        _writer=new OutputStreamWriter(_bytes,_characterEncoding);
-                        System.err.println("writer for "+_characterEncoding);
-                    }
-                    
+                        _writer=_characterEncoding==null?new OutputStreamWriter(_bytes):new OutputStreamWriter(_bytes,_characterEncoding);
                     
                     int i0=i++;
-                    while(i<end && s.charAt(i)>=_maxChar) 
+                    if (_maxChar==0)
+                        i=end;
+                    else while(i<end && s.charAt(i)>=_maxChar) 
                         i++;
                     _writer.write(s,i0,i-i0);
                     _writer.flush();
@@ -804,7 +858,7 @@ public class HttpConnection
             {
                 _bytes=new ByteArrayOutputStream2(length);
                 if (_characterEncoding==null)
-                    _maxChar=0;
+                    _maxChar=0; // TODO maybe 0x80 if we know default encoding is 8859
                 else if (StringUtil.__ISO_8859_1.equalsIgnoreCase(_characterEncoding))
                     _maxChar=0x100;
                 else if (StringUtil.__UTF8.equalsIgnoreCase(_characterEncoding))
@@ -830,7 +884,9 @@ public class HttpConnection
                     }
                     
                     int i0=i++;
-                    while(i<end && s[i]>=_maxChar) 
+                    if (_maxChar==0)
+                        i=end;
+                    else while(i<end && s[i]>=_maxChar) 
                         i++;
                     _writer.write(s,i0,i-i0);
                     _writer.flush();
@@ -843,6 +899,8 @@ public class HttpConnection
         }
 
     }
+
+    
     
 
 }
