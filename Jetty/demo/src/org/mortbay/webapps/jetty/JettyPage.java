@@ -327,40 +327,31 @@ public class JettyPage extends Page
         {
             
             Block _resourceHead = new Block ("div", "class=menuRightHead");
-            _resourceHead.add("Related sites:");
            _divRight.add(_resourceHead);
             _divRight.add("<div class=\"menuRightItem\"><A HREF=\"http://www.mortbay.com\"><IMG SRC=\""+_context+"/images/mbLogoBar.gif\" WIDTH=120 HEIGHT=75 ALT=\"Mort Bay\"></A></div>");
-            
+
+            _divRight.add("<br/>");
+
             _divRight.add("<div class=\"menuRightItem\"><A HREF=\"http://sourceforge.net/projects/jetty/\">");
             if (__realSite)
                 _divRight.add("<IMG src=\"http://sourceforge.net/sflogo.php?group_id=7322\" width=\"88\" height=\"31\" border=\"0\" alt=\"SourceForge\">");
             else
                 _divRight.add("<IMG SRC=\""+_context+"/images/sourceforge.gif\" WIDTH=88 HEIGHT=31 BORDER=\"0\" alt=\"SourceForge\"></A>");
             _divRight.add("</A></div>");
+
+            _divRight.add("<br/>");
+            _divRight.add("<div class=\"menuRightItem\"><A HREF=\"http://www.codehaus.org\"><IMG SRC=\""+_context+"/images/codehaus-small.png\" WIDTH=140 BORDER=0 ALT=\"Codehaus\"></A></div>");
             
-            
-            Block _associatesHead = new Block ("div", "class=menuRightHead");
-            _associatesHead.add("Associates:");
-            _divRight.add(_associatesHead);
+            _divRight.add("<br/>");
             _divRight.add("<div class=\"menuRightItem\"><A HREF=\"http://www.coredevelopers.net\"><IMG SRC=\""+_context+"/images/coredev.gif\" WIDTH=81 HEIGHT=81 BORDER=0 ALT=\"CoreDev\"></A></div>");
             
-            if (__realSite)
-            {
-            Block _siteHead = new Block ("div", "class=menuRightHead");
-            _siteHead.add("Project site host:");
-            _divRight.add(_siteHead);
+            _divRight.add("<br/>");
             _divRight.add("<div class=\"menuRightItem\"><A HREF=\"http://www.inetu.net\"><IMG SRC=\""+_context+"/images/inetu.gif\" WIDTH=121 HEIGHT=52 BORDER=0 ALT=\"InetU\"></A></div>");
-            }
-        
-            Block _supportHead = new Block("div", "class=menuRightHead");
-            _supportHead.add("We support:");
-            _divRight.add(_supportHead);
-            _divRight.add("<div class=\"menuRightItem\"><A HREF=\""+_context+"/freesoftware.html\"><IMG SRC=\""+_context+"/images/effbr.gif\" WIDTH=88 HEIGHT=32 BORDER=0 ALT=\"EFF\"></A><P></div>");    
-        
             
-            Block _poweredHead = new Block ("div", "class=menuRightHead");
-            _poweredHead.add("Logos for your project: ");
-            _divRight.add(_poweredHead);
+            _divRight.add("<br/>");
+            _divRight.add("<div class=\"menuRightItem\"><A HREF=\""+_context+"/freesoftware.html\"><IMG SRC=\""+_context+"/images/effbr.gif\" WIDTH=88 HEIGHT=32 BORDER=0 ALT=\"EFF\"></A><P></div>");    
+                    
+            _divRight.add("<br/>");
             _divRight.add("<div class=\"menuRightItem\"><A HREF=http://jetty.mortbay.org><IMG class=\"powered\" SRC=\""+_context+"/images/powered.gif\" WIDTH=140 HEIGHT=58 BORDER=0 ALT=\"Powered by Jetty\"></a></div>");
         }
         
