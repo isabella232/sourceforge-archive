@@ -1,0 +1,29 @@
+SECTION: 600-J2EE
+TITLE: jsr77
+QUESTION: Does Jetty support JSR77 statistics?
+
+Yes! 
+<P>
+To enable JSR77 for Jetty, you:
+<ol>
+ <li> ensure you have a distribution of Jetty that includes the extra packages such as JettyPlus or that you have built the <code>$JETTY_HOME/extra/plus</code> and <code>$JETTY_HOME/extra/jsr77</code> packages
+
+ <li> uncomment these lines from the <code>$JETTY_HOME/extra/etc/jettyplus.xml</code> config file:
+ <pre>
+ &lt;Set name="WebApplicationConfigurationClassNames"&gt;
+   &lt;Array type="java.lang.String"&gt;
+     &lt;Item&gt;org.mortbay.jetty.plus.PlusWebAppContext$Configuration&lt;/Item&gt;
+     &lt;Item&gt;org.mortbay.jetty.servlet.JettyWebConfiguration&lt;/Item&gt;
+     &lt;Item&gt;org.mortbay.jetty.servlet.jsr77.Configuration&lt;/Item&gt;
+   &lt;/Array&gt;
+ &lt;/Set&gt;
+ </pre>
+ <li> configure your webapps as necessary in <code>extra/etc/jettyplus.xml</code>
+ <li> run Jetty with jmx enabled:
+<pre>
+java -Dmain.class=org.mortbay.xml.XmlConfiguration -DSTART=extra/etc/start-plus.config -jar start.jar extra/etc/jettyplus-jmx.xml
+</pre>
+</ol>
+
+You should now be able to surf to <code>http://localhost:8082</code> and see the JSR77 mbeans for each servlet in your webapp.
+
