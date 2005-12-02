@@ -1,6 +1,10 @@
 Jetty Versions
 --------------
 
+ + char encoding for MultiPartRequest
+ + fixed merging of POST params in dispatch query string.
+ + protect from NPE in dispatcher getValues
+
 Jetty-5.1.6 - 18 November 2005
  + Fixed JSP visibility security issue.
  + Improved jetty-web.xml access to org.mortbay classes.

@@ -229,6 +229,12 @@ public class Dispatcher implements RequestDispatcher
             }
 
             request.setParameters(parameters);
+            
+            String old_query=httpServletRequest.getQueryString();
+            if (old_query!=null)
+                request.setQuery(query+"&"+old_query);
+            else
+                request.setQuery(query);
         }
         
         Object old_scope = null;
@@ -339,6 +345,7 @@ public class Dispatcher implements RequestDispatcher
         boolean _xContext;
         HttpSession _xSession;
         ServletHttpRequest _servletHttpRequest;
+        String _query;
         
         /* ------------------------------------------------------------ */
         DispatcherRequest(HttpServletRequest httpServletRequest,
@@ -382,6 +389,12 @@ public class Dispatcher implements RequestDispatcher
             _contextPath = (cp.length()==1 && cp.charAt(0)=='/')?"":cp;
             _servletPath=sp;
             _pathInfo=pi;
+        }
+
+        /* ------------------------------------------------------------ */
+        void setQuery(String q)
+        {
+            this._query=q;
         }
         
         /* ------------------------------------------------------------ */
@@ -466,18 +479,9 @@ public class Dispatcher implements RequestDispatcher
         /* ------------------------------------------------------------ */
         public String getQueryString()
         {
-            if (_filterType==Dispatcher.__INCLUDE||isNamed()||_parameters==null)
+            if (this._query==null)
                 return super.getQueryString();
-            
-            Map m=getParameterMap();
-            UrlEncoded encode = new UrlEncoded();
-            Iterator iter=m.entrySet().iterator();
-            while (iter.hasNext())
-            {
-                Map.Entry entry = (Map.Entry)iter.next();
-                encode.addValues(entry.getKey(), (String[])entry.getValue());
-            }
-            return encode.encode();
+            return this._query;
         }
 
         /* ------------------------------------------------------------ */
@@ -509,6 +513,8 @@ public class Dispatcher implements RequestDispatcher
             if (_parameters==null)
                 return super.getParameterValues(name);
             List l =_parameters.getValues(name);
+            if (l==null)
+                return null;
             return (String[])l.toArray(new String[l.size()]);
         }
         
