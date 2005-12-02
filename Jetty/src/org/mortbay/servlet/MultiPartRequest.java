@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
@@ -59,6 +60,7 @@ public class MultiPartRequest
     HttpServletRequest _request;
     LineInput _in;
     String _boundary;
+    String _encoding;
     byte[] _byteBoundary;
     MultiMap _partMap = new MultiMap(10);
     int _char=-2;
@@ -79,8 +81,11 @@ public class MultiPartRequest
             throw new IOException("Not multipart/form-data request");
 
         if(log.isDebugEnabled())log.debug("Multipart content type = "+content_type);
-        
-        _in = new LineInput(request.getInputStream());
+        _encoding = request.getCharacterEncoding();
+        if (_encoding != null)
+            _in = new LineInput(request.getInputStream(), 2048, _encoding);
+        else
+            _in = new LineInput(request.getInputStream());
         
         // Extract boundary string
         _boundary="--"+
@@ -120,10 +125,23 @@ public class MultiPartRequest
      */
     public String getString(String name)
     {
-        List part = (List)_partMap.getValues(name);
+        List part = _partMap.getValues(name);
         if (part==null)
             return null;
-        return new String(((Part)part.get(0))._data);
+        if (_encoding != null)
+        {
+            try 
+            {
+                return new String(((Part)part.get(0))._data, _encoding);
+            } 
+            catch (UnsupportedEncodingException uee) 
+            {
+                if (log.isDebugEnabled())log.debug("Invalid character set: " + uee);
+                return null;
+            }
+        }
+        else
+            return new String(((Part)part.get(0))._data);
     }
     
     /* ------------------------------------------------------------ */
@@ -133,13 +151,30 @@ public class MultiPartRequest
      */
     public String[] getStrings(String name)
     {
-        List parts = (List)_partMap.getValues(name);
+        List parts = _partMap.getValues(name);
         if (parts==null)
             return null;
         String[] strings = new String[parts.size()];
-        for (int i=0; i<strings.length; i++) {
-            strings[i] = new String(((Part)parts.get(i))._data);
+        
+        if (_encoding == null) 
+        {
+            for (int i=0; i<strings.length; i++) 
+                strings[i] = new String(((Part)parts.get(i))._data);
+        } 
+        else 
+        {
+            try 
+            {
+                for (int i=0; i<strings.length; i++)
+                    strings[i] = new String(((Part)parts.get(i))._data, _encoding);
+            }
+            catch (UnsupportedEncodingException uee) 
+            {
+                if (log.isDebugEnabled())log.debug("Invalid character set: " + uee);
+                return null;
+            }
         }
+       
         return strings;
     }
     
