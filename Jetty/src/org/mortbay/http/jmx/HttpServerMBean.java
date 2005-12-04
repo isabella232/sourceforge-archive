@@ -115,16 +115,22 @@ public class HttpServerMBean extends LifeCycleMBean
         defineOperation("statsReset",IMPACT_ACTION);
         defineAttribute("connections");
         defineAttribute("connectionsOpen");
+        defineAttribute("connectionsOpenMin");
         defineAttribute("connectionsOpenMax");
         defineAttribute("connectionsDurationAve");
+        defineAttribute("connectionsDurationMin");
         defineAttribute("connectionsDurationMax");
+        defineAttribute("connectionsDurationTotal");
         defineAttribute("connectionsRequestsAve");
+        defineAttribute("connectionsRequestsMin");
         defineAttribute("connectionsRequestsMax");
         defineAttribute("errors");
         defineAttribute("requests");
         defineAttribute("requestsActive");
+        defineAttribute("requestsActiveMin");
         defineAttribute("requestsActiveMax");
         defineAttribute("requestsDurationAve");
+        defineAttribute("requestsDurationMin");
         defineAttribute("requestsDurationMax");
         
         defineOperation("stop",new String[]{"java.lang.Boolean.TYPE"},IMPACT_ACTION);

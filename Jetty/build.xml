@@ -369,7 +369,7 @@
              destdir="${javadoc}"
              author="true"
              version="true"
-             public="true"
+             public="false"
              windowtitle="${ant.project.name} ${RELEASE.MAJOR.MINOR} API"
              doctitle="${ant.project.name} ${RELEASE.MAJOR.MINOR}"
              bottom="Copyright &amp;copy; 2004 Mortbay Consulting Pty. Ltd. All Rights Reserved.">

@@ -4,6 +4,7 @@ Jetty Versions
  + char encoding for MultiPartRequest
  + fixed merging of POST params in dispatch query string.
  + protect from NPE in dispatcher getValues
+ + Updated to 2.6.2 xerces
 
 Jetty-5.1.6 - 18 November 2005
  + Fixed JSP visibility security issue.

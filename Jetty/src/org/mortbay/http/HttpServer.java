@@ -119,25 +119,7 @@ public class HttpServer extends Container
     private transient HttpContext _notFoundContext=null;
     private transient boolean _gracefulStop;
     
-    /* ------------------------------------------------------------ */
-    private boolean _statsOn=false;
-    private transient Object _statsLock=new Object[0];
-    private transient long _statsStartedAt=0;
-    private transient int _connections;
-    private transient int _connectionsOpen;
-    private transient int _connectionsOpenMax;
-    private transient long _connectionsDurationAve;
-    private transient long _connectionsDurationMax;
-    private transient int _connectionsRequestsAve;
-    private transient int _connectionsRequestsMax;
-
-    private transient int _errors;
-    private transient int _requests;
-    private transient int _requestsActive;
-    private transient int _requestsActiveMax;
-    private transient long _requestsDurationAve;
-    private transient long _requestsDurationMax;
-
+    
     
     /* ------------------------------------------------------------ */
     /** Constructor. 
@@ -1077,27 +1059,69 @@ public class HttpServer extends Container
         _resolveRemoteHost = resolveRemoteHost;
     }
 
+
+    /* ------------------------------------------------------------ */
+    private boolean _statsOn=false;
+    private transient Object _statsLock=new Object[0];
+    
+    private transient long _statsStartedAt=0;
+    
+    private transient int _connections;                  // total number of connections made to server
+    
+    private transient int _connectionsOpen;              // number of connections currently open
+    private transient int _connectionsOpenMin;           // min number of connections open simultaneously
+    private transient int _connectionsOpenMax;           // max number of connections open simultaneously
+    
+    private transient long _connectionsDurationMin;      // min duration of a connection
+    private transient long _connectionsDurationMax;      // max duration of a connection
+    private transient long _connectionsDurationTotal;    // total duration of all coneection
+
+    private transient int _errors;                       // total bad requests to the server
+    private transient int _requests;                     // total requests made to the server
+
+    private transient int _requestsActive;               // number of requests currently being handled
+    private transient int _requestsActiveMin;            // min number of connections handled simultaneously
+    private transient int _requestsActiveMax;            // max number of connections handled simultaneously
+    
+    private transient int _connectionsRequestsMin;       // min requests per connection
+    private transient int _connectionsRequestsMax;       // max requests per connection
+
+    private transient long _requestsDurationMin;         // min request duration
+    private transient long _requestsDurationMax;         // max request duration
+    private transient long _requestsDurationTotal;       // total request duration
+    
+    
+    
     /* ------------------------------------------------------------ */
     /** Reset statistics.
      */
     public void statsReset()
     {
         _statsStartedAt=System.currentTimeMillis();
-        
+
         _connections=0;
-        _connectionsOpen=0;
-        _connectionsOpenMax=0;
-        _connectionsDurationAve=0;
-        _connectionsDurationMax=0;
-        _connectionsRequestsAve=0;
-        _connectionsRequestsMax=_connectionsOpen;
         
+        _connectionsOpenMin=_connectionsOpen;
+        _connectionsOpenMax=_connectionsOpen;
+        _connectionsOpen=0;
+        
+        _connectionsDurationMin=0;
+        _connectionsDurationMax=0;
+        _connectionsDurationTotal=0;
+
         _errors=0;
         _requests=0;
-        _requestsActive=0;
+
+        _requestsActiveMin=_requestsActive;
         _requestsActiveMax=_requestsActive;
-        _requestsDurationAve=0;
+        _requestsActive=0;
+        
+        _connectionsRequestsMin=0;
+        _connectionsRequestsMax=0;
+
+        _requestsDurationMin=0;
         _requestsDurationMax=0;
+        _requestsDurationTotal=0;
     }
     
     /* ------------------------------------------------------------ */
@@ -1124,6 +1148,71 @@ public class HttpServer extends Container
     {
         return _statsOn?(System.currentTimeMillis()-_statsStartedAt):0;
     }
+    
+    
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the connectionsDurationMin.
+     */
+    public long getConnectionsDurationMin()
+    {
+        return _connectionsDurationMin;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the connectionsDurationTotal.
+     */
+    public long getConnectionsDurationTotal()
+    {
+        return _connectionsDurationTotal;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the connectionsOpenMin.
+     */
+    public int getConnectionsOpenMin()
+    {
+        return _connectionsOpenMin;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the connectionsRequestsMin.
+     */
+    public int getConnectionsRequestsMin()
+    {
+        return _connectionsRequestsMin;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the requestsActiveMin.
+     */
+    public int getRequestsActiveMin()
+    {
+        return _requestsActiveMin;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the requestsDurationMin.
+     */
+    public long getRequestsDurationMin()
+    {
+        return _requestsDurationMin;
+    }
+
+    /* ------------------------------------------------------------ */
+    /**
+     * @return Returns the requestsDurationTotal.
+     */
+    public long getRequestsDurationTotal()
+    {
+        return _requestsDurationTotal;
+    }
 
     /* ------------------------------------------------------------ */
     /** 
@@ -1148,10 +1237,10 @@ public class HttpServer extends Container
 
     /* ------------------------------------------------------------ */
     /** 
-     * @return Sliding average duration in milliseconds of open connections
+     * @return Average duration in milliseconds of open connections
      * since statsReset() called. Undefined if setStatsOn(false).
      */
-    public long getConnectionsDurationAve() {return _connectionsDurationAve/128;}
+    public long getConnectionsDurationAve() {return _connections==0?0:(_connectionsDurationTotal/_connections);}
 
     /* ------------------------------------------------------------ */
     /** 
@@ -1162,10 +1251,10 @@ public class HttpServer extends Container
 
     /* ------------------------------------------------------------ */
     /** 
-     * @return Sliding average number of requests per connection
+     * @return Average number of requests per connection
      * since statsReset() called. Undefined if setStatsOn(false).
      */
-    public int getConnectionsRequestsAve() {return _connectionsRequestsAve/16;}
+    public int getConnectionsRequestsAve() {return _connections==0?0:(_requests/_connections);}
 
     /* ------------------------------------------------------------ */
     /** 
@@ -1208,7 +1297,7 @@ public class HttpServer extends Container
      * @return Average duration of request handling in milliseconds 
      * since statsReset() called. Undefined if setStatsOn(false).
      */
-    public long getRequestsDurationAve() {return _requestsDurationAve/128;}
+    public long getRequestsDurationAve() {return _requests==0?0:(_requestsDurationTotal/_requests);}
 
     /* ------------------------------------------------------------ */
     /** 
@@ -1222,7 +1311,8 @@ public class HttpServer extends Container
     {
         synchronized(_statsLock)
         {
-            if (++_connectionsOpen > _connectionsOpenMax)
+            _connectionsOpen++;
+            if (_connectionsOpen > _connectionsOpenMax)
                 _connectionsOpenMax=_connectionsOpen;
         }
     }
@@ -1232,7 +1322,8 @@ public class HttpServer extends Container
     {
         synchronized(_statsLock)
         {
-            if (++_requestsActive > _requestsActiveMax)
+            _requestsActive++;
+            if (_requestsActive > _requestsActiveMax)
                 _requestsActiveMax=_requestsActive;
         }
     }
@@ -1243,18 +1334,22 @@ public class HttpServer extends Container
         synchronized(_statsLock)
         {
             _requests++;
-            if (--_requestsActive<0)
+            _requestsActive--;
+            if (_requestsActive<0)
                 _requestsActive=0;
-            if (!ok)
-                _errors++;
-            else
+            if (_requestsActive < _requestsActiveMin)
+                _requestsActiveMin=_requestsActive;
+            
+            if (ok)
             {
+                _requestsDurationTotal+=duration;
+                if (_requestsDurationMin==0 || duration<_requestsDurationMin)
+                    _requestsDurationMin=duration;
                 if (duration>_requestsDurationMax)
                     _requestsDurationMax=duration;
-                if (_requestsDurationAve==0)
-                    _requestsDurationAve=duration*128;
-                _requestsDurationAve=_requestsDurationAve-_requestsDurationAve/128+duration;
             }
+            else
+                _errors++;
         }
     }
     
@@ -1265,18 +1360,19 @@ public class HttpServer extends Container
         {
             _connections++;
             _connectionsOpen--;
+            _connectionsDurationTotal+=duration;
             if (_connectionsOpen<0)
                 _connectionsOpen=0;
+            if (_connectionsOpen<_connectionsOpenMin)
+                _connectionsOpenMin=_connectionsOpen;
+            if (_connectionsDurationMin==0 || duration<_connectionsDurationMin)
+                _connectionsDurationMin=duration;
             if (duration>_connectionsDurationMax)
                 _connectionsDurationMax=duration;
-            if (_connectionsDurationAve==0)
-                _connectionsDurationAve=128*duration;
-            _connectionsDurationAve=_connectionsDurationAve-_connectionsDurationAve/128+duration;
+            if (_connectionsRequestsMin==0 || requests<_connectionsRequestsMin)
+                _connectionsRequestsMin=requests;
             if (requests>_connectionsRequestsMax)
                 _connectionsRequestsMax=requests;
-            if (_connectionsRequestsAve==0)
-                _connectionsRequestsAve=16;
-            _connectionsRequestsAve=_connectionsRequestsAve-_connectionsRequestsAve/16+requests;
         }
     }
 
