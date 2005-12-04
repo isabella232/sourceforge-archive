@@ -66,7 +66,6 @@ public class JSR154Filter implements Filter
     {
         _servletContext=filterConfig.getServletContext();
         _unwrappedDispatchSupported=Boolean.valueOf(filterConfig.getInitParameter("unwrappedDispatch")).booleanValue();
-        _servletContext.log("JSR154 unwrappedDispatchSupported="+_unwrappedDispatchSupported);
     }
 
     /* ------------------------------------------------------------ */
