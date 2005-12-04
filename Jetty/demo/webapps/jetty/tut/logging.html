@@ -193,7 +193,9 @@ to use log4j you need to put the log4j.jar on the classpath (place it in the ext
 with a command like:<pre>
   java -Dorg.mortbay.log.LogFactory.noDiscovery=false -jar start.jar
 </pre>
-You need to consult the documentation for those specific log mechanism to learn their configuration.
+You need to consult the documentation for those specific log mechanism to learn their configuration. You will also need
+to copy a commons-logging.jar into $JETTY_HOME/ext directory, as only the commons-loggin-api.jar is shipped with the
+Jetty distro.
 </p>
 
 
