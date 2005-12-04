@@ -400,7 +400,7 @@ public class ServletHandler extends Container implements HttpHandler
         if (isStarted())
             return;
         
-        _contextLog = LogFactory.getLog(getHttpContext().getHttpContextName());
+        _contextLog = LogFactory.getLog("org.mortbay.jetty.context."+getHttpContext().getHttpContextName());
         
         if (_contextLog==null)
             _contextLog=log;
