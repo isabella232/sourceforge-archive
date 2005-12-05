@@ -45,7 +45,7 @@
       <Arg ref="demologger"/>
     </Call>  
     <Call name="setAttribute">
-      <Arg>Jetty Demo</Arg>
+      <Arg>org.mortbay.jetty.context.Jetty Demo</Arg>
       <Arg ref="demologger"/>
     </Call>
   </Call>

@@ -17,6 +17,7 @@ package org.mortbay.jetty.servlet;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.EventListener;
 import java.util.Iterator;
 import java.util.Map;
@@ -350,6 +351,7 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
         String name=node.getString("servlet-name",false,true);
         String className=node.getString("servlet-class",false,true);
         String jspFile=null;
+        Holder template=null;
         if(className==null)
         {
             // There is no class, so look for a jsp file
@@ -358,7 +360,10 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
             {
                 Map.Entry entry=getWebApplicationHandler().getHolderEntry(jspFile);
                 if(entry!=null)
-                    className=((ServletHolder)entry.getValue()).getClassName();
+                {
+                    template = (Holder)entry.getValue();
+                    className=template.getClassName();  
+                }
             }
             if(className==null)
             {
@@ -369,9 +374,22 @@ public class XMLConfiguration implements WebApplicationContext.Configuration
         if(name==null)
             name=className;
         ServletHolder holder=getWebApplicationHandler().newServletHolder(name,className,jspFile);
-        // handle JSP classpath
+
+        // handle JSP configuration
         if(jspFile!=null)
-            holder.setInitParameter("classpath",getWebApplicationContext().getFileClassPath());
+        {
+            Enumeration e=template.getInitParameterNames();
+            
+            while(e.hasMoreElements())
+            {   
+                String p=(String)e.nextElement();
+                holder.setInitParameter(p, template.getInitParameter(p));
+            }
+            if (holder.getInitParameter("classpath")==null)
+                holder.setInitParameter("classpath",getWebApplicationContext().getFileClassPath());
+        }
+       
+        // handle init params
         Iterator iParamsIter=node.iterator("init-param");
         while(iParamsIter.hasNext())
         {
