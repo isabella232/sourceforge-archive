@@ -107,7 +107,6 @@ public class Factory extends org.apache.commons.logging.LogFactory
      */
     public void release()
     {
-        log.reset();
     }
 
     /* (non-Javadoc)
