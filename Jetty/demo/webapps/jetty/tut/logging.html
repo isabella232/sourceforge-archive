@@ -204,13 +204,13 @@ Jetty distro.
 The 
 <a href="http://localhost:8080/javadoc/javax/servlet/ServletContext.html">javax.servlet.ServletContext</a> API provides
 several log methods that a web application can use to log information and exceptions. These methods are directed to a
-commons log selected by name.  The context name is used, which is the either display name (if set in the web.xml) or
+commons log selected by "org.mortbay.jetty.context."+name.  The context name is used, which is the either display name (if set in the web.xml) or
 the [virtualhost:]contextPath.   This name can be used to map to a specific logger, or using the jetty log factory
 it can be mapped to an existing log impl as follows:
 <pre>
   &lt;Call class="org.apache.commons.logging.LogFactory" name="getFactory">
     &lt;Call name="setAttribute">
-      &lt;Arg>myvhost:/mycontext&lt;/Arg>
+      &lt;Arg>org.mortbay.jetty.context./mycontext&lt;/Arg>
       &lt;Arg>org.mortbay.mypackage.*&lt;/Arg>
     &lt;/Call>
   &lt;/Call>  
