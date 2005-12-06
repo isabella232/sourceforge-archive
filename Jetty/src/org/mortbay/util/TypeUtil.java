@@ -352,6 +352,12 @@ public class TypeUtil
     }
 
     /* ------------------------------------------------------------ */
+    public static char toHexChar(int b)
+    {   
+        return (char)(b<10?('0'+b):('A'+b-10));
+    }
+    
+    /* ------------------------------------------------------------ */
     public static String toHexString(byte[] b)
     {   
         StringBuffer buf = new StringBuffer();

@@ -859,7 +859,6 @@ public class HttpConnection
     protected void readRequest()
         throws IOException
     {
-        log.debug("readRequest() ...");
         _request.readHeader((LineInput)(_inputStream)
                             .getInputStream());
     }

@@ -40,9 +40,8 @@ public class URI
 {
     private static Log log = LogFactory.getLog(URI.class);
 
-
-    public static final String __CHARSET=
-        System.getProperty("org.mortbay.util.URI.charset",StringUtil.__UTF_8);
+    public static final String __CHARSET=System.getProperty("org.mortbay.util.URI.charset",StringUtil.__UTF_8);
+    public static final boolean __CHARSET_IS_DEFAULT=__CHARSET.equals(StringUtil.__UTF_8);
     
     /* ------------------------------------------------------------ */
     private String _uri;
@@ -680,8 +679,6 @@ public class URI
         for (int i=0;i<len;i++)
         {
             char c = path.charAt(i);
-            if (c<0||c>0xff)
-                throw new IllegalArgumentException("Not decoded");
             
             byte b = (byte)(0xff & c);
 

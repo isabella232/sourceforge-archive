@@ -27,6 +27,7 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 
+import javax.print.URIException;
 import javax.servlet.http.Cookie;
 
 import org.apache.commons.logging.Log;
@@ -122,6 +123,7 @@ public class HttpRequest extends HttpMessage
     private Principal _userPrincipal;
     private String _authUser;
     private String _authType;
+    private char[] _uriExpanded;
 
     /* ------------------------------------------------------------ */
     /**
@@ -697,7 +699,44 @@ public class HttpRequest extends HttpMessage
         // handle URI
         try
         {
-            String raw_uri = new String(buf, s3, e3 - s3 + 1);
+            String raw_uri =null;
+            if (URI.__CHARSET_IS_DEFAULT) 
+                raw_uri = new String(buf, s3, e3 - s3 + 1);
+            else
+            {
+                int l=e3-s3+1;
+                for (int i=0;i<l;i++)
+                {
+                    char c=buf[s3+i];
+                    
+                    if (c>=0 && c<0x80)
+                        continue;
+                
+                    if (_uriExpanded==null || _uriExpanded.length<3*l)
+                        _uriExpanded=new char[3*l];
+                    
+                    if (i>0)
+                        System.arraycopy(buf, s3, _uriExpanded, 0, i);
+                    int j=i;
+                    for (;i<l;i++)
+                    {
+                        c=buf[s3+i];
+                        if (c>=0 && c<0x80)
+                            _uriExpanded[j++]=c;
+                        else
+                        {
+                            _uriExpanded[j++]='%';
+                            _uriExpanded[j++]=TypeUtil.toHexChar(0xf&(c>>4));
+                            _uriExpanded[j++]=TypeUtil.toHexChar(0xf&c);
+                        }
+                    }
+                    raw_uri=new String(_uriExpanded, 0, j);
+                }
+
+                if (raw_uri==null) 
+                    raw_uri = new String(buf, s3, e3 - s3 + 1);
+            } 
+           
             if (_uri == null)
                 _uri = new URI(raw_uri);
             else

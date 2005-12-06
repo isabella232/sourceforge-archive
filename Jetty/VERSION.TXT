@@ -5,7 +5,7 @@ Jetty-6.0.0betaX -
  + See http://jetty.mortbay.org/jetty6 for 6.0 releases
 
 
-Jetty-5.1.7 
+Jetty-5.1.7rc0
  + improved server stats
  + char encoding for MultiPartRequest
  + fixed merging of POST params in dispatch query string.
@@ -13,6 +13,8 @@ Jetty-5.1.7
  + Updated to 2.6.2 xerces
  + JSP file servlet mappings copy JspServlet init params.
  + Prefix servlet context logs with org.mortbay.jetty.context
+ + better support for URI character encodings
+ + use commons logging jar instead of api jar.
 
 Jetty-5.1.6 - 18 November 2005
  + Fixed JSP visibility security issue.
