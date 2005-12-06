@@ -60,7 +60,7 @@ all         - everything
     <pathelement location="${mortbay.jmx.jar}"/>
     <pathelement location="${ext}/javax77.jar"/>
     <pathelement location="${lib}/org.mortbay.jsr77.jar"/>
-    <pathelement location="${jetty.ext}/commons-logging-api.jar"/>
+    <pathelement location="${jetty.ext}/commons-logging.jar"/>
     <path refid="jboss.classpath"/>
   </path>
 
@@ -187,7 +187,7 @@ all         - everything
       <fileset dir="${jetty.ext}">   
         <include name="jasper-*.jar"/>
         <include name="ant*.jar"/>
-        <include name="commons-logging-api.jar"/>
+        <include name="commons-logging.jar"/>
         <include name="commons-el.jar"/>
       </fileset>
       <fileset dir="${jetty.etc}">   

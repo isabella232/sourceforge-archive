@@ -313,9 +313,8 @@
             <manifest>
                 <attribute name="Built-By" value="${user.name}"/>
                 <attribute name="Main-Class" value="org.mortbay.http.HttpServer"/>
-				<attribute name="Class-Path" value="ext\commons-logging-api.jar"/>
-<!-- doc update: only runs as command line: java -cp ext\commons-logging-api.jar;lib\org.mortbay.http.jar org.mortbay.http.HttpServer %1 %2 -->
-              </manifest>
+		<attribute name="Class-Path" value="ext\commons-logging.jar"/>
+            </manifest>
     </jar>
   </target>
 
