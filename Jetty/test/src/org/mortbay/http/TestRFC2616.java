@@ -1413,12 +1413,10 @@ public class TestRFC2616
     /* --------------------------------------------------------------- */
     public static void test14_39()
     {      
-        if (!log.isTraceEnabled())
-        {
-            log.debug("NOT HANDLED RFC2616 14.39 TE");
-            return;
-        }
+        log.debug("NOT HANDLED RFC2616 14.39 TE");
+        return;
         
+        /*
         TestCase t = new TestCase("RFC2616 14.39 TE");
         try
         {
@@ -1456,6 +1454,7 @@ public class TestRFC2616
             log.warn(LogSupport.EXCEPTION,e);
             t.check(false,e.toString());
         }
+        */
     }
     
     /* --------------------------------------------------------------- */
