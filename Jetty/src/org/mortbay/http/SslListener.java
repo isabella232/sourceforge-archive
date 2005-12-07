@@ -292,8 +292,11 @@ public class SslListener extends SocketListener
                         p_acceptQueueSize, p_address.getInetAddress());
             }
 
-            socket.setNeedClientAuth(_needClientAuth);
-            socket.setWantClientAuth(_wantClientAuth);
+            if (_needClientAuth)
+                socket.setNeedClientAuth(true);
+            else if (_wantClientAuth)
+                socket.setWantClientAuth(true);
+            
             if(cipherSuites != null && cipherSuites.length >0) {
             	socket.setEnabledCipherSuites(cipherSuites);
             	for ( int i=0; i<cipherSuites.length; i++ ) {
