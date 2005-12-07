@@ -4,6 +4,8 @@ Jetty Versions
 Jetty-6.0.0betaX -
  + See http://jetty.mortbay.org/jetty6 for 6.0 releases
 
+Jetty-5.1.8 - 7 December 2005
+ + Fixed space in URL issued created in 5.1.6
 
 Jetty-5.1.7 - 7 December 2005
 Jetty-5.1.7rc0 - 6 December 2005

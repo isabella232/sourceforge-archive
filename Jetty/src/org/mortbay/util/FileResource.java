@@ -151,8 +151,9 @@ public class FileResource extends URLResource
             r=new FileResource(newFile.toURI().toURL(),null,newFile);
         }
         
-        int expected=r._urlString.length()-path.length();
-        int index = r._urlString.lastIndexOf(path, expected);
+        String encoded=org.mortbay.util.URI.encodePath(path);
+        int expected=r._urlString.length()-encoded.length();
+        int index = r._urlString.lastIndexOf(encoded, expected);
 
         if (expected!=index && ((expected-1)!=index || path.endsWith("/") || !r.isDirectory()))
         {
