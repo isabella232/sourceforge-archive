@@ -607,7 +607,11 @@ public class Dispatcher implements RequestDispatcher
 
             if (_filterType!=Dispatcher.__INCLUDE && !isNamed())
             {
-                set.add(__FORWARD_PATH_INFO);
+                if (_pathInfo!=null)
+                    set.add(__FORWARD_PATH_INFO);
+                else
+                    set.remove(__FORWARD_PATH_INFO);
+                    
                 set.add(__FORWARD_REQUEST_URI);
                 set.add(__FORWARD_SERVLET_PATH);
                 set.add(__FORWARD_CONTEXT_PATH);
