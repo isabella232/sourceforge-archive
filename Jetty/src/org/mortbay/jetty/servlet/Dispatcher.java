@@ -590,6 +590,10 @@ public class Dispatcher implements RequestDispatcher
             
             if (_filterType==Dispatcher.__INCLUDE && !isNamed())
             {
+                if (_pathInfo!=null)
+                    set.add(__INCLUDE_PATH_INFO);
+                else
+                    set.remove(__INCLUDE_PATH_INFO);
                 set.add(__INCLUDE_PATH_INFO);
                 set.add(__INCLUDE_REQUEST_URI);
                 set.add(__INCLUDE_SERVLET_PATH);
@@ -607,7 +611,7 @@ public class Dispatcher implements RequestDispatcher
 
             if (_filterType!=Dispatcher.__INCLUDE && !isNamed())
             {
-                if (_pathInfo!=null)
+                if (_servletHttpRequest.getPathInfo()!=null)
                     set.add(__FORWARD_PATH_INFO);
                 else
                     set.remove(__FORWARD_PATH_INFO);
