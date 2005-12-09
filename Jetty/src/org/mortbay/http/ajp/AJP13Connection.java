@@ -209,9 +209,8 @@ public class AJP13Connection extends HttpConnection
                   {
                       String hdr=packet.getHeader();
                       String val=packet.getString();
-                      request.setField(hdr,val);
-                      if (!_keepAlive && hdr.equalsIgnoreCase(HttpFields.__Connection) &&
-                          val.equalsIgnoreCase(HttpFields.__KeepAlive))
+                      request.addField(hdr,val);
+                      if (!_keepAlive && hdr.equalsIgnoreCase(HttpFields.__Connection) && val.equalsIgnoreCase(HttpFields.__KeepAlive))
                           _keepAlive=true;
                   }
                   
