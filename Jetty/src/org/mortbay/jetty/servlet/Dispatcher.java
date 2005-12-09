@@ -598,7 +598,11 @@ public class Dispatcher implements RequestDispatcher
                 set.add(__INCLUDE_REQUEST_URI);
                 set.add(__INCLUDE_SERVLET_PATH);
                 set.add(__INCLUDE_CONTEXT_PATH);
-                set.add(__INCLUDE_QUERY_STRING);
+                if (Dispatcher.this._query!=null)
+                    set.add(__INCLUDE_QUERY_STRING);
+                else
+                    set.remove(__INCLUDE_QUERY_STRING);
+                    
             }
             else
             {
@@ -619,7 +623,10 @@ public class Dispatcher implements RequestDispatcher
                 set.add(__FORWARD_REQUEST_URI);
                 set.add(__FORWARD_SERVLET_PATH);
                 set.add(__FORWARD_CONTEXT_PATH);
-                set.add(__FORWARD_QUERY_STRING);
+                if (_servletHttpRequest.getQueryString()!=null)
+                    set.add(__FORWARD_QUERY_STRING);
+                else
+                    set.remove(__FORWARD_QUERY_STRING);
             }
             
             if (_attributes!=null)
