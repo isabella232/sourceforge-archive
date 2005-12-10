@@ -494,7 +494,7 @@ abstract public class ThreadedServer extends ThreadPool
     /*
      * Start the ThreadedServer listening
      */
-    synchronized public void start() throws Exception
+    public synchronized void start() throws Exception
     {
         try
         {
@@ -573,7 +573,10 @@ abstract public class ThreadedServer extends ThreadPool
         }
         finally
         {
-            _acceptor = null;
+            synchronized (this)
+            {
+                _acceptor = null;
+            }
         }
     }
 
