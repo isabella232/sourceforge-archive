@@ -594,7 +594,6 @@ public class Dispatcher implements RequestDispatcher
                     set.add(__INCLUDE_PATH_INFO);
                 else
                     set.remove(__INCLUDE_PATH_INFO);
-                set.add(__INCLUDE_PATH_INFO);
                 set.add(__INCLUDE_REQUEST_URI);
                 set.add(__INCLUDE_SERVLET_PATH);
                 set.add(__INCLUDE_CONTEXT_PATH);
