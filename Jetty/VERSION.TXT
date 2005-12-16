@@ -3,6 +3,7 @@ Jetty Versions
 
 
  + Fix for AJP13 with multiple headers
+ + Fix for AJP13 with encoded path
 
 Jetty-5.1.9 - 7 December 2005
  + Fixed wantClientAuth(false) overriding netClientAuth(true) 

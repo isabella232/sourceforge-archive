@@ -37,6 +37,7 @@ import org.mortbay.http.HttpResponse;
 import org.mortbay.http.Version;
 import org.mortbay.util.LineInput;
 import org.mortbay.util.LogSupport;
+import org.mortbay.util.URI;
 
 /* ------------------------------------------------------------ */
 /** 
@@ -193,7 +194,10 @@ public class AJP13Connection extends HttpConnection
                   request.setState(HttpMessage.__MSG_EDITABLE);
                   request.setMethod(packet.getMethod());
                   request.setVersion(packet.getString());
-                  request.setPath(packet.getString());
+                  
+                  String path=packet.getString();
+                  request.setPath(URI.encodePath(path));
+                  
                   _remoteAddr=packet.getString();
                   _remoteHost=packet.getString();
                   _serverName=packet.getString();
