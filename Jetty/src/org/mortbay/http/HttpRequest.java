@@ -840,8 +840,6 @@ public class HttpRequest extends HttpMessage
         String encoding = getCharacterEncoding();
         if (encoding == null)
         {
-            // No encoding, so use the existing characters.
-            encoding = StringUtil.__UTF_8;
             _uri.putParametersTo(_parameters);
         }
         else
@@ -893,8 +891,7 @@ public class HttpRequest extends HttpMessage
                                 throw new IllegalStateException("Form too large");
                             
                             // Add form params to query params
-                            UrlEncoded.decodeTo(bout.getBuf(), 0, bout.getCount(), _parameters,
-                                    encoding);
+                            UrlEncoded.decodeTo(bout.getBuf(), 0, bout.getCount(), _parameters,encoding);
                         }
                         catch (EOFException e)
                         {

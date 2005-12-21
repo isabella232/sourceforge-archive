@@ -280,6 +280,8 @@ public class UrlEncoded extends MultiMap
                           data[ox++] = (byte)' ';
                           break;
                       case '%':
+                          int i0 = (14<<4)+1;
+                          byte b0 = (byte)i0;
                           data[ox++] = (byte)
                               ((TypeUtil.convertHexDigit(data[ix++]) << 4)+
                                TypeUtil.convertHexDigit(data[ix++]));

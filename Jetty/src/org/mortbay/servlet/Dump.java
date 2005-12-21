@@ -72,6 +72,7 @@ public class Dump extends HttpServlet
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         request.setAttribute("Dump", this);
+        request.setCharacterEncoding("ISO_8859_1");
         getServletContext().setAttribute("Dump",this);
         
         String info= request.getPathInfo();
