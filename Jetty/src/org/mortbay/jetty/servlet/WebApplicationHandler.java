@@ -550,6 +550,7 @@ public class WebApplicationHandler extends ServletHandler
             if (mapping.appliesTo(pathInContext, requestType))
                 filters= LazyList.add(filters, mapping.getHolder());
         }
+        
         // Servlet filters
         if (servletHolder != null && _servletFilterMap.size() > 0)
         {
@@ -690,7 +691,6 @@ public class WebApplicationHandler extends ServletHandler
             removeComponent(sh);
         }
     }
-    
 
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */

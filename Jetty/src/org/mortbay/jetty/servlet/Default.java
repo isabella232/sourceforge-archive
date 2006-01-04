@@ -177,7 +177,7 @@ public class Default extends HttpServlet
     protected Resource getResource(String pathInContext) throws IOException
     {
         Resource r = (_resourceBase == null) ? _httpContext.getResource(pathInContext) : _resourceBase.addPath(pathInContext);
-
+        
         if (log.isDebugEnabled())
             log.debug("RESOURCE=" + r);
         return r;

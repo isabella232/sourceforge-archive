@@ -819,7 +819,7 @@ public class URI
     
     /* ------------------------------------------------------------ */
     /** Convert a path to a cananonical form.
-     * All instances of "//", "." and ".." are factored out.  Null is returned
+     * All instances of "." and ".." are factored out.  Null is returned
      * if the path tries to .. above it's root.
      * @param path 
      * @return path or null.
@@ -864,7 +864,7 @@ public class URI
         while (end>0)
         {
             switch(end-start)
-            {
+            {       
               case 2: // possible single dot
                   if (buf.charAt(start+1)!='.')
                   {
