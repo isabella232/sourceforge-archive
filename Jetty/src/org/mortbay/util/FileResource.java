@@ -125,14 +125,21 @@ class FileResource extends URLResource
             path = org.mortbay.util.URI.canonicalPath(path);
             
             // treat all paths being added as relative
+            String rel=path;
             if (path.startsWith("/"))
-                path = path.substring(1);
+                rel = path.substring(1);
             
-            File newFile = new File(_file,path);
-            
+            File newFile = new File(_file,rel.replace('/', File.separatorChar));
             r=new FileResource(newFile.toURI().toURL(),null,newFile);
         }
-                                  
+
+        int expected=r._urlString.length()-path.length();
+        int index = r._urlString.lastIndexOf(path, expected);
+        if (expected!=index && ((expected-1)!=index || path.endsWith("/") || !r.isDirectory()))
+        {
+            r._alias=r._url;
+            r._aliasChecked=true;
+        }                              
         return r;
     }
    
