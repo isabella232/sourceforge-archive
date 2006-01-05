@@ -5,6 +5,7 @@ Jetty-5.1.10 - 5 January 2005
  + Fixed path aliasing with // on windows.
  + Fix for AJP13 with multiple headers
  + Fix for AJP13 with encoded path
+ + Remove null dispatch attributes from getAttributeNames
  + Put POST content default back to iso_8859_1. GET is UTF-8 still
 
 Jetty-5.1.9 - 7 December 2005
