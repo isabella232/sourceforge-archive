@@ -46,6 +46,7 @@ import org.mortbay.util.Password;
  * This is heavily based on the work from Court Demas, which in
  * turn is based on the work from Forge Research.
  *
+ * @deprecated Use org.mortbay.http.SslListener
  * @version $Id$
  * @author Martin Cordova (mcordova@megaserv.com)
  * @author Greg Wilkins (gregw@mortbay.com)
