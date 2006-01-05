@@ -1,11 +1,11 @@
 Jetty Versions 
 ==============
 
-
+Jetty-5.1.10 - 5 January 2005
+ + Fixed path aliasing with // on windows.
  + Fix for AJP13 with multiple headers
  + Fix for AJP13 with encoded path
  + Put POST content default back to iso_8859_1. GET is UTF-8 still
- + Fixed path aliasing with // on windows.
 
 Jetty-5.1.9 - 7 December 2005
  + Fixed wantClientAuth(false) overriding netClientAuth(true) 
