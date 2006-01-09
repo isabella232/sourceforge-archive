@@ -249,7 +249,7 @@ public class ContextLoader extends URLClassLoader
     {
         URL url= null;
         boolean tried_parent= false;
-        if (_java2compliant || isSystemPath(name))
+        if (_parent!=null &&(_java2compliant || isSystemPath(name)))
         {
             if (log.isTraceEnabled())
                 log.trace("try getResource " + name + " from " + _parent);
@@ -271,7 +271,7 @@ public class ContextLoader extends URLClassLoader
             }
         }
 
-        if (url == null && !tried_parent)
+        if (_parent!=null && url == null && !tried_parent)
         {
             if (log.isTraceEnabled())
                 log.trace("try getResource " + name + " from " + _parent);
