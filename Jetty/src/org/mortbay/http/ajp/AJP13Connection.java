@@ -196,7 +196,11 @@ public class AJP13Connection extends HttpConnection
                   request.setVersion(packet.getString());
                   
                   String path=packet.getString();
-                  request.setPath(URI.encodePath(path));
+                  int sc=path.lastIndexOf(";");
+                  if (sc<0)
+                      request.setPath(URI.encodePath(path));
+                  else
+                      request.setPath(URI.encodePath(path.substring(0,sc))+path.substring(sc));
                   
                   _remoteAddr=packet.getString();
                   _remoteHost=packet.getString();
