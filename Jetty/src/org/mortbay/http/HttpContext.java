@@ -1714,23 +1714,23 @@ public class HttpContext extends Container
     public void stop(boolean graceful)
         throws InterruptedException
     {
-	boolean gs=_gracefulStop;
-	try
-	{
-	    _gracefulStop=true;
-
-	    // wait for all requests to complete.
-	    while (graceful && _statsOn && _requestsActive>0 && _httpServer!=null)
-		try {Thread.sleep(100);}
-		catch (InterruptedException e){throw e;}
-		catch (Exception e){LogSupport.ignore(log,e);}
-
-	    stop();
-	}
-	finally
-	{
-	    _gracefulStop=gs;
-	}
+        boolean gs=_gracefulStop;
+        try
+        {
+            _gracefulStop=true;
+            
+            // wait for all requests to complete.
+            while (graceful && _statsOn && _requestsActive>0 && _httpServer!=null)
+                try {Thread.sleep(100);}
+            catch (InterruptedException e){throw e;}
+            catch (Exception e){LogSupport.ignore(log,e);}
+            
+            stop();
+        }
+        finally
+        {
+            _gracefulStop=gs;
+        }
     }
 
     /* ------------------------------------------------------------ */
