@@ -16,6 +16,7 @@
 package org.mortbay.http;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketException;
 
 import org.apache.commons.logging.Log;
 import org.mortbay.log.LogFactory;
@@ -252,11 +253,12 @@ public class SocketListener
     protected HttpConnection createConnection(Socket socket)
         throws IOException
     {
-        return new HttpConnection(this,
+        HttpConnection c = new HttpConnection(this,
                                   socket.getInetAddress(),
                                   socket.getInputStream(),
                                   socket.getOutputStream(),
                                   socket);
+        return c;
     }
 
     /* ------------------------------------------------------------ */

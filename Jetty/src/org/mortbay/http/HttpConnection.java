@@ -264,6 +264,8 @@ public class HttpConnection
     {
         try{
             _completing=true;
+            if (_connection instanceof Socket)
+                ((Socket)_connection).shutdownOutput();
             _outputStream.close();
             _inputStream.close();
         }

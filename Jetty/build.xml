@@ -175,6 +175,8 @@
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}"
 	   encoding="${javac.encoding}"
+	   source="${javac.target}"
+	   target="${javac.target}"
            >
        <classpath>
          <path refid="extpath"/>
@@ -345,6 +347,8 @@
            debug="${javac.debug}"
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}"
+	   source="${javac.target}"
+	   target="${javac.target}"
            >
       <classpath>
         <path refid="extpath"/>
