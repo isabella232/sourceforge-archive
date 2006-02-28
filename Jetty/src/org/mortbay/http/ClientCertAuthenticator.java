@@ -68,9 +68,9 @@ public class ClientCertAuthenticator implements Authenticator
      * @exception IOException 
      */
     public Principal authenticate(UserRealm realm,
-                                           String pathInContext,
-                                           HttpRequest request,
-                                           HttpResponse response)
+                                  String pathInContext,
+                                  HttpRequest request,
+                                  HttpResponse response)
         throws IOException
     {
         java.security.cert.X509Certificate[] certs =
@@ -119,7 +119,8 @@ public class ClientCertAuthenticator implements Authenticator
         Principal user = realm.authenticate(username,certs,request);
         
         request.setAuthType(SecurityConstraint.__CERT_AUTH);
-        request.setAuthUser(user.getName());
+        if (user!=null) 
+            request.setAuthUser(user.getName());
         request.setUserPrincipal(user);                
         return user;
     }

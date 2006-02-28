@@ -23,6 +23,8 @@ import java.net.Socket;
 import java.util.Enumeration;
 import java.util.List;
 
+import javax.net.ssl.SSLSocket;
+
 import org.apache.commons.logging.Log;
 import org.mortbay.log.LogFactory;
 import org.mortbay.util.InetAddrPort;
@@ -264,7 +266,7 @@ public class HttpConnection
     {
         try{
             _completing=true;
-            if (_connection instanceof Socket)
+            if (_connection instanceof Socket && !(_connection instanceof SSLSocket))
                 ((Socket)_connection).shutdownOutput();
             _outputStream.close();
             _inputStream.close();

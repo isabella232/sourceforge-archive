@@ -54,9 +54,7 @@ public interface UserRealm
      * FORM authentication).
      * @return The authenticated UserPrincipal.
      */
-    public Principal authenticate(String username,
-                                            Object credentials,
-                                            HttpRequest request);
+    public Principal authenticate(String username,Object credentials,HttpRequest request);
 
     /* ------------------------------------------------------------ */
     /** Re Authenticate a Principal.
