@@ -16,6 +16,7 @@
 package org.mortbay.http;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.SocketException;
 
 import org.mortbay.util.ByteArrayISO8859Writer;
 import org.mortbay.util.ByteBufferOutputStream;

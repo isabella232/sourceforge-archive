@@ -574,6 +574,7 @@ public class ServletHandler extends Container implements HttpHandler
             Throwable th=e;
             while (th instanceof ServletException)
             {
+                log.warn(LogSupport.EXCEPTION, th);
                 Throwable cause=((ServletException)th).getRootCause();
                 if (cause==th || cause==null)
                     break;
@@ -586,10 +587,20 @@ public class ServletHandler extends Container implements HttpHandler
                 throw (IOException)th;
             else if (log.isDebugEnabled() || !( th instanceof java.io.IOException))
             {
-                _contextLog.warn(httpRequest.getURI()+": ",th);
+                if (_contextLog!=null)
+                {
+                    if (th instanceof RuntimeException) 
+                        _contextLog.error(httpRequest.getURI()+": ",th);
+                    else
+                        _contextLog.warn(httpRequest.getURI()+": ",th);
+                }
+                
                 if(log.isDebugEnabled())
                 {
-                    log.warn(httpRequest.getURI()+": ",th);
+                    if (th instanceof RuntimeException) 
+                        log.error(httpRequest.getURI()+": ",th);
+                    else
+                        log.warn(httpRequest.getURI()+": ",th);
                     log.debug(httpRequest);
                 }
             }
