@@ -85,6 +85,7 @@ public class SslListener extends SocketListener
     private String _protocol= "TLS";
     private String _algorithm = "SunX509"; // cert algorithm
     private String _keystoreType = "JKS"; // type of the key store
+    private String _provider = null;
 
 
 
@@ -254,7 +255,12 @@ public class SslListener extends SocketListener
     protected SSLServerSocketFactory createFactory() 
     	throws Exception
     {
-        SSLContext context = SSLContext.getInstance(_protocol);
+        SSLContext context;
+        if (_provider == null) {
+			context = SSLContext.getInstance(_protocol);
+		} else {
+			context = SSLContext.getInstance(_protocol, _provider);
+		}
 
         KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(_algorithm);        
         KeyStore keyStore = KeyStore.getInstance(_keystoreType);
@@ -466,4 +472,12 @@ public class SslListener extends SocketListener
             return _certs;
         }
     }
+
+	public String getProvider() {
+		return _provider;
+	}
+
+	public void setProvider(String _provider) {
+		this._provider = _provider;
+	}
 }
