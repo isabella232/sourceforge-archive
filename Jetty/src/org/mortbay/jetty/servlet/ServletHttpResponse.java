@@ -88,7 +88,7 @@ public class ServletHttpResponse implements HttpServletResponse
     private HttpSession _session=null;
     private boolean _noSession=false;
     private Locale _locale=null;
-    private boolean _explicitEncoding=false;
+    private boolean _charEncodingSetInContentType=false;
 
     
     /* ------------------------------------------------------------ */
@@ -108,7 +108,7 @@ public class ServletHttpResponse implements HttpServletResponse
         _session=null;
         _noSession=false;
         _locale=null;
-        _explicitEncoding=false;
+        _charEncodingSetInContentType=false;
     }
     
     /* ------------------------------------------------------------ */
@@ -260,7 +260,7 @@ public class ServletHttpResponse implements HttpServletResponse
                     int semi=type.indexOf(';');
                     if (semi<0)
                         type += "; charset="+charset;
-                    else if (!_explicitEncoding)
+                    else if (!_charEncodingSetInContentType)
                         type = type.substring(0,semi)+"; charset="+charset;
                     
                     setHeader(HttpFields.__ContentType,type);
@@ -619,13 +619,30 @@ public class ServletHttpResponse implements HttpServletResponse
         int semi=contentType.indexOf(';');
         if (semi>0)
         {
-            if (_outputState==0)
+            int charset0=contentType.indexOf("charset=",semi);
+            if (charset0>0)
             {
-                _explicitEncoding=true;
-                _httpResponse.setContentType(contentType);
+                if (_outputState==WRITER_OUT)
+                {
+                    // need to strip charset= from params
+                    int charset1=contentType.indexOf(' ',charset0);
+                    
+                    if ((charset0==semi+1 && charset1<0) ||
+                        (charset0==semi+2 && charset1<0 && contentType.charAt(semi+1)==' ' ))
+                        _httpResponse.setContentType(contentType.substring(0,semi));
+                    else if (charset1<0)
+                        _httpResponse.setContentType(contentType.substring(0, charset0).trim());
+                    else
+                        _httpResponse.setContentType(contentType.substring(0, charset0)+contentType.substring(charset1));
+                }
+                else
+                {
+                    _charEncodingSetInContentType=true;
+                    _httpResponse.setContentType(contentType);
+                }
             }
             else
-                _httpResponse.setContentType(contentType.substring(0,semi));
+                _httpResponse.setContentType(contentType);
         }
         else
             _httpResponse.setContentType(contentType);
@@ -639,7 +656,7 @@ public class ServletHttpResponse implements HttpServletResponse
     {
         if (this._outputState==0 && !isCommitted())
         {
-            _explicitEncoding=true;
+            _charEncodingSetInContentType=true;
             _httpResponse.setCharacterEncoding(encoding,true);
         }
     }

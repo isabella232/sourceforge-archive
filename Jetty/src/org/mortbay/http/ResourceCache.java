@@ -73,8 +73,8 @@ public class ResourceCache implements LifeCycle,
     
     
     
-    private int _maxCachedFileSize =254*1024;
-    private int _maxCacheSize =4096*1024;
+    private int _maxCachedFileSize =1*1024;
+    private int _maxCacheSize =1*1024;
 
     /* ------------------------------------------------------------ */
     private Resource _resourceBase;

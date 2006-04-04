@@ -6,6 +6,7 @@ Jetty Versions
  + Added provider support to SslListener 
  + logging improvements for servlet and runtime exceptions
  + Fixed AJP handling of ;jsessionid.
+ + improved contentType param handling 
 
 Jetty-5.1.10 - 5 January 2005
  + Fixed path aliasing with // on windows.

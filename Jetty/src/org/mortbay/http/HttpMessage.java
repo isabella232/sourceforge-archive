@@ -566,7 +566,7 @@ public abstract class HttpMessage
             {
                 // Strip params off mimetype
                 _mimeType=contentType.substring(0,i0).trim();
-
+                
                 // Look for charset
                 int i1=contentType.indexOf("charset=",i0);
                 if (i1>=0)
@@ -574,17 +574,16 @@ public abstract class HttpMessage
                     i1+=8;
                     int i2 = contentType.indexOf(' ',i1);
                     _characterEncoding = (0<i2)
-                        ? contentType.substring(i1,i2)
-                        : contentType.substring(i1);
+                    ? contentType.substring(i1,i2)
+                                    : contentType.substring(i1);
                     _characterEncoding = QuotedStringTokenizer.unquote(_characterEncoding);
                 }
                 else // No encoding in the params.
-                 {
-                     if (_characterEncoding!=null)
-                         // Add any previously set encoding.
-                         contentType+=";charset="+
-                             QuotedStringTokenizer.quote(_characterEncoding,";= ");
-                 }
+                {
+                    if (_characterEncoding!=null)
+                        // Add any previously set encoding.
+                        contentType+=";charset="+QuotedStringTokenizer.quote(_characterEncoding,";= ");
+                }
             }
             else // No encoding and no other params
             {
