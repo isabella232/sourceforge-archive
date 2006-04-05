@@ -946,19 +946,19 @@ public class TestRFC2616
             // if GET w/o range had Content-Location, then the corresponding 
             // response for the a GET w/ range must also have that same header
 
-            offset=t.checkContains(response,offset,"--org.mortbay.http.MultiPartResponse.boundary","4a. content type") + 2;
+            offset=t.checkContains(response,offset,"--jetty","4a. content type") + 2;
             offset=t.checkContains(response,offset,"Content-Type: text/plain","4a. content type") + 2;
             offset=t.checkContains(response,offset,"Content-Range: bytes 1-3/26","4a. content range") + 2;
             offset=t.checkContains(response,offset, 
                     				TestRFC2616.testFiles[0].data.substring(1, 3+1), 
                                    "6. subrange data");
-            offset=t.checkContains(response,offset,"--org.mortbay.http.MultiPartResponse.boundary","4b. content type") + 2;
+            offset=t.checkContains(response,offset,"--jetty","4b. content type") + 2;
             offset=t.checkContains(response,offset,"Content-Type: text/plain","4bontent type") + 2;
             offset=t.checkContains(response,offset,"Content-Range: bytes 6-9/26","4b. content range") + 2;
             offset=t.checkContains(response,offset, 
                     				TestRFC2616.testFiles[0].data.substring(6, 9+1), 
                                    "6. subrange data");
-            offset=t.checkContains(response,offset,"--org.mortbay.http.MultiPartResponse.boundary","4c. content type") + 2;
+            offset=t.checkContains(response,offset,"--jetty","4c. content type") + 2;
             offset=t.checkContains(response,offset,"Content-Type: text/plain","4c. content type") + 2;
             offset=t.checkContains(response,offset,"Content-Range: bytes 12-14/26","4c. content range") + 2;
             offset=t.checkContains(response,offset, 
