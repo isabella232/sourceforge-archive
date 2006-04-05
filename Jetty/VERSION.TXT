@@ -1,6 +1,7 @@
 Jetty Versions 
 ==============
 
+Jetty-5.1.11RC0 - 5 April 2006
  + stop JDBCUserRealm forcing all credentials to be String
  + force close with shutdownOutput for win32
  + NPE protection if desirable client certificates
@@ -9,7 +10,7 @@ Jetty Versions
  + Fixed AJP handling of ;jsessionid.
  + improved contentType param handling 
 
-Jetty-5.1.10 - 5 January 2005
+Jetty-5.1.10 - 5 January 2006
  + Fixed path aliasing with // on windows.
  + Fix for AJP13 with multiple headers
  + Fix for AJP13 with encoded path
