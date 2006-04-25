@@ -1,6 +1,8 @@
 Jetty Versions 
 ==============
 
+ + fixed ByteBufferOutputStream capacity calculation
+ 
 Jetty-5.1.11RC0 - 5 April 2006
  + stop JDBCUserRealm forcing all credentials to be String
  + force close with shutdownOutput for win32
