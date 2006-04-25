@@ -371,7 +371,7 @@ public class ByteBufferOutputStream extends OutputStream
             if (_fixed)
                 throw new IllegalStateException("Fixed");
                 
-            int new_size = ((n+_preReserve+_postReserve+4095)/4096)+4096;
+            int new_size = ((n+_preReserve+_postReserve+4095)/4096)*4096;
             
             byte[] old = _buf;
             _buf = new byte[new_size];
