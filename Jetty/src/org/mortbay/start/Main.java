@@ -116,7 +116,7 @@ public class Main
         {}
         return null;
     }
-
+    
     boolean isAvailable(String classname)
     {
         try
@@ -124,15 +124,15 @@ public class Main
             Class.forName(classname);
             return true;
         }
-        catch(ClassNotFoundException e)
-        {}
+        catch(NoClassDefFoundError e) {}
+        catch(ClassNotFoundException e) {}
         ClassLoader loader=_classpath.getClassLoader();
         try
         {
             loader.loadClass(classname);
             return true;
         } 
-    catch(NoClassDefFoundError e) {}
+        catch(NoClassDefFoundError e) {}
         catch(ClassNotFoundException e) {}
         return false;
     }
