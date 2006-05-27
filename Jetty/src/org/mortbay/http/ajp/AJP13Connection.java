@@ -227,14 +227,17 @@ public class AJP13Connection extends HttpConnection
                   byte attr=packet.getByte();
                   while ((0xFF&attr)!=0xFF)
                   {
-                      String value=packet.getString();
+                      String value = (attr == 11) ? null : packet.getString();                       
                       switch (attr)
                       {
+                        case 11: // key size
+                            request.setAttribute("javax.servlet.request.key_size",new Integer(packet.getInt()));
+                            break;                        	
                         case 10: // request attribute
                             request.setAttribute(value,packet.getString());
                             break;
                         case 9: // SSL session
-                            //log.warn("not implemented: sslsession="+value);
+                            request.setAttribute("javax.servlet.request.ssl_session",value);
                             break;
                         case 8: // SSL cipher
                             request.setAttribute("javax.servlet.request.cipher_suite",value);
