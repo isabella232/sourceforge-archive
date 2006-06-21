@@ -2,6 +2,8 @@ Jetty Versions
 ==============
 
  + fixed ByteBufferOutputStream capacity calculation
+ + Fixed AJP13 handling of certificate length
+ + Fixed order of destruction event calls
  
 Jetty-5.1.11RC0 - 5 April 2006
  + stop JDBCUserRealm forcing all credentials to be String

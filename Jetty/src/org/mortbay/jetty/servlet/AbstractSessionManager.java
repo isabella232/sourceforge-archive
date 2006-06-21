@@ -716,7 +716,7 @@ public abstract class AbstractSessionManager implements SessionManager
                     if (_sessionListeners!=null)
                     {
                         HttpSessionEvent event=new HttpSessionEvent(this);
-                        for (int i=0; i<_sessionListeners.size(); i++)
+                        for (int i=_sessionListeners.size(); i-->0;)
                             ((HttpSessionListener)_sessionListeners.get(i)).sessionDestroyed(event);
                     }
 
