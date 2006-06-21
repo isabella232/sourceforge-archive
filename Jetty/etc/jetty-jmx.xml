@@ -21,14 +21,14 @@
      <Call name="createMBean">
        <Arg>org.mortbay.jetty.jmx.ServerMBean</Arg>
        <Arg><New class="javax.management.ObjectName"><Arg>org.mortbay:jetty=admin</Arg></New></Arg>
-       <Arg><Array type="java.lang.Object"><Item>etc/admin.xml</Item></Array></Arg>
+       <Arg><Array type="java.lang.Object"><Item><SystemProperty name="jetty.home" default="."/>/etc/admin.xml</Item></Array></Arg>
        <Arg><Array type="java.lang.String"><Item>java.lang.String</Item></Array></Arg>
      </Call>
 
      <Call name="createMBean">
        <Arg>org.mortbay.jetty.jmx.ServerMBean</Arg>
        <Arg><New class="javax.management.ObjectName"><Arg>org.mortbay:jetty=default</Arg></New></Arg>
-       <Arg><Array type="java.lang.Object"><Item>etc/jetty.xml</Item></Array></Arg>
+       <Arg><Array type="java.lang.Object"><Item><SystemProperty name="jetty.home" default="."/>/etc/jetty.xml</Item></Array></Arg>
        <Arg><Array type="java.lang.String"><Item>java.lang.String</Item></Array></Arg>
      </Call>
 
