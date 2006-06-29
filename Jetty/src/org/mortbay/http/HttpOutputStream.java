@@ -351,8 +351,8 @@ public class HttpOutputStream extends OutputStream
         if (_bufferedOut!=null)
         {
             _bufferedOut.resetStream();
-        	if (_bufferedOut instanceof ChunkingOutputStream)
-        	    ((ChunkingOutputStream)_bufferedOut).setChunking(false);
+            if (_bufferedOut instanceof ChunkingOutputStream)
+                ((ChunkingOutputStream)_bufferedOut).setChunking(false);
         }
         if (_iso8859writer!=null)
             _iso8859writer.flush();

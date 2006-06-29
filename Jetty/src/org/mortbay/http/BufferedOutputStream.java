@@ -115,6 +115,8 @@ public class BufferedOutputStream
         throws IOException
     {
         httpMessage.writeHeader(_httpMessageWriter);
+        if (_httpMessageWriter.size()>capacity())
+            throw new IllegalStateException("Header too large");
     }
     
     /* ------------------------------------------------------------ */
