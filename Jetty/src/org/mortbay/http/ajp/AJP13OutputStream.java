@@ -174,6 +174,7 @@ public class AJP13OutputStream extends BufferedOutputStream
         _packet.resetData();
         _packet.addByte(AJP13ResponsePacket.__SEND_BODY_CHUNK);
         _packet.setDataSize(size()-AJP13ResponsePacket.__HDR_SIZE);
+        write((byte) 0);
     }
     
     /* ------------------------------------------------------------ */

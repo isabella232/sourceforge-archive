@@ -406,11 +406,17 @@ public abstract class AJP13Packet
     {
         _bytes=s+__HDR_SIZE;
         
-        _buf[2]=(byte)((s>>8) & 0xFF);
-        _buf[3]=(byte)(s & 0xFF);
         if (_buf[4]==__SEND_BODY_CHUNK)
         {
-            s=s-3;
+            s=s+1;
+        }
+
+        _buf[2]=(byte)((s>>8) & 0xFF);
+        _buf[3]=(byte)(s & 0xFF);
+
+        if (_buf[4]==__SEND_BODY_CHUNK)
+        {
+            s=s-4;
             _buf[5]=(byte)((s>>8) & 0xFF);
             _buf[6]=(byte)(s & 0xFF);
         }

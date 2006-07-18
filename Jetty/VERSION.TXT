@@ -2,7 +2,8 @@ Jetty Versions
 ==============
 
  + fixed ByteBufferOutputStream capacity calculation
- + Fixed AJP13 handling of certificate length
+ + Fixed AJP handling of certificate length (1494939)
+ + Fixed AJP chunk header (1507377)
  + Fixed order of destruction event calls
  
 Jetty-5.1.11RC0 - 5 April 2006
