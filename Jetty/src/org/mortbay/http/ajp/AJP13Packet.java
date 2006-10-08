@@ -15,7 +15,6 @@
 
 package org.mortbay.http.ajp;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,16 +28,15 @@ import org.mortbay.util.ByteArrayPool;
 import org.mortbay.util.LogSupport;
 import org.mortbay.util.StringUtil;
 
-
 /* ------------------------------------------------------------ */
 /**
- *
+ * 
  * @version $Id$
  * @author Greg Wilkins (gregw)
  */
 public abstract class AJP13Packet
 {
-    private static Log log = LogFactory.getLog(AJP13Packet.class);
+    private static Log log=LogFactory.getLog(AJP13Packet.class);
 
     /* ------------------------------------------------------------ */
     public static final int __MAX_BUF=8192;
@@ -46,78 +44,50 @@ public abstract class AJP13Packet
     public static final int __DATA_HDR=7;
     public static final int __MAX_DATA=__MAX_BUF-__DATA_HDR;
 
-    public static final byte
-        __FORWARD_REQUEST=2,
-        __SHUTDOWN=7,
-        __SEND_BODY_CHUNK=3,
-        __SEND_HEADERS=4,
-        __END_RESPONSE=5,
-        __GET_BODY_CHUNK=6;
-    
+    public static final byte __FORWARD_REQUEST=2, __SHUTDOWN=7, __SEND_BODY_CHUNK=3, __SEND_HEADERS=4, __END_RESPONSE=5, __GET_BODY_CHUNK=6;
+
     public static final String[] __method=
-    {
-        "ERROR",
-        "OPTIONS",
-        "GET",
-        "HEAD",
-        "POST",
-        "PUT",
-        "DELETE",
-        "TRACE",
-        "PROPFIND",
-        "PROPPATCH",
-        "MKCOL",
-        "COPY",
-        "MOVE",
-        "LOCK",
-        "UNLOCK",
-        "ACL",
-        "REPORT",
-        "VERSION-CONTROL",
-        "CHECKIN",
-        "CHECKOUT",
-        "UNCHECKOUT",
-        "SEARCH"
-    };
-    
-    public  String[] __header;
-    
-    protected  HashMap __headerMap = new HashMap();
-    
-	/**
-	 * Abstract method to populate the header array and hash map.
-	 *  
-	 */
+    { "ERROR", "OPTIONS", "GET", "HEAD", "POST", "PUT", "DELETE", "TRACE", "PROPFIND", "PROPPATCH", "MKCOL", "COPY", "MOVE", "LOCK", "UNLOCK", "ACL", "REPORT",
+            "VERSION-CONTROL", "CHECKIN", "CHECKOUT", "UNCHECKOUT", "SEARCH" };
+
+    public String[] __header;
+
+    protected HashMap __headerMap=new HashMap();
+
+    /**
+     * Abstract method to populate the header array and hash map.
+     * 
+     */
     abstract public void populateHeaders();
-    
+
     /* ------------------------------------------------------------ */
     private byte[] _buf;
     private int _bytes;
     private int _pos;
     private ByteArrayISO8859Writer _byteWriter;
     private boolean _ownBuffer;
-    
+
     /* ------------------------------------------------------------ */
     public AJP13Packet(byte[] buffer, int len)
     {
-    	populateHeaders();
+        populateHeaders();
         _buf=buffer;
         _ownBuffer=false;
         _bytes=len;
     }
-    
+
     /* ------------------------------------------------------------ */
     public AJP13Packet(byte[] buffer)
     {
-		populateHeaders();
+        populateHeaders();
         _buf=buffer;
         _ownBuffer=false;
     }
-    
+
     /* ------------------------------------------------------------ */
     public AJP13Packet(int size)
     {
-		populateHeaders();
+        populateHeaders();
         _buf=ByteArrayPool.getByteArray(size);
         _ownBuffer=true;
     }
@@ -131,7 +101,7 @@ public abstract class AJP13Packet
         addByte((byte)'B');
         addInt(0);
     }
-    
+
     /* ------------------------------------------------------------ */
     public void destroy()
     {
@@ -166,7 +136,7 @@ public abstract class AJP13Packet
     {
         return _bytes;
     }
-    
+
     /* ------------------------------------------------------------ */
     public int getBufferSize()
     {
@@ -174,26 +144,25 @@ public abstract class AJP13Packet
     }
 
     /* ------------------------------------------------------------ */
-    /** 
-     * @return Bytes of data remaining 
+    /**
+     * @return Bytes of data remaining
      */
     public int unconsumedData()
     {
         return _bytes-_pos;
     }
-    
+
     /* ------------------------------------------------------------ */
-    /** 
-     * @return Bytes of capacity remaining 
+    /**
+     * @return Bytes of capacity remaining
      */
     public int unconsumedCapacity()
     {
         return _buf.length-_bytes;
     }
-    
+
     /* ------------------------------------------------------------ */
-    public boolean read(InputStream in)
-        throws IOException
+    public boolean read(InputStream in) throws IOException
     {
         _bytes=0;
         _pos=0;
@@ -215,12 +184,10 @@ public abstract class AJP13Packet
         int len=getInt();
 
         // check packet fits into the buffer
-        int packetLength = __HDR_SIZE + len;
-        if ( packetLength > _buf.length )
-            throw new IOException("AJP13 packet (" + packetLength +
-                                  "bytes) too large for buffer (" + _buf.length +
-                                  " bytes)");
-        
+        int packetLength=__HDR_SIZE+len;
+        if (packetLength>_buf.length)
+            throw new IOException("AJP13 packet ("+packetLength+"bytes) too large for buffer ("+_buf.length+" bytes)");
+
         // read packet
         do
         {
@@ -230,52 +197,55 @@ public abstract class AJP13Packet
             _bytes+=l;
         }
         while (_bytes<packetLength);
-        
-        if(log.isTraceEnabled())log.trace("AJP13 rcv: "+this.toString(64));
-	//System.err.println(Thread.currentThread()+" AJP13 rcv "+this.toString());
+
+        if (log.isTraceEnabled())
+            log.trace("AJP13 rcv: "+this.toString(64));
+        // System.err.println(Thread.currentThread()+" AJP13 rcv
+        // "+this.toString());
 
         return true;
     }
 
     /* ------------------------------------------------------------ */
-    public void write(OutputStream out)
-        throws IOException
+    public void write(OutputStream out) throws IOException
     {
-        if(log.isTraceEnabled())log.trace("AJP13 snd: "+this.toString(64));
-	//System.err.println(Thread.currentThread()+" AJP13 snd "+this.toString());
+        if (log.isTraceEnabled())
+            log.trace("AJP13 snd: "+this.toString(64));
+        // System.err.println(Thread.currentThread()+" AJP13 snd
+        // "+this.toString());
         out.write(_buf,0,_bytes);
     }
-    
+
     /* ------------------------------------------------------------ */
     public byte getByte()
     {
         return _buf[_pos++];
     }
-    
+
     /* ------------------------------------------------------------ */
-    public int getBytes(byte[] buf,int offset,int length)
-    {   
+    public int getBytes(byte[] buf, int offset, int length)
+    {
         if (length>unconsumedData())
             length=unconsumedData();
         System.arraycopy(_buf,_pos,buf,offset,length);
         _pos+=length;
         return length;
     }
-    
+
     /* ------------------------------------------------------------ */
     public boolean getBoolean()
     {
         return _buf[_pos++]!=0;
     }
-    
+
     /* ------------------------------------------------------------ */
     public int getInt()
     {
-	int i =  _buf[_pos++] & 0xFF;
-        i=(i<<8)+(_buf[_pos++] & 0xFF);
+        int i=_buf[_pos++]&0xFF;
+        i=(i<<8)+(_buf[_pos++]&0xFF);
         return i;
     }
-    
+
     /* ------------------------------------------------------------ */
     public String getString()
     {
@@ -296,37 +266,38 @@ public abstract class AJP13Packet
         }
         catch (UnsupportedEncodingException e)
         {
-            log.fatal(e); System.exit(1);
+            log.fatal(e);
+            System.exit(1);
             return null;
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     public String getMethod()
     {
         return __method[getByte()];
     }
-    
+
     /* ------------------------------------------------------------ */
     public String getHeader()
     {
         if ((0xFF&_buf[_pos])==0xA0)
         {
             _pos++;
-           
+
             return __header[_buf[_pos++]];
         }
         return getString();
     }
-    
+
     /* ------------------------------------------------------------ */
     public void addByte(byte b)
     {
         _buf[_bytes++]=b;
     }
-    
+
     /* ------------------------------------------------------------ */
-    public int addBytes(byte[] buf,int offset,int length)
+    public int addBytes(byte[] buf, int offset, int length)
     {
         if (length>unconsumedCapacity())
             length=unconsumedCapacity();
@@ -334,30 +305,29 @@ public abstract class AJP13Packet
         _bytes+=length;
         return length;
     }
-    
+
     /* ------------------------------------------------------------ */
     public void addBoolean(boolean b)
     {
         _buf[_bytes++]=(byte)(b?1:0);
     }
-    
+
     /* ------------------------------------------------------------ */
     public void addInt(int i)
     {
-        _buf[_bytes++]=(byte)((i>>8) & 0xFF);
-        _buf[_bytes++]=(byte)(i & 0xFF);
+        _buf[_bytes++]=(byte)((i>>8)&0xFF);
+        _buf[_bytes++]=(byte)(i&0xFF);
     }
-    
+
     /* ------------------------------------------------------------ */
     public void setInt(int mark, int i)
     {
-        _buf[mark]=(byte)((i>>8) & 0xFF);
-        _buf[mark+1]=(byte)(i & 0xFF);
+        _buf[mark]=(byte)((i>>8)&0xFF);
+        _buf[mark+1]=(byte)(i&0xFF);
     }
-    
+
     /* ------------------------------------------------------------ */
-    public void addString(String s)
-        throws IOException
+    public void addString(String s) throws IOException
     {
         if (s==null)
         {
@@ -367,7 +337,7 @@ public abstract class AJP13Packet
 
         if (_byteWriter==null)
             _byteWriter=new ByteArrayISO8859Writer(_buf);
-        
+
         int p=_bytes+2;
         _byteWriter.setLength(p);
         _byteWriter.write(s);
@@ -379,22 +349,21 @@ public abstract class AJP13Packet
     }
 
     /* ------------------------------------------------------------ */
-    public void addHeader(String s)
-        throws IOException
+    public void addHeader(String s) throws IOException
     {
-        Integer h = (Integer)__headerMap.get(s);
+        Integer h=(Integer)__headerMap.get(s);
         if (h!=null)
             addInt(h.intValue());
         else
             addString(s);
     }
-    
+
     /* ------------------------------------------------------------ */
     public int getDataSize()
     {
         return _bytes-__HDR_SIZE;
     }
-    
+
     /* ------------------------------------------------------------ */
     public void setDataSize()
     {
@@ -405,29 +374,27 @@ public abstract class AJP13Packet
     public void setDataSize(int s)
     {
         _bytes=s+__HDR_SIZE;
-        
-        if (_buf[4]==__SEND_BODY_CHUNK)
-        {
-            s=s+1;
-        }
 
-        _buf[2]=(byte)((s>>8) & 0xFF);
-        _buf[3]=(byte)(s & 0xFF);
+        if (_buf[4]==__SEND_BODY_CHUNK)
+            s=s+1;
+
+        _buf[2]=(byte)((s>>8)&0xFF);
+        _buf[3]=(byte)(s&0xFF);
 
         if (_buf[4]==__SEND_BODY_CHUNK)
         {
             s=s-4;
-            _buf[5]=(byte)((s>>8) & 0xFF);
-            _buf[6]=(byte)(s & 0xFF);
+            _buf[5]=(byte)((s>>8)&0xFF);
+            _buf[6]=(byte)(s&0xFF);
         }
     }
-    
+
     /* ------------------------------------------------------------ */
     public String toString()
     {
         return toString(-1);
     }
-    
+
     /* ------------------------------------------------------------ */
     public String toString(int max)
     {
@@ -441,48 +408,60 @@ public abstract class AJP13Packet
         b.append(_pos);
         b.append("]: ");
 
-        switch(_buf[__HDR_SIZE])
+        switch (_buf[__HDR_SIZE])
         {
-          case __FORWARD_REQUEST: b.append("FORWARD_REQUEST{:");break;
-          case __SHUTDOWN:        b.append("SHUTDOWN        :");break;
-          case __SEND_BODY_CHUNK: b.append("SEND_BODY_CHUNK :");break;
-          case __SEND_HEADERS:    b.append("SEND_HEADERS  ( :");break;
-          case __END_RESPONSE:    b.append("END_RESPONSE  )}:");break;
-          case __GET_BODY_CHUNK:  b.append("GET_BODY_CHUNK  :");break;
+            case __FORWARD_REQUEST:
+                b.append("FORWARD_REQUEST{:");
+                break;
+            case __SHUTDOWN:
+                b.append("SHUTDOWN        :");
+                break;
+            case __SEND_BODY_CHUNK:
+                b.append("SEND_BODY_CHUNK :");
+                break;
+            case __SEND_HEADERS:
+                b.append("SEND_HEADERS  ( :");
+                break;
+            case __END_RESPONSE:
+                b.append("END_RESPONSE  )}:");
+                break;
+            case __GET_BODY_CHUNK:
+                b.append("GET_BODY_CHUNK  :");
+                break;
         }
-        
+
         if (max==0)
             return b.toString();
-        
+
         b.append("\n");
-        
-        for (int i=0;i<_bytes;i++)
+
+        for (int i=0; i<_bytes; i++)
         {
             int d=_buf[i]&0xFF;
             if (d<16)
                 b.append('0');
             b.append(Integer.toString(d,16));
 
-            char c= (char)d;
-            
+            char c=(char)d;
+
             if (Character.isLetterOrDigit(c))
                 a.append(c);
             else
                 a.append('.');
-            
-            if (i%32==31 || i==(_bytes-1))
+
+            if (i%32==31||i==(_bytes-1))
             {
                 b.append(" : ");
                 b.append(a.toString());
                 a.setLength(0);
                 b.append("\n");
-                if (max>0 && (i+1)>=max)
+                if (max>0&&(i+1)>=max)
                     break;
             }
             else
                 b.append(",");
-        }   
-        
+        }
+
         return b.toString();
-    }    
+    }
 }

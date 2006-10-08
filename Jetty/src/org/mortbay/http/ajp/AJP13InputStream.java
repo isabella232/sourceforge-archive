@@ -15,13 +15,12 @@
 
 package org.mortbay.http.ajp;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 public class AJP13InputStream extends InputStream
-{   
+{
     /* ------------------------------------------------------------ */
     private AJP13RequestPacket _packet;
     private AJP13RequestPacket _getBodyChunk;
@@ -29,7 +28,7 @@ public class AJP13InputStream extends InputStream
     private OutputStream _out;
     private boolean _gotFirst=false;
     private boolean _closed;
-    
+
     /* ------------------------------------------------------------ */
     AJP13InputStream(InputStream in, OutputStream out, int bufferSize)
     {
@@ -51,21 +50,22 @@ public class AJP13InputStream extends InputStream
         _closed=false;
         _packet.reset();
     }
-    
+
     /* ------------------------------------------------------------ */
     public void destroy()
     {
-        if (_packet!=null)_packet.destroy();
+        if (_packet!=null)
+            _packet.destroy();
         _packet=null;
-        if (_getBodyChunk!=null)_getBodyChunk.destroy();
+        if (_getBodyChunk!=null)
+            _getBodyChunk.destroy();
         _getBodyChunk=null;
         _in=null;
         _out=null;
     }
 
     /* ------------------------------------------------------------ */
-    public int available()
-        throws IOException
+    public int available() throws IOException
     {
         if (_closed)
             return 0;
@@ -75,15 +75,15 @@ public class AJP13InputStream extends InputStream
     }
 
     /* ------------------------------------------------------------ */
-    public void close()
-        throws IOException
+    public void close() throws IOException
     {
         _closed=true;
     }
 
     /* ------------------------------------------------------------ */
     public void mark(int readLimit)
-    {}
+    {
+    }
 
     /* ------------------------------------------------------------ */
     public boolean markSupported()
@@ -92,19 +92,17 @@ public class AJP13InputStream extends InputStream
     }
 
     /* ------------------------------------------------------------ */
-    public void reset()
-        throws IOException
+    public void reset() throws IOException
     {
         throw new IOException("reset() not supported");
     }
 
     /* ------------------------------------------------------------ */
-    public int read()
-        throws IOException
+    public int read() throws IOException
     {
         if (_closed)
             return -1;
-        
+
         if (_packet.unconsumedData()<=0)
         {
             fillPacket();
@@ -118,12 +116,11 @@ public class AJP13InputStream extends InputStream
     }
 
     /* ------------------------------------------------------------ */
-    public int read(byte[] b, int off, int len)
-        throws IOException
+    public int read(byte[] b, int off, int len) throws IOException
     {
         if (_closed)
             return -1;
-        
+
         if (_packet.unconsumedData()==0)
         {
             fillPacket();
@@ -133,53 +130,50 @@ public class AJP13InputStream extends InputStream
                 return -1;
             }
         }
-        
+
         return _packet.getBytes(b,off,len);
     }
 
     /* ------------------------------------------------------------ */
-    /** 
+    /**
      * @return The next packet from the stream. The packet is recycled and is
-     * only valid until the next call to nextPacket or read().
-     * @exception IOException 
+     *         only valid until the next call to nextPacket or read().
+     * @exception IOException
      */
-    public AJP13RequestPacket nextPacket()
-        throws IOException
+    public AJP13RequestPacket nextPacket() throws IOException
     {
         if (_packet.read(_in))
             return _packet;
         return null;
     }
-    
+
     /* ------------------------------------------------------------ */
-    private void fillPacket()
-        throws IOException
+    private void fillPacket() throws IOException
     {
         if (_closed)
             return;
-        
-        if (_gotFirst || _in.available()==0) 
+
+        if (_gotFirst||_in.available()==0)
             _getBodyChunk.write(_out);
         _gotFirst=true;
 
         // read packet
         if (!_packet.read(_in))
             throw new IOException("EOF");
-        
+
         if (_packet.unconsumedData()<=0)
             _closed=true;
-        else if(_packet.getInt()>_packet.getBufferSize())
+        else if (_packet.getInt()>_packet.getBufferSize())
             throw new IOException("AJP Protocol error");
     }
-    
+
     /* ------------------------------------------------------------ */
-    public long skip(long n)
-        throws IOException
+    public long skip(long n) throws IOException
     {
         if (_closed)
             return -1;
-        
-        for (int i=0;i<n;i++)
+
+        for (int i=0; i<n; i++)
             if (read()<0)
                 return i==0?-1:i;
         return n;

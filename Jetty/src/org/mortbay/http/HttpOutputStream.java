@@ -752,7 +752,7 @@ public class HttpOutputStream extends OutputStream
                             s=0;
                         }
                         char[] chars = str.toCharArray();
-                        writeEncoded(chars,offset+i,chars.length-(offset+i));
+                        writeEncoded(chars,offset+i,len-i);
                         break;
                     }
                 }

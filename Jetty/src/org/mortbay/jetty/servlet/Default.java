@@ -674,7 +674,7 @@ public class Default extends HttpServlet
         response.setContentType(metaData.getMimeType());
         if (count != -1)
         {
-            if (count == resource.length())
+            if (count == resource.length() && response instanceof ServletHttpResponse )
                 response.setHeader(HttpFields.__ContentLength, metaData.getLength());
             else
                 response.setContentLength((int) count);

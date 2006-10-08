@@ -1,10 +1,13 @@
 Jetty Versions 
 ==============
 
+Jetty-5.1.11 - 8 October 2006
  + fixed ByteBufferOutputStream capacity calculation
  + Fixed AJP handling of certificate length (1494939)
  + Fixed AJP chunk header (1507377)
  + Fixed order of destruction event calls
+ + Fix to HttpOutputStream from M.Traverso
+ + Default servlet only uses setContentLength on wrapped responses
  
 Jetty-5.1.11RC0 - 5 April 2006
  + stop JDBCUserRealm forcing all credentials to be String

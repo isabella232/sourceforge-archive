@@ -241,6 +241,20 @@ public class ByteBufferOutputStream extends OutputStream
      * @param length 
      * @exception IOException 
      */
+    public void postwrite(byte b)
+        throws IOException
+    {
+        _buf[_pos++]=b;
+    }
+
+    /* ------------------------------------------------------------ */
+    /** Write bytes into the postreserve.
+     * The capacity is not checked.
+     * @param b 
+     * @param offset 
+     * @param length 
+     * @exception IOException 
+     */
     public void postwrite(byte[] b,int offset, int length)
         throws IOException
     {
