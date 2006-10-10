@@ -90,7 +90,8 @@ public class WebApplicationContext
     /** Constructor. 
      */
     public WebApplicationContext()
-    {}
+    {
+    }
     
     /* ------------------------------------------------------------ */
     /** Constructor. 

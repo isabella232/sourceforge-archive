@@ -56,6 +56,7 @@
   <!-- This protocol can be used with mod_jk in apache, IIS etc.       -->
   <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
   <!--
+  -->
   <Call name="addListener">
     <Arg>
       <New class="org.mortbay.http.ajp.AJP13Listener">
@@ -68,7 +69,6 @@
       </New>
     </Arg>
   </Call>
-  -->
 
 
   <!-- =============================================================== -->

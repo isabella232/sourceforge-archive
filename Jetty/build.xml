@@ -180,6 +180,7 @@
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}"
            target="1.2"
+           source="1.2"
            >
        <classpath>
          <path refid="extpath"/>
@@ -193,6 +194,8 @@
            debug="${javac.debug}"
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}"
+           target="1.2"
+           source="1.2"
            >
        <classpath>
          <path refid="extpath"/>
@@ -347,6 +350,8 @@
            debug="${javac.debug}"
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}"
+           target="1.2"
+           source="1.2"
            >
       <classpath>
         <pathelement path="${servlet.jar}" />
@@ -367,6 +372,8 @@
            debug="${javac.debug}"
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}"
+           target="1.2"
+           source="1.2"
            >
       <classpath>
         <pathelement path="${servlet.jar}" />
@@ -379,6 +386,8 @@
            debug="${javac.debug}"
            optimize="${javac.optimize}"
            deprecation="${javac.deprecation}"
+           target="1.2"
+           source="1.2"
            >
       <classpath>
         <pathelement path="${servlet.jar}" />

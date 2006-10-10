@@ -1,6 +1,9 @@
 Jetty Versions
 --------------
 
+Jetty-4.2.26 - 8 October 2006
+ + Backport of AJP fixes
+
 Jetty-4.2.25 - 4 Jan 2006 
  + Fixed aliasing of // for win32
 
@@ -57,6 +60,9 @@ Jetty-5.1.2 - 18 January 2005
  + Cleaned up AbstractSessionManager synchronization.
  + Fixed potential concurrent login problem with JAAS
  + Apply patch #1103953
+
+Jetty-4.2.23.1 - 18 January 2006
+ + Fixed aliasing of // for win32
 
 Jetty-4.2.23 - 16 January 2005
  + Cleaned up AbstractSessionManager synchronization.
