@@ -9,6 +9,9 @@ Jetty-5.1.11 - 8 October 2006
  + Fix to HttpOutputStream from M.Traverso
  + Default servlet only uses setContentLength on wrapped responses
  
+Jetty-4.2.26 - 8 October 2006
+ + Backport of AJP fixes
+
 Jetty-5.1.11RC0 - 5 April 2006
  + stop JDBCUserRealm forcing all credentials to be String
  + force close with shutdownOutput for win32
