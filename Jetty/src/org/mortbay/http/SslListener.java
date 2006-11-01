@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.KeyStore;
+import java.security.Security;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -83,7 +84,7 @@ public class SslListener extends SocketListener
     private boolean _needClientAuth = false; // Set to true if we require client certificate authentication.
     private boolean _wantClientAuth = false; // Set to true if we would like client certificate authentication.
     private String _protocol= "TLS";
-    private String _algorithm = "SunX509"; // cert algorithm
+    private String _algorithm = (Security.getProperty("ssl.KeyManagerFactory.algorithm")==null?"SunX509":Security.getProperty("ssl.KeyManagerFactory.algorithm")); // cert algorithm
     private String _keystoreType = "JKS"; // type of the key store
     private String _provider = null;
 
