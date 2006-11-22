@@ -198,6 +198,16 @@ public class AJP13Connection extends HttpConnection
                     request.setState(HttpMessage.__MSG_EDITABLE);
                     request.setMethod(packet.getMethod());
                     request.setVersion(packet.getString());
+		    String version=packet.getString();
+		    try
+		    {
+			request.setVersion(version);
+		    }
+		    catch(Exception e)
+		    {
+			log.warn("Bad version"+version,e);
+			log.warn(packet.toString());
+		    }
 
                     String path=packet.getString();
                     int sc=path.lastIndexOf(";");
