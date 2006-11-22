@@ -1460,9 +1460,9 @@ public class HttpFields
             if (value!=null && value.length()>0)
             {
                 if (version==0)
-                    URI.encodeString(buf,value,"\";, ");
+                    URI.encodeString(buf,value,"\";, '");
                 else
-                    buf.append(QuotedStringTokenizer.quote(value,"\";, "));
+                    buf.append(QuotedStringTokenizer.quote(value,"\";, '"));
             }
 
             if (version>0)

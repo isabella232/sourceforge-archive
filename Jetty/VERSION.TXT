@@ -1,6 +1,10 @@
 Jetty Versions 
 ==============
 
+Jetty-5.1.12 - 22 November 2006
+ + Added support for TLS_DHE_RSA_WITH_AES_256_CBC_SHA
+ + Upgraded session ID generation to use SecureRandom
+
 Jetty-5.1.11 - 8 October 2006
  + fixed ByteBufferOutputStream capacity calculation
  + Fixed AJP handling of certificate length (1494939)
