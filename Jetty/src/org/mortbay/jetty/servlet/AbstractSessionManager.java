@@ -15,6 +15,8 @@
 
 package org.mortbay.jetty.servlet;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -82,6 +84,7 @@ public abstract class AbstractSessionManager implements SessionManager
     protected transient ArrayList _sessionAttributeListeners=new ArrayList();
     protected transient Map _sessions;
     protected transient Random _random;
+    protected transient boolean _weakRandom;
     protected transient ServletHandler _handler;
     protected int _minSessions = 0;
     protected int _maxSessions = 0;
@@ -102,6 +105,7 @@ public abstract class AbstractSessionManager implements SessionManager
     public AbstractSessionManager(Random random)
     {
         _random=random;
+        _weakRandom=false;
     }
     
     
@@ -192,8 +196,7 @@ public abstract class AbstractSessionManager implements SessionManager
     /* ------------------------------------------------------------ */
     /* new Session ID.
      * If the request has a requestedSessionID which is unique, that is used.
-     * The session ID is created as a unique random long, represented as in a
-     * base between 30 and 36, selected by timestamp.
+     * The session ID is created as a unique random long base 36.
      * If the request has a jvmRoute attribute, that is appended as a
      * worker tag, else any worker tag set on the manager is appended.
      * @param request 
@@ -221,9 +224,16 @@ public abstract class AbstractSessionManager implements SessionManager
             String id=null;
             while (id==null || id.length()==0 || __allSessions.containsKey(id))
             {
-                long r = _random.nextLong();
-                if (r<0)r=-r;
-                id=Long.toString(r,30+(int)(created%7));
+                long r=_weakRandom
+                ?(hashCode()^Runtime.getRuntime().freeMemory()^_random.nextInt()^(((long)request.hashCode())<<32))
+                :_random.nextLong();
+                r^=created;
+                if (request!=null && request.getRemoteAddr()!=null)
+                    r^=request.getRemoteAddr().hashCode();
+                if (r<0)
+                    r=-r;
+                id=Long.toString(r,36);
+                
                 String worker = (String)request.getAttribute("org.mortbay.http.ajp.JVMRoute");
                 if (worker!=null)
                     id+="."+worker;
@@ -469,11 +479,18 @@ public abstract class AbstractSessionManager implements SessionManager
         if (_random==null)
         {
             log.debug("New random session seed");
-            _random=new Random();
+            try 
+            {
+                _random=SecureRandom.getInstance("SHA1PRNG");
+            }
+            catch (NoSuchAlgorithmException e)
+            {
+                log.warn("Could not generate SecureRandom for session-id randomness",e);
+                _random=new Random();
+                _weakRandom=true;
+            }
+            _random.setSeed(_random.nextLong()^System.currentTimeMillis()^hashCode()^Runtime.getRuntime().freeMemory());
         }
-        else
-            if(log.isDebugEnabled())log.debug("Initializing random session key: "+_random);
-        _random.nextLong();
         
         if (_sessions==null)
             _sessions=new HashMap();
@@ -564,7 +581,20 @@ public abstract class AbstractSessionManager implements SessionManager
             thread.setContextClassLoader(old_loader);
         }
     }
-    
+
+
+    /* ------------------------------------------------------------ */
+    public Random getRandom()
+    {
+        return _random;
+    }
+
+    /* ------------------------------------------------------------ */
+    public void setRandom(Random random)
+    {
+        _random=random;
+    }
+
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -607,7 +637,7 @@ public abstract class AbstractSessionManager implements SessionManager
         
     }   // SessionScavenger
     
-    
+
     
     /* ------------------------------------------------------------ */
     /* ------------------------------------------------------------ */
@@ -924,6 +954,7 @@ public abstract class AbstractSessionManager implements SessionManager
                 .valueUnbound(new HttpSessionBindingEvent(this,name));
         }
     }
+
 
 
 }
