@@ -1028,6 +1028,7 @@ public class HttpRequest extends HttpMessage
 
                 // Parse the header
                 QuotedStringTokenizer tok = new QuotedStringTokenizer(hdr, ",;", false, false);
+                tok.setSingle(false);
                 while (tok.hasMoreElements())
                 {
                     String c = (String) tok.nextElement();
@@ -1057,7 +1058,7 @@ public class HttpRequest extends HttpMessage
                         if (n.startsWith("$"))
                         {
                             if ("$version".equalsIgnoreCase(n))
-                                version = Integer.parseInt(StringUtil.unquote(v));
+                                version = Integer.parseInt(QuotedStringTokenizer.unquoteDouble(v));
                             else if ("$path".equalsIgnoreCase(n) && cookie != null)
                                 cookie.setPath(v);
                             else if ("$domain".equalsIgnoreCase(n) && cookie != null)

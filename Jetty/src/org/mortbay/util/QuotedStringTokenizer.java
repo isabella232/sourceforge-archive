@@ -43,6 +43,9 @@ public class QuotedStringTokenizer
     private boolean _hasToken=false;
     private int _i=0;
     private int _lastStart=0;
+    private boolean _single=true;
+    private boolean _double=true;
+    
     
     /* ------------------------------------------------------------ */
     public QuotedStringTokenizer(String str,
@@ -111,13 +114,13 @@ public class QuotedStringTokenizer
                           return _hasToken=true;
                       }
                   }
-                  else if (c=='\'')
+                  else if (c=='\'' && _single)
                   {
                       if (_returnQuotes)
                           _token.append(c);
                       state=2;
                   }
-                  else if (c=='\"')
+                  else if (c=='\"' && _double)
                   {
                       if (_returnQuotes)
                           _token.append(c);
@@ -139,13 +142,13 @@ public class QuotedStringTokenizer
                           _i--;
                       return _hasToken;
                   }
-                  else if (c=='\'')
+                  else if (c=='\'' && _single)
                   {
                       if (_returnQuotes)
                           _token.append(c);
                       state=2;
                   }
-                  else if (c=='\"')
+                  else if (c=='\"' && _double)
                   {
                       if (_returnQuotes)
                           _token.append(c);
@@ -187,7 +190,7 @@ public class QuotedStringTokenizer
                       escape=false;
                       _token.append(c);
                   }
-                  else if (c=='\"')
+                  else if (c=='\"' )
                   {
                       if (_returnQuotes)
                           _token.append(c);
@@ -352,6 +355,64 @@ public class QuotedStringTokenizer
             
             return b.toString();
         }
+    }
+    
+    /* ------------------------------------------------------------ */
+    /** Unquote a string.
+     * @param s The string to unquote.
+     * @return quoted string
+     */
+    public static String unquoteDouble(String s)
+    {
+        if (s==null)
+            return null;
+        if (s.length()<2)
+            return s;
+
+        char first=s.charAt(0);
+        char last=s.charAt(s.length()-1);
+        if (first!=last || first!='"')
+            return s;
+        
+        StringBuffer b=new StringBuffer(s.length()-2);
+        synchronized(b)
+        {
+            boolean quote=false;
+            for (int i=1;i<s.length()-1;i++)
+            {
+                char c = s.charAt(i);
+
+                if (c=='\\' && !quote)
+                {
+                    quote=true;
+                    continue;
+                }
+                quote=false;
+                b.append(c);
+            }
+            
+            return b.toString();
+        }
+    }
+
+    public boolean getDouble()
+    {
+        return _double;
+    }
+
+    public void setDouble(boolean d)
+    {
+        _double=d;
+    }
+
+    public boolean getSingle()
+    {
+        return _single;
+    }
+
+    public void setSingle(boolean single)
+    {
+        _single=single;
     }
 }
 

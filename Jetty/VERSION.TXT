@@ -6,6 +6,7 @@ Jetty-5.1.12 - 22 November 2006
  + Upgraded session ID generation to use SecureRandom
  + Quote single quotes in cookies
  + AJP protected against bad requests from mod_jk
+ + JETTY-154 Cookies ignore single quotes
 
 Jetty-5.1.11 - 8 October 2006
  + fixed ByteBufferOutputStream capacity calculation
