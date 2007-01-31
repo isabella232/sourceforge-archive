@@ -203,7 +203,6 @@ public class ResourceCache implements LifeCycle,
     public void flushCache()
     {
         _cache.clear();
-        System.gc();
     }
 
     /* ------------------------------------------------------------ */
