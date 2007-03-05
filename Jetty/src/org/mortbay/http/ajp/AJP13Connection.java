@@ -197,7 +197,6 @@ public class AJP13Connection extends HttpConnection
 
                     request.setState(HttpMessage.__MSG_EDITABLE);
                     request.setMethod(packet.getMethod());
-                    request.setVersion(packet.getString());
 		    String version=packet.getString();
 		    try
 		    {

@@ -1,6 +1,9 @@
 Jetty Versions 
 ==============
 
+Jetty-5.1.13
+ + Sourceforge 1648335: problem setting version for AJP13
+
 Jetty-5.1.12 - 22 November 2006
  + Added support for TLS_DHE_RSA_WITH_AES_256_CBC_SHA
  + Upgraded session ID generation to use SecureRandom
