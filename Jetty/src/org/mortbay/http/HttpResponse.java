@@ -278,7 +278,10 @@ public class HttpResponse extends HttpMessage
             writer.write('0'+((_status/10)%10));
             writer.write('0'+(_status%10));
             writer.write(' ');
-            writer.write(getReason());
+	    String r=getReason();
+	    if (r!=null && r.length()>512)
+	    	r=r.substring(0,512);
+            writer.write(r);
             writer.write(HttpFields.__CRLF);
             _header.write(writer);
         }

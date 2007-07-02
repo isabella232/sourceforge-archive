@@ -631,7 +631,7 @@ public class HttpConnection
         
         // Handler forced close, listener stopped or no idle threads left.
         boolean has_close=HttpFields.__Close.equals(_response.getField(HttpFields.__Connection));
-        if (!_persistent || _close || _listener!=null && (!_listener.isStarted()||_listener.isOutOfResources()))
+        if (has_close||!_persistent || _close || _listener!=null && (!_listener.isStarted()||_listener.isOutOfResources()))
         {
             _close=true;
             if (!has_close)

@@ -1,6 +1,9 @@
 Jetty Versions 
 ==============
 
+ + JETTY-155 force close with content length.
+ + JETTY-369 failed state in Container
+
 Jetty-5.1.13
  + Sourceforge 1648335: problem setting version for AJP13
 

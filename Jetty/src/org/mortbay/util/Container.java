@@ -26,7 +26,6 @@ import org.mortbay.log.LogFactory;
 import org.mortbay.http.HttpContext;
 
 
-
 /* ------------------------------------------------------------ */
 /** Abstract Container.
  * Provides base handling for LifeCycle and Component events.
@@ -44,6 +43,7 @@ public abstract class Container implements LifeCycle,EventProvider,Serializable
     private transient boolean _started;
     private transient boolean _starting;
     private transient boolean _stopping;
+    private transient boolean _failed;
 
     
     /* ------------------------------------------------------------ */
@@ -71,6 +71,7 @@ public abstract class Container implements LifeCycle,EventProvider,Serializable
         {
             doStart();
             _started=true;
+            _failed=false;
             log.info("Started "+this);
             for(int i=0;i<LazyList.size(_eventListeners);i++)
             {
@@ -81,7 +82,9 @@ public abstract class Container implements LifeCycle,EventProvider,Serializable
         }
         catch(Throwable e)
         {
-            LifeCycleEvent failed = new LifeCycleEvent(this,e);
+            _failed=true;
+            
+            event = new LifeCycleEvent(this,e);
             for(int i=0;i<LazyList.size(_eventListeners);i++)
             {
                 EventListener listener=(EventListener)LazyList.get(_eventListeners,i);
@@ -118,6 +121,12 @@ public abstract class Container implements LifeCycle,EventProvider,Serializable
     }
     
     /* ------------------------------------------------------------ */
+    public synchronized boolean isFailed()
+    {
+        return _started;
+    }
+    
+    /* ------------------------------------------------------------ */
     protected synchronized boolean isStarting()
     {
         return _starting;
@@ -136,7 +145,7 @@ public abstract class Container implements LifeCycle,EventProvider,Serializable
     public synchronized final void stop()
     	throws InterruptedException
     {
-        if (!_started || _stopping)
+        if ((!_started && !_failed) || _stopping)
             return;
         _stopping=true;
 
@@ -153,6 +162,7 @@ public abstract class Container implements LifeCycle,EventProvider,Serializable
         {	
             doStop();
             _started=false;
+            _failed=false;
             log.info("Stopped "+this);
             for(int i=0;i<LazyList.size(_eventListeners);i++)
             {
@@ -163,6 +173,7 @@ public abstract class Container implements LifeCycle,EventProvider,Serializable
         }
         catch(Throwable e)
         {
+            _failed=true;
             event = new LifeCycleEvent(this,e);
             for(int i=0;i<LazyList.size(_eventListeners);i++)
             {
