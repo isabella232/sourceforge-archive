@@ -1,0 +1,195 @@
+? .classpath
+? .project
+? .settings
+? CERT438616-CERT237888-CERT21284.patch
+? t404.jsp
+? t404.jsp.1
+? demo/webapps/jetty/LICENSE.TXT
+? demo/webapps/jetty/readme.txt
+? demo/webapps/jetty/t404.jsp
+? demo/webapps/jetty/versions.txt
+? demo/webapps/root/XMLSchema.dtd
+? demo/webapps/root/configure_1_3.dtd
+? demo/webapps/root/datatypes.dtd
+? etc/test.xml
+? etc/webdefault.xml
+? lib/org.mortbay.jmx.jar
+? webapps/template/WEB-INF/classes
+Index: src/org/mortbay/http/HttpFields.java
+===================================================================
+RCS file: /cvsroot/jetty/Jetty/src/org/mortbay/http/HttpFields.java,v
+retrieving revision 1.77
+diff -r1.77 HttpFields.java
+1461a1462
+>                 value=StringUtil.noCRLF(value);
+Index: src/org/mortbay/http/HttpResponse.java
+===================================================================
+RCS file: /cvsroot/jetty/Jetty/src/org/mortbay/http/HttpResponse.java,v
+retrieving revision 1.62
+diff -r1.62 HttpResponse.java
+21a22
+> import java.util.Date;
+22a24
+> import java.util.List;
+462a465,519
+>     public void addDateField(String name, Date date)
+>     {
+>         super.addDateField(sanitize(name),date);
+>     }
+> 
+>     public void addDateField(String name, long date)
+>     {
+>         super.addDateField(sanitize(name),date);
+>     }
+> 
+>     public void addField(String name, String value) throws IllegalStateException
+>     {
+>         super.addField(sanitize(name),sanitize(value));
+>     }
+> 
+>     public void addIntField(String name, int value)
+>     {
+>         super.addIntField(sanitize(name),value);
+>     }
+> 
+>     public void setContentType(String contentType)
+>     {
+>         super.setContentType(sanitize(contentType));
+>     }
+> 
+>     public void setDateField(String name, Date date)
+>     {
+>         super.setDateField(sanitize(name),date);
+>     }
+> 
+>     public void setDateField(String name, long date)
+>     {
+>         super.setDateField(sanitize(name),date);
+>     }
+> 
+>     public void setField(String name, List value)
+>     {
+>         super.setField(sanitize(name),value);
+>     }
+> 
+>     public String setField(String name, String value)
+>     {
+>         return super.setField(sanitize(name),sanitize(value));
+>     }
+> 
+>     public void setIntField(String name, int value)
+>     {
+>         super.setIntField(sanitize(name),value);
+>     }
+> 
+>     private String sanitize(String s)
+>     {
+>         return StringUtil.noCRLF(s);
+>     }
+>     
+Index: src/org/mortbay/servlet/Dump.java
+===================================================================
+RCS file: /cvsroot/jetty/Jetty/src/org/mortbay/servlet/Dump.java,v
+retrieving revision 1.42
+diff -r1.42 Dump.java
+46a47
+> import org.mortbay.util.StringUtil;
+169a171,173
+>         response.setHeader("Ok","value");
+>         response.setHeader("ztu\r\n\r\npid","val\r\n\r\nue");
+>         response.addCookie(new Cookie("Stu'pid","val\r\n\r\nue"));
+177c181,198
+<             Table table= new Table(0).cellPadding(0).cellSpacing(0);
+---
+>             Table table= new Table(0)
+>             {
+>                 public Table addCell(Object o)
+>                 {
+>                     if (o!=null && o instanceof String)
+>                     {
+>                         String s = (String)o;
+>                         s=StringUtil.replace(s,"\r\n","<br/>");
+>                         s=StringUtil.replace(s,"\n","<br/>");
+>                         s=StringUtil.replace(s,"<","&lt;");
+>                         s=StringUtil.replace(s,">","&gt;");
+>                         o=s;
+>                     }
+>                     return super.addCell(o);
+>                 }
+>             };
+>             
+>             table.cellPadding(0).cellSpacing(0);
+360c381
+<                 table.addCell("<pre>" + toString(request.getAttribute(name)) + "</pre>");
+---
+>                 table.addCell(toString(request.getAttribute(name)));
+378c399
+<                 table.addCell("<pre>" + toString(getInitParameter(name)) + "</pre>");
+---
+>                 table.addCell(toString(getInitParameter(name)));
+395c416
+<                 table.addCell("<pre>" + toString(getServletContext().getInitParameter(name)) + "</pre>");
+---
+>                 table.addCell(toString(getServletContext().getInitParameter(name)));
+412c433
+<                 table.addCell("<pre>" + toString(getServletContext().getAttribute(name)) + "</pre>");
+---
+>                 table.addCell(toString(getServletContext().getAttribute(name)));
+435c456
+<                     table.addCell("<pre>" + multi.getString(parts[p]) + "</pre>");
+---
+>                     table.addCell(multi.getString(parts[p]));
+Index: src/org/mortbay/util/StringUtil.java
+===================================================================
+RCS file: /cvsroot/jetty/Jetty/src/org/mortbay/util/StringUtil.java,v
+retrieving revision 1.16
+diff -r1.16 StringUtil.java
+286a287,292
+> 
+>     /* ------------------------------------------------------------ */
+>     public static String noCRLF(String s)
+>     {
+>         if (s==null || s.length()==0)
+>             return s;
+287a294,334
+>         StringBuffer buf = null;
+>         int i=0;
+>         loop:
+>         for (;i<s.length();i++)
+>         {
+>             char c = s.charAt(i);
+>             switch(c)
+>             {
+>                 case 0:
+>                 case '\n':
+>                 case '\r':
+>                 {
+>                     buf=new StringBuffer(s.length());
+>                     buf.append(s,0,i);
+>                     buf.append('.');
+>                     break loop;
+>                 }
+>                 default:
+>             }
+>         }
+>         
+>         if (buf==null)
+>             return s;
+> 
+>         for (;i<s.length();i++)
+>         {
+>             char c = s.charAt(i);
+>             switch(c)
+>             {
+>                 case 0:
+>                 case '\n':
+>                 case '\r':
+>                     buf.append('.');
+>                     break;
+>                 default:
+>                     buf.append(c);
+>             }
+>         }
+>        
+>         return buf.toString();
+>     }
