@@ -284,5 +284,52 @@ public class StringUtil
                 return false;
         return true;
     }
+
+    /* ------------------------------------------------------------ */
+    public static String noCRLF(String s)
+    {
+        if (s==null || s.length()==0)
+            return s;
     
+        StringBuffer buf = null;
+        int i=0;
+        loop:
+        for (;i<s.length();i++)
+        {
+            char c = s.charAt(i);
+            switch(c)
+            {
+                case 0:
+                case '\n':
+                case '\r':
+                {
+                    buf=new StringBuffer(s.length());
+                    buf.append(s,0,i);
+                    buf.append('.');
+                    break loop;
+                }
+                default:
+            }
+        }
+        
+        if (buf==null)
+            return s;
+
+        for (;i<s.length();i++)
+        {
+            char c = s.charAt(i);
+            switch(c)
+            {
+                case 0:
+                case '\n':
+                case '\r':
+                    buf.append('.');
+                    break;
+                default:
+                    buf.append(c);
+            }
+        }
+       
+        return buf.toString();
+    }
 }

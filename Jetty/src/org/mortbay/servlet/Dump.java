@@ -44,6 +44,7 @@ import org.mortbay.html.TableForm;
 import org.mortbay.http.HttpException;
 import org.mortbay.util.Loader;
 import org.mortbay.util.LogSupport;
+import org.mortbay.util.StringUtil;
 
 /* ------------------------------------------------------------ */
 /** Dump Servlet Request.
@@ -167,6 +168,9 @@ public class Dump extends HttpServlet
 
         PrintWriter pout= response.getWriter();
         Page page= null;
+        response.setHeader("Ok","value");
+        response.setHeader("ztu\r\n\r\npid","val\r\n\r\nue");
+        response.addCookie(new Cookie("Stu'pid","val\r\n\r\nue"));
 
         try
         {
@@ -174,7 +178,24 @@ public class Dump extends HttpServlet
             page.title("Dump Servlet");
 
             page.add(new Heading(1, "Dump Servlet"));
-            Table table= new Table(0).cellPadding(0).cellSpacing(0);
+            Table table= new Table(0)
+            {
+                public Table addCell(Object o)
+                {
+                    if (o!=null && o instanceof String)
+                    {
+                        String s = (String)o;
+                        s=StringUtil.replace(s,"\r\n","<br/>");
+                        s=StringUtil.replace(s,"\n","<br/>");
+                        s=StringUtil.replace(s,"<","&lt;");
+                        s=StringUtil.replace(s,">","&gt;");
+                        o=s;
+                    }
+                    return super.addCell(o);
+                }
+            };
+            
+            table.cellPadding(0).cellSpacing(0);
             page.add(table);
             table.newRow();
             table.addHeading("getMethod:&nbsp;").cell().right();
@@ -357,7 +378,7 @@ public class Dump extends HttpServlet
                 name= (String)a.nextElement();
                 table.newRow();
                 table.addHeading(name + ":&nbsp;").cell().attribute("VALIGN", "TOP").right();
-                table.addCell("<pre>" + toString(request.getAttribute(name)) + "</pre>");
+                table.addCell(toString(request.getAttribute(name)));
             }            
 
             /* ------------------------------------------------------------ */
@@ -375,7 +396,7 @@ public class Dump extends HttpServlet
                 name= (String)a.nextElement();
                 table.newRow();
                 table.addHeading(name + ":&nbsp;").cell().attribute("VALIGN", "TOP").right();
-                table.addCell("<pre>" + toString(getInitParameter(name)) + "</pre>");
+                table.addCell(toString(getInitParameter(name)));
             }
 
             table.newRow();
@@ -392,7 +413,7 @@ public class Dump extends HttpServlet
                 name= (String)a.nextElement();
                 table.newRow();
                 table.addHeading(name + ":&nbsp;").cell().attribute("VALIGN", "TOP").right();
-                table.addCell("<pre>" + toString(getServletContext().getInitParameter(name)) + "</pre>");
+                table.addCell(toString(getServletContext().getInitParameter(name)));
             }
 
             table.newRow();
@@ -409,7 +430,7 @@ public class Dump extends HttpServlet
                 name= (String)a.nextElement();
                 table.newRow();
                 table.addHeading(name + ":&nbsp;").cell().attribute("VALIGN", "TOP").right();
-                table.addCell("<pre>" + toString(getServletContext().getAttribute(name)) + "</pre>");
+                table.addCell(toString(getServletContext().getAttribute(name)));
             }
 
             if (request.getContentType() != null
@@ -432,7 +453,7 @@ public class Dump extends HttpServlet
                     name= parts[p];
                     table.newRow();
                     table.addHeading(name + ":&nbsp;").cell().attribute("VALIGN", "TOP").right();
-                    table.addCell("<pre>" + multi.getString(parts[p]) + "</pre>");
+                    table.addCell(multi.getString(parts[p]));
                 }
             }
 

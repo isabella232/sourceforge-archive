@@ -1459,6 +1459,7 @@ public class HttpFields
             buf.append('=');
             if (value!=null && value.length()>0)
             {
+                value=StringUtil.noCRLF(value);
                 if (version==0)
                     URI.encodeString(buf,value,"\";, '");
                 else

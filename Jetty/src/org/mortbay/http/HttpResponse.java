@@ -19,7 +19,9 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.servlet.http.Cookie;
 
@@ -460,6 +462,61 @@ public class HttpResponse extends HttpMessage
         super.destroy();
     }
 
+    public void addDateField(String name, Date date)
+    {
+        super.addDateField(sanitize(name),date);
+    }
+
+    public void addDateField(String name, long date)
+    {
+        super.addDateField(sanitize(name),date);
+    }
+
+    public void addField(String name, String value) throws IllegalStateException
+    {
+        super.addField(sanitize(name),sanitize(value));
+    }
+
+    public void addIntField(String name, int value)
+    {
+        super.addIntField(sanitize(name),value);
+    }
+
+    public void setContentType(String contentType)
+    {
+        super.setContentType(sanitize(contentType));
+    }
+
+    public void setDateField(String name, Date date)
+    {
+        super.setDateField(sanitize(name),date);
+    }
+
+    public void setDateField(String name, long date)
+    {
+        super.setDateField(sanitize(name),date);
+    }
+
+    public void setField(String name, List value)
+    {
+        super.setField(sanitize(name),value);
+    }
+
+    public String setField(String name, String value)
+    {
+        return super.setField(sanitize(name),sanitize(value));
+    }
+
+    public void setIntField(String name, int value)
+    {
+        super.setIntField(sanitize(name),value);
+    }
+
+    private String sanitize(String s)
+    {
+        return StringUtil.noCRLF(s);
+    }
+    
 }
 
 
