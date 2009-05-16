@@ -47,7 +47,7 @@ import org.mortbay.util.URI;
  * HTTP/1.1 ranges are supported.
  * 
  * @version $Id$
- * @author Nuno Preguiça
+ * @author Nuno Preguica
  * @author Greg Wilkins
  */
 public class ResourceHandler extends AbstractHttpHandler

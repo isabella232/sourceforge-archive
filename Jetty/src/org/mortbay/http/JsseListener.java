@@ -52,7 +52,7 @@ import org.mortbay.util.LogSupport;
  * @author Greg Wilkins (gregw@mortbay.com)
  * @author Court Demas (court@kiwiconsulting.com)
  * @author Forge Research Pty Ltd ACN 003 491 576
- * @author Jan Hlavatý
+ * @author Jan Hlavaty
  */
 public abstract class JsseListener extends SocketListener
 {

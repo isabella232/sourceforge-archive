@@ -25,7 +25,7 @@ import org.mortbay.log.LogFactory;
 /** A pool of Objects.
  * <p>
  * @version $Id$
- * @author Juancarlo Añez <juancarlo@modelistica.com>
+ * @author Juancarlo Anez <juancarlo@modelistica.com>
  * @author Greg Wilkins <gregw@mortbay.com>
  */
 public class Pool

@@ -34,7 +34,7 @@ import org.mortbay.log.LogFactory;
 /** Abstract resource class.
  *
  * @version $Id$
- * @author Nuno Preguiça
+ * @author Nuno Preguica
  * @author Greg Wilkins (gregw)
  */
 public abstract class Resource implements Serializable
