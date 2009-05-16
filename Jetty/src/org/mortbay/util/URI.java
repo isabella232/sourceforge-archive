@@ -830,8 +830,7 @@ public class URI
             return path;
 
         int end=path.length();
-        int queryIdx=path.indexOf('?');
-        int start = path.lastIndexOf('/', (queryIdx > 0 ? queryIdx : end));
+        int start = path.lastIndexOf('/', end);
 
     search:
         while (end>0)
